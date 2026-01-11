@@ -90,7 +90,7 @@
         <div id="page-report" class="hidden-page">
             <div class="bg-[#1e293b] rounded-2xl p-4 text-white shadow-lg mb-4">
                 <div class="flex justify-between items-center mb-3 px-1 border-b border-white/10 pb-2">
-                    <p class="text-[14px] text-yellow-400 font-medium uppercase">สรุปวันนี้ (<span id="rep-count">0</span> รายการ)</p>
+                    <p class="text-[14px] text-yellow-400 font-medium uppercase">ยอดเงินรวม (<span id="rep-count">0</span> คน)</p>
                     <h2 class="text-3xl font-semibold">฿<span id="rep-total">0</span></h2>
                 </div>
                 
@@ -116,7 +116,7 @@
                 <a href="https://docs.google.com/spreadsheets/d/159I70YQh-XwUv_IunvU4_S16fL835y_56Rly7oXhP_M/edit" target="_blank" class="bg-[#107c41] text-white py-3 px-8 rounded-full font-medium text-md flex items-center gap-2">
                     <i class="fa-solid fa-file-excel"></i> ดู GOOGLE SHEET
                 </a>
-                <button onclick="clearDay()" class="text-red-400 text-[14px] font-medium underline opacity-70">ล้างข้อมูลวันนี้</button>
+                <button onclick="clearDay()" class="text-red-400 text-[14px] font-medium underline opacity-70">ลบข้อมูลวันนี้</button>
             </div>
         </div>
     </main>
@@ -217,7 +217,7 @@
         }
 
         function deleteItem(idx) { if (confirm('ต้องการลบรายการนี้หรือไม่?')) { database.splice(idx, 1); localStorage.setItem('lamoon_db_v6', JSON.stringify(database)); updateReport(); } }
-        function clearDay() { if (confirm('ล้างข้อมูลทั้งหมดของวันนี้?')) { database = []; localStorage.removeItem('lamoon_db_v6'); location.reload(); } }
+        function clearDay() { if (confirm('ลบข้อมูลทั้งหมดของวันนี้?')) { database = []; localStorage.removeItem('lamoon_db_v6'); location.reload(); } }
         
         function nav(p) {
             document.getElementById('page-record').classList.toggle('hidden-page', p !== 'record');
