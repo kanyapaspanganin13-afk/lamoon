@@ -24,7 +24,6 @@
         html, body { height: 100%; margin: 0; padding: 0; background: #f8fafc; overflow: hidden; }
         body { display: flex; flex-direction: column; color: #334155; }
         
-        /* Header ปรับให้ดูโปร่งขึ้น */
         header { 
             background: #1e293b; 
             color: white; 
@@ -45,7 +44,6 @@
         main { flex: 1; overflow-y: auto; padding: 12px 12px 100px 12px; }
         .hidden-page { display: none !important; }
         
-        /* Navigation ปรับความหนาตัวหนังสือลง */
         nav { 
             position: fixed; bottom: 0; left: 0; right: 0; 
             height: 75px; background: white; 
@@ -66,7 +64,6 @@
         }
         .nav-btn span { font-size: 14px; font-weight: 500; margin-top: 2px; }
         
-        /* Card ปรับให้ดูสะอาดตา */
         .card { 
             background: white; 
             border-radius: 12px; 
@@ -76,7 +73,6 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
         
-        /* ปรับ Input & Select ลดความตัน */
         select, input { 
             background: transparent; 
             outline: none; 
@@ -84,7 +80,7 @@
             font-size: 1.3rem; 
             color: #1e293b; 
             height: 45px; 
-            font-weight: 600; /* ลดจาก 800/900 */
+            font-weight: 600;
         }
         label { 
             font-size: 12px; 
@@ -96,7 +92,6 @@
             letter-spacing: 0.5px;
         }
         
-        /* Button */
         #save-btn { 
             width: 100%; 
             background: #1e293b; 
@@ -108,10 +103,9 @@
             margin-top: 10px; 
             border: none; 
             box-shadow: 0 4px 12px rgba(30, 41, 59, 0.2);
-            active: transform: scale(0.98);
         }
         
-        /* History Card */
+        /* ประวัติการบันทึกพร้อมเลขลำดับ */
         .history-card { 
             padding: 12px 18px; 
             border-radius: 14px; 
@@ -121,6 +115,21 @@
             justify-content: space-between; 
             align-items: center; 
             margin-bottom: 8px; 
+            position: relative;
+        }
+        .history-num {
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            margin-right: 10px;
+            border: 1px solid #e2e8f0;
         }
         .history-title { font-size: 20px; font-weight: 600; color: #1e293b; }
         .history-sub { font-size: 14px; color: #64748b; font-weight: 400; }
@@ -138,7 +147,6 @@
             background: #fdfdfd; 
         }
 
-        /* Settlement Box */
         .settle-box {
             border-radius: 12px;
             padding: 15px;
@@ -150,7 +158,7 @@
     </style>
 </head>
 <body>
-    <header>
+    <header id="main-header">
         <div class="shop-name">La-Moon Cut</div>
     </header>
 
@@ -162,7 +170,7 @@
             </div>
             <div id="services-container">
                 <div class="card flex justify-between items-center border-l-[6px] border-l-blue-500">
-                    <div class="flex-1"><label>บริการ</label>
+                    <div class="flex-1"><label>เลือกบริการ</label>
                         <select class="service-select">
                             <option>ตัดผม</option><option>แก้ผม</option><option>สระผม</option>
                             <option>โกนหนวด</option><option>กันหน้า</option><option>ย้อมผม</option>
@@ -185,11 +193,11 @@
                 </select>
             </div>
             <div class="grid grid-cols-2 gap-3 mb-3">
-                <button type="button" onclick="setPayment('cash')" id="pay-cash" class="card bg-slate-800 text-white flex flex-col items-center py-3 mb-0 transition-all">
+                <button type="button" onclick="setPayment('cash')" id="pay-cash" class="card bg-slate-800 text-white flex flex-col items-center py-3 mb-0 shadow-lg">
                     <i class="fa-solid fa-money-bill-wave text-xl mb-1"></i>
                     <span class="text-[16px] font-medium">เงินสด</span>
                 </button>
-                <button type="button" onclick="setPayment('transfer')" id="pay-transfer" class="card text-slate-400 flex flex-col items-center py-3 mb-0 transition-all">
+                <button type="button" onclick="setPayment('transfer')" id="pay-transfer" class="card text-slate-400 flex flex-col items-center py-3 mb-0">
                     <i class="fa-solid fa-qrcode text-xl mb-1"></i>
                     <span class="text-[16px] font-medium">โอนเงิน</span>
                 </button>
@@ -202,7 +210,7 @@
                 <div class="flex justify-between items-end mb-4 border-b border-white/10 pb-3">
                     <div>
                         <p class="text-yellow-500 text-sm font-semibold uppercase tracking-wider">ยอดเงินวันนี้</p>
-                        <p class="text-white/60 text-xs font-normal"><span id="rep-count">0</span> คน</p>
+                        <p class="text-white/90 text-xs font-normal"><span id="rep-count">0</span> คน</p>
                     </div>
                     <h2 class="text-4xl font-bold">฿<span id="rep-total">0</span></h2>
                 </div>
@@ -265,7 +273,7 @@
             const div = document.createElement('div');
             div.className = "card flex justify-between items-center relative mt-2 border-l-[6px] border-l-slate-300 shadow-sm";
             div.innerHTML = `<button onclick="this.parentElement.remove()" class="absolute -right-2 -top-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-[12px] z-10 shadow-md">✕</button>
-                <div class="flex-1"><label>งานบริการ</label><select class="service-select"><option>ตัดผม</option><option>แก้ผม</option><option>สระผม</option><option>โกนหนวด</option><option>กันหน้า</option><option>ย้อมผม</option><option>ดัดผม</option><option>อื่นๆ</option></select></div>
+                <div class="flex-1"><label>บริการ</label><select class="service-select"><option>ตัดผม</option><option>แก้ผม</option><option>สระผม</option><option>โกนหนวด</option><option>กันหน้า</option><option>ย้อมผม</option><option>ดัดผม</option><option>อื่นๆ</option></select></div>
                 <div class="w-32 text-right border-l pl-3"><label>ราคา</label><input type="number" placeholder="0" class="service-price text-right text-blue-600 text-3xl font-bold"></div>`;
             container.appendChild(div);
         }
@@ -295,14 +303,22 @@
             const list = document.getElementById('history-items');
             list.innerHTML = '';
             document.getElementById('rep-count').innerText = database.length;
+            
+            // วนลูปแสดงผลรายการล่าสุดอยู่บน (Reverse)
             database.slice().reverse().forEach((item, index) => {
-                const rIdx = database.length - 1 - index;
+                const actualOrder = database.length - index; // คำนวณเลขลำดับ 1, 2, 3...
+                const rIdx = database.length - 1 - index; // ตำแหน่ง index จริงใน Array
+                
                 total += item.total;
                 if (item.pType === 'cash') cash += item.total; else trans += item.total;
+                
                 list.innerHTML += `<div class="history-card border-l-[5px] ${item.pType==='cash'?'border-l-green-500':'border-l-blue-500'}">
-                    <div>
-                        <p class="history-title">${item.services}</p>
-                        <p class="history-sub">${item.timeStart}-${item.timeEnd} | ${item.style}</p>
+                    <div class="flex items-start">
+                        <div class="history-num">${actualOrder}</div>
+                        <div>
+                            <p class="history-title">${item.services}</p>
+                            <p class="history-sub">${item.timeStart}-${item.timeEnd} | ${item.style}</p>
+                        </div>
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="text-right">
@@ -313,6 +329,7 @@
                     </div>
                 </div>`;
             });
+            
             document.getElementById('rep-total').innerText = total.toLocaleString();
             document.getElementById('rep-cash').innerText = cash.toLocaleString();
             document.getElementById('rep-transfer').innerText = trans.toLocaleString();
@@ -327,11 +344,11 @@
                 statusBox.classList.remove('hidden');
                 if(balance > 0) {
                     val.innerText = "฿" + balance.toLocaleString();
-                    desc.innerText = "ช่างคืนเงินสดให้ร้าน ฿" + balance.toLocaleString();
+                    desc.innerText = "ช่างคืนเงินให้ร้าน ฿" + balance.toLocaleString();
                     statusBox.className = "settle-box bg-orange-50 text-orange-600 border border-orange-100";
                 } else if(balance < 0) {
                     val.innerText = "฿" + Math.abs(balance).toLocaleString();
-                    desc.innerText = "ร้านโอนเงินคืนช่าง ฿" + Math.abs(balance).toLocaleString();
+                    desc.innerText = "ร้านคืนเงินให้ช่าง ฿" + Math.abs(balance).toLocaleString();
                     statusBox.className = "settle-box bg-blue-50 text-blue-600 border border-blue-100";
                 } else {
                     val.innerText = "฿0";
@@ -349,6 +366,7 @@
             document.getElementById('page-report').classList.toggle('hidden-page', p !== 'report');
             document.getElementById('nav-record').classList.toggle('active-nav', p === 'record');
             document.getElementById('nav-report').classList.toggle('active-nav', p === 'report');
+            document.getElementById('main-header').style.display = (p === 'report') ? 'none' : 'block';
             if(p === 'report') updateReport();
         }
         window.onload = () => { nav('record'); updateReport(); };
