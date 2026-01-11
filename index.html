@@ -44,7 +44,7 @@
             <div class="card"><label>วันที่</label><input type="date" id="record-date"></div>
             <div class="flex gap-3 mb-2">
                 <div class="card flex-1"><label>เริ่ม</label><input type="time" id="time-start"></div>
-                <div class="card flex-1"><label>จบ</label><input type="time" id="time-end"></div>
+                <div class="card flex-1"><label>เสร็จ</label><input type="time" id="time-end"></div>
             </div>
             <div id="services-container">
                 <div class="card flex justify-between items-center border-l-[6px] border-l-blue-500">
@@ -98,7 +98,7 @@
             <div id="settle-status-box" class="settle-box hidden"><span id="settle-desc"></span></div>
             <div id="history-items" class="space-y-2"></div>
             <div class="flex flex-col items-center gap-5 mt-8 pb-20">
-                <a href="https://docs.google.com/spreadsheets/d/159I70YQh-XwUv_IunvU4_S16fL835y_56Rly7oXhP_M/edit" target="_blank" class="bg-[#107c41] text-white py-3 px-8 rounded-full font-semibold text-md shadow-md">
+                <a href="https://docs.google.com/spreadsheets/d/1Dqku0IZj_TcC6d1AzY9m6gD2qpB1KpJEHa6X-77x6p4/edit?usp=sharing" target="_blank" class="bg-[#107c41] text-white py-3 px-8 rounded-full font-semibold text-md shadow-md">
                     <i class="fa-solid fa-file-excel mr-2"></i> GOOGLE SHEET
                 </a>
                 <button onclick="clearDay()" class="text-red-400 text-sm font-medium underline">ลบข้อมูลทั้งหมด</button>
@@ -123,7 +123,6 @@
             document.getElementById('record-date').value = `${year}-${month}-${day}`;
         }
 
-        // ฟังก์ชันแปลงวันที่เป็น พ.ศ. ภาษาไทย
         function getThaiDate(dateStr) {
             const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
             const d = new Date(dateStr);
@@ -203,13 +202,13 @@
             if(total > 0) {
                 statusBox.classList.remove('hidden');
                 if(balance > 0) { val.innerText = "฿" + balance.toLocaleString(); desc.innerText = "ช่างคืนเงินให้ร้าน ฿" + balance.toLocaleString(); statusBox.className = "settle-box bg-orange-50 text-orange-600 border border-orange-100";
-                } else if(balance < 0) { val.innerText = "฿" + Math.abs(balance).toLocaleString(); desc.innerText = "ร้านคืนเงินให้ช่าง ฿" + Math.abs(balance).toLocaleString(); statusBox.className = "settle-box bg-blue-50 text-blue-600 border border-blue-100";
+                } else if(balance < 0) { val.innerText = "฿" + Math.abs(balance).toLocaleString(); desc.innerText = "ร้านคืนเงินช่าง ฿" + Math.abs(balance).toLocaleString(); statusBox.className = "settle-box bg-blue-50 text-blue-600 border border-blue-100";
                 } else { val.innerText = "฿0"; desc.innerText = "ยอดเงินลงตัวพอดี"; statusBox.className = "settle-box bg-green-50 text-green-600 border border-green-100"; }
             } else { statusBox.classList.add('hidden'); }
         }
 
         function deleteItem(idx) { if (confirm('ต้องการลบรายการนี้ใช่ไหม?')) { database.splice(idx, 1); localStorage.setItem('lamoon_db_v6', JSON.stringify(database)); updateReport(); } }
-        function clearDay() { if (confirm('ยืนยันการลงข้อมูลทั้งหมด?')) { database = []; localStorage.removeItem('lamoon_db_v6'); location.reload(); } }
+        function clearDay() { if (confirm('ยืนยันการลบข้อมูลทั้งหมด?')) { database = []; localStorage.removeItem('lamoon_db_v6'); location.reload(); } }
         function nav(p) {
             document.getElementById('page-record').classList.toggle('hidden-page', p !== 'record');
             document.getElementById('page-report').classList.toggle('hidden-page', p !== 'report');
