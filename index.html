@@ -163,7 +163,6 @@
     <main>
         <div id="page-record">
             <div class="card"><label>วันที่</label><input type="date" id="record-date"></div>
-            
             <div class="flex gap-3 mb-2">
                 <div class="card flex-1"><label>เริ่ม</label><input type="time" id="time-start"></div>
                 <div class="card flex-1"><label>เสร็จ</label><input type="time" id="time-end"></div>
@@ -171,7 +170,7 @@
             
             <div id="services-container">
                 <div class="card flex justify-between items-center border-l-[6px] border-l-blue-500">
-                    <div class="flex-1"><label>งานบริการ</label>
+                    <div class="flex-1"><label>เลือกบริการ</label>
                         <select class="service-select">
                             <option>ตัดผม</option><option>แก้ผม</option><option>สระผม</option>
                             <option>โกนหนวด</option><option>กันหน้า</option><option>ย้อมผม</option>
@@ -208,12 +207,15 @@
 
         <div id="page-report" class="hidden-page">
             <div class="bg-[#1e293b] rounded-2xl p-5 text-white shadow-lg mb-4">
-                <div class="flex justify-between items-end mb-4 border-b border-white/10 pb-3">
+                <div class="flex justify-between items-start mb-4 border-b border-white/10 pb-3">
                     <div>
                         <p class="text-yellow-500 text-sm font-semibold uppercase tracking-wider">ยอดเงินรวม</p>
-                        <p class="text-white/60 text-xs font-normal"><span id="rep-count">0</span> คน</p>
+                        <p id="rep-display-date" class="text-white/70 text-[13px] font-medium mt-0.5"></p>
+                        <p class="text-white/250 text-xs font-normal mt-1"><span id="rep-count">0</span> คน</p>
                     </div>
-                    <h2 class="text-4xl font-bold">฿<span id="rep-total">0</span></h2>
+                    <div class="text-right">
+                        <h2 class="text-4xl font-bold">฿<span id="rep-total">0</span></h2>
+                    </div>
                 </div>
                 
                 <div class="grid grid-cols-3 gap-2">
@@ -239,7 +241,7 @@
             <div id="history-items" class="space-y-2"></div>
             
             <div class="flex flex-col items-center gap-5 mt-8 pb-20">
-                <a href="https://docs.google.com/spreadsheets/d/159I70YQh-XwUv_IunvU4_S16fL835y_56Rly7oXhP_M/edit" target="_blank" class="bg-[#107c41] text-white py-3 px-8 rounded-full font-semibold text-md shadow-md">
+                <a href="YOUR_GOOGLE_SHEET_URL" target="_blank" class="bg-[#107c41] text-white py-3 px-8 rounded-full font-semibold text-md shadow-md">
                     <i class="fa-solid fa-file-excel mr-2"></i> GOOGLE SHEET
                 </a>
                 <button onclick="clearDay()" class="text-red-400 text-sm font-medium underline">ลบข้อมูลทั้งหมดของวันนี้</button>
@@ -259,14 +261,23 @@
     </nav>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4-X1fFa9FD_UNYz8HbOqqDurX7KRrl-v4VyjELMTObe9yo8GN1uVgcsHNcoqgVfGh/exec"; 
+        const SCRIPT_URL = "YOUR_SCRIPT_URL"; 
         let database = JSON.parse(localStorage.getItem('lamoon_db_v6')) || [];
         let pType = 'cash';
 
-        // ตั้งค่าวันที่ปัจจุบันอัตโนมัติ
         function setDefaultDate() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('record-date').value = today;
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            document.getElementById('record-date').value = `${year}-${month}-${day}`;
+        }
+
+        // ฟังก์ชันแปลงวันที่ให้เป็นแบบไทยเพื่อแสดงในรายงาน
+        function getThaiDate(dateStr) {
+            const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+            const d = new Date(dateStr);
+            return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear() + 543}`;
         }
 
         function setPayment(t) {
@@ -302,15 +313,7 @@
             if (totalAll === 0) { alert('กรุณาระบุราคาก่อนบันทึก'); return; }
             btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
             
-            const entry = { 
-                total: totalAll, 
-                pType: pType, 
-                timeStart: timeS, 
-                timeEnd: timeE, 
-                style: document.getElementById('hair-style').value, 
-                services: entryServices.join(', '), 
-                date: dateVal // ใช้วันที่จากช่องกรอก
-            };
+            const entry = { total: totalAll, pType: pType, timeStart: timeS, timeEnd: timeE, style: document.getElementById('hair-style').value, services: entryServices.join(', '), date: dateVal };
             
             database.push(entry);
             localStorage.setItem('lamoon_db_v6', JSON.stringify(database));
@@ -323,6 +326,14 @@
             const list = document.getElementById('history-items');
             list.innerHTML = '';
             document.getElementById('rep-count').innerText = database.length;
+
+            // แสดงวันที่ในหน้าสรุป (อิงจากวันที่ล่าสุดที่มีการบันทึก หรือวันที่ปัจจุบัน)
+            if(database.length > 0) {
+                document.getElementById('rep-display-date').innerText = getThaiDate(database[database.length-1].date);
+            } else {
+                const now = new Date();
+                document.getElementById('rep-display-date').innerText = getThaiDate(now.toISOString().split('T')[0]);
+            }
             
             database.slice().reverse().forEach((item, index) => {
                 const actualOrder = database.length - index;
@@ -377,7 +388,7 @@
         }
 
         function deleteItem(idx) { if (confirm('ต้องการลบรายการนี้ใช่ไหม?')) { database.splice(idx, 1); localStorage.setItem('lamoon_db_v6', JSON.stringify(database)); updateReport(); } }
-        function clearDay() { if (confirm('ยืนยันการลบข้อมูลวันนี้ทั้งหมด?')) { database = []; localStorage.removeItem('lamoon_db_v6'); location.reload(); } }
+        function clearDay() { if (confirm('ยืนยันการลบข้อมูลทั้งหมด?')) { database = []; localStorage.removeItem('lamoon_db_v6'); location.reload(); } }
         
         function nav(p) {
             document.getElementById('page-record').classList.toggle('hidden-page', p !== 'record');
