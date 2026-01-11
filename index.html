@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LA-MOON CUT</title>
-    <link rel="apple-touch-icon" href="https://i.ibb.co/23vLjkCh/LA-MOON.png">
-    <link rel="icon" type="image/png" href="https://i.ibb.co/23vLjkCh/LA-MOON.png">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/39bGJwGF/LA-MOON.png">
+    <link rel="icon" type="image/png" href="https://i.ibb.co/39bGJwGF/LA-MOON.png">
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -61,7 +61,7 @@
 <body>
     <header>
         <div class="header-logo">
-            <img src="https://i.ibb.co/23vLjkCh/LA-MOON.png" alt="Logo">
+            <img src="https://i.ibb.co/39bGJwGF/LA-MOON.png" alt="Logo">
         </div>
         <div class="shop-name">La-Moon Cut</div>
         <div class="shop-sub">Barber Shop for Gentleman</div>
@@ -154,77 +154,4 @@
             const div = document.createElement('div');
             div.className = "card flex justify-between items-center relative mt-2 border-l-4 border-l-slate-400";
             div.innerHTML = `<button onclick="this.parentElement.remove()" class="absolute -left-2 -top-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] z-10 font-bold shadow-sm">✕</button>
-                <div class="flex-1"><label>Service</label><select class="service-select"><option>ตัดผม</option><option>แก้ผม</option><option>สระผม</option><option>โกนหนวด</option><option>กันหน้า</option><option>ย้อมผม</option><option>ดัดผม</option><option>อื่นๆ</option></select></div>
-                <div class="w-24 text-right border-l pl-3"><label>Price</label><input type="number" placeholder="" class="service-price text-right text-blue-600 text-xl font-medium"></div>`;
-            container.appendChild(div);
-        }
-
-        async function saveRecord() {
-            const btn = document.getElementById('save-btn');
-            const prices = document.querySelectorAll('.service-price');
-            const names = document.querySelectorAll('.service-select');
-            const timeS = document.getElementById('time-start').value;
-            const timeE = document.getElementById('time-end').value;
-            let totalAll = 0, entryServices = [];
-            
-            prices.forEach((p, i) => { 
-                let val = parseFloat(p.value) || 0;
-                if (val > 0) { totalAll += val; entryServices.push(names[i].value); }
-            });
-
-            if (!timeS || !timeE) return alert('กรุณาระบุเวลา');
-            if (totalAll === 0) return alert('ระบุราคา');
-            btn.innerText = "SAVING..."; btn.disabled = true;
-            
-            const entry = { total: totalAll, pType: pType, timeStart: timeS, timeEnd: timeE, style: document.getElementById('hair-style').value, services: entryServices.join(', '), date: new Date().toLocaleDateString('en-GB') };
-            
-            database.push(entry);
-            localStorage.setItem('lamoon_db_v6', JSON.stringify(database));
-            fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(entry) });
-            setTimeout(() => { location.reload(); }, 400);
-        }
-
-        function updateReport() {
-            let total = 0, cash = 0, trans = 0;
-            const list = document.getElementById('history-items');
-            list.innerHTML = '';
-            document.getElementById('rep-count').innerText = database.length;
-
-            database.slice().reverse().forEach((item, index) => {
-                const rIdx = database.length - 1 - index;
-                total += item.total;
-                if (item.pType === 'cash') cash += item.total; else trans += item.total;
-                list.innerHTML += `<div class="card flex justify-between items-center mb-2 border-l-4 ${item.pType==='cash'?'border-l-green-400':'border-l-blue-400'} shadow-sm">
-                    <div class="flex-1"><p class="history-service-text">${item.services}</p><p class="text-[8px] text-slate-400 font-medium uppercase">${item.timeStart}-${item.timeEnd} | ${item.style}</p></div>
-                    <div class="flex items-center gap-3"><div class="text-right"><p class="history-price-text">฿${item.total}</p><p class="text-[7px] text-slate-300 font-bold uppercase">${item.pType}</p></div>
-                    <button onclick="deleteItem(${rIdx})" class="text-red-200 px-1"><i class="fa-solid fa-trash-can text-lg"></i></button></div></div>`;
-            });
-
-            document.getElementById('rep-total').innerText = total.toLocaleString();
-            document.getElementById('rep-cash').innerText = cash.toLocaleString();
-            document.getElementById('rep-transfer').innerText = trans.toLocaleString();
-
-            let barberShare = total > 0 ? (total < 400 ? 200 : total * 0.5) : 0;
-            let balance = cash - barberShare;
-            const sS = document.getElementById('settle-status'), sA = document.getElementById('settle-amount');
-
-            if(balance > 0) { sS.innerText = "ช่างคืนร้าน"; sS.className="text-[11px] text-orange-600 font-medium"; sA.innerText = "฿"+balance.toLocaleString(); sA.className="text-lg text-orange-600 font-semibold"; }
-            else if(balance < 0) { sS.innerText = "ร้านคืนช่าง"; sS.className="text-[11px] text-blue-600 font-medium"; sA.innerText = "฿"+Math.abs(balance).toLocaleString(); sA.className="text-lg text-blue-600 font-semibold"; }
-            else { sS.innerText = "ยอดลงตัว"; sS.className="text-[11px] text-green-600 font-medium"; sA.innerText = "฿0"; sA.className="text-lg text-green-600 font-semibold"; }
-        }
-
-        function deleteItem(idx) { if (confirm('ลบรายการนี้?')) { database.splice(idx, 1); localStorage.setItem('lamoon_db_v6', JSON.stringify(database)); updateReport(); } }
-        function clearDay() { if (confirm('ล้างข้อมูลทั้งหมด?')) { database = []; localStorage.removeItem('lamoon_db_v6'); location.reload(); } }
-        
-        function nav(p) {
-            document.getElementById('page-record').classList.toggle('hidden-page', p !== 'record');
-            document.getElementById('page-report').classList.toggle('hidden-page', p !== 'report');
-            document.getElementById('nav-record').classList.toggle('active-nav', p === 'record');
-            document.getElementById('nav-report').classList.toggle('active-nav', p === 'report');
-            if(p === 'report') { updateReport(); }
-        }
-
-        window.onload = () => { updateReport(); };
-    </script>
-</body>
-</html>
+                <div class="flex-1"><label>Service</label><select class="service-select"><option>ตัดผม</option><option>แก้ผม</option><option>สระผม</option><option>โกนหนวด</option><option>กันหน้า</option><option>ย้อมผม</option><option
