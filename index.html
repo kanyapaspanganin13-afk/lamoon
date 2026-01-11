@@ -231,6 +231,43 @@
             document.getElementById('rep-cash').innerText = cash.toLocaleString();
             document.getElementById('rep-transfer').innerText = trans.toLocaleString();
 
+            // --- ส่วนที่แก้ไข: คำนวณยอดเคลียร์เงิน ---
+            let barberShare = total > 0 ? (total < 400 ? 200 : total * 0.5) : 0;
+            let balance = cash - barberShare; // เงินสดในมือช่าง หัก ส่วนแบ่งช่าง
+            
+            const valUpper = document.getElementById('settle-val'); // ตัวเลขใน Card บน
+            const statusBox = document.getElementById('settle-status-box'); // แถบสีด้านล่าง
+            const desc = document.getElementById('settle-desc'); // ข้อความในแถบสี
+
+            if(total > 0) {
+                statusBox.classList.remove('hidden');
+                // แสดงตัวเลขใน Card ด้านบน
+                valUpper.innerText = "฿" + balance.toLocaleString();
+                
+                if(balance > 0) {
+                    desc.innerText = "ช่างคืนเงินให้ร้าน ฿" + balance.toLocaleString();
+                    statusBox.className = "settle-box bg-orange-50 text-orange-600 border border-orange-100";
+                    valUpper.className = "text-orange-400 text-xl font-bold"; // เปลี่ยนสีตัวเลขบน Card ให้เด่น
+                } else if(balance < 0) {
+                    desc.innerText = "ร้านคืนเงินให้ช่าง ฿" + Math.abs(balance).toLocaleString();
+                    statusBox.className = "settle-box bg-blue-50 text-blue-600 border border-blue-100";
+                    valUpper.className = "text-blue-400 text-xl font-bold";
+                } else {
+                    desc.innerText = "ยอดเงินลงตัวพอดี";
+                    statusBox.className = "settle-box bg-green-50 text-green-600 border border-green-100";
+                    valUpper.className = "text-white text-xl font-bold";
+                }
+            } else { 
+                statusBox.classList.add('hidden'); 
+                valUpper.innerText = "฿0";
+                valUpper.className = "text-white text-xl font-bold";
+            }
+        }
+            
+            document.getElementById('rep-total').innerText = total.toLocaleString();
+            document.getElementById('rep-cash').innerText = cash.toLocaleString();
+            document.getElementById('rep-transfer').innerText = trans.toLocaleString();
+
             let barberShare = total > 0 ? (total < 400 ? 200 : total * 0.5) : 0;
             let balance = cash - barberShare;
             const val = document.getElementById('settle-val');
