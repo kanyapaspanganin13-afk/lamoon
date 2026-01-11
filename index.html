@@ -6,7 +6,6 @@
     <title>LA-MOON CUT</title>
     <link rel="apple-touch-icon" href="https://i.ibb.co/39bGJwGF/LA-MOON.png">
     <link rel="icon" type="image/png" href="https://i.ibb.co/39bGJwGF/LA-MOON.png">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,33 +15,22 @@
         * { font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
         html, body { height: 100%; margin: 0; padding: 0; background: #f8fafc; overflow: hidden; }
         body { display: flex; flex-direction: column; color: #334155; }
-        
-        /* สไตล์ Header */
-        header { background: #1e293b; color: white; padding: 15px 0; text-align: center; border-bottom: 3px solid #fbbf24; flex-shrink: 0; transition: all 0.3s; }
+        header { background: #1e293b; color: white; padding: 15px 0; text-align: center; border-bottom: 3px solid #fbbf24; flex-shrink: 0; }
         .shop-name { font-size: 1.2rem; text-transform: uppercase; font-weight: 700; letter-spacing: 2px; }
-        
-        /* ซ่อน Header เมื่ออยู่หน้ารายงาน */
-        .report-active header { height: 0; padding: 0; border: none; overflow: hidden; }
-
+        .report-active header { display: none; }
         main { flex: 1; overflow-y: auto; padding: 10px 12px 100px 12px; }
         .hidden-page { display: none !important; }
-        
-        /* ช่องเวลาตัวใหญ่ชัดเจน */
         .time-box { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 8px 5px; text-align: center; flex: 1; }
-        .time-box input[type="time"] { font-size: 2.2rem; font-weight: 800; color: #1e293b; background: transparent; border: none; outline: none; width: 100%; text-align: center; display: block; line-height: 1; letter-spacing: -1px; }
-        
+        .time-box input[type="time"] { font-size: 2.2rem; font-weight: 800; color: #1e293b; background: transparent; border: none; outline: none; width: 100%; text-align: center; display: block; line-height: 1; }
         .card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 8px 12px; margin-bottom: 8px; }
         label { font-size: 10px; color: #94a3b8; font-weight: 600; margin-bottom: 2px; display: block; text-transform: uppercase; }
         select, .price-input { background: transparent; outline: none; width: 100%; font-size: 1.2rem; color: #1e293b; font-weight: 600; }
-        
         #save-btn { width: 100%; background: #1e293b; color: white; padding: 16px; border-radius: 12px; font-size: 1.4rem; font-weight: 700; margin-top: 10px; border: none; }
-        .btn-add { width: 100%; border: 1px dashed #cbd5e1; color: #94a3b8; font-size: 14px; font-weight: 600; border-radius: 10px; padding: 10px; margin-bottom: 10px; background: #fdfdfd; }
-        
         nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: white; border-top: 1px solid #e2e8f0; display: flex; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
         .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; border: none; background: none; }
         .active-nav { color: #1e293b; border-top: 4px solid #fbbf24; font-weight: 700; }
-        
-        .btn-sheet { background: #15803d; color: white; display: flex; align-items: center; justify-content: center; padding: 14px; border-radius: 50px; font-weight: 700; width: 80%; margin: 25px auto; box-shadow: 0 4px 12px rgba(21, 128, 61, 0.2); }
+        .btn-sheet { background: #15803d; color: white; display: flex; align-items: center; justify-content: center; padding: 14px; border-radius: 50px; font-weight: 700; width: 80%; margin: 20px auto 10px auto; }
+        .btn-clear-all { color: #fca5a5; font-size: 12px; text-decoration: underline; background: none; border: none; width: 100%; text-align: center; margin-bottom: 20px; opacity: 0.7; }
     </style>
 </head>
 <body id="body-container">
@@ -50,7 +38,7 @@
 
     <main>
         <div id="page-record">
-            <div class="card mb-2"><label>วันที่</label><input type="date" id="work-date" class="font-bold text-base"></div>
+            <div class="card mb-2"><label>วันที่</label><input type="date" id="work-date" class="font-bold"></div>
             <div class="flex gap-3 mb-3">
                 <div class="time-box"><label>เวลาเริ่ม</label><input type="time" id="time-start"></div>
                 <div class="time-box"><label>เวลาเสร็จ</label><input type="time" id="time-end"></div>
@@ -60,47 +48,50 @@
                     <div class="flex-1"><label>เลือกบริการ</label>
                         <select class="service-select">
                             <option>ตัดผม</option><option>แก้ผม</option><option>สระผม</option>
-                            <option>โกนหนวด</option><option>กันหน้า</option><option>ย้อมผม</option>
-                            <option>ดัดผม</option><option>อื่นๆ</option>
+                            <option>โกนหนวด</option><option>กันหน้า</option><option>ย้อมผม</option><option>ดัดผม</option>
                         </select>
                     </div>
-                    <div class="w-32 text-right border-l pl-3"><label>ราคา (บาท)</label>
-                        <input type="number" placeholder="0" class="service-price text-right text-blue-600 text-3xl font-bold price-input" inputmode="decimal">
+                    <div class="w-24 text-right border-l pl-3"><label>ราคา</label>
+                        <input type="number" placeholder="0" class="service-price text-right text-blue-600 text-2xl font-bold price-input" inputmode="decimal">
                     </div>
                 </div>
             </div>
-            <button onclick="addServiceRow()" class="btn-add"><i class="fa-solid fa-plus mr-1"></i> เพิ่มบริการ</button>
+            <button onclick="addServiceRow()" class="w-full border border-dashed border-slate-300 py-2 rounded-lg text-slate-400 text-sm mb-3 mt-1">+ เพิ่มบริการ</button>
             <div class="card mb-3"><label>ทรงผม</label>
                 <select id="hair-style">
                     <option>รองทรง</option><option>แฟชั่น / ทูบล็อค</option><option>สกินเฟด</option>
-                    <option>นักเรียน</option><option>ตำรวจ / ทหาร</option><option>ทรงอเมริกัน</option>
-                    <option>เปิดข้าง / วินเทจ</option>
+                    <option>นักเรียน</option><option>ตำรวจ / ทหาร</option><option>ทรงอเมริกัน</option><option>วินเทจ</option>
                 </select>
             </div>
             <div class="grid grid-cols-2 gap-3 mb-3">
-                <button onclick="setPayment('cash')" id="pay-cash" class="card bg-slate-800 text-white flex flex-col items-center py-4 mb-0 border-none shadow-lg"><i class="fa-solid fa-money-bill-wave text-xl mb-1"></i><span>เงินสด</span></button>
-                <button onclick="setPayment('transfer')" id="pay-transfer" class="card text-slate-400 flex flex-col items-center py-4 mb-0 border-none"><i class="fa-solid fa-qrcode text-xl mb-1"></i><span>โอนเงิน</span></button>
+                <button onclick="setPayment('cash')" id="pay-cash" class="card bg-slate-800 text-white py-4 mb-0 border-none shadow-lg text-center">เงินสด</button>
+                <button onclick="setPayment('transfer')" id="pay-transfer" class="card text-slate-400 py-4 mb-0 border-none text-center">โอนเงิน</button>
             </div>
             <button id="save-btn" onclick="saveRecord()">บันทึกข้อมูล</button>
         </div>
 
-        <div id="page-report" class="hidden-page pt-4">
+        <div id="page-report" class="hidden-page pt-2">
+            <div id="report-date-display" class="text-yellow-500 font-bold mb-1 text-sm ml-2"></div>
+            
             <div class="bg-[#1e293b] rounded-2xl p-5 text-white shadow-lg mb-4">
                 <div class="flex justify-between items-end mb-4 border-b border-white/10 pb-3">
-                    <div><p class="text-yellow-500 text-sm font-semibold uppercase">ยอดเงินรวม</p><p class="text-xs opacity-60"><span id="rep-count">0</span> คน</p></div>
+                    <div><p class="text-yellow-500 text-[10px] font-semibold uppercase">ยอดเงินรวม</p><p class="text-xs opacity-60"><span id="rep-count">0</span> คน</p></div>
                     <h2 class="text-4xl font-bold">฿<span id="rep-total">0</span></h2>
                 </div>
                 <div class="grid grid-cols-3 gap-2 text-center">
-                    <div><span class="text-white/50 block text-[11px]">เงินสด</span><span class="text-green-400 text-xl font-bold">฿<span id="rep-cash">0</span></span></div>
-                    <div class="border-x border-white/10"><span class="text-white/50 block text-[11px]">โอนเงิน</span><span class="text-blue-400 text-xl font-bold">฿<span id="rep-transfer">0</span></span></div>
-                    <div><span class="text-yellow-500 block text-[11px]">เคลียร์ยอด</span><span id="settle-val" class="text-white text-xl font-bold">฿0</span></div>
+                    <div><span class="text-white/50 block text-[10px]">เงินสด</span><span class="text-green-400 text-xl font-bold">฿<span id="rep-cash">0</span></span></div>
+                    <div class="border-x border-white/10"><span class="text-white/50 block text-[10px]">โอนเงิน</span><span class="text-blue-400 text-xl font-bold">฿<span id="rep-transfer">0</span></span></div>
+                    <div><span class="text-yellow-500 block text-[10px]">เคลียร์ยอด</span><span id="settle-val" class="text-white text-xl font-bold">฿0</span></div>
                 </div>
             </div>
-            <div id="settle-status-box" class="card text-center font-bold hidden mb-4 py-4"></div>
-            <div id="history-items" class="space-y-2 mb-6"></div>
+            <div id="settle-status-box" class="card text-center font-bold hidden mb-4 py-3"></div>
+            <div id="history-items" class="space-y-2 mb-4"></div>
+            
             <a href="https://docs.google.com/spreadsheets/d/159I70YQh-XwUv_IunvU4_S16fL835y_56Rly7oXhP_M/edit" target="_blank" class="btn-sheet">
-                <i class="fa-solid fa-file-excel mr-2 text-xl"></i> เปิด GOOGLE SHEET
+                <i class="fa-solid fa-file-excel mr-2"></i> เปิด GOOGLE SHEET
             </a>
+            
+            <button onclick="clearAllData()" class="btn-clear-all">ลบข้อมูลทั้งหมด</button>
         </div>
     </main>
 
@@ -111,7 +102,7 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4-X1fFa9FD_UNYz8HbOqqDurX7KRrl-v4VyjELMTObe9yo8GN1uVgcsHNcoqgVfGh/exec"; 
-        let db = JSON.parse(localStorage.getItem('lamoon_db_final_v2')) || [];
+        let db = JSON.parse(localStorage.getItem('lamoon_db_final_v3')) || [];
         let pType = 'cash';
 
         function init() {
@@ -125,17 +116,17 @@
 
         function setPayment(t) {
             pType = t;
-            document.getElementById('pay-cash').className = t === 'cash' ? "card bg-slate-800 text-white flex flex-col items-center py-4 mb-0 border-none shadow-lg" : "card text-slate-400 flex flex-col items-center py-4 mb-0 border-none";
-            document.getElementById('pay-transfer').className = t === 'transfer' ? "card bg-slate-800 text-white flex flex-col items-center py-4 mb-0 border-none shadow-lg" : "card text-slate-400 flex flex-col items-center py-4 mb-0 border-none";
+            document.getElementById('pay-cash').className = t === 'cash' ? "card bg-slate-800 text-white py-4 mb-0 border-none shadow-lg text-center" : "card text-slate-400 py-4 mb-0 border-none text-center";
+            document.getElementById('pay-transfer').className = t === 'transfer' ? "card bg-slate-800 text-white py-4 mb-0 border-none shadow-lg text-center" : "card text-slate-400 py-4 mb-0 border-none text-center";
         }
 
         function addServiceRow() {
             const container = document.getElementById('services-container');
             const div = document.createElement('div');
             div.className = "card border-l-[6px] border-l-slate-300 relative mt-2 flex justify-between items-center";
-            div.innerHTML = `<button onclick="this.parentElement.remove()" class="absolute -right-2 -top-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-[10px] z-10">✕</button>
-                <div class="flex-1"><label>บริการ</label><select class="service-select"><option>ตัดผม</option><option>แก้ผม</option><option>สระผม</option><option>โกนหนวด</option><option>กันหน้า</option><option>ย้อมผม</option><option>ดัดผม</option><option>อื่นๆ</option></select></div>
-                <div class="w-32 text-right border-l pl-3"><label>ราคา (บาท)</label><input type="number" placeholder="0" class="service-price text-right text-blue-600 text-3xl font-bold price-input" inputmode="decimal"></div>`;
+            div.innerHTML = `<button onclick="this.parentElement.remove()" class="absolute -right-2 -top-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] z-10">✕</button>
+                <div class="flex-1"><label>เลือกบริการ</label><select class="service-select"><option>ตัดผม</option><option>แก้ผม</option><option>สระผม</option><option>โกนหนวด</option><option>กันหน้า</option><option>ย้อมผม</option><option>ดัดผม</option></select></div>
+                <div class="w-24 text-right border-l pl-3"><label>ราคา</label><input type="number" placeholder="0" class="service-price text-right text-blue-600 text-2xl font-bold price-input" inputmode="decimal"></div>`;
             container.appendChild(div);
         }
 
@@ -145,11 +136,11 @@
             const names = document.querySelectorAll('.service-select');
             let total = 0, svcs = [];
             prices.forEach((p, i) => { if(parseFloat(p.value) > 0) { total += parseFloat(p.value); svcs.push(names[i].value); } });
-            if(total === 0) return alert('กรุณาใส่ราคาก่อนครับ');
+            if(total === 0) return alert('ใส่ราคาก่อนครับ');
             btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
             const entry = { id: Date.now(), date: document.getElementById('work-date').value, total, pType, timeStart: document.getElementById('time-start').value, timeEnd: document.getElementById('time-end').value, style: document.getElementById('hair-style').value, services: svcs.join(', ') };
             db.push(entry);
-            localStorage.setItem('lamoon_db_final_v2', JSON.stringify(db));
+            localStorage.setItem('lamoon_db_final_v3', JSON.stringify(db));
             try { await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(entry) }); } catch(e) {}
             location.reload();
         }
@@ -157,50 +148,58 @@
         function updateReport() {
             let total = 0, cash = 0, trans = 0;
             const list = document.getElementById('history-items');
-            const target = document.getElementById('work-date').value;
+            const targetDate = document.getElementById('work-date').value;
+            
+            // แสดงวันที่ในหน้ารายงาน
+            const d = new Date(targetDate);
+            const thDate = d.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('report-date-display').innerText = thDate;
+
             list.innerHTML = '';
-            const filtered = db.filter(it => it.date === target);
-            filtered.slice().reverse().forEach((item, index) => {
+            const filtered = db.filter(it => it.date === targetDate);
+            filtered.slice().reverse().forEach((item) => {
                 total += item.total;
-                const typeName = item.pType === 'cash' ? 'เงินสด' : 'โอนเงิน';
                 if (item.pType === 'cash') cash += item.total; else trans += item.total;
-                list.innerHTML += `<div class="card flex justify-between items-center border-l-[5px] ${item.pType==='cash'?'border-l-green-500':'border-l-blue-500'}">
-                    <div><p class="font-bold text-lg">${item.services}</p><p class="text-xs text-slate-400">${item.timeStart}-${item.timeEnd} | ${item.style}</p></div>
-                    <div class="text-right flex items-center gap-4"><div><p class="text-2xl font-bold">฿${item.total}</p><p class="text-[10px] font-bold ${item.pType==='cash'?'text-green-600':'text-blue-600'} uppercase">${typeName}</p></div>
-                    <button onclick="deleteItem(${item.id})" class="text-slate-200"><i class="fa-solid fa-trash-can text-xl"></i></button></div></div>`;
+                list.innerHTML += `<div class="card flex justify-between items-center border-l-[4px] ${item.pType==='cash'?'border-l-green-500':'border-l-blue-500'}">
+                    <div><p class="font-bold text-base text-slate-700">${item.services}</p><p class="text-[10px] text-slate-400">${item.timeStart}-${item.timeEnd} | ${item.style}</p></div>
+                    <div class="text-right flex items-center gap-3"><div><p class="text-xl font-bold">฿${item.total}</p><p class="text-[9px] font-bold ${item.pType==='cash'?'text-green-600':'text-blue-600'} uppercase">${item.pType==='cash'?'เงินสด':'โอนเงิน'}</p></div>
+                    <button onclick="deleteItem(${item.id})" class="text-slate-300"><i class="fa-solid fa-trash-can"></i></button></div></div>`;
             });
             document.getElementById('rep-total').innerText = total.toLocaleString();
             document.getElementById('rep-cash').innerText = cash.toLocaleString();
             document.getElementById('rep-transfer').innerText = trans.toLocaleString();
             document.getElementById('rep-count').innerText = filtered.length;
+            
             let share = total > 0 ? (total < 400 ? 200 : total * 0.5) : 0;
             let balance = cash - share;
             const box = document.getElementById('settle-status-box');
             if(total > 0) {
                 box.classList.remove('hidden');
-                if(balance > 0) { box.innerText = "ช่างคืนร้าน ฿" + balance.toLocaleString(); box.className = "card bg-orange-50 text-orange-600 text-center font-bold border-orange-100 mb-4 py-4"; }
-                else if(balance < 0) { box.innerText = "ร้านคืนช่าง ฿" + Math.abs(balance).toLocaleString(); box.className = "card bg-blue-50 text-blue-600 text-center font-bold border-blue-100 mb-4 py-4"; }
-                else { box.innerText = "ยอดเงินลงตัว"; box.className = "card bg-green-50 text-green-600 text-center font-bold border-green-100 mb-4 py-4"; }
+                if(balance > 0) { box.innerText = "ช่างคืนร้าน ฿" + balance.toLocaleString(); box.className = "card bg-orange-50 text-orange-600 text-center font-bold mb-4 py-3"; }
+                else if(balance < 0) { box.innerText = "ร้านคืนช่าง ฿" + Math.abs(balance).toLocaleString(); box.className = "card bg-blue-50 text-blue-600 text-center font-bold mb-4 py-3"; }
+                else { box.innerText = "ยอดเงินลงตัวพอดี"; box.className = "card bg-green-50 text-green-600 text-center font-bold mb-4 py-3"; }
                 document.getElementById('settle-val').innerText = "฿" + Math.abs(balance).toLocaleString();
             } else { box.classList.add('hidden'); }
         }
 
-        function deleteItem(id) { if(confirm('ลบรายการนี้?')) { db = db.filter(it => it.id !== id); localStorage.setItem('lamoon_db_final_v2', JSON.stringify(db)); updateReport(); } }
+        function deleteItem(id) { if(confirm('ลบรายการนี้?')) { db = db.filter(it => it.id !== id); localStorage.setItem('lamoon_db_final_v3', JSON.stringify(db)); updateReport(); } }
         
+        function clearAllData() {
+            if(confirm('ระวัง! คุณต้องการลบข้อมูลทั้งหมดในเครื่องใช่หรือไม่? (ข้อมูลใน Google Sheet จะไม่ถูกลบ)')) {
+                localStorage.removeItem('lamoon_db_final_v3');
+                db = [];
+                updateReport();
+            }
+        }
+
         function nav(p) {
             const body = document.getElementById('body-container');
             document.getElementById('page-record').classList.toggle('hidden-page', p !== 'record');
             document.getElementById('page-report').classList.toggle('hidden-page', p !== 'report');
             document.getElementById('nav-record').classList.toggle('active-nav', p === 'record');
             document.getElementById('nav-report').classList.toggle('active-nav', p === 'report');
-            
-            // เพิ่ม class เพื่อซ่อน Header เมื่อเข้าหน้ารายงาน
-            if(p === 'report') {
-                body.classList.add('report-active');
-                updateReport();
-            } else {
-                body.classList.remove('report-active');
-            }
+            if(p === 'report') { body.classList.add('report-active'); updateReport(); } 
+            else { body.classList.remove('report-active'); }
         }
         window.onload = init;
     </script>
