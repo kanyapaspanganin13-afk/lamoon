@@ -17,7 +17,6 @@
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: #f8fafc; }
         body { display: flex; flex-direction: column; }
         
-        /* ขยาย Header ให้สูงเด่น */
         header { 
             background: #1e293b; 
             color: white; 
@@ -34,7 +33,7 @@
         
         nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: white; border-top: 1px solid #e2e8f0; display: flex; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
         .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; border: none; background: none; }
-        .active-nav { color: #1e293b; border-top: 4px solid #1e293b; font-weight: 600; }
+        .active-nav { color: #1e293b; border-top: 4px solid #fbbf24; font-weight: 600; }
         
         .card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         select, input { background: transparent; outline: none; width: 100%; font-size: 1rem; font-weight: 500; color: #1e293b; min-height: 26px; }
@@ -130,15 +129,6 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4-X1fFa9FD_UNYz8HbOqqDurX7KRrl-v4VyjELMTObe9yo8GN1uVgcsHNcoqgVfGh/exec"; 
         let database = JSON.parse(localStorage.getItem('lamoon_db_v6')) || [];
         let pType = 'cash';
-        let timeTracker;
-
-        function updateLiveTime() {
-            const now = new Date().toLocaleTimeString('th-TH', {hour12:false, hour:'2-digit', minute:'2-digit'});
-            if (document.activeElement.type !== 'time') {
-                document.getElementById('time-start').value = now;
-                document.getElementById('time-end').value = now;
-            }
-        }
 
         function setPayment(t) {
             pType = t;
@@ -160,6 +150,8 @@
             const btn = document.getElementById('save-btn');
             const prices = document.querySelectorAll('.service-price');
             const names = document.querySelectorAll('.service-select');
+            const timeS = document.getElementById('time-start').value;
+            const timeE = document.getElementById('time-end').value;
             let totalAll = 0, entryServices = [];
             
             prices.forEach((p, i) => { 
@@ -167,10 +159,12 @@
                 if (val > 0) { totalAll += val; entryServices.push(names[i].value); }
             });
 
+            if (!timeS || !timeE) return alert('กรุณาระบุเวลา');
             if (totalAll === 0) return alert('ระบุราคา');
+            
             btn.innerText = "SAVING..."; btn.disabled = true;
             
-            const entry = { total: totalAll, pType: pType, timeStart: document.getElementById('time-start').value, timeEnd: document.getElementById('time-end').value, style: document.getElementById('hair-style').value, services: entryServices.join(', '), date: new Date().toLocaleDateString('en-GB') };
+            const entry = { total: totalAll, pType: pType, timeStart: timeS, timeEnd: timeE, style: document.getElementById('hair-style').value, services: entryServices.join(', '), date: new Date().toLocaleDateString('en-GB') };
             
             database.push(entry);
             localStorage.setItem('lamoon_db_v6', JSON.stringify(database));
@@ -215,10 +209,10 @@
             document.getElementById('page-report').classList.toggle('hidden-page', p !== 'report');
             document.getElementById('nav-record').classList.toggle('active-nav', p === 'record');
             document.getElementById('nav-report').classList.toggle('active-nav', p === 'report');
-            if(p === 'report') { clearInterval(timeTracker); updateReport(); } else { timeTracker = setInterval(updateLiveTime, 1000); }
+            if(p === 'report') { updateReport(); }
         }
 
-        window.onload = () => { updateLiveTime(); timeTracker = setInterval(updateLiveTime, 1000); updateReport(); };
+        window.onload = () => { updateReport(); };
     </script>
 </body>
 </html>
