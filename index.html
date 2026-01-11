@@ -211,7 +211,7 @@
                     <div>
                         <p class="text-yellow-500 text-sm font-semibold uppercase tracking-wider">ยอดเงินรวม</p>
                         <p id="rep-display-date" class="text-white/70 text-[13px] font-medium mt-0.5"></p>
-                        <p class="text-white/250 text-xs font-normal mt-1"><span id="rep-count">0</span> คน</p>
+                        <p class="text-white/70 text-xs font-normal mt-1"><span id="rep-count">0</span> คน</p>
                     </div>
                     <div class="text-right">
                         <h2 class="text-4xl font-bold">฿<span id="rep-total">0</span></h2>
@@ -273,9 +273,9 @@
             document.getElementById('record-date').value = `${year}-${month}-${day}`;
         }
 
-        // ฟังก์ชันแปลงวันที่ให้เป็นแบบไทยเพื่อแสดงในรายงาน
         function getThaiDate(dateStr) {
-            const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+            if(!dateStr) return "";
+            const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค. Lights"];
             const d = new Date(dateStr);
             return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear() + 543}`;
         }
@@ -327,7 +327,7 @@
             list.innerHTML = '';
             document.getElementById('rep-count').innerText = database.length;
 
-            // แสดงวันที่ในหน้าสรุป (อิงจากวันที่ล่าสุดที่มีการบันทึก หรือวันที่ปัจจุบัน)
+            // อัปเดตวันที่แสดงผลในหน้ารายงาน
             if(database.length > 0) {
                 document.getElementById('rep-display-date').innerText = getThaiDate(database[database.length-1].date);
             } else {
