@@ -13,56 +13,58 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
-        * { font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        * { font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; box-sizing: border-box; touch-action: manipulation; }
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: #f8fafc; }
         body { display: flex; flex-direction: column; }
         
         header { 
             background: #1e293b; 
             color: white; 
-            padding: 20px 0 15px 0; 
+            padding: 15px 0; 
             text-align: center; 
             flex-shrink: 0; 
             border-bottom: 3px solid #fbbf24;
+            z-index: 50;
         }
         .header-logo {
-            width: 70px;
-            height: 70px;
-            margin: 0 auto 10px auto;
+            width: 60px; height: 60px;
+            margin: 0 auto 8px auto;
             border-radius: 50%;
             border: 2px solid #fbbf24;
             background: #fff;
             overflow: hidden;
         }
         .header-logo img { width: 100%; height: 100%; object-fit: cover; }
-        .shop-name { letter-spacing: 0.15em; font-size: 1.4rem; text-transform: uppercase; font-weight: 600; line-height: 1; }
-        .shop-sub { font-size: 9px; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.3em; margin-top: 6px; }
+        .shop-name { letter-spacing: 0.1em; font-size: 1.2rem; text-transform: uppercase; font-weight: 600; }
+        .shop-sub { font-size: 9px; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.2em; }
         
-        main { flex: 1; overflow-y: auto; padding: 15px 12px 90px 12px; }
+        main { flex: 1; overflow-y: auto; padding: 15px 12px 100px 12px; position: relative; z-index: 10; }
         .hidden-page { display: none !important; }
         
-        nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: white; border-top: 1px solid #e2e8f0; display: flex; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; border: none; background: none; }
+        nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: white; border-top: 1px solid #e2e8f0; display: flex; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; border: none; background: none; cursor: pointer; }
         .active-nav { color: #1e293b; border-top: 4px solid #fbbf24; font-weight: 600; }
         
-        .card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-        select, input { background: transparent; outline: none; width: 100%; font-size: 1rem; font-weight: 500; color: #1e293b; min-height: 26px; }
-        label { font-size: 9px; color: #94a3b8; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; display: block; }
+        .card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 12px; margin-bottom: 10px; }
+        select, input { background: transparent; outline: none; width: 100%; font-size: 1rem; color: #1e293b; min-height: 35px; }
+        label { font-size: 9px; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; display: block; }
         
         .payment-active { background-color: #1e293b !important; color: white !important; border-color: #1e293b !important; }
         
-        #save-btn { width: 100%; background: #1e293b; color: white; padding: 16px; border-radius: 12px; font-size: 1.1rem; font-weight: 600; margin-top: 5px; border: none; }
-        .btn-add { width: 100%; border: 1px dashed #cbd5e1; color: #64748b; font-size: 10px; font-weight: 600; border-radius: 10px; padding: 10px; margin-bottom: 10px; background: #fff; }
-
-        .history-service-text { font-size: 1rem; font-weight: 500; color: #1e293b; }
-        .history-price-text { font-size: 1.2rem; font-weight: 600; color: #1e293b; }
+        #save-btn { 
+            width: 100%; background: #1e293b; color: white; padding: 18px; 
+            border-radius: 12px; font-size: 1.1rem; font-weight: 600; 
+            margin-top: 10px; border: none; cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        #save-btn:active { opacity: 0.8; transform: scale(0.98); }
+        
+        .btn-add { width: 100%; border: 1px dashed #cbd5e1; color: #64748b; font-size: 11px; font-weight: 600; border-radius: 10px; padding: 12px; margin-bottom: 15px; background: #fff; }
     </style>
 </head>
 <body>
     <header>
-        <div class="header-logo">
-            <img src="https://i.ibb.co/39bGJwGF/LA-MOON.png" alt="Logo">
-        </div>
+        <div class="header-logo"><img src="https://i.ibb.co/39bGJwGF/LA-MOON.png" alt="Logo"></div>
         <div class="shop-name">La-Moon Cut</div>
         <div class="shop-sub">Barber Shop for Gentleman</div>
     </header>
@@ -76,22 +78,25 @@
             
             <div id="services-container">
                 <div class="card flex justify-between items-center border-l-4 border-l-slate-400">
-                    <div class="flex-1"><label>Service</label>
+                    <div class="flex-1">
+                        <label>Service</label>
                         <select class="service-select">
                             <option>ตัดผม</option><option>แก้ผม</option><option>สระผม</option>
                             <option>โกนหนวด</option><option>กันหน้า</option><option>ย้อมผม</option>
                             <option>ดัดผม</option><option>อื่นๆ</option>
                         </select>
                     </div>
-                    <div class="w-24 text-right border-l pl-3"><label>Price</label>
-                        <input type="number" id="main-service-price" placeholder="" class="service-price text-right text-blue-600 text-xl font-medium">
+                    <div class="w-24 text-right border-l pl-3">
+                        <label>Price</label>
+                        <input type="number" placeholder="0" class="service-price text-right text-blue-600 text-xl font-bold">
                     </div>
                 </div>
             </div>
 
-            <button onclick="addServiceRow()" class="btn-add"><i class="fa-solid fa-plus mr-1"></i> ADD SERVICE</button>
+            <button type="button" onclick="addServiceRow()" class="btn-add"><i class="fa-solid fa-plus mr-1"></i> ADD SERVICE</button>
 
-            <div class="card mb-3"><label>Hair Style</label>
+            <div class="card mb-3">
+                <label>Hair Style</label>
                 <select id="hair-style">
                     <option>รองทรง</option><option>แฟชั่น / ทูบล็อค</option><option>สกินเฟด</option>
                     <option>นักเรียน</option><option>ตำรวจ / ทหาร</option><option>ทรงอเมริกัน</option>
@@ -100,42 +105,43 @@
             </div>
 
             <div class="grid grid-cols-2 gap-3 mb-4">
-                <button onclick="setPayment('cash')" id="pay-cash" class="card payment-active flex flex-col items-center py-3 mb-0"><i class="fa-solid fa-money-bill-1-wave mb-1 text-lg"></i><span class="text-[10px] font-semibold">CASH</span></button>
-                <button onclick="setPayment('transfer')" id="pay-transfer" class="card text-slate-400 flex flex-col items-center py-3 mb-0"><i class="fa-solid fa-qrcode mb-1 text-lg"></i><span class="text-[10px] font-semibold">TRANSFER</span></button>
+                <button type="button" onclick="setPayment('cash')" id="pay-cash" class="card payment-active flex flex-col items-center py-4 mb-0 transition-all">
+                    <i class="fa-solid fa-money-bill-1-wave mb-1 text-xl"></i><span class="text-[10px] font-bold">CASH</span>
+                </button>
+                <button type="button" onclick="setPayment('transfer')" id="pay-transfer" class="card text-slate-400 flex flex-col items-center py-4 mb-0 transition-all">
+                    <i class="fa-solid fa-qrcode mb-1 text-xl"></i><span class="text-[10px] font-bold">TRANSFER</span>
+                </button>
             </div>
 
-            <button id="save-btn" onclick="saveRecord()">SAVE RECORD</button>
+            <button type="button" id="save-btn" onclick="saveRecord()">SAVE RECORD</button>
         </div>
 
         <div id="page-report" class="hidden-page">
             <div class="bg-[#1e293b] rounded-xl p-6 text-white text-center mb-4">
-                <p class="text-[10px] text-yellow-500 tracking-widest mb-1 font-medium uppercase">Today Total (<span id="rep-count">0</span> Customers)</p>
-                <h2 class="text-3xl font-semibold">฿<span id="rep-total">0</span></h2>
+                <p class="text-[10px] text-yellow-500 tracking-widest mb-1 font-bold uppercase">Today Total (<span id="rep-count">0</span> Customers)</p>
+                <h2 class="text-4xl font-bold">฿<span id="rep-total">0</span></h2>
                 <div class="flex justify-between px-4 border-t border-white/10 pt-4 mt-4">
-                    <div class="text-left"><span class="opacity-50 block text-[9px] font-semibold">CASH</span><span class="text-green-400 text-lg font-semibold">฿<span id="rep-cash">0</span></span></div>
-                    <div class="text-right"><span class="opacity-50 block text-[9px] font-semibold">TRANSFER</span><span class="text-blue-400 text-lg font-semibold">฿<span id="rep-transfer">0</span></span></div>
+                    <div class="text-left"><span class="opacity-50 block text-[9px] font-bold">CASH</span><span class="text-green-400 text-lg font-bold">฿<span id="rep-cash">0</span></span></div>
+                    <div class="text-right"><span class="opacity-50 block text-[9px] font-bold">TRANSFER</span><span class="text-blue-400 text-lg font-bold">฿<span id="rep-transfer">0</span></span></div>
                 </div>
             </div>
-
-            <div class="card flex justify-between items-center py-3 border-l-4 border-l-slate-800">
-                <div><label>Settlement</label><p id="settle-status" class="text-[11px] font-medium">Calculating...</p></div>
-                <div class="text-right font-semibold text-lg" id="settle-amount">฿0</div>
+            
+            <div class="card flex justify-between items-center py-4 border-l-4 border-l-slate-800">
+                <div><label>Settlement</label><p id="settle-status" class="text-[12px] font-bold">Calculating...</p></div>
+                <div class="text-right font-bold text-xl" id="settle-amount">฿0</div>
             </div>
 
-            <div id="history-items" class="space-y-2"></div>
+            <div id="history-items" class="space-y-3"></div>
             
-            <div class="mt-6 flex flex-col items-center gap-5">
-                <a href="https://docs.google.com/spreadsheets/d/159I70YQh-XwUv_IunvU4_S16fL835y_56Rly7oXhP_M/edit" target="_blank" class="bg-green-600 text-white px-6 py-2.5 rounded-full text-[11px] font-semibold flex items-center gap-2 shadow-sm">
-                    <i class="fa-solid fa-table"></i> GO TO SHEET
-                </a>
-                <button onclick="clearDay()" class="text-red-400 text-[9px] font-semibold underline opacity-50 uppercase">Clear All Data</button>
+            <div class="mt-8 flex flex-col items-center gap-6">
+                <button onclick="clearDay()" class="text-red-400 text-[10px] font-bold underline opacity-60 uppercase tracking-widest">Clear All Today's Data</button>
             </div>
         </div>
     </main>
 
     <nav>
-        <button onclick="nav('record')" id="nav-record" class="nav-btn active-nav"><i class="fa-solid fa-scissors text-xl"></i><span class="text-[10px] mt-1 font-semibold">RECORD</span></button>
-        <button onclick="nav('report')" id="nav-report" class="nav-btn"><i class="fa-solid fa-chart-line text-xl"></i><span class="text-[10px] mt-1 font-semibold">REPORT</span></button>
+        <button type="button" onclick="nav('record')" id="nav-record" class="nav-btn active-nav"><i class="fa-solid fa-scissors text-2xl"></i><span class="text-[10px] mt-1 font-bold">RECORD</span></button>
+        <button type="button" onclick="nav('report')" id="nav-report" class="nav-btn"><i class="fa-solid fa-chart-line text-2xl"></i><span class="text-[10px] mt-1 font-bold">REPORT</span></button>
     </nav>
 
     <script>
@@ -145,13 +151,115 @@
 
         function setPayment(t) {
             pType = t;
-            document.getElementById('pay-cash').className = t === 'cash' ? "card payment-active flex flex-col items-center py-3 mb-0" : "card text-slate-400 flex flex-col items-center py-3 mb-0";
-            document.getElementById('pay-transfer').className = t === 'transfer' ? "card payment-active flex flex-col items-center py-3 mb-0" : "card text-slate-400 flex flex-col items-center py-3 mb-0";
+            document.getElementById('pay-cash').className = t === 'cash' ? "card payment-active flex flex-col items-center py-4 mb-0 transition-all" : "card text-slate-400 flex flex-col items-center py-4 mb-0 transition-all";
+            document.getElementById('pay-transfer').className = t === 'transfer' ? "card payment-active flex flex-col items-center py-4 mb-0 transition-all" : "card text-slate-400 flex flex-col items-center py-4 mb-0 transition-all";
         }
 
         function addServiceRow() {
             const container = document.getElementById('services-container');
             const div = document.createElement('div');
-            div.className = "card flex justify-between items-center relative mt-2 border-l-4 border-l-slate-400";
-            div.innerHTML = `<button onclick="this.parentElement.remove()" class="absolute -left-2 -top-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] z-10 font-bold shadow-sm">✕</button>
-                <div class="flex-1"><label>Service</label><select class="service-select"><option>ตัดผม</option><option>แก้ผม</option><option>สระผม</option><option>โกนหนวด</option><option>กันหน้า</option><option>ย้อมผม</option><option
+            div.className = "card flex justify-between items-center relative mt-2 border-l-4 border-l-slate-400 animate-fade-in";
+            div.innerHTML = `<button onclick="this.parentElement.remove()" class="absolute -left-2 -top-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-[12px] z-10 font-bold shadow-md">✕</button>
+                <div class="flex-1"><label>Service</label><select class="service-select"><option>ตัดผม</option><option>แก้ผม</option><option>สระผม</option><option>โกนหนวด</option><option>กันหน้า</option><option>ย้อมผม</option><option>ดัดผม</option><option>อื่นๆ</option></select></div>
+                <div class="w-24 text-right border-l pl-3"><label>Price</label><input type="number" placeholder="0" class="service-price text-right text-blue-600 text-xl font-bold"></div>`;
+            container.appendChild(div);
+        }
+
+        async function saveRecord() {
+            const btn = document.getElementById('save-btn');
+            const prices = document.querySelectorAll('.service-price');
+            const names = document.querySelectorAll('.service-select');
+            const timeS = document.getElementById('time-start').value;
+            const timeE = document.getElementById('time-end').value;
+            
+            let totalAll = 0;
+            let entryServices = [];
+            
+            prices.forEach((p, i) => { 
+                let val = parseFloat(p.value) || 0;
+                if (val > 0) { 
+                    totalAll += val; 
+                    entryServices.push(names[i].value); 
+                }
+            });
+
+            if (!timeS || !timeE) { alert('กรุณาระบุเวลาเริ่มและจบ'); return; }
+            if (totalAll === 0) { alert('กรุณาระบุราคาบริการ'); return; }
+
+            btn.innerText = "กำลังบันทึก...";
+            btn.disabled = true;
+            btn.style.opacity = "0.5";
+            
+            const entry = { 
+                total: totalAll, 
+                pType: pType, 
+                timeStart: timeS, 
+                timeEnd: timeE, 
+                style: document.getElementById('hair-style').value, 
+                services: entryServices.join(', '), 
+                date: new Date().toLocaleDateString('en-GB') 
+            };
+            
+            try {
+                database.push(entry);
+                localStorage.setItem('lamoon_db_v6', JSON.stringify(database));
+                
+                // ส่งข้อมูลไป Google Sheets (เบื้องหลัง)
+                fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(entry) });
+                
+                setTimeout(() => {
+                    alert('บันทึกสำเร็จ!');
+                    location.reload();
+                }, 500);
+            } catch (e) {
+                alert('เกิดข้อผิดพลาดในการบันทึก');
+                btn.innerText = "SAVE RECORD";
+                btn.disabled = false;
+                btn.style.opacity = "1";
+            }
+        }
+
+        function updateReport() {
+            let total = 0, cash = 0, trans = 0;
+            const list = document.getElementById('history-items');
+            list.innerHTML = '';
+            document.getElementById('rep-count').innerText = database.length;
+
+            database.slice().reverse().forEach((item, index) => {
+                const rIdx = database.length - 1 - index;
+                total += item.total;
+                if (item.pType === 'cash') cash += item.total; else trans += item.total;
+                list.innerHTML += `<div class="card flex justify-between items-center mb-2 border-l-4 ${item.pType==='cash'?'border-l-green-400':'border-l-blue-400'} shadow-sm">
+                    <div class="flex-1"><p class="text-[15px] font-bold text-slate-800">${item.services}</p><p class="text-[9px] text-slate-400 font-bold uppercase">${item.timeStart}-${item.timeEnd} | ${item.style}</p></div>
+                    <div class="flex items-center gap-4"><div class="text-right"><p class="text-lg font-bold text-slate-900">฿${item.total}</p><p class="text-[8px] text-slate-400 font-bold uppercase">${item.pType}</p></div>
+                    <button onclick="deleteItem(${rIdx})" class="text-red-300 active:text-red-500 p-2"><i class="fa-solid fa-trash-can text-lg"></i></button></div></div>`;
+            });
+
+            document.getElementById('rep-total').innerText = total.toLocaleString();
+            document.getElementById('rep-cash').innerText = cash.toLocaleString();
+            document.getElementById('rep-transfer').innerText = trans.toLocaleString();
+
+            let barberShare = total > 0 ? (total < 400 ? 200 : total * 0.5) : 0;
+            let balance = cash - barberShare;
+            const sS = document.getElementById('settle-status'), sA = document.getElementById('settle-amount');
+
+            if(balance > 0) { sS.innerText = "ช่างต้องคืนร้าน"; sS.className="text-[12px] text-orange-600 font-bold"; sA.innerText = "฿"+balance.toLocaleString(); sA.className="text-xl text-orange-600 font-bold"; }
+            else if(balance < 0) { sS.innerText = "ร้านต้องคืนช่าง"; sS.className="text-[12px] text-blue-600 font-bold"; sA.innerText = "฿"+Math.abs(balance).toLocaleString(); sA.className="text-xl text-blue-600 font-bold"; }
+            else { sS.innerText = "ยอดลงตัวพอดี"; sS.className="text-[12px] text-green-600 font-bold"; sA.innerText = "฿0"; sA.className="text-xl text-green-600 font-bold"; }
+        }
+
+        function deleteItem(idx) { if (confirm('ต้องการลบรายการนี้ใช่หรือไม่?')) { database.splice(idx, 1); localStorage.setItem('lamoon_db_v6', JSON.stringify(database)); updateReport(); } }
+        function clearDay() { if (confirm('คำเตือน! ข้อมูลทั้งหมดของวันนี้จะถูกล้างทิ้ง ต้องการทำต่อหรือไม่?')) { database = []; localStorage.removeItem('lamoon_db_v6'); location.reload(); } }
+        
+        function nav(p) {
+            document.getElementById('page-record').classList.toggle('hidden-page', p !== 'record');
+            document.getElementById('page-report').classList.toggle('hidden-page', p !== 'report');
+            document.getElementById('nav-record').classList.toggle('active-nav', p === 'record');
+            document.getElementById('nav-report').classList.toggle('active-nav', p === 'report');
+            if(p === 'report') updateReport();
+        }
+
+        window.onload = () => { updateReport(); };
+    </script>
+</body>
+</html>
