@@ -126,131 +126,116 @@
     </nav>
 
     <script>
-        const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwNFKCDFWna8t42rSYRrdsMCsd2symtnM9C7N_wNPJ_R713F_5J0s02A4AnBWPzIVAq/exec";
-        let db=JSON.parse(localStorage.getItem('lamoon_db_vfinal'))||[], payType='cash';
-        const monthsThai=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNFKCDFWna8t42rSYRrdsMCsd2symtnM9C7N_wNPJ_R713F_5J0s02A4AnBWPzIVAq/exec";
+        let db = JSON.parse(localStorage.getItem('lamoon_db_vfinal')) || [], payType = 'cash';
+        const monthsThai = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
 
-        function init(){
-            const n=new Date(); 
-            document.getElementById('work-date').valueAsDate=n;
-            updateDateLabel(n);
-            document.getElementById('t-start').value=n.toTimeString().slice(0,5);
-            document.getElementById('t-end').value=new Date(n.getTime()+30*60000).toTimeString().slice(0,5);
+        const $ = (id) => document.getElementById(id);
+
+        function init() {
+            const n = new Date();
+            $('work-date').valueAsDate = n;
+            $('display-date-rep').innerText = `${n.getDate()} ${monthsThai[n.getMonth()]} ${n.getFullYear() + 543}`;
+            $('t-start').value = n.toTimeString().slice(0, 5);
+            $('t-end').value = new Date(n.getTime() + 30 * 60000).toTimeString().slice(0, 5);
         }
 
-        function updateDateLabel(d) {
-            document.getElementById('display-date-rep').innerText=`${d.getDate()} ${monthsThai[d.getMonth()]} ${d.getFullYear()+543}`;
+        function addSvc() {
+            const div = document.createElement('div');
+            div.className = "card border-l-[6px] border-blue-500 flex svc-row relative mt-1";
+            div.innerHTML = document.querySelector('.svc-row').innerHTML + `<button onclick="this.parentElement.remove()" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]">✕</button>`;
+            $('svc-list').appendChild(div);
         }
 
-        function addSvc(){
-            const div=document.createElement('div'); div.className="card border-l-[6px] border-blue-500 flex svc-row relative mt-1";
-            div.innerHTML=document.querySelector('.svc-row').innerHTML+`<button onclick="this.parentElement.remove()" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]">✕</button>`;
-            document.getElementById('svc-list').appendChild(div);
+        function setPay(t) {
+            payType = t;
+            $('p-cash').classList.toggle('active', t === 'cash');
+            $('p-trans').classList.toggle('active', t === 'transfer');
         }
 
-        function setPay(t){
-            payType=t;
-            document.getElementById('p-cash').classList.toggle('active', t=='cash');
-            document.getElementById('p-trans').classList.toggle('active', t=='transfer');
-        }
-
-        async function saveData(){
-            let total=0, svcs=[]; 
-            document.querySelectorAll('.svc-row').forEach(r=>{
-                const p=Number(r.querySelector('.svc-price').value);
-                if(p){total+=p;svcs.push(r.querySelector('.svc-name').value)}
+        async function saveData() {
+            let total = 0, svcs = [];
+            document.querySelectorAll('.svc-row').forEach(r => {
+                const p = Number(r.querySelector('.svc-price').value);
+                if (p) { total += p; svcs.push(r.querySelector('.svc-name').value); }
             });
-            if(!total) return alert("กรุณาใส่ราคา");
-            const btn=document.getElementById('btn-save'); 
-            btn.innerText="กำลังบันทึก..."; btn.disabled=true;
-            
+            if (!total) return alert("กรุณาใส่ราคา");
+
+            const btn = $('btn-save');
+            btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
+
             const rec = {
-                date: document.getElementById('work-date').value,
+                date: $('work-date').value,
                 services: svcs.join(','),
-                hairstyle: document.getElementById('h-style').value,
+                hairstyle: $('h-style').value,
                 total: total,
-                t_start: document.getElementById('t-start').value,
-                t_end: document.getElementById('t-end').value,
-                pay_transfer: payType === 'transfer' ? total : 0, 
-                pay_cash: payType === 'cash' ? total : 0          
+                t_start: $('t-start').value,
+                t_end: $('t-end').value,
+                pay_transfer: payType === 'transfer' ? total : 0,
+                pay_cash: payType === 'cash' ? total : 0
             };
 
             try {
-                await fetch(SCRIPT_URL, {method:"POST", mode:"no-cors", body:JSON.stringify(rec)});
-                rec.id=Date.now(); 
-                rec.payment=payType=='cash'?'เงินสด':'โอนเงิน';
-                db.push(rec); 
-                localStorage.setItem('lamoon_db_vfinal',JSON.stringify(db));
-                btn.innerText="สำเร็จ!"; btn.classList.add('success');
-                setTimeout(()=>location.reload(), 800);
-            } catch(e) { 
-                alert("ล้มเหลว"); 
-                btn.disabled=false; 
-                btn.innerText="Save Record"; 
+                await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(rec) });
+                rec.id = Date.now();
+                rec.payment = payType === 'cash' ? 'เงินสด' : 'โอนเงิน';
+                db.push(rec);
+                localStorage.setItem('lamoon_db_vfinal', JSON.stringify(db));
+                btn.innerText = "สำเร็จ!"; btn.classList.add('success');
+                setTimeout(() => location.reload(), 800);
+            } catch (e) {
+                alert("ล้มเหลว"); btn.disabled = false; btn.innerText = "Save Record";
             }
         }
 
-        function nav(p){
-            if(p=='rec'){
-                document.getElementById('page-rec').classList.remove('hidden');
-                document.getElementById('page-rep').classList.add('hidden');
-                document.getElementById('n-rec').classList.add('active');
-                document.getElementById('n-rep').classList.remove('active');
-                document.body.classList.remove('report-mode');
-            } else {
-                document.getElementById('page-rec').classList.add('hidden');
-                document.getElementById('page-rep').classList.remove('hidden');
-                document.getElementById('n-rec').classList.remove('active');
-                document.getElementById('n-rep').classList.add('active');
-                document.body.classList.add('report-mode');
-                renderReport();
-            }
+        function nav(p) {
+            const isRec = (p === 'rec');
+            $('page-rec').classList.toggle('hidden', !isRec);
+            $('page-rep').classList.toggle('hidden', isRec);
+            $('n-rec').classList.toggle('active', isRec);
+            $('n-rep').classList.toggle('active', !isRec);
+            document.body.classList.toggle('report-mode', !isRec);
+            if (!isRec) renderReport();
         }
 
-        function renderReport(){
-            let t=0,c=0,tr=0; 
-            const list=document.getElementById('hist-list'); 
-            list.innerHTML='';
-            
-            db.slice().reverse().forEach((r,i)=>{
+        function renderReport() {
+            let t = 0, c = 0, tr = 0;
+            const list = $('hist-list');
+            list.innerHTML = '';
+
+            db.slice().reverse().forEach((r, i) => {
                 const val = Number(r.total) || 0;
-                t+=val; 
-                if(r.payment=='เงินสด') c+=val; else tr+=val;
-                
-                const displayIdx = db.length - i;
-                list.innerHTML+=`<div class="history-card">
-                    <div class="idx-box">${displayIdx}</div>
+                t += val;
+                r.payment === 'เงินสด' ? c += val : tr += val;
+                list.innerHTML += `<div class="history-card">
+                    <div class="idx-box">${db.length - i}</div>
                     <div class="flex-1 font-bold text-sm">${r.services}<div class="text-[11px] text-gray-400 font-normal">${r.t_start}-${r.t_end} | ${r.hairstyle}</div></div>
-                    <div class="text-right"><div class="font-bold text-lg">฿${val}</div><div class="text-[10px] ${r.payment=='เงินสด'?'text-green-500':'text-blue-500'} font-bold">${r.payment}</div></div>
+                    <div class="text-right"><div class="font-bold text-lg">฿${val.toLocaleString()}</div><div class="text-[10px] ${r.payment === 'เงินสด' ? 'text-green-500' : 'text-blue-500'} font-bold">${r.payment}</div></div>
                     <button onclick="delItem(${r.id})" class="ml-2 text-red-300"><i class="fa-solid fa-trash text-sm"></i></button>
                 </div>`;
             });
 
-            document.getElementById('r-count').innerText=db.length;
-            document.getElementById('r-total').innerText=t.toLocaleString();
-            document.getElementById('r-cash').innerText=c.toLocaleString();
-            document.getElementById('r-transfer').innerText=tr.toLocaleString();
-            
-            let s=t>=400 ? (c - (t/2)) : (c - 200);
-            document.getElementById('r-settle').innerText=Math.abs(s).toLocaleString();
-        
-const b = document.getElementById('status-box'); 
-b.classList.remove('hidden');
+            $('r-count').innerText = db.length;
+            $('r-total').innerText = t.toLocaleString();
+            $('r-cash').innerText = c.toLocaleString();
+            $('r-transfer').innerText = tr.toLocaleString();
 
-if (s === 0) {
-    b.innerText = `ยอดพอดี`;
-    b.className = `card text-center font-bold py-4 bg-gray-100 text-gray-500 border-gray-200 text-lg`;
-} else if (s > 0) {
-    b.innerText = `ช่างคืนร้าน ฿${s.toLocaleString()}`;
-    b.className = `card text-center font-bold py-4 bg-orange-50 text-orange-600 border-orange-200 text-lg`;
-} else {
-    b.innerText = `ร้านคืนช่าง ฿${Math.abs(s).toLocaleString()}`;
-    b.className = `card text-center font-bold py-4 bg-blue-50 text-blue-600 border-blue-200 text-lg`;
-}
+            const s = t >= 400 ? (c - (t / 2)) : (c - 200);
+            $('r-settle').innerText = Math.abs(s).toLocaleString();
 
-        function delItem(id){ if(confirm('ลบรายการนี้?')){db=db.filter(i=>i.id!=id);localStorage.setItem('lamoon_db_vfinal',JSON.stringify(db));renderReport();}}
-        function clearDB(){ if(confirm('ลบข้อมูลทั้งหมด?')){localStorage.removeItem('lamoon_db_vfinal');db=[];renderReport();}}        
+            const b = $('status-box');
+            b.classList.remove('hidden');
+
+            if (s === 0) {
+                b.innerText = `ยอดพอดี`;
+                b.className = `card text-center font-bold py-4 bg-gray-100 text-gray-500 border-gray-200 text-lg`;
+            } else {
+                b.innerText = s > 0 ? `ช่างคืนร้าน ฿${s.toLocaleString()}` : `ร้านคืนช่าง ฿${Math.abs(s).toLocaleString()}`;
+                b.className = `card text-center font-bold py-4 ${s > 0 ? 'bg-orange-50 text-orange-600 border-orange-200' : 'bg-blue-50 text-blue-600 border-blue-200'} text-lg`;
+            }
+        }
+
+        function delItem(id) { if (confirm('ลบรายการนี้?')) { db = db.filter(i => i.id != id); localStorage.setItem('lamoon_db_vfinal', JSON.stringify(db)); renderReport(); } }
+        function clearDB() { if (confirm('ลบข้อมูลทั้งหมด?')) { localStorage.removeItem('lamoon_db_vfinal'); db = []; renderReport(); } }
         window.onload = init;
     </script>
-</body>
-</html>
