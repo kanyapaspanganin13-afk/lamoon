@@ -115,7 +115,7 @@
         }
 
         function updateDateLabel(d) {
-            document.getElementById('display-date-rep').innerText=`${d.getDate()} ${monthsThai[d.getMonth()]} พ.ศ. ${d.getFullYear()+543}`;
+            document.getElementById('display-date-rep').innerText=`${d.getDate()} ${monthsThai[d.getMonth()]}  ${d.getFullYear()+543}`;
         }
 
         function addSvc(){
@@ -136,7 +136,7 @@
                 const p=Number(r.querySelector('.svc-price').value);
                 if(p){total+=p;svcs.push(r.querySelector('.svc-name').value)}
             });
-            if(!total) return alert("กรุณาใส่ราคาครับ");
+            if(!total) return alert("กรุณาใส่ราคา");
 
             const btn=document.getElementById('btn-save'); 
             btn.innerText="กำลังบันทึก..."; btn.disabled=true;
