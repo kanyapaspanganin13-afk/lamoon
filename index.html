@@ -17,14 +17,12 @@ body{background:#f8fafc;color:#1e293b;margin:0;padding-bottom:100px}
 
 .lbl-18 { font-size: 16px; font-weight: 500; color: #64748b; margin-bottom: 4px; display: block; }
 
-/* หัวข้อร้าน: เอาแถบเหลืองออกแล้ว */
 header{background:#1e293b; color:white; padding:30px 0; text-align:center; border-bottom: none;}
 .report-mode header{display:none}
 
 .card{background:white; border-radius:15px; border:1px solid #e2e8f0; padding:15px; margin-bottom:12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);}
 select, input{width:100%; font-size:1.1rem; font-weight:600; border:none; outline:none; background:transparent; color:#1e293b;}
 
-/* ปรับปุ่มจ่ายเงินให้เล็กลงพอดีจอ */
 .pay-btn{border-radius:10px; padding:8px; text-align:center; border:2px solid #e2e8f0; background:white; transition: 0.2s;}
 .pay-btn.active{background:#1e293b; color:white; border-color:#1e293b;}
 .pay-btn i { font-size: 1rem; margin-bottom: 2px; }
@@ -32,6 +30,7 @@ select, input{width:100%; font-size:1.1rem; font-weight:600; border:none; outlin
 
 #btn-save{background:#1e293b; color:white; width:100%; padding:18px; border-radius:15px; font-size:20px; font-weight:700; transition: 0.3s;}
 #btn-save.success{background:#10b981}
+#btn-save:disabled{background:#94a3b8; opacity:0.7}
 
 .nav-bar{position:fixed; bottom:0; left:0; right:0; height:80px; background:white; border-top:1px solid #e2e8f0; display:flex; z-index:100}
 .nav-item{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#94a3b8; font-size: 13px;}
@@ -119,7 +118,7 @@ select, input{width:100%; font-size:1.1rem; font-weight:600; border:none; outlin
         <div id="status-box" class="card text-center font-bold hidden py-4 border-2 shadow-md"></div>
         <div id="hist-list" class="space-y-3"></div>
 
-        <a href="https://docs.google.com/spreadsheets/d/159I70YQh-XwUv_IunvU4_S16fL835y_56Rly7oXhP_M/edit" target="_blank"
+        <a href="https://docs.google.com/spreadsheets/d/1Dqku0IZj_TcC6d1AzY9m6gD2qpB1KpJEHa6X-77x6p4/edit" target="_blank"
            class="block bg-[#1d6f42] text-white text-center py-4 rounded-2xl font-bold mt-8 shadow-lg active:scale-95 transition-all">
            <i class="fa-solid fa-file-excel mr-2 text-xl"></i> เปิดดู GOOGLE SHEET
         </a>
@@ -134,13 +133,16 @@ select, input{width:100%; font-size:1.1rem; font-weight:600; border:none; outlin
 </nav>
 
 <script>
+// ลิงก์เชื่อมต่อ Google Sheet ของช่าง
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwU72LDZEZagp-huxGIOR4vISa-M7A7M9E8FhsNBD3P2sBYrRGIegY08P7vQjYTLpzo/exec";
+
 let db = JSON.parse(localStorage.getItem('lamoon_db_vfinal')) || [];
 let payType = 'cash';
 
 const monthsThai = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 const formatThaiDate = (d) => {
     const date = new Date(d);
-    return `${date.getDate()} ${monthsThai[date.getMonth()]} พ.ศ. ${date.getFullYear() + 543}`;
+    return `${date.getDate()} ${monthsThai[date.getMonth()]}  ${date.getFullYear() + 543}`;
 };
 
 function init(){
@@ -169,7 +171,7 @@ function setPay(t){
   document.getElementById('p-trans').classList.toggle('active', t === 'transfer');
 }
 
-function saveData(){
+async function saveData(){
   let total = 0, svcNames = [];
   document.querySelectorAll('.svc-row').forEach(r => {
     const n = r.querySelector('.svc-name').value;
@@ -179,29 +181,49 @@ function saveData(){
   
   if(total === 0) return alert("กรุณาใส่ราคาด้วยครับ");
 
+  const btn = document.getElementById('btn-save');
+  btn.innerText = "กำลังส่งข้อมูล...";
+  btn.disabled = true;
+
   const rec = {
     id: Date.now(),
     date: document.getElementById('work-date').value,
     services: svcNames.join(','),
     hairstyle: document.getElementById('h-style').value,
     total: total,
-    payment: payType,
+    payment: payType === 'cash' ? 'เงินสด' : 'โอนเงิน',
     time: document.getElementById('t-start').value
   };
 
-  db.push(rec);
-  localStorage.setItem('lamoon_db_vfinal', JSON.stringify(db));
-  
-  const btn = document.getElementById('btn-save');
-  btn.innerText = "บันทึกสำเร็จ!";
-  btn.classList.add('success');
-  
-  setTimeout(() => {
-    btn.innerText = "บันทึกข้อมูล";
-    btn.classList.remove('success');
-    document.querySelectorAll('.svc-price').forEach(i => i.value = '');
-    document.querySelectorAll('.svc-row').forEach((r, idx) => { if(idx > 0) r.remove(); });
-  }, 1000);
+  try {
+    // ส่งข้อมูลไป Google Sheet
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      cache: "no-cache",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(rec)
+    });
+
+    // บันทึกลงเครื่อง
+    db.push(rec);
+    localStorage.setItem('lamoon_db_vfinal', JSON.stringify(db));
+    
+    btn.innerText = "บันทึกสำเร็จ!";
+    btn.classList.add('success');
+    
+    setTimeout(() => {
+      btn.innerText = "บันทึกข้อมูล";
+      btn.disabled = false;
+      btn.classList.remove('success');
+      document.querySelectorAll('.svc-price').forEach(i => i.value = '');
+      document.querySelectorAll('.svc-row').forEach((r, idx) => { if(idx > 0) r.remove(); });
+    }, 1000);
+
+  } catch (error) {
+    alert("การบันทึกลง Sheet ขัดข้อง แต่ข้อมูลถูกเก็บในเครื่องแล้ว");
+    btn.disabled = false;
+  }
 }
 
 function nav(p){
@@ -220,19 +242,23 @@ function renderReport(){
   
   db.slice().reverse().forEach((r) => {
     total += r.total;
-    if(r.payment === 'cash') cashTotal += r.total;
+    if(r.payment === 'เงินสด') cashTotal += r.total;
     else transferTotal += r.total;
 
+    // แก้ไข: ย้ายประเภทเงินโอน/เงินสดไปอยู่ใต้ราคา
     list.innerHTML += `
       <div class="history-card">
         <div class="idx-circle">${db.indexOf(r) + 1}</div>
         <div class="flex-1">
           <div class="font-bold text-lg">${r.services}</div>
-          <div class="text-[10px] text-slate-400 uppercase font-bold">${r.time} • ${r.hairstyle} • ${r.payment === 'cash' ? 'เงินสด' : 'โอน'}</div>
+          <div class="text-[10px] text-slate-400 uppercase font-bold">${r.time} • ${r.hairstyle}</div>
         </div>
         <div class="text-right flex items-center gap-2">
-          <div class="font-bold text-lg text-blue-600">฿${r.total}</div>
-          <button onclick="delItem(${r.id})" class="text-red-400 p-2">
+          <div>
+            <div class="font-bold text-lg text-blue-600">฿${r.total}</div>
+            <div class="text-[10px] font-bold ${r.payment === 'เงินสด' ? 'text-green-500' : 'text-orange-500'}">${r.payment}</div>
+          </div>
+          <button onclick="delItem(${r.id})" class="text-red-400 p-2 ml-1">
             <i class="fa-solid fa-trash-can"></i>
           </button>
         </div>
@@ -261,7 +287,7 @@ function renderReport(){
 }
 
 function delItem(id){
-  if(confirm('ลบรายการนี้?')){
+  if(confirm('ลบรายการนี้? (ลบในเครื่องเท่านั้น)')){
     db = db.filter(i => i.id !== id);
     localStorage.setItem('lamoon_db_vfinal', JSON.stringify(db));
     renderReport();
@@ -269,7 +295,7 @@ function delItem(id){
 }
 
 function clearDB(){
-  if(confirm('ลบข้อมูลทั้งหมด?')){
+  if(confirm('ลบข้อมูลทั้งหมดในเครื่อง? (ข้อมูลใน Sheet ไม่หาย)')){
     localStorage.removeItem('lamoon_db_vfinal');
     db = [];
     renderReport();
