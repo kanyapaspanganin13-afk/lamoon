@@ -80,8 +80,8 @@
             <div id="display-date-rep" class="font-bold mb-3 text-gray-500 text-xl"></div>
             <div class="summary-dark mb-4 shadow-lg">
                 <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
-                    <div>จำนวนลูกค้า<br><span id="r-count" class="text-4xl font-bold">0</span></div>
-                    <div class="text-right text-yellow-400">ยอดเงินรวม<br>฿<span id="r-total" class="text-4xl font-bold">0</span></div>
+                    <div>จำนวนคน<br><span id="r-count" class="text-4xl font-bold">0</span></div>
+                    <div class="text-right text-yellow-400">ยอดรวม<br>฿<span id="r-total" class="text-4xl font-bold">0</span></div>
                 </div>
                 <div class="grid grid-cols-3 text-center text-xs">
                     <div>เงินสด<br><span id="r-cash" class="text-green-400 font-bold text-xl">0</span></div>
@@ -91,7 +91,7 @@
             </div>
             <div id="status-box" class="card text-center font-bold hidden py-5 border-2 text-xl"></div>
             <div id="hist-list" class="space-y-2"></div>
-            <button onclick="clearDB()" class="w-full text-red-400 text-sm mt-10 underline">ลบประวัติในเครื่อง </button>
+            <button onclick="clearDB()" class="w-full text-red-400 text-sm mt-10 underline">ลบประวัติในเครื่อง (เริ่มวันใหม่)</button>
         </div>
     </main>
 
@@ -115,7 +115,7 @@
         }
 
         function updateDateLabel(d) {
-            document.getElementById('display-date-rep').innerText=`${d.getDate()} ${monthsThai[d.getMonth()]}  ${d.getFullYear()+543}`;
+            document.getElementById('display-date-rep').innerText=`${d.getDate()} ${monthsThai[d.getMonth()]} พ.ศ. ${d.getFullYear()+543}`;
         }
 
         function addSvc(){
@@ -136,7 +136,7 @@
                 const p=Number(r.querySelector('.svc-price').value);
                 if(p){total+=p;svcs.push(r.querySelector('.svc-name').value)}
             });
-            if(!total) return alert("กรุณาใส่ราคา");
+            if(!total) return alert("กรุณาใส่ราคาครับ");
 
             const btn=document.getElementById('btn-save'); 
             btn.innerText="กำลังบันทึก..."; btn.disabled=true;
@@ -173,63 +173,32 @@
         }
 
         function renderReport(){
-    let t=0, c=0, tr=0; 
-    const list = document.getElementById('hist-list'); 
-    list.innerHTML = '';
-    
-    // เรียงจากใหม่ไปเก่า (ตัวเลขลำดับจะยังคงถูกต้องตามลำดับงานจริง)
-    db.slice().reverse().forEach((r, i) => {
-        t += r.total; 
-        if(r.payment == 'เงินสด') c += r.total; else tr += r.total;
+            let t=0,c=0,tr=0; const list=document.getElementById('hist-list'); list.innerHTML='';
+            db.slice().reverse().forEach((r,i)=>{
+                t+=r.total; if(r.payment=='เงินสด') c+=r.total; else tr+=r.total;
+                list.innerHTML+=`<div class="history-card ${r.payment=='เงินสด'?'card-green':'card-blue'}">
+                    <div class="idx-box">${db.length-i}</div>
+                    <div class="flex-1 font-bold">${r.services}<div class="text-xs text-gray-400 font-normal">${r.t_start}-${r.t_end} | ${r.hairstyle}</div></div>
+                    <div class="text-right"><div class="font-bold text-xl">฿${r.total}</div><div class="text-xs ${r.payment=='เงินสด'?'text-green-500':'text-blue-500'}">${r.payment}</div></div>
+                    <button onclick="delItem(${r.id})" class="ml-3 text-red-300"><i class="fa-solid fa-trash"></i></button>
+                </div>`;
+            });
+            document.getElementById('r-count').innerText=db.length;
+            document.getElementById('r-total').innerText=t.toLocaleString();
+            document.getElementById('r-cash').innerText=c.toLocaleString();
+            document.getElementById('r-transfer').innerText=tr.toLocaleString();
+            
+            let s=t>=400 ? (c - (t/2)) : (c - 200);
+            document.getElementById('r-settle').innerText=Math.abs(s).toLocaleString();
+            const b=document.getElementById('status-box'); b.classList.remove('hidden');
+            b.innerText=s>=0 ? `ช่างคืนร้าน ฿${s.toLocaleString()}` : `ร้านคืนช่าง ฿${Math.abs(s).toLocaleString()}`;
+            b.className=`card text-center font-bold py-5 ${s>=0?'bg-orange-50 text-orange-600 border-orange-200':'bg-blue-50 text-blue-600 border-blue-200'} text-xl`;
+        }
+
+        function delItem(id){ if(confirm('ลบรายการนี้?')){db=db.filter(i=>i.id!=id);localStorage.setItem('lamoon_db_vfinal',JSON.stringify(db));renderReport();}}
+        function clearDB(){ if(confirm('ล้างประวัติทั้งหมด?')){localStorage.removeItem('lamoon_db_vfinal');db=[];renderReport();}}
         
-        // คำนวณเลขลำดับ (ตัวเลขที่โชว์จะเป็น 1, 2, 3... ตามคิวงาน)
-        const displayIdx = db.length - i;
-
-        list.innerHTML += `
-            <div class="history-card ${r.payment == 'เงินสด' ? 'card-green' : 'card-blue'}">
-                <div class="idx-box" style="
-                    min-width: 32px; 
-                    height: 32px; 
-                    background: #1e293b; 
-                    color: white; 
-                    border-radius: 6px; 
-                    display: flex; 
-                    align-items: center; 
-                    justify-content: center; 
-                    font-size: 16px; 
-                    font-weight: bold; 
-                    margin-right: 15px;
-                ">
-                    ${displayIdx}
-                </div>
-
-                <div class="flex-1">
-                    <div class="font-bold" style="font-size: 18px;">${r.services}</div>
-                    <div class="text-xs text-gray-400 font-normal">${r.t_start}-${r.t_end} | ${r.hairstyle}</div>
-                </div>
-
-                <div class="text-right">
-                    <div class="font-bold text-xl" style="color: #1e293b;">฿${r.total}</div>
-                    <div class="text-xs ${r.payment == 'เงินสด' ? 'text-green-500' : 'text-blue-500'}">${r.payment}</div>
-                </div>
-
-                <button onclick="delItem(${r.id})" class="ml-3 text-red-300" style="padding: 5px;">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
-            </div>`;
-    });
-
-    // อัปเดตยอดสรุปด้านบน
-    document.getElementById('r-count').innerText = db.length;
-    document.getElementById('r-total').innerText = t.toLocaleString();
-    document.getElementById('r-cash').innerText = c.toLocaleString();
-    document.getElementById('r-transfer').innerText = tr.toLocaleString();
-    
-    // คำนวณยอดเคลียร์ (ประกันรายได้)
-    let s = t >= 400 ? (c - (t / 2)) : (c - 200);
-    document.getElementById('r-settle').innerText = Math.abs(s).toLocaleString();
-    const b = document.getElementById('status-box'); 
-    b.classList.remove('hidden');
-    b.innerText = s >= 0 ? `ช่างคืนร้าน ฿${s.toLocaleString()}` : `ร้านคืนช่าง ฿${Math.abs(s).toLocaleString()}`;
-    b.className = `card text-center font-bold py-5 ${s >= 0 ? 'bg-orange-50 text-orange-600 border-orange-200' : 'bg-blue-50 text-blue-600 border-blue-200'} text-xl`;
-}
+        window.onload = init;
+    </script>
+</body>
+</html>
