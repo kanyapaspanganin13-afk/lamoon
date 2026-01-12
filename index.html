@@ -234,11 +234,20 @@
             let s=t>=400 ? (c - (t/2)) : (c - 200);
             document.getElementById('r-settle').innerText=Math.abs(s).toLocaleString();
             
-            const b=document.getElementById('status-box'); 
-            b.classList.remove('hidden');
-            b.innerText=s>=0 ? `ช่างคืนร้าน ฿${s.toLocaleString()}` : `ร้านคืนช่าง ฿${Math.abs(s).toLocaleString()}`;
-            b.className=`card text-center font-bold py-4 ${s>=0?'bg-orange-50 text-orange-600 border-orange-200':'bg-blue-50 text-blue-600 border-blue-200'} text-lg`;
-        }
+            // --- วางทับตั้งแต่ตรงนี้เป็นต้นไป ---
+const b = document.getElementById('status-box'); 
+b.classList.remove('hidden');
+
+if (s === 0) {
+    b.innerText = `ยอดพอดี`;
+    b.className = `card text-center font-bold py-4 bg-gray-100 text-gray-500 border-gray-200 text-lg`;
+} else if (s > 0) {
+    b.innerText = `ช่างคืนร้าน ฿${s.toLocaleString()}`;
+    b.className = `card text-center font-bold py-4 bg-orange-50 text-orange-600 border-orange-200 text-lg`;
+} else {
+    b.innerText = `ร้านคืนช่าง ฿${Math.abs(s).toLocaleString()}`;
+    b.className = `card text-center font-bold py-4 bg-blue-50 text-blue-600 border-blue-200 text-lg`;
+}
 
         function delItem(id){ if(confirm('ลบรายการนี้?')){db=db.filter(i=>i.id!=id);localStorage.setItem('lamoon_db_vfinal',JSON.stringify(db));renderReport();}}
         function clearDB(){ if(confirm('ลบข้อมูลทั้งหมด?')){localStorage.removeItem('lamoon_db_vfinal');db=[];renderReport();}}        
