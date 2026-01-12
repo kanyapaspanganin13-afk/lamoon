@@ -27,7 +27,6 @@
         .summary-dark{background:#1e293b;border-radius:25px;padding:22px;color:white}
         .history-card{background:white;border-radius:15px;padding:15px;display:flex;align-items:center;border-left:8px solid #1e293b;margin-bottom:10px}
         .card-green{border-left-color:#10b981}.card-blue{border-left-color:#3b82f6}
-        .idx-box{width:32px;height:32px;background:#f1f5f9;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:12px;font-weight:700;color:#64748b}
         .nav-bar{position:fixed;bottom:0;left:0;right:0;height:85px;background:white;border-top:1px solid #e2e8f0;display:flex;z-index:100}
         .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#94a3b8}.nav-item.active{color:#1e293b;font-weight:700;border-top:4px solid #1e293b}
         .hidden{display:none!important}
@@ -47,10 +46,11 @@
             <div id="svc-list">
                 <div class="card border-l-8 border-blue-500 flex svc-row relative">
                     <div class="flex-1">
-                        <label class="text-xs text-gray-400">เลือกบริการ</label>
+                        <label class="text-xs text-gray-400">บริการ</label>
                         <select class="svc-name">
-                            <option>ตัดผม</option><option>สระผม</option><option>ย้อมผม</option>
-                            <option>โกนหนวด</option><option>กันหน้า</option><option>ดัดผม</option>อื่นๆ/option>
+                            <option>ตัดผม</option><option>ย้อมผม</option><option>สระผม</option>
+                            <option>แก้ผม</option><option>กันหน้า</option><option>โกนหนวด</option>
+                            <option>ดัดผม</option><option>อื่นๆ</option>
                         </select>
                     </div>
                     <div class="w-24 text-right border-l pl-3">
@@ -61,7 +61,13 @@
             </div>
             
             <button onclick="addSvc()" class="w-full border-2 border-dashed py-3 rounded-xl text-gray-400 font-bold mb-4 text-sm">+ เพิ่มบริการ</button>
-            <div class="card"><label class="text-sm text-gray-400">ทรงผม</label><select id="h-style"><option>รองทรง</option><option>แฟชั่น/ทูบล็อค</option><option>วินเทจ</option><option>สกินเฟด</option><option>นักเรียน</option></select></div>
+            <div class="card">
+                <label class="text-sm text-gray-400">ทรงผม</label>
+                <select id="h-style">
+                    <option>รองทรง</option><option>เปิดข้าง / วินเทจ</option><option>แฟชั่น / ทูบล็อค</option>
+                    <option>สกินเฟด</option><option>ทรงอเมริกัน</option><option>ตำรวจ / ทหาร</option><option>นักเรียน</option>
+                </select>
+            </div>
             
             <div class="grid grid-cols-2 gap-3 mb-6">
                 <div onclick="setPay('cash')" id="p-cash" class="pay-btn active"><i class="fa-solid fa-money-bill"></i><br>เงินสด</div>
@@ -79,11 +85,11 @@
                 </div>
                 <div class="grid grid-cols-3 text-center text-xs">
                     <div>เงินสด<br><span id="r-cash" class="text-green-400 font-bold text-xl">0</span></div>
-                    <div>โอนเงิน<br><span id="r-transfer" class="text-blue-400 font-bold text-xl">0</span></div>
+                    <div>เงินโอน<br><span id="r-transfer" class="text-blue-400 font-bold text-xl">0</span></div>
                     <div>เคลียร์ยอด<br><span id="r-settle" class="text-white font-bold text-xl">0</span></div>
                 </div>
             </div>
-            <div id="status-box" class="card text-center font-bold hidden py-5 border-2 text-xl shadow-md"></div>
+            <div id="status-box" class="card text-center font-bold hidden py-5 border-2 text-xl"></div>
             <div id="hist-list" class="space-y-2"></div>
             <button onclick="clearDB()" class="w-full text-red-400 text-sm mt-10 underline">ลบประวัติในเครื่อง </button>
         </div>
@@ -95,7 +101,8 @@
     </nav>
 
     <script>
-        const SCRIPT_URL="https://script.google.com/macros/s/AKfycbw31HBsUa6H6wQ7NmZOmmzNtCB50rLzFAJuF8cCI8ZputZXn68lzQ1pfPLhyMJw3Uo/exec";
+        // ใช้ URL ใหม่ที่ช่างส่งมาให้
+        const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwNFKCDFWna8t42rSYRrdsMCsd2symtnM9C7N_wNPJ_R713F_5J0s02A4AnBWPzIVAq/exec";
         let db=JSON.parse(localStorage.getItem('lamoon_db_vfinal'))||[], payType='cash';
         const monthsThai=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 
@@ -129,11 +136,12 @@
                 const p=Number(r.querySelector('.svc-price').value);
                 if(p){total+=p;svcs.push(r.querySelector('.svc-name').value)}
             });
-            if(!total) return alert("กรุณาใส่ราคา");
+            if(!total) return alert("กรุณาใส่ราคาครับ");
 
             const btn=document.getElementById('btn-save'); 
             btn.innerText="กำลังบันทึก..."; btn.disabled=true;
 
+            // บังคับข้อมูลส่งไปแยก Column G และ H อย่างชัดเจน
             const rec = {
                 date: document.getElementById('work-date').value,
                 services: svcs.join(','),
@@ -141,8 +149,8 @@
                 total: total,
                 t_start: document.getElementById('t-start').value,
                 t_end: document.getElementById('t-end').value,
-                pay_transfer: payType === 'transfer' ? total : "", // ลง Column G
-                pay_cash: payType === 'cash' ? total : ""         // ลง Column H
+                pay_transfer: payType === 'transfer' ? total : "", 
+                pay_cash: payType === 'cash' ? total : ""         
             };
 
             try {
@@ -150,9 +158,9 @@
                 rec.id=Date.now(); rec.payment=payType=='cash'?'เงินสด':'โอนเงิน';
                 db.push(rec); 
                 localStorage.setItem('lamoon_db_vfinal',JSON.stringify(db));
-                btn.innerText="สำเร็จ!"; btn.classList.add('success');
+                btn.innerText="บันทึกสำเร็จ!"; btn.classList.add('success');
                 setTimeout(()=>location.reload(), 800);
-            } catch(e) { alert("ล้มเหลว ตรวจสอบเน็ตครับ"); btn.disabled=false; }
+            } catch(e) { alert("ล้มเหลว"); btn.disabled=false; }
         }
 
         function nav(p){
@@ -184,11 +192,11 @@
             document.getElementById('r-settle').innerText=Math.abs(s).toLocaleString();
             const b=document.getElementById('status-box'); b.classList.remove('hidden');
             b.innerText=s>=0 ? `ช่างคืนร้าน ฿${s.toLocaleString()}` : `ร้านคืนช่าง ฿${Math.abs(s).toLocaleString()}`;
-            b.className=`card text-center font-bold py-5 ${s>=0?'bg-orange-50 text-orange-600 border-orange-200':'bg-blue-50 text-blue-600 border-blue-200'} shadow-md text-xl`;
+            b.className=`card text-center font-bold py-5 ${s>=0?'bg-orange-50 text-orange-600 border-orange-200':'bg-blue-50 text-blue-600 border-blue-200'} text-xl`;
         }
 
         function delItem(id){ if(confirm('ลบรายการนี้?')){db=db.filter(i=>i.id!=id);localStorage.setItem('lamoon_db_vfinal',JSON.stringify(db));renderReport();}}
-        function clearDB(){ if(confirm('ล้างประวัติทั้งหมดเพื่อเริ่มวันใหม่?')){localStorage.removeItem('lamoon_db_vfinal');db=[];renderReport();}}
+        function clearDB(){ if(confirm('ล้างประวัติทั้งหมด?')){localStorage.removeItem('lamoon_db_vfinal');db=[];renderReport();}}
         
         window.onload = init;
     </script>
