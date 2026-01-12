@@ -173,32 +173,63 @@
         }
 
         function renderReport(){
-            let t=0,c=0,tr=0; const list=document.getElementById('hist-list'); list.innerHTML='';
-            db.slice().reverse().forEach((r,i)=>{
-                t+=r.total; if(r.payment=='เงินสด') c+=r.total; else tr+=r.total;
-                list.innerHTML+=`<div class="history-card ${r.payment=='เงินสด'?'card-green':'card-blue'}">
-                    <div class="idx-box">${db.length-i}</div>
-                    <div class="flex-1 font-bold">${r.services}<div class="text-xs text-gray-400 font-normal">${r.t_start}-${r.t_end} | ${r.hairstyle}</div></div>
-                    <div class="text-right"><div class="font-bold text-xl">฿${r.total}</div><div class="text-xs ${r.payment=='เงินสด'?'text-green-500':'text-blue-500'}">${r.payment}</div></div>
-                    <button onclick="delItem(${r.id})" class="ml-3 text-red-300"><i class="fa-solid fa-trash"></i></button>
-                </div>`;
-            });
-            document.getElementById('r-count').innerText=db.length;
-            document.getElementById('r-total').innerText=t.toLocaleString();
-            document.getElementById('r-cash').innerText=c.toLocaleString();
-            document.getElementById('r-transfer').innerText=tr.toLocaleString();
-            
-            let s=t>=400 ? (c - (t/2)) : (c - 200);
-            document.getElementById('r-settle').innerText=Math.abs(s).toLocaleString();
-            const b=document.getElementById('status-box'); b.classList.remove('hidden');
-            b.innerText=s>=0 ? `ช่างคืนร้าน ฿${s.toLocaleString()}` : `ร้านคืนช่าง ฿${Math.abs(s).toLocaleString()}`;
-            b.className=`card text-center font-bold py-5 ${s>=0?'bg-orange-50 text-orange-600 border-orange-200':'bg-blue-50 text-blue-600 border-blue-200'} text-xl`;
-        }
-
-        function delItem(id){ if(confirm('ลบรายการนี้?')){db=db.filter(i=>i.id!=id);localStorage.setItem('lamoon_db_vfinal',JSON.stringify(db));renderReport();}}
-        function clearDB(){ if(confirm('ล้างประวัติทั้งหมด?')){localStorage.removeItem('lamoon_db_vfinal');db=[];renderReport();}}
+    let t=0, c=0, tr=0; 
+    const list = document.getElementById('hist-list'); 
+    list.innerHTML = '';
+    
+    // เรียงจากใหม่ไปเก่า (ตัวเลขลำดับจะยังคงถูกต้องตามลำดับงานจริง)
+    db.slice().reverse().forEach((r, i) => {
+        t += r.total; 
+        if(r.payment == 'เงินสด') c += r.total; else tr += r.total;
         
-        window.onload = init;
-    </script>
-</body>
-</html>
+        // คำนวณเลขลำดับ (ตัวเลขที่โชว์จะเป็น 1, 2, 3... ตามคิวงาน)
+        const displayIdx = db.length - i;
+
+        list.innerHTML += `
+            <div class="history-card ${r.payment == 'เงินสด' ? 'card-green' : 'card-blue'}">
+                <div class="idx-box" style="
+                    min-width: 32px; 
+                    height: 32px; 
+                    background: #1e293b; 
+                    color: white; 
+                    border-radius: 6px; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    font-size: 16px; 
+                    font-weight: bold; 
+                    margin-right: 15px;
+                ">
+                    ${displayIdx}
+                </div>
+
+                <div class="flex-1">
+                    <div class="font-bold" style="font-size: 18px;">${r.services}</div>
+                    <div class="text-xs text-gray-400 font-normal">${r.t_start}-${r.t_end} | ${r.hairstyle}</div>
+                </div>
+
+                <div class="text-right">
+                    <div class="font-bold text-xl" style="color: #1e293b;">฿${r.total}</div>
+                    <div class="text-xs ${r.payment == 'เงินสด' ? 'text-green-500' : 'text-blue-500'}">${r.payment}</div>
+                </div>
+
+                <button onclick="delItem(${r.id})" class="ml-3 text-red-300" style="padding: 5px;">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>`;
+    });
+
+    // อัปเดตยอดสรุปด้านบน
+    document.getElementById('r-count').innerText = db.length;
+    document.getElementById('r-total').innerText = t.toLocaleString();
+    document.getElementById('r-cash').innerText = c.toLocaleString();
+    document.getElementById('r-transfer').innerText = tr.toLocaleString();
+    
+    // คำนวณยอดเคลียร์ (ประกันรายได้)
+    let s = t >= 400 ? (c - (t / 2)) : (c - 200);
+    document.getElementById('r-settle').innerText = Math.abs(s).toLocaleString();
+    const b = document.getElementById('status-box'); 
+    b.classList.remove('hidden');
+    b.innerText = s >= 0 ? `ช่างคืนร้าน ฿${s.toLocaleString()}` : `ร้านคืนช่าง ฿${Math.abs(s).toLocaleString()}`;
+    b.className = `card text-center font-bold py-5 ${s >= 0 ? 'bg-orange-50 text-orange-600 border-orange-200' : 'bg-blue-50 text-blue-600 border-blue-200'} text-xl`;
+}
