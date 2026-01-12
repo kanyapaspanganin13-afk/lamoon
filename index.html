@@ -1,237 +1,266 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>LA-MOON CUT</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LA-MOON CUT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body { background: #f8fafc; color: #1e293b; margin: 0; padding-bottom: 90px; }
+        
+        /* ขนาดตัวหนังสือคำสั่ง 18px ตามสั่ง */
+        .lbl-18 { font-size: 18px; font-weight: 500; color: #64748b; margin-bottom: 5px; display: block; }
+        
+        header { background: #1e293b; color: white; padding: 20px 0; text-align: center; border-bottom: 4px solid #fbbf24; }
+        .report-mode header { display: none; } /* ซ่อนชื่อร้านหน้ารายงาน */
 
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        .card { background: white; border-radius: 15px; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 12px; }
+        select, input { width: 100%; font-size: 1.2rem; font-weight: 600; background: transparent; outline: none; border: none; }
+        
+        /* กล่องรายงานแคปจอ */
+        .summary-dark { background: #1e293b; border-radius: 25px; padding: 25px; color: white; margin-bottom: 15px; }
+        .row-top { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 15px; }
+        
+        /* ปุ่มจ่ายเงิน */
+        .pay-btn { border-radius: 12px; padding: 15px; text-align: center; border: 2px solid #e2e8f0; transition: 0.3s; }
+        .pay-btn.active { background: #1e293b; color: white; border-color: #1e293b; }
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
+        /* ปุ่มบันทึก */
+        #btn-save { background: #1e293b; color: white; width: 100%; padding: 18px; border-radius: 15px; font-size: 20px; font-weight: 700; transition: 0.3s; }
+        #btn-save.success { background: #10b981; }
 
-*{font-family:'Kanit',sans-serif;box-sizing:border-box}
-body{margin:0;background:#f8fafc;color:#1e293b}
-label{font-size:18px;font-weight:600}
-select,input{font-size:18px}
-
-header{background:#1e293b;color:#fff;text-align:center;padding:14px;font-weight:700}
-.hidden{display:none}
-
-.time-box input{
-font-size:34px;
-font-weight:800;
-text-align:center;
-width:100%;
-border:none;
-outline:none;
-}
-
-.card{
-background:#fff;
-border-radius:14px;
-border:1px solid #e2e8f0;
-padding:12px;
-}
-
-.service-card{
-border-left:6px solid #2563eb;
-display:flex;
-gap:10px;
-align-items:center;
-}
-
-.price{
-font-size:28px;
-font-weight:800;
-text-align:right;
-color:#2563eb;
-width:100%;
-border:none;
-outline:none;
-}
-
-#save-btn{
-background:#1e293b;
-color:#fff;
-font-size:20px;
-font-weight:700;
-padding:16px;
-border-radius:14px;
-width:100%;
-}
-
-#save-btn.success{background:#16a34a}
-
-nav{
-position:fixed;bottom:0;left:0;right:0;
-display:flex;background:#fff;border-top:1px solid #e2e8f0
-}
-nav button{
-flex:1;padding:10px;font-size:16px;color:#64748b
-}
-nav .active{color:#1e293b;font-weight:700;border-top:4px solid #fbbf24}
-</style>
+        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 80px; background: white; border-top: 1px solid #e2e8f0; display: flex; z-index: 100; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 14px; }
+        .nav-item.active { color: #1e293b; font-weight: 700; border-top: 4px solid #fbbf24; background: #fffbeb; }
+        
+        .history-card { background: white; border-radius: 12px; padding: 12px; display: flex; align-items: center; border-left: 5px solid #e2e8f0; margin-bottom: 8px; }
+        .idx-circle { width: 25px; height: 25px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 10px; }
+        .hidden { display: none !important; }
+    </style>
 </head>
+<body id="main-body">
 
-<body>
+    <header id="top-header"><div class="text-xl font-bold tracking-widest uppercase">La-Moon Cut</div></header>
 
-<header id="header">LA-MOON CUT</header>
+    <main class="p-4 max-w-md mx-auto">
+        <div id="page-rec">
+            <div class="card"><label class="lbl-18">วันที่</label><div id="display-date-rec" class="font-bold text-xl"></div></div>
+            
+            <div class="flex gap-3 mb-3">
+                <div class="card flex-1"><label class="lbl-18">เวลาเริ่ม</label><input type="time" id="t-start"></div>
+                <div class="card flex-1"><label class="lbl-18">เวลาเสร็จ</label><input type="time" id="t-end"></div>
+            </div>
 
-<main class="p-3 pb-28">
+            <div id="svc-list">
+                <div class="card border-l-[6px] border-l-blue-500 flex justify-between items-center svc-row">
+                    <div class="flex-1"><label class="lbl-18">บริการ</label>
+                        <select class="svc-name">
+                            <option>ตัดผม</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option>
+                            <option>ย้อมผม</option><option>แก้ผม</option><option>ดัดผม</option><option>อื่นๆ</option>
+                        </select>
+                    </div>
+                    <div class="w-28 text-right border-l pl-3"><label class="lbl-18 text-right">ราคา</label>
+                        <input type="number" placeholder="0" class="svc-price text-right text-blue-600 text-2xl font-bold" inputmode="decimal">
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="addSvc()" class="w-full border-2 border-dashed border-slate-300 py-3 rounded-xl text-slate-400 font-bold mb-4">+ เพิ่มบริการ</button>
 
-<!-- RECORD PAGE -->
-<section id="record">
+            <div class="card mb-4"><label class="lbl-18">ทรงผม</label>
+                <select id="h-style">
+                    <option>รองทรง</option><option>แฟชั่น / ทูบล็อค</option><option>เปิดข้าง / วินเทจ</option>
+                    <option>สกินเฟด</option><option>ทรงอเมริกัน</option><option>ตำรวจ / ทหาร</option><option>นักเรียน</option>
+                </select>
+            </div>
 
-<div class="card mb-2">
-<label>วันที่ทำงาน</label>
-<div id="date-th" class="text-xl font-bold"></div>
-</div>
+            <div class="grid grid-cols-2 gap-3 mb-5">
+                <div onclick="setPay('cash')" id="p-cash" class="pay-btn active"><i class="fa-solid fa-money-bill-1-wave text-2xl mb-1"></i><br><span class="lbl-18">เงินสด</span></div>
+                <div onclick="setPay('transfer')" id="p-trans" class="pay-btn"><i class="fa-solid fa-qrcode text-2xl mb-1"></i><br><span class="lbl-18">โอนเงิน</span></div>
+            </div>
 
-<div class="grid grid-cols-2 gap-3 mb-3">
-<div class="card time-box">
-<label>เริ่ม</label>
-<input type="time" id="start">
-</div>
-<div class="card time-box">
-<label>เสร็จ</label>
-<input type="time" id="end">
-</div>
-</div>
+            <button id="btn-save" onclick="saveData()">บันทึกข้อมูล</button>
+        </div>
 
-<div class="card service-card mb-2">
-<div class="flex-1">
-<label>บริการ</label>
-<select>
-<option>ตัดผม</option>
-<option>โกนหนวด</option>
-<option>กันหน้า</option>
-<option>สระผม</option>
-<option>ย้อมผม</option>
-<option>แก้ผม</option>
-<option>ดัดผม</option>
-<option>อื่นๆ</option>
-</select>
-</div>
-<div class="w-24">
-<label>ราคา</label>
-<input class="price" type="number" placeholder="0">
-</div>
-</div>
+        <div id="page-rep" class="hidden">
+            <div id="display-date-rep" class="lbl-18 font-bold text-slate-500 mb-3 border-l-4 border-yellow-400 pl-3"></div>
+            
+            <div class="summary-dark shadow-2xl">
+                <div class="row-top">
+                    <div>
+                        <p class="text-slate-400 text-xs uppercase font-bold mb-1">จำนวนลูกค้า</p>
+                        <p class="text-2xl font-medium"><span id="r-count">0</span> คน</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-yellow-400 text-xs uppercase font-bold mb-1">ยอดเงินรวม</p>
+                        <p class="text-4xl font-bold">฿<span id="r-total">0</span></p>
+                    </div>
+                </div>
 
-<button class="w-full border-dashed border py-2 rounded mb-3 text-slate-400">
-+ เพิ่มบริการ
-</button>
+                <div class="grid grid-cols-3 gap-2 text-center">
+                    <div><span class="text-slate-400 block text-[10px] mb-1">เงินสด</span><span class="text-green-400 text-xl font-bold">฿<span id="r-cash">0</span></span></div>
+                    <div class="border-x border-white/10"><span class="text-slate-400 block text-[10px] mb-1">โอนเงิน</span><span class="text-blue-400 text-xl font-bold">฿<span id="r-transfer">0</span></span></div>
+                    <div><span class="text-yellow-500 block text-[10px] mb-1">เคลียร์ยอด</span><span class="text-white text-xl font-bold">฿<span id="r-settle">0</span></span></div>
+                </div>
+            </div>
 
-<div class="card mb-3">
-<label>ทรงผม</label>
-<select>
-<option>รองทรง</option>
-<option>แฟชั่น / ทูบล็อค</option>
-<option>เปิดข้าง / วินเทจ</option>
-<option>สกินเฟด</option>
-<option>ทรงอเมริกัน</option>
-<option>ตำรวจ / ทหาร</option>
-<option>นักเรียน</option>
-</select>
-</div>
+            <div id="status-box" class="card text-center text-lg font-bold py-4 shadow-md hidden"></div>
+            <div id="hist-list" class="space-y-2 mt-4"></div>
 
-<div class="grid grid-cols-2 gap-3 mb-3">
-<button class="card bg-slate-800 text-white text-center py-4">
-<i class="fa-solid fa-money-bill-wave text-xl"></i><br>เงินสด
-</button>
-<button class="card text-center py-4">
-<i class="fa-solid fa-qrcode text-xl"></i><br>โอนเงิน
-</button>
-</div>
+            <a href="https://docs.google.com/spreadsheets/d/159I70YQh-XwUv_IunvU4_S16fL835y_56Rly7oXhP_M/edit" target="_blank" class="block w-full bg-green-700 text-white py-4 rounded-full text-center font-bold mt-10 shadow-lg">
+                <i class="fa-solid fa-file-excel mr-2"></i> เปิดดู GOOGLE SHEET
+            </a>
+            <button onclick="clearDB()" class="w-full text-red-400 text-sm font-bold mt-8 mb-10 underline">ลบข้อมูลทั้งหมด</button>
+        </div>
+    </main>
 
-<button id="save-btn" onclick="save()">บันทึกข้อมูล</button>
-</section>
+    <nav class="nav-bar">
+        <div onclick="nav('rec')" id="n-rec" class="nav-item active"><i class="fa-solid fa-edit text-2xl mb-1"></i>บันทึก</div>
+        <div onclick="nav('rep')" id="n-rep" class="nav-item"><i class="fa-solid fa-chart-pie text-2xl mb-1"></i>รายงาน</div>
+    </nav>
 
-<!-- REPORT PAGE -->
-<section id="report" class="hidden">
+    <script>
+        let db = JSON.parse(localStorage.getItem('lamoon_final_v1')) || [];
+        let payType = 'cash';
 
-<div id="report-date" class="text-lg font-bold mb-2"></div>
+        function init() {
+            const n = new Date();
+            const options = { day: 'numeric', month: 'short', year: 'numeric' };
+            const thaiDate = n.toLocaleDateString('th-TH', options);
+            document.getElementById('display-date-rec').innerText = thaiDate;
+            document.getElementById('display-date-rep').innerText = thaiDate;
+            
+            const hh = String(n.getHours()).padStart(2,'0'), mm = String(n.getMinutes()).padStart(2,'0');
+            document.getElementById('t-start').value = `${hh}:${mm}`;
+            document.getElementById('t-end').value = `${hh}:${mm}`;
+        }
 
-<div class="bg-[#1e293b] text-white rounded-xl p-4 mb-4">
-<div class="flex justify-between items-end">
-<div>
-<p class="text-sm opacity-70">วันนี้</p>
-<p><span id="count">0</span> คน</p>
-</div>
-<div class="text-4xl font-bold">฿<span id="total">0</span></div>
-</div>
+        function addSvc() {
+            const container = document.getElementById('svc-list');
+            const row = document.createElement('div');
+            row.className = "card border-l-[6px] border-l-slate-300 flex justify-between items-center svc-row mt-2 relative";
+            row.innerHTML = `<button onclick="this.parentElement.remove()" class="absolute -right-2 -top-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs shadow-md">✕</button>
+                <div class="flex-1"><label class="lbl-18">บริการ</label><select class="svc-name"><option>ตัดผม</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>แก้ผม</option><option>ดัดผม</option><option>อื่นๆ</option></select></div>
+                <div class="w-28 text-right border-l pl-3"><label class="lbl-18 text-right">ราคา</label><input type="number" class="svc-price text-right text-blue-600 text-2xl font-bold" inputmode="decimal"></div>`;
+            container.appendChild(row);
+        }
 
-<div class="grid grid-cols-3 text-center mt-3 text-sm">
-<div>สด<br><b>฿0</b></div>
-<div>โอน<br><b>฿0</b></div>
-<div>เคลียร์<br><b>฿0</b></div>
-</div>
-</div>
+        function setPay(t) {
+            payType = t;
+            document.getElementById('p-cash').className = t === 'cash' ? 'pay-btn active' : 'pay-btn';
+            document.getElementById('p-trans').className = t === 'transfer' ? 'pay-btn active' : 'pay-btn';
+        }
 
-<div class="card text-center font-bold text-orange-500 mb-3">
-ร้านคืนช่าง
-</div>
+        function saveData() {
+            const prices = document.querySelectorAll('.svc-price');
+            const names = document.querySelectorAll('.svc-name');
+            let sumPrice = 0, services = [];
+            
+            prices.forEach((p, i) => {
+                if(p.value > 0) {
+                    sumPrice += parseFloat(p.value);
+                    services.push(names[i].value);
+                }
+            });
 
-<div class="card mb-2 flex justify-between items-center">
-<div class="flex">
-<div class="mr-2 font-bold">1</div>
-<div>
-<div>ตัดผม • 10:30</div>
-<div class="text-sm text-slate-500">รองทรง</div>
-</div>
-</div>
-<div class="text-right">
-<div class="font-bold">฿100</div>
-<i class="fa-solid fa-trash text-red-500"></i>
-</div>
-</div>
+            if(sumPrice === 0) return alert('กรุณาใส่ราคาด้วยครับ');
 
-<a class="block bg-green-600 text-white text-center py-3 rounded-full font-bold mb-3">
-เปิดดู Google Sheet
-</a>
+            const btn = document.getElementById('btn-save');
+            btn.innerText = "บันทึกสำเร็จ!";
+            btn.classList.add('success');
 
-<button class="w-full text-red-500 underline text-sm">
-ลบข้อมูลทั้งหมด
-</button>
+            const record = {
+                id: Date.now(),
+                price: sumPrice,
+                type: payType,
+                service: services.join(', '),
+                style: document.getElementById('h-style').value,
+                time: document.getElementById('t-start').value
+            };
 
-</section>
+            db.push(record);
+            localStorage.setItem('lamoon_final_v1', JSON.stringify(db));
 
-</main>
+            setTimeout(() => {
+                btn.innerText = "บันทึกข้อมูล";
+                btn.classList.remove('success');
+                prices.forEach(p => p.value = '');
+                document.querySelectorAll('.svc-row').forEach((r, i) => { if(i>0) r.remove(); });
+                init();
+            }, 800);
+        }
 
-<nav>
-<button class="active" onclick="show('record')">
-<i class="fa-solid fa-pen"></i><br>บันทึก
-</button>
-<button onclick="show('report')">
-<i class="fa-solid fa-chart-pie"></i><br>รายงาน
-</button>
-</nav>
+        function renderReport() {
+            const list = document.getElementById('hist-list'); list.innerHTML = '';
+            let total = 0, cash = 0, trans = 0;
 
-<script>
-function thaiDate(){
-const d=new Date()
-const m=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.']
-return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()+543}`
-}
-document.getElementById('date-th').innerText=thaiDate()
-document.getElementById('report-date').innerText=thaiDate()
+            db.slice().reverse().forEach((item, idx) => {
+                total += item.price;
+                if(item.type === 'cash') cash += item.price; else trans += item.price;
 
-function show(p){
-record.classList.add('hidden')
-report.classList.add('hidden')
-document.getElementById(p).classList.remove('hidden')
-header.style.display=p==='report'?'none':'block'
-}
+                list.innerHTML += `
+                    <div class="history-card ${item.type === 'cash' ? 'border-l-green-400' : 'border-l-blue-400'} shadow-sm">
+                        <div class="idx-circle">${db.length - idx}</div>
+                        <div class="flex-1">
+                            <p class="font-bold text-lg text-slate-700">${item.service}</p>
+                            <p class="text-[10px] text-slate-400 uppercase font-bold">${item.time} | ${item.style}</p>
+                        </div>
+                        <div class="text-right flex items-center gap-4">
+                            <div>
+                                <p class="text-xl font-bold">฿${item.price}</p>
+                                <p class="text-[10px] font-bold ${item.type==='cash'?'text-green-500':'text-blue-500'} uppercase">${item.type==='cash'?'เงินสด':'โอนเงิน'}</p>
+                            </div>
+                            <button onclick="deleteItem(${item.id})" class="text-red-300 active:text-red-600"><i class="fa-solid fa-trash-can text-lg"></i></button>
+                        </div>
+                    </div>`;
+            });
 
-function save(){
-const btn=document.getElementById('save-btn')
-btn.classList.add('success')
-btn.innerText='บันทึกสำเร็จ'
-setTimeout(()=>{btn.innerText='บันทึกข้อมูล'},1500)
-}
-</script>
+            // สูตร 400/200
+            let share = total > 0 ? (total < 400 ? 200 : total / 2) : 0;
+            let settle = cash - share;
 
+            document.getElementById('r-total').innerText = total.toLocaleString();
+            document.getElementById('r-count').innerText = db.length;
+            document.getElementById('r-cash').innerText = cash.toLocaleString();
+            document.getElementById('r-transfer').innerText = trans.toLocaleString();
+            document.getElementById('r-settle').innerText = Math.abs(settle).toLocaleString();
+
+            const status = document.getElementById('status-box');
+            if(total > 0) {
+                status.classList.remove('hidden');
+                status.innerText = settle >= 0 ? `ช่างคืนร้าน ฿${settle.toLocaleString()}` : `ร้านคืนช่าง ฿${Math.abs(settle).toLocaleString()}`;
+                status.style.color = settle >= 0 ? '#ea580c' : '#1d4ed8';
+                status.style.background = settle >= 0 ? '#fff7ed' : '#eff6ff';
+            } else { status.classList.add('hidden'); }
+        }
+
+        function deleteItem(id) {
+            if(confirm('ลบรายการนี้ใช่ไหม?')) {
+                db = db.filter(i => i.id !== id);
+                localStorage.setItem('lamoon_final_v1', JSON.stringify(db));
+                renderReport();
+            }
+        }
+
+        function clearDB() {
+            if(confirm('ต้องการลบข้อมูลทั้งหมดเพื่อเริ่มวันใหม่ใช่ไหม?')) {
+                db = []; localStorage.removeItem('lamoon_final_v1'); renderReport();
+            }
+        }
+
+        function nav(p) {
+            document.getElementById('page-rec').classList.toggle('hidden', p !== 'rec');
+            document.getElementById('page-rep').classList.toggle('hidden', p !== 'rep');
+            document.getElementById('n-rec').classList.toggle('active', p === 'rec');
+            document.getElementById('n-rep').classList.toggle('active', p === 'rep');
+            document.getElementById('main-body').classList.toggle('report-mode', p === 'rep');
+            if(p === 'rep') renderReport();
+        }
+
+        window.onload = init;
+    </script>
 </body>
 </html>
