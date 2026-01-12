@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LA-MOON CUT</title>
     
-    <link rel="apple-touch-icon" href="https://img.icons8.com/flat-round/512/scissors.png">
-    <link rel="icon" href="https://img.icons8.com/flat-round/512/scissors.png">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/ycCG3DGk/LA-MOON.png">
+    <link rel="icon" type="image/png" href="https://i.ibb.co/ycCG3DGk/LA-MOON.png">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="LA-MOON">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -27,6 +29,22 @@
         .summary-dark{background:#1e293b;border-radius:25px;padding:22px;color:white}
         .history-card{background:white;border-radius:15px;padding:15px;display:flex;align-items:center;border-left:8px solid #1e293b;margin-bottom:10px}
         .card-green{border-left-color:#10b981}.card-blue{border-left-color:#3b82f6}
+        
+        /* ช่องสี่เหลี่ยมเลขลำดับ */
+        .idx-box {
+            min-width: 32px;
+            height: 32px;
+            background: #1e293b;
+            color: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
         .nav-bar{position:fixed;bottom:0;left:0;right:0;height:85px;background:white;border-top:1px solid #e2e8f0;display:flex;z-index:100}
         .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#94a3b8}.nav-item.active{color:#1e293b;font-weight:700;border-top:4px solid #1e293b}
         .hidden{display:none!important}
@@ -46,7 +64,7 @@
             <div id="svc-list">
                 <div class="card border-l-8 border-blue-500 flex svc-row relative">
                     <div class="flex-1">
-                        <label class="text-xs text-gray-400">บริการ</label>
+                        <label class="text-xs text-gray-400">เลือกบริการ</label>
                         <select class="svc-name">
                             <option>ตัดผม</option><option>ย้อมผม</option><option>สระผม</option>
                             <option>แก้ผม</option><option>กันหน้า</option><option>โกนหนวด</option>
@@ -91,7 +109,7 @@
             </div>
             <div id="status-box" class="card text-center font-bold hidden py-5 border-2 text-xl"></div>
             <div id="hist-list" class="space-y-2"></div>
-            <button onclick="clearDB()" class="w-full text-red-400 text-sm mt-10 underline">ลบประวัติในเครื่อง (เริ่มวันใหม่)</button>
+            <button onclick="clearDB()" class="w-full text-red-400 text-sm mt-10 underline">ล้างข้อมูลทั้งหมด</button>
         </div>
     </main>
 
@@ -101,7 +119,6 @@
     </nav>
 
     <script>
-        // ใช้ URL ใหม่ที่ช่างส่งมาให้
         const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwNFKCDFWna8t42rSYRrdsMCsd2symtnM9C7N_wNPJ_R713F_5J0s02A4AnBWPzIVAq/exec";
         let db=JSON.parse(localStorage.getItem('lamoon_db_vfinal'))||[], payType='cash';
         const monthsThai=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
@@ -141,7 +158,6 @@
             const btn=document.getElementById('btn-save'); 
             btn.innerText="กำลังบันทึก..."; btn.disabled=true;
 
-            // บังคับข้อมูลส่งไปแยก Column G และ H อย่างชัดเจน
             const rec = {
                 date: document.getElementById('work-date').value,
                 services: svcs.join(','),
@@ -150,7 +166,7 @@
                 t_start: document.getElementById('t-start').value,
                 t_end: document.getElementById('t-end').value,
                 pay_transfer: payType === 'transfer' ? total : "", 
-                pay_cash: payType === 'cash' ? total : ""         
+                pay_cash: payType === 'cash' ? total : ""          
             };
 
             try {
@@ -158,7 +174,7 @@
                 rec.id=Date.now(); rec.payment=payType=='cash'?'เงินสด':'โอนเงิน';
                 db.push(rec); 
                 localStorage.setItem('lamoon_db_vfinal',JSON.stringify(db));
-                btn.innerText="บันทึกสำเร็จ!"; btn.classList.add('success');
+                btn.innerText="สำเร็จ!"; btn.classList.add('success');
                 setTimeout(()=>location.reload(), 800);
             } catch(e) { alert("ล้มเหลว"); btn.disabled=false; }
         }
@@ -176,8 +192,9 @@
             let t=0,c=0,tr=0; const list=document.getElementById('hist-list'); list.innerHTML='';
             db.slice().reverse().forEach((r,i)=>{
                 t+=r.total; if(r.payment=='เงินสด') c+=r.total; else tr+=r.total;
+                const displayIdx = db.length - i;
                 list.innerHTML+=`<div class="history-card ${r.payment=='เงินสด'?'card-green':'card-blue'}">
-                    <div class="idx-box">${db.length-i}</div>
+                    <div class="idx-box">${displayIdx}</div>
                     <div class="flex-1 font-bold">${r.services}<div class="text-xs text-gray-400 font-normal">${r.t_start}-${r.t_end} | ${r.hairstyle}</div></div>
                     <div class="text-right"><div class="font-bold text-xl">฿${r.total}</div><div class="text-xs ${r.payment=='เงินสด'?'text-green-500':'text-blue-500'}">${r.payment}</div></div>
                     <button onclick="delItem(${r.id})" class="ml-3 text-red-300"><i class="fa-solid fa-trash"></i></button>
