@@ -30,22 +30,23 @@
         .history-card{background:white;border-radius:15px;padding:15px;display:flex;align-items:center;border-left:8px solid #1e293b;margin-bottom:10px}
         .card-green{border-left-color:#10b981}.card-blue{border-left-color:#3b82f6}
         
-        /* เลขลำดับในช่องประวัติ */
+        /* แก้ไขกล่องเลขลำดับให้ใหญ่และชัด */
         .idx-box {
-            min-width: 32px; height: 32px; background: #1e293b; color: white !important; 
-            border-radius: 6px; display: flex; align-items: center; justify-content: center; 
-            font-weight: bold; margin-right: 15px; font-size: 16px;
+            min-width: 35px; height: 35px; background: #1e293b; color: white !important; 
+            border-radius: 8px; display: flex; align-items: center; justify-content: center; 
+            font-weight: bold; margin-right: 12px; font-size: 16px;
         }
-
+        
         /* ปุ่ม Sheet ขนาดเล็ก */
         .btn-sheet-mini {
             display: inline-flex; align-items: center; justify-content: center; gap: 5px;
-            background: #10b981; color: white !important; padding: 8px 15px; 
-            border-radius: 10px; font-size: 14px; text-decoration: none; margin-top: 15px;
+            background: #10b981; color: white !important; padding: 10px 20px; 
+            border-radius: 12px; font-size: 14px; text-decoration: none; margin-top: 15px;
         }
 
         .nav-bar{position:fixed;bottom:0;left:0;right:0;height:85px;background:white;border-top:1px solid #e2e8f0;display:flex;z-index:100}
-        .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#94a3b8}.nav-item.active{color:#1e293b;font-weight:700;border-top:4px solid #1e293b}
+        .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#94a3b8}
+        .nav-item.active{color:#1e293b;font-weight:700;border-top:4px solid #1e293b}
         .hidden{display:none!important}
     </style>
 </head>
@@ -59,7 +60,6 @@
                 <div class="card flex-1"><label class="text-xs text-gray-400">เวลาเริ่ม</label><input type="time" id="t-start"></div>
                 <div class="card flex-1"><label class="text-xs text-gray-400">เวลาเสร็จ</label><input type="time" id="t-end"></div>
             </div>
-            
             <div id="svc-list">
                 <div class="card border-l-8 border-blue-500 flex svc-row relative">
                     <div class="flex-1">
@@ -76,7 +76,6 @@
                     </div>
                 </div>
             </div>
-            
             <button onclick="addSvc()" class="w-full border-2 border-dashed py-3 rounded-xl text-gray-400 font-bold mb-4 text-sm">+ เพิ่มบริการ</button>
             <div class="card">
                 <label class="text-sm text-gray-400">ทรงผม</label>
@@ -85,7 +84,6 @@
                     <option>สกินเฟด</option><option>ทรงอเมริกัน</option><option>ตำรวจ / ทหาร</option><option>นักเรียน</option>
                 </select>
             </div>
-            
             <div class="grid grid-cols-2 gap-3 mb-6">
                 <div onclick="setPay('cash')" id="p-cash" class="pay-btn active"><i class="fa-solid fa-money-bill"></i><br>เงินสด</div>
                 <div onclick="setPay('transfer')" id="p-trans" class="pay-btn"><i class="fa-solid fa-qrcode"></i><br>โอนเงิน</div>
@@ -106,16 +104,15 @@
                     <div>เคลียร์ยอด<br><span id="r-settle" class="text-white font-bold text-xl">0</span></div>
                 </div>
             </div>
-
             <div id="status-box" class="card text-center font-bold hidden py-5 border-2 text-xl"></div>
             
             <div id="hist-list" class="space-y-2 mb-6"></div>
             
-            <div class="text-center border-t pt-4">
-                <button onclick="clearDB()" class="text-red-400 text-sm underline block w-full mb-2">ลบประวัติในเครื่อง (เริ่มวันใหม่)</button>
+            <div class="text-center pt-4">
+                <button onclick="clearDB()" class="text-red-400 text-sm underline block w-full mb-4 font-bold">ลบประวัติทั้งหมด </button>
                 <a href="https://docs.google.com/spreadsheets/d/1B6DkU8E0UuS0fX6C8z_7Oq9iLqYf7D0_7W2h3M5M/edit" 
                    target="_blank" class="btn-sheet-mini shadow-sm">
-                   <i class="fa-solid fa-file-excel"></i> เปิดดู Sheet
+                   <i class="fa-solid fa-file-excel"></i> เปิดดู Google Sheet
                 </a>
             </div>
         </div>
@@ -162,10 +159,8 @@
                 if(p){total+=p;svcs.push(r.querySelector('.svc-name').value)}
             });
             if(!total) return alert("กรุณาใส่ราคา");
-
             const btn=document.getElementById('btn-save'); 
             btn.innerText="กำลังบันทึก..."; btn.disabled=true;
-
             const rec = {
                 date: document.getElementById('work-date').value,
                 services: svcs.join(','),
@@ -176,7 +171,6 @@
                 pay_transfer: payType === 'transfer' ? total : "", 
                 pay_cash: payType === 'cash' ? total : ""          
             };
-
             try {
                 await fetch(SCRIPT_URL, {method:"POST", mode:"no-cors", body:JSON.stringify(rec)});
                 rec.id=Date.now(); rec.payment=payType=='cash'?'เงินสด':'โอนเงิน';
@@ -184,7 +178,7 @@
                 localStorage.setItem('lamoon_db_vfinal',JSON.stringify(db));
                 btn.innerText="สำเร็จ!"; btn.classList.add('success');
                 setTimeout(()=>location.reload(), 800);
-            } catch(e) { alert("ล้มเหลว"); btn.disabled=false; }
+            } catch(e) { alert("ล้มเหลว"); btn.disabled=false; btn.innerText="Save Record"; }
         }
 
         function nav(p){
@@ -203,7 +197,7 @@
                 const displayIdx = db.length - i;
                 list.innerHTML+=`<div class="history-card ${r.payment=='เงินสด'?'card-green':'card-blue'}">
                     <div class="idx-box">${displayIdx}</div>
-                    <div class="flex-1 font-bold">${r.services}<div class="text-xs text-gray-400 font-normal">${r.t_start}-${r.t_end} | ${r.hairstyle}</div></div>
+                    <div class="flex-1 font-bold text-base">${r.services}<div class="text-xs text-gray-400 font-normal">${r.t_start}-${r.t_end} | ${r.hairstyle}</div></div>
                     <div class="text-right"><div class="font-bold text-xl">฿${r.total}</div><div class="text-xs ${r.payment=='เงินสด'?'text-green-500':'text-blue-500'}">${r.payment}</div></div>
                     <button onclick="delItem(${r.id})" class="ml-3 text-red-300"><i class="fa-solid fa-trash"></i></button>
                 </div>`;
@@ -212,9 +206,16 @@
             document.getElementById('r-total').innerText=t.toLocaleString();
             document.getElementById('r-cash').innerText=c.toLocaleString();
             document.getElementById('r-transfer').innerText=tr.toLocaleString();
-            
             let s=t>=400 ? (c - (t/2)) : (c - 200);
             document.getElementById('r-settle').innerText=Math.abs(s).toLocaleString();
             const b=document.getElementById('status-box'); b.classList.remove('hidden');
             b.innerText=s>=0 ? `ช่างคืนร้าน ฿${s.toLocaleString()}` : `ร้านคืนช่าง ฿${Math.abs(s).toLocaleString()}`;
-            b.className=`card
+            b.className=`card text-center font-bold py-5 ${s>=0?'bg-orange-50 text-orange-600 border-orange-200':'bg-blue-50 text-blue-600 border-blue-200'} text-xl`;
+        }
+
+        function delItem(id){ if(confirm('ลบรายการนี้?')){db=db.filter(i=>i.id!=id);localStorage.setItem('lamoon_db_vfinal',JSON.stringify(db));renderReport();}}
+        function clearDB(){ if(confirm('ลบข้อมูลทั้งหมด?')){localStorage.removeItem('lamoon_db_vfinal');db=[];renderReport();}}       
+        window.onload = init;
+    </script>
+</body>
+</html>
