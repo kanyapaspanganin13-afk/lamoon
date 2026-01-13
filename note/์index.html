@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Barber Note</title>
+    <link rel="manifest" href="data:application/manifest+json,{"name":"Barber Note","short_name":"BarberNote","start_url":".","display":"standalone","background_color":"#1a1a1a","theme_color":"#2ecc71"}">
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --card-bg: #262626;
+            --accent: #2ecc71; /* เขียวพาสเทล Modern */
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --danger: #e74c3c;
+            --border: #333;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-primary); margin: 0; padding: 12px; padding-bottom: 50px; }
+
+        /* Header & Shop Name */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: var(--card-bg); padding: 10px; border-radius: 12px; border: 1px solid var(--border); }
+        .shop-info input { background: transparent; border: none; color: var(--accent); font-size: 1.1rem; font-weight: bold; width: 150px; outline: none; }
+        .barber-info { font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; }
+        .barber-info input { background: transparent; border: none; color: var(--text-secondary); width: 80px; outline: none; border-bottom: 1px dashed #555; }
+        .btn-settings { background: none; border: none; font-size: 1.4rem; cursor: pointer; padding: 5px; }
+
+        /* Input Card - Compact Style */
+        .card { background: var(--card-bg); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .grid-2 { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 8px; margin-bottom: 8px; }
+        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #333; color: white; font-size: 16px; outline: none; }
+        input:focus { border-color: var(--accent); }
+        
+        .service-options { display: flex; gap: 5px; margin-bottom: 10px; }
+        .opt-btn { flex: 1; padding: 10px 5px; border-radius: 8px; border: 1px solid #444; background: #333; color: white; font-size: 13px; cursor: pointer; transition: 0.2s; }
+        .opt-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: bold; }
+
+        .btn-save { width: 100%; padding: 14px; border-radius: 10px; border: none; background: var(--accent); color: #000; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
+        .btn-save:active { transform: scale(0.98); }
+
+        /* Report Card - 3 King Columns */
+        .report-card { border-top: 4px solid var(--accent); }
+        .total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .main-total { font-size: 2rem; font-weight: bold; color: var(--accent); }
+        
+        .king-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 10px 0; }
+        .king-box { background: #1a1a1a; padding: 10px 5px; border-radius: 10px; text-align: center; border: 1px solid #333; }
+        .king-box small { font-size: 0.65rem; color: var(--text-secondary); display: block; margin-bottom: 4px; text-transform: uppercase; }
+        .king-box span { font-size: 1.05rem; font-weight: bold; }
+
+        /* Status Toggle */
+        .status-badge { width: 100%; padding: 10px; border-radius: 10px; text-align: center; font-weight: bold; margin-top: 10px; cursor: pointer; border: 1px solid; transition: 0.3s; }
+        .status-pending { color: #f1c40f; border-color: #f1c40f; background: rgba(241, 196, 15, 0.05); }
+        .status-done { color: var(--accent); border-color: var(--accent); background: rgba(46, 204, 113, 0.1); }
+
+        /* History List */
+        .history-list { margin-top: 15px; border-top: 1px solid #333; max-height: 200px; overflow-y: auto; }
+        .history-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2a2a2a; font-size: 0.85rem; align-items: center; }
+        .btn-del { color: #555; background: none; border: none; padding: 8px; font-size: 1rem; }
+
+        /* Settings Overlay */
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; padding: 30px 20px; }
+        .modal-content h3 { color: var(--accent); margin-top: 0; }
+        .modal-content label { display: block; margin: 15px 0 5px; color: var(--text-secondary); font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="shop-info">
+            <input type="text" id="shopName" placeholder="ชื่อร้าน..." onchange="saveConfig()">
+            <div class="barber-info">ช่าง: <input type="text" id="barberName" placeholder="ชื่อคุณ" onchange="saveConfig()"></div>
+        </div>
+        <button class="btn-settings" onclick="toggleModal(true)">⚙️</button>
+    </div>
+
+    <div class="card">
+        <div class="grid-2">
+            <input type="date" id="date">
+            <select id="payType">
+                <option value="โอน">💰 โอน</option>
+                <option value="เงินสด">💵 เงินสด</option>
+            </select>
+        </div>
+        <div class="grid-2">
+            <select id="mainService">
+                <option value="ตัดผม">ตัดผม</option>
+                <option value="โกนหนวด">โกนหนวด</option>
+                <option value="สระไดร์">สระไดร์</option>
+            </select>
+            <input type="number" id="price" placeholder="ราคา" inputmode="numeric">
+        </div>
+        <div class="service-options" id="extraServices">
+            <button class="opt-btn" onclick="this.classList.toggle('active')" data-val="สระ">สระ</button>
+            <button class="opt-btn" onclick="this.classList.toggle('active')" data-val="โกน">โกน</button>
+            <button class="opt-btn" onclick="this.classList.toggle('active')" data-val="กันหน้า">กันหน้า</button>
+        </div>
+        <button class="btn-save" onclick="saveData()">บันทึกรายการ</button>
+    </div>
+
+    <div id="reportList"></div>
+
+    <div id="modal">
+        <div class="modal-content">
+            <h3>ตั้งค่าส่วนแบ่ง</h3>
+            <label>ยอดขั้นต่ำส่งร้าน (บาท)</label>
+            <input type="number" id="minVal" placeholder="400">
+            <label>ส่วนแบ่งช่าง (%) เมื่อเกินขั้นต่ำ</label>
+            <input type="number" id="rateVal" placeholder="50">
+            <p style="font-size: 0.7rem; color: #777; margin-top: 20px;">* ข้อมูลถูกเก็บไว้ในเครื่องของคุณเท่านั้น</p>
+            <button class="btn-save" onclick="toggleModal(false)" style="margin-top: 20px;">บันทึกและปิด</button>
+            <button class="btn-save" onclick="clearAllData()" style="margin-top: 10px; background: #555; color: #fff;">ล้างข้อมูลทั้งหมด</button>
+        </div>
+    </div>
+
+    <script>
+        let db = JSON.parse(localStorage.getItem('barber_db') || '[]');
+        let cfg = JSON.parse(localStorage.getItem('barber_cfg') || '{"shop":"ชื่อร้านของคุณ","barber":"ช่าง..","min":400,"rate":50}');
+
+        // Setup
+        document.getElementById('date').valueAsDate = new Date();
+        document.getElementById('shopName').value = cfg.shop;
+        document.getElementById('barberName').value = cfg.barber;
+        document.getElementById('minVal').value = cfg.min;
+        document.getElementById('rateVal').value = cfg.rate;
+
+        function saveConfig() {
+            cfg.shop = document.getElementById('shopName').value;
+            cfg.barber = document.getElementById('barberName').value;
+            cfg.min = parseInt(document.getElementById('minVal').value) || 0;
+            cfg.rate = parseInt(document.getElementById('rateVal').value) || 0;
+            localStorage.setItem('barber_cfg', JSON.stringify(cfg));
+            render();
+        }
+
+        function toggleModal(show) {
+            document.getElementById('modal').style.display = show ? 'block' : 'none';
+            if(!show) saveConfig();
+        }
+
+        function saveData() {
+            const price = parseFloat(document.getElementById('price').value);
+            if(!price) return;
+
+            const extras = Array.from(document.querySelectorAll('#extraServices .opt-btn.active')).map(b => b.dataset.val);
+            
+            const entry = {
+                id: Date.now(),
+                date: document.getElementById('date').value,
+                service: document.getElementById('mainService').value,
+                price: price,
+                pay: document.getElementById('payType').value,
+                extras: extras,
+                cleared: false
+            };
+
+            db.push(entry);
+            localStorage.setItem('barber_db', JSON.stringify(db));
+            
+            // Reset
+            document.getElementById('price').value = '';
+            document.querySelectorAll('#extraServices .opt-btn').forEach(b => b.classList.remove('active'));
+            render();
+        }
+
+        function deleteItem(id) {
+            if(!confirm('ลบรายการนี้?')) return;
+            db = db.filter(i => i.id !== id);
+            localStorage.setItem('barber_db', JSON.stringify(db));
+            render();
+        }
+
+        function toggleStatus(date) {
+            const state = !db.find(i => i.date === date).cleared;
+            db.forEach(i => { if(i.date === date) i.cleared = state; });
+            localStorage.setItem('barber_db', JSON.stringify(db));
+            render();
+        }
+
+        function render() {
+            const container = document.getElementById('reportList');
+            container.innerHTML = '';
+
+            const groups = db.reduce((acc, i) => {
+                acc[i.date] = acc[i.date] || [];
+                acc[i.date].push(i);
+                return acc;
+            }, {});
+
+            Object.keys(groups).sort().reverse().forEach(date => {
+                const items = groups[date];
+                const total = items.reduce((s, i) => s + i.price, 0);
+                const transfer = items.filter(i => i.pay === 'โอน').reduce((s, i) => s + i.price, 0);
+                const isDone = items[0].cleared;
+
+                // Calculation Logic
+                let shopCut = 0;
+                if(total <= cfg.min) { shopCut = total / 2; }
+                else { shopCut = (cfg.min / 2) + ((total - cfg.min) * ((100-cfg.rate)/100)); }
+                let barberCut = total - shopCut;
+
+                const card = document.createElement('div');
+                card.className = 'card report-card';
+                card.innerHTML = `
+                    <div class="total-row">
+                        <div>
+                            <div style="font-weight:bold; font-size:1.1rem;">${date}</div>
+                            <div style="font-size:0.75rem; color:var(--text-secondary);">ลูกค้า ${items.length} รายการ</div>
+                        </div>
+                        <div class="main-total">฿${total}</div>
+                    </div>
+                    <div class="king-grid">
+                        <div class="king-box"><small>ยอดโอน</small><span>${transfer}</span></div>
+                        <div class="king-box" style="
