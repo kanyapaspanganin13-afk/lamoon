@@ -95,30 +95,26 @@
         <div id="page-rep" class="hidden">
             <div id="display-date-rep" class="font-bold mb-2 text-gray-500 text-lg"></div>
             <div class="summary-dark mb-4 shadow-lg">
-                <div class="flex justify-between items-center mb-3 border-b border-white/10 pb-2">
-                    <div>จำนวนลูกค้า<br><span id="r-count" class="text-3xl font-bold">0</span> <span class="text-sm font-normal">คน</span></div>
-                    <div class="text-right text-yellow-400">ยอดรวม<br>฿<span id="r-total" class="text-3xl font-bold">0</span></div>
+                <div class="flex justify-between items-start mb-4 border-b border-white/10 pb-3">
+                    <div>
+                        <div class="text-[11px] text-gray-400 uppercase tracking-widest mb-1">จำนวนลูกค้า</div>
+                        <div class="leading-none mb-2"><span id="r-count" class="text-4xl font-bold">0</span> <span class="text-sm">คน</span></div>
+                        <div class="text-[10px] text-gray-300 flex gap-2">
+                            <span>โกน: <b id="count-shave" class="text-white">0</b></span>
+                            <span>สระ: <b id="count-wash" class="text-white">0</b></span>
+                            <span>ย้อม: <b id="count-color" class="text-white">0</b></span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[11px] text-yellow-400 uppercase tracking-widest mb-1">ยอดเงินรวม</div>
+                        <div class="text-yellow-400 leading-none"><span class="text-sm">฿</span><span id="r-total" class="text-4xl font-bold">0</span></div>
+                    </div>
                 </div>
                 
                 <div class="grid grid-cols-3 text-center text-[11px] gap-1">
                     <div>เงินโอน<br><span id="r-transfer" class="text-blue-400 font-bold text-lg">0</span></div>
                     <div>รายได้ช่าง<br><span id="r-barber" class="text-green-400 font-bold text-lg">0</span></div>
                     <div>รายได้ร้าน<br><span id="r-shop" class="text-white font-bold text-lg">0</span></div>
-                </div>
-
-                <div class="mt-4 pt-3 border-t border-white/10 flex justify-around text-center">
-                    <div>
-                        <div class="text-[10px] text-gray-400 uppercase">โกนหนวด</div>
-                        <div class="text-lg font-bold" id="count-shave">0</div>
-                    </div>
-                    <div>
-                        <div class="text-[10px] text-gray-400 uppercase">สระผม</div>
-                        <div class="text-lg font-bold" id="count-wash">0</div>
-                    </div>
-                    <div>
-                        <div class="text-[10px] text-gray-400 uppercase">ย้อมผม</div>
-                        <div class="text-lg font-bold" id="count-color">0</div>
-                    </div>
                 </div>
             </div>
 
@@ -216,7 +212,7 @@
 
         function renderReport() {
             let t = 0, c = 0, tr = 0;
-            let nShave = 0, nWash = 0, nColor = 0; // ตัวแปรนับเฉพาะ
+            let nShave = 0, nWash = 0, nColor = 0;
             const list = $('hist-list');
             list.innerHTML = '';
 
@@ -225,7 +221,6 @@
                 t += val;
                 r.payment === 'เงินสด' ? c += val : tr += val;
 
-                // ตรวจสอบเพื่อนับเฉพาะ โกน, สระ, ย้อม
                 if(r.services) {
                     const sList = r.services.split(',');
                     sList.forEach(s => {
@@ -253,7 +248,6 @@
             $('r-barber').innerText = barberIncome.toLocaleString();
             $('r-shop').innerText = shopIncome.toLocaleString();
             
-            // แสดงผลการนับ โกน, สระ, ย้อม
             $('count-shave').innerText = nShave;
             $('count-wash').innerText = nWash;
             $('count-color').innerText = nColor;
