@@ -39,7 +39,6 @@
             font-weight: bold; margin-right: 10px; font-size: 14px;
         }
 
-        /* Fixed Navigation Z-Index Fix */
         .nav-bar{position:fixed;bottom:0;left:0;right:0;height:75px;background:white;border-top:1px solid #e2e8f0;display:flex;z-index:999}
         .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#94a3b8;font-size:14px;cursor:pointer}
         .nav-item.active{color:#1e293b;font-weight:700;border-top:4px solid #1e293b}
@@ -97,15 +96,32 @@
             <div id="display-date-rep" class="font-bold mb-2 text-gray-500 text-lg"></div>
             <div class="summary-dark mb-4 shadow-lg">
                 <div class="flex justify-between items-center mb-3 border-b border-white/10 pb-2">
-                    <div>จำนวนลูกค้า<br><span id="r-count" class="text-3xl font-bold">0</span></div>
-                    <div class="text-right text-yellow-400">ยอดเงินรวม<br>฿<span id="r-total" class="text-3xl font-bold">0</span></div>
+                    <div>จำนวนลูกค้า<br><span id="r-count" class="text-3xl font-bold">0</span> <span class="text-sm font-normal">คน</span></div>
+                    <div class="text-right text-yellow-400">ยอดรวม<br>฿<span id="r-total" class="text-3xl font-bold">0</span></div>
                 </div>
-                <div class="grid grid-cols-3 text-center text-xs">
-                    <div>เงินสด<br><span id="r-cash" class="text-green-400 font-bold text-lg">0</span></div>
+                
+                <div class="grid grid-cols-3 text-center text-[11px] gap-1">
                     <div>เงินโอน<br><span id="r-transfer" class="text-blue-400 font-bold text-lg">0</span></div>
-                    <div>เคลียร์ยอด<br><span id="r-settle" class="text-white font-bold text-lg">0</span></div>
+                    <div>รายได้ช่าง<br><span id="r-barber" class="text-green-400 font-bold text-lg">0</span></div>
+                    <div>รายได้ร้าน<br><span id="r-shop" class="text-white font-bold text-lg">0</span></div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-white/10 flex justify-around text-center">
+                    <div>
+                        <div class="text-[10px] text-gray-400 uppercase">โกนหนวด</div>
+                        <div class="text-lg font-bold" id="count-shave">0</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-gray-400 uppercase">สระผม</div>
+                        <div class="text-lg font-bold" id="count-wash">0</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-gray-400 uppercase">ย้อมผม</div>
+                        <div class="text-lg font-bold" id="count-color">0</div>
+                    </div>
                 </div>
             </div>
+
             <div id="status-box" class="card text-center font-bold hidden py-4 border-2 text-lg"></div>
             
             <div id="hist-list" class="space-y-2 mb-6"></div>
@@ -200,6 +216,7 @@
 
         function renderReport() {
             let t = 0, c = 0, tr = 0;
+            let nShave = 0, nWash = 0, nColor = 0; // ตัวแปรนับเฉพาะ
             const list = $('hist-list');
             list.innerHTML = '';
 
@@ -207,6 +224,17 @@
                 const val = Number(r.total) || 0;
                 t += val;
                 r.payment === 'เงินสด' ? c += val : tr += val;
+
+                // ตรวจสอบเพื่อนับเฉพาะ โกน, สระ, ย้อม
+                if(r.services) {
+                    const sList = r.services.split(',');
+                    sList.forEach(s => {
+                        if(s === 'โกนหนวด') nShave++;
+                        if(s === 'สระผม') nWash++;
+                        if(s === 'ย้อมผม') nColor++;
+                    });
+                }
+
                 list.innerHTML += `<div class="history-card">
                     <div class="idx-box">${db.length - i}</div>
                     <div class="flex-1 font-bold text-sm">${r.services}<div class="text-[11px] text-gray-400 font-normal">${r.t_start}-${r.t_end} | ${r.hairstyle}</div></div>
@@ -215,18 +243,29 @@
                 </div>`;
             });
 
+            let barberIncome = t >= 400 ? (t / 2) : 200; 
+            if (t === 0) barberIncome = 0;
+            let shopIncome = t - barberIncome;
+
             $('r-count').innerText = db.length;
             $('r-total').innerText = t.toLocaleString();
-            $('r-cash').innerText = c.toLocaleString();
             $('r-transfer').innerText = tr.toLocaleString();
+            $('r-barber').innerText = barberIncome.toLocaleString();
+            $('r-shop').innerText = shopIncome.toLocaleString();
+            
+            // แสดงผลการนับ โกน, สระ, ย้อม
+            $('count-shave').innerText = nShave;
+            $('count-wash').innerText = nWash;
+            $('count-color').innerText = nColor;
 
-            const s = t >= 400 ? (c - (t / 2)) : (c - 200);
-            $('r-settle').innerText = Math.abs(s).toLocaleString();
-
+            const s = c - barberIncome;
             const b = $('status-box');
             b.classList.remove('hidden');
 
-            if (s === 0) {
+            if (t === 0) {
+                b.innerText = `ยังไม่มีข้อมูลวันนี้`;
+                b.className = `card text-center font-bold py-4 bg-gray-100 text-gray-500 border-gray-200 text-lg`;
+            } else if (s === 0) {
                 b.innerText = `ยอดพอดี`;
                 b.className = `card text-center font-bold py-4 bg-gray-100 text-gray-500 border-gray-200 text-lg`;
             } else {
@@ -239,3 +278,5 @@
         function clearDB() { if (confirm('ลบข้อมูลทั้งหมด?')) { localStorage.removeItem('lamoon_db_vfinal'); db = []; renderReport(); } }
         window.onload = init;
     </script>
+</body>
+</html>
