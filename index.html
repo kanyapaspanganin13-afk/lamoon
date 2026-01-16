@@ -188,20 +188,29 @@
     </div>
     <button class="btn-close-day" onclick="closeDay()"><i class="fas fa-check-circle"></i></button>
 </div>
-
 <div id="p3" class="page">
-    <div class="card" style="border-top: 4px solid var(--primary);">
-        <label>เรียกดูประวัติรายวัน</label>
-        <input type="date" id="histDate" onchange="loadHistDaily()">
-        <div id="histDailyArea" style="margin-top:15px"></div>
-    </div>
-    <div class="card" style="border-top: 4px solid var(--warning);">
-        <label>สรุปสถิติรายเดือน</label>
-        <input type="month" id="histMonth" onchange="loadHistMonth()">
-        <div id="histMonthArea" style="margin-top:15px"></div>
-    </div>
-</div>
 
+    <div class="card" style="border-top:4px solid var(--primary);">
+        <label>เรียกดูประวัติรายวัน</label>
+        <div style="display:flex; gap:8px;">
+            <input type="date" id="histDate" onchange="loadHistDaily()" style="flex:1">
+            <button onclick="closeHist('histDailyArea')">ปิด</button>
+        </div>
+        <div id="histDailyArea" style="margin-top:12px; opacity:.5; text-align:center;">
+            เลือกวันที่เพื่อดูข้อมูล
+        </div>
+    </div>
+
+    <div class="card" style="border-top:4px solid var(--warning);">
+        <label>สรุปสถิติรายเดือน</label>
+        <div style="display:flex; gap:8px;">
+            <input type="month" id="histMonth" onchange="loadHistMonth()" style="flex:1">
+            <button onclick="closeHist('histMonthArea')">ปิด</button>
+        </div>
+        <div id="histMonthArea" style="margin-top:12px; opacity:.5; text-align:center;">
+            เลือกเดือนเพื่อดูสถิติ
+        </div>
+    </div>
 <div id="modalSet" class="modal">
     <div class="modal-content">
         <h3>⚙️ ตั้งค่าระบบ</h3>
@@ -419,109 +428,68 @@
         }
     }
 
-    function closeDay() {
-        const d = document.getElementById("dateInp").value;
-        const today = db.filter(r => r.date === d);
-        if(!today.length) return alert("ไม่มีข้อมูล");
-        if(confirm("ปิดยอดวันนี้และส่งไปหน้าสถิติ?")) {
-            const tot = today.reduce((a,b) => a+b.price, 0);
-            const cash = today.filter(r=>r.pay==='Cash').reduce((a,b)=>a+b.price, 0);
-            const bEarn = Math.max(tot * (conf.perc/100), conf.guar);
-            
-            let dailyStats = {};
-            today.forEach(r => {
-                r.svcs.forEach(s => {
-                    dailyStats[s] = (dailyStats[s] || 0) + 1;
-                });
-            });
-
-            const arc = {
-                date: d, total: tot, cash: cash, barber: bEarn, shop: tot - bEarn, settle: cash - bEarn, count: today.length, details: today, stats: dailyStats 
-            };
-            
-            archives = archives.filter(a => a.date !== d);
-            archives.push(arc);
-            localStorage.setItem("barber_arc", JSON.stringify(archives));
-            db = db.filter(r => r.date !== d);
-            localStorage.setItem("barber_db", JSON.stringify(db));
-            
-            speak("ส่งรายงานวันนี้สำเร็จ");
-            alert("ส่งรายงานสำเร็จ!");
-            go(3);
-        }
-    }
-
     function loadHistDaily() {
-        const d = document.getElementById("histDate").value;
-        const found = archives.find(a => a.date === d);
-        const area = document.getElementById("histDailyArea");
-        if(!found) { area.innerHTML = "<center style='color:#ccc; padding:20px;'>ไม่พบข้อมูล</center>"; return; }
-        
-        let rows = found.details.map(r => `
-            <div class="history-row" style="font-size:13px;">
-                <div style="display:flex; justify-content:space-between">
-                    <b>${r.time} | ${r.svcs.join('+')}</b>
-                    <b>฿${r.price}</b>
-                </div>
-                <div style="font-size:13px; font-weight:600; color:var(--text);">${r.hair || ''} <span style="font-weight:300; opacity:0.6">(${r.pay==='Cash'?'เงินสด':'โอน'})</span></div>
-            </div>`).join('');
+    const d = document.getElementById("histDate").value;
+    const area = document.getElementById("histDailyArea");
+    document.getElementById("histMonthArea").innerHTML = "";
 
-        let statBadges = "";
-        if (found.stats) {
-            for(let s in found.stats) { 
-                statBadges += `<span class="badge" style="background:#eee; color:#333; margin-right:4px;">${s}: ${found.stats[s]}</span>`; 
-            }
-        }
-        const settle = found.settle || 0;
-        const cash = found.cash || 0;
-        const settleText = settle > 0 ? `ช่างคืนร้าน: ฿${Math.floor(settle).toLocaleString()}` : 
-                           settle < 0 ? `ร้านคืนช่าง: ฿${Math.floor(Math.abs(settle)).toLocaleString()}` : "ยอดพอดี";
-        const settleClass = settle > 0 ? "status-red" : settle < 0 ? "status-indigo" : "status-green";
-
-        area.innerHTML = `
-            <div style="background:var(--input-bg); padding:15px; border-radius:15px;">
-                <div class="status-bar ${settleClass}" style="padding:8px; font-size:13px; margin-bottom:10px;">${settleText}</div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:15px; font-size:13px;">
-                    <div>ยอดรวม: <b>${found.total.toLocaleString()}</b></div>
-                    <div>เงินสด: <b>${cash.toLocaleString()}</b></div>
-                    <div>ช่างได้: <b>${Math.floor(found.barber).toLocaleString()}</b></div>
-                    <div>ร้านได้: <b>${Math.floor(found.shop).toLocaleString()}</b></div>
-                </div>
-                <div style="margin-bottom:15px; display:flex; flex-wrap:wrap; gap:4px;">${statBadges}</div>
-                <div style="border-top:1px dashed #ccc; padding-top:10px;">${rows}</div>
-            </div>`;
+    if(!archives || !archives.length) {
+        area.innerHTML = "<center style='color:#ccc; padding:20px;'>ยังไม่มีข้อมูลประวัติ</center>";
+        return;
     }
 
-    function loadHistMonth() {
-        const m = document.getElementById("histMonth").value;
-        const area = document.getElementById("histMonthArea");
-        if(!m) return;
-        const filtered = archives.filter(a => a.date.startsWith(m));
-        if(!filtered.length) { area.innerHTML = "<center style='color:#ccc; padding:20px;'>ไม่มีข้อมูล</center>"; return; }
-        
-        let tot = 0, bTot = 0, cTot = 0, monthStats = {};
-        filtered.forEach(a => { 
-            tot += a.total; bTot += a.barber; cTot += a.count;
-            if(a.stats) { for(let s in a.stats) { monthStats[s] = (monthStats[s] || 0) + a.stats[s]; } }
-        });
+    const found = archives.find(a => a.date === d);
+    if(!found) {
+        area.innerHTML = "<center style='color:#ccc; padding:20px;'>ไม่พบข้อมูล</center>";
+        return;
+    }
 
-        let monthStatBadges = "";
-        for(let s in monthStats) { monthStatBadges += `<span class="badge" style="background:var(--indigo); color:white; font-weight:300;">${s}: ${monthStats[s]}</span>`; }
+    let rows = found.details.map(r => `
+        <div class="history-row">
+            <div style="display:flex; justify-content:space-between; font-weight:500">
+                <span>${r.time} | ${r.svcs.join('+')}</span>
+                <span>฿${r.price}</span>
+            </div>
+            <div style="font-size:12px; opacity:0.6">${r.hair || ''}</div>
+        </div>
+    `).join('');
 
-        area.innerHTML = `
-            <div style="padding:15px; background:var(--input-bg); border-radius:15px;">
-                <div style="font-size:20px; margin-bottom:10px;">รายได้รวม: <b style="color:var(--primary)">฿${tot.toLocaleString()}</b></div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px; opacity:0.8;">
-                    <div>ช่างรวม: <b>฿${Math.floor(bTot).toLocaleString()}</b></div>
-                    <div>ร้านรวม: <b>฿${Math.floor(tot-bTot).toLocaleString()}</b></div>
-                    <div>ลูกค้าสะสม: <b>${cTot} คน</b></div>
-                    <div>วันที่บันทึก: <b>${filtered.length} วัน</b></div>
-                </div>
-                <div style="margin-top:15px; border-top:1px dashed #ccc; padding-top:10px;">
-                    <label style="font-size:11px; opacity:0.6;">สถิติบริการรวมทั้งเดือน:</label>
-                    <div style="margin-top:5px;">${monthStatBadges || '<span style="opacity:0.4">ไม่มีข้อมูลสถิติ</span>'}</div>
-                </div>
-            </div>`;
+    let statBadges = "";
+    for(let s in found.stats) {
+        statBadges += `<span class="badge">${s}: ${found.stats[s]}</span>`;
+    }
+
+    const settle = found.settle || 0;
+    const settleText = settle > 0 ? `ช่างคืนร้าน ฿${settle.toLocaleString()}` :
+                      settle < 0 ? `ร้านคืนช่าง ฿${Math.abs(settle).toLocaleString()}` :
+                      "ยอดพอดี";
+
+    area.innerHTML = `
+        <div style="background:var(--input-bg); padding:15px; border-radius:15px; position:relative;">
+            <button onclick="closeHist('histDailyArea')" 
+                style="position:absolute; top:10px; right:10px;
+                background:var(--danger); color:white; border:none;
+                border-radius:8px; padding:4px 8px; font-size:11px;">
+                ✕ ปิด
+            </button>
+
+            <div class="status-bar ${settle>0?'status-red':settle<0?'status-indigo':'status-green'}">
+                ${settleText}
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px;">
+                <div>ยอดรวม: <b>${found.total.toLocaleString()}</b></div>
+                <div>ช่างได้: <b>${Math.floor(found.barber).toLocaleString()}</b></div>
+            </div>
+
+            <div style="margin:10px 0;">${statBadges}</div>
+            <div style="border-top:1px dashed #ccc; padding-top:10px; max-height:280px; overflow-y:auto;">
+                ${rows}
+            </div>
+        </div>
+    `;
+}
+
     }
 
     function shareLine() {
