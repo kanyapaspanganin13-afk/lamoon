@@ -287,7 +287,7 @@
         const ex2 = document.getElementById("extra2").value;
 
         if(!p || !payMethod) {
-            speak("กรุณาระบุราคาและวิธีชำระเงินค่ะ");
+            speak("กรุณาระบุราคาและวิธีชำระเงิน");
             return alert("ระบุราคาและวิธีชำระเงิน");
         }
 
@@ -310,7 +310,7 @@
         db.push(rec);
         localStorage.setItem("barber_db", JSON.stringify(db));
         
-        speak("บันทึก " + p + " บาท เรียบร้อยค่ะ");
+        speak("บันทึก " + p + " บาท สำเร็จ");
 
         const b = document.getElementById("mainSaveBtn");
         b.innerText = "บันทึกแล้ว ✓"; b.style.background = "var(--accent)";
@@ -383,7 +383,7 @@
         if(confirm("ลบรายการนี้?")) {
             db = db.filter(r => r.id !== id);
             localStorage.setItem("barber_db", JSON.stringify(db));
-            speak("ลบรายการเรียบร้อยค่ะ");
+            speak("ลบรายการสำเร็จ");
             renderDay();
         }
     }
@@ -414,8 +414,8 @@
             db = db.filter(r => r.date !== d);
             localStorage.setItem("barber_db", JSON.stringify(db));
             
-            speak("ปิดยอดวันนี้เรียบร้อยค่ะ ขอบคุณที่เหนื่อยมาทั้งวันนะคะ");
-            alert("ปิดยอดสำเร็จ!");
+            speak("ส่งรายงานวันนี้สำเร็จ");
+            alert("ส่งรายงานสำเร็จ!");
             go(3);
         }
     }
@@ -545,7 +545,7 @@
         localStorage.setItem("barber_conf", JSON.stringify(conf)); 
         applySettings(); 
         closeSettings(); 
-        speak("บันทึกการตั้งค่าเรียบร้อยค่ะ");
+        speak("บันทึกการตั้งค่าเรียบร้อย");
     }
 
     function applySettings() { 
