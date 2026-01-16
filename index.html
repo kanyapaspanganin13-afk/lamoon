@@ -44,7 +44,6 @@
             font-family: 'Kanit'; 
         }
 
-        /* --- 🎨 เพิ่มสีแยกช่องตามคำขอ (สีพาสเทล) --- */
         #dateInp { background: #e0f2fe !important; border: 1px solid #bae6fd !important; }
         .time-input { background: #f0f9ff !important; border: 1px solid #bae6fd !important; text-align: center; font-weight: 600; letter-spacing: 1px; font-size: 18px; }
 
@@ -53,7 +52,6 @@
 
         #priceInp { background: #fffbeb !important; border: 1px solid #fef3c7 !important; }
 
-        /* --- 💰 ปรับปรุงปุ่มเงินสด/เงินโอน --- */
         .btn-pay { 
             border: 2px solid transparent; 
             background: var(--input-bg); 
@@ -69,11 +67,9 @@
             justify-content: center; 
             gap: 4px; 
         }
-        /* สถานะปุ่มปกติ (ใส่สีอ่อนไว้เลย) */
         #btnCash { background: #f0fdf4; color: #16a34a; border-color: #dcfce7; }
         #btnTrans { background: #f0f9ff; color: #0284c7; border-color: #e0f2fe; }
 
-        /* สถานะเมื่อกดเลือก */
         .btn-pay.active-cash { border: 3px solid #16a34a !important; color: #14532d !important; background: #dcfce7 !important; font-weight: 600; }
         .btn-pay.active-transfer { border: 3px solid #0284c7 !important; color: #0c4a6e !important; background: #e0f2fe !important; font-weight: 600; }
         
@@ -173,12 +169,12 @@
         <div class="card" style="text-align: center;">
             <label>ยอดเงินรวมวันนี้</label>
             <div id="dTotal" style="font-size:28px; font-weight:600">0</div>
-            <div id="dCounts" style="font-size:12px; opacity:0.6;">ลูกค้า: 0 คน</div>
+            <div id="dCounts" style="font-size:18px; font-weight:600; color:var(--primary); margin-top:5px;">ลูกค้า: 0 คน</div>
         </div>
         <div class="card">
-            <div style="font-size:13px; margin-bottom:4px;">📱 โอน: <b id="dTrans">0</b></div>
-            <div style="font-size:13px; margin-bottom:4px;">🤵 ช่าง: <b id="dBarber">0</b></div>
-            <div style="font-size:13px;">🏠 ร้าน: <b id="dShop">0</b></div>
+            <div style="font-size:16px; font-weight:600; margin-bottom:6px;">📱 โอน: <b id="dTrans">0</b></div>
+            <div style="font-size:16px; font-weight:600; margin-bottom:6px;">🤵 ช่าง: <b id="dBarber">0</b></div>
+            <div style="font-size:16px; font-weight:600;">🏠 ร้าน: <b id="dShop">0</b></div>
         </div>
     </div>
     <div id="settleBar" class="status-bar status-blue">ยอดพอดี</div>
@@ -374,14 +370,15 @@
             tot += r.price;
             if(r.pay==='Trans') trans += r.price; else cash += r.price;
             r.svcs.forEach(s => stats[s] = (stats[s]||0)+1);
+            
             listHtml += `<div class="history-row">
-                <div style="display:flex; justify-content:space-between; font-weight:500">
+                <div style="display:flex; justify-content:space-between; font-weight:500; font-size:15px;">
                     <span>${r.time} | ${r.svcs.join('+')}</span>
                     <span>฿${r.price}</span>
                 </div>
-                <div style="display:flex; justify-content:space-between; font-size:12px; opacity:0.7; margin-top:2px;">
-                    <span>${r.hair ? 'ทรง: '+r.hair : ''}</span>
-                    <span>${r.pay==='Cash'?'💵 สด':'📱 โอน'} <i class="fas fa-trash" style="margin-left:10px; color:var(--danger)" onclick="delRec(${r.id})"></i></span>
+                <div style="display:flex; justify-content:space-between; font-size:15px; margin-top:3px;">
+                    <span style="font-weight:600; color:var(--text);">${r.hair ? 'ทรง: '+r.hair : ''}</span>
+                    <span style="opacity:0.7;">${r.pay==='Cash'?'💵 สด':'📱 โอน'} <i class="fas fa-trash" style="margin-left:10px; color:var(--danger)" onclick="delRec(${r.id})"></i></span>
                 </div>
             </div>`;
         });
@@ -466,7 +463,7 @@
                     <b>${r.time} | ${r.svcs.join('+')}</b>
                     <b>฿${r.price}</b>
                 </div>
-                <div style="font-size:11px; opacity:0.6">${r.hair || ''} (${r.pay==='Cash'?'เงินสด':'โอน'})</div>
+                <div style="font-size:13px; font-weight:600; color:var(--text);">${r.hair || ''} <span style="font-weight:300; opacity:0.6">(${r.pay==='Cash'?'เงินสด':'โอน'})</span></div>
             </div>`).join('');
 
         let statBadges = "";
@@ -592,4 +589,3 @@
 </script>
 </body>
 </html>
-
