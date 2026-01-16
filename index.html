@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="apple-touch-icon" href="https://i.ibb.co/27GqTXFn/Barber-Note.png">
-    <title>Barber Note Pro v.1.2 + Multi-Voice</title>
+    <title>Barber Note Pro v.1.3 + Multi-Voice</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -28,16 +28,14 @@
         .card { background: var(--card); border-radius: 20px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
-        /* ปรับหัวข้อให้ใหญ่ขึ้น (18px) แต่ชิดขึ้น */
         label { font-size: 18px; font-weight: 500; opacity: 0.9; margin-bottom: 4px; display: block; }
 
-        /* ปรับช่องกรอกและ Select ให้ตัวหนังสือ 18px แต่คุมความสูงไว้ที่ 45px ไม่ให้ล้นจอ */
         input, select { 
             width: 100%; 
             height: 45px; 
             padding: 8px 12px; 
             border-radius: 12px; 
-            border: none; 
+            border: 1px solid transparent; 
             font-size: 18px; 
             box-sizing: border-box; 
             background: var(--input-bg); 
@@ -45,11 +43,17 @@
             outline: none; 
             font-family: 'Kanit'; 
         }
-        
-        /* ช่องเวลาให้ใหญ่เท่าช่องกรอก */
-        .time-input { text-align: center; font-weight: 600; letter-spacing: 1px; font-size: 18px; }
 
-        /* ปรับปุ่มเงินสด/เงินโอน ให้ตัวหนังสือ 18px และกระชับพื้นที่ */
+        /* --- 🎨 เพิ่มสีแยกช่องตามคำขอ (สีพาสเทล) --- */
+        #dateInp { background: #e0f2fe !important; border: 1px solid #bae6fd !important; }
+        .time-input { background: #f0f9ff !important; border: 1px solid #bae6fd !important; text-align: center; font-weight: 600; letter-spacing: 1px; font-size: 18px; }
+
+        #mainSvc, #hairStyle { background: #f0fdf4 !important; border: 1px solid #bbf7d0 !important; }
+        #extra1, #extra2 { background: #f5f3ff !important; border: 1px solid #ddd6fe !important; }
+
+        #priceInp { background: #fffbeb !important; border: 1px solid #fef3c7 !important; }
+
+        /* --- 💰 ปรับปรุงปุ่มเงินสด/เงินโอน --- */
         .btn-pay { 
             border: 2px solid transparent; 
             background: var(--input-bg); 
@@ -65,8 +69,13 @@
             justify-content: center; 
             gap: 4px; 
         }
-        .btn-pay.active-cash { border-color: var(--warning); color: var(--warning); background: #fffbeb; }
-        .btn-pay.active-transfer { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
+        /* สถานะปุ่มปกติ (ใส่สีอ่อนไว้เลย) */
+        #btnCash { background: #f0fdf4; color: #16a34a; border-color: #dcfce7; }
+        #btnTrans { background: #f0f9ff; color: #0284c7; border-color: #e0f2fe; }
+
+        /* สถานะเมื่อกดเลือก */
+        .btn-pay.active-cash { border: 3px solid #16a34a !important; color: #14532d !important; background: #dcfce7 !important; font-weight: 600; }
+        .btn-pay.active-transfer { border: 3px solid #0284c7 !important; color: #0c4a6e !important; background: #e0f2fe !important; font-weight: 600; }
         
         .status-bar { width: 100%; padding: 15px; border-radius: 15px; text-align: center; font-weight: 600; font-size: 16px; margin: 10px 0; box-sizing: border-box; }
         .status-red { background: #fee2e2; color: #dc2626; }
@@ -112,10 +121,10 @@
 </header>
 
 <div id="p1" class="page active">
-    <div class="card">
+    <div class="card" style="border-left: 5px solid #0ea5e9;">
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom:15px;">
-            <i class="fas fa-calendar-day" style="color:var(--primary)"></i>
-            <input type="date" id="dateInp" style="padding: 5px; background:none; font-size: 18px;">
+            <i class="fas fa-calendar-day" style="color:#0ea5e9"></i>
+            <input type="date" id="dateInp" style="padding: 5px; font-size: 18px;">
         </div>
         <div class="grid-2">
             <div><label>เวลาเริ่ม</label><input type="tel" id="tStart" placeholder="0900" class="time-input" maxlength="4"></div>
@@ -123,7 +132,7 @@
         </div>
     </div>
 
-    <div class="card">
+    <div class="card" style="border-left: 5px solid #10b981;">
         <label>เลือกรายการ</label>
         <div class="grid-2" style="margin-bottom:10px">
             <select id="mainSvc">
@@ -148,9 +157,9 @@
         </div>
     </div>
 
-    <div class="card">
+    <div class="card" style="border-left: 5px solid #f59e0b;">
         <label>ค่าบริการ</label>
-        <input type="number" id="priceInp" placeholder="0" inputmode="numeric" style="font-size:40px; font-weight:600; color:var(--primary); text-align:center; background:var(--input-bg); height:80px;">
+        <input type="number" id="priceInp" placeholder="0" inputmode="numeric" style="font-size:40px; font-weight:600; color:#b45309; text-align:center; height:80px;">
         <div class="grid-2" style="margin-top:15px">
             <button id="btnCash" class="btn-pay" onclick="selectPay('Cash')"><i class="fas fa-money-bill-wave"></i> สด</button>
             <button id="btnTrans" class="btn-pay" onclick="selectPay('Trans')"><i class="fas fa-mobile-alt"></i> โอน</button>
@@ -257,7 +266,6 @@
 
 <script>
     let payMethod = "";
-    // เพิ่ม config voice เริ่มต้นเป็นผู้หญิง
     let conf = JSON.parse(localStorage.getItem("barber_conf")) || {shop:"Barber Shop", perc:50, guar:0, theme:"light", bg:"#f1f5f9", sound:"on", voice:"female"};
     let db = JSON.parse(localStorage.getItem("barber_db")) || []; 
     let archives = JSON.parse(localStorage.getItem("barber_arc")) || []; 
@@ -267,25 +275,19 @@
         applySettings();
     };
 
-    /* ===== ปรับปรุงฟังก์ชันเสียง (รองรับ ชาย/หญิง) ===== */
     function speak(text) {
         if (conf.sound === "off") return;
         window.speechSynthesis.cancel();
         const msg = new SpeechSynthesisUtterance(text);
         msg.lang = 'th-TH';
-        
-        // ค้นหาเสียงที่เหมาะสมในเครื่อง
         const voices = window.speechSynthesis.getVoices();
         if (conf.voice === "male") {
-            // พยายามหาเสียงผู้ชาย (มักจะมีคำว่า 'male' หรือ 'Narisa' เป็นหญิง 'Kanya' เป็นหญิง)
-            // หมายเหตุ: เสียงภาษาไทยส่วนใหญ่มักเป็นเสียงผู้หญิง ขึ้นอยู่กับระบบปฏิบัติการ
-            msg.pitch = 0.6; // ปรับโทนเสียงให้ต่ำลงเพื่อให้ดูเป็นผู้ชายมากขึ้น
+            msg.pitch = 0.6; 
             msg.rate = 1.0;
         } else {
-            msg.pitch = 1.1; // เสียงผู้หญิงปกติ
+            msg.pitch = 1.1; 
             msg.rate = 1.1;
         }
-        
         window.speechSynthesis.speak(msg);
     }
 
