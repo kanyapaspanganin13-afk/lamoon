@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="apple-touch-icon" href="https://i.ibb.co/27GqTXFn/Barber-Note.png">
-    <title>Barber Note pro v.1.1 + Voice</title>
+    <title>Barber Note Pro v.1 + Multi-Voice</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -174,11 +174,22 @@
             <div><label>ประกันรายวัน</label><input type="number" id="setGuar"></div>
         </div>
         
-        <label style="margin-top:15px">🔊 การตั้งค่าเสียง</label>
-        <select id="setSound">
-            <option value="on">เปิดเสียงแจ้งเตือน</option>
-            <option value="off">ปิดเสียงแจ้งเตือน</option>
-        </select>
+        <div class="grid-2" style="margin-top:15px">
+            <div>
+                <label>🔊 เสียงแจ้งเตือน</label>
+                <select id="setSound">
+                    <option value="on">เปิดเสียง</option>
+                    <option value="off">ปิดเสียง</option>
+                </select>
+            </div>
+            <div>
+                <label>🎚️ เลือกเสียงพูด</label>
+                <select id="setVoice">
+                    <option value="female">👩 ผู้หญิง</option>
+                    <option value="male">👨 ผู้ชาย</option>
+                </select>
+            </div>
+        </div>
 
         <label style="margin-top:15px">โหมดสี</label>
         <select id="setTheme" onchange="changeTheme(this.value)">
@@ -186,6 +197,7 @@
             <option value="dark">Dark Mode</option>
             <option value="pastel">Pastel Mode</option>
         </select>
+        
         <label style="margin-top:15px">สีพื้นหลัง</label>
         <div id="colorPicker" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px;">
             <div class="color-dot" style="background:#fdf2f8" onclick="setBg('#fdf2f8')"></div>
@@ -196,6 +208,7 @@
             <div class="color-dot" style="background:#eef2ff" onclick="setBg('#eef2ff')"></div>
             <div class="color-dot" style="background:#fff7ed" onclick="setBg('#fff7ed')"></div>
         </div>
+        
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
             <button class="btn-save" onclick="saveSettings()" style="width:100%; margin:0; font-size:16px; padding:12px;">บันทึก</button>
             <button onclick="closeSettings()" style="width:100%; margin:0; border: 1px solid var(--border); background: #f8fafc; color: #666; border-radius: 10px; cursor: pointer; font-weight: 500;">ปิด</button>
@@ -212,7 +225,8 @@
 
 <script>
     let payMethod = "";
-    let conf = JSON.parse(localStorage.getItem("barber_conf")) || {shop:"Barber Shop", perc:50, guar:0, theme:"light", bg:"#f1f5f9", sound:"on"};
+    // เพิ่ม config voice เริ่มต้นเป็นผู้หญิง
+    let conf = JSON.parse(localStorage.getItem("barber_conf")) || {shop:"Barber Shop", perc:50, guar:0, theme:"light", bg:"#f1f5f9", sound:"on", voice:"female"};
     let db = JSON.parse(localStorage.getItem("barber_db")) || []; 
     let archives = JSON.parse(localStorage.getItem("barber_arc")) || []; 
 
@@ -221,15 +235,25 @@
         applySettings();
     };
 
-    /* ===== ฟังก์ชันเสียง (VOICE) ===== */
+    /* ===== ปรับปรุงฟังก์ชันเสียง (รองรับ ชาย/หญิง) ===== */
     function speak(text) {
         if (conf.sound === "off") return;
-        // ยกเลิกเสียงที่กำลังพูดอยู่ก่อนหน้า
         window.speechSynthesis.cancel();
         const msg = new SpeechSynthesisUtterance(text);
         msg.lang = 'th-TH';
-        msg.rate = 1.1; // ความเร็ว
-        msg.pitch = 1.0; // ระดับเสียง
+        
+        // ค้นหาเสียงที่เหมาะสมในเครื่อง
+        const voices = window.speechSynthesis.getVoices();
+        if (conf.voice === "male") {
+            // พยายามหาเสียงผู้ชาย (มักจะมีคำว่า 'male' หรือ 'Narisa' เป็นหญิง 'Kanya' เป็นหญิง)
+            // หมายเหตุ: เสียงภาษาไทยส่วนใหญ่มักเป็นเสียงผู้หญิง ขึ้นอยู่กับระบบปฏิบัติการ
+            msg.pitch = 0.6; // ปรับโทนเสียงให้ต่ำลงเพื่อให้ดูเป็นผู้ชายมากขึ้น
+            msg.rate = 1.0;
+        } else {
+            msg.pitch = 1.1; // เสียงผู้หญิงปกติ
+            msg.rate = 1.1;
+        }
+        
         window.speechSynthesis.speak(msg);
     }
 
@@ -381,15 +405,7 @@
             });
 
             const arc = {
-                date: d, 
-                total: tot, 
-                cash: cash,
-                barber: bEarn, 
-                shop: tot - bEarn, 
-                settle: cash - bEarn, 
-                count: today.length, 
-                details: today,
-                stats: dailyStats 
+                date: d, total: tot, cash: cash, barber: bEarn, shop: tot - bEarn, settle: cash - bEarn, count: today.length, details: today, stats: dailyStats 
             };
             
             archives = archives.filter(a => a.date !== d);
@@ -404,7 +420,6 @@
         }
     }
 
-    /* สถิติรายวัน/รายเดือน - โค้ดส่วนนี้ยังคงเดิม */
     function loadHistDaily() {
         const d = document.getElementById("histDate").value;
         const found = archives.find(a => a.date === d);
@@ -513,7 +528,9 @@
         document.getElementById("setGuar").value = conf.guar; 
         document.getElementById("setTheme").value = conf.theme; 
         document.getElementById("setSound").value = conf.sound || "on";
+        document.getElementById("setVoice").value = conf.voice || "female";
     }
+    
     function closeSettings() { document.getElementById("modalSet").style.display = "none"; }
     function setBg(c) { conf.bg = c; applySettings(); }
     function changeTheme(v) { conf.theme = v; applySettings(); }
@@ -524,6 +541,7 @@
         conf.guar = Number(document.getElementById("setGuar").value); 
         conf.theme = document.getElementById("setTheme").value; 
         conf.sound = document.getElementById("setSound").value;
+        conf.voice = document.getElementById("setVoice").value;
         localStorage.setItem("barber_conf", JSON.stringify(conf)); 
         applySettings(); 
         closeSettings(); 
@@ -535,6 +553,7 @@
         document.getElementById("mainBody").className = "theme-" + conf.theme; 
         document.getElementById("mainBody").style.backgroundColor = conf.bg; 
     }
+    
     function clearAllData() { if(confirm("ล้างข้อมูลทั้งหมด? ข้อมูลจะหายถาวรและกู้คืนไม่ได้")) { localStorage.clear(); location.reload(); } }
 </script>
 </body>
