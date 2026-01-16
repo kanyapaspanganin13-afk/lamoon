@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="apple-touch-icon" href="https://i.ibb.co/27GqTXFn/Barber-Note.png">
-    <title>Barber Note Pro v.2 + Multi-Voice</title>
+    <title>Barber Note Pro v.2.1 + Multi-Voice</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -44,7 +44,6 @@
             font-family: 'Kanit'; 
         }
 
-        /* --- 🎨 เพิ่มสีแยกช่องตามคำขอ (สีพาสเทล) --- */
         #dateInp { background: #e0f2fe !important; border: 1px solid #bae6fd !important; }
         .time-input { background: #f0f9ff !important; border: 1px solid #bae6fd !important; text-align: center; font-weight: 600; letter-spacing: 1px; font-size: 18px; }
 
@@ -53,7 +52,6 @@
 
         #priceInp { background: #fffbeb !important; border: 1px solid #fef3c7 !important; }
 
-        /* --- 💰 ปรับปรุงปุ่มเงินสด/เงินโอน --- */
         .btn-pay { 
             border: 2px solid transparent; 
             background: var(--input-bg); 
@@ -69,11 +67,9 @@
             justify-content: center; 
             gap: 4px; 
         }
-        /* สถานะปุ่มปกติ (ใส่สีอ่อนไว้เลย) */
         #btnCash { background: #f0fdf4; color: #16a34a; border-color: #dcfce7; }
         #btnTrans { background: #f0f9ff; color: #0284c7; border-color: #e0f2fe; }
 
-        /* สถานะเมื่อกดเลือก */
         .btn-pay.active-cash { border: 3px solid #16a34a !important; color: #14532d !important; background: #dcfce7 !important; font-weight: 600; }
         .btn-pay.active-transfer { border: 3px solid #0284c7 !important; color: #0c4a6e !important; background: #e0f2fe !important; font-weight: 600; }
         
@@ -176,9 +172,9 @@
             <div id="dCounts" style="font-size:18px; font-weight:600; color:var(--primary); margin-top:5px;">ลูกค้า: 0 คน</div>
         </div>
         <div class="card">
-            <div style="font-size:13px; margin-bottom:4px;">📱 โอน: <b id="dTrans">0</b></div>
-            <div style="font-size:13px; margin-bottom:4px;">🤵 ช่าง: <b id="dBarber">0</b></div>
-            <div style="font-size:13px;">🏠 ร้าน: <b id="dShop">0</b></div>
+            <div style="font-size:16px; font-weight:600; margin-bottom:6px;">📱 โอน: <b id="dTrans">0</b></div>
+            <div style="font-size:16px; font-weight:600; margin-bottom:6px;">🤵 ช่าง: <b id="dBarber">0</b></div>
+            <div style="font-size:16px; font-weight:600;">🏠 ร้าน: <b id="dShop">0</b></div>
         </div>
     </div>
     <div id="settleBar" class="status-bar status-blue">ยอดพอดี</div>
@@ -375,7 +371,6 @@
             if(r.pay==='Trans') trans += r.price; else cash += r.price;
             r.svcs.forEach(s => stats[s] = (stats[s]||0)+1);
             
-            // ปรับส่วนทรงผมให้ตัวหนาและขนาดเท่ารายการหลัก (15px)
             listHtml += `<div class="history-row">
                 <div style="display:flex; justify-content:space-between; font-weight:500; font-size:15px;">
                     <span>${r.time} | ${r.svcs.join('+')}</span>
