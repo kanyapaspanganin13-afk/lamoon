@@ -99,7 +99,7 @@
                 <option value="เด็ก">เด็ก</option>
             </select>
             <select id="hairStyle">
-                <option value="">(เลือกทรงผม)</option>
+                <option value="">เลือกทรงผม</option>
                 <option>รองทรง</option>
                 <option>แฟชั่น</option>
                 <option>สกินเฟด</option>
@@ -111,8 +111,8 @@
             </select>
         </div>
         <div class="grid-2">
-            <select id="extra1"><option value="">(บริการอื่น1)</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>โกนผม</option></select>
-            <select id="extra2"><option value="">(บริการอื่น2)</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>โกนผม</option></select>
+            <select id="extra1"><option value="">บริการอื่น1</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>โกนผม</option></select>
+            <select id="extra2"><option value="">บริการอื่น2</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>โกนผม</option></select>
         </div>
     </div>
 
@@ -170,7 +170,7 @@
         <h3>⚙️ ตั้งค่าระบบ</h3>
         <label>ชื่อร้าน</label><input id="setShop">
         <div class="grid-2" style="margin-top:10px">
-            <div><label>% คอมมิชชั่น</label><input type="number" id="setPerc"></div>
+            <div><label>% แบ่งเปอร์เซ็น</label><input type="number" id="setPerc"></div>
             <div><label>ประกันรายวัน</label><input type="number" id="setGuar"></div>
         </div>
         <label style="margin-top:15px">โหมดสี</label>
@@ -312,7 +312,7 @@
         document.getElementById("dTotal").innerText = tot.toLocaleString();
         document.getElementById("dTrans").innerText = trans.toLocaleString();
         // เพิ่มการแสดงผล Cash และผลต่างการคืนเงินในหน้า 2
-        document.getElementById("dBarber").innerHTML = `${Math.floor(bEarn).toLocaleString()} <span style="font-size:10px; font-weight:normal; opacity:0.6">(สดในมือ: ${cash.toLocaleString()})</span>`;
+        document.getElementById("dBarber").innerHTML = `${Math.floor(bEarn).toLocaleString()} <span style="font-size:10px; font-weight:normal; opacity:0.6">(เงินสด: ${cash.toLocaleString()})</span>`;
         document.getElementById("dShop").innerText = Math.floor(sEarn).toLocaleString();
         document.getElementById("dCounts").innerText = `ลูกค้า: ${today.length} คน`;
         document.getElementById("dailyList").innerHTML = listHtml || "<center style='padding:40px; opacity:0.3'>ยังไม่มีข้อมูล</center>";
@@ -329,7 +329,7 @@
         } else if(settle < 0) { 
             bar.innerText = `🟦 ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; bar.className = "status-bar status-indigo"; 
         } else { 
-            bar.innerText = "✅ ยอดลงตัวพอดี"; bar.className = "status-bar status-green"; 
+            bar.innerText = "✅ ยอดพอดี"; bar.className = "status-bar status-green"; 
         }
     }
 
@@ -517,7 +517,7 @@ function closeDay() {
         msg += `🏠 ร้าน: ${Math.floor(sEarn).toLocaleString()} บาท\n`;
         msg += `--------------------------\n`;
 
-        let setMsg = tot === 0 ? "ร้านจ่ายประกันรายวัน" : settle > 0 ? `ช่างคืนร้าน ${Math.floor(settle).toLocaleString()} บาท` : settle < 0 ? `ร้านคืนช่าง ${Math.floor(Math.abs(settle)).toLocaleString()} บาท` : "ยอดลงตัวพอดี";
+        let setMsg = tot === 0 ? "ร้านจ่ายประกันรายวัน" : settle > 0 ? `ช่างคืนร้าน ${Math.floor(settle).toLocaleString()} บาท` : settle < 0 ? `ร้านคืนช่าง ${Math.floor(Math.abs(settle)).toLocaleString()} บาท` : "ยอดพอดี";
         msg += `⚠️ ${setMsg}`;
 
         window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`);
