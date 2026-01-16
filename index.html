@@ -173,7 +173,7 @@
         <div class="card" style="text-align: center;">
             <label>ยอดเงินรวมวันนี้</label>
             <div id="dTotal" style="font-size:28px; font-weight:600">0</div>
-            <div id="dCounts" style="font-size:12px; opacity:0.6;">ลูกค้า: 0 คน</div>
+            <div id="dCounts" style="font-size:18px; font-weight:600; color:var(--primary); margin-top:5px;">ลูกค้า: 0 คน</div>
         </div>
         <div class="card">
             <div style="font-size:13px; margin-bottom:4px;">📱 โอน: <b id="dTrans">0</b></div>
@@ -374,14 +374,16 @@
             tot += r.price;
             if(r.pay==='Trans') trans += r.price; else cash += r.price;
             r.svcs.forEach(s => stats[s] = (stats[s]||0)+1);
+            
+            // ปรับส่วนทรงผมให้ตัวหนาและขนาดเท่ารายการหลัก (15px)
             listHtml += `<div class="history-row">
-                <div style="display:flex; justify-content:space-between; font-weight:500">
+                <div style="display:flex; justify-content:space-between; font-weight:500; font-size:15px;">
                     <span>${r.time} | ${r.svcs.join('+')}</span>
                     <span>฿${r.price}</span>
                 </div>
-                <div style="display:flex; justify-content:space-between; font-size:12px; opacity:0.7; margin-top:2px;">
-                    <span>${r.hair ? 'ทรง: '+r.hair : ''}</span>
-                    <span>${r.pay==='Cash'?'💵 สด':'📱 โอน'} <i class="fas fa-trash" style="margin-left:10px; color:var(--danger)" onclick="delRec(${r.id})"></i></span>
+                <div style="display:flex; justify-content:space-between; font-size:15px; margin-top:3px;">
+                    <span style="font-weight:600; color:var(--text);">${r.hair ? 'ทรง: '+r.hair : ''}</span>
+                    <span style="opacity:0.7;">${r.pay==='Cash'?'💵 สด':'📱 โอน'} <i class="fas fa-trash" style="margin-left:10px; color:var(--danger)" onclick="delRec(${r.id})"></i></span>
                 </div>
             </div>`;
         });
@@ -466,7 +468,7 @@
                     <b>${r.time} | ${r.svcs.join('+')}</b>
                     <b>฿${r.price}</b>
                 </div>
-                <div style="font-size:11px; opacity:0.6">${r.hair || ''} (${r.pay==='Cash'?'เงินสด':'โอน'})</div>
+                <div style="font-size:13px; font-weight:600; color:var(--text);">${r.hair || ''} <span style="font-weight:300; opacity:0.6">(${r.pay==='Cash'?'เงินสด':'โอน'})</span></div>
             </div>`).join('');
 
         let statBadges = "";
