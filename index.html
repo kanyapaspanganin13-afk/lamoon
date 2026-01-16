@@ -28,11 +28,43 @@
         .card { background: var(--card); border-radius: 20px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
-        label { font-size: 13px; font-weight: 500; opacity: 0.8; margin-bottom: 5px; display: block; }
-        input, select { width: 100%; padding: 12px; border-radius: 12px; border: none; font-size: 16px; box-sizing: border-box; background: var(--input-bg); color: var(--text); outline: none; font-family: 'Kanit'; }
+        /* ปรับหัวข้อให้ใหญ่ขึ้น (18px) แต่ชิดขึ้น */
+        label { font-size: 18px; font-weight: 500; opacity: 0.9; margin-bottom: 4px; display: block; }
+
+        /* ปรับช่องกรอกและ Select ให้ตัวหนังสือ 18px แต่คุมความสูงไว้ที่ 45px ไม่ให้ล้นจอ */
+        input, select { 
+            width: 100%; 
+            height: 45px; 
+            padding: 8px 12px; 
+            border-radius: 12px; 
+            border: none; 
+            font-size: 18px; 
+            box-sizing: border-box; 
+            background: var(--input-bg); 
+            color: var(--text); 
+            outline: none; 
+            font-family: 'Kanit'; 
+        }
         
-        .time-input { text-align: center; font-weight: 500; letter-spacing: 1px; }
-        .btn-pay { border: 2px solid transparent; background: var(--input-bg); color: var(--text); padding: 12px; border-radius: 12px; font-weight: 500; cursor: pointer; transition: 0.2s; }
+        /* ช่องเวลาให้ใหญ่เท่าช่องกรอก */
+        .time-input { text-align: center; font-weight: 600; letter-spacing: 1px; font-size: 18px; }
+
+        /* ปรับปุ่มเงินสด/เงินโอน ให้ตัวหนังสือ 18px และกระชับพื้นที่ */
+        .btn-pay { 
+            border: 2px solid transparent; 
+            background: var(--input-bg); 
+            color: var(--text); 
+            padding: 8px 5px; 
+            border-radius: 12px; 
+            font-weight: 500; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            font-size: 18px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 4px; 
+        }
         .btn-pay.active-cash { border-color: var(--warning); color: var(--warning); background: #fffbeb; }
         .btn-pay.active-transfer { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
         
@@ -83,7 +115,7 @@
     <div class="card">
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom:15px;">
             <i class="fas fa-calendar-day" style="color:var(--primary)"></i>
-            <input type="date" id="dateInp" style="padding: 5px; background:none;">
+            <input type="date" id="dateInp" style="padding: 5px; background:none; font-size: 18px;">
         </div>
         <div class="grid-2">
             <div><label>เวลาเริ่ม</label><input type="tel" id="tStart" placeholder="0900" class="time-input" maxlength="4"></div>
@@ -120,8 +152,8 @@
         <label>ค่าบริการ</label>
         <input type="number" id="priceInp" placeholder="0" inputmode="numeric" style="font-size:40px; font-weight:600; color:var(--primary); text-align:center; background:var(--input-bg); height:80px;">
         <div class="grid-2" style="margin-top:15px">
-            <button id="btnCash" class="btn-pay" onclick="selectPay('Cash')">💵 เงินสด</button>
-            <button id="btnTrans" class="btn-pay" onclick="selectPay('Trans')">📱 โอนเงิน</button>
+            <button id="btnCash" class="btn-pay" onclick="selectPay('Cash')"><i class="fas fa-money-bill-wave"></i> สด</button>
+            <button id="btnTrans" class="btn-pay" onclick="selectPay('Trans')"><i class="fas fa-mobile-alt"></i> โอน</button>
         </div>
     </div>
     <button class="btn-save" id="mainSaveBtn" onclick="handleSave()">บันทึกข้อมูล</button>
