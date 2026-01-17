@@ -46,45 +46,21 @@
     <div class="card" style="border-left: 5px solid #10b981;"><div class="grid-2" style="margin-bottom:10px"><select id="mainSvc"><option value="">ไม่เลือก</option><option value="เด็ก">เด็ก</option></select><select id="hairStyle"><option value="">ทรงผม</option><option>รองทรง</option><option>แฟชั่น</option><option>สกินเฟด</option><option>เปิดข้าง</option><option>วินเทจ</option><option>ตำรวจ/ทหาร</option><option>ทรงนักเรียน</option><option>แก้ทรงผม</option></select></div>
     <div class="grid-2"><select id="extra1"><option value="">บริการอื่น 1</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>โกนผม</option></select><select id="extra2"><option value="">บริการอื่น 2</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>โกนผม</option></select></div></div>
     <div class="card" style="border-left: 5px solid #f59e0b;"><input type="number" id="priceInp" placeholder="0" inputmode="numeric" style="font-size:40px; font-weight:600; color:#b45309; text-align:center; height:80px;"><div class="grid-2" style="margin-top:15px"><button id="btnCash" class="btn-pay" onclick="selectPay('Cash')"><i class="fas fa-money-bill-wave"></i> สด</button><button id="btnTrans" class="btn-pay" onclick="selectPay('Trans')"><i class="fas fa-mobile-alt"></i> โอน</button></div></div>
-    <button class="btn-save" id="mainSaveBtn" onclick="handleSave()">บันทึกข้อมูล</button>
-</div>
-
+    <button class="btn-save" id="mainSaveBtn" onclick="handleSave()">บันทึกข้อมูล</button></div>
 <div id="p2" class="page">
-    <div class="grid-2">
-        <div class="card" style="text-align: center;">
-            <label>ยอดเงินรวมวันนี้</label>
-            <div id="dTotal" style="font-size:28px; font-weight:600">0</div>
-            <div id="dCounts" style="font-size:18px; font-weight:600; color:var(--primary); margin-top:5px;">ลูกค้า: 0 คน</div>
-        </div>
-        <div class="card">
-            <div style="font-size:16px; font-weight:600; margin-bottom:6px;">📱 โอน: <b id="dTrans">0</b></div>
-            <div style="font-size:16px; font-weight:600; margin-bottom:6px;">🤵 ช่าง: <b id="dBarber">0</b></div>
-            <div style="font-size:16px; font-weight:600;">🏠 ร้าน: <b id="dShop">0</b></div>
-        </div>
-    </div>
-    <div id="settleBar" class="status-bar status-blue">ยอดพอดี</div>
-    <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-            <label>รายการวันนี้</label>
-            <i class="fab fa-line" style="color:#06C755; font-size:24px; cursor:pointer;" onclick="shareLine()"></i>
-        </div>
-        <div id="dServiceStats" style="margin-bottom:15px;"></div>
-        <div id="dailyList"></div>
+    <div class="grid-2"><div class="card" style="text-align: center;"><label>ยอดเงินรวมวันนี้</label><div id="dTotal" style="font-size:28px; font-weight:600">0</div><div id="dCounts" style="font-size:18px; font-weight:600; color:var(--primary); margin-top:5px;">ลูกค้า: 0 คน</div></div>
+<div class="card"><div style="font-size:16px; font-weight:600; margin-bottom:6px;">📱 โอน: <b id="dTrans">0</b></div><div style="font-size:16px; font-weight:600; margin-bottom:6px;">🤵 ช่าง: <b id="dBarber">0</b></div><div style="font-size:16px; font-weight:600;">🏠 ร้าน: <b id="dShop">0</b></div></div></div>
+    <div id="settleBar" class="status-bar status-blue">ยอดพอดี</div><div class="card"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><label>รายการวันนี้</label><i class="fab fa-line" style="color:#06C755; font-size:24px; cursor:pointer;" onclick="shareLine()"></i>
+</div>
+    <div id="dServiceStats" style="margin-bottom:15px;"></div><div id="dailyList"></div>
     </div>
     <button class="btn-close-day" onclick="closeDay()"><i class="fas fa-check-circle"></i></button>
 </div>
-
-<div id="p3" class="page">
-    <div class="card" style="border-top: 4px solid var(--primary);">
-        <label>เรียกดูประวัติรายวัน</label>
-        <input type="date" id="histDate" onchange="loadHistDaily()">
-        <div id="histDailyArea" style="margin-top:15px"></div>
+<div id="p3" class="page"><div class="card" style="border-top: 4px solid var(--primary);"><label>เรียกดูประวัติรายวัน</label><input type="date" id="histDate" onchange="loadHistDaily()"><div id="histDailyArea" style="margin-top:15px"></div>
     </div>
     <div class="card" style="border-top: 4px solid var(--warning);">
         <label>สรุปสถิติรายเดือน</label>
-        <input type="month" id="histMonth" onchange="loadHistMonth()">
-        <div id="histMonthArea" style="margin-top:15px"></div>
-    </div>
+        <input type="month" id="histMonth" onchange="loadHistMonth()"><div id="histMonthArea" style="margin-top:15px"></div></div>
 </div> 
 <div id="modalSet" class="modal"><div class="modal-content"><h3>⚙️ ตั้งค่า</h3><label>ชื่อร้าน</label><input id="setShop">
 <div class="grid-2" style="margin-top:10px"><div><label>% แบ่ง</label><input type="number" id="setPerc"></div><div><label>ประกัน</label><input type="number" id="setGuar"></div></div>
