@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="apple-touch-icon" href="https://i.ibb.co/27GqTXFn/Barber-Note.png">
-    <title>Barber Note Pro v.1.3 + Multi-Voice</title>
+    <title>Barber Note Pro v.3 + Multi-Voice</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -20,52 +20,24 @@
         body { margin: 0; font-family: 'Kanit', sans-serif; background: var(--main-bg); color: var(--text); padding-bottom: 90px; transition: 0.3s; font-weight: 300; }
         header { padding: 15px; background: var(--card); display: flex; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05); position: sticky; top:0; z-index:100; }
         header h1 { flex: 1; text-align: center; font-size: 18px; margin: 0; font-weight: 500; }
-        
         .page { display: none; padding: 15px; animation: fadeIn 0.2s; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         .card { background: var(--card); border-radius: 20px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        
         label { font-size: 18px; font-weight: 500; opacity: 0.9; margin-bottom: 4px; display: block; }
-
         input, select { 
-            width: 100%; 
-            height: 45px; 
-            padding: 8px 12px; 
-            border-radius: 12px; 
-            border: 1px solid transparent; 
-            font-size: 18px; 
-            box-sizing: border-box; 
-            background: var(--input-bg); 
-            color: var(--text); 
-            outline: none; 
-            font-family: 'Kanit'; 
+        width: 100%; height: 45px; padding: 8px 12px; border-radius: 12px; border: 1px solid transparent;  font-size: 18px;  box-sizing: border-box;  background: var(--input-bg); 
+        color: var(--text); outline: none; font-family: 'Kanit'; 
         }
-
         #dateInp { background: #e0f2fe !important; border: 1px solid #bae6fd !important; }
         .time-input { background: #f0f9ff !important; border: 1px solid #bae6fd !important; text-align: center; font-weight: 600; letter-spacing: 1px; font-size: 18px; }
-
         #mainSvc, #hairStyle { background: #f0fdf4 !important; border: 1px solid #bbf7d0 !important; }
         #extra1, #extra2 { background: #f5f3ff !important; border: 1px solid #ddd6fe !important; }
-
         #priceInp { background: #fffbeb !important; border: 1px solid #fef3c7 !important; }
-
         .btn-pay { 
-            border: 2px solid transparent; 
-            background: var(--input-bg); 
-            color: var(--text); 
-            padding: 8px 5px; 
-            border-radius: 12px; 
-            font-weight: 500; 
-            cursor: pointer; 
-            transition: 0.2s; 
-            font-size: 18px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 4px; 
+         border: 2px solid transparent; background: var(--input-bg);  color: var(--text); padding: 8px 5px; border-radius: 12px; font-weight: 500; cursor: pointer; 
+        transition: 0.2s; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 4px; 
         }
         #btnCash { background: #f0fdf4; color: #16a34a; border-color: #dcfce7; }
         #btnTrans { background: #f0f9ff; color: #0284c7; border-color: #e0f2fe; }
@@ -74,18 +46,14 @@
         .btn-pay.active-transfer { border: 3px solid #0284c7 !important; color: #0c4a6e !important; background: #e0f2fe !important; font-weight: 600; }
         
         .status-bar { width: 100%; padding: 15px; border-radius: 15px; text-align: center; font-weight: 600; font-size: 16px; margin: 10px 0; box-sizing: border-box; }
-        .status-red { background: #fee2e2; color: #dc2626; }
-        .status-green { background: #dcfce7; color: #16a34a; }
-        .status-blue { background: #e0f2fe; color: #0284c7; }
-        .status-indigo { background: #e0e7ff; color: #4338ca; }
+        .status-red { background: #fee2e2; color: #dc2626; }.status-green { background: #dcfce7; color: #16a34a; }
+        .status-blue { background: #e0f2fe; color: #0284c7; }.status-indigo { background: #e0e7ff; color: #4338ca; }
 
         .nav { 
-            position: fixed; bottom: 0; left: 0; right: 0; 
-            background: var(--card); display: flex !important; 
+            position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); display: flex !important; 
             border-top: 1px solid rgba(0,0,0,0.1); padding-bottom: env(safe-area-inset-bottom); 
             z-index: 9999; height: 75px; align-items: center; justify-content: space-around; 
         }
-
         .nav-item { 
             flex: 1; text-align: center; color: #94a3b8; font-size: 13px; 
             cursor: pointer; display: flex !important; flex-direction: column; 
@@ -127,32 +95,22 @@
             <div><label>เวลาเสร็จ</label><input type="tel" id="tEnd" placeholder="0930" class="time-input" maxlength="4"></div>
         </div>
     </div>
-
     <div class="card" style="border-left: 5px solid #10b981;">
         <label>เลือกรายการ</label>
         <div class="grid-2" style="margin-bottom:10px">
             <select id="mainSvc">
-                <option value="">ตัดผม</option>
+                <option value="">ไม่เลือก</option>
                 <option value="เด็ก">เด็ก</option>
             </select>
             <select id="hairStyle">
-                <option value="">เลือกทรงผม</option>
-                <option>รองทรง</option>
-                <option>แฟชั่น</option>
-                <option>สกินเฟด</option>
-                <option>เปิดข้าง</option>
-                <option>วินเทจ</option>
-                <option>ตำรวจ/ทหาร</option>
-                <option>ทรงนักเรียน</option>
-                <option>แก้ทรงผม</option>
-            </select>
+                <option value="">เลือกทรงผม</option> <option>รองทรง</option><option>แฟชั่น</option><option>สกินเฟด</option> <option>เปิดข้าง</option>
+                <option>วินเทจ</option> <option>ตำรวจ/ทหาร</option><option>ทรงนักเรียน</option> <option>แก้ทรงผม</option></select>
         </div>
         <div class="grid-2">
             <select id="extra1"><option value="">บริการอื่น1</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>โกนผม</option></select>
             <select id="extra2"><option value="">บริการอื่น2</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>โกนผม</option></select>
         </div>
     </div>
-
     <div class="card" style="border-left: 5px solid #f59e0b;">
         <label>ค่าบริการ</label>
         <input type="number" id="priceInp" placeholder="0" inputmode="numeric" style="font-size:40px; font-weight:600; color:#b45309; text-align:center; height:80px;">
@@ -163,7 +121,6 @@
     </div>
     <button class="btn-save" id="mainSaveBtn" onclick="handleSave()">บันทึกข้อมูล</button>
 </div>
-
 <div id="p2" class="page">
     <div class="grid-2">
         <div class="card" style="text-align: center;">
@@ -201,7 +158,6 @@
         <div id="histMonthArea" style="margin-top:15px"></div>
     </div>
 </div>
-
 <div id="modalSet" class="modal">
     <div class="modal-content">
         <h3>⚙️ ตั้งค่าระบบ</h3>
@@ -210,42 +166,31 @@
             <div><label>% แบ่งเปอร์เซ็น</label><input type="number" id="setPerc"></div>
             <div><label>ประกันรายวัน</label><input type="number" id="setGuar"></div>
         </div>
-        
         <div class="grid-2" style="margin-top:15px">
             <div>
                 <label>🔊 เสียงแจ้งเตือน</label>
                 <select id="setSound">
-                    <option value="on">เปิดเสียง</option>
-                    <option value="off">ปิดเสียง</option>
-                </select>
+                    <option value="on">เปิดเสียง</option> <option value="off">ปิดเสียง</option> </select>
             </div>
             <div>
                 <label>🎚️ เลือกเสียงพูด</label>
                 <select id="setVoice">
-                    <option value="female">👩 ผู้หญิง</option>
-                    <option value="male">👨 ผู้ชาย</option>
-                </select>
+                    <option value="female">👩 ผู้หญิง</option> <option value="male">👨 ผู้ชาย</option></select>
             </div>
         </div>
-
         <label style="margin-top:15px">โหมดสี</label>
         <select id="setTheme" onchange="changeTheme(this.value)">
             <option value="light">Light Mode</option>
             <option value="dark">Dark Mode</option>
             <option value="pastel">Pastel Mode</option>
         </select>
-        
         <label style="margin-top:15px">สีพื้นหลัง</label>
         <div id="colorPicker" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px;">
-            <div class="color-dot" style="background:#fdf2f8" onclick="setBg('#fdf2f8')"></div>
-            <div class="color-dot" style="background:#f0fdf4" onclick="setBg('#f0fdf4')"></div>
-            <div class="color-dot" style="background:#f0f9ff" onclick="setBg('#f0f9ff')"></div>
-            <div class="color-dot" style="background:#fffbeb" onclick="setBg('#fffbeb')"></div>
-            <div class="color-dot" style="background:#f1f5f9" onclick="setBg('#f1f5f9')"></div>
-            <div class="color-dot" style="background:#eef2ff" onclick="setBg('#eef2ff')"></div>
+            <div class="color-dot" style="background:#fdf2f8" onclick="setBg('#fdf2f8')"></div> <div class="color-dot" style="background:#f0fdf4" onclick="setBg('#f0fdf4')"></div>
+            <div class="color-dot" style="background:#f0f9ff" onclick="setBg('#f0f9ff')"></div><div class="color-dot" style="background:#fffbeb" onclick="setBg('#fffbeb')"></div>
+            <div class="color-dot" style="background:#f1f5f9" onclick="setBg('#f1f5f9')"></div><div class="color-dot" style="background:#eef2ff" onclick="setBg('#eef2ff')"></div>
             <div class="color-dot" style="background:#fff7ed" onclick="setBg('#fff7ed')"></div>
-        </div>
-        
+        </div>     
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
             <button class="btn-save" onclick="saveSettings()" style="width:100%; margin:0; font-size:16px; padding:12px;">บันทึก</button>
             <button onclick="closeSettings()" style="width:100%; margin:0; border: 1px solid var(--border); background: #f8fafc; color: #666; border-radius: 10px; cursor: pointer; font-weight: 500;">ปิด</button>
@@ -253,7 +198,6 @@
         <button class="btn-clear-data" onclick="clearAllData()">ล้างข้อมูลทั้งหมด</button>
     </div>
 </div>
-
 <nav class="nav">
     <div class="nav-item active" id="n1" onclick="go(1)"><i class="fas fa-edit"></i>บันทึก</div>
     <div class="nav-item" id="n2" onclick="go(2)"><i class="fas fa-calendar-check"></i>รายวัน</div>
@@ -270,12 +214,9 @@
         document.getElementById("dateInp").valueAsDate = new Date();
         applySettings();
     };
-
     function speak(text) {
-        if (conf.sound === "off") return;
-        window.speechSynthesis.cancel();
-        const msg = new SpeechSynthesisUtterance(text);
-        msg.lang = 'th-TH';
+        if (conf.sound === "off") return; window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(text); msg.lang = 'th-TH';
         const voices = window.speechSynthesis.getVoices();
         if (conf.voice === "male") {
             msg.pitch = 0.6; 
@@ -286,7 +227,6 @@
         }
         window.speechSynthesis.speak(msg);
     }
-
     document.querySelectorAll('.time-input').forEach(inp => {
         inp.addEventListener('input', (e) => {
             let v = e.target.value.replace(/\D/g, '');
@@ -295,7 +235,6 @@
             }
         });
     });
-
     function go(n) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -303,13 +242,11 @@
         document.getElementById('n'+n).classList.add('active');
         if(n===2) renderDay();
     }
-
     function selectPay(m) {
         payMethod = m;
         document.getElementById("btnCash").className = m==='Cash'?'btn-pay active-cash':'btn-pay';
         document.getElementById("btnTrans").className = m==='Trans'?'btn-pay active-transfer':'btn-pay';
     }
-
     function handleSave() {
         const p = document.getElementById("priceInp").value;
         const mainSvcValue = document.getElementById("mainSvc").value;
@@ -320,7 +257,6 @@
             speak("กรุณาระบุราคาและวิธีชำระเงิน");
             return alert("ระบุราคาและวิธีชำระเงิน");
         }
-
         let allSvcs = [];
         if(mainSvcValue) allSvcs.push(mainSvcValue); else allSvcs.push("ตัดผม");
         if(ex1) allSvcs.push(ex1);
@@ -328,15 +264,10 @@
 
         const rec = {
             id: Date.now(),
-            date: document.getElementById("dateInp").value,
-            time: `${document.getElementById("tStart").value}-${document.getElementById("tEnd").value}`,
-            mainSvc: mainSvcValue || "ตัดผม", 
-            svcs: allSvcs, 
-            hair: document.getElementById("hairStyle").value,
-            price: Number(p),
-            pay: payMethod
+            date: document.getElementById("dateInp").value, time: `${document.getElementById("tStart").value}-${document.getElementById("tEnd").value}`,
+            mainSvc: mainSvcValue || "ตัดผม",  svcs: allSvcs, 
+            hair: document.getElementById("hairStyle").value,price: Number(p), pay: payMethod
         };
-
         db.push(rec);
         localStorage.setItem("barber_db", JSON.stringify(db));
         
@@ -357,7 +288,6 @@
             selectPay("");
         }, 600);
     }
-
     function renderDay() {
         const d = document.getElementById("dateInp").value;
         const today = db.filter(r => r.date === d);
@@ -409,7 +339,6 @@
             bar.innerText = "✅ ยอดพอดี"; bar.className = "status-bar status-green"; 
         }
     }
-
     function delRec(id) {
         if(confirm("ลบรายการนี้?")) {
             db = db.filter(r => r.id !== id);
@@ -418,7 +347,6 @@
             renderDay();
         }
     }
-
     function closeDay() {
         const d = document.getElementById("dateInp").value;
         const today = db.filter(r => r.date === d);
@@ -434,34 +362,23 @@
                     dailyStats[s] = (dailyStats[s] || 0) + 1;
                 });
             });
-
             const arc = {
                 date: d, total: tot, cash: cash, barber: bEarn, shop: tot - bEarn, settle: cash - bEarn, count: today.length, details: today, stats: dailyStats 
             };
-            
-            archives = archives.filter(a => a.date !== d);
-            archives.push(arc);
-            localStorage.setItem("barber_arc", JSON.stringify(archives));
-            db = db.filter(r => r.date !== d);
-            localStorage.setItem("barber_db", JSON.stringify(db));
-            
+            archives = archives.filter(a => a.date !== d); archives.push(arc);localStorage.setItem("barber_arc", JSON.stringify(archives));
+            db = db.filter(r => r.date !== d);localStorage.setItem("barber_db", JSON.stringify(db))
             speak("ส่งรายงานวันนี้สำเร็จ");
             alert("ส่งรายงานสำเร็จ!");
             go(3);
         }
     }
-
     function loadHistDaily() {
         const d = document.getElementById("histDate").value;
         const found = archives.find(a => a.date === d);
         const area = document.getElementById("histDailyArea");
         if(!found) { area.innerHTML = "<center style='color:#ccc; padding:20px;'>ไม่พบข้อมูล</center>"; return; }
         
-        let rows = found.details.map(r => `
-            <div class="history-row" style="font-size:13px;">
-                <div style="display:flex; justify-content:space-between">
-                    <b>${r.time} | ${r.svcs.join('+')}</b>
-                    <b>฿${r.price}</b>
+        let rows = found.details.map(r => ` <div class="history-row" style="font-size:13px;"><div style="display:flex; justify-content:space-between"><b>${r.time} | ${r.svcs.join('+')}</b><b>฿${r.price}</b>
                 </div>
                 <div style="font-size:13px; font-weight:600; color:var(--text);">${r.hair || ''} <span style="font-weight:300; opacity:0.6">(${r.pay==='Cash'?'เงินสด':'โอน'})</span></div>
             </div>`).join('');
@@ -474,10 +391,8 @@
         }
         const settle = found.settle || 0;
         const cash = found.cash || 0;
-        const settleText = settle > 0 ? `ช่างคืนร้าน: ฿${Math.floor(settle).toLocaleString()}` : 
-                           settle < 0 ? `ร้านคืนช่าง: ฿${Math.floor(Math.abs(settle)).toLocaleString()}` : "ยอดพอดี";
+        const settleText = settle > 0 ? `ช่างคืนร้าน: ฿${Math.floor(settle).toLocaleString()}` : settle < 0 ? `ร้านคืนช่าง: ฿${Math.floor(Math.abs(settle)).toLocaleString()}` : "ยอดพอดี";
         const settleClass = settle > 0 ? "status-red" : settle < 0 ? "status-indigo" : "status-green";
-
         area.innerHTML = `
             <div style="background:var(--input-bg); padding:15px; border-radius:15px;">
                 <div class="status-bar ${settleClass}" style="padding:8px; font-size:13px; margin-bottom:10px;">${settleText}</div>
@@ -491,7 +406,6 @@
                 <div style="border-top:1px dashed #ccc; padding-top:10px;">${rows}</div>
             </div>`;
     }
-
     function loadHistMonth() {
         const m = document.getElementById("histMonth").value;
         const area = document.getElementById("histMonthArea");
@@ -507,7 +421,6 @@
 
         let monthStatBadges = "";
         for(let s in monthStats) { monthStatBadges += `<span class="badge" style="background:var(--indigo); color:white; font-weight:300;">${s}: ${monthStats[s]}</span>`; }
-
         area.innerHTML = `
             <div style="padding:15px; background:var(--input-bg); border-radius:15px;">
                 <div style="font-size:20px; margin-bottom:10px;">รายได้รวม: <b style="color:var(--primary)">฿${tot.toLocaleString()}</b></div>
@@ -524,44 +437,60 @@
             </div>`;
     }
 
-    function shareLine() {
-        const d = document.getElementById("dateInp").value;
-        const today = db.filter(r => r.date === d);
-        if (!today.length) return alert("ไม่มีข้อมูลที่จะส่ง");
+function shareLine() {
+    const d = document.getElementById("dateInp").value;
+    const today = db.filter(r => r.date === d);
+    if (!today.length) return alert("ไม่มีข้อมูลที่จะส่ง");
 
-        let tot = 0, cash = 0, trans = 0;
-        today.forEach(r => {
-            tot += r.price;
-            if (r.pay === 'Cash') cash += r.price; else trans += r.price;
-        });
+    let tot = 0, cash = 0, trans = 0;
+    today.forEach(r => {
+        tot += r.price;
+        r.pay === 'Cash' ? cash += r.price : trans += r.price;
+    });
 
-        const bEarn = Math.max(tot * (conf.perc / 100), conf.guar);
-        const sEarn = tot - bEarn;
-        const settle = cash - bEarn;
-        const ds = d.split('-');
-        const thaiDate = `${ds[2]}/${ds[1]}/${parseInt(ds[0]) + 543}`;
+    const bEarn = Math.max(tot * (conf.perc / 100), conf.guar);
+    const sEarn = tot - bEarn;
+    const settle = cash - bEarn;
 
-        let msg = `💈 รายงานร้าน: ${conf.shop}\n📅 วันที่: ${thaiDate}\n--------------------------\n`;
-        today.forEach((r, i) => {
-            msg += `${i + 1}. [${r.time}] ${r.svcs.join('+')} = ${r.price} ${r.pay === 'Cash' ? '💵' : '📱'}\n`;
-        });
-        msg += `--------------------------\n💰 ยอดรวม: ${tot.toLocaleString()} บาท\n📱 ยอดโอน: ${trans.toLocaleString()} บาท\n🤵 ช่าง: ${Math.floor(bEarn).toLocaleString()} บาท\n🏠 ร้าน: ${Math.floor(sEarn).toLocaleString()} บาท\n--------------------------\n`;
-        let setMsg = tot === 0 ? "ร้านจ่ายประกันรายวัน" : settle > 0 ? `ช่างคืนร้าน ${Math.floor(settle).toLocaleString()} บาท` : settle < 0 ? `ร้านคืนช่าง ${Math.floor(Math.abs(settle)).toLocaleString()} บาท` : "ยอดพอดี";
-        msg += `⚠️ ${setMsg}`;
+    const ds = d.split('-');
+    const thaiDate = `${ds[2]}/${ds[1]}/${parseInt(ds[0]) + 543}`;
 
-        window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`);
-    }
+    let msg = `💈 รายงานร้าน: ${conf.shop}\n📅 วันที่: ${thaiDate}\n--------------------------\n`;
 
+    today.forEach((r, i) => {
+
+        // ✅ ตรวจงานเด็กจากงานหลัก (แม่นยำ)
+        const isChild = r.mainSvc && r.mainSvc.includes("เด็ก");
+        // ✅ สร้างชื่อแสดงผล
+        let displayName = "";
+        if (r.hair && r.hair.trim() !== "") {
+            // มีชื่อทรง → ใช้ชื่อทรง
+            displayName = r.hair.trim();
+        } else {
+            // ไม่มีชื่อทรง → ใช้บริการเสริม
+            const extras = r.svcs.filter(s =>
+                s &&
+                s !== r.mainSvc &&
+                s !== "ตัดผม"
+            );
+            displayName = extras.length ? extras.join('+') : "ตัดผม";
+        }
+        // ✅ เติม (เด็ก)
+        if (isChild) displayName += " (เด็ก)";
+        const icon = r.pay === 'Cash' ? '💵' : '📱';
+        msg += `${i + 1}. [${r.time}] ${displayName} = ${r.price.toLocaleString()} ${icon}\n`;
+    });
+    msg += `--------------------------\n`; msg += `💰 ยอดรวม: ${tot.toLocaleString()} บาท\n`; msg += `📱 ยอดโอน: ${trans.toLocaleString()} บาท\n`;
+    msg += `🤵 ช่าง: ${Math.floor(bEarn).toLocaleString()} บาท\n`;msg += `🏠 ร้าน: ${Math.floor(sEarn).toLocaleString()} บาท\n`; msg += `--------------------------\n`;
+    let setMsg =
+    tot === 0 ? "ร้านจ่ายประกันรายวัน" : settle > 0 ? `ช่างคืนร้าน ${Math.floor(settle).toLocaleString()} บาท` : settle < 0 ? `ร้านคืนช่าง ${Math.floor(Math.abs(settle)).toLocaleString()} บาท` : "ยอดพอดี";
+    msg += `⚠️ ${setMsg}`;
+    window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`);
+}
     function openSettings() { 
-        document.getElementById("modalSet").style.display = "flex"; 
-        document.getElementById("setShop").value = conf.shop; 
-        document.getElementById("setPerc").value = conf.perc; 
-        document.getElementById("setGuar").value = conf.guar; 
-        document.getElementById("setTheme").value = conf.theme; 
-        document.getElementById("setSound").value = conf.sound || "on";
-        document.getElementById("setVoice").value = conf.voice || "female";
+        document.getElementById("modalSet").style.display = "flex"; document.getElementById("setShop").value = conf.shop; document.getElementById("setPerc").value = conf.perc; document.getElementById("setGuar").value = conf.guar; 
+        document.getElementById("setTheme").value = conf.theme; document.getElementById("setSound").value = conf.sound || "on";document.getElementById("setVoice").value = conf.voice || "female";
     }
-    
     function closeSettings() { document.getElementById("modalSet").style.display = "none"; }
     function setBg(c) { conf.bg = c; applySettings(); }
     function changeTheme(v) { conf.theme = v; applySettings(); }
@@ -578,13 +507,11 @@
         closeSettings(); 
         speak("บันทึกการตั้งค่าเรียบร้อย");
     }
-
     function applySettings() { 
         document.getElementById("shopNameDisp").innerText = conf.shop; 
         document.getElementById("mainBody").className = "theme-" + conf.theme; 
         document.getElementById("mainBody").style.backgroundColor = conf.bg; 
     }
-    
     function clearAllData() { if(confirm("ล้างข้อมูลทั้งหมด? ข้อมูลจะหายถาวรและกู้คืนไม่ได้")) { localStorage.clear(); location.reload(); } }
 </script>
 </body>
