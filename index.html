@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/27GqTXFn/Barber-Note.png">
-    <title>Barber Note Pro v.9.1</title>
+    <title>Barber Note Pro v.9.2</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -116,19 +116,22 @@
         let t=f.reduce((a,b)=>a+b.total,0), bT=f.reduce((a,b)=>a+b.barber,0);
         $("histMonthArea").innerHTML=`<div style="background:var(--input-bg); padding:15px; border-radius:10px; margin-top:10px"><b>รวมเดือนนี้: ฿${t.toLocaleString()}</b><br><small>ช่าง: ${Math.floor(bT).toLocaleString()} | ร้าน: ${Math.floor(t-bT).toLocaleString()}</small></div>`;
     }
-    function shareLine(){
-        const d=$("dateInp").value, today=db.filter(r=>r.date===d); if(!today.length)return;
-        let tot=0, trans=0, cash=0, msg=`💈 รายงานร้าน: ${conf.shop}\n📅 วันที่: ${d}\n-------------------------\n📝 จำนวนลูกค้า (รวม ${today.length} คน):\n`;
-        let kids = 0;
-        today.forEach((r,i)=>{ 
-            tot+=r.price; if(r.pay==='Trans') trans+=r.price; else cash+=r.price;
-            let name=r.hair||r.svcs[0]; if(r.mainSvc==="เด็ก") { name+="(เด็ก)"; kids++; }
-            msg+=`${i+1}. [${r.time}] ${name} = ${r.price} ${r.pay==='Cash'?'💵':'📱'}\n`;
-        });
-        const bE=Math.max(tot*(conf.perc/100),conf.guar), settle=cash-bE;
-        msg+=`-------------------------\n📊 สรุปงาน:\n🧒 เด็ก: ${kids} คน\n-------------------------\n💰 ยอดรวม: ${tot} บาท\n📱 ยอดโอน: ${trans} บาท\n🤵 ช่าง: ${Math.floor(bE)} บาท\n🏠 ร้าน: ${Math.floor(tot-bE)} บาท\n-------------------------\n⚠️ ${settle>0?'ช่างคืนเงินให้ร้าน ':'ร้านคืนเงินให้ช่าง '}${Math.floor(Math.abs(settle))} บาท`;
-        window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`);
+    function shareLine() {
+    const d = $("dateInp").value, today = db.filter(r => r.date === d);if (!today.length) return;
+    let tot = 0, trans = 0, cash = 0, kids = 0, counts = {};
+    let msg = `💈 รายงานร้าน: ${conf.shop}\n📅 วันที่: ${d}\n-------------------------\n📝 จำนวนลูกค้า (รวม ${today.length} คน):\n`;
+    today.forEach((r, i) => {
+    tot += r.price; r.pay === 'Trans' ? trans += r.price : cash += r.price;let name = r.hair || r.svcs[0]; if (r.mainSvc === "เด็ก") { name += "(เด็ก)"; kids++; }
+    msg += `${i + 1}. [${r.time}] ${name} = ${r.price} ${r.pay === 'Cash' ? '💵' : '📱'}\n`; r.svcs.forEach(s => { if(s) counts[s] = (counts[s] || 0) + 1; });
+    });
+    const bE = Math.max(tot * (conf.perc / 100), conf.guar), settle = cash - bE;msg += `-------------------------\n📊 สรุปงาน:\n`;
+    for (let s in counts) {
+    let emo = s.includes("เด็ก")?"🧒":s.includes("สระ")?"🧼":s.includes("โกน")?"🪒":s.includes("ย้อม")?"🎨":"🔹";msg += `${emo} ${s}: ${counts[s]} คน\n`;
     }
+    msg += `-------------------------\n💰 ยอดรวม: ${tot} บาท\n📱 ยอดโอน: ${trans} บาท\n🤵 ช่าง: ${Math.floor(bE)} บาท\n🏠 ร้าน: ${Math.floor(tot - bE)} บาท\n-------------------------\n`;
+    msg += `⚠️ ${settle > 0 ? 'ช่างคืนเงินให้ร้าน ' : 'ร้านคืนเงินให้ช่าง '}${Math.floor(Math.abs(settle))} บาท`;
+    window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`);
+}
     function openSettings(){ $("modalSet").style.display="flex"; $("setShop").value=conf.shop; $("setPerc").value=conf.perc; $("setGuar").value=conf.guar; $("setTheme").value=conf.theme; $("setSound").value=conf.sound; $("setVoice").value=conf.voice; }
     function closeSettings(){ $("modalSet").style.display="none"; }
     function setBg(c){ conf.bg=c; applySettings(); }
