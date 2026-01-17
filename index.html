@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.7.5 (Updated)</title>
+    <title>Barber Note Pro v.11.7.6 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -72,23 +72,39 @@
             <h3 style="margin:0; font-size:15px; color:#b45309;">🧾 สรุปยอดบัญชี</h3>
             <div id="accLight" class="acc-light" style="width:12px; height:12px; border-radius:50%; background:gray;"></div>
         </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-            <div style="background: #fff7ed; padding: 15px 10px; border-radius: 20px; border: 3px solid #fb923c; text-align: center;">
-                <div style="font-size: 12px; font-weight: 700; color: #b45309; margin-bottom: 5px;">📅 ค้างเดิม</div>
-                <div id="accOldText" style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1;">฿0</div>
-            </div>
-            <div style="background: #f0f9ff; padding: 15px 10px; border-radius: 20px; border: 3px solid #38bdf8; text-align: center;">
-                <div style="font-size: 12px; font-weight: 700; color: #0369a1; margin-bottom: 5px;">📅 วันนี้</div>
-                <div id="accTodayText" style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1;">฿0</div>
-            </div>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+    <div style="background: #fff7ed; padding: 15px 10px; border-radius: 20px; border: 3px solid #fb923c; text-align: center;">
+        <div style="font-size: 12px; font-weight: 700; color: #b45309; margin-bottom: 5px;">
+            📅 ค้างเดิม
         </div>
-
-        <div style="text-align: center; margin-bottom: 15px;">
-        <span style="font-size: 13px; color: #64748b;">ยอดสุทธิที่ต้องเคลียร์:</span>
-        <b style="font-size: 24px; color: #1e3a8a; margin-left: 5px;">฿<span id="accNet">0</span></b>
-        <div id="accStatus" class="status-bar" style="margin-top:8px; padding:6px; font-size:12px;">คำนวณ...</div>
+        <div id="accOld" style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1;">
+            0
+        </div>
     </div>
+
+    <div style="background: #f0f9ff; padding: 15px 10px; border-radius: 20px; border: 3px solid #38bdf8; text-align: center;">
+        <div style="font-size: 12px; font-weight: 700; color: #0369a1; margin-bottom: 5px;">
+            📅 วันนี้
+        </div>
+        <div id="accToday" style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1;">
+            0
+        </div>
+    </div>
+</div>
+
+<div style="text-align: center; margin-bottom: 15px;">
+    <span style="font-size: 13px; color: #64748b;">
+        ยอดสุทธิที่ต้องเคลียร์:
+    </span>
+    <b style="font-size: 24px; color: #1e3a8a; margin-left: 5px;">
+        ฿<span id="accNet">0</span>
+    </b>
+
+    <div id="accStatus" class="status-bar" style="margin-top:8px; padding:6px; font-size:12px;">
+        ยอดพอดี
+    </div>
+</div>
+
         <div style="border-top: 2px dashed #cbd5e1; padding-top: 15px;">
             <b style="font-size: 14px; display: block; margin-bottom: 10px; color: #334155;">✅ ยืนยันการเคลียร์เงิน</b>
             <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
@@ -249,26 +265,50 @@ function closeHistoryFull() {
     $("historyPanel").style.display = "none";
 }
 
-    function loadAccountStatus() {
-        const todaySettle = calcTodaySettle();
-        const oldBal = account.balance || 0;
-        const net = oldBal + todaySettle;
-        const dStr = $("dateInp").value;
-        const dObj = new Date(dStr);
-        const dateThai = `${dObj.getDate()}/${dObj.getMonth()+1}/${(dObj.getFullYear()+543).toString().slice(-2)}`;
+function loadAccountStatus() {
+    const todaySettle = calcTodaySettle();
+    const oldBal = account.balance || 0;
+    const net = oldBal + todaySettle;
 
-        $("accOldVal").innerText = `฿${oldBal.toLocaleString()}`;
-        $("accTodayVal").innerText = `฿${todaySettle.toLocaleString()}`;
-        $("accNet").innerText = Math.abs(net).toLocaleString();
+    // ดึงวันที่แสดงผลตัวเล็กๆ ใต้ตัวเลข
+    const dStr = $("dateInp").value;
+    const dObj = new Date(dStr);
+    const dateToday = `${dObj.getDate()}/${dObj.getMonth()+1}/${(dObj.getFullYear()+543).toString().slice(-2)}`;
+    
+    const dOldObj = new Date(dObj);
+    dOldObj.setDate(dObj.getDate() - 1);
+    const dateOld = `${dOldObj.getDate()}/${dOldObj.getMonth()+1}/${(dOldObj.getFullYear()+543).toString().slice(-2)}`;
 
-        let txt="✅ ยอดพอดี", cls="status-green", light="#16a34a";
-        if(net>0){ txt=`🚩 สรุป ${dateThai}: ช่างคืนร้าน ฿${Math.abs(net).toLocaleString()}`; cls="status-red"; light="#dc2626"; }
-        else if(net<0){ txt=`🚩 สรุป ${dateThai}: ร้านคืนช่าง ฿${Math.abs(net).toLocaleString()}`; cls="status-indigo"; light="#1e3a8a"; }
+    // อัปเดตตัวเลขในกล่อง (เน้นสี แดง = ช่างคืนร้าน / น้ำเงิน = ร้านคืนช่าง)
+    $("accOldText").innerHTML = `
+        <span style="color: ${oldBal >= 0 ? '#be123c' : '#1d4ed8'};">฿${Math.abs(oldBal).toLocaleString()}</span>
+        <div style="font-size: 10px; font-weight: 600; color: #94a3b8; margin-top: 4px;">(${dateOld})</div>
+    `;
 
-        $("accStatus").innerText = txt;
-        $("accStatus").className = "status-bar "+cls;
-        $("accLight").style.background = light;
+    $("accTodayText").innerHTML = `
+        <span style="color: ${todaySettle >= 0 ? '#be123c' : '#1d4ed8'};">฿${Math.abs(todaySettle).toLocaleString()}</span>
+        <div style="font-size: 10px; font-weight: 600; color: #94a3b8; margin-top: 4px;">(${dateToday})</div>
+    `;
+    
+    // อัปเดตยอดสุทธิกลางจอ (ถ้ามี ID accNet)
+    if($("accNet")) $("accNet").innerText = Math.abs(net).toLocaleString();
+
+    // แจ้งสถานะสรุปว่าใครต้องคืนใคร
+    let txt = "✅ ยอดพอดี", cls = "status-green";
+    if (net > 0) { 
+        txt = `🚩 ช่างต้องคืนร้านรวม ฿${Math.abs(net).toLocaleString()}`; 
+        cls = "status-red"; 
+    } else if (net < 0) { 
+        txt = `🚩 ร้านต้องคืนช่างรวม ฿${Math.abs(net).toLocaleString()}`; 
+        cls = "status-indigo"; 
     }
+
+    $("accStatus").innerText = txt;
+    $("accStatus").className = "status-bar " + cls;
+    
+    // ปรับสีจุดไฟสถานะด้านบน (ถ้ามี)
+    if($("accLight")) $("accLight").style.background = net > 0 ? "#dc2626" : (net < 0 ? "#1e3a8a" : "#16a34a");
+}
 
     function clearAccount(){
         const d = $("accDate").value; if(!d) return alert("เลือกวันที่เคลียร์");
