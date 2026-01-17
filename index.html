@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.4 (Updated)</title>
+    <title>Barber Note Pro v.11.1 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -36,28 +36,7 @@
         .history-wrapper { display: none; background: rgba(0,0,0,0.02); border-radius: 15px; padding: 10px; margin-bottom: 15px; }
         .history-list { max-height: 200px; overflow-y: auto; font-size: 12px; }
         .acc-light { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-/* ป้องกัน Navbar ถูกดันเมื่อคีย์บอร์ดเปิด */
-@media screen and (max-height: 500px) {
-    .nav {
-        display: none; /* ซ่อนเมนูไปเลยขณะพิมพ์ เพื่อให้มีพื้นที่พิมพ์หมายเหตุมากขึ้น */
-    }
-}
 
-.nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--card);
-    display: flex;
-    border-top: 1px solid rgba(0,0,0,0.1);
-    height: 70px;
-    align-items: center;
-    justify-content: space-around;
-    z-index: 9999;
-    /* เพิ่มบรรทัดนี้เพื่อป้องกันการขยับ */
-    transform: translateZ(0); 
-}
         .nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); display: flex; border-top: 1px solid rgba(0,0,0,0.1); height: 75px; align-items: center; justify-content: space-around; z-index: 9999; }
         .nav-item { flex: 1; text-align: center; color: #94a3b8; font-size: 13px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
         .nav-item.active { color: var(--primary); font-weight: 500; }
@@ -91,57 +70,59 @@
     </div>
     <button class="btn-close-day" onclick="closeDay()"><i class="fas fa-check-circle"></i></button>
 </div>
+
 <div id="p3" class="page">
-    <div class="card" style="border-left: 5px solid #f59e0b; padding: 15px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-            <b style="font-size:14px; color:#b45309;">🧾 สรุปยอดบัญชี</b>
-            <div id="accLight" class="acc-light" style="width:12px; height:12px; border-radius:50%; background:gray;"></div>
+    <div class="acc-main-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0; font-size:15px; color:#b45309;">🧾 สรุปยอดบัญชีสุทธิ</h3>
+            <div id="accLight" class="acc-light" style="background:gray;"></div>
         </div>
 
-       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-    <div style="background: #fff7ed; padding: 15px 10px; border-radius: 20px; border: 3px solid #f97316; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-        <div style="font-size: 13px; font-weight: 800; color: #c2410c; margin-bottom: 5px;">📅 ค้างเดิม</div>
-        <div id="accOldText" style="font-size: 24px; font-weight: 900; color: #1e293b; line-height: 1;">
-            ฿0
-        </div>
-    </div>
-    
-    <div style="background: #f0f9ff; padding: 15px 10px; border-radius: 20px; border: 3px solid #0ea5e9; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-        <div style="font-size: 13px; font-weight: 800; color: #0369a1; margin-bottom: 5px;">📅 วันนี้</div>
-        <div id="accTodayText" style="font-size: 24px; font-weight: 900; color: #1e293b; line-height: 1;">
-            ฿0
-        </div>
-    </div>
-</div>
-
-<div style="border-top: 2px dashed #cbd5e1; padding-top: 15px; margin-top: 5px;">
-    <b style="font-size: 14px; display: block; margin-bottom: 10px; color: #334155;">✅ ยืนยันการเคลียร์เงิน</b>
-    
-    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
-        <div style="position: relative; width: 50px; height: 50px; background: #fff; border-radius: 15px; display: flex; align-items: center; justify-content: center; border: 2px solid #cbd5e1; flex-shrink: 0;">
-            <i class="fas fa-calendar-day" style="color: #6366f1; font-size: 22px;"></i>
-            <input type="date" id="accDate" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;">
+        <div style="font-size:11px; color:#64748b; margin:12px 0; line-height:1.6; background:rgba(0,0,0,0.03); padding:10px; border-radius:12px;">
+            <div style="display:flex; justify-content:space-between;">
+                <span id="accOldText">ยอดค้างเดิม:</span>
+                <b id="accOldVal">฿0</b>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span id="accTodayText">ยอดวันนี้:</span>
+                <b id="accTodayVal">฿0</b>
+            </div>
         </div>
 
-        <input type="text" id="accNote" placeholder="พิมพ์หมายเหตุการเคลียร์เงินที่นี่..." 
-            style="flex: 1; height: 50px; border-radius: 15px; border: 2px solid #cbd5e1; padding: 0 15px; font-size: 15px; background: #fff; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+        <div style="text-align:center; margin:15px 0;">
+            <div style="font-size:38px; font-weight:800; color:#1e3a8a;">
+                <small style="font-size:18px; font-weight:400; opacity:0.5;">฿</small><span id="accNet">0</span>
+            </div>
+        </div>
+        
+        <div id="accStatus" class="status-bar" style="margin:10px 0; text-align:center;">กำลังดึงข้อมูล...</div>
+
+        <button class="btn-toggle-history" onclick="toggleAccHistory()">
+            <i class="fas fa-history"></i> <span id="toggleText">ดูประวัติการเคลียร์เงิน</span>
+        </button>
+
+        <div id="accHistoryWrapper" class="history-wrapper">
+            <div id="accHistory" class="history-list"></div>
+        </div>
+
+        <hr style="opacity:0.05; margin:15px 0;">
+
+        <label style="font-size:12px; color:#64748b;">ระบุวันที่เคลียร์</label>
+        <input type="date" id="accDate" style="height:40px; margin-bottom:10px;">
+        <input type="text" id="accNote" placeholder="หมายเหตุการเคลียร์" style="height:40px; margin-bottom:10px;">
+        <button class="btn-save" onclick="clearAccount()" style="margin:0; padding:15px; background:var(--accent);">✅ ยืนยันเคลียร์เงินเรียบร้อย</button>
     </div>
-    
-    <button class="btn-save" onclick="clearAccount()" style="margin:0; padding:15px; font-size:16px; background:#10b981; border-radius:15px; width:100%; font-weight: 900; box-shadow: 0 4px 0 #059669;">
-        ยืนยันบันทึกการเคลียร์
-    </button>
-</div>
 
     <div class="card" style="border-top: 4px solid var(--primary);"><label>เรียกดูประวัติรายวัน</label><input type="date" id="histDate" onchange="loadHistDaily()"><div id="histDailyArea"></div></div>
     <div class="card" style="border-top: 4px solid var(--warning);"><label>สรุปสถิติรายเดือน</label><input type="month" id="histMonth" onchange="loadHistMonth()"><div id="histMonthArea"></div></div>
-</div>
-
+</div> 
 <div id="historyPanel" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:10000; align-items:flex-end;">
-    <div style="background:var(--card); width:100%; border-radius:25px 25px 0 0; padding:20px; max-height:85vh; overflow-y:auto; box-shadow: 0 -10px 25px rgba(0,0,0,0.2);">
+    <div style="background:var(--card); width:100%; border-radius:25px 25px 0 0; padding:20px; max-height:85vh; overflow-y:auto; animation: slideUp 0.3s ease-out; box-shadow: 0 -10px 25px rgba(0,0,0,0.2);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:2px solid rgba(0,0,0,0.05); padding-bottom:15px;">
             <h3 style="margin:0; font-size:18px;"><i class="fas fa-history"></i> ประวัติการเคลียร์เงิน</h3>
             <button onclick="closeHistoryFull()" style="background:#f1f5f9; border:none; padding:10px 20px; border-radius:12px; font-weight:bold; color:var(--danger);">ปิด</button>
         </div>
+        
         <div id="accHistoryFull"></div>
     </div>
 </div>
@@ -271,25 +252,26 @@ function closeHistoryFull() {
     $("historyPanel").style.display = "none";
 }
 
-  function loadAccountStatus() {
-    const todaySettle = calcTodaySettle();
-    const oldBal = account.balance || 0;
-    
-    // ยอดค้างเดิม: ถ้าเป็นบวก (ช่างต้องคืนร้าน) ใช้สีแดง / ถ้าติดลบ (ร้านต้องคืนช่าง) ใช้สีน้ำเงิน
-    $("accOldText").innerHTML = `
-        <span style="color: ${oldBal >= 0 ? '#dc2626' : '#2563eb'};">฿${Math.abs(oldBal).toLocaleString()}</span>
-    `;
+    function loadAccountStatus() {
+        const todaySettle = calcTodaySettle();
+        const oldBal = account.balance || 0;
+        const net = oldBal + todaySettle;
+        const dStr = $("dateInp").value;
+        const dObj = new Date(dStr);
+        const dateThai = `${dObj.getDate()}/${dObj.getMonth()+1}/${(dObj.getFullYear()+543).toString().slice(-2)}`;
 
-    // ยอดวันนี้
-    $("accTodayText").innerHTML = `
-        <span style="color: ${todaySettle >= 0 ? '#dc2626' : '#2563eb'};">฿${Math.abs(todaySettle).toLocaleString()}</span>
-    `;
-    
-    // ปรับยอด Net ตรงกลาง (ยอดสุทธิ)
-    const net = oldBal + todaySettle;
-    $("accNet").innerText = Math.abs(net).toLocaleString();
-    $("accNet").parentElement.style.fontWeight = "900"; // ทำให้ตัว ฿0 หนาด้วย
-}
+        $("accOldVal").innerText = `฿${oldBal.toLocaleString()}`;
+        $("accTodayVal").innerText = `฿${todaySettle.toLocaleString()}`;
+        $("accNet").innerText = Math.abs(net).toLocaleString();
+
+        let txt="✅ ยอดพอดี", cls="status-green", light="#16a34a";
+        if(net>0){ txt=`🚩 สรุป ${dateThai}: ช่างคืนร้าน ฿${Math.abs(net).toLocaleString()}`; cls="status-red"; light="#dc2626"; }
+        else if(net<0){ txt=`🚩 สรุป ${dateThai}: ร้านคืนช่าง ฿${Math.abs(net).toLocaleString()}`; cls="status-indigo"; light="#1e3a8a"; }
+
+        $("accStatus").innerText = txt;
+        $("accStatus").className = "status-bar "+cls;
+        $("accLight").style.background = light;
+    }
 
     function clearAccount(){
         const d = $("accDate").value; if(!d) return alert("เลือกวันที่เคลียร์");
