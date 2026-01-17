@@ -66,51 +66,50 @@
     </div>
     <button class="btn-close-day" onclick="closeDay()"><i class="fas fa-check-circle"></i></button>
 </div>
-
 <div id="p3" class="page">
-    <div class="acc-main-card">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div class="card" style="border-left: 5px solid #f59e0b; padding: 15px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h3 style="margin:0; font-size:15px; color:#b45309;">🧾 สรุปยอดบัญชี</h3>
-            <div id="accLight" class="acc-light" style="background:gray;"></div>
+            <div id="accLight" class="acc-light" style="width:12px; height:12px; border-radius:50%; background:gray;"></div>
         </div>
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-    <div style="background: #fff7ed; padding: 15px 10px; border-radius: 20px; border: 3px solid #fb923c; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-        <div style="font-size: 12px; font-weight: 700; color: #b45309; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">📅 ค้างเดิม</div>
-        <div id="accOldText" style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1; letter-spacing: -0.5px;">
-            ฿0
-        </div>
-    </div>
-    
-    <div style="background: #f0f9ff; padding: 15px 10px; border-radius: 20px; border: 3px solid #38bdf8; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-        <div style="font-size: 12px; font-weight: 700; color: #0369a1; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">📅 วันนี้</div>
-        <div id="accTodayText" style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1; letter-spacing: -0.5px;">
-            ฿0
-        </div>
-    </div>
-</div>
-
-<div style="border-top: 2px dashed #cbd5e1; padding-top: 15px; margin-top: 5px;">
-    <b style="font-size: 14px; display: block; margin-bottom: 10px; color: #334155;">✅ ยืนยันการเคลียร์เงิน</b>
-    
-    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
-        <div style="position: relative; width: 50px; height: 50px; background: #fff; border-radius: 15px; display: flex; align-items: center; justify-content: center; border: 2px solid #cbd5e1; flex-shrink: 0;">
-            <i class="fas fa-calendar-day" style="color: #6366f1; font-size: 22px;"></i>
-            <input type="date" id="accDate" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+            <div style="background: #fff7ed; padding: 15px 10px; border-radius: 20px; border: 3px solid #fb923c; text-align: center;">
+                <div style="font-size: 12px; font-weight: 700; color: #b45309; margin-bottom: 5px;">📅 ค้างเดิม</div>
+                <div id="accOldText" style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1;">฿0</div>
+            </div>
+            <div style="background: #f0f9ff; padding: 15px 10px; border-radius: 20px; border: 3px solid #38bdf8; text-align: center;">
+                <div style="font-size: 12px; font-weight: 700; color: #0369a1; margin-bottom: 5px;">📅 วันนี้</div>
+                <div id="accTodayText" style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1;">฿0</div>
+            </div>
         </div>
 
-        <input type="text" id="accNote" placeholder="พิมพ์หมายเหตุการเคลียร์เงินที่นี่..." 
-            style="flex: 1; height: 50px; border-radius: 15px; border: 2px solid #cbd5e1; padding: 0 15px; font-size: 15px; background: #fff; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+        <div id="accStatus" class="status-bar" style="margin-bottom:15px; font-weight:900;">คำนวณยอด...</div>
+
+        <div style="border-top: 2px dashed #cbd5e1; padding-top: 15px;">
+            <b style="font-size: 14px; display: block; margin-bottom: 10px; color: #334155;">✅ ยืนยันการเคลียร์เงิน</b>
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
+                <div style="position: relative; width: 50px; height: 50px; background: #fff; border-radius: 15px; display: flex; align-items: center; justify-content: center; border: 2px solid #cbd5e1; flex-shrink: 0;">
+                    <i class="fas fa-calendar-day" style="color: #6366f1; font-size: 22px;"></i>
+                    <input type="date" id="accDate" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;">
+                </div>
+                <input type="text" id="accNote" placeholder="พิมพ์หมายเหตุการเคลียร์เงิน..." 
+                    style="flex: 1; height: 50px; border-radius: 15px; border: 2px solid #cbd5e1; padding: 0 15px; font-size: 15px; background: #fff;">
+            </div>
+            <button class="btn-save" onclick="clearAccount()" style="margin:0; padding:15px; font-size:16px; background:#10b981; border-radius:15px; width:100%; font-weight: 900; box-shadow: 0 4px 0 #059669;">
+                ยืนยันบันทึกการเคลียร์
+            </button>
+        </div>
+
+        <button onclick="toggleAccHistory()" class="btn-toggle-history" style="margin-top:15px;">
+            <i class="fas fa-history"></i> ดูประวัติการเคลียร์เงินทั้งหมด
+        </button>
     </div>
-    
-    <button class="btn-save" onclick="clearAccount()" style="margin:0; padding:15px; font-size:16px; background:#10b981; border-radius:15px; width:100%; font-weight: 900; box-shadow: 0 4px 0 #059669;">
-        ยืนยันบันทึกการเคลียร์
-    </button>
-</div>
-    
+
     <div class="card" style="border-top: 4px solid var(--primary);"><label>เรียกดูประวัติรายวัน</label><input type="date" id="histDate" onchange="loadHistDaily()"><div id="histDailyArea"></div></div>
     <div class="card" style="border-top: 4px solid var(--warning);"><label>สรุปสถิติรายเดือน</label><input type="month" id="histMonth" onchange="loadHistMonth()"><div id="histMonthArea"></div></div>
-</div> 
+</div>
+
 <div id="historyPanel" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:10000; align-items:flex-end;">
     <div style="background:var(--card); width:100%; border-radius:25px 25px 0 0; padding:20px; max-height:85vh; overflow-y:auto; animation: slideUp 0.3s ease-out; box-shadow: 0 -10px 25px rgba(0,0,0,0.2);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:2px solid rgba(0,0,0,0.05); padding-bottom:15px;">
