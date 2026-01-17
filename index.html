@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11</title>
+    <title>Barber Note Pro v.11.1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -35,7 +35,35 @@
         .acc-right { flex: 1; background: var(--card); padding: 12px; border-radius: 20px; border-left: 5px solid #10b981; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
         .acc-light { width: 12px; height: 12px; border-radius: 50%; }
         .history-list { max-height: 220px; overflow-y: auto; font-size: 11px; margin-top: 10px; }
+/* สไตล์หน้า 3 แบบ Card เดียว (Pop-up) */
+        .acc-main-card { 
+            background: var(--card); 
+            padding: 18px; 
+            border-radius: 25px; 
+            border-left: 6px solid #f59e0b; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            margin-bottom: 15px;
+        }
+        .btn-toggle-history {
+            width: 100%; background: #f1f5f9; border: 1px solid #e2e8f0;
+            padding: 10px; border-radius: 12px; font-size: 13px;
+            color: var(--primary); cursor: pointer; margin: 10px 0;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .history-wrapper { display: none; background: rgba(0,0,0,0.02); border-radius: 15px; padding: 10px; margin-bottom: 15px; }
+        .history-list { max-height: 200px; overflow-y: auto; font-size: 12px; }
+        .acc-light { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+<div id="accHistoryModal" class="acc-history-modal">
+    <div class="acc-history-box">
+        <div class="acc-history-header">
+            <span>📜 ประวัติการเคลียร์เงิน</span>
+            <button class="acc-history-close" onclick="closeAccHistory()">✕</button>
+        </div>
+        <div id="accHistory" class="acc-history-list"></div>
+    </div>
+</div>
 
+        /* สไตล์ส่วนกลางที่ใช้ร่วมกัน */
         .nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); display: flex; border-top: 1px solid rgba(0,0,0,0.1); height: 75px; align-items: center; justify-content: space-around; z-index: 9999; }
         .nav-item { flex: 1; text-align: center; color: #94a3b8; font-size: 13px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
         .nav-item.active { color: var(--primary); font-weight: 500; }
@@ -70,26 +98,34 @@
 </div>
 
 <div id="p3" class="page">
-    <div class="acc-split">
-        <div class="acc-left">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="margin:0; font-size:14px; color:#b45309;">🧾 สถานะบัญชี</h3>
-                <div id="accLight" class="acc-light" style="background:gray;"></div>
-            </div>
-            <div style="font-size:11px; color:#64748b; margin:8px 0;">
-                ค้างเดิม: ฿<span id="accOld">0</span> | วันนี้: ฿<span id="accToday">0</span>
-            </div>
-            <div style="font-size:26px; font-weight:700; color:#1e3a8a; margin-bottom:5px;">฿<span id="accNet">0</span></div>
-            <div id="accStatus" class="status-bar" style="font-size:12px; padding:6px; margin:5px 0;">ยอดพอดี</div>
-            <input type="date" id="accDate" style="height:35px; font-size:13px; margin-bottom:5px;">
-            <input type="text" id="accNote" placeholder="ระบุช่วงวันที่/หมายเหตุ" style="height:35px; font-size:12px; margin-bottom:8px; padding:0 8px;">
-            <button class="btn-save" onclick="clearAccount()" style="margin:0; padding:10px; font-size:14px; background:var(--accent); border-radius:10px;">ยืนยันเคลียร์เงิน</button>
+    <div class="acc-left">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0; font-size:14px; color:#b45309;">🧾 สถานะบัญชี</h3>
+            <div id="accLight" class="acc-light"></div>
         </div>
-        <div class="acc-right">
-            <h3 style="margin:0; font-size:13px; color:#047857;">🟢 ประวัติ</h3>
-            <div id="accHistory" class="history-list"></div>
+
+        <div style="font-size:11px; color:#64748b; margin:8px 0;">
+            ค้างเดิม: ฿<span id="accOld">0</span> | วันนี้: ฿<span id="accToday">0</span>
         </div>
+
+        <div style="font-size:26px; font-weight:700; color:#1e3a8a;">
+            ฿<span id="accNet">0</span>
+        </div>
+
+        <div id="accStatus" class="status-bar" style="margin:6px 0;">ยอดพอดี</div>
+
+        <button class="btn-save" onclick="openAccHistory()" style="background:#e5e7eb; color:#111; margin-top:6px;">
+            📜 ดูประวัติการเคลียร์เงิน
+        </button>
+
+        <input type="date" id="accDate" style="margin-top:8px; height:36px;">
+        <input type="text" id="accNote" placeholder="หมายเหตุ" style="height:36px; margin-top:6px;">
+
+        <button class="btn-save" onclick="clearAccount()" style="margin-top:8px;">
+            ✅ ยืนยันเคลียร์เงิน
+        </button>
     </div>
+</div>
 
     <div class="card" style="border-top: 4px solid var(--primary);"><label>เรียกดูประวัติรายวัน</label><input type="date" id="histDate" onchange="loadHistDaily()"><div id="histDailyArea" style="margin-top:15px"></div>
     </div>
@@ -277,7 +313,14 @@ function renderDay(){
             </div>
         `).join("");
     }
+function openAccHistory(){
+    $("accHistoryModal").style.display = "flex";
+    loadAccountHistory();
+}
 
+function closeAccHistory(){
+    $("accHistoryModal").style.display = "none";
+}
     function delRec(id) {
         if(confirm("ลบรายการนี้?")) {
             db = db.filter(r => r.id !== id);
