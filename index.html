@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/27GqTXFn/Barber-Note.png">
-    <title>Barber Note Pro v.9.3</title>
+    <title>Barber Note Pro v.9.4</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -16,9 +16,9 @@
         .page { display: none; padding: 15px; animation: fadeIn 0.2s; } .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .card { background: var(--card); border-radius: 20px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        input, select { width: 100%; height: 45px; padding: 8px 12px; border-radius: 12px; border: 1px solid transparent; font-size: 18px; box-sizing: border-box; background: var(--input-bg); color: var(--text); outline: none; font-family: 'Kanit'; }
-        #dateInp { background: #e0f2fe !important; border: 1px solid #bae6fd !important; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; box-sizing: border-box; }input, select { width: 100%;height: 45px; padding: 8px 10px;border-radius: 12px; 
+        border: 1px solid rgba(0,0,0,0.05);font-size: 16px; box-sizing: border-box; background: var(--input-bg); color: var(--text); outline: none; font-family: 'Kanit'; }
+        #dateInp { background: #e0f2fe !important; border: 1px solid #bae6fd !important;-webkit-appearance: none;}
         .time-input { background: #f0f9ff !important; border: 1px solid #bae6fd !important; text-align: center; font-weight: 600; }
         .btn-pay { border: 2px solid transparent; background: var(--input-bg); color: var(--text); padding: 8px 5px; border-radius: 12px; font-weight: 500; cursor: pointer; transition: 0.2s; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 4px; }
         .active-cash { border: 3px solid #16a34a !important; color: #14532d !important; background: #dcfce7 !important; }
@@ -55,9 +55,17 @@
     <div class="card"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><label>รายการวันนี้</label><i class="fab fa-line" style="color:#06C755; font-size:24px; cursor:pointer" onclick="shareLine()"></i></div><div id="dServiceStats"></div><div id="dailyList"></div></div>
     <button class="btn-close-day" onclick="closeDay()"><i class="fas fa-check-circle"></i></button>
 </div>
-
-<div id="p3" class="page"><div class="card"><label>ประวัติรายวัน</label><input type="date" id="histDate" onchange="loadHistDaily()"><div id="histDailyArea"></div></div></div>
-
+<div id="p3" class="page">
+    <div class="card">
+        <label>ดูสถิติรายเดือน</label>
+        <select id="monthFilter" onchange="renderMonthly()" style="margin: 10px 0;">
+            <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option><option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option>
+            <option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option><option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option></select>
+        <div id="monthlyList"></div><div style="margin-top:15px; padding:10px; background:var(--primary); color:white; border-radius:10px; text-align:center;">
+            ยอดรวมเดือนนี้: <span id="monthTotal" style="font-size:20px; font-weight:600;">0</span> บาท
+        </div>
+    </div>
+</div>
 <div id="modalSet" class="modal"><div class="modal-content"><h3>⚙️ ตั้งค่า</h3><label>ชื่อร้าน</label><input id="setShop">
 <div class="grid-2" style="margin-top:10px"><div><label>% แบ่ง</label><input type="number" id="setPerc"></div><div><label>ประกัน</label><input type="number" id="setGuar"></div></div>
 <div class="grid-2" style="margin-top:15px"><div><label>🔊 เสียง</label><select id="setSound"><option value="on">เปิด</option><option value="off">ปิด</option></select></div><div><label>🎚️ เสียงพูด</label><select id="setVoice"><option value="female">👩 หญิง</option><option value="male">👨 ชาย</option></select></div></div>
@@ -111,11 +119,14 @@
         let rs=f.details.map(r=>`<div class="history-row"><div style="display:flex; justify-content:space-between"><b>${r.time} | ${r.svcs.join('+')}</b><b>฿${r.price}</b></div><div>${r.hair||''} (${r.pay==='Cash'?'สด':'โอน'})</div></div>`).join('');
         $("histDailyArea").innerHTML=`<div style="background:var(--input-bg); padding:10px; border-radius:10px; margin-top:10px"><div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; font-size:12px"><div>ยอด: ${f.total}</div><div>ช่าง: ${Math.floor(f.barber)}</div></div><div style="border-top:1px dashed #ccc; margin-top:5px">${rs}</div></div>`;
     }
-    function loadHistMonth(){
-        const m=$("histMonth").value, f=archives.filter(a=>a.date.startsWith(m)); if(!f.length)return;
-        let t=f.reduce((a,b)=>a+b.total,0), bT=f.reduce((a,b)=>a+b.barber,0);
-        $("histMonthArea").innerHTML=`<div style="background:var(--input-bg); padding:15px; border-radius:10px; margin-top:10px"><b>รวมเดือนนี้: ฿${t.toLocaleString()}</b><br><small>ช่าง: ${Math.floor(bT).toLocaleString()} | ร้าน: ${Math.floor(t-bT).toLocaleString()}</small></div>`;
+    function renderMonthly() {
+    const m = $("monthFilter") ? $("monthFilter").value : new Date().toISOString().slice(5, 7);const monthlyData = db.filter(r => r.date.split('-')[1] === m);
+    let total = 0, html = "";let dailySum = {};monthlyData.forEach(r => {dailySum[r.date] = (dailySum[r.date] || 0) + r.price; total += r.price;
+    });
+    for (let date in dailySum) { html += `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid var(--border);"><span>${date}</span><b>฿${dailySum[date].toLocaleString()}</b></div>`;
     }
+    $("monthlyList").innerHTML = html || "<center>ไม่มีข้อมูลเดือนนี้</center>";$("monthTotal").innerText = total.toLocaleString();
+}
     function shareLine() {
     const d = $("dateInp").value, today = db.filter(r => r.date === d);if (!today.length) return;
     let tot = 0, trans = 0, cash = 0, counts = {"เด็ก":0, "สระผม":0, "โกนหนวด":0, "ย้อมผม":0};
