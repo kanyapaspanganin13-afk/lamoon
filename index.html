@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.9.8</title>
+    <title>Barber Note Pro v.9.8.1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -243,33 +243,60 @@
         }
     }
 
-    function closeDay() {
-        const d = $("dateInp").value;
-        const today = db.filter(r => r.date === d);
-        if(!today.length) return alert("ไม่มีข้อมูล");
-        if(confirm("ปิดยอดวันนี้และส่งไปหน้าสถิติ?")) {
-            const tot = today.reduce((a,b) => a+b.price, 0);
-            const cash = today.filter(r=>r.pay==='Cash').reduce((a,b)=>a+b.price, 0);
-            const bEarn = Math.max(tot * (conf.perc/100), conf.guar);
-            let dailyStats = {};
-            today.forEach(r => { r.svcs.forEach(s => { dailyStats[s] = (dailyStats[s] || 0) + 1; }); });if(r.hair) {dailyStats["ตัดผม"] = (dailyStats["ตัดผม"] || 0) + 1;}
-    });
-            const arc = {date: d, total: tot, cash: cash, barber: bEarn, shop: tot - bEarn, settle: cash - bEarn, count: today.length, details: today, stats: dailyStats };
-            // อัปเดตยอดค้างสะสมเข้าบัญชี
-            account.balance = (account.balance || 0) + (cash - bEarn);
-            localStorage.setItem("barber_account", JSON.stringify(account));
+  function closeDay() {
+    const d = $("dateInp").value;
+    const today = db.filter(r => r.date === d);
+    if(!today.length) return alert("ไม่มีข้อมูล");
 
-            archives = archives.filter(a => a.date !== d);
-            archives.push(arc);
-            localStorage.setItem("barber_arc", JSON.stringify(archives));
-            db = db.filter(r => r.date !== d);
-            localStorage.setItem("barber_db", JSON.stringify(db));
-            
-            speak("ส่งรายงานวันนี้สำเร็จ");
-            alert("ส่งรายงานสำเร็จ!");
-            go(3);
-        }
+    if(confirm("ปิดยอดวันนี้และส่งไปหน้าสถิติ?")) {
+        const tot = today.reduce((a,b) => a+b.price, 0);
+        const cash = today.filter(r=>r.pay==='Cash').reduce((a,b)=>a+b.price, 0);
+        const bEarn = Math.max(tot * (conf.perc/100), conf.guar);
+
+        let dailyStats = {};
+        
+        // --- เริ่มต้นการนับสถิติ ---
+        today.forEach(r => { 
+            // 1. นับจากบริการหลัก/บริการเสริม
+            r.svcs.forEach(s => { 
+                dailyStats[s] = (dailyStats[s] || 0) + 1; 
+            }); 
+
+            // 2. ตรวจสอบว่าถ้าเลือก "ทรงผม" ให้นับเป็น "ตัดผม" เพิ่มเสมอ
+            if(r.hair) {
+                dailyStats["ตัดผม"] = (dailyStats["ตัดผม"] || 0) + 1;
+            }
+        }); 
+        // --- สิ้นสุดการนับสถิติ ---
+
+        const arc = {
+            date: d, 
+            total: tot, 
+            cash: cash, 
+            barber: bEarn, 
+            shop: tot - bEarn, 
+            settle: cash - bEarn, 
+            count: today.length, 
+            details: today, 
+            stats: dailyStats 
+        };
+        
+        // อัปเดตยอดค้างสะสมเข้าบัญชี
+        account.balance = (account.balance || 0) + (cash - bEarn);
+        localStorage.setItem("barber_account", JSON.stringify(account));
+
+        archives = archives.filter(a => a.date !== d);
+        archives.push(arc);
+        localStorage.setItem("barber_arc", JSON.stringify(archives));
+        
+        db = db.filter(r => r.date !== d);
+        localStorage.setItem("barber_db", JSON.stringify(db));
+        
+        speak("ส่งรายงานวันนี้สำเร็จ");
+        alert("ส่งรายงานสำเร็จ!");
+        go(3);
     }
+}
 
     function loadHistDaily() {
         const d = $("histDate").value; const found = archives.find(a => a.date === d); 
