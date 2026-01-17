@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.9.8.4</title>
+    <title>Barber Note Pro v.9.8.6</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -154,7 +154,7 @@
         },600);
     }
 
-   function renderDay(){
+function renderDay(){
     const d=$("dateInp").value, today=db.filter(r=>r.date===d); 
     let tot=0,trans=0,cash=0,stats={},listHtml="";
 
@@ -162,28 +162,37 @@
         tot+=r.price; 
         r.pay==='Trans' ? trans+=r.price : cash+=r.price; 
 
-        // --- ส่วนที่แก้ไข: การนับสถิติแบบรวมยอด ---
-        
-        // 1. เช็คก่อนว่ารายการนี้คือการ "ตัดผม" หรือไม่? 
-        // (ถ้ามีคำว่า 'ตัดผม' หรือ 'เด็ก' หรือ 'มีระบุทรงผม' ให้ถือว่าเป็น 1 หัวตัดผม)
+        // 1. เช็คงานตัดผมรวม (ให้ผลลัพธ์เป็น ตัดผม: 3)
         const isCutting = r.svcs.includes("ตัดผม") || r.svcs.includes("เด็ก") || (r.hair && r.hair.trim() !== "");
-        
         if (isCutting) {
             stats["ตัดผม"] = (stats["ตัดผม"] || 0) + 1;
         }
 
-        // 2. เก็บสถิติแยกตามปุ่มที่กด (เพื่อแสดงปุ่ม เด็ก, สระผม, โกนหนวด แยกต่างหาก)
+        // 2. นับสถิติย่อยแยกประเภท
         r.svcs.forEach(s => {
-            // ถ้าเป็น 'ตัดผม' เรานับไปแล้วในข้อ 1 จึงไม่บวกซ้ำที่นี่
-            if (s !== "ตัดผม") {
+            if (s === "เด็ก") {
+                stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
+            } else if (s !== "ตัดผม") {
                 stats[s] = (stats[s] || 0) + 1;
             }
         });
-        // ---------------------------------------
 
-        listHtml+=`<div class="history-row"><div style="display:flex; justify-content:space-between"><span>${r.time} | ${r.svcs.join('+')}</span><b>฿${r.price}</b></div><div style="display:flex; justify-content:space-between; opacity:0.7"><span>${r.hair||''}</span><span>${r.pay==='Cash'?'💵 สด':'📱 โอน'} <i class="fas fa-trash" style="margin-left:10px; color:var(--danger)" onclick="delRec(${r.id})"></i></span></div></div>`;
+        // ✅ แก้ไขจุดที่เขียนผิด: รวม div เข้าไปในก้อนเดียวกันให้ถูกต้อง
+        listHtml += `<div class="history-row">
+            <div style="display:flex; justify-content:space-between">
+                <span>${r.time} | ${r.svcs.join('+')}</span>
+                <b>฿${r.price}</b>
+            </div>
+            <div style="display:flex; justify-content:space-between; opacity:0.7">
+                <span>${r.hair||''}</span>
+                <span>${r.pay==='Cash'?'💵 สด':'📱 โอน'} 
+                    <i class="fas fa-trash" style="margin-left:10px; color:var(--danger)" onclick="delRec(${r.id})"></i>
+                </span>
+            </div>
+        </div>`;
     });
 
+    // --- ส่วนแสดงผลด้านล่าง ---
     const bEarn=Math.max(tot*(conf.perc/100),conf.guar), sEarn=tot-bEarn, settle=cash-bEarn;
     $("dTotal").innerText=tot.toLocaleString(); 
     $("dTrans").innerText=trans.toLocaleString(); 
@@ -192,11 +201,9 @@
     $("dCounts").innerText=`ลูกค้า: ${today.length} คน`; 
     $("dailyList").innerHTML=listHtml||"<center style='opacity:0.3; padding:20px'>ไม่มีข้อมูล</center>";
     
-    // แสดงปุ่มสถิติ
+    // แสดงปุ่มสถิติ (Badge)
     let sH=""; 
-    // บังคับให้ปุ่ม "ตัดผม" ขึ้นก่อนเสมอ
     if(stats["ตัดผม"]) sH += `<span class="badge" style="background:#4338ca; color:white;">ตัดผม: ${stats["ตัดผม"]}</span>`;
-    
     for(let s in stats) {
         if(s !== "ตัดผม") sH += `<span class="badge">${s}: ${stats[s]}</span>`;
     }
