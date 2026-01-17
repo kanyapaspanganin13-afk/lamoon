@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.9.7.2</title>
+    <title>Barber Note Pro v.9.7.3</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -195,35 +195,67 @@
         else { b.innerText="✅ ยอดพอดี"; b.className="status-bar status-green"; }
     }
 
+   // ฟังก์ชันคำนวณสถานบัญชีจากหน้า 2
+    function calcTodaySettle(){
+        const d = $("dateInp").value;
+        const today = db.filter(r=>r.date===d);
+        if(!today.length) return 0;
+        const tot = today.reduce((a,b)=>a+b.price,0);
+        const cash = today.filter(r=>r.pay==='Cash').reduce((a,b)=>a+b.price,0);
+        const bEarn = Math.max(tot*(conf.perc/100), conf.guar);
+        return cash - bEarn;
+    }
+
     function loadAccountStatus(){
-    const todaySettle = calcTodaySettle();
-    const oldBal = account.balance || 0;
-    const net = oldBal + todaySettle;
-    
-    // ดึงวันที่จากหน้าบันทึกมาแสดง
-    const dStr = $("dateInp").value;
-    const dObj = new Date(dStr);
-    const dateThai = `${dObj.getDate()}/${dObj.getMonth()+1}/${(dObj.getFullYear()+543).toString().slice(-2)}`;
+        const todaySettle = calcTodaySettle();
+        const net = (account.balance || 0) + todaySettle;
+        $("accOld").innerText = (account.balance || 0).toLocaleString();
+        $("accToday").innerText = todaySettle.toLocaleString();
+        $("accNet").innerText = Math.abs(net).toLocaleString();
 
-    $("accOld").innerText = `ค้างเดิม: ${oldBal >= 0 ? 'ช่างคืนร้าน' : 'ร้านคืนช่าง'} ${Math.abs(oldBal).toLocaleString()}`;
-    $("accToday").innerText = `วันนี้ (${dateThai}): ${todaySettle >= 0 ? 'ช่างคืนร้าน' : 'ร้านคืนช่าง'} ${Math.abs(todaySettle).toLocaleString()}`;
-    $("accNet").innerText = Math.abs(net).toLocaleString();
+        let txt="✅ ยอดพอดี", cls="status-green", light="#16a34a";
+        if(net>0){ txt="🔴 ช่างค้างร้าน"; cls="status-red"; light="red"; }
+        if(net<0){ txt="🔵 ร้านค้างช่าง"; cls="status-indigo"; light="#4338ca"; }
 
-    let txt="✅ ยอดพอดี", cls="status-green", light="#16a34a";
-    if(net > 0){ txt=`🚩 ช่างคืนร้าน ${Math.abs(net)} บ.`; cls="status-red"; light="red"; }
-    if(net < 0){ txt=`🚩 ร้านคืนช่าง ${Math.abs(net)} บ.`; cls="status-indigo"; light="#4338ca"; }
+        $("accStatus").innerText = txt;
+        $("accStatus").className = "status-bar "+cls;
+        $("accLight").style.background = light;
+    }
 
-    $("accStatus").innerText = txt;
-    $("accStatus").className = "status-bar "+cls;
-    $("accLight").style.background = light;
-}
-    function delRec(id) {
-        if(confirm("ลบรายการนี้?")) {
-            db = db.filter(r => r.id !== id);
-            localStorage.setItem("barber_db", JSON.stringify(db)); 
-            speak("ลบรายการสำเร็จ");
-            renderDay(); 
+    function clearAccount(){
+        const d = $("accDate").value;
+        if(!d) return alert("เลือกวันที่เคลียร์");
+        const net = (account.balance || 0) + calcTodaySettle();
+        
+        account.logs.unshift({
+            date: d,
+            amount: net,
+            note: $("accNote").value || "เคลียร์ยอดสะสม"
+        });
+
+        // เมื่อเคลียร์แล้ว ยอดสะสมในอดีตจะเป็น 0 แต่เราต้องหักลบยอด "วันนี้" ออกด้วยเพื่อให้หน้า 3 เป็น 0 จริงๆ
+        account.balance = 0 - calcTodaySettle();
+        localStorage.setItem("barber_account",JSON.stringify(account));
+        
+        speak("เคลียร์เงินเรียบร้อย");
+        $("accNote").value = "";
+        loadAccountHistory();
+        loadAccountStatus();
+    }
+
+    function loadAccountHistory(){
+        const box = $("accHistory");
+        if(!account.logs.length){
+            box.innerHTML = "<center style='opacity:.4; padding-top:20px;'>ไม่มีประวัติ</center>";
+            return;
         }
+        box.innerHTML = account.logs.map(l=>`
+            <div class="history-row" style="padding:8px 0; border-bottom:1px dashed #ddd;">
+                <b>${l.date}</b> | ฿${Math.abs(l.amount).toLocaleString()}
+                <div style="font-size:10px; opacity:.6">${l.note}</div>
+            </div>
+        `).join("");
+    }
     }
 
     function closeDay() {
