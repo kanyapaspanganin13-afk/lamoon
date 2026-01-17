@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.9.7</title>
+    <title>Barber Note Pro v.9.8</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -191,7 +191,7 @@
         $("accNet").innerText = Math.abs(net).toLocaleString();
 
         let txt="✅ ยอดพอดี", cls="status-green", light="#16a34a";
-        if(net>0){ txt="🔴 ช่างค้างร้าน"; cls="status-red"; light="red"; }
+        if(net>0){ txt="🔴 ช่างคืนร้าน"; cls="status-red"; light="red"; }
         if(net<0){ txt="🔵 ร้านค้างช่าง"; cls="status-indigo"; light="#4338ca"; }
 
         $("accStatus").innerText = txt;
@@ -252,9 +252,9 @@
             const cash = today.filter(r=>r.pay==='Cash').reduce((a,b)=>a+b.price, 0);
             const bEarn = Math.max(tot * (conf.perc/100), conf.guar);
             let dailyStats = {};
-            today.forEach(r => { r.svcs.forEach(s => { dailyStats[s] = (dailyStats[s] || 0) + 1; }); });
+            today.forEach(r => { r.svcs.forEach(s => { dailyStats[s] = (dailyStats[s] || 0) + 1; }); });if(r.hair) {dailyStats["ตัดผม"] = (dailyStats["ตัดผม"] || 0) + 1;}
+    });
             const arc = {date: d, total: tot, cash: cash, barber: bEarn, shop: tot - bEarn, settle: cash - bEarn, count: today.length, details: today, stats: dailyStats };
-            
             // อัปเดตยอดค้างสะสมเข้าบัญชี
             account.balance = (account.balance || 0) + (cash - bEarn);
             localStorage.setItem("barber_account", JSON.stringify(account));
