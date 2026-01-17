@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.7.6 (Updated)</title>
+    <title>Barber Note Pro v.11.7.7 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -226,16 +226,34 @@
         else { b.innerText="✅ ยอดพอดี"; b.className="status-bar status-green"; }
     }
 
-    function calcTodaySettle(){
-        const d = $("dateInp").value;
-        const today = db.filter(r=>r.date===d);
-        if(!today.length) return 0;
-        const tot = today.reduce((a,b)=>a+b.price,0);
-        const cash = today.filter(r=>r.pay==='Cash').reduce((a,b)=>a+b.price,0);
-        const bEarn = Math.max(tot*(conf.perc/100), conf.guar);
-        return cash - bEarn;
-    }
+   function closeDay() {
+    const d = $("dateInp").value;
+    const today = db.filter(r => r.date === d);
+    if(!today.length) return alert("ไม่มีข้อมูลของวันนี้");
+    
+    if(confirm("ปิดยอดวันนี้และส่งไปหน้าสรุปบัญชี?")) {
+        const tot = today.reduce((a,b) => a+b.price, 0);
+        const cash = today.filter(r=>r.pay==='Cash').reduce((a,b)=>a+b.price, 0);
+        const bEarn = Math.max(tot * (conf.perc/100), conf.guar);
+        const settleToday = cash - bEarn; // ยอดที่ต้องเคลียร์ของวันนี้
 
+        // 1. เก็บลง Archives (ประวัติรายวัน)
+        archives = archives.filter(a => a.date !== d);
+        archives.push({date: d, total: tot, cash: cash, barber: bEarn, shop: tot-bEarn, settle: settleToday, count: today.length, details: today});
+        localStorage.setItem("barber_arc", JSON.stringify(archives));
+
+        // 2. บวกยอดเข้าไปใน Account Balance (หน้า 3)
+        account.balance = (account.balance || 0) + settleToday;
+        localStorage.setItem("barber_account", JSON.stringify(account));
+
+        // 3. ล้างข้อมูลหน้าแรก
+        db = db.filter(r => r.date !== d);
+        localStorage.setItem("barber_db", JSON.stringify(db));
+        
+        speak("ปิดยอดสำเร็จ ยอดสะสมถูกอัปเดตแล้ว");
+        go(3); // พาไปหน้าบัญชีทันที
+    }
+}
     // แก้ไขฟังก์ชันเดิมให้เป็นการเปิด Pop-up แทน
 function toggleAccHistory() {
     const panel = $("historyPanel");
@@ -265,12 +283,15 @@ function closeHistoryFull() {
     $("historyPanel").style.display = "none";
 }
 
+// --- ส่วนที่แก้ไขใหม่ ---
+
 function loadAccountStatus() {
-    const todaySettle = calcTodaySettle();
+    // 1. คำนวณยอด
+    const todaySettle = calcTodaySettle(); 
     const oldBal = account.balance || 0;
     const net = oldBal + todaySettle;
 
-    // ดึงวันที่แสดงผลตัวเล็กๆ ใต้ตัวเลข
+    // 2. จัดการวันที่แสดงผล
     const dStr = $("dateInp").value;
     const dObj = new Date(dStr);
     const dateToday = `${dObj.getDate()}/${dObj.getMonth()+1}/${(dObj.getFullYear()+543).toString().slice(-2)}`;
@@ -279,35 +300,80 @@ function loadAccountStatus() {
     dOldObj.setDate(dObj.getDate() - 1);
     const dateOld = `${dOldObj.getDate()}/${dOldObj.getMonth()+1}/${(dOldObj.getFullYear()+543).toString().slice(-2)}`;
 
-    // อัปเดตตัวเลขในกล่อง (เน้นสี แดง = ช่างคืนร้าน / น้ำเงิน = ร้านคืนช่าง)
-    $("accOldText").innerHTML = `
-        <span style="color: ${oldBal >= 0 ? '#be123c' : '#1d4ed8'};">฿${Math.abs(oldBal).toLocaleString()}</span>
-        <div style="font-size: 10px; font-weight: 600; color: #94a3b8; margin-top: 4px;">(${dateOld})</div>
-    `;
-
-    $("accTodayText").innerHTML = `
-        <span style="color: ${todaySettle >= 0 ? '#be123c' : '#1d4ed8'};">฿${Math.abs(todaySettle).toLocaleString()}</span>
-        <div style="font-size: 10px; font-weight: 600; color: #94a3b8; margin-top: 4px;">(${dateToday})</div>
-    `;
-    
-    // อัปเดตยอดสุทธิกลางจอ (ถ้ามี ID accNet)
-    if($("accNet")) $("accNet").innerText = Math.abs(net).toLocaleString();
-
-    // แจ้งสถานะสรุปว่าใครต้องคืนใคร
-    let txt = "✅ ยอดพอดี", cls = "status-green";
-    if (net > 0) { 
-        txt = `🚩 ช่างต้องคืนร้านรวม ฿${Math.abs(net).toLocaleString()}`; 
-        cls = "status-red"; 
-    } else if (net < 0) { 
-        txt = `🚩 ร้านต้องคืนช่างรวม ฿${Math.abs(net).toLocaleString()}`; 
-        cls = "status-indigo"; 
+    // 3. แสดงผลยอด "ค้างเดิม" (ID: accOld)
+    if ($("accOld")) {
+        $("accOld").innerHTML = `
+            <span style="color: ${oldBal >= 0 ? '#dc2626' : '#1d4ed8'};">฿${Math.abs(oldBal).toLocaleString()}</span>
+            <div style="font-size: 10px; font-weight: 500; color: #94a3b8; margin-top: 4px;">(${dateOld})</div>
+        `;
     }
 
-    $("accStatus").innerText = txt;
-    $("accStatus").className = "status-bar " + cls;
+    // 4. แสดงผลยอด "วันนี้" (ID: accToday)
+    if ($("accToday")) {
+        $("accToday").innerHTML = `
+            <span style="color: ${todaySettle >= 0 ? '#dc2626' : '#1d4ed8'};">฿${Math.abs(todaySettle).toLocaleString()}</span>
+            <div style="font-size: 10px; font-weight: 500; color: #94a3b8; margin-top: 4px;">(${dateToday})</div>
+        `;
+    }
+
+    // 5. แสดงยอดสุทธิ (ID: accNet)
+    if ($("accNet")) {
+        $("accNet").innerText = Math.abs(net).toLocaleString();
+        $("accNet").parentElement.style.color = net > 0 ? '#dc2626' : (net < 0 ? '#1d4ed8' : '#1e293b');
+    }
+
+    // 6. แสดงแถบสถานะ (ID: accStatus)
+    const statusBox = $("accStatus");
+    if (statusBox) {
+        let txt = "✅ ยอดพอดี", cls = "status-green";
+        if (net > 0) { 
+            txt = `🚩 ช่างคืนร้านรวม ฿${Math.abs(net).toLocaleString()}`; 
+            cls = "status-red"; 
+        } else if (net < 0) { 
+            txt = `🚩 ร้านคืนช่างรวม ฿${Math.abs(net).toLocaleString()}`; 
+            cls = "status-indigo"; 
+        }
+        statusBox.innerText = txt;
+        statusBox.className = "status-bar " + cls;
+        statusBox.style.fontWeight = "900";
+    }
+
+    // 7. ไฟสถานะด้านบน
+    if ($("accLight")) {
+        $("accLight").style.background = net > 0 ? "#dc2626" : (net < 0 ? "#4338ca" : "#16a34a");
+    }
+}
+
+// แก้ไขฟังก์ชันเคลียร์เงินให้ทำงานสัมพันธ์กัน
+function clearAccount() {
+    const d = $("accDate").value; 
+    if (!d) return alert("กรุณาเลือกวันที่ต้องการเคลียร์");
     
-    // ปรับสีจุดไฟสถานะด้านบน (ถ้ามี)
-    if($("accLight")) $("accLight").style.background = net > 0 ? "#dc2626" : (net < 0 ? "#1e3a8a" : "#16a34a");
+    const todaySettle = calcTodaySettle();
+    const net = (account.balance || 0) + todaySettle;
+    
+    if (confirm(`ยืนยันการเคลียร์ยอดสุทธิ ฿${Math.abs(net).toLocaleString()} ?`)) {
+        // บันทึกลงประวัติ
+        account.logs.unshift({ 
+            date: d, 
+            amount: net, 
+            note: $("accNote").value || "เคลียร์ยอดสุทธิ" 
+        });
+        
+        // เซ็ตยอดค้างเก่าเป็น 0 แต่ยังต้องหักลบกับยอดของวันนี้ที่ยังไม่ได้ปิดยอด (ถ้ามี)
+        account.balance = 0 - todaySettle; 
+        
+        localStorage.setItem("barber_account", JSON.stringify(account));
+        speak("เคลียร์เงินเรียบร้อย");
+        
+        $("accNote").value = ""; 
+        loadAccountStatus(); 
+        // ถ้ามีฟังก์ชันโหลดประวัติให้เรียกตรงนี้ด้วย
+        if (typeof toggleAccHistory === "function") {
+             // อัปเดตรายการเล็กน้อยถ้าไม่ได้เปิดหน้าต่างประวัติอยู่
+             if($("accHistory")) loadAccountHistory(); 
+        }
+    }
 }
 
     function clearAccount(){
