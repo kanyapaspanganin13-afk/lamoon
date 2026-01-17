@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.9.8.6</title>
+    <title>Barber Note Pro v.11</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -299,21 +299,27 @@ function renderDay(){
 
         let dailyStats = {};
         
-        // --- เริ่มต้นการนับสถิติใหม่ ---
+       // --- เริ่มต้นการนับสถิติใหม่ (แก้ไขส่วนนี้) ---
         today.forEach(r => { 
-            // 1. นับตามบริการที่เลือกจริง (เช่น เด็ก, สระผม, โกนหนวด)
+            // 1. นับตามบริการที่เลือกจริง (เด็ก, สระผม, โกนหนวด)
             r.svcs.forEach(s => { 
                 dailyStats[s] = (dailyStats[s] || 0) + 1; 
 
-                // ส่วนที่เพิ่ม: ถ้าบริการที่เลือกคือ "เด็ก" ให้นับใน "ตัดผม" เพิ่มด้วย
+                // ถ้าบริการคือ "เด็ก" ให้นับใน "ตัดผม" ด้วย
                 if(s === "เด็ก") {
                     dailyStats["ตัดผม"] = (dailyStats["ตัดผม"] || 0) + 1;
                 }
             }); 
 
-            // 2. ถ้ามีการเลือก "ทรงผม" (เช่น รองทรง) ก็นับเป็น "ตัดผม" เพิ่มเสมอ
+            // 2. ถ้ามีการเลือก "ทรงผม"
             if(r.hair) {
+                // ก. นับรวมใน "ตัดผม" (เพื่อให้ยอดรวมการตัดผมถูกต้อง)
                 dailyStats["ตัดผม"] = (dailyStats["ตัดผม"] || 0) + 1;
+                
+                // ข. นับแยกตามชื่อทรงผม (เพื่อดูสถิติทรงผมต่างหาก)
+                // เราจะเพิ่มคำว่า "ทรง:" นำหน้าเพื่อให้แยกออกจากบริการอื่นชัดเจน
+                let hairName = "ทรง:" + r.hair;
+                dailyStats[hairName] = (dailyStats[hairName] || 0) + 1;
             }
         }); 
         // --- สิ้นสุดการนับสถิติ ---
@@ -361,14 +367,60 @@ function renderDay(){
     }
 
     function loadHistMonth() {
-        const m = $("histMonth").value; const area = $("histMonthArea"); if(!m) return;
-        const filtered = archives.filter(a => a.date.startsWith(m));
-        if(!filtered.length) { area.innerHTML = "<center style='color:#ccc; padding:20px;'>ไม่มีข้อมูล</center>"; return; }
-        let tot = 0, bTot = 0, cTot = 0, monthStats = {};
-        filtered.forEach(a => { tot += a.total; bTot += a.barber; cTot += a.count; if(a.stats) { for(let s in a.stats) { monthStats[s] = (monthStats[s] || 0) + a.stats[s]; } } });
-        let monthStatBadges = ""; for(let s in monthStats) { monthStatBadges += `<span class="badge" style="background:var(--indigo); color:white; font-weight:300;">${s}: ${monthStats[s]}</span>`; }
-        area.innerHTML = `<div style="padding:15px; background:var(--input-bg); border-radius:15px;"><div style="font-size:20px; margin-bottom:10px;">รายได้รวม: <b style="color:var(--primary)">฿${tot.toLocaleString()}</b></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px; opacity:0.8;"><div>ช่างรวม: <b>฿${Math.floor(bTot).toLocaleString()}</b></div><div>ร้านรวม: <b>฿${Math.floor(tot-bTot).toLocaleString()}</b></div><div>ลูกค้าสะสม: <b>${cTot} คน</b></div><div>วันทำงาน: <b>${filtered.length} วัน</b></div> </div><div style="margin-top:15px; border-top:1px dashed #ccc; padding-top:10px;"><label style="font-size:11px; opacity:0.6;">สถิติบริการรวมทั้งเดือน:</label><div style="margin-top:5px;">${monthStatBadges || '<span style="opacity:0.4">ไม่มีข้อมูลสถิติ</span>'}</div></div></div>`;
+    const m = $("histMonth").value; 
+    const area = $("histMonthArea"); 
+    if(!m) return;
+    
+    const filtered = archives.filter(a => a.date.startsWith(m));
+    if(!filtered.length) { 
+        area.innerHTML = "<center style='color:#ccc; padding:20px;'>ไม่มีข้อมูล</center>"; 
+        return; 
     }
+
+    let tot = 0, bTot = 0, cTot = 0, monthStats = {};
+    filtered.forEach(a => { 
+        tot += a.total; 
+        bTot += a.barber; 
+        cTot += a.count; 
+        if(a.stats) { 
+            for(let s in a.stats) { 
+                monthStats[s] = (monthStats[s] || 0) + a.stats[s]; 
+            } 
+        } 
+    });
+
+    // แยกกลุ่ม Badge ระหว่าง บริการ และ ทรงผม
+    let serviceBadges = "";
+    let hairBadges = "";
+
+    for(let s in monthStats) { 
+        // ถ้าชื่อสถิตินั้นมีคำว่า "ทรง:" นำหน้า (ที่เราตั้งค่าไว้ใน closeDay)
+        if(s.startsWith("ทรง:")) {
+            hairBadges += `<span class="badge" style="background:#10b981; color:white; font-weight:400;">${s.replace("ทรง:","")}: ${monthStats[s]}</span>`;
+        } else {
+            serviceBadges += `<span class="badge" style="background:var(--indigo); color:white; font-weight:400;">${s}: ${monthStats[s]}</span>`;
+        }
+    }
+
+    area.innerHTML = `
+        <div style="padding:15px; background:var(--input-bg); border-radius:15px;">
+            <div style="font-size:20px; margin-bottom:10px;">รายได้รวม: <b style="color:var(--primary)">฿${tot.toLocaleString()}</b></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px; opacity:0.8; margin-bottom:15px;">
+                <div>ช่างรวม: <b>฿${Math.floor(bTot).toLocaleString()}</b></div>
+                <div>ร้านรวม: <b>฿${Math.floor(tot-bTot).toLocaleString()}</b></div>
+                <div>ลูกค้าสะสม: <b>${cTot} คน</b></div>
+                <div>วันทำงาน: <b>${filtered.length} วัน</b></div>
+            </div>
+            
+            <div style="border-top:1px dashed #ccc; padding-top:10px;">
+                <label style="font-size:11px; opacity:0.6;">📊 สถิติบริการ (รวมตัดผม):</label>
+                <div style="margin:5px 0 12px 0;">${serviceBadges || '-'}</div>
+                
+                <label style="font-size:11px; opacity:0.6;">💇 สถิติทรงผมที่ตัด:</label>
+                <div style="margin-top:5px;">${hairBadges || '<span style="opacity:0.4">ยังไม่มีข้อมูลทรงผม</span>'}</div>
+            </div>
+        </div>`;
+}
 
     function shareLine() {
         const d = $("dateInp").value, today = db.filter(r => r.date === d); if (!today.length) return;
