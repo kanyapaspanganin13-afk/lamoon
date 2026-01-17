@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11 (Updated)</title>
+    <title>Barber Note Pro v.11.1 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -116,8 +116,24 @@
     <div class="card" style="border-top: 4px solid var(--primary);"><label>เรียกดูประวัติรายวัน</label><input type="date" id="histDate" onchange="loadHistDaily()"><div id="histDailyArea"></div></div>
     <div class="card" style="border-top: 4px solid var(--warning);"><label>สรุปสถิติรายเดือน</label><input type="month" id="histMonth" onchange="loadHistMonth()"><div id="histMonthArea"></div></div>
 </div> 
+<div id="historyPanel" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:10000; align-items:flex-end;">
+    <div style="background:var(--card); width:100%; border-radius:25px 25px 0 0; padding:20px; max-height:85vh; overflow-y:auto; animation: slideUp 0.3s ease-out; box-shadow: 0 -10px 25px rgba(0,0,0,0.2);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:2px solid rgba(0,0,0,0.05); padding-bottom:15px;">
+            <h3 style="margin:0; font-size:18px;"><i class="fas fa-history"></i> ประวัติการเคลียร์เงิน</h3>
+            <button onclick="closeHistoryFull()" style="background:#f1f5f9; border:none; padding:10px 20px; border-radius:12px; font-weight:bold; color:var(--danger);">ปิด</button>
+        </div>
+        
+        <div id="accHistoryFull"></div>
+    </div>
+</div>
 
-<div id="modalSet" class="modal"><div class="modal-content"><h3>⚙️ ตั้งค่า</h3><label>ชื่อร้าน</label><input id="setShop">
+<style>
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+/* ปรับสไตล์ปุ่มดูประวัติใน Card ให้เด่นขึ้น */
+.btn-toggle-history { width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--primary); background: #f0f7ff; color: var(--primary); cursor: pointer; font-family: 'Kanit'; }
+</style>
+
+    <div id="modalSet" class="modal"><div class="modal-content"><h3>⚙️ ตั้งค่า</h3><label>ชื่อร้าน</label><input id="setShop">
 <div class="grid-2" style="margin-top:10px"><div><label>% แบ่ง</label><input type="number" id="setPerc"></div><div><label>ประกัน</label><input type="number" id="setGuar"></div></div>
 <div class="grid-2" style="margin-top:15px"><div><label>🔊 เสียง</label><select id="setSound"><option value="on">เปิด</option><option value="off">ปิด</option></select></div><div><label>🎚️ เสียงพูด</label><select id="setVoice"><option value="female">👩 หญิง</option><option value="male">👨 ชาย</option></select></div></div>
 <label style="margin-top:15px">ธีม</label><select id="setTheme" onchange="changeTheme(this.value)"><option value="light">Light</option><option value="dark">Dark</option><option value="pastel">Pastel</option></select>
@@ -207,16 +223,34 @@
         return cash - bEarn;
     }
 
-    // ฟังก์ชันใหม่: จัดการหน้าบัญชี 3 (Toggle ประวัติ และ ยอดสรุป)
-    function toggleAccHistory() {
-        const wrapper = $("accHistoryWrapper");
-        const text = $("toggleText");
-        if (wrapper.style.display === "none" || wrapper.style.display === "") {
-            wrapper.style.display = "block"; text.innerText = "ปิดประวัติการเคลียร์"; loadAccountHistory();
-        } else {
-            wrapper.style.display = "none"; text.innerText = "ดูประวัติการเคลียร์เงิน";
-        }
+    // แก้ไขฟังก์ชันเดิมให้เป็นการเปิด Pop-up แทน
+function toggleAccHistory() {
+    const panel = $("historyPanel");
+    const box = $("accHistoryFull");
+    panel.style.display = "flex";
+
+    if(!account.logs.length){
+        box.innerHTML = "<center style='opacity:.4; padding:50px;'>ไม่มีประวัติการเคลียร์เงิน</center>";
+        return;
     }
+
+    // สร้างรายการประวัติแบบขยายใหญ่
+    box.innerHTML = account.logs.map(l => `
+        <div style="padding:15px; border-bottom:1px solid rgba(0,0,0,0.05); margin-bottom:12px; background:var(--input-bg); border-radius:15px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <b style="font-size:15px;">📅 ${l.date}</b>
+                <b style="font-size:18px; color:var(--accent);">฿${Math.abs(l.amount).toLocaleString()}</b>
+            </div>
+            <div style="font-size:12px; color:#64748b; margin-top:8px; line-height:1.4;">
+                <i class="far fa-comment-dots"></i> ${l.note || "เคลียร์ยอดสะสม"}
+            </div>
+        </div>
+    `).join("");
+}
+
+function closeHistoryFull() {
+    $("historyPanel").style.display = "none";
+}
 
     function loadAccountStatus() {
         const todaySettle = calcTodaySettle();
