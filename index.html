@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.3 (Updated)</title>
+    <title>Barber Note Pro v.11.4 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -36,7 +36,28 @@
         .history-wrapper { display: none; background: rgba(0,0,0,0.02); border-radius: 15px; padding: 10px; margin-bottom: 15px; }
         .history-list { max-height: 200px; overflow-y: auto; font-size: 12px; }
         .acc-light { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+/* ป้องกัน Navbar ถูกดันเมื่อคีย์บอร์ดเปิด */
+@media screen and (max-height: 500px) {
+    .nav {
+        display: none; /* ซ่อนเมนูไปเลยขณะพิมพ์ เพื่อให้มีพื้นที่พิมพ์หมายเหตุมากขึ้น */
+    }
+}
 
+.nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--card);
+    display: flex;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    height: 70px;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 9999;
+    /* เพิ่มบรรทัดนี้เพื่อป้องกันการขยับ */
+    transform: translateZ(0); 
+}
         .nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); display: flex; border-top: 1px solid rgba(0,0,0,0.1); height: 75px; align-items: center; justify-content: space-around; z-index: 9999; }
         .nav-item { flex: 1; text-align: center; color: #94a3b8; font-size: 13px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
         .nav-item.active { color: var(--primary); font-weight: 500; }
@@ -78,16 +99,16 @@
         </div>
 
        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-    <div style="background: #fff7ed; padding: 15px 10px; border-radius: 20px; border: 3px solid #fb923c; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-        <div style="font-size: 12px; font-weight: 700; color: #b45309; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">📅 ค้างเดิม</div>
-        <div id="accOldText" style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1; letter-spacing: -0.5px;">
+    <div style="background: #fff7ed; padding: 15px 10px; border-radius: 20px; border: 3px solid #f97316; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+        <div style="font-size: 13px; font-weight: 800; color: #c2410c; margin-bottom: 5px;">📅 ค้างเดิม</div>
+        <div id="accOldText" style="font-size: 24px; font-weight: 900; color: #1e293b; line-height: 1;">
             ฿0
         </div>
     </div>
     
-    <div style="background: #f0f9ff; padding: 15px 10px; border-radius: 20px; border: 3px solid #38bdf8; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-        <div style="font-size: 12px; font-weight: 700; color: #0369a1; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">📅 วันนี้</div>
-        <div id="accTodayText" style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1; letter-spacing: -0.5px;">
+    <div style="background: #f0f9ff; padding: 15px 10px; border-radius: 20px; border: 3px solid #0ea5e9; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+        <div style="font-size: 13px; font-weight: 800; color: #0369a1; margin-bottom: 5px;">📅 วันนี้</div>
+        <div id="accTodayText" style="font-size: 24px; font-weight: 900; color: #1e293b; line-height: 1;">
             ฿0
         </div>
     </div>
@@ -253,39 +274,21 @@ function closeHistoryFull() {
   function loadAccountStatus() {
     const todaySettle = calcTodaySettle();
     const oldBal = account.balance || 0;
-    const net = oldBal + todaySettle;
-
-    // ดึงวันที่
-    const dStr = $("dateInp").value;
-    const dObj = new Date(dStr);
-    const dateToday = `${dObj.getDate()}/${dObj.getMonth()+1}/${(dObj.getFullYear()+543).toString().slice(-2)}`;
     
-    const dOldObj = new Date(dObj);
-    dOldObj.setDate(dObj.getDate() - 1);
-    const dateOld = `${dOldObj.getDate()}/${dOldObj.getMonth()+1}/${(dOldObj.getFullYear()+543).toString().slice(-2)}`;
-
-    // แสดงผลยอดค้างเดิม (ถ้าติดลบใช้สีน้ำเงิน ถ้าบวกใช้สีแดงเข้ม)
+    // ยอดค้างเดิม: ถ้าเป็นบวก (ช่างต้องคืนร้าน) ใช้สีแดง / ถ้าติดลบ (ร้านต้องคืนช่าง) ใช้สีน้ำเงิน
     $("accOldText").innerHTML = `
-        <span style="color: ${oldBal >= 0 ? '#be123c' : '#1d4ed8'};">฿${Math.abs(oldBal).toLocaleString()}</span>
-        <div style="font-size: 10px; font-weight: 600; color: #94a3b8; margin-top: 2px;">(${dateOld})</div>
+        <span style="color: ${oldBal >= 0 ? '#dc2626' : '#2563eb'};">฿${Math.abs(oldBal).toLocaleString()}</span>
     `;
 
-    // แสดงผลยอดวันนี้
+    // ยอดวันนี้
     $("accTodayText").innerHTML = `
-        <span style="color: ${todaySettle >= 0 ? '#be123c' : '#1d4ed8'};">฿${Math.abs(todaySettle).toLocaleString()}</span>
-        <div style="font-size: 10px; font-weight: 600; color: #94a3b8; margin-top: 2px;">(${dateToday})</div>
+        <span style="color: ${todaySettle >= 0 ? '#dc2626' : '#2563eb'};">฿${Math.abs(todaySettle).toLocaleString()}</span>
     `;
     
+    // ปรับยอด Net ตรงกลาง (ยอดสุทธิ)
+    const net = oldBal + todaySettle;
     $("accNet").innerText = Math.abs(net).toLocaleString();
-
-    // ปรับแถบสถานะให้ตัวหนาขึ้น
-    let txt = "✅ ยอดพอดี", cls = "status-green";
-    if (net > 0) { txt = `🚩 ช่างคืนร้าน ${Math.abs(net).toLocaleString()}`; cls = "status-red"; }
-    else if (net < 0) { txt = `🚩 ร้านคืนช่าง ${Math.abs(net).toLocaleString()}`; cls = "status-indigo"; }
-
-    $("accStatus").innerText = txt;
-    $("accStatus").style.fontWeight = "900";
-    $("accStatus").className = "status-bar " + cls;
+    $("accNet").parentElement.style.fontWeight = "900"; // ทำให้ตัว ฿0 หนาด้วย
 }
 
     function clearAccount(){
