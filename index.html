@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.9.7.5</title>
+    <title>Barber Note Pro v.9.7.6</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -70,46 +70,33 @@
 </div>
 
 <div id="p3" class="page">
-    <div id="accountSectionArea" style="display: flex; gap: 8px; margin-bottom: 15px;">
-        <div class="acc-left" style="flex: 1.4; background: var(--card); padding: 15px; border-radius: 20px; border-left: 5px solid #1e3a8a; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+    <div class="acc-split">
+        <div class="acc-left">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="margin:0; font-size:14px; color:var(--primary);">🧾 สถานะบัญชีปัจจุบัน</h3>
-                <div id="accLight" style="width:12px; height:12px; border-radius:50%; background:gray;"></div>
+                <h3 style="margin:0; font-size:14px; color:#b45309;">🧾 สถานบัญชี</h3>
+                <div id="accLight" class="acc-light" style="background:gray;"></div>
             </div>
-            
-            <div style="font-size:11px; color:#64748b; margin:10px 0; line-height: 1.6;">
-                <div id="accDetailOld">ยอดค้างเดิม: -</div>
-                <div id="accDetailToday">ยอดวันนี้: -</div>
+            <div style="font-size:11px; color:#64748b; margin:8px 0;">
+                ค้างเดิม: ฿<span id="accOld">0</span> | วันนี้: ฿<span id="accToday">0</span>
             </div>
-
-            <div style="border-top: 1px dashed #eee; margin: 8px 0;"></div>
-            <div style="font-size:12px; color:#64748b;">ผลลัพธ์สุทธิ:</div>
-            <div style="font-size:28px; font-weight:700; color:var(--text); margin: 2px 0;">฿<span id="accNet">0</span></div>
-            
-            <div id="accStatusText" class="status-bar" style="font-size:13px; padding:8px; margin:10px 0; border-radius:10px;">คำนวณ...</div>
-            
-            <input type="text" id="accNote" placeholder="ระบุหมายเหตุการเคลียร์" style="height:35px; font-size:12px; margin-bottom:8px; width:100%; box-sizing:border-box;">
-            <button class="btn-save" onclick="clearAccount()" style="margin:0; padding:12px; font-size:14px; background:var(--accent); border-radius:12px; width:100%; border:none; color:white; font-weight:600;">✅ ยืนยันเคลียร์เงินทั้งหมด</button>
+            <div style="font-size:26px; font-weight:700; color:#1e3a8a; margin-bottom:5px;">฿<span id="accNet">0</span></div>
+            <div id="accStatus" class="status-bar" style="font-size:12px; padding:6px; margin:5px 0;">ยอดพอดี</div>
+            <input type="date" id="accDate" style="height:35px; font-size:13px; margin-bottom:5px;">
+            <input type="text" id="accNote" placeholder="ระบุช่วงวันที่/หมายเหตุ" style="height:35px; font-size:12px; margin-bottom:8px; padding:0 8px;">
+            <button class="btn-save" onclick="clearAccount()" style="margin:0; padding:10px; font-size:14px; background:var(--accent); border-radius:10px;">ยืนยันเคลียร์เงิน</button>
         </div>
-
-        <div class="acc-right" style="flex: 1; background: var(--card); padding: 15px; border-radius: 20px; border-left: 5px solid var(--accent); box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <h3 style="margin:0; font-size:13px; color:var(--accent);"><i class="fas fa-history"></i> ประวัติเคลียร์</h3>
-            <div id="accHistory" style="max-height: 240px; overflow-y: auto; font-size: 11px; margin-top: 10px;"></div>
+        <div class="acc-right">
+            <h3 style="margin:0; font-size:13px; color:#047857;">🟢 ประวัติ</h3>
+            <div id="accHistory" class="history-list"></div>
         </div>
     </div>
 
-    <div class="card" style="border-top: 4px solid var(--primary);">
-        <label>เรียกดูประวัติรายวัน</label>
-        <input type="date" id="histDate" onchange="loadHistDaily()" style="margin-top:8px;">
-        <div id="histDailyArea" style="margin-top:15px"></div>
+    <div class="card" style="border-top: 4px solid var(--primary);"><label>เรียกดูประวัติรายวัน</label><input type="date" id="histDate" onchange="loadHistDaily()"><div id="histDailyArea" style="margin-top:15px"></div>
     </div>
-
     <div class="card" style="border-top: 4px solid var(--warning);">
         <label>สรุปสถิติรายเดือน</label>
-        <input type="month" id="histMonth" onchange="loadHistMonth()" style="margin-top:8px;">
-        <div id="histMonthArea" style="margin-top:15px"></div>
-    </div>
-</div>
+        <input type="month" id="histMonth" onchange="loadHistMonth()"><div id="histMonthArea" style="margin-top:15px"></div></div>
+</div> 
 
 <div id="modalSet" class="modal"><div class="modal-content"><h3>⚙️ ตั้งค่า</h3><label>ชื่อร้าน</label><input id="setShop">
 <div class="grid-2" style="margin-top:10px"><div><label>% แบ่ง</label><input type="number" id="setPerc"></div><div><label>ประกัน</label><input type="number" id="setGuar"></div></div>
