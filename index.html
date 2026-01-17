@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.9.7</title>
+    <title>Barber Note Pro v.9.7.1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -70,26 +70,36 @@
 </div>
 
 <div id="p3" class="page">
-    <div class="acc-split">
-        <div class="acc-left">
+    <div class="acc-split" style="display: flex; gap: 8px; margin-bottom: 15px;">
+        <div class="acc-left" style="flex: 1.4; background: var(--card); padding: 15px; border-radius: 20px; border-left: 5px solid #1e3a8a; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="margin:0; font-size:14px; color:#b45309;">🧾 สถานบัญชี</h3>
-                <div id="accLight" class="acc-light" style="background:gray;"></div>
+                <h3 style="margin:0; font-size:14px; color:var(--primary);">🧾 สถานะบัญชีปัจจุบัน</h3>
+                <div id="accLight" style="width:12px; height:12px; border-radius:50%; background:gray;"></div>
             </div>
-            <div style="font-size:11px; color:#64748b; margin:8px 0;">
-                ค้างเดิม: ฿<span id="accOld">0</span> | วันนี้: ฿<span id="accToday">0</span>
+            
+            <div style="font-size:11px; color:#64748b; margin:10px 0; line-height: 1.6;">
+                <div id="accDetailOld">ยอดค้างเดิม: -</div>
+                <div id="accDetailToday">ยอดวันนี้: -</div>
             </div>
-            <div style="font-size:26px; font-weight:700; color:#1e3a8a; margin-bottom:5px;">฿<span id="accNet">0</span></div>
-            <div id="accStatus" class="status-bar" style="font-size:12px; padding:6px; margin:5px 0;">ยอดพอดี</div>
-            <input type="date" id="accDate" style="height:35px; font-size:13px; margin-bottom:5px;">
-            <input type="text" id="accNote" placeholder="ระบุช่วงวันที่/หมายเหตุ" style="height:35px; font-size:12px; margin-bottom:8px; padding:0 8px;">
-            <button class="btn-save" onclick="clearAccount()" style="margin:0; padding:10px; font-size:14px; background:var(--accent); border-radius:10px;">ยืนยันเคลียร์เงิน</button>
+
+            <div style="border-top: 1px dashed #eee; margin: 8px 0;"></div>
+            <div id="accStatusLabel" style="font-size:12px; color:#64748b;">ผลลัพธ์สุทธิ:</div>
+            <div style="font-size:28px; font-weight:700; color:var(--text); margin: 2px 0;">฿<span id="accNet">0</span></div>
+            
+            <div id="accStatusText" class="status-bar" style="font-size:13px; padding:8px; margin:10px 0; border-radius:10px;">คำนวณ...</div>
+            
+            <input type="text" id="accNote" placeholder="ระบุหมายเหตุการเคลียร์" style="height:35px; font-size:12px; margin-bottom:8px;">
+            <button class="btn-save" onclick="clearAccount()" style="margin:0; padding:12px; font-size:14px; background:var(--accent); border-radius:12px; width:100%;">✅ ยืนยันเคลียร์เงินทั้งหมด</button>
         </div>
-        <div class="acc-right">
-            <h3 style="margin:0; font-size:13px; color:#047857;">🟢 ประวัติ</h3>
-            <div id="accHistory" class="history-list"></div>
+
+        <div class="acc-right" style="flex: 1; background: var(--card); padding: 15px; border-radius: 20px; border-left: 5px solid var(--accent); box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <h3 style="margin:0; font-size:13px; color:var(--accent);"><i class="fas fa-history"></i> ประวัติเคลียร์</h3>
+            <div id="accHistory" style="max-height: 240px; overflow-y: auto; font-size: 11px; margin-top: 10px;"></div>
         </div>
     </div>
+
+    <div class="card" style="border-top: 4px solid var(--primary);">...</div>
+</div>
 
     <div class="card" style="border-top: 4px solid var(--primary);"><label>เรียกดูประวัติรายวัน</label><input type="date" id="histDate" onchange="loadHistDaily()"><div id="histDailyArea" style="margin-top:15px"></div>
     </div>
@@ -172,67 +182,111 @@
         else { b.innerText="✅ ยอดพอดี"; b.className="status-bar status-green"; }
     }
 
-    // ฟังก์ชันคำนวณสถานบัญชีจากหน้า 2
-    function calcTodaySettle(){
-        const d = $("dateInp").value;
-        const today = db.filter(r=>r.date===d);
-        if(!today.length) return 0;
-        const tot = today.reduce((a,b)=>a+b.price,0);
-        const cash = today.filter(r=>r.pay==='Cash').reduce((a,b)=>a+b.price,0);
-        const bEarn = Math.max(tot*(conf.perc/100), conf.guar);
-        return cash - bEarn;
+   // ฟังก์ชันคำนวณยอดเงินจากหน้า 2 (Real-time)
+function getTodaySettleAmount() {
+    const d = $("dateInp").value;
+    const todayData = db.filter(r => r.date === d);
+    if (!todayData.length) return 0;
+
+    let total = 0, cash = 0;
+    todayData.forEach(r => {
+        total += r.price;
+        if (r.pay === 'Cash') cash += r.price;
+    });
+
+    // คำนวณส่วนแบ่งช่าง (Logic เดียวกับหน้า 2)
+    const barberEarn = Math.max(total * (conf.perc / 100), conf.guar);
+    return cash - barberEarn; // ถ้าค่าเป็น + คือช่างต้องคืนร้าน, ถ้าเป็น - คือร้านต้องคืนช่าง
+}
+
+// ฟังก์ชันอัปเดตสถานะบัญชีในหน้า 3
+function updateAccountDisplay() {
+    const todayAmt = getTodaySettleAmount();
+    const oldAmt = account.balance || 0;
+    const netAmt = oldAmt + todayAmt;
+
+    // ดึงวันที่จากหน้าบันทึก
+    const dateStr = $("dateInp").value;
+    const dObj = new Date(dateStr);
+    const dateThai = `${dObj.getDate()}/${dObj.getMonth()+1}/${(dObj.getFullYear()+543).toString().slice(-2)}`;
+
+    // แสดงผลตัวเลข
+    $("accDetailOld").innerText = `ค้างเดิม: ${oldAmt >= 0 ? 'ช่างคืนร้าน' : 'ร้านคืนช่าง'} ${Math.abs(oldAmt).toLocaleString()} บ.`;
+    $("accDetailToday").innerText = `วันนี้ (${dateThai}): ${todayAmt >= 0 ? 'ช่างคืนร้าน' : 'ร้านคืนช่าง'} ${Math.abs(todayAmt).toLocaleString()} บ.`;
+    $("accNet").innerText = Math.abs(netAmt).toLocaleString();
+
+    // ปรับเปลี่ยนสีและข้อความตามผลลัพธ์สุทธิ (ไม่ fix ข้อความ)
+    let statusTxt = "ยอดพอดี", statusCls = "status-green", lightColor = "#16a34a";
+
+    if (netAmt > 0) {
+        statusTxt = "🚩 สรุป: ช่างคืนร้าน";
+        statusCls = "status-red";
+        lightColor = "#dc2626";
+    } else if (netAmt < 0) {
+        statusTxt = "🚩 สรุป: ร้านคืนช่าง";
+        statusCls = "status-indigo";
+        lightColor = "#1e3a8a";
     }
 
-    function loadAccountStatus(){
-        const todaySettle = calcTodaySettle();
-        const net = (account.balance || 0) + todaySettle;
-        $("accOld").innerText = (account.balance || 0).toLocaleString();
-        $("accToday").innerText = todaySettle.toLocaleString();
-        $("accNet").innerText = Math.abs(net).toLocaleString();
+    $("accStatusText").innerText = statusTxt;
+    $("accStatusText").className = "status-bar " + statusCls;
+    $("accLight").style.background = lightColor;
+    
+    loadAccountHistory();
+}
 
-        let txt="✅ ยอดพอดี", cls="status-green", light="#16a34a";
-        if(net>0){ txt="🔴 ช่างค้างร้าน"; cls="status-red"; light="red"; }
-        if(net<0){ txt="🔵 ร้านค้างช่าง"; cls="status-indigo"; light="#4338ca"; }
+// แก้ไขฟังก์ชัน go(n) ให้เรียกอัปเดตบัญชีเมื่อเปิดหน้า 3
+function go(n) {
+    document.querySelectorAll('.page, .nav-item').forEach(el => el.classList.remove('active'));
+    $("p" + n).classList.add('active');
+    $("n" + n).classList.add('active');
+    
+    if (n === 2) renderDay();
+    if (n === 3) updateAccountDisplay(); // อัปเดตเมื่อเข้าหน้า 3
+}
 
-        $("accStatus").innerText = txt;
-        $("accStatus").className = "status-bar "+cls;
-        $("accLight").style.background = light;
-    }
+// ฟังก์ชันเคลียร์เงิน
+function clearAccount() {
+    const todayAmt = getTodaySettleAmount();
+    const netAmt = (account.balance || 0) + todayAmt;
+    if (netAmt === 0) return alert("ไม่มียอดค้างชำระ");
 
-    function clearAccount(){
-        const d = $("accDate").value;
-        if(!d) return alert("เลือกวันที่เคลียร์");
-        const net = (account.balance || 0) + calcTodaySettle();
+    if (confirm(`ยืนยันการเคลียร์ยอดจำนวน ${Math.abs(netAmt)} บาท?`)) {
+        const d = new Date();
+        const timestamp = `${d.getDate()}/${d.getMonth()+1} ${d.getHours()}:${d.getMinutes()}`;
         
+        // บันทึกประวัติ
         account.logs.unshift({
-            date: d,
-            amount: net,
+            date: timestamp,
+            amount: netAmt,
+            type: netAmt > 0 ? 'ช่างคืนร้าน' : 'ร้านคืนช่าง',
             note: $("accNote").value || "เคลียร์ยอดสะสม"
         });
 
-        // เมื่อเคลียร์แล้ว ยอดสะสมในอดีตจะเป็น 0 แต่เราต้องหักลบยอด "วันนี้" ออกด้วยเพื่อให้หน้า 3 เป็น 0 จริงๆ
-        account.balance = 0 - calcTodaySettle();
-        localStorage.setItem("barber_account",JSON.stringify(account));
+        // เซ็ตยอดค้างเดิมให้สัมพันธ์กับยอดวันนี้ เพื่อให้ Net เป็น 0
+        account.balance = 0 - todayAmt; 
+        localStorage.setItem("barber_account", JSON.stringify(account));
         
-        speak("เคลียร์เงินเรียบร้อย");
         $("accNote").value = "";
-        loadAccountHistory();
-        loadAccountStatus();
+        updateAccountDisplay();
+        speak("เคลียร์บัญชีเรียบร้อย");
     }
+}
 
-    function loadAccountHistory(){
-        const box = $("accHistory");
-        if(!account.logs.length){
-            box.innerHTML = "<center style='opacity:.4; padding-top:20px;'>ไม่มีประวัติ</center>";
-            return;
-        }
-        box.innerHTML = account.logs.map(l=>`
-            <div class="history-row" style="padding:8px 0; border-bottom:1px dashed #ddd;">
-                <b>${l.date}</b> | ฿${Math.abs(l.amount).toLocaleString()}
-                <div style="font-size:10px; opacity:.6">${l.note}</div>
-            </div>
-        `).join("");
+function loadAccountHistory() {
+    const box = $("accHistory");
+    if (!account.logs || !account.logs.length) {
+        box.innerHTML = "<center style='opacity:0.3; margin-top:20px;'>ไม่มีประวัติ</center>";
+        return;
     }
+    box.innerHTML = account.logs.map(l => `
+        <div style="padding:8px 0; border-bottom:1px dashed #eee;">
+            <b style="color:var(--primary)">${l.date}</b><br>
+            <span>${l.type}: <b>${Math.abs(l.amount)}.-</b></span><br>
+            <span style="opacity:0.6; font-size:10px;">${l.note}</span>
+        </div>
+    `).join("");
+}
 
     function delRec(id) {
         if(confirm("ลบรายการนี้?")) {
