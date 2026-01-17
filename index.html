@@ -20,12 +20,9 @@
         input, select { width: 100%; height: 45px; padding: 8px 12px; border-radius: 12px; border: 1px solid transparent; font-size: 18px; box-sizing: border-box; background: var(--input-bg); color: var(--text); outline: none; font-family: 'Kanit'; }
         #dateInp { background: #e0f2fe !important; border: 1px solid #bae6fd !important; }
         .time-input { background: #f0f9ff !important; border: 1px solid #bae6fd !important; text-align: center; font-weight: 600; }
-        #mainSvc, #hairStyle { background: #f0fdf4 !important; border: 1px solid #bbf7d0 !important; }
-        #extra1, #extra2 { background: #f5f3ff !important; border: 1px solid #ddd6fe !important; }
-        #priceInp { background: #fffbeb !important; border: 1px solid #fef3c7 !important; }
         .btn-pay { border: 2px solid transparent; background: var(--input-bg); color: var(--text); padding: 8px 5px; border-radius: 12px; font-weight: 500; cursor: pointer; transition: 0.2s; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 4px; }
-        .active-cash { border: 3px solid #16a34a !important; color: #14532d !important; background: #dcfce7 !important; font-weight: 600; }
-        .active-transfer { border: 3px solid #0284c7 !important; color: #0c4a6e !important; background: #e0f2fe !important; font-weight: 600; }
+        .active-cash { border: 3px solid #16a34a !important; color: #14532d !important; background: #dcfce7 !important; }
+        .active-transfer { border: 3px solid #0284c7 !important; color: #0c4a6e !important; background: #e0f2fe !important; }
         .status-bar { width: 100%; padding: 15px; border-radius: 15px; text-align: center; font-weight: 600; font-size: 16px; margin: 10px 0; box-sizing: border-box; }
         .status-red { background: #fee2e2; color: #dc2626; } .status-green { background: #dcfce7; color: #16a34a; }
         .status-blue { background: #e0f2fe; color: #0284c7; } .status-indigo { background: #e0e7ff; color: #4338ca; }
@@ -36,13 +33,14 @@
         .btn-close-day { position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px; border-radius: 30px; background: #818cf8; color: white; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 99; font-size: 24px; }
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
         .modal-content { background: var(--card); width: 100%; border-radius: 25px; padding: 22px; max-height: 85vh; overflow-y: auto; }
-        .badge { background: rgba(0,0,0,0.05); padding: 4px 10px; border-radius: 8px; font-size: 12px; margin: 2px; display: inline-block; color: var(--primary); }
+        .color-dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid #ddd; display: inline-block; margin: 5px; }
         .history-row { padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.03); font-size: 14px; }
-        .color-dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid #ddd; display: inline-block; }
+        .badge { background: rgba(0,0,0,0.05); padding: 4px 10px; border-radius: 8px; font-size: 12px; margin: 2px; display: inline-block; color: var(--primary); }
     </style>
 </head>
 <body id="mainBody">
 <header><div style="width:40px"></div><h1 id="shopNameDisp">Barber Note</h1><div onclick="openSettings()" style="cursor:pointer"><i class="fas fa-cog"></i></div></header>
+
 <div id="p1" class="page active">
     <div class="card" style="border-left: 5px solid #0ea5e9;"><input type="date" id="dateInp" style="margin-bottom:15px"><div class="grid-2"><div><label>เริ่ม</label><input type="tel" id="tStart" placeholder="0900" class="time-input" maxlength="4"></div><div><label>เสร็จ</label><input type="tel" id="tEnd" placeholder="0930" class="time-input" maxlength="4"></div></div></div>
     <div class="card" style="border-left: 5px solid #10b981;"><div class="grid-2" style="margin-bottom:10px"><select id="mainSvc"><option value="">ไม่เลือก</option><option value="เด็ก">เด็ก</option></select><select id="hairStyle"><option value="">ทรงผม</option><option>รองทรง</option><option>แฟชั่น</option><option>สกินเฟด</option><option>เปิดข้าง</option><option>วินเทจ</option><option>ตำรวจ/ทหาร</option><option>ทรงนักเรียน</option><option>แก้ทรงผม</option></select></div>
@@ -50,19 +48,26 @@
     <div class="card" style="border-left: 5px solid #f59e0b;"><input type="number" id="priceInp" placeholder="0" inputmode="numeric" style="font-size:40px; font-weight:600; color:#b45309; text-align:center; height:80px;"><div class="grid-2" style="margin-top:15px"><button id="btnCash" class="btn-pay" onclick="selectPay('Cash')"><i class="fas fa-money-bill-wave"></i> สด</button><button id="btnTrans" class="btn-pay" onclick="selectPay('Trans')"><i class="fas fa-mobile-alt"></i> โอน</button></div></div>
     <button class="btn-save" id="mainSaveBtn" onclick="handleSave()">บันทึกข้อมูล</button>
 </div>
+
 <div id="p2" class="page">
     <div class="grid-2"><div class="card" style="text-align: center;"><label>ยอดรวม</label><div id="dTotal" style="font-size:28px; font-weight:600">0</div><div id="dCounts" style="color:var(--primary)">ลูกค้า: 0 คน</div></div><div class="card"><div>📱 โอน: <b id="dTrans">0</b></div><div>🤵 ช่าง: <b id="dBarber">0</b></div><div>🏠 ร้าน: <b id="dShop">0</b></div></div></div>
     <div id="settleBar" class="status-bar status-blue">ยอดพอดี</div>
     <div class="card"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><label>รายการวันนี้</label><i class="fab fa-line" style="color:#06C755; font-size:24px; cursor:pointer" onclick="shareLine()"></i></div><div id="dServiceStats"></div><div id="dailyList"></div></div>
     <button class="btn-close-day" onclick="closeDay()"><i class="fas fa-check-circle"></i></button>
 </div>
-<div id="p3" class="page"><div class="card"><label>ประวัติรายวัน</label><input type="date" id="histDate" onchange="loadHistDaily()"><div id="histDailyArea"></div></div><div class="card"><label>สถิติรายเดือน</label><input type="month" id="histMonth" onchange="loadHistMonth()"><div id="histMonthArea"></div></div></div>
-<div id="modalSet" class="modal"><div class="modal-content"><h3>⚙️ ตั้งค่า</h3><label>ชื่อร้าน</label><input id="setShop"><div class="grid-2" style="margin-top:10px"><div><label>% แบ่ง</label><input type="number" id="setPerc"></div><div><label>ประกัน</label><input type="number" id="setGuar"></div></div>
+
+<div id="p3" class="page"><div class="card"><label>ประวัติรายวัน</label><input type="date" id="histDate" onchange="loadHistDaily()"><div id="histDailyArea"></div></div></div>
+
+<div id="modalSet" class="modal"><div class="modal-content"><h3>⚙️ ตั้งค่า</h3><label>ชื่อร้าน</label><input id="setShop">
+<div class="grid-2" style="margin-top:10px"><div><label>% แบ่ง</label><input type="number" id="setPerc"></div><div><label>ประกัน</label><input type="number" id="setGuar"></div></div>
 <div class="grid-2" style="margin-top:15px"><div><label>🔊 เสียง</label><select id="setSound"><option value="on">เปิด</option><option value="off">ปิด</option></select></div><div><label>🎚️ เสียงพูด</label><select id="setVoice"><option value="female">👩 หญิง</option><option value="male">👨 ชาย</option></select></div></div>
 <label style="margin-top:15px">ธีม</label><select id="setTheme" onchange="changeTheme(this.value)"><option value="light">Light</option><option value="dark">Dark</option><option value="pastel">Pastel</option></select>
-<div id="colorPicker" style="display: flex; gap: 8px; margin-top: 10px;"><div class="color-dot" style="background:#fdf2f8" onclick="setBg('#fdf2f8')"></div><div class="color-dot" style="background:#f0fdf4" onclick="setBg('#f0fdf4')"></div><div class="color-dot" style="background:#f1f5f9" onclick="setBg('#f1f5f9')"></div></div>
+<div style="margin-top:10px"><label>เลือกสีพื้นหลัง (7 สี)</label><br>
+    <div class="color-dot" style="background:#fdf2f8" onclick="setBg('#fdf2f8')"></div><div class="color-dot" style="background:#f0fdf4" onclick="setBg('#f0fdf4')"></div><div class="color-dot" style="background:#f0f9ff" onclick="setBg('#f0f9ff')"></div><div class="color-dot" style="background:#fffbeb" onclick="setBg('#fffbeb')"></div><div class="color-dot" style="background:#faf5ff" onclick="setBg('#faf5ff')"></div><div class="color-dot" style="background:#f1f5f9" onclick="setBg('#f1f5f9')"></div><div class="color-dot" style="background:#ffffff; border:1px solid #ccc" onclick="setBg('#ffffff')"></div>
+</div>
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;"><button class="btn-save" onclick="saveSettings()" style="margin:0">บันทึก</button><button onclick="closeSettings()" style="border-radius:10px; border: 1px solid var(--border)">ปิด</button></div>
 <button onclick="clearAllData()" style="width:100%; background:none; border:none; color:red; margin-top:20px; font-size:12px; opacity:0.5">ล้างข้อมูลทั้งหมด</button></div></div>
+
 <nav class="nav"><div class="nav-item active" id="n1" onclick="go(1)"><i class="fas fa-edit"></i>บันทึก</div><div class="nav-item" id="n2" onclick="go(2)"><i class="fas fa-calendar-check"></i>รายวัน</div><div class="nav-item" id="n3" onclick="go(3)"><i class="fas fa-history"></i>สถิติ</div></nav>
 <script>
     let payMethod="", conf=JSON.parse(localStorage.getItem("barber_conf"))||{shop:"Barber Shop",perc:50,guar:0,theme:"light",bg:"#f1f5f9",sound:"on",voice:"female"}, db=JSON.parse(localStorage.getItem("barber_db"))||[], archives=JSON.parse(localStorage.getItem("barber_arc"))||[];
@@ -113,10 +118,15 @@
     }
     function shareLine(){
         const d=$("dateInp").value, today=db.filter(r=>r.date===d); if(!today.length)return;
-        let tot=0, cash=0, trans=0, msg=`💈 ${conf.shop}\n📅 ${d}\n---\n`;
-        today.forEach((r,i)=>{ tot+=r.price; r.pay==='Cash'?cash+=r.price:trans+=r.price; let name=r.hair||r.svcs[0]; if(r.mainSvc.includes("เด็ก"))name+="(เด็ก)"; msg+=`${i+1}. [${r.time}] ${name}=${r.price}${r.pay==='Cash'?'💵':'📱'}\n`; });
+        let tot=0, trans=0, cash=0, msg=`💈 รายงานร้าน: ${conf.shop}\n📅 วันที่: ${d}\n-------------------------\n📝 จำนวนลูกค้า (รวม ${today.length} คน):\n`;
+        let kids = 0;
+        today.forEach((r,i)=>{ 
+            tot+=r.price; if(r.pay==='Trans') trans+=r.price; else cash+=r.price;
+            let name=r.hair||r.svcs[0]; if(r.mainSvc==="เด็ก") { name+="(เด็ก)"; kids++; }
+            msg+=`${i+1}. [${r.time}] ${name} = ${r.price} ${r.pay==='Cash'?'💵':'📱'}\n`;
+        });
         const bE=Math.max(tot*(conf.perc/100),conf.guar), settle=cash-bE;
-        msg+=`---\n💰 รวม: ${tot}\n🤵 ช่าง: ${Math.floor(bE)}\n🏠 ร้าน: ${Math.floor(tot-bE)}\n⚠️ ${settle>0?'คืนร้าน ':'คืนช่าง '}${Math.floor(Math.abs(settle))}`;
+        msg+=`-------------------------\n📊 สรุปงาน:\n🧒 เด็ก: ${kids} คน\n-------------------------\n💰 ยอดรวม: ${tot} บาท\n📱 ยอดโอน: ${trans} บาท\n🤵 ช่าง: ${Math.floor(bE)} บาท\n🏠 ร้าน: ${Math.floor(tot-bE)} บาท\n-------------------------\n⚠️ ${settle>0?'ช่างคืนเงินให้ร้าน ':'ร้านคืนเงินให้ช่าง '}${Math.floor(Math.abs(settle))} บาท`;
         window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`);
     }
     function openSettings(){ $("modalSet").style.display="flex"; $("setShop").value=conf.shop; $("setPerc").value=conf.perc; $("setGuar").value=conf.guar; $("setTheme").value=conf.theme; $("setSound").value=conf.sound; $("setVoice").value=conf.voice; }
