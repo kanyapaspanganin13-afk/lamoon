@@ -100,29 +100,68 @@
         let sH=""; for(let s in stats) sH+=`<span class="badge">${s}: ${stats[s]}</span>`; $("dServiceStats").innerHTML=sH;
         const b=$("settleBar"); if(tot===0){ b.innerText="🟦 ร้านจ่ายประกัน"; b.className="status-bar status-blue"; } else if(settle>0){ b.innerText=`🟥 ช่างคืนร้าน ฿${Math.floor(settle).toLocaleString()}`; b.className="status-bar status-red"; } else if(settle<0){ b.innerText=`🟦 ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; b.className="status-bar status-indigo"; } else { b.innerText="✅ ยอดพอดี"; b.className="status-bar status-green"; }
     }
-    function delRec(id){ if(confirm("ลบรายการนี้?")){ db=db.filter(r=>r.id!==id); localStorage.setItem("barber_db",JSON.stringify(db)); renderDay(); } }
-    function closeDay(){
-        const d=$("dateInp").value, today=db.filter(r=>r.date===d); if(!today.length)return;
-        if(confirm("ปิดยอดวันนี้?")){
-            const tot=today.reduce((a,b)=>a+b.price,0), cash=today.filter(r=>r.pay==='Cash').reduce((a,b)=>a+b.price,0), bEarn=Math.max(tot*(conf.perc/100),conf.guar);
-            let s={}; today.forEach(r=>r.svcs.forEach(v=>s[v]=(s[v]||0)+1));
-            archives=archives.filter(a=>a.date!==d); archives.push({date:d,total:tot,cash,barber:bEarn,shop:tot-bEarn,settle:cash-bEarn,count:today.length,details:today,stats:s});
-            localStorage.setItem("barber_arc",JSON.stringify(archives)); db=db.filter(r=>r.date!==d); localStorage.setItem("barber_db",JSON.stringify(db)); speak("ส่งรายงานสำเร็จ"); go(3);
+    function delRec(id) {
+        if(confirm("ลบรายการนี้?")) {db = db.filter(r => r.id !== id);localStorage.setItem("barber_db", JSON.stringify(db)); speak("ลบรายการสำเร็จ");renderDay(); }
+    }
+    function closeDay() {const d = document.getElementById("dateInp").value;const today = db.filter(r => r.date === d);if(!today.length) return alert("ไม่มีข้อมูล");if(confirm("ปิดยอดวันนี้และส่งไปหน้าสถิติ?")) {
+    const tot = today.reduce((a,b) => a+b.price, 0);const cash = today.filter(r=>r.pay==='Cash').reduce((a,b)=>a+b.price, 0);const bEarn = Math.max(tot * (conf.perc/100), conf.guar);
+    let dailyStats = {};today.forEach(r => {r.svcs.forEach(s => { dailyStats[s] = (dailyStats[s] || 0) + 1;});});
+    const arc = {date: d, total: tot, cash: cash, barber: bEarn, shop: tot - bEarn, settle: cash - bEarn, count: today.length, details: today, stats: dailyStats }; archives = archives.filter(a => a.date !== d);archives.push(arc);localStorage.setItem("barber_arc", JSON.stringify(archives));db = db.filter(r => r.date !== d);localStorage.setItem("barber_db", JSON.stringify(db));
+    speak("ส่งรายงานวันนี้สำเร็จ");alert("ส่งรายงานสำเร็จ!");go(3);}
+    }
+    function loadHistDaily() {
+        const d = document.getElementById("histDate").value;const found = archives.find(a => a.date === d); area = document.getElementById("histDailyArea"); if(!found) { area.innerHTML = "<center style='color:#ccc; padding:20px;'>ไม่พบข้อมูล</center>"; return; }
+         let rows = found.details.map(r => `<div class="history-row" style="font-size:13px;"><div style="display:flex; justify-content:space-between"><b>${r.time} | ${r.svcs.join('+')}</b> <b>฿${r.price}</b></div><div style="font-size:13px; font-weight:600; color:var(--text);">${r.hair || ''} <span style="font-weight:300; opacity:0.6">(${r.pay==='Cash'?'เงินสด':'โอน'})</span></div>
+        </div>`).join('');let statBadges = "";if (found.stats) {for(let s in found.stats) { statBadges += `<span class="badge" style="background:#eee; color:#333; margin-right:4px;">${s}: ${found.stats[s]}</span>`; }
         }
+        const settle = found.settle || 0;const cash = found.cash || 0;const settleText = settle > 0 ? `ช่างคืนร้าน: ฿${Math.floor(settle).toLocaleString()}` : settle < 0 ? `ร้านคืนช่าง: ฿${Math.floor(Math.abs(settle)).toLocaleString()}` : "ยอดพอดี";
+        const settleClass = settle > 0 ? "status-red" : settle < 0 ? "status-indigo" : "status-green";
+        area.innerHTML = `
+            <div style="background:var(--input-bg); padding:15px; border-radius:15px;">
+                <div class="status-bar ${settleClass}" style="padding:8px; font-size:13px; margin-bottom:10px;">${settleText}</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:15px; font-size:13px;">
+                    <div>ยอดรวม: <b>${found.total.toLocaleString()}</b></div>
+                    <div>เงินสด: <b>${cash.toLocaleString()}</b></div>
+                    <div>ช่างได้: <b>${Math.floor(found.barber).toLocaleString()}</b></div>
+                    <div>ร้านได้: <b>${Math.floor(found.shop).toLocaleString()}</b></div>
+                </div>
+                <div style="margin-bottom:15px; display:flex; flex-wrap:wrap; gap:4px;">${statBadges}</div>
+                <div style="border-top:1px dashed #ccc; padding-top:10px;">${rows}</div>
+            </div>`;
     }
-    function loadHistDaily(){
-        const d=$("histDate").value, f=archives.find(a=>a.date===d); if(!f){ $("histDailyArea").innerHTML="<center>ไม่พบข้อมูล</center>"; return; }
-        let rs=f.details.map(r=>`<div class="history-row"><div style="display:flex; justify-content:space-between"><b>${r.time} | ${r.svcs.join('+')}</b><b>฿${r.price}</b></div><div>${r.hair||''} (${r.pay==='Cash'?'สด':'โอน'})</div></div>`).join('');
-        $("histDailyArea").innerHTML=`<div style="background:var(--input-bg); padding:10px; border-radius:10px; margin-top:10px"><div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; font-size:12px"><div>ยอด: ${f.total}</div><div>ช่าง: ${Math.floor(f.barber)}</div></div><div style="border-top:1px dashed #ccc; margin-top:5px">${rs}</div></div>`;
+
+    function loadHistMonth() {
+        const m = document.getElementById("histMonth").value;
+        const area = document.getElementById("histMonthArea");
+        if(!m) return;
+        const filtered = archives.filter(a => a.date.startsWith(m));
+        if(!filtered.length) { area.innerHTML = "<center style='color:#ccc; padding:20px;'>ไม่มีข้อมูล</center>"; return; }
+        
+        let tot = 0, bTot = 0, cTot = 0, monthStats = {};
+        filtered.forEach(a => { 
+            tot += a.total; bTot += a.barber; cTot += a.count;
+            if(a.stats) { for(let s in a.stats) { monthStats[s] = (monthStats[s] || 0) + a.stats[s]; } }
+        });
+
+        let monthStatBadges = "";
+        for(let s in monthStats) { monthStatBadges += `<span class="badge" style="background:var(--indigo); color:white; font-weight:300;">${s}: ${monthStats[s]}</span>`; }
+
+        area.innerHTML = `
+            <div style="padding:15px; background:var(--input-bg); border-radius:15px;">
+                <div style="font-size:20px; margin-bottom:10px;">รายได้รวม: <b style="color:var(--primary)">฿${tot.toLocaleString()}</b></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px; opacity:0.8;">
+                    <div>ช่างรวม: <b>฿${Math.floor(bTot).toLocaleString()}</b></div>
+                    <div>ร้านรวม: <b>฿${Math.floor(tot-bTot).toLocaleString()}</b></div>
+                    <div>ลูกค้าสะสม: <b>${cTot} คน</b></div>
+                    <div>วันที่บันทึก: <b>${filtered.length} วัน</b></div>
+                </div>
+                <div style="margin-top:15px; border-top:1px dashed #ccc; padding-top:10px;">
+                    <label style="font-size:11px; opacity:0.6;">สถิติบริการรวมทั้งเดือน:</label>
+                    <div style="margin-top:5px;">${monthStatBadges || '<span style="opacity:0.4">ไม่มีข้อมูลสถิติ</span>'}</div>
+                </div>
+            </div>`;
     }
-    function renderMonthly() {
-    const m = $("monthFilter") ? $("monthFilter").value : new Date().toISOString().slice(5, 7);const monthlyData = db.filter(r => r.date.split('-')[1] === m);
-    let total = 0, html = "";let dailySum = {};monthlyData.forEach(r => {dailySum[r.date] = (dailySum[r.date] || 0) + r.price; total += r.price;
-    });
-    for (let date in dailySum) { html += `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid var(--border);"><span>${date}</span><b>฿${dailySum[date].toLocaleString()}</b></div>`;
-    }
-    $("monthlyList").innerHTML = html || "<center>ไม่มีข้อมูลเดือนนี้</center>";$("monthTotal").innerText = total.toLocaleString();
-}
+
     function shareLine() {
     const d = $("dateInp").value, today = db.filter(r => r.date === d);if (!today.length) return;
     let tot = 0, trans = 0, cash = 0, counts = {"เด็ก":0, "สระผม":0, "โกนหนวด":0, "ย้อมผม":0};
