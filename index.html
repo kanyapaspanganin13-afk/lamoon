@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.1 (Updated)</title>
+    <title>Barber Note Pro v.12 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -54,7 +54,7 @@
 
 <div id="p1" class="page active">
     <div class="card" style="border-left: 5px solid #0ea5e9;"><input type="date" id="dateInp" style="margin-bottom:15px"><div class="grid-2"><div><label>เริ่ม</label><input type="tel" id="tStart" placeholder="0900" class="time-input" maxlength="4"></div><div><label>เสร็จ</label><input type="tel" id="tEnd" placeholder="0930" class="time-input" maxlength="4"></div></div></div>
-    <div class="card" style="border-left: 5px solid #10b981;"><div class="grid-2" style="margin-bottom:10px"><select id="mainSvc"><option value="">ไม่เลือก</option><option value="เด็ก">เด็ก</option></select><select id="hairStyle"><option value="">ทรงผม</option><option>รองทรง</option><option>แฟชั่น</option><option>สกินเฟด</option><option>เปิดข้าง</option><option>วินเทจ</option><option>ตำรวจ/ทหาร</option><option>ทรงนักเรียน</option><option>แก้ทรงผม</option></select></div>
+    <div class="card" style="border-left: 5px solid #10b981;"><div class="grid-2" style="margin-bottom:10px"><select id="mainSvc"><option value="">ไม่เลือก</option><option value="เด็ก">เด็ก</option></select><select id="hairStyle"><option value="">ไม่เลือก</option><option>รองทรง</option><option>แฟชั่น</option><option>สกินเฟด</option><option>เปิดข้าง</option><option>วินเทจ</option><option>ตำรวจ/ทหาร</option><option>ทรงนักเรียน</option><option>แก้ทรงผม</option></select></div>
     <div class="grid-2"><select id="extra1"><option value="">บริการอื่น 1</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>โกนผม</option></select><select id="extra2"><option value="">บริการอื่น 2</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>โกนผม</option></select></div></div>
     <div class="card" style="border-left: 5px solid #f59e0b;"><input type="number" id="priceInp" placeholder="0" inputmode="numeric" style="font-size:40px; font-weight:600; color:#b45309; text-align:center; height:80px;"><div class="grid-2" style="margin-top:15px"><button id="btnCash" class="btn-pay" onclick="selectPay('Cash')"><i class="fas fa-money-bill-wave"></i> สด</button><button id="btnTrans" class="btn-pay" onclick="selectPay('Trans')"><i class="fas fa-mobile-alt"></i> โอน</button></div></div>
     <button class="btn-save" id="mainSaveBtn" onclick="handleSave()">บันทึกข้อมูล</button>
@@ -196,9 +196,11 @@
         today.sort((a,b)=>a.time.localeCompare(b.time)).forEach(r=>{
             tot+=r.price; 
             r.pay==='Trans' ? trans+=r.price : cash+=r.price; 
-            const isCutting = r.svcs.includes("ตัดผม") || r.svcs.includes("เด็ก") || (r.hair && r.hair.trim() !== "");
-            if (isCutting) stats["ตัดผม"] = (stats["ตัดผม"] || 0) + 1;
-            r.svcs.forEach(s => { if (s === "เด็ก") stats["เด็ก"] = (stats["เด็ก"] || 0) + 1; else if (s !== "ตัดผม") stats[s] = (stats[s] || 0) + 1; });
+            // นับงานตัด (isCutting) และบริการเสริม (s) แบบไม่ซ้ำซ้อน
+if (r.hair || r.svcs.includes("เด็ก") || r.mainSvc === "ตัดผม") stats["ตัดผม"] = (stats["ตัดผม"] || 0) + 1;
+if (r.hair) stats["ทรง:" + r.hair] = (stats["ทรง:" + r.hair] || 0) + 1;
+else if (r.svcs.includes("เด็ก")) stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
+r.svcs.forEach(s => { if (s !== "เด็ก" && s !== "ตัดผม") stats[s] = (stats[s] || 0) + 1; });
             listHtml += `<div class="history-row"><div style="display:flex; justify-content:space-between"><span>${r.time} | ${r.svcs.join('+')}</span><b>฿${r.price}</b></div><div style="display:flex; justify-content:space-between; opacity:0.7"><span>${r.hair||''}</span><span>${r.pay==='Cash'?'💵 สด':'📱 โอน'} <i class="fas fa-trash" style="margin-left:10px; color:var(--danger)" onclick="delRec(${r.id})"></i></span></div></div>`;
         });
         const bEarn=Math.max(tot*(conf.perc/100),conf.guar), sEarn=tot-bEarn, settle=cash-bEarn;
@@ -213,7 +215,7 @@
         else { b.innerText="✅ ยอดพอดี"; b.className="status-bar status-green"; }
     }
 
-    function calcTodaySettle(){
+        function calcTodaySettle(){
         const d = $("dateInp").value;
         const today = db.filter(r=>r.date===d);
         if(!today.length) return 0;
@@ -222,19 +224,9 @@
         const bEarn = Math.max(tot*(conf.perc/100), conf.guar);
         return cash - bEarn;
     }
-
-    // แก้ไขฟังก์ชันเดิมให้เป็นการเปิด Pop-up แทน
-function toggleAccHistory() {
-    const panel = $("historyPanel");
-    const box = $("accHistoryFull");
-    panel.style.display = "flex";
-
-    if(!account.logs.length){
-        box.innerHTML = "<center style='opacity:.4; padding:50px;'>ไม่มีประวัติการเคลียร์เงิน</center>";
-        return;
+    function toggleAccHistory() { const panel = $("historyPanel"); const box = $("accHistoryFull"); panel.style.display = "flex";
+    if(!account.logs.length){ box.innerHTML = "<center style='opacity:.4; padding:50px;'>ไม่มีประวัติการเคลียร์เงิน</center>"; return;
     }
-
-    // สร้างรายการประวัติแบบขยายใหญ่
     box.innerHTML = account.logs.map(l => `
         <div style="padding:15px; border-bottom:1px solid rgba(0,0,0,0.05); margin-bottom:12px; background:var(--input-bg); border-radius:15px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -299,10 +291,11 @@ function closeHistoryFull() {
             const cash = today.filter(r=>r.pay==='Cash').reduce((a,b)=>a+b.price, 0);
             const bEarn = Math.max(tot * (conf.perc/100), conf.guar);
             let dailyStats = {};
-            today.forEach(r => { 
-                r.svcs.forEach(s => { dailyStats[s] = (dailyStats[s] || 0) + 1; if(s === "เด็ก") dailyStats["ตัดผม"] = (dailyStats["ตัดผม"] || 0) + 1; }); 
-                if(r.hair) { dailyStats["ตัดผม"] = (dailyStats["ตัดผม"] || 0) + 1; dailyStats["ทรง:" + r.hair] = (dailyStats["ทรง:" + r.hair] || 0) + 1; }
-            }); 
+           today.forEach(r => {if (r.hair || r.svcs.includes("เด็ก") || r.mainSvc === "ตัดผม") dailyStats["ตัดผม"] = (dailyStats["ตัดผม"] || 0) + 1;
+        if (r.hair) dailyStats["ทรง:" + r.hair] = (dailyStats["ทรง:" + r.hair] || 0) + 1;
+        else if (r.svcs.includes("เด็ก")) dailyStats["เด็ก"] = (dailyStats["เด็ก"] || 0) + 1;
+        r.svcs.forEach(s => { if (s !== "เด็ก" && s !== "ตัดผม") dailyStats[s] = (dailyStats[s] || 0) + 1; });
+        });
             archives = archives.filter(a => a.date !== d);
             archives.push({date: d, total: tot, cash: cash, barber: bEarn, shop: tot-bEarn, settle: cash-bEarn, count: today.length, details: today, stats: dailyStats});
             account.balance = (account.balance || 0) + (cash - bEarn);
