@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.9.7.4</title>
+    <title>Barber Note Pro v.9.7.5</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -223,26 +223,27 @@
     }
 
     function clearAccount(){
-        const d = $("accDate").value;
-        if(!d) return alert("เลือกวันที่เคลียร์");
-        const net = (account.balance || 0) + calcTodaySettle();
-        
-        account.logs.unshift({
-            date: d,
-            amount: net,
-            note: $("accNote").value || "เคลียร์ยอดสะสม"
-        });
+    const d = $("accDate").value;
+    if(!d) return alert("เลือกวันที่เคลียร์");
 
-        // เมื่อเคลียร์แล้ว ยอดสะสมในอดีตจะเป็น 0 แต่เราต้องหักลบยอด "วันนี้" ออกด้วยเพื่อให้หน้า 3 เป็น 0 จริงๆ
-        account.balance = 0 - calcTodaySettle();
-        localStorage.setItem("barber_account",JSON.stringify(account));
-        
-        speak("เคลียร์เงินเรียบร้อย");
-        $("accNote").value = "";
-        loadAccountHistory();
-        loadAccountStatus();
-    }
+    const net = (account.balance || 0) + calcTodaySettle();
 
+    account.logs.unshift({
+        date: d,
+        amount: net,
+        note: $("accNote").value || "เคลียร์ยอดสะสม"
+    });
+
+    // เคลียร์ = ตั้งยอดสะสมเป็น 0 จริง
+    account.balance = 0;
+
+    localStorage.setItem("barber_account", JSON.stringify(account));
+
+    speak("เคลียร์เงินเรียบร้อย");
+    $("accNote").value = "";
+    loadAccountHistory();
+    loadAccountStatus();
+}
     function loadAccountHistory(){
         const box = $("accHistory");
         if(!account.logs.length){
