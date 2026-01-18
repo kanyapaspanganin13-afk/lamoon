@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.3.3 (Updated)</title>
+    <title>Barber Note Pro v.11.3.4 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
  <style>
@@ -204,7 +204,11 @@
 /* ปรับสไตล์ปุ่มดูประวัติใน Card ให้เด่นขึ้น */
 .btn-toggle-history { width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--primary); background: #f0f7ff; color: var(--primary); cursor: pointer; font-family: 'Kanit'; }
 </style>
-
+<div class="nav">
+        <div class="nav-item active" onclick="go(1, this)"><i class="fa-solid fa-edit"></i>บันทึก</div>
+        <div class="nav-item" onclick="go(2, this)"><i class="fa-solid fa-calendar-day"></i>รายวัน</div>
+        <div class="nav-item" onclick="go(3, this)"><i class="fa-solid fa-chart-line"></i>สถิติ</div>
+    </div>
     <div id="modalSet" class="modal">
         <div class="modal-content">
             <h3>⚙️ ตั้งค่า</h3>
