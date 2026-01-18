@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12.3.3 (Updated)</title>
+    <title>Barber Note Pro v.13(Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -50,8 +50,8 @@
     </style>
 </head>
 <body id="mainBody">
-<header><div style="width:40px"></div><h1 id="shopNameDisp">Barber Note</h1><div onclick="openSettings()" style="cursor:pointer"><i class="fas fa-cog"></i></div></header>
-  
+<header><div style="width:40px"></div><h1 id="shopNameDisp">Barber Note</h1><div onclick="openSettings()" style="cursor:pointer"><i class="fas fa-cog"></i></div></header>  
+
 <div id="p1" class="page active">
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; padding: 5px;">
         <div style="position: relative; background: #e0f2fe; border: 1px solid #bae6fd; border-radius: 12px; padding: 12px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer;">
@@ -68,7 +68,7 @@
             <span style="font-size: 10px; font-weight: 800; color: #be185d;">บันทึกวันหยุด</span>
         </div>
     </div>
-    </div>
+
     <div class="card" style="border-left: 5px solid #0ea5e9; padding: 10px 15px;">
         <div class="grid-2">
             <div><label style="font-size:12px">เริ่ม</label><input type="tel" id="tStart" placeholder="0900" class="time-input" maxlength="4"></div>
@@ -76,12 +76,26 @@
         </div>
     </div>
 
-    <div class="card" style="border-left: 5px solid #10b981;"><div class="grid-2" style="margin-bottom:10px"><select id="mainSvc"><option value="">ไม่เลือก</option><option value="เด็ก">เด็ก</option></select><select id="hairStyle"><option value="">ไม่เลือก</option><option>รองทรง</option><option>แฟชั่น</option><option>สกินเฟด</option><option>เปิดข้าง</option></option><option>ตำรวจ/ทหาร</option><option>ทรงนักเรียน</option><option>แก้ทรงผม<option>โกนผม</option></select></div>
-    <div class="grid-2"><select id="extra1"><option value="">บริการอื่น 1</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option></option></select><select id="extra2"><option value="">บริการอื่น 2</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option>ม</option></select></div></div>
-    <div class="card" style="border-left: 5px solid #f59e0b;"><input type="number" id="priceInp" placeholder="0" inputmode="numeric" style="font-size:40px; font-weight:600; color:#b45309; text-align:center; height:80px;"><div class="grid-2" style="margin-top:15px"><button id="btnCash" class="btn-pay" onclick="selectPay('Cash')"><i class="fas fa-money-bill-wave"></i> สด</button><button id="btnTrans" class="btn-pay" onclick="selectPay('Trans')"><i class="fas fa-mobile-alt"></i> โอน</button></div></div>
+    <div class="card" style="border-left: 5px solid #10b981;">
+        <div class="grid-2" style="margin-bottom:10px">
+            <select id="mainSvc"><option value="">ไม่เลือก</option><option value="เด็ก">เด็ก</option></select>
+            <select id="hairStyle"><option value="">ไม่เลือก</option><option>รองทรง</option><option>แฟชั่น</option><option>สกินเฟด</option><option>เปิดข้าง</option><option>ตำรวจ/ทหาร</option><option>ทรงนักเรียน</option><option>แก้ทรงผม</option><option>โกนผม</option></select>
+        </div>
+        <div class="grid-2">
+            <select id="extra1"><option value="">บริการอื่น 1</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option></select>
+            <select id="extra2"><option value="">บริการอื่น 2</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option></select>
+        </div>
+    </div>
+
+    <div class="card" style="border-left: 5px solid #f59e0b;">
+        <input type="number" id="priceInp" placeholder="0" inputmode="numeric" style="font-size:40px; font-weight:600; color:#b45309; text-align:center; height:80px;">
+        <div class="grid-2" style="margin-top:15px">
+            <button id="btnCash" class="btn-pay" onclick="selectPay('Cash')"><i class="fas fa-money-bill-wave"></i> สด</button>
+            <button id="btnTrans" class="btn-pay" onclick="selectPay('Trans')"><i class="fas fa-mobile-alt"></i> โอน</button>
+        </div>
+    </div>
     <button class="btn-save" id="mainSaveBtn" onclick="handleSave()">บันทึกข้อมูล</button>
 </div>
-
 <div id="p2" class="page">
     <div class="grid-2"><div class="card" style="text-align: center;"><label>ยอดเงินรวมวันนี้</label><div id="dTotal" style="font-size:28px; font-weight:600">0</div><div id="dCounts" style="font-size:18px; font-weight:600; color:var(--primary); margin-top:5px;">ลูกค้า: 0 คน</div></div>
     <div class="card"><div style="font-size:16px; font-weight:600; margin-bottom:6px;">📱 โอน: <b id="dTrans">0</b></div><div style="font-size:16px; font-weight:600; margin-bottom:6px;">🤵 ช่าง: <b id="dBarber">0</b></div><div style="font-size:16px; font-weight:600;">🏠 ร้าน: <b id="dShop">0</b></div></div></div>
@@ -269,7 +283,6 @@
             saveSpecialEntry(item);
         }
     }
-
     function handleHoliday() {
         const d = $("dateInp").value;
         if (!d) { alert("กรุณาเลือกวันที่ก่อนครับ"); return; }
@@ -289,79 +302,85 @@
         alert("บันทึกสำเร็จ!");
         go(2); // พาไปหน้า 2
     }
-    // ฟังก์ชันแสดงผลหน้า 2 (รายวัน) - ปรับปรุงให้รองรับยอดประกันรายได้
-   function renderDay() {
-        const d = document.getElementById("dateInp").value;
-        const today = db.filter(r => r.date === d);
-        const special = archives.find(a => a.date === d);
-        
-        let tot = 0, trans = 0, cash = 0, stats = {}, listHtml = "";
+  // --- แก้ไขฟังก์ชัน renderDay ---
+function renderDay() {
+    const d = document.getElementById("dateInp").value;
+    const today = db.filter(r => r.date === d);
+    const special = archives.find(a => a.date === d);
+    
+    let tot = 0, trans = 0, cash = 0, stats = {}, listHtml = "";
 
-        // กรณีมีลูกค้าปกติ
-        if (today.length > 0) {
-            today.forEach(r => {
-                tot += r.price; 
-                r.pay === 'Trans' ? trans += r.price : cash += r.price; 
-                r.svcs.forEach(s => stats[s] = (stats[s] || 0) + 1);
-                listHtml += `<div class="history-row">
-                    <div style="display:flex; justify-content:space-between"><span>${r.time} | ${r.svcs.join('+')}</span><b>฿${r.price}</b></div>
-                    <div style="display:flex; justify-content:space-between; opacity:0.7"><span>${r.hair||''}</span><span>${r.pay==='Cash'?'💵 สด':'📱 โอน'} <i class="fas fa-trash" style="margin-left:10px; color:var(--danger)" onclick="delRec(${r.id})"></i></span></div>
-                </div>`;
-            });
-            const bEarn = Math.max(tot * (conf.perc / 100), conf.guar);
-            const sEarn = tot - bEarn;
-            const settle = cash - bEarn;
-            updateUI(tot, trans, bEarn, sEarn, settle, today.length, listHtml, stats);
-        } 
-        // กรณี "ประกันรายได้" (ลบสถานะโอน/สด ออก)
-        else if (special && special.isInsurance) {
-            const bEarn = special.barber;
-            const sEarn = -bEarn;
-            const settle = -bEarn;
-            // แสดงรายการโดยไม่มีสถานะ สด/โอน
-            listHtml = `<div class="history-row" style="border-left:4px solid #f59e0b; padding-left:10px;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>🛡️ ประกันรายได้ (คงที่)</span>
-                    <b>฿${bEarn}</b>
-                </div>
-                <div style="font-size:12px; opacity:0.6;">รายการพิเศษจากระบบ</div>
+    // 1. กรณีมีลูกค้าปกติ
+    if (today.length > 0) {
+        today.forEach(r => {
+            tot += r.price; 
+            r.pay === 'Trans' ? trans += r.price : cash += r.price; 
+            r.svcs.forEach(s => stats[s] = (stats[s] || 0) + 1);
+            listHtml += `<div class="history-row">
+                <div style="display:flex; justify-content:space-between"><span>${r.time} | ${r.svcs.join('+')}</span><b>฿${r.price}</b></div>
+                <div style="display:flex; justify-content:space-between; opacity:0.7"><span>${r.hair||''}</span><span>${r.pay==='Cash'?'💵 สด':'📱 โอน'} <i class="fas fa-trash" style="margin-left:10px; color:var(--danger)" onclick="delRec(${r.id})"></i></span></div>
             </div>`;
-            updateUI(0, 0, bEarn, sEarn, settle, 0, listHtml, {"ประกันรายได้": 1});
-        } 
-        else {
-            const msg = (special && special.isHoliday) ? "🏖️ วันหยุดพักผ่อน" : "ไม่มีข้อมูล";
-            updateUI(0, 0, 0, 0, 0, 0, `<center style="padding:20px; opacity:0.3;">${msg}</center>`, {});
-        }
+        });
+        
+        const bEarn = Math.max(tot * (conf.perc / 100), conf.guar);
+        const sEarn = tot - bEarn;
+        const settle = cash - bEarn;
+        
+        // ส่งค่า cash สุดท้ายพ่วงไปด้วย
+        updateUI(tot, trans, bEarn, sEarn, settle, today.length, listHtml, stats, cash);
+    } 
+    // 2. กรณี "ประกันรายได้" (ส่งค่าเงินสดเป็น 0)
+    else if (special && special.isInsurance) {
+        const bEarn = special.barber;
+        const sEarn = -bEarn;
+        const settle = -bEarn;
+        listHtml = `<div class="history-row" style="border-left:4px solid #f59e0b; padding-left:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span>🛡️ ประกันรายได้ (คงที่)</span>
+                <b>฿${bEarn}</b>
+            </div>
+            <div style="font-size:12px; opacity:0.6;">รายการพิเศษจากระบบ</div>
+        </div>`;
+        
+        // ส่งค่าเงินสด (ตัวสุดท้าย) เป็น 0 เพื่อไม่ให้ยอดเก่าค้าง
+        updateUI(0, 0, bEarn, sEarn, settle, 0, listHtml, {"ประกันรายได้": 1}, 0);
+    } 
+    // 3. กรณี "วันหยุด" หรือ ไม่มีข้อมูล
+    else {
+        const msg = (special && special.isHoliday) ? "🏖️ วันหยุดพักผ่อน" : "ไม่มีข้อมูล";
+        updateUI(0, 0, 0, 0, 0, 0, `<center style="padding:20px; opacity:0.3;">${msg}</center>`, {}, 0);
+    }
+}
+
+// --- แก้ไขฟังก์ชัน updateUI ---
+function updateUI(tot, trans, bEarn, sEarn, settle, count, listHtml, stats, currentCash) {
+    document.getElementById("dTotal").innerText = tot.toLocaleString();
+    document.getElementById("dTrans").innerText = trans.toLocaleString();
+    
+    // แสดงยอดช่าง: ถ้าเป็นประกันรายได้ (tot=0) จะซ่อนวงเล็บเงินสดทันที
+    const barberDisp = document.getElementById("dBarber");
+    if (tot === 0) {
+        barberDisp.innerText = Math.floor(bEarn).toLocaleString();
+    } else {
+        barberDisp.innerHTML = `${Math.floor(bEarn).toLocaleString()} <small style="opacity:0.5">(สด: ${currentCash.toLocaleString()})</small>`;
     }
 
-    // --- 3. ฟังก์ชันอัปเดตหน้าจอ (แก้ไขการแสดงผล สด: 0) ---
-    function updateUI(tot, trans, bEarn, sEarn, settle, count, listHtml, stats) {
-        document.getElementById("dTotal").innerText = tot.toLocaleString();
-        document.getElementById("dTrans").innerText = trans.toLocaleString();
-        
-        // ถ้าเป็นประกันรายได้ ให้แสดงแค่ยอดช่าง ไม่ต้องมี (สด: 0)
-        if (tot === 0 && bEarn > 0) {
-            document.getElementById("dBarber").innerText = Math.floor(bEarn).toLocaleString();
-        } else {
-            document.getElementById("dBarber").innerHTML = `${Math.floor(bEarn).toLocaleString()} <small style="opacity:0.5">(สด: ${cash})</small>`;
-        }
-
-        document.getElementById("dShop").innerText = Math.floor(sEarn).toLocaleString();
-        document.getElementById("dCounts").innerText = `ลูกค้า: ${count} คน`;
-        document.getElementById("dailyList").innerHTML = listHtml;
-        
-        const b = document.getElementById("settleBar");
-        if(settle < 0) {
-            b.innerText = `🟦 ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`;
-            b.className = "status-bar status-indigo";
-        } else if(settle > 0) {
-            b.innerText = `🟥 ช่างคืนร้าน ฿${Math.floor(settle).toLocaleString()}`;
-            b.className = "status-bar status-red";
-        } else {
-            b.innerText = "✅ ยอดพอดี";
-            b.className = "status-bar status-green";
-        }
+    document.getElementById("dShop").innerText = Math.floor(sEarn).toLocaleString();
+    document.getElementById("dCounts").innerText = `ลูกค้า: ${count} คน`;
+    document.getElementById("dailyList").innerHTML = listHtml;
+    
+    const b = document.getElementById("settleBar");
+    if(settle < 0) {
+        b.innerText = `🟦 ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`;
+        b.className = "status-bar status-indigo";
+    } else if(settle > 0) {
+        b.innerText = `🟥 ช่างคืนร้าน ฿${Math.floor(settle).toLocaleString()}`;
+        b.className = "status-bar status-red";
+    } else {
+        b.innerText = "✅ ยอดพอดี";
+        b.className = "status-bar status-green";
     }
+}
     // ฟังก์ชันคำนวณยอดสุทธิ (ใช้ในหน้า 3)
     function calcTodaySettle(){
         const d = $("dateInp").value;
