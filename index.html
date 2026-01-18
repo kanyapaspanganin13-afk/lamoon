@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.2.1 (Updated)</title>
+    <title>Barber Note Pro v.11.2.3 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -72,45 +72,29 @@
 </div>
 
 <div id="p3" class="page">
-    <div class="acc-main-card">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="margin:0; font-size:15px; color:#b45309;">🧾 สรุปยอดบัญชีสุทธิ</h3>
-            <div id="accLight" class="acc-light" style="background:gray;"></div>
-        </div>
-
-        <div style="font-size:11px; color:#64748b; margin:12px 0; line-height:1.6; background:rgba(0,0,0,0.03); padding:10px; border-radius:12px;">
-            <div style="display:flex; justify-content:space-between;">
-                <span id="accOldText">ยอดค้างเดิม:</span>
-                <b id="accOldVal">฿0</b>
+        <div class="card">
+            <div style="margin-bottom: 15px; font-weight: 600; color: #e67e22;">📋 สรุปยอดบัญชี</div>
+            <div class="stat-grid">
+                <div class="stat-box" style="border-color: var(--orange); background: #fffaf0;">
+                    <div style="font-size: 0.8rem;">📅 ค้างเดิม</div>
+                    <div style="font-size: 1.4rem; font-weight: bold;">฿0</div>
+                </div>
+                <div class="stat-box" style="border-color: var(--blue); background: #f0faff;">
+                    <div style="font-size: 0.8rem;">📅 วันนี้</div>
+                    <div style="font-size: 1.4rem; font-weight: bold;">฿0</div>
+                </div>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span id="accTodayText">ยอดวันนี้:</span>
-                <b id="accTodayVal">฿0</b>
+            <div style="text-align: center; margin: 20px 0; color: #747d8c;">คำนวณยอด...</div>
+            <hr style="border: none; border-top: 1px dashed #ddd; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                <input type="checkbox" checked style="margin-right: 10px;"> ยืนยันการเคลียร์เงิน
             </div>
-        </div>
-
-        <div style="text-align:center; margin:15px 0;">
-            <div style="font-size:38px; font-weight:800; color:#1e3a8a;">
-                <small style="font-size:18px; font-weight:400; opacity:0.5;">฿</small><span id="accNet">0</span>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <div style="background: #efefff; padding: 12px; border-radius: 12px;"><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i></div>
+                <input type="text" placeholder="พิมพ์หมายเหตุการเคลียร์เงิน...">
             </div>
+            <button class="btn-green">ยืนยันบันทึกการเคลียร์</button>
         </div>
-        
-        <div id="accStatus" class="status-bar" style="margin:10px 0; text-align:center;">กำลังดึงข้อมูล...</div>
-
-        <button class="btn-toggle-history" onclick="toggleAccHistory()">
-            <i class="fas fa-history"></i> <span id="toggleText">ดูประวัติการเคลียร์เงิน</span>
-        </button>
-
-        <div id="accHistoryWrapper" class="history-wrapper">
-            <div id="accHistory" class="history-list"></div>
-        </div>
-
-        <hr style="opacity:0.05; margin:15px 0;">
-
-        <label style="font-size:12px; color:#64748b;">ระบุวันที่เคลียร์</label>
-        <input type="date" id="accDate" style="height:40px; margin-bottom:10px;">
-        <input type="text" id="accNote" placeholder="หมายเหตุการเคลียร์" style="height:40px; margin-bottom:10px;">
-        <button class="btn-save" onclick="clearAccount()" style="margin:0; padding:15px; background:var(--accent);">✅ ยืนยันเคลียร์เงินเรียบร้อย</button>
     </div>
 
     <div class="card" style="border-top: 4px solid var(--primary);"><label>เรียกดูประวัติรายวัน</label><input type="date" id="histDate" onchange="loadHistDaily()"><div id="histDailyArea"></div></div>
