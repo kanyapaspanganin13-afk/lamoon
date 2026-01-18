@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.3.3 (Updated)</title>
+    <title>Barber Note Pro v.12 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -194,7 +194,6 @@
     }
 
     function selectPay(m){ payMethod=m; $("btnCash").className=m==='Cash'?'btn-pay active-cash':'btn-pay'; $("btnTrans").className=m==='Trans'?'btn-pay active-transfer':'btn-pay'; }
-    
     function handleSave(){
         const p=$("priceInp").value; 
         if(!p||!payMethod){ speak("กรุณาระบุราคาและวิธีชำระเงิน"); return; }
@@ -212,22 +211,19 @@
             $("extra1").value=$("extra2").value=""; selectPay(""); 
         },600);
     }
-    function handleInsurance() {
-    const d = $("dateInp").value;
-    if (!d) { alert("กรุณาเลือกวันที่ก่อนครับ"); return; }
 
-    // ตรวจสอบว่าวันนี้มีลูกค้าใน db ไปหรือยัง
-    const hasCustomer = db.some(item => item.date === d);
-    if (hasCustomer) { 
-        alert("วันนี้มีการบันทึกลูกค้าไปแล้ว ไม่สามารถลงยอดประกันได้ครับ"); 
-        return; 
-    }
-  // 🛡️ ฟังก์ชันจัดการประกันรายได้
+    // 🛡️ ฟังก์ชันจัดการประกันรายได้ (แก้ไขให้ไม่ซ้อนกัน)
     function handleInsurance() {
         const d = $("dateInp").value;
         if (!d) { alert("กรุณาเลือกวันที่ก่อนครับ"); return; }
 
-        // ดึงยอดประกันจาก settings (ถ้าไม่มีให้ใช้ 300 เป็นค่าเริ่มต้น)
+        // ตรวจสอบว่าวันนี้มีลูกค้าใน db หรือยัง
+        const hasCustomer = db.some(item => item.date === d);
+        if (hasCustomer) { 
+            alert("วันนี้มีการบันทึกลูกค้าไปแล้ว ไม่สามารถลงยอดประกันได้ครับ"); 
+            return; 
+        }
+
         const currentInsurance = (window.settings && window.settings.guarantee) ? window.settings.guarantee : 300;
 
         if (confirm(`ยืนยันลงยอด "ประกันรายได้" ฿${currentInsurance}\n(ลูกค้า 0 คน - ร้านจ่ายช่าง)`)) {
@@ -270,16 +266,17 @@
             saveSpecialEntry(item);
         }
     }
-    // 💾 ฟังก์ชันบันทึกตัวกลาง (ต้องมีฟังก์ชันนี้ด้วยนะครับ)
+
+    // 💾 ฟังก์ชันบันทึกตัวกลาง
     function saveSpecialEntry(item) {
-        // ลบข้อมูลเก่าของวันที่นี้ออกก่อนเพื่อป้องกันซ้ำ
+        if (typeof archives === 'undefined') archives = [];
         archives = archives.filter(a => a.date !== item.date);
         archives.push(item);
         localStorage.setItem("barber_archives", JSON.stringify(archives));
         
         alert("บันทึกสำเร็จ!");
-        showPage('p2'); // สลับไปหน้าประวัติรายวัน
-        if (typeof loadHistDaily === 'function') loadHistDaily(); // อัปเดตรายการหน้า 2
+        showPage('p2'); 
+        if (typeof loadHistDaily === 'function') loadHistDaily(); 
     }
     function renderDay(){
         const d=$("dateInp").value, today=db.filter(r=>r.date===d); 
