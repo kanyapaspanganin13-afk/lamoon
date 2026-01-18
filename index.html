@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.3 (Updated)</title>
+    <title>Barber Note Pro v.11.3.1 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -54,24 +54,24 @@
 
 <div id="p1" class="page active">
   <div id="p1" class="page active">
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 8px; margin-bottom: 15px;">
-        
-        <div style="position: relative; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-            <span style="font-size: 16px;">📅</span>
-            <input type="date" id="dateInp" style="position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
-            <span id="dateDisplay" style="font-size: 13px; font-weight: 700; color: #475569;">เลือกวันที่</span>
-        </div>
-
-        <div onclick="addInsurance()" style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-            <span style="font-size: 16px;">🛡️</span>
-            <span style="font-size: 10px; font-weight: 700; color: #0369a1;">ประกันรายได้</span>
-        </div>
-
-        <div onclick="addHoliday()" style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-            <span style="font-size: 16px;">🏖️</span>
-            <span style="font-size: 10px; font-weight: 700; color: #be185d;">บันทึกวันหยุด</span>
-        </div>
+ <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; padding: 5px;">
+    
+    <div style="position: relative; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <span style="font-size: 18px;">📅</span>
+        <input type="date" id="dateInp" onchange="updateDateDisplay(this.value)" style="position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
+        <span id="dateDisplay" style="font-size: 10px; font-weight: 700; color: #475569;">เลือกวันที่</span>
     </div>
+
+    <div onclick="handleInsurance()" style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 12px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <span style="font-size: 18px;">🛡️</span>
+        <span style="font-size: 10px; font-weight: 800; color: #b45309;">ประกันรายได้</span>
+    </div>
+
+    <div onclick="handleHoliday()" style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 12px; padding: 12px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <span style="font-size: 18px;">🏖️</span>
+        <span style="font-size: 10px; font-weight: 800; color: #be185d;">บันทึกวันหยุด</span>
+    </div>
+</div>
 
     <div class="card" style="border-left: 5px solid #0ea5e9; padding: 10px 15px;">
         <div class="grid-2">
@@ -342,7 +342,12 @@ function closeHistoryFull() {
         const settleClass = settle > 0 ? "status-red" : settle < 0 ? "status-indigo" : "status-green";
         area.innerHTML = `<div style="background:var(--input-bg); padding:15px; border-radius:15px;"><div class="status-bar ${settleClass}" style="padding:8px; font-size:13px; margin-bottom:10px;">${settleText}</div><div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:15px; font-size:13px;"><div>ยอดรวม: <b>${found.total.toLocaleString()}</b></div><div>เงินสด: <b>${found.cash.toLocaleString()}</b></div><div>ช่างได้: <b>${Math.floor(found.barber).toLocaleString()}</b></div><div>ร้านได้: <b>${Math.floor(found.shop).toLocaleString()}</b></div></div><div style="margin-bottom:15px; display:flex; flex-wrap:wrap; gap:4px;">${statBadges}</div><div style="border-top:1px dashed #ccc; padding-top:10px;">${rows}</div></div>`;
     }
-
+function updateDateDisplay(val) {
+    if(!val) return;
+    const d = new Date(val);
+    const months = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+    document.getElementById('dateDisplay').innerText = d.getDate() + " " + months[d.getMonth()];
+}
     function loadHistMonth() {
     const m = $("histMonth").value; 
     const area = $("histMonthArea"); 
