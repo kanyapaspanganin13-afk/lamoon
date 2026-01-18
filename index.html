@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.2.1 (Updated)</title>
+    <title>Barber Note Pro v.11.2.3 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -318,16 +318,69 @@ function closeHistoryFull() {
     }
 
     function loadHistMonth() {
-        const m = $("histMonth").value; const area = $("histMonthArea"); if(!m) return;
-        const filtered = archives.filter(a => a.date.startsWith(m));
-        if(!filtered.length) { area.innerHTML = "<center style='color:#ccc; padding:20px;'>ไม่มีข้อมูล</center>"; return; }
-        let tot = 0, bTot = 0, cTot = 0, monthStats = {};
-        filtered.forEach(a => { tot += a.total; bTot += a.barber; cTot += a.count; if(a.stats) { for(let s in a.stats) monthStats[s] = (monthStats[s] || 0) + a.stats[s]; } });
-        let sB = "", hB = "";
-        for(let s in monthStats) { if(s.startsWith("ทรง:")) hB += `<span class="badge" style="background:#10b981; color:white;">${s.replace("ทรง:","")}: ${monthStats[s]}</span>`; else sB += `<span class="badge" style="background:var(--indigo); color:white;">${s}: ${monthStats[s]}</span>`; }
-        area.innerHTML = `<div style="padding:15px; background:var(--input-bg); border-radius:15px;"><div style="font-size:20px; margin-bottom:10px;">รายได้รวม: <b style="color:var(--primary)">฿${tot.toLocaleString()}</b></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px; opacity:0.8; margin-bottom:15px;"><div>ช่างรวม: <b>฿${Math.floor(bTot).toLocaleString()}</b></div><div>ร้านรวม: <b>฿${Math.floor(tot-bTot).toLocaleString()}</b></div><div>ลูกค้า: <b>${cTot} คน</b></div><div>ทำงาน: <b>${filtered.length} วัน</b></div></div><div style="border-top:1px dashed #ccc; padding-top:10px;"><label style="font-size:11px; opacity:0.6;">📊 สถิติบริการ:</label><div style="margin:5px 0 12px 0;">${sB || '-'}</div><label style="font-size:11px; opacity:0.6;">💇 ทรงผม:</label><div style="margin-top:5px;">${hB || '-'}</div></div></div>`;
+    const m = $("histMonth").value; 
+    const area = $("histMonthArea"); 
+    if(!m) return;
+    
+    const filtered = archives.filter(a => a.date.startsWith(m));
+    if(!filtered.length) { 
+        area.innerHTML = "<center style='color:#ccc; padding:20px;'>ไม่มีข้อมูลของเดือนนี้</center>"; 
+        return; 
     }
 
+    let monthTotal = 0;   // ยอดตัดทั้งเดือน
+    let monthBarber = 0;  // รายได้ช่างรวม
+    let monthShop = 0;    // รายได้ร้านรวม
+    let monthCount = 0;   // จำนวนลูกค้า
+    let monthStats = {};
+
+    filtered.forEach(a => { 
+        monthTotal += a.total; 
+        monthBarber += a.barber; 
+        monthShop += (a.total - a.barber); // คำนวณจากยอดเต็มหักยอดช่าง
+        monthCount += a.count; 
+        if(a.stats) { 
+            for(let s in a.stats) monthStats[s] = (monthStats[s] || 0) + a.stats[s]; 
+        } 
+    });
+
+    let sB = "", hB = "";
+    for(let s in monthStats) { 
+        if(s.startsWith("ทรง:")) hB += `<span class="badge" style="background:#10b981; color:white;">${s.replace("ทรง:","")}: ${monthStats[s]}</span>`; 
+        else sB += `<span class="badge" style="background:var(--indigo); color:white;">${s}: ${monthStats[s]}</span>`; 
+    }
+
+    area.innerHTML = `
+    <div style="padding:15px; background:var(--input-bg); border-radius:20px; border:1px solid var(--border);">
+        <div style="text-align:center; margin-bottom:15px; padding:10px; background:#fff; border-radius:15px; box-shadow:inset 0 0 10px rgba(0,0,0,0.02);">
+            <div style="font-size:12px; color:#64748b;">✂️ ยอดตัดทั้งเดือน</div>
+            <div style="font-size:28px; font-weight:700; color:var(--primary);">฿${monthTotal.toLocaleString()}</div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
+            <div style="background:#dcfce7; padding:12px; border-radius:15px; text-align:center;">
+                <div style="font-size:11px; color:#166534;">🤵 รายได้ช่างรวม</div>
+                <div style="font-size:18px; font-weight:700; color:#15803d;">฿${Math.floor(monthBarber).toLocaleString()}</div>
+            </div>
+            <div style="background:#e0f2fe; padding:12px; border-radius:15px; text-align:center;">
+                <div style="font-size:11px; color:#0369a1;">🏠 รายได้ร้านรวม</div>
+                <div style="font-size:18px; font-weight:700; color:#075985;">฿${Math.floor(monthShop).toLocaleString()}</div>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px; margin-bottom:15px; padding:0 5px;">
+            <div style="color:#64748b;">👥 ลูกค้าทั้งหมด: <b style="color:var(--text);">${monthCount} คน</b></div>
+            <div style="color:#64748b;">📅 วันทำงาน: <b style="color:var(--text);">${filtered.length} วัน</b></div>
+        </div>
+
+        <div style="border-top:1px dashed #cbd5e1; padding-top:10px;">
+            <label style="font-size:11px; opacity:0.6; font-weight:bold;">📊 สถิติบริการ:</label>
+            <div style="margin:5px 0 10px 0;">${sB || '-'}</div>
+            <label style="font-size:11px; opacity:0.6; font-weight:bold;">💇 ทรงผม:</label>
+            <div style="margin-top:5px;">${hB || '-'}</div>
+        </div>
+    </div>`;
+}
     function shareLine() {
         const d = $("dateInp").value, today = db.filter(r => r.date === d); if (!today.length) return;
         let tot = 0, trans = 0, cash = 0; let msg = `💈 ร้าน: ${conf.shop}\n📅 วันที่: ${d}\n-------------------------\n`;
