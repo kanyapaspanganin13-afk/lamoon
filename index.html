@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.3.3 (Updated)</title>
+    <title>Barber Note Pro v.2 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -71,8 +71,8 @@
 
     <div class="card" style="border-left: 5px solid #0ea5e9; padding: 10px 15px;">
         <div class="grid-2">
-            <div><label style="font-size:12px">เริ่ม</label><input type="tel" id="tStart" placeholder="0900" class="time-input" maxlength="4"></div>
-            <div><label style="font-size:12px">เสร็จ</label><input type="tel" id="tEnd" placeholder="0930" class="time-input" maxlength="4"></div>
+            <div><label style="font-size:12px">เวลาเริ่ม</label><input type="tel" id="tStart" placeholder="0900" class="time-input" maxlength="4"></div>
+            <div><label style="font-size:12px">เวลาเสร็จ</label><input type="tel" id="tEnd" placeholder="0930" class="time-input" maxlength="4"></div>
         </div>
     </div>
 
@@ -112,7 +112,7 @@
 <div id="p3" class="page">
     <div class="acc-main-card">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="margin:0; font-size:15px; color:#b45309;">🧾 สรุปยอดบัญชีสุทธิ</h3>
+            <h3 style="margin:0; font-size:15px; color:#b45309;">🧾 สรุปยอดบัญชี</h3>
             <div id="accLight" class="acc-light" style="background:gray;"></div>
         </div>
 
@@ -176,9 +176,8 @@
 <div style="margin-top:10px"><label>เลือกสีพื้นหลัง (7 สี)</label><br>
     <div class="color-dot" style="background:#fdf2f8" onclick="setBg('#fdf2f8')"></div><div class="color-dot" style="background:#f0fdf4" onclick="setBg('#f0fdf4')"></div><div class="color-dot" style="background:#f0f9ff" onclick="setBg('#f0f9ff')"></div><div class="color-dot" style="background:#fffbeb" onclick="setBg('#fffbeb')"></div><div class="color-dot" style="background:#faf5ff" onclick="setBg('#faf5ff')"></div><div class="color-dot" style="background:#f1f5f9" onclick="setBg('#f1f5f9')"></div><div class="color-dot" style="background:#ffffff; border:1px solid #ccc" onclick="setBg('#ffffff')"></div>
 </div>
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;"><button class="btn-save" onclick="saveSettings()" style="margin:0">บันทึก</button><button onclick="closeSettings()" style="border-radius:10px; border: 1px solid var(--border)">ปิด</button></div>
-<button onclick="clearAllData()" style="width:100%; background:none; border:none; color:red; margin-top:20px; font-size:12px; opacity:0.5">ล้างข้อมูลทั้งหมด</button></div></div>
-
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;"><button class="btn-save" onclick="saveSettings()" style="margin:0">บันทึก</button><button onclick="closeSettings()" class="btn-save" style="margin:0; background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;">ปิด</button>
+<button onclick="clearAllData()" class="btn-save" style="margin-top:20px; background:none; border: 1px solid #fee2e2; color: #dc2626; font-size: 16px;">⚠️ ล้างข้อมูลทั้งหมด</button>
 <nav class="nav"><div class="nav-item active" id="n1" onclick="go(1)"><i class="fas fa-edit"></i>บันทึก</div><div class="nav-item" id="n2" onclick="go(2)"><i class="fas fa-calendar-check"></i>รายวัน</div><div class="nav-item" id="n3" onclick="go(3)"><i class="fas fa-history"></i>สถิติ</div></nav>
 
 <script>
@@ -225,28 +224,71 @@
             $("extra1").value=$("extra2").value=""; selectPay(""); 
         },600);
     }
-   function renderDay(){
-        const d=$("dateInp").value, today=db.filter(r=>r.date===d); 
-        let tot=0,trans=0,cash=0,stats={},listHtml="";
-        today.sort((a,b)=>a.time.localeCompare(b.time)).forEach(r=>{
-            tot+=r.price; 
-            r.pay==='Trans' ? trans+=r.price : cash+=r.price; 
-            const isCutting = r.svcs.includes("ตัดผม") || r.svcs.includes("เด็ก") || (r.hair && r.hair.trim() !== "");
-            if (isCutting) stats["ตัดผม"] = (stats["ตัดผม"] || 0) + 1;
-            r.svcs.forEach(s => { if (s === "เด็ก") stats["เด็ก"] = (stats["เด็ก"] || 0) + 1; else if (s !== "ตัดผม") stats[s] = (stats[s] || 0) + 1; });
-            listHtml += `<div class="history-row"><div style="display:flex; justify-content:space-between"><span>${r.time} | ${r.svcs.join('+')}</span><b>฿${r.price}</b></div><div style="display:flex; justify-content:space-between; opacity:0.7"><span>${r.hair||''}</span><span>${r.pay==='Cash'?'💵 สด':'📱 โอน'} <i class="fas fa-trash" style="margin-left:10px; color:var(--danger)" onclick="delRec(${r.id})"></i></span></div></div>`;
-        });
-        const bEarn=Math.max(tot*(conf.perc/100),conf.guar), sEarn=tot-bEarn, settle=cash-bEarn;
-        $("dTotal").innerText=tot.toLocaleString(); $("dTrans").innerText=trans.toLocaleString(); $("dBarber").innerHTML=`${Math.floor(bEarn).toLocaleString()} <small>(สด: ${cash})</small>`; $("dShop").innerText=Math.floor(sEarn).toLocaleString(); $("dCounts").innerText=`ลูกค้า: ${today.length} คน`; $("dailyList").innerHTML=listHtml||"<center style='opacity:0.3; padding:20px'>ไม่มีข้อมูล</center>";
-        let sH=""; if(stats["ตัดผม"]) sH += `<span class="badge" style="background:#4338ca; color:white;">ตัดผม: ${stats["ตัดผม"]}</span>`;
-        for(let s in stats) { if(s !== "ตัดผม") sH += `<span class="badge">${s}: ${stats[s]}</span>`; }
-        $("dServiceStats").innerHTML=sH;
-        const b=$("settleBar"); 
-        if(tot===0){ b.innerText="🟦 ร้านจ่ายประกัน"; b.className="status-bar status-blue"; } 
-        else if(settle>0){ b.innerText=`🟥 ช่างคืนร้าน ฿${Math.floor(settle).toLocaleString()}`; b.className="status-bar status-red"; } 
-        else if(settle<0){ b.innerText=`🟦 ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; b.className="status-bar status-indigo"; } 
-        else { b.innerText="✅ ยอดพอดี"; b.className="status-bar status-green"; }
-    }
+   function renderDay() {
+    const d = $("dateInp").value, today = db.filter(r => r.date === d);
+    let tot = 0, trans = 0, cash = 0, stats = {}, listHtml = "";
+
+    // เช็คก่อนว่าวันนี้มีบันทึก "วันหยุด" หรือไม่
+    const isHoliday = today.some(r => r.type === "Holiday");
+
+    today.sort((a, b) => a.time.localeCompare(b.time)).forEach(r => {
+        tot += r.price;
+        r.pay === 'Trans' ? trans += r.price : cash += r.price;
+        
+        // ถ้าเป็นรายการปกติ (ไม่ใช่บันทึกวันหยุด) ให้เก็บสถิติ
+        if(r.type !== "Holiday") {
+            const isCutting = r.svcs.includes("ตัดผม") || r.svcs.includes("เด็ก") || (r.hair && r.hair.trim() !== "");
+            if (isCutting) stats["ตัดผม"] = (stats["ตัดผม"] || 0) + 1;
+            r.svcs.forEach(s => { 
+                if (s === "เด็ก") stats["เด็ก"] = (stats["เด็ก"] || 0) + 1; 
+                else if (s !== "ตัดผม") stats[s] = (stats[s] || 0) + 1; 
+            });
+        }
+        
+        listHtml += `<div class="history-row" style="${r.type === 'Holiday' ? 'background: #fff1f2; border-radius: 8px; padding: 10px;' : ''}">
+            <div style="display:flex; justify-content:space-between">
+                <span>${r.time} | ${r.svcs.join('+')}</span>
+                <b>${r.price > 0 ? '฿' + r.price : '-'}</b>
+            </div>
+            <div style="display:flex; justify-content:space-between; opacity:0.7">
+                <span>${r.hair || ''}</span>
+                <span>${r.type === 'Holiday' ? '🏖️ วันหยุด' : (r.pay === 'Cash' ? '💵 สด' : '📱 โอน')} 
+                <i class="fas fa-trash" style="margin-left:10px; color:var(--danger)" onclick="delRec(${r.id})"></i></span>
+            </div>
+        </div>`;
+    });
+
+    const bEarn = Math.max(tot * (conf.perc / 100), conf.guar), sEarn = tot - bEarn, settle = cash - bEarn;
+    
+    $("dTotal").innerText = tot.toLocaleString();
+    $("dTrans").innerText = trans.toLocaleString();
+    $("dBarber").innerHTML = `${Math.floor(bEarn).toLocaleString()} <small>(สด: ${cash})</small>`;
+    $("dShop").innerText = Math.floor(sEarn).toLocaleString();
+    $("dCounts").innerText = isHoliday ? "วันหยุด" : `ลูกค้า: ${today.length} คน`;
+    $("dailyList").innerHTML = listHtml || "<center style='opacity:0.3; padding:20px'>ไม่มีข้อมูล</center>";
+
+    let sH = ""; 
+    if (stats["ตัดผม"]) sH += `<span class="badge" style="background:#4338ca; color:white;">ตัดผม: ${stats["ตัดผม"]}</span>`;
+    for (let s in stats) { if (s !== "ตัดผม") sH += `<span class="badge">${s}: ${stats[s]}</span>`; }
+    $("dServiceStats").innerHTML = sH;
+
+    const b = $("settleBar");
+    if (isHoliday) {
+        b.innerText = "🏖️ วันหยุดร้าน";
+        b.className = "status-bar status-red";
+    } else if (tot === 0) {
+        b.innerText = "🟦 ร้านจ่ายประกัน";
+        b.className = "status-bar status-blue";
+    } else if (settle > 0) {
+        b.innerText = `🟥 ช่างคืนร้าน ฿${Math.floor(settle).toLocaleString()}`;
+        b.className = "status-bar status-red";
+    } else if (settle < 0) {
+        b.innerText = `🟦 ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`;
+        b.className = "status-bar status-indigo";
+    } else {
+        b.innerText = "✅ ยอดพอดี";
+        b.className = "status-bar status-green";
+    }
     function handleInsurance() {
     const d = $("dateInp").value;
     const guarAmt = conf.guar || 0;
@@ -266,19 +308,27 @@
         renderDay(); go(2);
     }
 }
-
 function handleHoliday() {
     const d = $("dateInp").value;
-    if (confirm(`บันทึกเป็นวันหยุดสำหรับวันที่ ${d}?`)) {
-        db = db.filter(r => r.date !== d);
-        const idx = archives.findIndex(a => a.date === d);
-        const data = { date: d, isHoliday: true, note: "วันหยุด" };
-        if (idx > -1) archives[idx] = data; else archives.push(data);
-        localStorage.setItem("barber_db", JSON.stringify(db));
-        localStorage.setItem("barber_arc", JSON.stringify(archives));
-        speak("บันทึกวันหยุดเรียบร้อย");
-        renderDay(); go(2);
-    }
+    if (!confirm("ต้องการบันทึกเป็นวันหยุดใช่หรือไม่?")) return;
+    
+    // ลบข้อมูลเก่าของวันนี้ออกก่อน เพื่อไม่ให้ยอดซ้ำซ้อน
+    db = db.filter(r => r.date !== d);
+    
+    // บันทึกรายการพิเศษเป็นวันหยุด
+    db.push({
+        id: Date.now(),
+        date: d,
+        time: "--:--",
+        type: "Holiday", // กำหนดประเภทว่าเป็นวันหยุด
+        svcs: ["หยุดร้าน 🏖️"],
+        price: 0,
+        pay: "Cash"
+    });
+    
+    localStorage.setItem("barber_db", JSON.stringify(db));
+    speak("บันทึกวันหยุดแล้ว");
+    go(2); // สลับไปหน้า 2 เพื่อดูรายงานทันที
 }
 
 function updateDateDisplay(val) {
