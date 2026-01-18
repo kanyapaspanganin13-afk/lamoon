@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.2.5 (Updated)</title>
+    <title>Barber Note Pro v.11.2.6 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -343,7 +343,6 @@ function closeHistoryFull() {
             for(let s in a.stats) monthStats[s] = (monthStats[s] || 0) + a.stats[s]; 
         } 
     });
-// ฟังก์ชันสร้างสีพาสเทลแบบสุ่มตามชื่อบริการ (อ่อน สบายตา)
     const getPastelColor = (str) => {
         const colors = [
             {bg: "#e0f2fe", text: "#0369a1"}, // ฟ้าอ่อน
@@ -371,34 +370,36 @@ function closeHistoryFull() {
             sB += `<span class="badge" style="background:${colorPair.bg}; color:${colorPair.text}; border-radius:10px; padding:5px 12px; font-weight:500; font-size:13px; border: 1px solid rgba(0,0,0,0.03);">${s}: ${monthStats[s]}</span>`; 
         }
     }
+
     area.innerHTML = `
-    <div style="padding:15px; background:var(--input-bg); border-radius:20px; border:1px solid var(--border);">
-        <div style="text-align:center; margin-bottom:15px; padding:10px; background:#fff; border-radius:15px; box-shadow:inset 0 0 10px rgba(0,0,0,0.02);">
-            <div style="font-size:12px; color:#64748b;">✂️ ยอดตัดทั้งเดือน</div>
-            <div style="font-size:28px; font-weight:700; color:var(--primary);">฿${monthTotal.toLocaleString()}</div>
+    <div style="padding:15px; background:var(--card); border-radius:20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        <div style="text-align:center; margin-bottom:15px; padding:20px; background:linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius:18px;">
+            <div style="font-size:14px; color:#64748b; margin-bottom:5px;">✂️ ยอดตัดรวมทั้งเดือน</div>
+            <div style="font-size:32px; font-weight:700; color:#1e3a8a;">฿${totalFullAmount.toLocaleString()}</div>
         </div>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
-            <div style="background:#dcfce7; padding:12px; border-radius:15px; text-align:center;">
-                <div style="font-size:11px; color:#166534;">🤵 รายได้ช่างรวม</div>
-                <div style="font-size:18px; font-weight:700; color:#15803d;">฿${Math.floor(monthBarber).toLocaleString()}</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+            <div style="background:#f0fdf4; padding:15px; border-radius:16px; text-align:center; border: 1px solid #dcfce7;">
+                <div style="font-size:12px; color:#166534; margin-bottom:4px;">🤵 รายได้ช่าง</div>
+                <div style="font-size:18px; font-weight:600; color:#15803d;">฿${Math.floor(bTot).toLocaleString()}</div>
             </div>
-            <div style="background:#e0f2fe; padding:12px; border-radius:15px; text-align:center;">
-                <div style="font-size:11px; color:#0369a1;">🏠 รายได้ร้านรวม</div>
-                <div style="font-size:18px; font-weight:700; color:#075985;">฿${Math.floor(monthShop).toLocaleString()}</div>
+            <div style="background:#f0f9ff; padding:15px; border-radius:16px; text-align:center; border: 1px solid #e0f2fe;">
+                <div style="font-size:12px; color:#0369a1; margin-bottom:4px;">🏠 รายได้ร้าน</div>
+                <div style="font-size:18px; font-weight:600; color:#0369a1;">฿${Math.floor(totalFullAmount - bTot).toLocaleString()}</div>
             </div>
         </div>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px; margin-bottom:15px; padding:0 5px;">
-            <div style="color:#64748b;">👥 ลูกค้าทั้งหมด: <b style="color:var(--text);">${monthCount} คน</b></div>
-            <div style="color:#64748b;">📅 วันทำงาน: <b style="color:var(--text);">${filtered.length} วัน</b></div>
+        <div style="display:flex; justify-content:center; gap:20px; font-size:13px; color:#94a3b8; margin-bottom:20px;">
+            <span><i class="fas fa-users"></i> 👥 ลูกค้าทั้งหมด: <b>${cTot}</b> คน</span>
+            <span><i class="fas fa-calendar-check"></i> 📅 วันทำงาน: <b>${filtered.length}</b> วัน</span>
         </div>
 
-        <div style="border-top:1px dashed #cbd5e1; padding-top:10px;">
-            <label style="font-size:11px; opacity:0.6; font-weight:bold;">📊 สถิติบริการ:</label>
-            <div style="margin:5px 0 10px 0;">${sB || '-'}</div>
-            <label style="font-size:11px; opacity:0.6; font-weight:bold;">💇 ทรงผม:</label>
-            <div style="margin-top:5px;">${hB || '-'}</div>
+        <div style="border-top: 1px solid #f1f5f9; padding-top:15px;">
+            <label style="font-size:12px; font-weight:600; color:#94a3b8; display:block; margin-bottom:10px; text-transform:uppercase;">📈 สถิติแต่ละบริการ</label>
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">${sB || '-'}</div>
+            
+            <label style="font-size:12px; font-weight:600; color:#94a3b8; display:block; margin:20px 0 10px 0; text-transform:uppercase;">💇 รายละเอียดทรงผม</label>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">${hB || '-'}</div>
         </div>
     </div>`;
 }
