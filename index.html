@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12.1 (Updated)</title>
+    <title>Barber Note Pro v.12.1.1 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -170,15 +170,39 @@
 <nav class="nav"><div class="nav-item active" id="n1" onclick="go(1)"><i class="fas fa-edit"></i>บันทึก</div><div class="nav-item" id="n2" onclick="go(2)"><i class="fas fa-calendar-check"></i>รายวัน</div><div class="nav-item" id="n3" onclick="go(3)"><i class="fas fa-history"></i>สถิติ</div></nav>
 
 <script>
-    let payMethod="", 
+  let payMethod="", 
         conf=JSON.parse(localStorage.getItem("barber_conf"))||{shop:"Barber Shop",perc:50,guar:0,theme:"light",bg:"#f1f5f9",sound:"on",voice:"female"}, 
         db=JSON.parse(localStorage.getItem("barber_db"))||[], 
         archives=JSON.parse(localStorage.getItem("barber_arc"))||[],
         account=JSON.parse(localStorage.getItem("barber_account"))||{balance:0, logs:[]};
 
-   const $ = (id) => document.getElementById(id);window.onload = () => { const dateInp = $("dateInp"); dateInp.valueAsDate = new Date(); applySettings(); updateDateDisplay(dateInp.value); 
-}; 
-    function speak(t){ if(conf.sound==="off")return; window.speechSynthesis.cancel(); const m=new SpeechSynthesisUtterance(t); m.lang='th-TH'; m.pitch=conf.voice==="male"?0.6:1.1; window.speechSynthesis.speak(m); }
+    const $ = (id) => document.getElementById(id);
+
+    // ฟังก์ชันแสดงวันที่บนปุ่มปฏิทิน
+    function updateDateDisplay(val) {
+        if(!val) return;
+        const d = new Date(val);
+        const months = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+        if($("dateDisplay")) $("dateDisplay").innerText = d.getDate() + " " + months[d.getMonth()];
+    }
+
+    window.onload = () => { 
+        const dateInp = $("dateInp"); 
+        if(dateInp) {
+            dateInp.valueAsDate = new Date(); 
+            updateDateDisplay(dateInp.value);
+        }
+        if(typeof applySettings === 'function') applySettings(); 
+    }; 
+
+    function speak(t){ 
+        if(conf.sound==="off") return; 
+        window.speechSynthesis.cancel(); 
+        const m=new SpeechSynthesisUtterance(t); 
+        m.lang='th-TH'; 
+        m.pitch=conf.voice==="male"?0.6:1.1; 
+        window.speechSynthesis.speak(m); 
+    }
     
     document.querySelectorAll('.time-input').forEach(i=>i.addEventListener('input',e=>{ 
         let v=e.target.value.replace(/\D/g,''); 
@@ -189,109 +213,76 @@
         document.querySelectorAll('.page, .nav-item').forEach(el=>el.classList.remove('active')); 
         $("p"+n).classList.add('active'); 
         $("n"+n).classList.add('active'); 
-        if(n===2) renderDay(); 
-        if(n===3) { loadAccountStatus(); loadAccountHistory(); }
+        if(n===2) { if(typeof renderDay === 'function') renderDay(); }
+        if(n===3) { 
+            if(typeof loadAccountStatus === 'function') loadAccountStatus(); 
+            if(typeof loadAccountHistory === 'function') loadAccountHistory(); 
+        }
     }
 
-    function selectPay(m){ payMethod=m; $("btnCash").className=m==='Cash'?'btn-pay active-cash':'btn-pay'; $("btnTrans").className=m==='Trans'?'btn-pay active-transfer':'btn-pay'; }
-// 1. ฟังก์ชันบันทึกปกติ
+    function selectPay(m){ 
+        payMethod=m; 
+        $("btnCash").className=m==='Cash'?'btn-pay active-cash':'btn-pay'; 
+        $("btnTrans").className=m==='Trans'?'btn-pay active-transfer':'btn-pay'; 
+    }
+
     function handleSave(){
         const p=$("priceInp").value; 
         if(!p||!payMethod){ speak("กรุณาระบุราคาและวิธีชำระเงิน"); return; }
         let svcs=[($("mainSvc").value||"ตัดผม"),$("extra1").value,$("extra2").value].filter(s=>s);
-        
-        db.push({
-            id:Date.now(),
-            date:$("dateInp").value,
-            time:`${$("tStart").value}-${$("tEnd").value}`,
-            mainSvc:$("mainSvc").value||"ตัดผม",
-            svcs,
-            hair:$("hairStyle").value,
-            price:Number(p),
-            pay:payMethod
-        });
-        
+        db.push({id:Date.now(),date:$("dateInp").value,time:`${$("tStart").value}-${$("tEnd").value}`,mainSvc:$("mainSvc").value||"ตัดผม",svcs,hair:$("hairStyle").value,price:Number(p),pay:payMethod});
         localStorage.setItem("barber_db",JSON.stringify(db)); 
         speak("บันทึก "+p+" บาท สำเร็จ");
         $("mainSaveBtn").innerText="บันทึกแล้ว ✓"; 
         $("mainSaveBtn").style.background="var(--accent)";
-        
         setTimeout(()=>{ 
             $("mainSaveBtn").innerText="บันทึกข้อมูล"; 
             $("mainSaveBtn").style.background="var(--primary)"; 
             $("priceInp").value=""; 
             if($("tEnd").value){ $("tStart").value=$("tEnd").value; $("tEnd").value=""; } 
-            $("extra1").value=$("extra2").value=""; 
-            selectPay(""); 
-        }, 600);
+            $("extra1").value=$("extra2").value=""; selectPay(""); 
+        },600);
     }
 
-    // 2. ฟังก์ชันประกันรายได้
     function handleInsurance() {
         const d = $("dateInp").value;
         if (!d) { alert("กรุณาเลือกวันที่ก่อนครับ"); return; }
-
-        // เช็คว่าวันนี้มีลูกค้าหรือยัง (ใช้ตัวแปร db ตาม handleSave)
         if (db.some(item => item.date === d)) { 
             alert("วันนี้มีการบันทึกลูกค้าไปแล้ว ไม่สามารถลงยอดประกันได้ครับ"); 
             return; 
         }
-
-        const currentInsurance = (window.settings && window.settings.guarantee) ? window.settings.guarantee : 300;
-
+        // ดึงยอดประกันจาก conf.guar ที่คุณตั้งค่าไว้
+        const currentInsurance = conf.guar || 300;
         if (confirm(`ยืนยันลงยอด "ประกันรายได้" ฿${currentInsurance}\n(ลูกค้า 0 คน - ร้านจ่ายช่าง)`)) {
             const item = {
-                date: d,
-                total: Number(currentInsurance),
-                cash: 0,
-                barber: Number(currentInsurance),
-                shop: -Number(currentInsurance),
-                count: 0,
-                details: [{
-                    time: "00:00",
-                    svcs: ["🛡️ ประกันรายได้"],
-                    price: Number(currentInsurance),
-                    hair: "ชดเชยประกันรายได้ประจำวัน",
-                    pay: "Trans",
-                    barber: Number(currentInsurance)
-                }],
-                stats: { "ประกันรายได้": 1 },
-                settle: -Number(currentInsurance),
-                isInsurance: true
+                date: d, total: Number(currentInsurance), cash: 0, barber: Number(currentInsurance),
+                shop: -Number(currentInsurance), count: 0,
+                details: [{time: "00:00", svcs: ["🛡️ ประกันรายได้"], price: Number(currentInsurance), pay: "Trans", barber: Number(currentInsurance)}],
+                stats: { "ประกันรายได้": 1 }, settle: -Number(currentInsurance), isInsurance: true
             };
             saveSpecialEntry(item);
         }
     }
 
-    // 3. ฟังก์ชันวันหยุด
     function handleHoliday() {
         const d = $("dateInp").value;
         if (!d) { alert("กรุณาเลือกวันที่ก่อนครับ"); return; }
-        if (confirm("ยืนยันบันทึกวันนี้เป็น 'วันหยุด'?\n(ไม่นับเป็นวันทำงานในสถิติ)")) {
+        if (confirm("ยืนยันบันทึกวันนี้เป็น 'วันหยุด'?")) {
             const item = {
-                date: d,
-                total: 0, cash: 0, barber: 0, shop: 0, count: 0,
-                details: [],
-                stats: { "🏖️ วันหยุด": 1 },
-                settle: 0,
-                isHoliday: true 
+                date: d, total: 0, cash: 0, barber: 0, shop: 0, count: 0,
+                details: [], stats: { "🏖️ วันหยุด": 1 }, settle: 0, isHoliday: true 
             };
             saveSpecialEntry(item);
         }
     }
 
-    // 4. ฟังก์ชันบันทึกตัวกลาง
     function saveSpecialEntry(item) {
-        // ตรวจสอบชื่อตัวแปรที่ใช้เก็บประวัติ (ถ้าแอปคุณใช้ชื่ออื่นให้เปลี่ยนจาก archives เป็นชื่อนั้น)
-        if (typeof archives === 'undefined') archives = [];
-        
+        // ใช้ตัวแปร archives และ barber_arc ตามที่คุณประกาศไว้
         archives = archives.filter(a => a.date !== item.date);
         archives.push(item);
-        localStorage.setItem("barber_archives", JSON.stringify(archives));
-        
+        localStorage.setItem("barber_arc", JSON.stringify(archives));
         alert("บันทึกสำเร็จ!");
-        showPage('p2'); 
-        if (typeof loadHistDaily === 'function') loadHistDaily(); 
+        go(2); // พาไปหน้า 2
     }
     
     function renderDay(){
