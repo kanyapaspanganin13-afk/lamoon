@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12 (Updated)</title>
+    <title>Barber Note Pro v.12.1 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -194,32 +194,45 @@
     }
 
     function selectPay(m){ payMethod=m; $("btnCash").className=m==='Cash'?'btn-pay active-cash':'btn-pay'; $("btnTrans").className=m==='Trans'?'btn-pay active-transfer':'btn-pay'; }
+// 1. ฟังก์ชันบันทึกปกติ
     function handleSave(){
         const p=$("priceInp").value; 
         if(!p||!payMethod){ speak("กรุณาระบุราคาและวิธีชำระเงิน"); return; }
         let svcs=[($("mainSvc").value||"ตัดผม"),$("extra1").value,$("extra2").value].filter(s=>s);
-        db.push({id:Date.now(),date:$("dateInp").value,time:`${$("tStart").value}-${$("tEnd").value}`,mainSvc:$("mainSvc").value||"ตัดผม",svcs,hair:$("hairStyle").value,price:Number(p),pay:payMethod});
+        
+        db.push({
+            id:Date.now(),
+            date:$("dateInp").value,
+            time:`${$("tStart").value}-${$("tEnd").value}`,
+            mainSvc:$("mainSvc").value||"ตัดผม",
+            svcs,
+            hair:$("hairStyle").value,
+            price:Number(p),
+            pay:payMethod
+        });
+        
         localStorage.setItem("barber_db",JSON.stringify(db)); 
         speak("บันทึก "+p+" บาท สำเร็จ");
         $("mainSaveBtn").innerText="บันทึกแล้ว ✓"; 
         $("mainSaveBtn").style.background="var(--accent)";
+        
         setTimeout(()=>{ 
             $("mainSaveBtn").innerText="บันทึกข้อมูล"; 
             $("mainSaveBtn").style.background="var(--primary)"; 
             $("priceInp").value=""; 
             if($("tEnd").value){ $("tStart").value=$("tEnd").value; $("tEnd").value=""; } 
-            $("extra1").value=$("extra2").value=""; selectPay(""); 
-        },600);
+            $("extra1").value=$("extra2").value=""; 
+            selectPay(""); 
+        }, 600);
     }
 
-    // 🛡️ ฟังก์ชันจัดการประกันรายได้ (แก้ไขให้ไม่ซ้อนกัน)
+    // 2. ฟังก์ชันประกันรายได้
     function handleInsurance() {
         const d = $("dateInp").value;
         if (!d) { alert("กรุณาเลือกวันที่ก่อนครับ"); return; }
 
-        // ตรวจสอบว่าวันนี้มีลูกค้าใน db หรือยัง
-        const hasCustomer = db.some(item => item.date === d);
-        if (hasCustomer) { 
+        // เช็คว่าวันนี้มีลูกค้าหรือยัง (ใช้ตัวแปร db ตาม handleSave)
+        if (db.some(item => item.date === d)) { 
             alert("วันนี้มีการบันทึกลูกค้าไปแล้ว ไม่สามารถลงยอดประกันได้ครับ"); 
             return; 
         }
@@ -250,7 +263,7 @@
         }
     }
 
-    // 🏖️ ฟังก์ชันจัดการวันหยุด
+    // 3. ฟังก์ชันวันหยุด
     function handleHoliday() {
         const d = $("dateInp").value;
         if (!d) { alert("กรุณาเลือกวันที่ก่อนครับ"); return; }
@@ -267,9 +280,11 @@
         }
     }
 
-    // 💾 ฟังก์ชันบันทึกตัวกลาง
+    // 4. ฟังก์ชันบันทึกตัวกลาง
     function saveSpecialEntry(item) {
+        // ตรวจสอบชื่อตัวแปรที่ใช้เก็บประวัติ (ถ้าแอปคุณใช้ชื่ออื่นให้เปลี่ยนจาก archives เป็นชื่อนั้น)
         if (typeof archives === 'undefined') archives = [];
+        
         archives = archives.filter(a => a.date !== item.date);
         archives.push(item);
         localStorage.setItem("barber_archives", JSON.stringify(archives));
@@ -278,6 +293,7 @@
         showPage('p2'); 
         if (typeof loadHistDaily === 'function') loadHistDaily(); 
     }
+    
     function renderDay(){
         const d=$("dateInp").value, today=db.filter(r=>r.date===d); 
         let tot=0,trans=0,cash=0,stats={},listHtml="";
