@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.2.3 (Updated)</title>
+    <title>Barber Note Pro v.2.3.1 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -168,8 +168,7 @@
 /* ปรับสไตล์ปุ่มดูประวัติใน Card ให้เด่นขึ้น */
 .btn-toggle-history { width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--primary); background: #f0f7ff; color: var(--primary); cursor: pointer; font-family: 'Kanit'; }
 </style>
-
-   <div id="modalSet" class="modal">
+<div id="modalSet" class="modal">
     <div class="modal-content" style="max-width: 350px; border-radius: 30px;">
         <h3 style="margin: 0 0 15px 0; text-align: center; font-size: 20px;">⚙️ ตั้งค่าระบบ</h3>
         
@@ -232,9 +231,11 @@
             </span>
         </div>
     </div>
-</div>
-    <nav class="nav"><div class="nav-item active" id="n1" onclick="go(1)"><i class="fas fa-edit"></i>บันทึก</div><div class="nav-item" id="n2" onclick="go(2)"><i class="fas fa-calendar-check"></i>รายวัน</div><div class="nav-item" id="n3" onclick="go(3)"><i class="fas fa-history"></i>สถิติ</div></nav>
-
+</div> <nav class="nav">
+    <div class="nav-item active" id="n1" onclick="go(1)"><i class="fas fa-edit"></i>บันทึก</div>
+    <div class="nav-item" id="n2" onclick="go(2)"><i class="fas fa-calendar-check"></i>รายวัน</div>
+    <div class="nav-item" id="n3" onclick="go(3)"><i class="fas fa-history"></i>สถิติ</div>
+</nav>
 <script>
     let payMethod="", 
         conf=JSON.parse(localStorage.getItem("barber_conf"))||{shop:"Barber Shop",perc:50,guar:0,theme:"light",bg:"#f1f5f9",sound:"on",voice:"female"}, 
