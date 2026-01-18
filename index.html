@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.2.1 (Updated)</title>
+    <title>Barber Note Pro v.11.2.2 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -188,28 +188,81 @@
         },600);
     }
 
-    function renderDay(){
-        const d=$("dateInp").value, today=db.filter(r=>r.date===d); 
-        let tot=0,trans=0,cash=0,stats={},listHtml="";
-        today.sort((a,b)=>a.time.localeCompare(b.time)).forEach(r=>{
-            tot+=r.price; 
-            r.pay==='Trans' ? trans+=r.price : cash+=r.price; 
-            const isCutting = r.svcs.includes("ตัดผม") || r.svcs.includes("เด็ก") || (r.hair && r.hair.trim() !== "");
-            if (isCutting) stats["ตัดผม"] = (stats["ตัดผม"] || 0) + 1;
-            r.svcs.forEach(s => { if (s === "เด็ก") stats["เด็ก"] = (stats["เด็ก"] || 0) + 1; else if (s !== "ตัดผม") stats[s] = (stats[s] || 0) + 1; });
-            listHtml += `<div class="history-row"><div style="display:flex; justify-content:space-between"><span>${r.time} | ${r.svcs.join('+')}</span><b>฿${r.price}</b></div><div style="display:flex; justify-content:space-between; opacity:0.7"><span>${r.hair||''}</span><span>${r.pay==='Cash'?'💵 สด':'📱 โอน'} <i class="fas fa-trash" style="margin-left:10px; color:var(--danger)" onclick="delRec(${r.id})"></i></span></div></div>`;
+ function renderDay() {
+    const d = $("dateInp").value, today = db.filter(r => r.date === d);
+    let tot = 0, trans = 0, cash = 0, stats = {}, listHtml = "";
+
+    today.sort((a, b) => a.time.localeCompare(b.time)).forEach(r => {
+        tot += r.price;
+        r.pay === 'Trans' ? trans += r.price : cash += r.price;
+
+        // --- ส่วนที่แก้ไข: ตรรกะการนับใหม่ ---
+        // 1. เช็คว่ารายการนี้มีการ "ตัดผม" หรือไม่ (เช็คจากช่องหลัก หรือ ช่องทรงผม)
+        const hasMain = r.mainSvc && r.mainSvc !== ""; // เช่น เลือก "เด็ก"
+        const hasHair = r.hair && r.hair !== "";       // เช่น เลือก "รองทรง"
+        
+        if (hasMain || hasHair) {
+            stats["ตัดผม"] = (stats["ตัดผม"] || 0) + 1;
+            
+            // ถ้าระบุว่าเป็นเด็ก ให้นับสถิติเด็กเพิ่ม
+            if (r.mainSvc === "เด็ก") {
+                stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
+            }
+            // เก็บสถิติแยกทรงผม (ถ้าต้องการโชว์ชื่อทรง)
+            if (hasHair) {
+                stats[r.hair] = (stats[r.hair] || 0) + 1;
+            }
+        }
+
+        // 2. นับบริการอื่น (จากช่อง extra1 และ extra2)
+        [r.extra1, r.extra2].forEach(ex => {
+            if (ex && ex !== "") {
+                stats[ex] = (stats[ex] || 0) + 1;
+            }
         });
-        const bEarn=Math.max(tot*(conf.perc/100),conf.guar), sEarn=tot-bEarn, settle=cash-bEarn;
-        $("dTotal").innerText=tot.toLocaleString(); $("dTrans").innerText=trans.toLocaleString(); $("dBarber").innerHTML=`${Math.floor(bEarn).toLocaleString()} <small>(สด: ${cash})</small>`; $("dShop").innerText=Math.floor(sEarn).toLocaleString(); $("dCounts").innerText=`ลูกค้า: ${today.length} คน`; $("dailyList").innerHTML=listHtml||"<center style='opacity:0.3; padding:20px'>ไม่มีข้อมูล</center>";
-        let sH=""; if(stats["ตัดผม"]) sH += `<span class="badge" style="background:#4338ca; color:white;">ตัดผม: ${stats["ตัดผม"]}</span>`;
-        for(let s in stats) { if(s !== "ตัดผม") sH += `<span class="badge">${s}: ${stats[s]}</span>`; }
-        $("dServiceStats").innerHTML=sH;
-        const b=$("settleBar"); 
-        if(tot===0){ b.innerText="🟦 ร้านจ่ายประกัน"; b.className="status-bar status-blue"; } 
-        else if(settle>0){ b.innerText=`🟥 ช่างคืนร้าน ฿${Math.floor(settle).toLocaleString()}`; b.className="status-bar status-red"; } 
-        else if(settle<0){ b.innerText=`🟦 ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; b.className="status-bar status-indigo"; } 
-        else { b.innerText="✅ ยอดพอดี"; b.className="status-bar status-green"; }
+        // -----------------------------------
+
+        // ส่วนแสดงผลรายการ (List HTML) - ใช้ข้อมูลตามโครงสร้างใหม่
+        const svcsShow = [r.mainSvc, r.hair, r.extra1, r.extra2].filter(s => s).join('+');
+        listHtml += `<div class="history-row">
+            <div style="display:flex; justify-content:space-between">
+                <span>${r.time} | ${svcsShow}</span>
+                <b>฿${r.price}</b>
+            </div>
+            <div style="display:flex; justify-content:space-between; opacity:0.7">
+                <span></span> 
+                <span>${r.pay === 'Cash' ? '💵 สด' : '📱 โอน'} 
+                    <i class="fas fa-trash" style="margin-left:10px; color:var(--danger)" onclick="delRec(${r.id})"></i>
+                </span>
+            </div>
+        </div>`;
+    });
+
+    // --- ส่วนคำนวณเงินและแสดงสถานะ (คงเดิมตามสูตรของคุณ) ---
+    const bEarn = Math.max(tot * (conf.perc / 100), conf.guar), sEarn = tot - bEarn, settle = cash - bEarn;
+    $("dTotal").innerText = tot.toLocaleString(); 
+    $("dTrans").innerText = trans.toLocaleString(); 
+    $("dBarber").innerHTML = `${Math.floor(bEarn).toLocaleString()} <small>(สด: ${cash})</small>`; 
+    $("dShop").innerText = Math.floor(sEarn).toLocaleString(); 
+    $("dCounts").innerText = `ลูกค้า: ${today.length} คน`; 
+    $("dailyList").innerHTML = listHtml || "<center style='opacity:0.3; padding:20px'>ไม่มีข้อมูล</center>";
+
+    // --- ส่วนการแสดง Badge สถิติ ---
+    let sH = ""; 
+    if (stats["ตัดผม"]) sH += `<span class="badge" style="background:#4338ca; color:white;">ตัดผม: ${stats["ตัดผม"]}</span>`;
+    for (let s in stats) { 
+        // แสดงเฉพาะสถิติที่ไม่ใช่ "ตัดผม" และไม่ซ้ำกับชื่อทรงผม (ถ้าไม่อยากให้รก)
+        if (s !== "ตัดผม") sH += `<span class="badge">${s}: ${stats[s]}</span>`; 
     }
+    $("dServiceStats").innerHTML = sH;
+
+    // --- แถบสถานะการคืนเงิน (คงเดิม) ---
+    const b = $("settleBar");
+    if (tot === 0) { b.innerText = "🟦 ร้านจ่ายประกัน"; b.className = "status-bar status-blue"; }
+    else if (settle > 0) { b.innerText = `🟥 ช่างคืนร้าน ฿${Math.floor(settle).toLocaleString()}`; b.className = "status-bar status-red"; }
+    else if (settle < 0) { b.innerText = `🟦 ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; b.className = "status-bar status-indigo"; }
+    else { b.innerText = "✅ ยอดพอดี"; b.className = "status-bar status-green"; }
+}
 
     function calcTodaySettle(){
         const d = $("dateInp").value;
