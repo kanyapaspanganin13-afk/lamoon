@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.1 (Updated)</title>
+    <title>Barber Note Pro v.11.2 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -54,8 +54,8 @@
 
 <div id="p1" class="page active">
     <div class="card" style="border-left: 5px solid #0ea5e9;"><input type="date" id="dateInp" style="margin-bottom:15px"><div class="grid-2"><div><label>เริ่ม</label><input type="tel" id="tStart" placeholder="0900" class="time-input" maxlength="4"></div><div><label>เสร็จ</label><input type="tel" id="tEnd" placeholder="0930" class="time-input" maxlength="4"></div></div></div>
-    <div class="card" style="border-left: 5px solid #10b981;"><div class="grid-2" style="margin-bottom:10px"><select id="mainSvc"><option value="">ไม่เลือก</option><option value="เด็ก">เด็ก</option></select><select id="hairStyle"><option value="">ทรงผม</option><option>รองทรง</option><option>แฟชั่น</option><option>สกินเฟด</option><option>เปิดข้าง</option><option>วินเทจ</option><option>ตำรวจ/ทหาร</option><option>ทรงนักเรียน</option><option>แก้ทรงผม</option></select></div>
-    <div class="grid-2"><select id="extra1"><option value="">บริการอื่น 1</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>โกนผม</option></select><select id="extra2"><option value="">บริการอื่น 2</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>โกนผม</option></select></div></div>
+    <div class="card" style="border-left: 5px solid #10b981;"><div class="grid-2" style="margin-bottom:10px"><select id="mainSvc"><option value="">ไม่เลือก</option><option value="เด็ก">เด็ก</option></select><select id="hairStyle"><option value="">ไม่เลือก</option><option>รองทรง</option><option>แฟชั่น</option><option>สกินเฟด</option><option>เปิดข้าง</option><option>วินเทจ</option><option>ตำรวจ/ทหาร</option><option>ทรงนักเรียน</option><option>แก้ทรงผม<option>โกนผ</option></select></div>
+    <div class="grid-2"><select id="extra1"><option value="">บริการอื่น 1</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option></option></select><select id="extra2"><option value="">บริการอื่น 2</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option>ม</option></select></div></div>
     <div class="card" style="border-left: 5px solid #f59e0b;"><input type="number" id="priceInp" placeholder="0" inputmode="numeric" style="font-size:40px; font-weight:600; color:#b45309; text-align:center; height:80px;"><div class="grid-2" style="margin-top:15px"><button id="btnCash" class="btn-pay" onclick="selectPay('Cash')"><i class="fas fa-money-bill-wave"></i> สด</button><button id="btnTrans" class="btn-pay" onclick="selectPay('Trans')"><i class="fas fa-mobile-alt"></i> โอน</button></div></div>
     <button class="btn-save" id="mainSaveBtn" onclick="handleSave()">บันทึกข้อมูล</button>
 </div>
@@ -120,14 +120,12 @@
     <div style="background:var(--card); width:100%; border-radius:25px 25px 0 0; padding:20px; max-height:85vh; overflow-y:auto; animation: slideUp 0.3s ease-out; box-shadow: 0 -10px 25px rgba(0,0,0,0.2);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:2px solid rgba(0,0,0,0.05); padding-bottom:15px;">
             <h3 style="margin:0; font-size:18px;"><i class="fas fa-history"></i> ประวัติการเคลียร์เงิน</h3>
-            <button onclick="closeHistoryFull()" style="background:#f1f5f9; border:none; padding:10px 20px; border-radius:12px; font-weight:bold; color:var(--danger);">ปิด</button>
-        </div>
-        
+            <button onclick="closeHistoryFull()" style="background:#f1f5f9; border:none; padding:10px 20px; border-radius:12px; font-weight:bold; color:var(--danger);">ปิด</button></div>
         <div id="accHistoryFull"></div>
     </div>
 </div>
 
-<style>
+    <style>
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 /* ปรับสไตล์ปุ่มดูประวัติใน Card ให้เด่นขึ้น */
 .btn-toggle-history { width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--primary); background: #f0f7ff; color: var(--primary); cursor: pointer; font-family: 'Kanit'; }
@@ -223,7 +221,6 @@
         return cash - bEarn;
     }
 
-    // แก้ไขฟังก์ชันเดิมให้เป็นการเปิด Pop-up แทน
 function toggleAccHistory() {
     const panel = $("historyPanel");
     const box = $("accHistoryFull");
@@ -233,8 +230,6 @@ function toggleAccHistory() {
         box.innerHTML = "<center style='opacity:.4; padding:50px;'>ไม่มีประวัติการเคลียร์เงิน</center>";
         return;
     }
-
-    // สร้างรายการประวัติแบบขยายใหญ่
     box.innerHTML = account.logs.map(l => `
         <div style="padding:15px; border-bottom:1px solid rgba(0,0,0,0.05); margin-bottom:12px; background:var(--input-bg); border-radius:15px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
