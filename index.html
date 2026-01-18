@@ -4,50 +4,126 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.2.3 (Updated)</title>
+    <title>Barber Note Pro v.11.3.3 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root { --primary: #1e3a8a; --accent: #16a34a; --danger: #dc2626; --warning: #f59e0b; --main-bg: #f1f5f9; --card: #ffffff; --text: #1e293b; --input-bg: #f8fafc; --indigo: #818cf8; --border: #e2e8f0; }
-        body.theme-dark { --main-bg: #0f172a; --card: #1e293b; --text: #f8fafc; --input-bg: #334155; --border: #475569; }
-        body.theme-pastel { --main-bg: #faf5ff; --card: #ffffff; --text: #4c1d95; --input-bg: #f5f3ff; --border: #e9d5ff; }
-        body { margin: 0; font-family: 'Kanit'; background: var(--main-bg); color: var(--text); padding-bottom: 90px; transition: 0.3s; font-weight: 300; }
-        header { padding: 15px; background: var(--card); display: flex; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05); position: sticky; top:0; z-index:100; }
-        header h1 { flex: 1; text-align: center; font-size: 18px; margin: 0; font-weight: 500; }
-        .page { display: none; padding: 15px; animation: fadeIn 0.2s; } .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .card { background: var(--card); border-radius: 20px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; box-sizing: border-box; }
-        input, select { width: 100%; height: 45px; padding: 8px 10px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); font-size: 16px; box-sizing: border-box; background: var(--input-bg); color: var(--text); outline: none; font-family: 'Kanit'; }
-        #dateInp { background: #e0f2fe !important; border: 1px solid #bae6fd !important; -webkit-appearance: none;}
-        .time-input { background: #f0f9ff !important; border: 1px solid #bae6fd !important; text-align: center; font-weight: 600; }
-        .btn-pay { border: 2px solid transparent; background: var(--input-bg); color: var(--text); padding: 8px 5px; border-radius: 12px; font-weight: 500; cursor: pointer; transition: 0.2s; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 4px; }
-        .active-cash { border: 3px solid #16a34a !important; color: #14532d !important; background: #dcfce7 !important; }
-        .active-transfer { border: 3px solid #0284c7 !important; color: #0c4a6e !important; background: #e0f2fe !important; }
-        .status-bar { width: 100%; padding: 15px; border-radius: 15px; text-align: center; font-weight: 600; font-size: 16px; margin: 10px 0; box-sizing: border-box; }
-        .status-red { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; } 
-        .status-green { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
-        .status-blue { background: #e0f2fe; color: #0284c7; } 
-        .status-indigo { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
+ <style>
+    /* 1. พื้นฐาน และ การจัดการธีม (รวมของเดิมและสี v.12) */
+    :root { 
+        --primary: #1e3a8a; --accent: #16a34a; --danger: #dc2626; --warning: #f59e0b; 
+        --main-bg: #f1f5f9; --card: #ffffff; --text: #1e293b; --input-bg: #f8fafc; 
+        --indigo: #818cf8; --border: #e2e8f0;
+        /* สีเพิ่มเติมสำหรับ v.12 */
+        --orange-v12: #ffbe76; --blue-v12: #7ed6df; 
+    }
+    
+    body.theme-dark { 
+        --main-bg: #0f172a; --card: #1e293b; --text: #f8fafc; --input-bg: #334155; --border: #475569; 
+    }
+    
+    body.theme-pastel { 
+        --main-bg: #faf5ff; --card: #ffffff; --text: #4c1d95; --input-bg: #f5f3ff; --border: #e9d5ff; 
+    }
 
-        /* สไตล์หน้า 3 แบบ Card เดียว (Updated) */
-        .acc-main-card { background: var(--card); padding: 18px; border-radius: 25px; border-left: 6px solid #f59e0b; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 15px; }
-        .btn-toggle-history { width: 100%; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 10px; border-radius: 12px; font-size: 13px; color: var(--primary); cursor: pointer; margin: 10px 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .history-wrapper { display: none; background: rgba(0,0,0,0.02); border-radius: 15px; padding: 10px; margin-bottom: 15px; }
-        .history-list { max-height: 200px; overflow-y: auto; font-size: 12px; }
-        .acc-light { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    body { 
+        margin: 0; font-family: 'Kanit', sans-serif; background: var(--main-bg); 
+        color: var(--text); padding-bottom: 90px; transition: 0.3s; font-weight: 300; 
+    }
 
-        .nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); display: flex; border-top: 1px solid rgba(0,0,0,0.1); height: 75px; align-items: center; justify-content: space-around; z-index: 9999; }
-        .nav-item { flex: 1; text-align: center; color: #94a3b8; font-size: 13px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
-        .nav-item.active { color: var(--primary); font-weight: 500; }
-        .btn-save { background: var(--primary); color: white; width: 100%; padding: 16px; border-radius: 16px; font-size: 18px; font-weight: 600; border: none; margin-top: 10px; cursor: pointer; }
-        .btn-close-day { position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px; border-radius: 30px; background: #818cf8; color: white; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 99; font-size: 24px; }
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-        .modal-content { background: var(--card); width: 100%; border-radius: 25px; padding: 22px; max-height: 85vh; overflow-y: auto; }
-        .color-dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid #ddd; display: inline-block; margin: 5px; }
-        .history-row { padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.03); font-size: 14px; }
-        .badge { background: rgba(0,0,0,0.05); padding: 4px 10px; border-radius: 8px; font-size: 12px; margin: 2px; display: inline-block; color: var(--primary); }
-    </style>
+    /* 2. ส่วนหัว และ หน้าเพจ */
+    header { 
+        padding: 15px; background: var(--card); display: flex; align-items: center; 
+        border-bottom: 1px solid rgba(0,0,0,0.05); position: sticky; top:0; z-index:100; 
+    }
+    header h1 { flex: 1; text-align: center; font-size: 18px; margin: 0; font-weight: 500; }
+
+    .page { display: none; padding: 15px; animation: fadeIn 0.2s; } 
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* 3. ส่วนประกอบ UI (Cards & Inputs) */
+    .card { 
+        background: var(--card); border-radius: 20px; padding: 16px; 
+        margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; box-sizing: border-box; }
+    
+    input, select { 
+        width: 100%; height: 45px; padding: 8px 10px; border-radius: 12px; 
+        border: 1px solid var(--border); font-size: 16px; box-sizing: border-box; 
+        background: var(--input-bg); color: var(--text); outline: none; font-family: 'Kanit'; 
+    }
+
+    #dateInp { background: #e0f2fe !important; border: 1px solid #bae6fd !important; }
+
+    /* ปุ่มและการชำระเงิน */
+    .btn-pay { 
+        border: 2px solid transparent; background: var(--input-bg); color: var(--text); 
+        padding: 8px 5px; border-radius: 12px; font-weight: 500; cursor: pointer; 
+        transition: 0.2s; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 4px; 
+    }
+    .active-cash { border: 3px solid #16a34a !important; color: #14532d !important; background: #dcfce7 !important; }
+    .active-transfer { border: 3px solid #0284c7 !important; color: #0c4a6e !important; background: #e0f2fe !important; }
+
+    /* 4. [NEW] หน้า 3 บัญชีสไตล์ Card ส้ม-ฟ้า (v.12) */
+    .account-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0; }
+    
+    .stat-card { 
+        padding: 15px; border-radius: 20px; text-align: center; 
+        border: 2px solid transparent; transition: 0.3s;
+    }
+    .card-orange { 
+        border-color: var(--orange-v12); background: #fffaf0; color: #e67e22; 
+    }
+    .card-blue { 
+        border-color: var(--blue-v12); background: #f0faff; color: #2980b9; 
+    }
+    .stat-label { font-size: 12px; margin-bottom: 5px; font-weight: 400; opacity: 0.8; }
+    .stat-value { font-size: 20px; font-weight: 600; }
+
+    /* 5. เมนูนำทางด้านล่าง (Nav Bar) */
+    .nav { 
+        position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); 
+        display: flex; border-top: 1px solid rgba(0,0,0,0.1); height: 75px; 
+        align-items: center; justify-content: space-around; z-index: 9999; 
+    }
+    .nav-item { 
+        flex: 1; text-align: center; color: #94a3b8; font-size: 13px; cursor: pointer; 
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; 
+    }
+    .nav-item.active { color: var(--primary); font-weight: 500; }
+
+    /* 6. ปุ่มหลัก และสถานะ */
+    .btn-save { 
+        background: var(--primary); color: white; width: 100%; padding: 16px; 
+        border-radius: 16px; font-size: 18px; font-weight: 600; border: none; 
+        margin-top: 10px; cursor: pointer; 
+    }
+    .status-bar { width: 100%; padding: 15px; border-radius: 15px; text-align: center; font-weight: 600; font-size: 16px; margin: 10px 0; box-sizing: border-box; }
+    .status-red { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; } 
+    .status-green { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+
+    /* 7. [NEW] หน้าต่างตั้งค่า (Modal v.12) */
+    .modal { 
+        position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; 
+        align-items: center; justify-content: center; z-index: 10000; padding: 20px; 
+    }
+    .modal.active { display: flex; }
+    .modal-content { 
+        background: var(--card); width: 100%; max-width: 400px; border-radius: 25px; 
+        padding: 22px; max-height: 85vh; overflow-y: auto; position: relative;
+    }
+    
+    /* บริการเสริม Checkbox Grid */
+    .service-selection {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;
+    }
+    .service-box {
+        background: var(--input-bg); padding: 12px; border-radius: 12px;
+        display: flex; align-items: center; gap: 10px; cursor: pointer;
+        border: 1px solid var(--border); font-size: 14px;
+    }
+</style>
 </head>
 <body id="mainBody">
 <header><div style="width:40px"></div><h1 id="shopNameDisp">Barber Note</h1><div onclick="openSettings()" style="cursor:pointer"><i class="fas fa-cog"></i></div></header>
@@ -70,36 +146,50 @@
     </div>
     <button class="btn-close-day" onclick="closeDay()"><i class="fas fa-check-circle"></i></button>
 </div>
-
 <div id="p3" class="page">
-        <div class="card">
-            <div style="margin-bottom: 15px; font-weight: 600; color: #e67e22;">📋 สรุปยอดบัญชี</div>
-            <div class="stat-grid">
-                <div class="stat-box" style="border-color: var(--orange); background: #fffaf0;">
-                    <div style="font-size: 0.8rem;">📅 ค้างเดิม</div>
-                    <div style="font-size: 1.4rem; font-weight: bold;">฿0</div>
-                </div>
-                <div class="stat-box" style="border-color: var(--blue); background: #f0faff;">
-                    <div style="font-size: 0.8rem;">📅 วันนี้</div>
-                    <div style="font-size: 1.4rem; font-weight: bold;">฿0</div>
-                </div>
-            </div>
-            <div style="text-align: center; margin: 20px 0; color: #747d8c;">คำนวณยอด...</div>
-            <hr style="border: none; border-top: 1px dashed #ddd; margin-bottom: 15px;">
-            <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                <input type="checkbox" checked style="margin-right: 10px;"> ยืนยันการเคลียร์เงิน
-            </div>
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <div style="background: #efefff; padding: 12px; border-radius: 12px;"><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i></div>
-                <input type="text" placeholder="พิมพ์หมายเหตุการเคลียร์เงิน...">
-            </div>
-            <button class="btn-green">ยืนยันบันทึกการเคลียร์</button>
+    <div class="card" style="border-left: 5px solid #f59e0b; padding: 15px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0; font-size:15px; color:#b45309;">🧾 สรุปยอดบัญชี</h3>
+            <div id="accLight" class="acc-light" style="width:12px; height:12px; border-radius:50%; background:gray;"></div>
         </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+            <div style="background: #fff7ed; padding: 15px 10px; border-radius: 20px; border: 3px solid #fb923c; text-align: center;">
+                <div style="font-size: 12px; font-weight: 700; color: #b45309; margin-bottom: 5px;">📅 ค้างเดิม</div>
+                <div id="accOldText" style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1;">฿0</div>
+            </div>
+            <div style="background: #f0f9ff; padding: 15px 10px; border-radius: 20px; border: 3px solid #38bdf8; text-align: center;">
+                <div style="font-size: 12px; font-weight: 700; color: #0369a1; margin-bottom: 5px;">📅 วันนี้</div>
+                <div id="accTodayText" style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1;">฿0</div>
+            </div>
+        </div>
+
+        <div id="accStatus" class="status-bar" style="margin-bottom:15px; font-weight:900;">คำนวณยอด...</div>
+
+        <div style="border-top: 2px dashed #cbd5e1; padding-top: 15px;">
+            <b style="font-size: 14px; display: block; margin-bottom: 10px; color: #334155;">✅ ยืนยันการเคลียร์เงิน</b>
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
+                <div style="position: relative; width: 50px; height: 50px; background: #fff; border-radius: 15px; display: flex; align-items: center; justify-content: center; border: 2px solid #cbd5e1; flex-shrink: 0;">
+                    <i class="fas fa-calendar-day" style="color: #6366f1; font-size: 22px;"></i>
+                    <input type="date" id="accDate" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;">
+                </div>
+                <input type="text" id="accNote" placeholder="พิมพ์หมายเหตุการเคลียร์เงิน..." 
+                    style="flex: 1; height: 50px; border-radius: 15px; border: 2px solid #cbd5e1; padding: 0 15px; font-size: 15px; background: #fff;">
+            </div>
+            <button class="btn-save" onclick="clearAccount()" style="margin:0; padding:15px; font-size:16px; background:#10b981; border-radius:15px; width:100%; font-weight: 900; box-shadow: 0 4px 0 #059669;">
+                ยืนยันบันทึกการเคลียร์
+            </button>
+        </div>
+
+        <button onclick="toggleAccHistory()" class="btn-toggle-history" style="margin-top:15px;">
+            <i class="fas fa-history"></i> ดูประวัติการเคลียร์เงินทั้งหมด
+        </button>
     </div>
 
     <div class="card" style="border-top: 4px solid var(--primary);"><label>เรียกดูประวัติรายวัน</label><input type="date" id="histDate" onchange="loadHistDaily()"><div id="histDailyArea"></div></div>
     <div class="card" style="border-top: 4px solid var(--warning);"><label>สรุปสถิติรายเดือน</label><input type="month" id="histMonth" onchange="loadHistMonth()"><div id="histMonthArea"></div></div>
-</div> 
+</div>
+
 <div id="historyPanel" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:10000; align-items:flex-end;">
     <div style="background:var(--card); width:100%; border-radius:25px 25px 0 0; padding:20px; max-height:85vh; overflow-y:auto; animation: slideUp 0.3s ease-out; box-shadow: 0 -10px 25px rgba(0,0,0,0.2);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:2px solid rgba(0,0,0,0.05); padding-bottom:15px;">
@@ -115,18 +205,55 @@
 .btn-toggle-history { width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--primary); background: #f0f7ff; color: var(--primary); cursor: pointer; font-family: 'Kanit'; }
 </style>
 
-    <div id="modalSet" class="modal"><div class="modal-content"><h3>⚙️ ตั้งค่า</h3><label>ชื่อร้าน</label><input id="setShop">
-<div class="grid-2" style="margin-top:10px"><div><label>% แบ่ง</label><input type="number" id="setPerc"></div><div><label>ประกัน</label><input type="number" id="setGuar"></div></div>
-<div class="grid-2" style="margin-top:15px"><div><label>🔊 เสียง</label><select id="setSound"><option value="on">เปิด</option><option value="off">ปิด</option></select></div><div><label>🎚️ เสียงพูด</label><select id="setVoice"><option value="female">👩 หญิง</option><option value="male">👨 ชาย</option></select></div></div>
-<label style="margin-top:15px">ธีม</label><select id="setTheme" onchange="changeTheme(this.value)"><option value="light">Light</option><option value="dark">Dark</option><option value="pastel">Pastel</option></select>
-<div style="margin-top:10px"><label>เลือกสีพื้นหลัง (7 สี)</label><br>
-    <div class="color-dot" style="background:#fdf2f8" onclick="setBg('#fdf2f8')"></div><div class="color-dot" style="background:#f0fdf4" onclick="setBg('#f0fdf4')"></div><div class="color-dot" style="background:#f0f9ff" onclick="setBg('#f0f9ff')"></div><div class="color-dot" style="background:#fffbeb" onclick="setBg('#fffbeb')"></div><div class="color-dot" style="background:#faf5ff" onclick="setBg('#faf5ff')"></div><div class="color-dot" style="background:#f1f5f9" onclick="setBg('#f1f5f9')"></div><div class="color-dot" style="background:#ffffff; border:1px solid #ccc" onclick="setBg('#ffffff')"></div>
-</div>
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;"><button class="btn-save" onclick="saveSettings()" style="margin:0">บันทึก</button><button onclick="closeSettings()" style="border-radius:10px; border: 1px solid var(--border)">ปิด</button></div>
-<button onclick="clearAllData()" style="width:100%; background:none; border:none; color:red; margin-top:20px; font-size:12px; opacity:0.5">ล้างข้อมูลทั้งหมด</button></div></div>
+    <div id="modalSet" class="modal">
+        <div class="modal-content">
+            <h3>⚙️ ตั้งค่า</h3>
+            <label>ชื่อร้าน</label><input id="setShop">
+            <div class="grid-2" style="margin-top:10px">
+                <div><label>% แบ่ง</label><input type="number" id="setPerc"></div>
+                <div><label>ประกัน</label><input type="number" id="setGuar"></div>
+            </div>
+            <div class="grid-2" style="margin-top:15px">
+                <div><label>🔊 เสียง</label><select id="setSound"><option value="on">เปิด</option><option value="off">ปิด</option></select></div>
+                <div><label>🎚️ เสียงพูด</label><select id="setVoice"><option value="female">👩 หญิง</option><option value="male">👨 ชาย</option></select></div>
+            </div>
+            <label style="margin-top:15px">ธีม</label>
+            <select id="setTheme" onchange="changeTheme(this.value)">
+                <option value="light">Light</option><option value="dark">Dark</option><option value="pastel">Pastel</option>
+            </select>
+            <div style="margin-top:10px"><label>เลือกสีพื้นหลัง (7 สี)</label><br>
+                <div class="color-dot" style="background:#fdf2f8" onclick="setBg('#fdf2f8')"></div>
+                <div class="color-dot" style="background:#f0fdf4" onclick="setBg('#f0fdf4')"></div>
+                <div class="color-dot" style="background:#f0f9ff" onclick="setBg('#f0f9ff')"></div>
+                <div class="color-dot" style="background:#fffbeb" onclick="setBg('#fffbeb')"></div>
+                <div class="color-dot" style="background:#faf5ff" onclick="setBg('#faf5ff')"></div>
+                <div class="color-dot" style="background:#f1f5f9" onclick="setBg('#f1f5f9')"></div>
+                <div class="color-dot" style="background:#ffffff; border:1px solid #ccc" onclick="setBg('#ffffff')"></div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+                <button class="btn-save" onclick="saveSettings()" style="margin:0">บันทึก</button>
+                <button class="btn-save" style="background:#ccc" onclick="closeSettings()">ปิด</button>
+            </div>
+            <button onclick="clearAllData()" style="width:100%; background:none; border:none; color:red; margin-top:20px; font-size:12px; opacity:0.5">ล้างข้อมูลทั้งหมด</button>
+        </div>
+    </div>
 
-<nav class="nav"><div class="nav-item active" id="n1" onclick="go(1)"><i class="fas fa-edit"></i>บันทึก</div><div class="nav-item" id="n2" onclick="go(2)"><i class="fas fa-calendar-check"></i>รายวัน</div><div class="nav-item" id="n3" onclick="go(3)"><i class="fas fa-history"></i>สถิติ</div></nav>
+    <script>
+        // ฟังก์ชันสลับหน้า
+        function go(n, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('p' + n).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+        }
 
+        // ฟังก์ชันควบคุม Modal
+        function openSettings() { document.getElementById('modalSet').style.display = 'flex'; }
+        function closeSettings() { document.getElementById('modalSet').style.display = 'none'; }
+
+        // ฟังก์ชันธีมและพื้นหลัง
+        function changeTheme(v) { document.body.className = 'theme-' + v; }
+        function setBg(color) { document.body.style.background = color; }
 <script>
     let payMethod="", 
         conf=JSON.parse(localStorage.getItem("barber_conf"))||{shop:"Barber Shop",perc:50,guar:0,theme:"light",bg:"#f1f5f9",sound:"on",voice:"female"}, 
