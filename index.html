@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.2.3 (Updated)</title>
+    <title>Barber Note Pro v.11.2.4 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -381,13 +381,22 @@ function closeHistoryFull() {
         </div>
     </div>`;
 }
-    function shareLine() {
+   function shareLine() {
         const d = $("dateInp").value, today = db.filter(r => r.date === d); if (!today.length) return;
-        let tot = 0, trans = 0, cash = 0; let msg = `💈 ร้าน: ${conf.shop}\n📅 วันที่: ${d}\n-------------------------\n`;
-        today.forEach((r, i) => { tot += r.price; r.pay === 'Trans' ? trans += r.price : cash += r.price; msg += `${i + 1}. [${r.time}] ${r.hair || r.svcs[0]} = ${r.price} ${r.pay === 'Cash' ? '💵' : '📱'}\n`; });
+        let tot = 0, trans = 0, cash = 0, counts = {"เด็ก":0, "สระผม":0, "โกนหนวด":0, "ย้อมผม":0};
+        let msg = `💈 รายงานร้าน: ${conf.shop}\n📅 วันที่: ${d}\n-------------------------\n📝 จำนวนลูกค้า (รวม ${today.length} ):\n`;
+        today.forEach((r, i) => { tot += r.price; r.pay === 'Trans' ? trans += r.price : cash += r.price;
+            let name = r.hair || r.svcs[0]; if (r.mainSvc === "เด็ก") name += "(เด็ก)";
+            msg += `${i + 1}. [${r.time}] ${name} = ${r.price} ${r.pay === 'Cash' ? '💵' : '📱'}\n`;
+            r.svcs.forEach(s => {
+                if (s.includes("เด็ก")) counts["เด็ก"]++; else if (s.includes("สระ")) counts["สระผม"]++; else if (s.includes("โกน") || s.includes("กันหน้า")) counts["โกนหนวด"]++; else if (s.includes("ย้อม") || s.includes("ดัด")) counts["ย้อมผม"]++;
+            });
+        });
         const bE = Math.max(tot * (conf.perc / 100), conf.guar), settle = Math.floor(cash - bE);
-        msg += `-------------------------\n💰 ยอดรวม: ${tot}\n📱 โอน: ${trans}\n🤵 ช่าง: ${Math.floor(bE)}\n🏠 ร้าน: ${Math.floor(tot-bE)}\n-------------------------\n`;
-        msg += settle === 0 ? `✅ ยอดพอดี` : `⚠️ ${settle > 0 ? 'ช่างคืนร้าน ' : 'ร้านคืนช่าง '}${Math.abs(settle)}`;
+        msg += `-------------------------\n📊 สรุปงาน:\n`;
+        const icons = {"เด็ก":"🧒", "สระผม":"🧼", "โกนหนวด":"🪒", "ย้อมผม":"🎨"}; for (let k in counts) { if(counts[k] > 0) msg += `${icons[k]} ${k}: ${counts[k]} \n`; }
+        msg += `-------------------------\n💰 ยอดรวม: ${tot} บาท\n📱 ยอดโอน: ${trans} บาท\n🤵 ช่าง: ${Math.floor(bE)} บาท\n🏠 ร้าน: ${Math.floor(tot - bE)} บาท\n-------------------------\n`;
+        if (settle === 0) msg += `✅ ยอดพอดี`; else msg += `⚠️ ${settle > 0 ? 'ช่างคืนร้าน ' : 'ร้านคืนช่าง '}${Math.abs(settle)} บาท`;
         window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`);
     }
 
