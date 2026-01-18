@@ -2,9 +2,9 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.13.1(Updated)</title>
+    <title>Barber Note Pro v.13.2(Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -86,8 +86,36 @@
         .badge { background: rgba(0,0,0,0.05); padding: 4px 10px; border-radius: 8px; font-size: 12px; margin: 2px; display: inline-block; color: var(--primary); }
     </style>
 </head>
-<body id="mainBody">
-<header><div style="width:40px"></div><h1 id="shopNameDisp">Barber Note</h1><div onclick="openSettings()" style="cursor:pointer"><i class="fas fa-cog"></i></div></header>  
+/* 1. คุมไม่ให้ตัว Body ขยายเกินจอ */
+#mainBody {
+    margin: 0;
+    padding: 0;
+    width: 100vw; /* กว้างเท่าจอพอดี */
+    overflow-x: hidden; /* ตัดส่วนที่ล้นออกทางขวาทิ้ง */
+    box-sizing: border-box;
+    font-family: 'Kanit', sans-serif;
+}
+
+/* 2. ปรับ Header ไม่ให้ดันจอออก */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: var(--card);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    width: 100%; /* ให้กว้างเท่า Body */
+    box-sizing: border-box; /* สำคัญ: เพื่อให้ padding ไม่ไปเพิ่มความกว้าง */
+}
+
+/* 3. ปรับขนาดตัวหนังสือชื่อร้านไม่ให้ใหญ่เกินไปจนดัน Header */
+#shopNameDisp {
+    margin: 0;
+    font-size: 18px; /* ปรับขนาดให้พอเหมาะ */
+    white-space: nowrap; /* ห้ามขึ้นบรรทัดใหม่ */
+    overflow: hidden;
+    text-overflow: ellipsis; /* ถ้าชื่อยาวเกินให้เป็น ... */
+}
 
 <div id="p1" class="page active">
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; padding: 5px;">
