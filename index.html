@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.2.4 (Updated)</title>
+    <title>Barber Note Pro v.11.2.5 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -343,13 +343,34 @@ function closeHistoryFull() {
             for(let s in a.stats) monthStats[s] = (monthStats[s] || 0) + a.stats[s]; 
         } 
     });
+// ฟังก์ชันสร้างสีพาสเทลแบบสุ่มตามชื่อบริการ (อ่อน สบายตา)
+    const getPastelColor = (str) => {
+        const colors = [
+            {bg: "#e0f2fe", text: "#0369a1"}, // ฟ้าอ่อน
+            {bg: "#fef3c7", text: "#92400e"}, // เหลือง/ส้มอ่อน
+            {bg: "#dcfce7", text: "#15803d"}, // เขียวอ่อน
+            {bg: "#fce7f3", text: "#be185d"}, // ชมพูอ่อน
+            {bg: "#ede9fe", text: "#6d28d9"}, // ม่วงอ่อน
+            {bg: "#ffedd5", text: "#c2410c"}, // ส้มพาสเทล
+            {bg: "#f1f5f9", text: "#475569"}  // เทาอ่อน
+        ];
+        // ใช้ชื่อบริการเป็นตัวเลือก index ของสี เพื่อให้ชื่อเดิมได้สีเดิมเสมอ
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        return colors[Math.abs(hash) % colors.length];
+    };
 
     let sB = "", hB = "";
     for(let s in monthStats) { 
-        if(s.startsWith("ทรง:")) hB += `<span class="badge" style="background:#10b981; color:white;">${s.replace("ทรง:","")}: ${monthStats[s]}</span>`; 
-        else sB += `<span class="badge" style="background:var(--indigo); color:white;">${s}: ${monthStats[s]}</span>`; 
+        if(s.startsWith("ทรง:")) {
+            hB += `<span class="badge" style="background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; border-radius:6px; padding:2px 8px;">${s.replace("ทรง:","")}: ${monthStats[s]}</span>`; 
+        } else {
+            const colorPair = getPastelColor(s);
+            sB += `<span class="badge" style="background:${colorPair.bg}; color:${colorPair.text}; border-radius:10px; padding:5px 12px; font-weight:500; font-size:13px; border: 1px solid rgba(0,0,0,0.03);">${s}: ${monthStats[s]}</span>`; 
+        }
     }
-
     area.innerHTML = `
     <div style="padding:15px; background:var(--input-bg); border-radius:20px; border:1px solid var(--border);">
         <div style="text-align:center; margin-bottom:15px; padding:10px; background:#fff; border-radius:15px; box-shadow:inset 0 0 10px rgba(0,0,0,0.02);">
