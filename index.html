@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11.3.1 (Updated)</title>
+    <title>Barber Note Pro v.11.3.3 (Updated)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -176,9 +176,8 @@
         archives=JSON.parse(localStorage.getItem("barber_arc"))||[],
         account=JSON.parse(localStorage.getItem("barber_account"))||{balance:0, logs:[]};
 
-    const $=(id)=>document.getElementById(id);
-    window.onload=()=>{ $("dateInp").valueAsDate=new Date(); applySettings(); };
-    
+   const $ = (id) => document.getElementById(id);window.onload = () => { const dateInp = $("dateInp"); dateInp.valueAsDate = new Date(); applySettings(); updateDateDisplay(dateInp.value); 
+}; 
     function speak(t){ if(conf.sound==="off")return; window.speechSynthesis.cancel(); const m=new SpeechSynthesisUtterance(t); m.lang='th-TH'; m.pitch=conf.voice==="male"?0.6:1.1; window.speechSynthesis.speak(m); }
     
     document.querySelectorAll('.time-input').forEach(i=>i.addEventListener('input',e=>{ 
@@ -213,7 +212,76 @@
             $("extra1").value=$("extra2").value=""; selectPay(""); 
         },600);
     }
-   function renderDay(){
+    function handleInsurance() {
+    const d = $("dateInp").value;
+    if (!d) { alert("กรุณาเลือกวันที่ก่อนครับ"); return; }
+
+    // ตรวจสอบว่าวันนี้มีลูกค้าใน db ไปหรือยัง
+    const hasCustomer = db.some(item => item.date === d);
+    if (hasCustomer) { 
+        alert("วันนี้มีการบันทึกลูกค้าไปแล้ว ไม่สามารถลงยอดประกันได้ครับ"); 
+        return; 
+    }
+  // 🛡️ ฟังก์ชันจัดการประกันรายได้
+    function handleInsurance() {
+        const d = $("dateInp").value;
+        if (!d) { alert("กรุณาเลือกวันที่ก่อนครับ"); return; }
+
+        // ดึงยอดประกันจาก settings (ถ้าไม่มีให้ใช้ 300 เป็นค่าเริ่มต้น)
+        const currentInsurance = (window.settings && window.settings.guarantee) ? window.settings.guarantee : 300;
+
+        if (confirm(`ยืนยันลงยอด "ประกันรายได้" ฿${currentInsurance}\n(ลูกค้า 0 คน - ร้านจ่ายช่าง)`)) {
+            const item = {
+                date: d,
+                total: Number(currentInsurance),
+                cash: 0,
+                barber: Number(currentInsurance),
+                shop: -Number(currentInsurance),
+                count: 0,
+                details: [{
+                    time: "00:00",
+                    svcs: ["🛡️ ประกันรายได้"],
+                    price: Number(currentInsurance),
+                    hair: "ชดเชยประกันรายได้ประจำวัน",
+                    pay: "Trans",
+                    barber: Number(currentInsurance)
+                }],
+                stats: { "ประกันรายได้": 1 },
+                settle: -Number(currentInsurance),
+                isInsurance: true
+            };
+            saveSpecialEntry(item);
+        }
+    }
+
+    // 🏖️ ฟังก์ชันจัดการวันหยุด
+    function handleHoliday() {
+        const d = $("dateInp").value;
+        if (!d) { alert("กรุณาเลือกวันที่ก่อนครับ"); return; }
+        if (confirm("ยืนยันบันทึกวันนี้เป็น 'วันหยุด'?\n(ไม่นับเป็นวันทำงานในสถิติ)")) {
+            const item = {
+                date: d,
+                total: 0, cash: 0, barber: 0, shop: 0, count: 0,
+                details: [],
+                stats: { "🏖️ วันหยุด": 1 },
+                settle: 0,
+                isHoliday: true 
+            };
+            saveSpecialEntry(item);
+        }
+    }
+    // 💾 ฟังก์ชันบันทึกตัวกลาง (ต้องมีฟังก์ชันนี้ด้วยนะครับ)
+    function saveSpecialEntry(item) {
+        // ลบข้อมูลเก่าของวันที่นี้ออกก่อนเพื่อป้องกันซ้ำ
+        archives = archives.filter(a => a.date !== item.date);
+        archives.push(item);
+        localStorage.setItem("barber_archives", JSON.stringify(archives));
+        
+        alert("บันทึกสำเร็จ!");
+        showPage('p2'); // สลับไปหน้าประวัติรายวัน
+        if (typeof loadHistDaily === 'function') loadHistDaily(); // อัปเดตรายการหน้า 2
+    }
+    function renderDay(){
         const d=$("dateInp").value, today=db.filter(r=>r.date===d); 
         let tot=0,trans=0,cash=0,stats={},listHtml="";
         today.sort((a,b)=>a.time.localeCompare(b.time)).forEach(r=>{
