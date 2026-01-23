@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12.1</title>
+    <title>Barber Note Pro v.12.2</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -226,55 +226,41 @@ nav {
             <h3 style="margin:0 0 20px; font-size:20px; color:#1a237e; font-weight:800; text-align:center;">⚙️ ตั้งค่าระบบ</h3>
 
             <div style="margin-bottom:18px;">
-                <label style="display:block; font-size:11px; font-weight:800; color:#94a3b8; margin-bottom:8px; margin-left:5px;">ชื่อร้าน</label>
-                <input type="text" id="setShop" placeholder="ระบุชื่อร้าน" style="width:100%; height:55px; border-radius:18px; border:none; background:#f8fafc; text-align:center; font-size:16px; font-weight:700; color:#1e293b; outline:none;">
+                <label style="display:block; font-size:11px; font-weight:800; color:#94a3b8; margin-bottom:8px;">ชื่อร้าน</label>
+                <input type="text" id="setShop" style="width:100%; height:55px; border-radius:18px; border:none; background:#f8fafc; text-align:center; font-size:16px; font-weight:700; outline:none;">
             </div>
 
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                <div>
-                    <label style="display:block; font-size:11px; font-weight:800; color:#94a3b8; margin-bottom:8px; margin-left:5px;">% ช่าง</label>
-                    <input type="number" id="setPerc" style="width:100%; height:55px; border-radius:18px; border:none; background:#f8fafc; text-align:center; font-size:18px; font-weight:700; color:#1e293b; outline:none;">
-                </div>
-                <div>
-                    <label style="display:block; font-size:11px; font-weight:800; color:#94a3b8; margin-bottom:8px; margin-left:5px;">ค่าประกัน</label>
-                    <input type="number" id="setGuar" style="width:100%; height:55px; border-radius:18px; border:none; background:#f8fafc; text-align:center; font-size:18px; font-weight:700; color:#1e293b; outline:none;">
-                </div>
+                <input type="number" id="setPerc" placeholder="% ช่าง" style="width:100%; height:55px; border-radius:18px; border:none; background:#f8fafc; text-align:center; font-weight:700; outline:none;">
+                <input type="number" id="setGuar" placeholder="ประกัน" style="width:100%; height:55px; border-radius:18px; border:none; background:#f8fafc; text-align:center; font-weight:700; outline:none;">
             </div>
 
             <div style="margin-top:18px;">
-                <label style="display:block; font-size:11px; font-weight:800; color:#94a3b8; margin-bottom:8px; margin-left:5px;">เลือกธีมแสดงผล</label>
-                <select id="setTheme" style="width:100%; height:55px; border-radius:18px; border:none; background:#f8fafc; padding:0 15px; font-weight:700; color:#1e293b; outline:none; appearance:none;">
-                    <option value="light">🌤 โหมดสว่าง (Light Mode)</option>
-                    <option value="navy">🌌 โหมดน้ำเงิน (Navy Mode)</option>
-                    <option value="dark">🌑 โหมดดำ-ทอง (Dark Gold)</option>
+                <select id="setTheme" style="width:100%; height:55px; border-radius:18px; border:none; background:#f8fafc; padding:0 15px; font-weight:700; outline:none; appearance:none;">
+                    <option value="light">🌤 โหมดสว่าง</option>
+                    <option value="navy">🌌 โหมดน้ำเงิน</option>
+                    <option value="dark">🌑 โหมดดำ-ทอง</option>
                 </select>
             </div>
 
             <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:12px; margin-top:18px;">
-                <div>
-                    <label style="display:block; font-size:11px; font-weight:800; color:#94a3b8; margin-bottom:8px; margin-left:5px;">เสียงระบบ</label>
-                    <select id="setSound" style="width:100%; height:55px; border-radius:18px; border:none; background:#f8fafc; padding:0 10px; font-weight:700; color:#1e293b; outline:none; appearance:none;">
-                        <option value="on">🔊 เปิด</option>
-                        <option value="off">🔇 ปิด</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="display:block; font-size:11px; font-weight:800; color:#94a3b8; margin-bottom:8px; margin-left:5px;">พนักงานเสียง</label>
-                    <select id="setVoice" style="width:100%; height:55px; border-radius:18px; border:none; background:#f8fafc; padding:0 10px; font-weight:700; color:#1e293b; outline:none; appearance:none;">
-                        <option value="female">👸 หญิง (พรีเมียม)</option>
-                        <option value="male">🤵 ชาย (พรีเมียม)</option>
-                    </select>
-                </div>
+                <select id="setSound" style="width:100%; height:55px; border-radius:18px; border:none; background:#f8fafc; padding:0 10px; font-weight:700; outline:none; appearance:none;">
+                    <option value="on">🔊 เปิดเสียง</option>
+                    <option value="off">🔇 ปิดเสียง</option>
+                </select>
+                <select id="setVoice" style="width:100%; height:55px; border-radius:18px; border:none; background:#f8fafc; padding:0 10px; font-weight:700; outline:none; appearance:none;">
+                    <option value="female">👸 หญิง </option>
+                    <option value="male">🤵 ชาย </option>
+                </select>
             </div>
 
             <div style="display:grid; grid-template-columns: 2fr 1fr; gap:15px; margin-top:25px;">
-                <button onclick="saveSettings()" style="background:#1e3a8a; color:#fff; height:65px; border-radius:22px; border:none; font-weight:800; font-size:18px; box-shadow:0 10px 20px rgba(30,58,138,0.2);">บันทึกข้อมูล</button>
-                <button onclick="closeSettings()" style="background:#fff5f5; color:#e11d48; height:65px; border-radius:22px; border:none; font-size:32px; display:flex; align-items:center; justify-content:center;">⏻</button>
+                <button onclick="saveSettings()" style="background:#1e3a8a; color:#fff; height:65px; border-radius:22px; border:none; font-weight:800; font-size:18px;">บันทึกข้อมูล</button>
+                
+                <button onclick="document.getElementById('modalSet').style.display='none'" style="background:#fff5f5; color:#e11d48; height:65px; border-radius:22px; border:none; font-size:32px; display:flex; align-items:center; justify-content:center; cursor:pointer;">⏻</button>
             </div>
 
-            <button onclick="clearAllData()" style="width:100%; margin-top:20px; background:none; border:none; color:#fca5a5; font-size:12px; font-weight:700; text-decoration:underline;">
-                ล้างข้อมูลระบบทั้งหมด
-            </button>
+            <button onclick="clearAllData()" style="width:100%; margin-top:20px; background:none; border:none; color:#fca5a5; font-size:16px; font-weight:700; text-decoration:underline; cursor:pointer;">ล้างข้อมูลระบบทั้งหมด</button>
         </div>
     </div>
 </div>
@@ -319,7 +305,7 @@ function handleInsurance() {
     const d = $("dateInp").value || new Date().toISOString().split('T')[0], g = parseInt(conf.guar) || 0;
     const speak = (t) => { const m = new SpeechSynthesisUtterance(t); m.lang = 'th-TH'; window.speechSynthesis.speak(m); };
     if (g <= 0) return (speak("กรุณาตั้งค่าประกัน"), alert("⚠️ ตั้งค่ายอดประกันใน 'ตั้งค่าระบบ' ก่อน"));
-    if (db.find(r => r.date === d && r.type === "GUARANTEE_CLAIM")) return (speak("วันนี้เปิดประกันไปแล้วค่ะ"), alert("🛡️ วันนี้เปิดระบบประกันไปแล้วครับ"));
+    if (db.find(r => r.date === d && r.type === "GUARANTEE_CLAIM")) return (speak("วันนี้เปิดประกันไปแล้วค่ะ"), alert("🛡️ วันนี้เปิดระบบประกันไปแล้ว"));
     if (confirm(`🛡️ ยืนยันใช้ระบบ 'ประกันรายได้'?`)) {
         db.push({ id: Date.now(), date: d, time: "00:00", svcs: ["🛡️ ประกันรายวัน"], price: 0, pay: "N/A", type: "GUARANTEE_CLAIM" });
         saveDB(); speak(`เปิดระบบประกัน ${g} บาท เรียบร้อย`); alert("✅ เปิดระบบประกันเรียบร้อย"); renderDay();
@@ -340,7 +326,7 @@ function openSettings(){const m=document.getElementById("modalSet");if(m)m.style
 function saveSettings(){try{conf={...conf,shop:document.getElementById("setShop").value,perc:parseInt(document.getElementById("setPerc").value)||0,guar:parseInt(document.getElementById("setGuar").value)||0,theme:document.getElementById("setTheme").value,voice:document.getElementById("setVoice").value,sound:document.getElementById("setSound").value};localStorage.setItem("barber_conf",JSON.stringify(conf));applyTheme(conf.theme);if(document.getElementById("shopNameDisp"))document.getElementById("shopNameDisp").innerText=conf.shop;alert("✅ บันทึกเรียบร้อย");closeAndGoHome();if(typeof renderDay==='function')renderDay()}catch(e){alert("❌ พังเพราะ:"+e.message)}}
 function closeAndGoHome(){const m=document.getElementById("modalSet");if(m)m.style.display='none';if(typeof go==='function')go(1);else location.reload()}
 function speak(t){if(conf.sound==='off')return;window.speechSynthesis.cancel();const m=new SpeechSynthesisUtterance(t);m.lang='th-TH';m.pitch=(conf.voice==='male')?0.8:1.1;window.speechSynthesis.speak(m)}
-function clearAllData(){if(confirm("💣 ล้างบางข้อมูลทั้งหมด?")){localStorage.clear();location.reload()}}
+function clearAllData(){if(confirm("💣 ลบข้อมูลทั้งหมด?")){localStorage.clear();location.reload()}}
 function updateDateDisplay(v){if(!v)return;const d=new Date(v);const el=$("dateDisplay");if(el)el.innerText=d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});if(typeof renderDay==="function")renderDay()}
 window.addEventListener('DOMContentLoaded',()=>{const i=$("dateInp"),t=new Date().toISOString().split('T')[0];if(i){i.value=t;updateDateDisplay(t)}});
   
@@ -433,7 +419,7 @@ function saveAndGo(date, total, shop, barber) {
     $("accTodayVal").innerText = `฿${settle.toLocaleString()}`;
     $("accNet").innerText = Math.abs(net).toLocaleString();
 
-    let txt="✅ พอดี", light="#16a34a";
+    let txt="✅ ยอดพอดี", light="#16a34a";
     if(net > 0){ txt=`🚩 ${dThai}: ช่างคืนร้าน ฿${Math.abs(net).toLocaleString()}`; light="#dc2626"; }
     else if(net < 0){ txt=`🚩 ${dThai}: ร้านคืนช่าง ฿${Math.abs(net).toLocaleString()}`; light="#1e3a8a"; }
 
@@ -499,29 +485,25 @@ function loadHistMonth() {
     let statText = Object.entries(stats).filter(([k])=>allowed.some(a=>k.includes(a))).map(([k,v])=>`${icons[Object.keys(icons).find(i=>k.includes(i))]||'🔹'} ${k}: ${v}`).join('\n');
     let bEarn = Math.max(tot*(conf.perc/100), conf.guar) + tips; // ช่างได้ = ส่วนแบ่ง + ทิปทั้งหมด
     let settle = cash - bEarn, settleMsg = settle > 0 ? `⚠️ ช่างคืนร้าน ${Math.floor(Math.abs(settle))}` : `🟦 ร้านคืนช่าง ${Math.floor(Math.abs(settle))}`;
-    let msg = `💈 รายงานร้าน: Barber Shop\n📅 วันที่: ${fDate}\n-------------------------\n📝 ลูกค้า (${today.length} คน):\n${clientList}\n-------------------------\n📊 สถิติ:\n${statText}\n-------------------------\n💰 ยอด: ${tot} | 🧧 ทิป: ${tips}\n📱 โอน: ${trans} | 💵 สด: ${cash}\n🤵 ช่างได้: ${Math.floor(bEarn)}\n🏠 ร้านได้: ${Math.floor(tot-(bEarn-tips))}\n-------------------------\n${settleMsg}`;
+    let msg = `💈 รายงานร้าน: Barber Shop\n📅 วันที่: ${fDate}\n-------------------------\n📝 ลูกค้า (${today.length} คน):\n${clientList}\n-------------------------\n📊 สรุปงาน:\n${statText}\n-------------------------\n💰 ยอด: ${tot} | 🧧 ทิป: ${tips}\n📱 โอน: ${trans} | 💵 สด: ${cash}\n🤵 ช่างได้: ${Math.floor(bEarn)}\n🏠 ร้านได้: ${Math.floor(tot-(bEarn-tips))}\n-------------------------\n${settleMsg}`;
     window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`);
 }
  function go(p) {
-    // 1. สลับหน้า: ปิดทุกหน้าที่มี class 'page' แล้วเปิดเฉพาะ p1/p2/p3
     document.querySelectorAll('.page').forEach(pg => {
         pg.classList.remove('active');
-        pg.style.display = 'none'; // กันเหนียวเผื่อ CSS มึงไม่คุม display
+        pg.style.display = 'none'; 
     });
-
     const targetPage = document.getElementById('p' + p);
     if (targetPage) {
         targetPage.classList.add('active');
         targetPage.style.display = 'block';
     }
-
-    // 2. สลับไอคอนล่าง: ให้ตัวที่กดสว่าง (Active)
     document.querySelectorAll('.nav-item').forEach((btn, i) => {
         btn.classList.toggle('active', (i + 1) === p);
     });
 }
     function saveDB() { localStorage.setItem("barber_db", JSON.stringify(db)); localStorage.setItem("barber_conf", JSON.stringify(conf)); }
-    function delRec(id) { if (confirm("จะลบรายการนี้ใช่ไหมครับพี่?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); } }
+    function delRec(id) { if (confirm("ลบรายการนี้?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); } }
     function editTime(id) {const rec = db.find(r => r.id === id);if (!rec) return;const newStart = prompt("แก้เวลาเริ่ม (HH:MM)", rec.time);if (!newStart) return;const newEnd = prompt("แก้เวลาเสร็จ (HH:MM)", rec.endTime || "");rec.time = newStart;rec.endTime = newEnd || addMinutes(newStart, 30);saveDB();renderDay();}
     function openHistoryModal() { $("historyModal").style.display = "block"; renderHistoryList(); }
     function closeHistoryModal() { $("historyModal").style.display = "none"; }
