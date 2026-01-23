@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12.2</title>
+    <title>Barber Note Pro v.12.7</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -381,13 +381,44 @@ function renderDay() {
     container.innerHTML = `<div id="settleBar" style="flex:8; height:55px; background:${bg}; display:flex; align-items:center; justify-content:center; border-radius:15px; font-weight:900; font-size:15px; color:#1e293b; border:1px solid rgba(0,0,0,0.05);">${txt}</div><button onclick="saveAndGo('${dInp}', ${tot}, ${sEarn}, ${bEarn})" style="flex:2; height:55px; background:#f97316; color:#fff; border-radius:15px; border:none; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"><i class="fas fa-paper-plane"></i></button>`;
 }
 function saveAndGo(date, total, shop, barber) {
-    if (total === 0 && !confirm("ไม่มีข้อมูลยอด ปิดงานเลยมั้ย?")) return;
-    let s = {}; db.filter(r => r.date === date).forEach(r => { 
-        r.svcs.forEach(v => s[v] = (s[v]||0)+1); if(r.hair) s["ทรง:"+r.hair] = (s["ทรง:"+r.hair]||0)+1; 
+    // 1. ดึงข้อมูลวันนั้นมา
+    const dayRecords = db.filter(r => r.date === date);
+
+    // 2. สรุปสถิติ (Stats) แบบกางออก
+    let s = {};
+    dayRecords.forEach(r => { 
+        (r.svcs || []).forEach(v => s[v] = (s[v]||0)+1);
+        if(r.hair) s["ทรง:"+r.hair] = (s["ทรง:"+r.hair]||0)+1; 
     });
-    const entry = { date, total, barber, shop: total-barber, count: db.filter(r => r.date === date).length, stats: s };
-    const i = archives.findIndex(a => a.date === date); (i > -1) ? archives[i] = entry : archives.push(entry);
-    save(); alert("✅ บันทึกเรียบร้อย!"); go(3);
+
+    // 3. จัดโครงสร้าง Object ให้พร้อมสำหรับ "แถวแนวนอน" (Table Row)
+    const entry = {
+        date: date,           // วันที่ (Column 1)
+        total: total,         // ยอดรวม (Column 2)
+        barber: barber,       // ส่วนช่าง (Column 3)
+        shop: total - barber, // ส่วนร้าน (Column 4)
+        count: dayRecords.length, // จำนวนหัว (Column 5)
+        stats: s,
+        details: dayRecords.map(r => ({
+            time: r.time,
+            hair: r.hair,
+            price: r.price,
+            comm: r.barberPart
+        })) // รายละเอียดรายหัวเพื่อไป map ออกเป็นตารางแนวนอนในหน้า 3
+    };
+
+    // 4. บันทึกลง Archives (ตรวจสอบว่าซ้ำไหม ถ้าซ้ำให้ทับ)
+    const i = archives.findIndex(a => a.date === date);
+    if (i > -1) {
+        archives[i] = entry;
+    } else {
+        archives.push(entry);
+    }
+
+    // 5. Save และไปหน้า 3 (หน้ารายงาน)
+    save(); 
+    alert("✅ บันทึกยอดแนวนอนเรียบร้อย!");
+    go(3);
 }
   function updateAccountFromOrange() {
             const barberShareStr = document.getElementById('dBarber').innerText || "0";
