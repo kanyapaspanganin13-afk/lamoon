@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12.3</title>
+    <title>Barber Note Pro v.12</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -490,11 +490,33 @@ function loadHistDaily() {
     const d = $("histDate").value, f = archives.find(a => a.date === d);
     if(!f) return openReportModal("🔍 ค้นหา", "<center style='padding:40px;color:#ccc;'>❌ ไม่พบข้อมูล</center>");
 
-    let rows = f.details.map(r => `<div style="font-size:12px;padding:8px 0;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;"><span><b>${r.time}</b> ${r.svcs.join('+')}</span><b>฿${r.price}</b></div>`).join('');
-    let st = ""; for(let s in f.stats) st += `<span style="background:${s.startsWith("ทรง:")?"#10b981":"#6366f1"};color:#fff;margin:2px;padding:2px 6px;border-radius:5px;font-size:10px;display:inline-block;">${s.replace("ทรง:","")}:${f.stats[s]}</span>`;
+    // 🧪 ใส่ Guard กันพัง: (r.svcs || []) เพื่อไม่ให้ .join() แล้วตาย
+    let rows = (f.details || []).map(r => `
+        <div style="font-size:12px; padding:10px 0; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
+            <span style="flex:2;"><b>${r.time || '--:--'}</b> <span style="color:#64748b; margin-left:5px;">${(r.svcs || []).join('+') || (r.hair || 'ตัดผม')}</span></span>
+            <b style="flex:1; text-align:right; color:#1e293b;">฿${r.price || 0}</b>
+        </div>`).join('');
 
-    const set = f.settle || 0, sTxt = set > 0 ? `🔴 คืนร้าน: ฿${Math.floor(set)}` : set < 0 ? `🔵 คืนช่าง: ฿${Math.floor(Math.abs(set))}` : "🟢 พอดีเป๊ะ";
-    openReportModal(`📅 ${d}`, `<div style="background:${set>0?"#fef2f2":set<0?"#eef2ff":"#f0fdf4"};padding:10px;border-radius:12px;font-weight:900;text-align:center;margin-bottom:10px;">${sTxt}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;font-size:11px;"><div style="background:#f8fafc;padding:6px;border-radius:8px;">ยอดรวม: <b>฿${f.total}</b></div><div style="background:#f0fdf4;padding:6px;border-radius:8px;">ช่าง: <b>฿${Math.floor(f.barber)}</b></div></div><div style="margin-bottom:10px;">${st}</div><div style="border-top:1px dashed #ddd;">${rows}</div>`);
+    // สถิติบริการ (Stats)
+    let st = ""; 
+    if(f.stats) {
+        for(let s in f.stats) st += `<span style="background:${s.startsWith("ทรง:")?"#10b981":"#6366f1"};color:#fff;margin:2px;padding:3px 8px;border-radius:6px;font-size:10px;display:inline-block;">${s.replace("ทรง:","")}:${f.stats[s]}</span>`;
+    }
+
+    // 🔴 แก้เรื่อง Settle (คืนร้าน/คืนช่าง)
+    const set = Number(f.settle) || 0; 
+    const sTxt = set > 0 ? `🔴 คืนร้าน: ฿${Math.floor(set).toLocaleString()}` : set < 0 ? `🔵 คืนช่าง: ฿${Math.floor(Math.abs(set)).toLocaleString()}` : "🟢 ยอดพอดีเป๊ะ";
+    const bgHeader = set > 0 ? "#fef2f2" : set < 0 ? "#eef2ff" : "#f0fdf4";
+
+    openReportModal(`📅 ${d}`, `
+        <div style="background:${bgHeader}; padding:15px; border-radius:15px; font-weight:900; text-align:center; margin-bottom:12px; font-size:16px; border:1px solid rgba(0,0,0,0.05);">${sTxt}</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; font-size:12px;">
+            <div style="background:#f8fafc; padding:10px; border-radius:10px; text-align:center;">ยอดรวม<br><b style="font-size:14px;">฿${(f.total || 0).toLocaleString()}</b></div>
+            <div style="background:#f0fdf4; padding:10px; border-radius:10px; text-align:center;">ส่วนช่าง<br><b style="font-size:14px;">฿${Math.floor(f.barber || 0).toLocaleString()}</b></div>
+        </div>
+        <div style="margin-bottom:12px; text-align:center;">${st || '<small style="opacity:0.3;">ไม่มีสถิติ</small>'}</div>
+        <div style="border-top:2px solid #f1f5f9; padding-top:10px; max-height:250px; overflow-y:auto;">${rows || '<center style="padding:20px; opacity:0.3;">ไม่มีรายละเอียด</center>'}</div>
+    `);
 }
 
 function loadHistMonth() {
@@ -502,13 +524,32 @@ function loadHistMonth() {
     if(!f.length) return openReportModal("📊 รายงาน", "<center style='padding:40px;color:#ccc;'>🌑 ไม่มีข้อมูล</center>");
 
     let t=0, b=0, c=0, ms={}, sB="", hB="";
-    f.forEach(a => { t+=a.total; b+=a.barber; c+=a.count; if(a.stats) for(let s in a.stats) ms[s]=(ms[s]||0)+a.stats[s] });
+    f.forEach(a => { 
+        t += Number(a.total) || 0; 
+        b += Number(a.barber) || 0; 
+        c += Number(a.count) || 0; 
+        if(a.stats) for(let s in a.stats) ms[s] = (ms[s]||0) + a.stats[s];
+    });
+
     for(let s in ms) {
-        let tag = `<span style="background:${s.startsWith("ทรง:")?"#10b981":"#6366f1"};color:white;padding:2px 6px;border-radius:5px;margin:2px;font-size:10px;display:inline-block;">${s.replace("ทรง:","")}:${ms[s]}</span>`;
-        if(s.startsWith("ทรง:")) hB+=tag; else sB+=tag;
+        let tag = `<span style="background:${s.startsWith("ทรง:")?"#10b981":"#6366f1"}; color:white; padding:3px 8px; border-radius:6px; margin:2px; font-size:10px; display:inline-block;">${s.replace("ทรง:","")}:${ms[s]}</span>`;
+        if(s.startsWith("ทรง:")) hB += tag; else sB += tag;
     }
 
-    openReportModal(`🗓️ เดือน ${m}`, `<div style="text-align:center;margin-bottom:10px;padding:10px;background:#f8fafc;border-radius:15px;"><b>รวมรายได้</b><div style="font-size:28px;font-weight:900;">฿${t.toLocaleString()}</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;font-size:11px;"><div style="background:#f0fdf4;padding:8px;border-radius:10px;text-align:center;">ช่าง: <b>฿${Math.floor(b).toLocaleString()}</b></div><div style="background:#eff6ff;padding:8px;border-radius:10px;text-align:center;">คน: <b>${c}</b></div></div><div style="font-size:11px;"><b>📊 บริการ:</b> ${sB||'-'}<br><b>💇 ทรงผม:</b> ${hB||'-'}</div>`);
+    openReportModal(`🗓️ เดือน ${m}`, `
+        <div style="text-align:center; margin-bottom:15px; padding:20px; background:linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius:20px;">
+            <span style="font-size:14px; color:#64748b; font-weight:700;">รวมรายได้ทั้งเดือน</span>
+            <div style="font-size:32px; font-weight:900; color:#1e293b;">฿${t.toLocaleString()}</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
+            <div style="background:#f0fdf4; padding:12px; border-radius:15px; text-align:center;"><small style="color:#166534; font-weight:800;">ช่างรับ</small><br><b style="font-size:16px;">฿${Math.floor(b).toLocaleString()}</b></div>
+            <div style="background:#eff6ff; padding:12px; border-radius:15px; text-align:center;"><small style="color:#1e40af; font-weight:800;">จำนวนลูกค้า</small><br><b style="font-size:16px;">${c} คน</b></div>
+        </div>
+        <div style="font-size:12px; background:#fff; padding:10px; border-radius:12px; border:1px solid #f1f5f9;">
+            <b style="color:#1e293b;">📊 บริการ:</b> <div style="margin:5px 0 10px;">${sB||'-'}</div>
+            <b style="color:#1e293b;">💇 ทรงผม:</b> <div style="margin:5px 0;">${hB||'-'}</div>
+        </div>
+    `);
 }
   function shareLine() {
     const dInp = $("dateInp").value, today = db.filter(r => r.date === dInp); if (!today.length) return;
@@ -529,19 +570,55 @@ function loadHistMonth() {
     let msg = `💈 รายงานร้าน: Barber Shop\n📅 วันที่: ${fDate}\n-------------------------\n📝 ลูกค้า (${today.length} คน):\n${clientList}\n-------------------------\n📊 สรุปงาน:\n${statText}\n-------------------------\n💰 ยอด: ${tot} | 🧧 ทิป: ${tips}\n📱 โอน: ${trans} | 💵 สด: ${cash}\n🤵 ช่างได้: ${Math.floor(bEarn)}\n🏠 ร้านได้: ${Math.floor(tot-(bEarn-tips))}\n-------------------------\n${settleMsg}`;
     window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`);
 }
- function go(p) {
-    document.querySelectorAll('.page').forEach(pg => {
-        pg.classList.remove('active');
-        pg.style.display = 'none'; 
+function saveAndGo(date, total, shop, barber) {
+    const dInp = $("dateInp").value;
+    const allRec = db.filter(r => r.date === date);
+    const dayRecords = allRec.filter(r => r.type !== 'HOLIDAY');
+    
+    // 1. คำนวณ settle (ยอดที่ต้องเคลียร์) ณ ตอนนั้นเลย
+    let cash = 0;
+    dayRecords.forEach(r => { if(r.pay !== 'Trans') cash += Number(r.price)||0; });
+    const settle = cash - barber; // ✅ ตัวแปรเจ้าปัญหาที่มึงบอกว่าต้องมี
+
+    // 2. สรุปสถิติ
+    let s = {};
+    dayRecords.forEach(r => { 
+        (r.svcs || []).forEach(v => s[v] = (s[v]||0)+1);
+        if(r.hair) s["ทรง:"+r.hair] = (s["ทรง:"+r.hair]||0)+1; 
     });
-    const targetPage = document.getElementById('p' + p);
-    if (targetPage) {
-        targetPage.classList.add('active');
-        targetPage.style.display = 'block';
+
+    // 3. จัดโครงสร้างข้อมูล (แบบที่หน้ารายงานต้องการ)
+    const entry = {
+        date,
+        total,
+        barber,
+        shop,
+        settle, // ✅ บันทึก settle ลงไปด้วย
+        count: dayRecords.length,
+        stats: s,
+        // ✅ เก็บ details ให้ครบทุก Field (รวม svcs และ pay)
+        details: dayRecords.map(r => ({
+            time: r.time,
+            endTime: r.endTime,
+            hair: r.hair,
+            price: r.price,
+            tip: r.tip,
+            pay: r.pay,      // ✅ ต้องมี
+            svcs: r.svcs || [] // ✅ ห้ามขาด! เดี๋ยว .join() พัง
+        }))
+    };
+
+    // 4. บันทึกลงคลัง
+    const i = archives.findIndex(a => a.date === date);
+    if (i > -1) {
+        archives[i] = entry;
+    } else {
+        archives.push(entry);
     }
-    document.querySelectorAll('.nav-item').forEach((btn, i) => {
-        btn.classList.toggle('active', (i + 1) === p);
-    });
+
+    save();
+    alert("✅ ปิดยอดและบันทึกข้อมูลสมบูรณ์!");
+    go(3); // บินไปหน้าสรุป
 }
     function saveDB() { localStorage.setItem("barber_db", JSON.stringify(db)); localStorage.setItem("barber_conf", JSON.stringify(conf)); }
     function delRec(id) { if (confirm("ลบรายการนี้?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); } }
