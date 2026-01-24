@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.13.3</title>
+    <title>Barber Note Pro v.13.7</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -282,34 +282,40 @@ function renderDay() {
     let tot = 0, trans = 0, cash = 0, tips = 0, stats = {}, listHtml = "";
 
     today.slice().sort((a,b) => a.time.localeCompare(b.time)).forEach((r,i) => {
-        const p = Number(r.price) || 0, t = Number(r.tip) || 0; tot += p; tips += t; (r.pay === "Trans") ? trans += (p+t) : cash += p;
+        const p = Number(r.price)||0, t = Number(r.tip)||0; tot += p; tips += t; 
+        (r.pay === "Trans") ? trans += (p+t) : cash += p;
         const c = new Set(["ตัดผม"]); if (r.hair?.includes("เด็ก")) c.add("เด็ก"); (r.svcs || []).forEach(s => c.add(s));
         c.forEach(k => stats[k] = (stats[k]||0) + 1);
-        listHtml += `<div class="history-row" style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;"><b>${i+1}. ${r.time}</b> <span>฿${p}${t?` (+${t})`:''}</span></div>`;
+        const desc = (r.svcs && r.svcs.length) ? r.svcs.join('+') : (r.hair || 'ตัดผม');
+        listHtml += `<div style="padding:12px; border-bottom:1px solid rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center;">
+            <div><b style="font-size:14px; color:#1e293b;">${i+1}. ${r.time}</b><br><small style="color:#64748b;">${desc}</small></div>
+            <b style="font-size:16px; color:#1e293b;">฿${p}${t ? `<span style="color:#2563eb;"> (+${t})</span>` : ''}</b>
+        </div>`;
     });
 
-    // 💰 คำนวณส่วนแบ่ง (ประกัน/คอมมิชชัน)
-    const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc/100), conf.guar) + tips;
-    const sEarn = isHoliday ? 0 : tot - (bEarn - tips);
-    const settle = isHoliday ? 0 : cash - bEarn;
-
+    const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc/100), conf.guar) + tips, sEarn = isHoliday ? 0 : tot - (bEarn - tips), settle = isHoliday ? 0 : cash - bEarn;
     $("dTotal").innerText = tot.toLocaleString(); $("dBarber").innerText = Math.floor(bEarn).toLocaleString(); $("dShop").innerText = Math.floor(sEarn).toLocaleString();
 
-    // 📊 ส่วนสถิติห่าง 10/20
-    let sH = `<div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:10px 0 20px 0;">`;
-    for (let k in stats) { sH += `<span style="background:#4338ca; color:#fff; padding:4px 10px; border-radius:8px; font-size:11px;">${k}: ${stats[k]}</span>`; }
-    if ($("dServiceStats")) $("dServiceStats").innerHTML = sH + `</div>`;
+    // 🎨 ธีมน้ำเงิน Electric Blue (เน้นเข้ม สว่าง ตัดกัน)
+    let txt = "✅ ยอดพอดี", bg = "#1e3a8a"; // Navy เข้ม
+    if (isHoliday) { txt = "🏖️ วันหยุดร้าน"; bg = "#475569"; }
+    else if (tot === 0) { txt = "🛡️ ร้านจ่ายประกัน"; bg = "#0ea5e9"; } // Electric Blue
+    else if (settle > 0) { txt = `🤵 ช่างคืนร้าน ฿${Math.abs(settle).toLocaleString()}`; bg="#2563eb"; } // Vivid Blue
+    else if (settle < 0) { txt = `🏠 ร้านคืนช่าง ฿${Math.abs(settle).toLocaleString()}`; bg="#0284c7"; } // Sky Dark
 
-    const container = $("settleBarContainer"); if (!container) return;
-
-    // 🚩 [FIX] ลอจิกสถานะแถบสี (รวมร้านจ่ายประกัน)
-    let txt = "✅ ยอดพอดี", bg = "#dcfce7";
-    if (isHoliday) { txt = "🏖️ วันหยุดร้าน"; bg = "#f1f5f9"; }
-    else if (tot === 0) { txt = "🟦 ร้านจ่ายประกัน"; bg = "#e0f2fe"; } // กรณีไม่มีลูกค้าเลย
-    else if (settle > 0) { txt = `🟥 ช่างคืนร้าน ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; bg="#fee2e2"; }
-    else if (settle < 0) { txt = `🟦 ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; bg="#e0e7ff"; }
-
-    container.style.cssText = "display:flex; gap:12px; margin-top:20px; margin-bottom:25px;";
+    const container = $("settleBarContainer"); 
+    if (container) {
+        container.style.cssText = "display:flex; gap:12px; margin-top:20px;";
+        container.innerHTML = `
+            <div style="flex:8; height:60px; background:${bg}; color:#fff; display:flex; align-items:center; justify-content:center; border-radius:18px; font-weight:900; font-size:16px; box-shadow:0 4px 15px ${bg}44; border:1px solid rgba(255,255,255,0.1);">
+                ${txt}
+            </div>
+            <button id="closeDayBtn" onclick="saveAndGo('${dInp}', ${tot}, ${sEarn}, ${bEarn})" style="flex:2; height:60px; border-radius:18px; background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; font-size:24px; border:none; cursor:pointer; box-shadow:0 4px 15px rgba(234,88,12,0.4);">
+                ✈️
+            </button>`;
+    }
+    if ($("dailyList")) $("dailyList").innerHTML = isHoliday ? "<center style='padding:40px;'>🏖️ วันหยุด</center>" : (listHtml || "<center style='padding:40px; opacity:0.3;'>ไม่มีรายการ</center>");
+}
     container.innerHTML = `
         <div style="flex:8; height:60px; background:${bg}; display:flex; align-items:center; justify-content:center; border-radius:18px; font-weight:900; font-size:16px; color:#1e293b; border:1px solid rgba(0,0,0,0.05); text-align:center; padding:0 10px;">
             ${txt}
@@ -429,14 +435,15 @@ function buildStats(records = []) {
     let msg = `💈 รายงานร้าน: Barber Shop\n📅 วันที่: ${fDate}\n-------------------------\n📝 ลูกค้า (${today.length} คน):\n${clientList}\n-------------------------\n📊 สรุปงาน:\n${statText}\n-------------------------\n💰 ยอด: ${tot} | 🧧 ทิป: ${tips}\n📱 โอน: ${trans} | 💵 สด: ${cash}\n🤵 ช่างได้: ${Math.floor(bEarn)}\n🏠 ร้านได้: ${Math.floor(tot-(bEarn-tips))}\n-------------------------\n${settleMsg}`;
     window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`);
 }
-function saveAndGo(d, t, s, b) {
-    if (archives.some(a => a.date === d)) return alert("❌ วันนี้ถูกปิดไปแล้ว");
-    const dayRecords = db.filter(r => r.date === d && r.type !== "HOLIDAY");
-    let cash = 0; dayRecords.forEach(r => { if (r.pay !== "Trans") cash += Number(r.price)||0; });
-    const entry = { date:d, total:t, shop:s, barber:b, settle:cash-b, count:dayRecords.length, stats:buildStats(dayRecords), details:dayRecords, cleared:false, createdAt:Date.now() };
-    archives.push(entry); saveArchives(); db = db.filter(r => r.date !== d); saveDB();
+function saveAndGo(date, total, shop, barber) {
+    if (archives.some(a => a.date === date)) return alert("❌ วันนี้ถูกปิดไปแล้ว");
+    const dayRecords = db.filter(r => r.date === date && r.type !== "HOLIDAY");
+    let cash = 0; dayRecords.forEach(r => { if (r.pay !== "Trans") cash += Number(r.price) || 0; });
+    const settle = cash - barber;
+    const entry = { date, total, shop, barber, settle, count: dayRecords.length, stats: buildStats(dayRecords), details: dayRecords, cleared: false, createdAt: Date.now() };
+    archives.push(entry); saveArchives(); db = db.filter(r => r.date !== date); saveDB();
     const btn = $("closeDayBtn"); if (btn) { btn.disabled = true; btn.style.opacity = "0.5"; }
-    go(3); setTimeout(() => { if(typeof loadAccountStatus==="function") loadAccountStatus(); if(typeof renderDay==="function") renderDay(); }, 50);
+    go(3); setTimeout(() => { if(typeof loadAccountStatus === "function") loadAccountStatus(); if(typeof renderDay === "function") renderDay(); }, 50);
     speak("ปิดงานเรียบร้อยแล้ว");
 }
 
