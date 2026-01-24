@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.3</title>
+    <title>Barber Note Pro v.7</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -481,32 +481,38 @@ function loadHistDaily() {
     /* ======================================================
    TIME UTILS
 ====================================================== */
-function addMinutes(time, mins){
-  if(!time) return "";
-  const [h,m] = time.split(":").map(Number);
-  const d = new Date();
-  d.setHours(h, m + mins, 0, 0);
-  return d.toTimeString().slice(0,5);
+function addMinutes(t, mins = 0) {
+    if (typeof t !== "string" || !t.includes(":")) return "";
+    const [h, m] = t.split(":").map(Number);
+    if (isNaN(h) || isNaN(m)) return "";
+    const tot = (h * 60 + m + mins + 1440) % 1440;
+    return `${String(Math.floor(tot / 60)).padStart(2, "0")}:${String(tot % 60).padStart(2, "0")}`;
 }
+
+const getSelectedSvcs = () => 
+    [...document.querySelectorAll('input[name="svc"]:checked')].map(el => el.value);
 
 /* ======================================================
    SAVE SERVICE
 ====================================================== */
 function handleSave() {
-    const d = $("date").value, s = $("tStart").value || new Date().toTimeString().slice(0,5);
-    if (!d) return alert("เลือกวันที่");
-    const record = { id: Date.now(), date: d, time: s, endTime: $("tEnd").value || addMinutes(s, 30), hair: $("hair").value || "", svcs: getSelectedSvcs(), price: Number($("price").value || 0), type: $("type").value || "SERVICE" };
-    db.unshift(record); saveDB(); renderDay(d);
-}
-const sortByTime = (arr) => arr.sort((a,b) => a.time.localeCompare(b.time));
+    try {
+        const d = $("date")?.value, n = new Date().toTimeString().slice(0,5), s = $("tStart")?.value || n;
+        if (!d) return alert("❌ เลือกวันที่ก่อนอิดอก!");
+        const pVal = Number($("price")?.value), p = Number.isFinite(pVal) ? pVal : 0;
+        const pay = (typeof payMethod === "string" && payMethod.trim()) ? payMethod : "Cash";
 
-function countStats(recs) {
-    const s = {};
-    recs.filter(r => r.type === "SERVICE").forEach(r => {
-        if (r.hair) s[r.hair] = (s[r.hair] || 0) + 1;
-        if (Array.isArray(r.svcs)) r.svcs.forEach(v => v && (s[v] = (s[v] || 0) + 1));
-    });
-    return s;
+        const record = {
+            id: Date.now(), date: d, time: s, endTime: $("tEnd")?.value || addMinutes(s, 30),
+            hair: $("hair")?.value || "", price: p, pay, type: "SERVICE",
+            svcs: typeof getSelectedSvcs === "function" ? getSelectedSvcs().filter(Boolean) : []
+        };
+
+        db.unshift(record); saveDB();
+        if (typeof renderDay === "function") renderDay(d);
+        if ($("price")) $("price").value = "";
+        alert("✅ บันทึกเรียบร้อย!");
+    } catch (e) { console.error(e); alert("🚨 พัง: " + e.message); }
 }
 /* ======================================================
    GUARANTEE / INSURANCE
@@ -574,15 +580,15 @@ function closeAndGoHome(){$("modalSet") && ($("modalSet").style.display="none");
    PAYMENT
 ====================================================== */
 function selectPay(m) {
+    if (!Object.values(PAY).includes(m)) return console.warn("Invalid:", m);
     payMethod = m;
-    if($("payType")) $("payType").value = m;
-    const isCash = m === "Cash";
-    $("btnCash").style.opacity = isCash ? "1" : "0.5";
-    $("btnCash").style.transform = isCash ? "scale(1.02)" : "scale(0.95)";
-    $("btnCash").style.filter = isCash ? "none" : "grayscale(0.5)";
-    $("btnTrans").style.opacity = isCash ? "0.5" : "1";
-    $("btnTrans").style.transform = isCash ? "scale(0.95)" : "scale(1.02)";
-    $("btnTrans").style.filter = isCash ? "grayscale(0.5)" : "none";
+    const c = $("btnCash"), t = $("btnTrans"), isC = m === PAY.CASH;
+    if (c && t) {
+        c.classList.toggle("active-pay", isC);
+        t.classList.toggle("active-pay", !isC);
+        c.disabled = isC; t.disabled = !isC;
+    }
+    console.log("Pay:", payMethod);
 }
 /* ======================================================
    CLOSE DAY (manual fallback)
