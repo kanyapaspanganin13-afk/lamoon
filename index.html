@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12.13</title>
+    <title>Barber Note Pro v.12.11</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -348,50 +348,13 @@ function handleInsurance() {
     }
 }
  function handleHoliday(){const d=$("dateInp").value;if(!d)return alert("เลือกวันที่ก่อน");if(confirm(`ยืนยันบันทึกวันที่ ${d} เป็น "วันหยุด"?`)){db.push({id:Date.now(),date:d,time:"00:00",svcs:["🏖️ วันหยุด"],price:0,pay:"N/A",type:"HOLIDAY"});saveDB();const m=new SpeechSynthesisUtterance("บันทึกวันหยุดเรียบร้อย");m.lang='th-TH';if(conf.voice==='male'){const v=window.speechSynthesis.getVoices().find(x=>x.name.includes('Male')||x.name.includes('Google'));if(v)m.voice=v}window.speechSynthesis.speak(m);alert("🏖️ บันทึกวันหยุดเรียบร้อย");renderDay()}}   
- function openSettings() {
-    const m = document.getElementById("modalSet");
-    if (!m) return; // ถ้าไม่มี Modal ก็จบงานตรงนี้ ไม่ต้องไปต่อให้ Error
-
-    m.style.display = 'flex';
-
-    const setVal = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.value = val;
-    };
-
-    setVal("setShop", conf.shop || '');
-    setVal("setTheme", conf.theme || 'light');
-    setVal("setVoice", conf.voice || 'female');
-    setVal("setSound", conf.sound || 'on');
-    setVal("setPerc", conf.perc || 50);
-    setVal("setGuar", conf.guar || 0);
-} 
-  function selectPay(m) {
-        payMethod = m;
-        $("btnCash").className = `btn btn-pay ${m === 'Cash' ? 'active-cash' : ''}`;
-        $("btnTrans").className = `btn btn-pay ${m === 'Trans' ? 'active-trans' : ''}`;
-    }
-function renderDay() {
-    const dInp = $("dateInp").value, 
-          allRec = db.filter(r => r.date === dInp),
-          today = allRec.filter(r => r.type !== 'HOLIDAY'), // 👈 กรองวันหยุดออกจากการคำนวณ
-          isHoliday = allRec.some(r => r.type === 'HOLIDAY'), // เช็คว่าวันนี้กดปุ่มวันหยุดไว้ไหม
-          stats = {};
-    let tot = 0, trans = 0, cash = 0, tips = 0, listHtml = "";
-
-    today.slice().sort((a,b) => a.time.localeCompare(b.time)).forEach((r, i) => {
-        const p = Number(r.price)||0, t = Number(r.tip)||0; tot += p; tips += t;
-        (r.pay === 'Trans') ? trans += (p + t) : cash += p;
-        const c = new Set(["ตัดผม"]); if (r.hair && r.hair.includes("เด็ก")) c.add("เด็ก");
-        (r.svcs || []).forEach(s => { if (s && !["เด็ก","รองทรง","แฟชั่น","นักเรียน","ตัดผม"].some(x => s.includes(x))) c.add(s); });
-        c.forEach(k => stats[k] = (stats[k] || 0) + 1);
-        const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
-        listHtml += `<div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column;"><span style="font-weight:800; font-size:14px; color:#1e293b;">${i+1}. [${timeShow}] | ${(r.svcs||[]).join('+')}</span>${t?`<small style="color:#be185d; font-weight:700; font-size:11px;">🔹 ทิป: ฿${t}</small>`:''}</div><div style="text-align:right;"><b style="font-size:16px; display:block;">฿${p}${t?` <span style="color:#be185d;">(+${t})</span>`:''}</b><span style="font-size:12px; font-weight:700;">${r.pay==='Trans'?'📱 โอน':'💵 สด'} <i class="fas fa-trash-alt" style="color:#ef4444; cursor:pointer; margin-left:8px;" onclick="delRec(${r.id})"></i></span></div></div></div>`;
-    });
-    const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc / 100), conf.guar) + tips;
-    const sEarn = isHoliday ? 0 : tot - (bEarn - tips);
-    const settle = isHoliday ? 0 : cash - bEarn;
-
+ function openSettings() {const m = document.getElementById("modalSet");if (!m) return; m.style.display = 'flex';const setVal = (id, val) => {const el = document.getElementById(id);if (el) el.value = val;};setVal("setShop", conf.shop || '');setVal("setTheme", conf.theme || 'light');setVal("setVoice", conf.voice || 'female');setVal("setSound", conf.sound || 'on');setVal("setPerc", conf.perc || 50);setVal("setGuar", conf.guar || 0);}     
+ function selectPay(m) {payMethod = m;$("btnCash").className = `btn btn-pay ${m === 'Cash' ? 'active-cash' : ''}`;$("btnTrans").className = `btn btn-pay ${m === 'Trans' ? 'active-trans' : ''}`;}   
+ function renderDay() {const dInp = $("dateInp").value,allRec = db.filter(r => r.date === dInp), today = allRec.filter(r => r.type !== 'HOLIDAY'),isHoliday = allRec.some(r => r.type === 'HOLIDAY'),stats = {};let tot = 0, trans = 0, cash = 0, tips = 0, listHtml = "";
+         today.slice().sort((a,b) => a.time.localeCompare(b.time)).forEach((r, i) => {const p = Number(r.price)||0, t = Number(r.tip)||0; tot += p; tips += t;(r.pay === 'Trans') ? trans += (p + t) : cash += p; const c = new Set(["ตัดผม"]); if (r.hair && r.hair.includes("เด็ก")) c.add("เด็ก");(r.svcs || []).forEach(s => { if (s && !["เด็ก","รองทรง","แฟชั่น","นักเรียน","ตัดผม"].some(x => s.includes(x))) c.add(s); });c.forEach(k => stats[k] = (stats[k] || 0) + 1);const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
+         listHtml += `<div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column;"><span style="font-weight:800; font-size:14px; color:#1e293b;">${i+1}. [${timeShow}] | ${(r.svcs||[]).join('+')}</span>${t?`<small style="color:#be185d; font-weight:700; font-size:11px;">🔹 ทิป: ฿${t}</small>`:''}</div><div style="text-align:right;"><b style="font-size:16px; display:block;">฿${p}${t?` <span style="color:#be185d;">(+${t})</span>`:''}</b><span style="font-size:12px; font-weight:700;">${r.pay==='Trans'?'📱 โอน':'💵 สด'} <i class="fas fa-trash-alt" style="color:#ef4444; cursor:pointer; margin-left:8px;" onclick="delRec(${r.id})"></i></span></div></div></div>`;});
+         const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc / 100), conf.guar) + tips;const sEarn = isHoliday ? 0 : tot - (bEarn - tips);const settle = isHoliday ? 0 : cash - bEarn;
+    
     $("dTotal").innerText = tot.toLocaleString(); $("dTrans").innerText = trans.toLocaleString(); $("dCash").innerText = cash.toLocaleString();
     $("dBarber").innerText = Math.floor(bEarn).toLocaleString(); $("dShop").innerText = Math.floor(sEarn).toLocaleString(); 
     $("dCounts").innerText = isHoliday ? "🏪 วันหยุด" : `ลูกค้า: ${today.length} คน`;
@@ -473,26 +436,11 @@ function loadAccountStatus() {
 
     if ($("accStatus")) $("accStatus").innerText = txt;
     if ($("accLight")) $("accLight").style.background = light;
-    if ($("accLight")) $("accLight").style.boxShadow = `0 0 8px ${light}`;
-}
-function closeDay(){
-  const d = $("dateInp").value;
-  if(!d) return alert("เลือกวันที่ก่อน");
+    if ($("accLight")) $("accLight").style.boxShadow = `0 0 8px ${light}`;}
+ function closeDay(){const d = $("dateInp").value;if(!d) return alert("เลือกวันที่ก่อน");const total = Number($("dTotal").innerText.replace(/,/g,'')) || 0;const barber = Number($("dBarber").innerText.replace(/,/g,'')) || 0;const shop = Number($("dShop").innerText.replace(/,/g,'')) || 0; saveAndGo(d, total, shop, barber);}
 
-  const total = Number($("dTotal").innerText.replace(/,/g,'')) || 0;
-  const barber = Number($("dBarber").innerText.replace(/,/g,'')) || 0;
-  const shop = Number($("dShop").innerText.replace(/,/g,'')) || 0;
+function clearAccount(){const d = $("accDate").value;if(!d) return alert("เลือกวันที่!");const day = archives.find(a => a.date === d);if(!day) return alert("ไม่พบข้อมูลวันที่นี้"); const settle = Number(day.settle || 0); account.logs.unshift({ date: d,amount: settle,note: $("accNote").value || "เคลียร์ยอด"});account.balance = 0;localStorage.setItem("barber_account", JSON.stringify(account));speak("เคลียร์เงินเรียบร้อย");$("accNote").value = "";loadAccountHistory();loadAccountStatus();}
 
-  saveAndGo(d, total, shop, barber);
-}
-function clearAccount(){
-    const d = $("accDate").value, settle = parseFloat(($('dSettle')?.innerText || "0").replace(/,/g,'')) || 0;
-    if(!d) return alert("เลือกวันที่!");
-    account.logs.unshift({ date: d, amount: (account.balance || 0) + settle, note: $("accNote").value || "เคลียร์ยอด" });
-    account.balance = -settle;
-    localStorage.setItem("barber_account", JSON.stringify(account));
-    speak("เคลียร์เงินเรียบร้อย"); $("accNote").value = ""; loadAccountHistory(); loadAccountStatus();
-}
 function renderHistoryList() {
     const db = JSON.parse(localStorage.getItem("barber_acc_logs") || "[]");
     $("accHistoryList").innerHTML = db.length ? db.map(h => `
@@ -643,7 +591,7 @@ function saveAndGo(date, total, shop, barber) {
         if(typeof loadAccountStatus === "function") loadAccountStatus(); // หน้า 3 ต้องเด้ง
     }, 100);
 
-    speak("ปิดงานเรียบร้อยแล้วค่ะเถ้าแก่");
+    speak("ปิดงานเรียบร้อยแล้ว");
 }
    function openHistoryModal() {
     const m = $("historyModal");
