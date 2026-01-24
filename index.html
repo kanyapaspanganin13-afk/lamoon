@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12</title>
+    <title>Barber Note Pro v.11</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -346,6 +346,37 @@ function saveAndGo(date, total, shop, barber) {
 
     alert("✅ ปิดยอดและบันทึกสถิติเรียบร้อย");
     renderDay(); go(3);
+}
+ function saveRecord() {
+    const hair = $("selectedHair")?.innerText || ""; // ดึงชื่อทรง
+    const price = Number($("priceInp")?.value || 0);
+    const date = $("dateInp").value;
+    const time = new Date().toLocaleTimeString("th-TH", { hour: '2-digit', minute: '2-digit' });
+    const pay = $("payType").value; // 'Cash' หรือ 'Trans'
+    
+    if (price <= 0) return alert("ใสราคาด้วยอิดอก!");
+
+    // ✅ จุดสำคัญ: ต้อง push เข้าไปใน db
+    const newEntry = {
+        id: Date.now(),
+        date: date,
+        time: time,
+        hair: hair,
+        svcs: selectedSvcs, // Array บริการเสริมที่เลือกไว้
+        price: price,
+        pay: pay,
+        type: "WORK"
+    };
+
+    db.push(newEntry); 
+    saveDB(); // บันทึกลง localStorage
+    
+    // ล้างหน้าจอหลังบันทึก
+    if($("priceInp")) $("priceInp").value = "";
+    selectedSvcs = []; 
+    
+    renderDay(); // สั่งวาดหน้าจอใหม่ทันที รายการถึงจะโผล่!
+    speak("บันทึกเรียบร้อยค่ะ");
 }
 /* ======================================================
    ACCOUNT (หน้า 3)
