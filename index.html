@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11</title>
+    <title>Barber Note Pro v.1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -110,6 +110,8 @@ nav {
     <input type="number" id="tipInp" placeholder="ทิป" inputmode="numeric" 
         style="width: 100%; height: 85px !important; background: #ccfbf1 !important; border-radius: 20px !important; font-size: 32px !important; font-weight: 900 !important; color: #0f766e !important; border: none !important;">
 </div>
+
+<input type="hidden" id="payType" value="Cash">
 
 <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:20px;">
     <button id="btnCash" onclick="selectPay('Cash')" style="height:75px; border-radius:22px; border:none; background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-weight:900; font-size:22px; box-shadow:0 8px 20px rgba(16,185,129,0.3); display:flex; align-items:center; justify-content:center; gap:10px;">
@@ -382,22 +384,22 @@ function saveAndGo(date, total, shop, barber) {
    ACCOUNT (หน้า 3)
 ====================================================== */
 function loadAccountStatus() {
-  // ไล่เช็คประวัติที่ยังไม่ถูกบันทึกการจ่ายเงิน (Log)
-  let bal = archives.reduce((sum, a) => 
-    !account.logs.some(l => l.date === a.date) ? sum + (a.settle || 0) : sum, 0);
+    const dInp = $("accDate").value; if (!dInp) return;
+    const day = archives.find(a => (a.date || "").slice(0, 10) === dInp);
+    const todaySettle = (day && !day.cleared) ? Number(day.settle || 0) : 0;
+    
+    // คำนวณยอดค้างสะสมทั้งหมดในระบบที่ยังไม่ได้เคลียร์
+    const oldBal = Number(account.balance || 0);
+    const net = oldBal + todaySettle;
 
-  account.balance = bal;
-  saveAcc();
-
-  $("accNet").innerText = Math.abs(bal).toLocaleString();
-  
-  // ปรับคำพูดให้เข้ากับนิสัยการเก็บเงินของมึง
-  let txt = "🟢 ยอดเคลียร์จบ", clr = "#16a34a";
-  if (bal > 0) { txt = "🔴 ช่างค้างร้าน"; clr = "#dc2626"; } 
-  else if (bal < 0) { txt = "🔵 ร้านค้างช่าง"; clr = "#1e3a8a"; }
-
-  const sBar = $("accStatus");
-  if (sBar) { sBar.innerText = txt; sBar.style.color = clr; }
+    $("accOldVal").innerText = "฿" + oldBal.toLocaleString();
+    $("accTodayVal").innerText = "฿" + todaySettle.toLocaleString();
+    $("accNet").innerText = Math.abs(net).toLocaleString();
+    
+    // เปลี่ยนสีไฟสถานะ
+    const color = todaySettle > 0 ? "#ef4444" : (todaySettle < 0 ? "#3b82f6" : "#22c55e");
+    $("accLight").style.background = color;
+    $("accLight").style.boxShadow = `0 0 8px ${color}`;
 }
 function clearAccount() {
   const d = $("accDate")?.value, bal = account.balance || 0;
@@ -411,13 +413,18 @@ function clearAccount() {
         account.logs.unshift({ date: a.date, amount: a.settle, note: "เคลียร์ยอดสะสม" });
       }
     });
-
     saveAcc();
     loadAccountStatus(); // ยอดจะกลายเป็น 0 ทันที
     if($("accNote")) $("accNote").value = "";
     speak("เคลียร์เงินเรียบร้อย");
     alert("💸 บันทึกการเคลียร์เงินครบทุกวันแล้ว");
   }
+}
+ function resetAccountOnly() {
+    if (!confirm("⚠️ คำเตือน: จะล้างเฉพาะยอดเงินค้างและประวัติเคลียร์เงินเท่านั้น ข้อมูลงานบริการจะยังอยู่ ยืนยันไหมอิดอก?")) return;
+    account = { balance: 0, logs: [] };
+    saveAccount();
+    location.reload();
 }
 /* ======================================================
    REPORT
@@ -665,7 +672,19 @@ function handleHoliday() {
 /* ======================================================
    SETTINGS
 ====================================================== */
-function openSettings(){
+function openHistoryModal() {
+    $("historyModal").style.display = "flex";
+    const list = $("barber_acc_logs_list"), logs = account.logs || [];
+    list.innerHTML = logs.length ? logs.map(l => `
+        <div style="padding:15px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <b style="font-size:14px; color:#1e293b;">${l.date}</b><br>
+                <small style="color:#64748b;">${l.note || 'เคลียร์ยอด'}</small>
+            </div>
+            <b style="color:${l.amount >= 0 ? '#10b981' : '#ef4444'};">฿${Math.abs(l.amount).toLocaleString()}</b>
+        </div>`).join('') : "<center style='padding:40px; opacity:0.4;'>🌑 ไม่มีประวัติการเคลียร์</center>";
+}
+ function openSettings(){
   const m = $("modalSet"); if(!m) return;
   m.style.display = "flex";
   const set = (id,v)=>$(id)&&( $(id).value=v );
@@ -707,95 +726,46 @@ function closeAndGoHome(){
 /* ======================================================
    PAYMENT
 ====================================================== */
-function selectPay(m){
-  payMethod = m;
-  $("btnCash").className  = `btn btn-pay ${m==="Cash"?"active-cash":""}`;
-  $("btnTrans").className = `btn btn-pay ${m==="Trans"?"active-trans":""}`;
-}
+function selectPay(m) {
+    // 1. เก็บค่าลงตัวแปร global และลง hidden input (กันเหนียว)
+    payMethod = m;
+    if($("payType")) $("payType").value = m;
 
+    // 2. จัดการเรื่องความสวย (Opacity & Scale) แทนการทับ Class
+    const isCash = m === "Cash";
+    // ปุ่มเงินสด
+    $("btnCash").style.opacity = isCash ? "1" : "0.5";
+    $("btnCash").style.transform = isCash ? "scale(1.02)" : "scale(0.95)";
+    $("btnCash").style.filter = isCash ? "none" : "grayscale(0.5)";
+
+    // ปุ่มโอน
+    $("btnTrans").style.opacity = isCash ? "0.5" : "1";
+    $("btnTrans").style.transform = isCash ? "scale(0.95)" : "scale(1.02)";
+    $("btnTrans").style.filter = isCash ? "grayscale(0.5)" : "none";
+}
 /* ======================================================
    CLOSE DAY (manual fallback)
 ====================================================== */
-function closeDay(){
-  const d = $("dateInp")?.value;
-  if(!d) return alert("เลือกวันที่ก่อน");
-  if(archives.some(a=>a.date===d))
-    return alert("❌ วันนี้ปิดไปแล้ว");
-
-  const total  = +$("dTotal").innerText.replace(/,/g,"")||0;
-  const barber = +$("dBarber").innerText.replace(/,/g,"")||0;
-  const shop   = +$("dShop").innerText.replace(/,/g,"")||0;
-  saveAndGo(d,total,shop,barber);
-}
-
+function closeDay(){const d = $("dateInp")?.value;if(!d) return alert("เลือกวันที่ก่อน");if(archives.some(a=>a.date===d))return alert("❌ วันนี้ปิดไปแล้ว");const total  = +$("dTotal").innerText.replace(/,/g,"")||0;const barber = +$("dBarber").innerText.replace(/,/g,"")||0;const shop   = +$("dShop").innerText.replace(/,/g,"")||0;saveAndGo(d,total,shop,barber);}
 /* ======================================================
    RECORD
 ====================================================== */
-function delRec(id){
-  if(!confirm("ลบรายการนี้?")) return;
-  db = db.filter(r=>r.id!==id);
-  saveDB();
-  renderDay();
-}
-
-function editTime(id){
-  const r = db.find(x=>x.id===id); if(!r) return;
-  const s = prompt("เวลาเริ่ม (HH:MM)", r.time); if(!s) return;
-  const e = prompt("เวลาสิ้นสุด (HH:MM)", r.endTime||"");
-  r.time = s;
-  r.endTime = e || addMinutes(s,30);
-  saveDB();
-  renderDay();
-}
+function delRec(id){if(!confirm("ลบรายการนี้?")) return;db = db.filter(r=>r.id!==id);saveDB();renderDay();}
+function editTime(id){const r = db.find(x=>x.id===id); if(!r) return;const s = prompt("เวลาเริ่ม (HH:MM)", r.time); if(!s) return;const e = prompt("เวลาสิ้นสุด (HH:MM)", r.endTime||"");r.time = s;r.endTime = e || addMinutes(s,30); saveDB();renderDay();}
 
 /* ======================================================
    UI / SYSTEM
 ====================================================== */
 function closeHistoryModal(){ $("historyModal")&&( $("historyModal").style.display="none" ); }
-
-function clearAllData(){
-  if(confirm("💣 ลบข้อมูลทั้งหมด?")){
-    localStorage.clear();
-    location.reload();
-  }
-}
-
-function updateDateDisplay(v){
-  if(!v) return;
-  const d = new Date(v);
-  $("dateDisplay")&&( $("dateDisplay").innerText =
-    d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"})
-  );
-  renderDay();
-}
-function go(n){
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  document.querySelectorAll(".nav-item").forEach(b=>b.classList.remove("active"));
-
-  $("p"+n)?.classList.add("active");
-  document.querySelectorAll("nav .nav-item")[n-1]?.classList.add("active");
-
-  if(n===2) renderDay();
-  if(n===3) loadAccountStatus();
-}
-function applyTheme() {
-    const t = (typeof conf !== 'undefined' && conf.theme) ? conf.theme : 'navy';
-    document.body.className = 'theme-' + t;
-    console.log("Theme applied:", t);
-}
-window.onload = () => { 
-    if(typeof applyTheme === 'function') applyTheme(); 
-    if(typeof renderDay === 'function') renderDay(); 
-};
+function clearAllData(){if(confirm("💣 ลบข้อมูลทั้งหมด?")){localStorage.clear();location.reload();}}
+function updateDateDisplay(v){if(!v) return;const d = new Date(v);$("dateDisplay")&&( $("dateDisplay").innerText =d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"}));renderDay();} 
+function go(n){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.querySelectorAll(".nav-item").forEach(b=>b.classList.remove("active"));$("p"+n)?.classList.add("active");document.querySelectorAll("nav .nav-item")[n-1]?.classList.add("active");if(n===2) renderDay();if(n===3) loadAccountStatus();}
+function applyTheme() {const t = (typeof conf !== 'undefined' && conf.theme) ? conf.theme : 'navy';document.body.className = 'theme-' + t;console.log("Theme applied:", t);}
+window.onload = () => {if(typeof applyTheme === 'function') applyTheme(); if(typeof renderDay === 'function') renderDay(); };
 /* ======================================================
    INIT
 ====================================================== */
-window.addEventListener("DOMContentLoaded",()=>{
-  const t = new Date().toISOString().slice(0,10);
-  $("dateInp")&&( $("dateInp").value=t );
-  updateDateDisplay(t);
-});
-
+window.addEventListener("DOMContentLoaded",()=>{const t = new Date().toISOString().slice(0,10);$("dateInp")&&( $("dateInp").value=t );updateDateDisplay(t);});
 window.onclick = e => { if(e.target === $("historyModal")) closeHistoryModal(); };
 
  </script>
