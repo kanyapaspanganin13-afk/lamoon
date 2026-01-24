@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.</title>
+    <title>Barber Note Pro v.1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -484,22 +484,38 @@ const getSelectedSvcs = () =>
 /* ======================================================
    SAVE SERVICE
 ====================================================== */
-function handleSave() {
-  try {
-    const d = $("dateInp")?.value, s = $("tStart")?.value || new Date().toTimeString().slice(0,5);
-    if (!d) return alert("เลือกวันที่ก่อน");
+function handleSave()function handleSave() {
+    try {
+        const d = d10($("dateInp")?.value);
+        if (!d) return alert("เลือกวันที่ก่อน!");
 
-    const pVal = Number($("priceInp")?.value), p = isFinite(pVal) ? pVal : 0;
-    const rec = {
-      id: Date.now(), date: d, time: s, endTime: addMinutes(s, 30),
-      hair: $("hairStyle")?.value || "", price: p, pay: payMethod, type: "SERVICE",
-      svcs: [$("extra1")?.value, $("extra2")?.value].filter(v => v)
-    };
+        const s = $("tStart")?.value || new Date().toTimeString().slice(0,5);
+        const pVal = Number($("priceInp")?.value), p = isFinite(pVal) ? pVal : 0;
 
-    db.unshift(rec); saveDB(); renderDay();
-    if($("priceInp")) $("priceInp").value = "";
-    alert("✅ บันทึกแล้ว");
-  } catch (e) { alert("🚨 " + e.message); }
+        const record = {
+            id: Date.now(),
+            date: d,
+            time: s,
+            endTime: (typeof addMinutes === "function") ? addMinutes(s, 30) : s,
+            hair: $("hairStyle")?.value || "",
+            svcs: [$("extra1")?.value, $("extra2")?.value].filter(v => v),
+            price: p,
+            pay: payMethod || "Cash", 
+            type: "SERVICE"
+        };
+
+        db.unshift(record);
+        saveDB(); // เรียกใช้ UTILS ของมึง
+        
+        if (typeof renderDay === "function") renderDay(d);
+        if ($("priceInp")) $("priceInp").value = "";
+        
+        alert("✅ บันทึกแล้วเถ้าแก่!");
+    } catch (e) {
+        console.error(e);
+        alert("🚨 พังที่: " + e.message);
+    }
+}
 ======================================================
    GUARANTEE / INSURANCE
 ====================================================== */
@@ -566,15 +582,19 @@ function closeAndGoHome(){$("modalSet") && ($("modalSet").style.display="none");
    PAYMENT
 ====================================================== */
 function selectPay(m) {
-    if (!Object.values(PAY).includes(m)) return console.warn("Invalid:", m);
-    payMethod = m;
-    const c = $("btnCash"), t = $("btnTrans"), isC = m === PAY.CASH;
-    if (c && t) {
-        c.classList.toggle("active-pay", isC);
-        t.classList.toggle("active-pay", !isC);
-        c.disabled = isC; t.disabled = !isC;
-    }
-    console.log("Pay:", payMethod);
+  // 1. เก็บค่าลงตัวแปร global และลง input hidden ของมึง
+  payMethod = (m === 'Trans') ? 'Transfer' : 'Cash'; 
+  if($("payType")) $("payType").value = payMethod;
+
+  // 2. จัดการ UI (ให้ปุ่มที่ถูกเลือกดูเด่น ปุ่มที่ไม่เลือกดูจาง)
+  const isC = m === 'Cash';
+  if ($("btnCash")) $("btnCash").style.transform = isC ? "scale(1.05)" : "scale(1)";
+  if ($("btnCash")) $("btnCash").style.opacity = isC ? "1" : "0.5";
+  
+  if ($("btnTrans")) $("btnTrans").style.transform = isC ? "scale(1)" : "scale(1.05)";
+  if ($("btnTrans")) $("btnTrans").style.opacity = isC ? "0.5" : "1";
+
+  console.log("เลือกจ่าย:", payMethod);
 }
 /* ======================================================
    CLOSE DAY (manual fallback)
