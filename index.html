@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.2</title>
+    <title>Barber Note Pro v.12</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -241,76 +241,75 @@ const d10 = d => (d||"").slice(0,10);
    RENDER DAY (หน้า 2)
 ====================================================== */
 function renderDay() {
-  const dInp = $("dateInp")?.value;
-  if (!dInp) return;
+    const dInp = $("dateInp").value, 
+          allRec = db.filter(r => d10(r.date) === dInp), 
+          today = allRec.filter(r => r.type !== 'HOLIDAY'), 
+          isHoliday = allRec.some(r => r.type === 'HOLIDAY'), 
+          stats = {}; 
+    let tot = 0, trans = 0, cash = 0, tips = 0, listHtml = "";
 
-  const all = db.filter(r => d10(r.date) === dInp);
-  const today = all.filter(r => r.type !== "HOLIDAY");
-  const isHoliday = all.some(r => r.type === "HOLIDAY");
+    today.slice().sort((a,b) => a.time.localeCompare(b.time)).forEach((r, i) => {
+        const p = Number(r.price)||0, t = Number(r.tip)||0; 
+        tot += p; tips += t;
+        (r.pay === 'Trans') ? trans += (p + t) : cash += p;
 
-  // 1. เพิ่มตัวแปร stats ไว้เก็บจำนวนหัว/งาน
-  let tot = 0, cash = 0, trans = 0, tips = 0, list = "", stats = {};
+        // --- 📊 1. ซ่อมตัวนับ (นับตัดผมแน่นอน) ---
+        const mainJob = r.hair || "ตัดผม";
+        stats[mainJob] = (stats[mainJob] || 0) + 1;
+        if (mainJob.includes("เด็ก")) stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
+        (r.svcs || []).forEach(s => { if(s) stats[s] = (stats[s] || 0) + 1; });
 
-  today.sort((a, b) => a.time.localeCompare(b.time)).forEach((r, i) => {
-    const p = +r.price || 0, t = +r.tip || 0;
-    tot += p; tips += t;
-    (r.pay === "Trans") ? trans += (p + t) : cash += p;
+        // --- 🕒 2. ซ่อมเวลาและชื่อรายการ (ดึง r.hair มาโชว์ด้วย) ---
+        const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
+        const jobDesc = r.hair ? (r.svcs?.length ? `${r.hair}+${r.svcs.join('+')}` : r.hair) : (r.svcs?.length ? r.svcs.join('+') : "ตัดผม");
 
-    // 2. ลอจิกการนับตัดผม/บริการเสริม (ตัวนับสถิติ)
-    const c = new Set(["ตัดผม"]); 
-    if (r.hair && r.hair.includes("เด็ก")) c.add("เด็ก");
-    (r.svcs || []).forEach(s => { if(s) c.add(s); });
-    c.forEach(k => stats[k] = (stats[k] || 0) + 1);
+        listHtml += `<div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; flex-direction:column;">
+                    <span style="font-weight:800; font-size:14px; color:#1e293b;">${i+1}. [${timeShow}] | ${jobDesc}</span>
+                    ${t?`<small style="color:#be185d; font-weight:700; font-size:11px;">🔹 ทิป: ฿${t}</small>`:''}
+                </div>
+                <div style="text-align:right;">
+                    <b style="font-size:16px; display:block;">฿${p}${t?` <span style="color:#be185d;">(+${t})</span>`:''}</b>
+                    <span style="font-size:12px; font-weight:700;">${r.pay==='Trans'?'📱 โอน':'💵 สด'} 
+                    <i class="fas fa-trash-alt" style="color:#ef4444; cursor:pointer; margin-left:8px;" onclick="delRec(${r.id})"></i></span>
+                </div>
+            </div>
+        </div>`;
+    });
 
-    const desc = (r.svcs?.length) ? r.svcs.join("+") : (r.hair || "ตัดผม");
-    list += `
-    <div style="padding:15px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; background:#fff;">
-      <div><b>${i + 1}. ${r.time} | ${desc}</b>${t ? `<div style="font-size:11px; color:#be185d">ทิป ฿${t}</div>` : ""}</div>
-      <div style="text-align:right">
-        <b>฿${p}${t ? ` (+${t})` : ""}</b><br>
-        <small style="color:#64748b">${r.pay === "Trans" ? "📱 โอน" : "💵 สด"}
-          <i class="fas fa-trash-alt" style="color:#ef4444; cursor:pointer; margin-left:5px;" onclick="delRec(${r.id})"></i>
-        </small>
-      </div>
-    </div>`;
-  });
+    // คำนวณยอด
+    const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc / 100), conf.guar) + tips;
+    const sEarn = isHoliday ? 0 : tot - (bEarn - tips);
+    const settle = isHoliday ? 0 : cash - bEarn;
 
-  const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc / 100), conf.guar) + tips;
-  const sEarn = isHoliday ? 0 : tot - (bEarn - tips);
-  const settle = isHoliday ? 0 : cash - bEarn;
+    $("dTotal").innerText = tot.toLocaleString();
+    $("dBarber").innerText = Math.floor(bEarn).toLocaleString();
+    $("dShop").innerText = Math.floor(sEarn).toLocaleString();
+    $("dCounts").innerText = isHoliday ? "🏪 วันหยุด" : `ลูกค้า: ${today.length} คน`;
 
-  // 3. แสดงผลตัวเลข (กูแถมตัวนับ stats ให้ไปโชว์ที่ ID "dStats" ถ้ามึงมีนะ)
-  $("dTotal").innerText = tot.toLocaleString();
-  $("dBarber").innerText = Math.floor(bEarn).toLocaleString();
-  $("dShop").innerText = Math.floor(sEarn).toLocaleString();
-  $("dCounts").innerText = isHoliday ? "🏪 วันหยุด" : `ลูกค้า: ${today.length} คน`;
-  
-  // ถ้ามึงมีที่โชว์แยก เช่น "ตัดผม 5 | โกนหนวด 2" ให้ใส่ ID dStats ไว้
-  if($("dStats")) {
-    $("dStats").innerText = Object.entries(stats).map(([k,v]) => `${k}: ${v}`).join(" | ");
-  }
+    // 🏷️ แสดงสถิติ (จัดกลุ่ม ตัดผม/เด็ก ไว้หน้าสุด)
+    let sH = `<div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:10px; margin-bottom:20px;">`;
+    ["ตัดผม", "เด็ก"].forEach(k => { if (stats[k]) sH += `<span style="background:#4338ca;color:#fff;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;">${k}: ${stats[k]}</span>`; });
+    for (let s in stats) { if (!["ตัดผม", "เด็ก"].includes(s)) sH += `<span style="background:#64748b;color:#fff;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;">${s}: ${stats[s]}</span>`; }
+    $("dServiceStats").innerHTML = sH + `</div>`;
 
-  let txt = "✅ ยอดพอดี", bg = "#1e3a8a";
-  if (isHoliday) { txt = "🏖️ วันหยุด"; bg = "#475569"; }
-  else if (tot === 0) { txt = "🛡️ ร้านจ่ายประกัน"; bg = "#7c3aed"; } // ม่วงไฟฟ้าโล่ฟ้าเด่น
-  else if (settle > 0) { txt = `🤵 ช่างคืนร้าน ฿${Math.abs(settle).toLocaleString()}`; bg = "#2563eb"; }
-  else if (settle < 0) { txt = `🏠 ร้านคืนช่าง ฿${Math.abs(settle).toLocaleString()}`; bg = "#0284c7"; }
+    // 🎨 3. ซ่อมสีม่วงไฟฟ้า (ให้โล่ฟ้าเด่น)
+    let txt = "", bg = "", color = "#1e293b"; 
+    if (isHoliday) { txt = "🏖️ พักผ่อนวันหยุด"; bg = "#f1f5f9"; }
+    else if (tot === 0) { txt = "🛡️ ร้านจ่ายประกัน"; bg = "#7c3aed"; color = "#fff"; } // ม่วงไฟฟ้าตามสั่ง
+    else if (settle > 0) { txt = `🤵 ช่างคืนร้าน ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; bg = "#fee2e2"; } 
+    else if (settle < 0) { txt = `🏪 ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; bg = "#e0e7ff"; } 
+    else { txt = "✅ ยอดพอดี"; bg = "#dcfce7"; }
 
-  $("dailyList").innerHTML = `
-    <div style="display:flex; justify-content:space-between; padding:10px">
-      <b>📋 รายการวันนี้</b>
-      <i class="fab fa-line" style="color:#22c55e; font-size:28px; cursor:pointer" onclick="shareLine()"></i>
-    </div>` + (isHoliday ? `<div style="padding:40px; text-align:center">🏖️ วันหยุด</div>` : (list || "<center style='padding:40px; opacity:.3'>ไม่มีข้อมูล</center>"));
-
-  const bar = $("settleBarContainer");
-  if (bar) {
-    const closed = archives.some(a => a.date === dInp);
-    bar.style.display = "flex"; bar.style.gap = "12px"; bar.style.marginTop = "20px";
-    bar.innerHTML = `
-      <div style="flex:8; height:60px; background:${bg}; color:#fff; display:flex; align-items:center; justify-content:center; border-radius:18px; font-weight:900; box-shadow:0 4px 12px ${bg}44">${txt}</div>
-      <button ${closed ? "disabled" : ""} onclick="saveAndGo('${dInp}',${tot},${sEarn},${bEarn})" 
-        style="flex:2; height:60px; border:none; border-radius:18px; background:${closed ? "#cbd5f5" : "linear-gradient(135deg,#f97316,#ea580c)"}; color:#fff; font-size:24px; cursor:pointer">✈️</button>`;
-  }
+    $("dailyList").innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0; padding:0 5px;"><b style="font-size:16px;">📋 รายการวันนี้:</b><i class="fab fa-line" style="color:#22c55e;font-size:32px;cursor:pointer" onclick="shareLine()"></i></div>` + (isHoliday ? `<div style="text-align:center; padding:40px; color:#64748b; font-weight:800;">🏖️ วันหยุดร้าน</div>` : (listHtml || "<center style='padding:40px; opacity:0.3;'>ไม่มีข้อมูล</center>"));
+    
+    const container = $("settleBarContainer"); 
+    if (container) {
+        container.style.cssText = "display:flex; gap:12px; margin-top:10px; margin-bottom:20px;";
+        container.innerHTML = `<div style="flex:8; height:60px; background:${bg}; color:${color}; display:flex; align-items:center; justify-content:center; border-radius:18px; font-weight:900; font-size:16px; border:1px solid rgba(0,0,0,0.05); box-shadow: 0 4px 10px ${bg}44;">${txt}</div>
+        <button onclick="saveAndGo('${dInp}',${tot},${sEarn},${bEarn})" style="flex:2; height:60px; border:none; border-radius:18px; background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; font-size:24px; cursor:pointer;">✈️</button>`;
+    }
 }
 
 /* ======================================================
@@ -387,46 +386,62 @@ function clearAccount(){
 /* ======================================================
    REPORT
 ====================================================== */
-function loadHistDaily(){
+function loadHistDaily() {
     const d = $("histDate").value, f = archives.find(a => a.date === d), res = $("histResult");
-    if(!f) return res.innerHTML = "<center style='padding:20px; color:#ef4444;'>❌ ไม่พบข้อมูลวันที่นี้</center>";
-    
-    // สร้างรายการย่อย
-    const details = (f.details || []).map(r => `
-        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f1f5f9; font-size:13px;">
-            <span>${r.time} | ${(r.svcs && r.svcs.length ? r.svcs.join('+') : (r.hair || 'ตัดผม'))}</span>
+    if (!f) return res.innerHTML = "<center style='padding:20px; color:#ef4444;'>❌ ไม่พบข้อมูลวันที่นี้</center>";
+
+    // --- 🕒 แก้จุดนี้: ให้ดึงชื่อทรงผม (hair) มาโชว์คู่กับบริการเสริม (svcs) เสมอ ---
+    const details = (f.details || []).map(r => {
+        const job = r.hair ? (r.svcs?.length ? `${r.hair}+${r.svcs.join('+')}` : r.hair) : (r.svcs?.length ? r.svcs.join('+') : "ตัดผม");
+        return `
+        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f1f5f9; font-size:13px;">
+            <span><b style="color:#2563eb;">${r.time || '--:--'}</b> | ${job}</span>
             <b style="color:#1e3a8a;">฿${Number(r.price).toLocaleString()}</b>
-        </div>`).join('');
+        </div>`;
+    }).join('');
 
     res.style.display = "block";
     res.innerHTML = `
-        <div style="border-left:4px solid #2563eb; padding-left:12px; margin-bottom:15px;">
-            <b style="font-size:18px; color:#1e3a8a;">📅 สรุปวันที่ ${d}</b><br>
-            <small style="color:#64748b;">ลูกค้าทั้งหมด ${f.count} คน</small>
-        </div>
-        <div style="background:#f8fafc; border-radius:15px; padding:15px; margin-bottom:15px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>ยอดรวม:</span><b>฿${f.total.toLocaleString()}</b></div>
-            <div style="display:flex; justify-content:space-between; color:#2563eb;"><span>ส่วนแบ่งช่าง:</span><b>฿${f.barber.toLocaleString()}</b></div>
-        </div>
-        <div style="max-height:200px; overflow-y:auto;">${details}</div>`;
+        <div style="background:#fff; border-radius:20px; padding:20px; position:relative; border:1px solid #e2e8f0; box-shadow:0 10px 25px rgba(0,0,0,0.1);">
+            <i class="fas fa-times" style="position:absolute; top:15px; right:15px; color:#64748b; cursor:pointer; font-size:20px;" onclick="$('histResult').style.display='none'"></i>
+            
+            <div style="border-left:4px solid #2563eb; padding-left:12px; margin-bottom:15px;">
+                <b style="font-size:18px; color:#1e3a8a;">📅 สรุปวันที่ ${d}</b><br>
+                <small style="color:#64748b;">ลูกค้าทั้งหมด ${f.count} คน</small>
+            </div>
+            
+            <div style="background:#f8fafc; border-radius:15px; padding:15px; margin-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>ยอดรวม:</span><b>฿${f.total.toLocaleString()}</b></div>
+                <div style="display:flex; justify-content:space-between; color:#2563eb;"><span>ส่วนแบ่งช่าง:</span><b>฿${f.barber.toLocaleString()}</b></div>
+            </div>
+            
+            <div style="max-height:250px; overflow-y:auto; padding-right:5px;">${details}</div>
+            
+            <button onclick="$('histResult').style.display='none'" style="width:100%; margin-top:15px; padding:12px; border:none; border-radius:12px; background:#1e3a8a; color:#fff; font-weight:bold; cursor:pointer;">ตกลง</button>
+        </div>`;
 }
 
-function loadHistMonth(){
+function loadHistMonth() {
     const m = $("histMonth").value, f = archives.filter(a => a.date.startsWith(m)), res = $("histResult");
-    if(!f.length) return res.innerHTML = "<center style='padding:20px; color:#ef4444;'>❌ ไม่มีข้อมูลเดือนนี้</center>";
+    if (!f.length) return res.innerHTML = "<center style='padding:20px; color:#ef4444;'>❌ ไม่มีข้อมูลเดือนนี้</center>";
 
-    let tTot=0, tBar=0, tShop=0, tCust=0;
-    f.forEach(a => { tTot += a.total; tBar += a.barber; tShop += a.shop; tCust += a.count; });
+    let tTot = 0, tBar = 0, tCust = 0;
+    f.forEach(a => { tTot += a.total; tBar += a.barber; tCust += a.count; });
 
     res.style.display = "block";
     res.innerHTML = `
-        <div style="background:linear-gradient(135deg, #1e3a8a, #2563eb); color:#fff; border-radius:20px; padding:20px; text-align:center; box-shadow:0 10px 20px rgba(30,58,138,0.2);">
-            <small style="opacity:0.8;">📊 สรุปภาพรวมเดือน ${m}</small>
-            <div style="font-size:32px; font-weight:900; margin:10px 0;">฿${tTot.toLocaleString()}</div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.2); pt:10px; margin-top:10px;">
-                <div><small>ช่างได้รับ</small><br><b>฿${Math.floor(tBar).toLocaleString()}</b></div>
-                <div><small>จำนวนลูกค้า</small><br><b>${tCust} คน</b></div>
+        <div style="background:linear-gradient(135deg, #1e3a8a, #2563eb); color:#fff; border-radius:25px; padding:25px; text-align:center; position:relative; box-shadow:0 15px 30px rgba(30,58,138,0.3);">
+            <i class="fas fa-times" style="position:absolute; top:20px; right:20px; color:#fff; cursor:pointer; opacity:0.7;" onclick="$('histResult').style.display='none'"></i>
+            
+            <small style="opacity:0.8; font-size:14px;">📊 สรุปภาพรวมเดือน ${m}</small>
+            <div style="font-size:36px; font-weight:900; margin:15px 0;">฿${tTot.toLocaleString()}</div>
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; border-top:1px solid rgba(255,255,255,0.2); padding-top:15px; margin-top:10px;">
+                <div><small style="opacity:0.8;">ช่างได้รับ</small><br><b style="font-size:18px;">฿${Math.floor(tBar).toLocaleString()}</b></div>
+                <div><small style="opacity:0.8;">ลูกค้าทั้งหมด</small><br><b style="font-size:18px;">${tCust} คน</b></div>
             </div>
+
+            <button onclick="$('histResult').style.display='none'" style="width:100%; margin-top:20px; padding:12px; border:none; border-radius:15px; background:rgba(255,255,255,0.2); color:#fff; font-weight:bold; cursor:pointer; backdrop-filter:blur(5px);">ปิดรายงาน</button>
         </div>`;
 }
     /* ======================================================
