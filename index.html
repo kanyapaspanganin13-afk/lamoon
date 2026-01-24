@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.7</title>
+    <title>Barber Note Pro v.17</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -317,37 +317,28 @@ function renderDay() {
 /* ======================================================
    SAVE & CLOSE DAY
 ====================================================== */
-function saveAndGo(date, total, shop, barber) {
-    const dKey = d10(date);
-    if (archives.some(a => a.date === dKey)) return alert("❌ วันนี้ปิดไปแล้ว");
+function saveAndGo() {
+    const d = $("date")?.value || $("histDate")?.value;
+    const today = db.filter(r => r.date === d);
+    if (!today.length) return alert("ไม่มีงานจะปิด");
 
-    const dayRec = db.filter(r => d10(r.date) === dKey && r.type !== "HOLIDAY");
-    const dayStats = {};
-    let cash = 0;
+    const total = today.reduce((s, r) => s + Number(r.price || 0), 0);
+    // 🤵 เงินที่ช่างควรได้ (ค่าแรง + ทิป)
+    const barberEarn = today.reduce((s, r) => s + (Number(r.price) * 0.5), 0); 
+    // 📱 เงินที่อยู่ที่ร้าน (ยอดโอนทั้งหมด)
+    const transInShop = today.filter(r => r.pay === "Transfer").reduce((s, r) => s + Number(r.price || 0), 0);
+
+    // ✅ ยอดเคลียร์ (Settle): เอาเงินโอนที่ร้านถืออยู่ หักลบกับ เงินที่ช่างต้องได้
+    const settle = transInShop - barberEarn;
+
+    // ถ้า settle เป็น + ร้านโอนคืนช่าง | ถ้า settle เป็น - ช่างควักสดจ่ายร้าน
+    account.balance = (Number(account.balance) || 0) + settle;
     
-    dayRec.forEach(r => {
-        if (r.pay !== "Trans") cash += +r.price || 0;
-        const job = r.hair || "ตัดผม";
-        dayStats[job] = (dayStats[job] || 0) + 1;
-        if (r.svcs) r.svcs.forEach(s => { if(s) dayStats[s] = (dayStats[s] || 0) + 1; });
-    });
-
-    const entry = {
-        date: dKey, total: +total, shop: +shop, barber: +barber,
-        settle: cash - barber, count: dayRec.length, stats: dayStats,
-        details: dayRec.map(r => ({ time: r.time, hair: r.hair, svcs: r.svcs, price: r.price, pay: r.pay }))
-    };
-
-    // 🔥 บันทึกลงตัวแปร
-    archives.push(entry);
-    db = db.filter(r => d10(r.date) !== dKey);
-
-    // 🔥 บันทึกลง localStorage (ใช้ตัวที่มึงหาเจอ!)
-    saveArch(); 
-    saveDB(); 
-
-    alert("✅ ปิดยอดและบันทึกสถิติเรียบร้อย");
-    renderDay(); go(3);
+    archives.unshift({ date: d, total, barber: barberEarn, settle, count: today.length, stats: countStats(today), details: today });
+    saveAcc(); saveArchives();
+    
+    alert(settle >= 0 ? `ร้านคืนช่าง ฿${settle}` : `ช่างคืนร้าน ฿${Math.abs(settle)}`);
+    go(3); // ไปหน้าบัญชี
 }
  
 /* ======================================================
@@ -497,24 +488,29 @@ const getSelectedSvcs = () =>
 ====================================================== */
 function handleSave() {
     try {
-        const d = $("date")?.value, n = new Date().toTimeString().slice(0,5), s = $("tStart")?.value || n;
-        if (!d) return alert("❌ เลือกวันที่ก่อนอิดอก!");
+        // ✅ แก้ตรงนี้: ถ้าดึงจาก ID "date" ไม่ได้ ให้เอาวันที่ปัจจุบันไปเลย ปุ่มจะไม่ตาย
+        const dInp = document.getElementById("date") || document.getElementById("histDate");
+        const d = dInp?.value || new Date().toISOString().slice(0, 10);
+
+        const n = new Date().toTimeString().slice(0,5), s = $("tStart")?.value || n;
         const pVal = Number($("price")?.value), p = Number.isFinite(pVal) ? pVal : 0;
-        const pay = (typeof payMethod === "string" && payMethod.trim()) ? payMethod : "Cash";
 
         const record = {
-            id: Date.now(), date: d, time: s, endTime: $("tEnd")?.value || addMinutes(s, 30),
-            hair: $("hair")?.value || "", price: p, pay, type: "SERVICE",
+            id: Date.now(), date: d, time: s,
+            endTime: $("tEnd")?.value || addMinutes(s, 30),
+            hair: $("hair")?.value || "", price: p, 
+            pay: (typeof payMethod !== "undefined") ? payMethod : "Cash", 
+            type: "SERVICE",
             svcs: typeof getSelectedSvcs === "function" ? getSelectedSvcs().filter(Boolean) : []
         };
 
         db.unshift(record); saveDB();
         if (typeof renderDay === "function") renderDay(d);
         if ($("price")) $("price").value = "";
-        alert("✅ บันทึกเรียบร้อย!");
-    } catch (e) { console.error(e); alert("🚨 พัง: " + e.message); }
-}
-/* ======================================================
+        alert("✅ บันทึกเข้าเครื่องแล้ว!");
+    } catch (e) { alert("🚨 พังที่: " + e.message); }
+
+======================================================
    GUARANTEE / INSURANCE
 ====================================================== */
 function handleInsurance() {
