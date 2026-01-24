@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12.</title>
+    <title>Barber Note Pro v.12.1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -586,48 +586,47 @@ function loadHistMonth() {
     window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`);
 }
 function saveAndGo(date, total, shop, barber) {
-    const dInp = $("dateInp").value;
+    // 1. กรองข้อมูลเอาเฉพาะที่ไม่ได้ลา
     const allRec = db.filter(r => r.date === date);
     const dayRecords = allRec.filter(r => r.type !== 'HOLIDAY');
-    
+
+    // 2. คำนวณ Settle (เงินสด - ส่วนแบ่งช่าง)
     let cash = 0;
     dayRecords.forEach(r => { if(r.pay !== 'Trans') cash += Number(r.price)||0; });
-    const settle = cash - barber; // ✅ ตัวแปรเจ้าปัญหาที่มึงบอกว่าต้องมี
+    const settle = cash - barber;
 
-    let s = {};
-    dayRecords.forEach(r => { 
-        (r.svcs || []).forEach(v => s[v] = (s[v]||0)+1);
-        if(r.hair) s["ทรง:"+r.hair] = (s["ทรง:"+r.hair]||0)+1; 
-    });
+    // 3. บันทึกลง Archives
     const entry = {
-        date,
-        total,
-        barber,
-        shop,
-        settle, // ✅ บันทึก settle ลงไปด้วย
+        date, total, barber, shop, settle,
         count: dayRecords.length,
-        stats: s,
-        // ✅ เก็บ details ให้ครบทุก Field (รวม svcs และ pay)
+        stats: buildStats(dayRecords),
         details: dayRecords.map(r => ({
-            time: r.time,
-            endTime: r.endTime,
-            hair: r.hair,
-            price: r.price,
-            tip: r.tip,
-            pay: r.pay,      // ✅ ต้องมี
-            svcs: r.svcs || [] // ✅ ห้ามขาด! เดี๋ยว .join() พัง
+            time: r.time, hair: r.hair, price: r.price, pay: r.pay, svcs: r.svcs || []
         }))
     };
-    const i = archives.findIndex(a => a.date === date);
-    if (i > -1) {
-        archives[i] = entry;
-    } else {
-        archives.push(entry);
-    }
 
-    save();
-    alert("✅ ปิดยอดและบันทึกข้อมูลสมบูรณ์!");
-    go(3); // บินไปหน้าสรุป
+    const i = archives.findIndex(a => a.date === date);
+    if(i > -1) archives[i] = entry; else archives.push(entry);
+    save(); // เซฟ archives ลง localStorage
+
+    // 🚀 [FIX 3] เคลียร์ข้อมูลชั่วคราว (db) ของวันนี้ทิ้ง!
+    db = db.filter(r => r.date !== date);
+    if (typeof saveDB === "function") saveDB(); // เซฟ db ที่เคลียร์แล้ว
+
+    // 🚀 [FIX 2] Sync วันที่ให้หน้า 3 และหน้า Report เห็นตรงกัน
+    if($("dateInp")) $("dateInp").value = date;
+    if($("accDate")) $("accDate").value = date;
+
+    // 4. เปลี่ยนหน้า
+    go(3);
+
+    // 🚀 [FIX 1] บังคับโหลด UI ใหม่ทุกจุดที่เกี่ยวข้อง
+    setTimeout(() => {
+        if(typeof renderDay === "function") renderDay();       // หน้า 2 ต้องโล่ง
+        if(typeof loadAccountStatus === "function") loadAccountStatus(); // หน้า 3 ต้องเด้ง
+    }, 100);
+
+    speak("ปิดงานเรียบร้อยแล้วค่ะเถ้าแก่");
 }
    function openHistoryModal() {
     const m = $("historyModal");
