@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12.11</title>
+    <title>Barber Note Pro v.13.11</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -406,7 +406,7 @@ function handleInsurance() {
     }
 function loadAccountStatus() {
     // 1. ดึงวันที่ปัจจุบันจากหน้าจอ
-    const dInp = $("dateInp").value; 
+    const dInp = $("accDate").value;
     const d = new Date(dInp);
     const dThai = `${d.getDate()}/${d.getMonth()+1}/${(d.getFullYear()+543).toString().slice(-2)}`;
 
@@ -439,7 +439,37 @@ function loadAccountStatus() {
     if ($("accLight")) $("accLight").style.boxShadow = `0 0 8px ${light}`;}
  function closeDay(){const d = $("dateInp").value;if(!d) return alert("เลือกวันที่ก่อน");const total = Number($("dTotal").innerText.replace(/,/g,'')) || 0;const barber = Number($("dBarber").innerText.replace(/,/g,'')) || 0;const shop = Number($("dShop").innerText.replace(/,/g,'')) || 0; saveAndGo(d, total, shop, barber);}
 
-function clearAccount(){const d = $("accDate").value;if(!d) return alert("เลือกวันที่!");const day = archives.find(a => a.date === d);if(!day) return alert("ไม่พบข้อมูลวันที่นี้"); const settle = Number(day.settle || 0); account.logs.unshift({ date: d,amount: settle,note: $("accNote").value || "เคลียร์ยอด"});account.balance = 0;localStorage.setItem("barber_account", JSON.stringify(account));speak("เคลียร์เงินเรียบร้อย");$("accNote").value = "";loadAccountHistory();loadAccountStatus();}
+function clearAccount(){
+    const d = $("accDate").value;
+    if(!d) return alert("เลือกวันที่!");
+
+    const day = archives.find(a => a.date === d);
+    if(!day) return alert("ไม่พบข้อมูลวันที่นี้");
+
+    if(day.cleared) return alert("วันนี้เคลียร์ไปแล้ว");
+
+    const settle = Number(day.settle || 0);
+
+    account.logs.unshift({
+        date: d,
+        amount: settle,
+        note: $("accNote").value || "เคลียร์ยอด"
+    });
+
+    account.balance += settle;
+
+    // 🔒 lock วันนั้น
+    day.cleared = true;
+    day.settle = 0;
+
+    localStorage.setItem("barber_archives", JSON.stringify(archives));
+    localStorage.setItem("barber_account", JSON.stringify(account));
+
+    speak("เคลียร์เงินเรียบร้อย");
+    $("accNote").value = "";
+
+    loadAccountStatus();
+}
 
 function renderHistoryList() {
     const db = JSON.parse(localStorage.getItem("barber_acc_logs") || "[]");
