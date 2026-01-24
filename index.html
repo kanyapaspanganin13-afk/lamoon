@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.13.7</title>
+    <title>Barber Note Pro v.</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -315,17 +315,6 @@ function renderDay() {
             </button>`;
     }
     if ($("dailyList")) $("dailyList").innerHTML = isHoliday ? "<center style='padding:40px;'>🏖️ วันหยุด</center>" : (listHtml || "<center style='padding:40px; opacity:0.3;'>ไม่มีรายการ</center>");
-}
-    container.innerHTML = `
-        <div style="flex:8; height:60px; background:${bg}; display:flex; align-items:center; justify-content:center; border-radius:18px; font-weight:900; font-size:16px; color:#1e293b; border:1px solid rgba(0,0,0,0.05); text-align:center; padding:0 10px;">
-            ${txt}
-        </div>
-        <button onclick="saveAndGo('${dInp}', ${tot}, ${sEarn}, ${bEarn})" style="flex:2; height:60px; border:none; border-radius:18px; background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; font-size:22px; cursor:pointer; box-shadow: 0 4px 12px rgba(249,115,22,0.2);">
-            ✈️
-        </button>`;
-
-    if ($("dailyList")) $("dailyList").innerHTML = isHoliday ? `<center style="padding:40px;">🏖️ วันหยุดร้าน</center>` : (listHtml || "<center style='padding:40px; opacity:0.3;'>ไม่มีข้อมูล</center>");
-}
 
   function updateAccountFromOrange() {
             const barberShareStr = document.getElementById('dBarber').innerText || "0";
