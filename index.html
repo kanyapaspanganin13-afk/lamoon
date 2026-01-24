@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12.3</title>
+    <title>Barber Note Pro v.12.13</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -568,6 +568,21 @@ function loadHistMonth() {
         </div>
     `);
 }
+  function buildStats(records = []) {
+    const stats = {};
+    records.forEach(r => {
+        if (r.hair) {
+            const k = "ทรง:" + r.hair;
+            stats[k] = (stats[k] || 0) + 1;
+        }
+        (r.svcs || []).forEach(s => {
+            if (!s) return;
+            stats[s] = (stats[s] || 0) + 1;
+        });
+    });
+    return stats;
+}
+
   function shareLine() {
     const dInp = $("dateInp").value, today = db.filter(r => r.date === dInp); if (!today.length) return;
     const dp = dInp.split('-'), fDate = `${dp[2]}/${dp[1]}/${dp[0]}`;
@@ -644,15 +659,12 @@ function saveAndGo(date, total, shop, barber) {
         list.innerHTML = "<center style='padding:40px; opacity:0.3;'>🌑 ไม่มีประวัติการเคลียร์เงิน</center>";
         return;
     }
-
-    // 🛑 ปรับ Container ให้เป็น Flex แนวนอนและยอมให้ Scroll
     let html = `<div style="display:flex; gap:12px; overflow-x:auto; padding:10px 5px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">`;
 
     logs.reverse().forEach(log => {
         const isPlus = log.amount >= 0;
         const color = isPlus ? '#16a34a' : '#ef4444';
         const bg = isPlus ? '#dcfce7' : '#fee2e2';
-        
         html += `
             <div style="flex: 0 0 160px; scroll-snap-align: start; background:#fff; padding:15px; border-radius:20px; border:1px solid #f1f5f9; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display:flex; flex-direction:column; justify-content:space-between; height:110px;">
                 <div>
