@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.9</title>
+    <title>Barber Note Pro v.2</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -14,19 +14,6 @@
     * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
     body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 90px; overflow-x: hidden; }
     .container { padding: 15px 15px 100px 15px !important; max-width: 500px; margin: auto; position: relative; z-index: 1; }
-    .nav-bar {
-        position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important;
-        height: 75px !important; background: white !important; display: flex !important; 
-        justify-content: space-around !important; align-items: center !important; 
-        z-index: 99999 !important; 
-        border-top: 1px solid #eee;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-    }
-    .nav-item {
-        flex: 1 !important; display: flex !important; flex-direction: column !important;
-        align-items: center !important; justify-content: center !important; cursor: pointer !important;
-        pointer-events: auto !important;
-    }
 nav {
     position: fixed; bottom: 0; left: 0; right: 0;
     background: #1a237e !important; /* น้ำเงินธนาคารเป๊ะๆ */
@@ -350,11 +337,21 @@ function saveAndGo(date,total,shop,barber){
    ACCOUNT (หน้า 3)
 ====================================================== */
 function loadAccountStatus(){
-  let bal = account.balance||0;
-  $("accNet").innerText = bal.toLocaleString();
-  $("accStatus").innerText = bal===0?"🟢 ปกติ":(bal>0?"🔴 ร้านค้าง":"🔵 ช่างค้าง");
-}
+  let bal = 0;
 
+  archives.forEach(a=>{
+    if(!account.logs.some(l=>l.date===a.date)){
+      bal += a.settle || 0;
+    }
+  });
+
+  account.balance = bal;
+  saveAcc();
+
+  $("accNet").innerText = bal.toLocaleString();
+  $("accStatus").innerText =
+    bal===0 ? "🟢 ปกติ" : (bal>0 ? "🔴 ร้านค้าง" : "🔵 ช่างค้าง");
+}
 function clearAccount(){
   const d = $("accDate")?.value;
   if(!d) return alert("เลือกวันที่");
@@ -362,11 +359,19 @@ function clearAccount(){
   if(account.logs.some(l=>l.date===d))
     return alert("วันนี้เคลียร์ไปแล้ว");
 
-  const settle = account.balance||0;
-  account.logs.unshift({date:d,amount:settle,note:"เคลียร์ยอด"});
-  account.balance = 0;
+  const settle = archives
+    .filter(a=>a.date===d)
+    .reduce((s,a)=>s+(a.settle||0),0);
+
+  account.logs.unshift({
+    date:d,
+    amount:settle,
+    note:$("accNote")?.value || "เคลียร์ยอด"
+  });
+
   saveAcc();
   loadAccountStatus();
+  $("accNote").value="";
   alert("💸 เคลียร์เงินเรียบร้อย");
 }
 
@@ -374,15 +379,46 @@ function clearAccount(){
    REPORT
 ====================================================== */
 function loadHistDaily(){
-  const d=$("histDate").value;
-  const f=archives.find(a=>a.date===d);
-  $("histResult").innerHTML = f?JSON.stringify(f,null,2):"❌ ไม่พบข้อมูล";
+    const d = $("histDate").value, f = archives.find(a => a.date === d), res = $("histResult");
+    if(!f) return res.innerHTML = "<center style='padding:20px; color:#ef4444;'>❌ ไม่พบข้อมูลวันที่นี้</center>";
+    
+    // สร้างรายการย่อย
+    const details = (f.details || []).map(r => `
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f1f5f9; font-size:13px;">
+            <span>${r.time} | ${(r.svcs && r.svcs.length ? r.svcs.join('+') : (r.hair || 'ตัดผม'))}</span>
+            <b style="color:#1e3a8a;">฿${Number(r.price).toLocaleString()}</b>
+        </div>`).join('');
+
+    res.style.display = "block";
+    res.innerHTML = `
+        <div style="border-left:4px solid #2563eb; padding-left:12px; margin-bottom:15px;">
+            <b style="font-size:18px; color:#1e3a8a;">📅 สรุปวันที่ ${d}</b><br>
+            <small style="color:#64748b;">ลูกค้าทั้งหมด ${f.count} คน</small>
+        </div>
+        <div style="background:#f8fafc; border-radius:15px; padding:15px; margin-bottom:15px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>ยอดรวม:</span><b>฿${f.total.toLocaleString()}</b></div>
+            <div style="display:flex; justify-content:space-between; color:#2563eb;"><span>ส่วนแบ่งช่าง:</span><b>฿${f.barber.toLocaleString()}</b></div>
+        </div>
+        <div style="max-height:200px; overflow-y:auto;">${details}</div>`;
 }
 
 function loadHistMonth(){
-  const m=$("histMonth").value;
-  const f=archives.filter(a=>a.date.startsWith(m));
-  $("histResult").innerHTML = f.length?JSON.stringify(f,null,2):"❌ ไม่มีข้อมูล";
+    const m = $("histMonth").value, f = archives.filter(a => a.date.startsWith(m)), res = $("histResult");
+    if(!f.length) return res.innerHTML = "<center style='padding:20px; color:#ef4444;'>❌ ไม่มีข้อมูลเดือนนี้</center>";
+
+    let tTot=0, tBar=0, tShop=0, tCust=0;
+    f.forEach(a => { tTot += a.total; tBar += a.barber; tShop += a.shop; tCust += a.count; });
+
+    res.style.display = "block";
+    res.innerHTML = `
+        <div style="background:linear-gradient(135deg, #1e3a8a, #2563eb); color:#fff; border-radius:20px; padding:20px; text-align:center; box-shadow:0 10px 20px rgba(30,58,138,0.2);">
+            <small style="opacity:0.8;">📊 สรุปภาพรวมเดือน ${m}</small>
+            <div style="font-size:32px; font-weight:900; margin:10px 0;">฿${tTot.toLocaleString()}</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.2); pt:10px; margin-top:10px;">
+                <div><small>ช่างได้รับ</small><br><b>฿${Math.floor(tBar).toLocaleString()}</b></div>
+                <div><small>จำนวนลูกค้า</small><br><b>${tCust} คน</b></div>
+            </div>
+        </div>`;
 }
     /* ======================================================
    TIME UTILS
@@ -622,6 +658,16 @@ function updateDateDisplay(v){
     d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"})
   );
   renderDay();
+}
+function go(n){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(b=>b.classList.remove("active"));
+
+  $("p"+n)?.classList.add("active");
+  document.querySelectorAll("nav .nav-item")[n-1]?.classList.add("active");
+
+  if(n===2) renderDay();
+  if(n===3) loadAccountStatus();
 }
 
 /* ======================================================
