@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12.1</title>
+    <title>Barber Note Pro v.12.3</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -314,12 +314,9 @@ nav {
         // ใช้ setTimeout นิดนึงเพื่อให้ Animation แนวนอนทำงาน (ถ้ามึงเขียน CSS ไว้)
         setTimeout(() => targetPage.classList.add('active'), 10);
     }
-    // 3. เปลี่ยนสถานะปุ่มที่ Navbar (แนวนอนข้างล่าง)
     document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
     const currentNav = document.querySelectorAll('.nav-item')[n - 1];
     if (currentNav) currentNav.classList.add('active');
-
-    // 4. ✅ จุดชี้ตาย: ถ้าไปหน้า 3 (บัญชี) ต้องโหลดเลขใหม่ทันที!
     if (n === 3) {
         if (typeof loadAccountStatus === "function") {
             loadAccountStatus();
@@ -350,14 +347,13 @@ function handleInsurance() {
         saveDB(); speak(`เปิดระบบประกัน ${g} บาท เรียบร้อย`); alert("✅ เปิดระบบประกันเรียบร้อย"); renderDay();
     }
 }
-  function handleHoliday(){const d=$("dateInp").value;if(!d)return alert("เลือกวันที่ก่อน");if(confirm(`ยืนยันบันทึกวันที่ ${d} เป็น "วันหยุด"?`)){db.push({id:Date.now(),date:d,time:"00:00",svcs:["🏖️ วันหยุด"],price:0,pay:"N/A",type:"HOLIDAY"});saveDB();const m=new SpeechSynthesisUtterance("บันทึกวันหยุดเรียบร้อย");m.lang='th-TH';if(conf.voice==='male'){const v=window.speechSynthesis.getVoices().find(x=>x.name.includes('Male')||x.name.includes('Google'));if(v)m.voice=v}window.speechSynthesis.speak(m);alert("🏖️ บันทึกวันหยุดเรียบร้อย");renderDay()}}   
+ function handleHoliday(){const d=$("dateInp").value;if(!d)return alert("เลือกวันที่ก่อน");if(confirm(`ยืนยันบันทึกวันที่ ${d} เป็น "วันหยุด"?`)){db.push({id:Date.now(),date:d,time:"00:00",svcs:["🏖️ วันหยุด"],price:0,pay:"N/A",type:"HOLIDAY"});saveDB();const m=new SpeechSynthesisUtterance("บันทึกวันหยุดเรียบร้อย");m.lang='th-TH';if(conf.voice==='male'){const v=window.speechSynthesis.getVoices().find(x=>x.name.includes('Male')||x.name.includes('Google'));if(v)m.voice=v}window.speechSynthesis.speak(m);alert("🏖️ บันทึกวันหยุดเรียบร้อย");renderDay()}}   
  function openSettings() {
     const m = document.getElementById("modalSet");
     if (!m) return; // ถ้าไม่มี Modal ก็จบงานตรงนี้ ไม่ต้องไปต่อให้ Error
 
     m.style.display = 'flex';
 
-    // ฟังก์ชันช่วยเติมค่าแบบปลอดภัย (ถ้าไม่มี ID นั้นใน HTML จะไม่พัง)
     const setVal = (id, val) => {
         const el = document.getElementById(id);
         if (el) el.value = val;
@@ -392,8 +388,6 @@ function renderDay() {
         const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
         listHtml += `<div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column;"><span style="font-weight:800; font-size:14px; color:#1e293b;">${i+1}. [${timeShow}] | ${(r.svcs||[]).join('+')}</span>${t?`<small style="color:#be185d; font-weight:700; font-size:11px;">🔹 ทิป: ฿${t}</small>`:''}</div><div style="text-align:right;"><b style="font-size:16px; display:block;">฿${p}${t?` <span style="color:#be185d;">(+${t})</span>`:''}</b><span style="font-size:12px; font-weight:700;">${r.pay==='Trans'?'📱 โอน':'💵 สด'} <i class="fas fa-trash-alt" style="color:#ef4444; cursor:pointer; margin-left:8px;" onclick="delRec(${r.id})"></i></span></div></div></div>`;
     });
-
-    // --- สูตรคำนวณ (ถ้าเป็นวันหยุด ยอดต้องเป็น 0 ทั้งหมด) ---
     const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc / 100), conf.guar) + tips;
     const sEarn = isHoliday ? 0 : tot - (bEarn - tips);
     const settle = isHoliday ? 0 : cash - bEarn;
@@ -407,7 +401,6 @@ function renderDay() {
     for (let s in stats) { if (!["ตัดผม", "เด็ก"].includes(s)) sH += `<span style="background:#64748b;color:#fff;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;">${s}: ${stats[s]}</span>`; }
     $("dServiceStats").innerHTML = sH + `</div>`;
 
-    // --- จัดการส่วนล่างสุด ---
     let txt = "", bg = ""; 
     if (isHoliday) { txt = "🏖️ พักผ่อนวันหยุด"; bg = "#f1f5f9"; }
     else if (tot === 0) { txt = "🟦 ร้านจ่ายประกัน"; bg = "#e0f2fe"; } 
@@ -482,7 +475,16 @@ function loadAccountStatus() {
     if ($("accLight")) $("accLight").style.background = light;
     if ($("accLight")) $("accLight").style.boxShadow = `0 0 8px ${light}`;
 }
+function closeDay(){
+  const d = $("dateInp").value;
+  if(!d) return alert("เลือกวันที่ก่อน");
 
+  const total = Number($("dTotal").innerText.replace(/,/g,'')) || 0;
+  const barber = Number($("dBarber").innerText.replace(/,/g,'')) || 0;
+  const shop = Number($("dShop").innerText.replace(/,/g,'')) || 0;
+
+  saveAndGo(d, total, shop, barber);
+}
 function clearAccount(){
     const d = $("accDate").value, settle = parseFloat(($('dSettle')?.innerText || "0").replace(/,/g,'')) || 0;
     if(!d) return alert("เลือกวันที่!");
@@ -670,18 +672,18 @@ function saveAndGo(date, total, shop, barber) {
     list.innerHTML = html + `</div>`;
 }
   function saveDB() { localStorage.setItem("barber_db", JSON.stringify(db)); localStorage.setItem("barber_conf", JSON.stringify(conf)); }
-    function delRec(id) { if (confirm("ลบรายการนี้?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); } }
-    function editTime(id) {const rec = db.find(r => r.id === id);if (!rec) return;const newStart = prompt("แก้เวลาเริ่ม (HH:MM)", rec.time);if (!newStart) return;const newEnd = prompt("แก้เวลาเสร็จ (HH:MM)", rec.endTime || "");rec.time = newStart;rec.endTime = newEnd || addMinutes(newStart, 30);saveDB();renderDay();}
-    function closeHistoryModal() { $("historyModal").style.display = "none"; }
-    function applyTheme(t){document.body.className=t;const o=document.getElementById("navyStyle");if(o)o.remove();const s=document.documentElement.style;if(t==='dark'){s.setProperty('--card','#262626');s.setProperty('--text','#fbbf24');document.body.style.background='#171717'}else{s.setProperty('--card','#fff');s.setProperty('--text','#1a237e');document.body.style.background=(t==='navy')?'#1a237e':''}if(t==='navy'){const st=document.createElement("style");st.id="navyStyle";st.innerHTML=`body.navy{background:#1a237e!important;color:#fff!important}.navy .card b,.navy .card span,.navy div[style*="background:white"] b{color:#1e293b!important}.navy #dTotal,.navy #accNet{color:#1a237e!important}.nav-item{color:#fff!important;opacity:0.8}.nav-item.active{color:#8b5cf6!important;opacity:1}`;document.head.appendChild(st)}}
-function saveSettings(){try{conf={...conf,shop:document.getElementById("setShop").value,perc:parseInt(document.getElementById("setPerc").value)||0,guar:parseInt(document.getElementById("setGuar").value)||0,theme:document.getElementById("setTheme").value,voice:document.getElementById("setVoice").value,sound:document.getElementById("setSound").value};localStorage.setItem("barber_conf",JSON.stringify(conf));applyTheme(conf.theme);if(document.getElementById("shopNameDisp"))document.getElementById("shopNameDisp").innerText=conf.shop;alert("✅ บันทึกเรียบร้อย");closeAndGoHome();if(typeof renderDay==='function')renderDay()}catch(e){alert("❌ พังเพราะ:"+e.message)}}
-function closeAndGoHome(){const m=document.getElementById("modalSet");if(m)m.style.display='none';if(typeof go==='function')go(1);else location.reload()}
-function speak(t){if(conf.sound==='off')return;window.speechSynthesis.cancel();const m=new SpeechSynthesisUtterance(t);m.lang='th-TH';m.pitch=(conf.voice==='male')?0.8:1.1;window.speechSynthesis.speak(m)}
-function clearAllData(){if(confirm("💣 ลบข้อมูลทั้งหมด?")){localStorage.clear();location.reload()}}
-function updateDateDisplay(v){if(!v)return;const d=new Date(v);const el=$("dateDisplay");if(el)el.innerText=d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});if(typeof renderDay==="function")renderDay()}
-window.addEventListener('DOMContentLoaded',()=>{const i=$("dateInp"),t=new Date().toISOString().split('T')[0];if(i){i.value=t;updateDateDisplay(t)}}); 
+  function delRec(id) { if (confirm("ลบรายการนี้?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); } }
+  function editTime(id) {const rec = db.find(r => r.id === id);if (!rec) return;const newStart = prompt("แก้เวลาเริ่ม (HH:MM)", rec.time);if (!newStart) return;const newEnd = prompt("แก้เวลาเสร็จ (HH:MM)", rec.endTime || "");rec.time = newStart;rec.endTime = newEnd || addMinutes(newStart, 30);saveDB();renderDay();}
+  function closeHistoryModal() { $("historyModal").style.display = "none"; }
+  function applyTheme(t){document.body.className=t;const o=document.getElementById("navyStyle");if(o)o.remove();const s=document.documentElement.style;if(t==='dark'){s.setProperty('--card','#262626');s.setProperty('--text','#fbbf24');document.body.style.background='#171717'}else{s.setProperty('--card','#fff');s.setProperty('--text','#1a237e');document.body.style.background=(t==='navy')?'#1a237e':''}if(t==='navy'){const st=document.createElement("style");st.id="navyStyle";st.innerHTML=`body.navy{background:#1a237e!important;color:#fff!important}.navy .card b,.navy .card span,.navy div[style*="background:white"] b{color:#1e293b!important}.navy #dTotal,.navy #accNet{color:#1a237e!important}.nav-item{color:#fff!important;opacity:0.8}.nav-item.active{color:#8b5cf6!important;opacity:1}`;document.head.appendChild(st)}}
+  function saveSettings(){try{conf={...conf,shop:document.getElementById("setShop").value,perc:parseInt(document.getElementById("setPerc").value)||0,guar:parseInt(document.getElementById("setGuar").value)||0,theme:document.getElementById("setTheme").value,voice:document.getElementById("setVoice").value,sound:document.getElementById("setSound").value};localStorage.setItem("barber_conf",JSON.stringify(conf));applyTheme(conf.theme);if(document.getElementById("shopNameDisp"))document.getElementById("shopNameDisp").innerText=conf.shop;alert("✅ บันทึกเรียบร้อย");closeAndGoHome();if(typeof renderDay==='function')renderDay()}catch(e){alert("❌ พังเพราะ:"+e.message)}}
+  function closeAndGoHome(){const m=document.getElementById("modalSet");if(m)m.style.display='none';if(typeof go==='function')go(1);else location.reload()}
+  function speak(t){if(conf.sound==='off')return;window.speechSynthesis.cancel();const m=new SpeechSynthesisUtterance(t);m.lang='th-TH';m.pitch=(conf.voice==='male')?0.8:1.1;window.speechSynthesis.speak(m)}
+  function clearAllData(){if(confirm("💣 ลบข้อมูลทั้งหมด?")){localStorage.clear();location.reload()}}
+  function updateDateDisplay(v){if(!v)return;const d=new Date(v);const el=$("dateDisplay");if(el)el.innerText=d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});if(typeof renderDay==="function")renderDay()}
+  window.addEventListener('DOMContentLoaded',()=>{const i=$("dateInp"),t=new Date().toISOString().split('T')[0];if(i){i.value=t;updateDateDisplay(t)}}); 
   window.onclick = function(e) { if (e.target == $("historyModal")) closeHistoryModal(); }
-     window.addEventListener('load', () => { const n = new Date(), t = n.getHours().toString().padStart(2, '0') + ':' + n.getMinutes().toString().padStart(2, '0'); if(document.getElementById('tStart')) document.getElementById('tStart').value = t; if(document.getElementById('tEnd')) document.getElementById('tEnd').value = t; });
+  window.addEventListener('load', () => { const n = new Date(), t = n.getHours().toString().padStart(2, '0') + ':' + n.getMinutes().toString().padStart(2, '0'); if(document.getElementById('tStart')) document.getElementById('tStart').value = t; if(document.getElementById('tEnd')) document.getElementById('tEnd').value = t; });
 </script>
 </body>
 </html>
