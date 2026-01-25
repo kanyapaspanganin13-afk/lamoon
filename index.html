@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.1</title>
+    <title>Barber Note Pro v.</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -181,11 +181,14 @@ nav {
     </div>
 </div>
 
-<div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); z-index:100000; align-items:center; justify-content:center;">
-    <div style="background:#fff; width:92%; max-width:400px; border-radius:35px; box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden; padding:25px; position:relative;">
-        <div style="width:40px; height:5px; background:#f1f5f9; border-radius:10px; margin:5px auto 20px;"></div>
-        <h3 style="margin:0 0 20px; font-size:20px; color:#1a237e; font-weight:800; text-align:center;">⚙️ ตั้งค่าระบบ</h3>
-        
+<div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); z-index:9999; align-items:flex-end; justify-content:center;">
+    <div style="background:#ffffff; width:92%; max-width:400px; border-radius:35px; margin-bottom:110px; box-shadow:0 20px 60px rgba(0,0,0,0.15); display:flex; flex-direction:column; overflow:hidden;">
+        <div style="padding:15px 0 0; text-align:center;">
+         <div style="width:40px; height:5px; background:#f1f5f9; border-radius:10px; margin:0 auto;"></div>
+        </div>
+        <div style="padding:10px 25px 30px;">
+            <h3 style="margin:0 0 20px; font-size:20px; color:#1a237e; font-weight:800; text-align:center;">⚙️ ตั้งค่าระบบ</h3>
+    
         <label style="display:block; font-size:11px; font-weight:800; color:#94a3b8; margin-bottom:8px;">ชื่อร้าน</label>
         <input type="text" id="setShop" style="width:100%; height:55px; border-radius:18px; border:none; background:#f8fafc; text-align:center; font-size:16px; font-weight:700; outline:none; margin-bottom:12px;">
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
@@ -199,12 +202,12 @@ nav {
             <select id="setSound" style="height:55px; border-radius:18px; border:none; background:#f8fafc; text-align:center; font-weight:700; outline:none;"><option value="on">🔊 เปิดเสียง</option><option value="off">🔇 ปิดเสียง</option></select>
             <select id="setVoice" style="height:55px; border-radius:18px; border:none; background:#f8fafc; text-align:center; font-weight:700; outline:none;"><option value="female">👸 หญิง</option><option value="male">🤵 ชาย</option></select>
         </div>
-           <div style="display:grid; grid-template-columns: 2fr 1fr; gap:15px; margin-top:20px;">
-            <button onclick="saveSettings()" style="background:#1e3a8a; color:#fff; height:60px; border-radius:20px; border:none; font-weight:800; font-size:18px;">บันทึก</button>
-            <button onclick="$('modalSet').style.display='none'" style="background:#fff5f5; color:#e11d48; height:60px; border-radius:20px; border:none; font-size:24px;">✕</button>
-        </div>
-    </div>
-</div>
+           <div style="display:grid; grid-template-columns: 2fr 1fr; gap:15px; margin-top:25px;">
+                <button onclick="saveSettings()" style="background:#1e3a8a; color:#fff; height:65px; border-radius:22px; border:none; font-weight:800; font-size:18px;">บันทึกข้อมูล</button>
+                
+                <button onclick="document.getElementById('modalSet').style.display='none'" style="background:#fff5f5; color:#e11d48; height:65px; border-radius:22px; border:none; font-size:32px; display:flex; align-items:center; justify-content:center; cursor:pointer;">⏻</button>
+            </div>
+
         <button onclick="clearAllData()" style="width:100%; margin-top:20px; background:none; border:none; color:#fca5a5; font-size:14px; font-weight:700; text-decoration:underline;">ล้างข้อมูลระบบทั้งหมด</button>
     </div>
 </div>
@@ -612,8 +615,54 @@ function selectPay(m) {
 /* ======================================================
    CLOSE DAY (manual fallback)
 ====================================================== */
-function closeDay(){const d = $("dateInp")?.value;if(!d) return alert("เลือกวันที่ก่อน");if(archives.some(a=>a.date===d))return alert("❌ วันนี้ปิดไปแล้ว");const total  = +$("dTotal").innerText.replace(/,/g,"")||0;const barber = +$("dBarber").innerText.replace(/,/g,"")||0;const shop   = +$("dShop").innerText.replace(/,/g,"")||0;saveAndGo(d,total,shop,barber);}
-/* ======================================================
+function closeDay() {
+    const d = document.getElementById("dateInp").value;
+    const today = db.filter(r => r.date === d);
+    
+    if(!today.length) return alert("ไม่มีข้อมูลของวันนี้จ้า");
+    
+    if(confirm("ปิดยอดวันนี้และส่งไปหน้าบัญชีสุทธิ?")) {
+        // --- ใช้ Logic ของมึงเป๊ะๆ ---
+        const tot = today.reduce((a,b) => a + (Number(b.price) || 0), 0);
+        const cash = today.filter(r => r.pay === 'Cash').reduce((a,b) => a + (Number(b.price) || 0), 0);
+        const bEarn = Math.max(tot * (conf.perc/100), conf.guar);
+        
+        let dailyStats = {};
+        today.forEach(r => {
+            // เช็คว่ามี svcs ไหม (กันพัง)
+            if(r.svcs) {
+                r.svcs.forEach(s => { if(s) dailyStats[s] = (dailyStats[s] || 0) + 1; });
+            }
+        });
+
+        const arc = {
+            date: d, 
+            total: tot, 
+            cash: cash, 
+            barber: bEarn, 
+            shop: tot - bEarn, 
+            settle: cash - bEarn, 
+            count: today.length, 
+            details: today, 
+            stats: dailyStats 
+        };
+
+        // ระบบล้างตัวเก่าทิ้งแล้วเสียบตัวใหม่ (ฉลาดมาก)
+        archives = archives.filter(a => a.date !== d);
+        archives.push(arc);
+        
+        localStorage.setItem("barber_arc", JSON.stringify(archives));
+        
+        // ลบข้อมูลจากหน้าบันทึก (db) เฉพาะวันที่ปิดยอด
+        db = db.filter(r => r.date !== d);
+        localStorage.setItem("barber_db", JSON.stringify(db));
+        
+        if(conf.sound === "on") speak("ส่งรายงานวันนี้สำเร็จ");
+        alert("ส่งรายงานสำเร็จ! ยอดเงินสดคืนร้านคือ " + Math.floor(cash - bEarn) + " บาท");
+        go(3); // ไปหน้าบัญชี
+    }
+}
+ /* ======================================================
    RECORD
 ====================================================== */
 function delRec(id){if(!confirm("ลบรายการนี้?")) return;db = db.filter(r=>r.id!==id);saveDB();renderDay();}
