@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.1</title>
+    <title>Barber Note Pro v.11</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -46,7 +46,6 @@ nav {
     .acc-main-card { background: white; padding: 20px; border-radius: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #fffbeb; }
     .btn-save { background: var(--success); color: white; border: none; width: 100%; padding: 15px; border-radius: 15px; font-weight: 700; font-size: 16px; cursor: pointer; }
     #accHistory { font-size: 12px; max-height: 150px; overflow-y: auto; }
- 
 </style>
 </head>
 <body>
@@ -61,7 +60,6 @@ nav {
             </div>
             <span style="color:#1e293b; font-weight:800; font-size:11px;">ประกันรายได้</span>
         </div>
-        
         <div class="icon-card" style="background:#fff; border:none; box-shadow:0 8px 15px rgba(0,0,0,0.05); border-radius:20px; height:90px; display:flex; flex-direction:column; align-items:center; justify-content:center;" onclick="handleHoliday()">
             <div style="background:linear-gradient(135deg, #f87171, #ef4444); width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; color:#fff; font-size:18px;">
                 <i class="fas fa-umbrella-beach"></i>
@@ -76,12 +74,13 @@ nav {
             <span style="color:#1e293b; font-weight:800; font-size:11px;">ตั้งค่าระบบ</span>
         </div>
     </div>
-
     <div class="grid-3" style="gap:10px; margin-bottom:15px;">
-        <div style="background:#fff; border-radius:18px; border:none; height:75px; position:relative; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-            <span id="dateDisplay" style="font-weight:800; color:#475569; font-size:18px;">📅 เลือกวันที่</span>
-            <input type="date" id="dateInp" onchange="document.getElementById('dateDisplay').innerText = this.value; if(window.updateDateDisplay) updateDateDisplay(this.value)" style="position:absolute; opacity:0; width:100%; height:100%; cursor:pointer; z-index:2;">
-        </div>
+       <div style="background:#fff; border-radius:18px; border:none; height:75px; position:relative; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+    <span id="dateDisplay" style="font-weight:800; color:#475569; font-size:18px;">📅 เลือกวันที่</span>
+    <input type="date" id="dateInp" 
+           onchange="updateDateDisplay(this.value)" 
+           style="position:absolute; opacity:0; width:100%; height:100%; cursor:pointer; z-index:2;">
+</div>
         <input type="time" id="tStart" style="height:60px; border-radius:22px; border:none; text-align:center; font-weight:700; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
         <input type="time" id="tEnd" style="height:60px; border-radius:22px; border:none; text-align:center; font-weight:700; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
     </div>
@@ -148,10 +147,12 @@ nav {
     <div id="dailyList"></div>
 </div>
 <div id="p3" class="page" 
- style="max-width:480px; margin:0 auto; padding:12px 12px 100px;background:#f8fafc;">
-  <button onclick="openSettings()" style="width:100%; margin-bottom:15px; background:#fff; color:#1e3a8a; border:2px solid #1e3a8a; border-radius:18px; padding:12px; font-weight:800;">
-  <i class="fas fa-cog"></i> ตั้งค่าระบบ
-</button>    
+<div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); z-index:9999; align-items:center; justify-content:center;">  
+    <div style="background:#fff; width:92%; max-width:400px; border-radius:35px; box-shadow:0 20px 60px rgba(0,0,0,0.15); overflow:hidden; padding:10px 25px 30px;">
+        <div style="width:40px; height:5px; background:#f1f5f9; border-radius:10px; margin:5px auto 20px;"></div>
+        <h3 style="margin:0 0 20px; font-size:20px; color:#1a237e; font-weight:800; text-align:center;">⚙️ ตั้งค่าระบบ</h3>
+        </div>
+</div>
  <div class="card" style="background:#fff; border-radius:25px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.08); margin-bottom:15px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><b style="font-size:16px; color:#92400e;"><i class="fas fa-wallet"></i> บัญชีสุทธิ</b><div id="accLight" style="background:#22c55e; width:10px; height:10px; border-radius:50%; box-shadow:0 0 8px #22c55e;"></div></div>
         <div style="display:flex; gap:12px; margin-bottom:25px;">
@@ -229,7 +230,6 @@ let db = JSON.parse(localStorage.getItem(KEY.DB) || "[]");
 let archives = JSON.parse(localStorage.getItem(KEY.ARCH) || "[]");
 let conf = JSON.parse(localStorage.getItem(KEY.CONF) || '{"perc":50,"guar":0}');
 let account = JSON.parse(localStorage.getItem(KEY.ACC) || '{"balance":0,"logs":[]}');
-
 let payMethod = ""; // FIX: กัน ReferenceError
 
 /* ======================================================
@@ -279,7 +279,6 @@ function renderDay() {
         </div>
     </div>`;
   });
-
   // คำนวณเงินช่าง/ร้าน
   const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc / 100), conf.guar) + tips;
   const sEarn = isHoliday ? 0 : tot - (bEarn - tips);
@@ -357,7 +356,6 @@ function loadAccountStatus() {
     $("accOldVal").innerText = "฿" + oldBal.toLocaleString();
     $("accTodayVal").innerText = "฿" + todaySettle.toLocaleString();
     $("accNet").innerText = Math.abs(net).toLocaleString();
-    
     // เปลี่ยนสีไฟสถานะ
     const color = todaySettle > 0 ? "#ef4444" : (todaySettle < 0 ? "#3b82f6" : "#22c55e");
     $("accLight").style.background = color;
@@ -395,7 +393,6 @@ function loadHistDaily() {
             else sB += `<span style="${style}#6366f1;">${s}: ${f.stats[s]}</span>`;
         }
     }
-
     // 2. รายการลูกค้า (ดึงตามจริง ไม่ Default)
     const detailsH = (f.details || []).map((r, i) => `
         <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #f1f5f9; min-width:350px;">
@@ -404,7 +401,6 @@ function loadHistDaily() {
             <span style="flex:1; text-align:right; font-weight:800; color:#1e3a8a;">฿${(+r.price).toLocaleString()}</span>
             <span style="width:30px; text-align:right;">${r.pay==='Trans'?'📱':'💵'}</span>
         </div>`).join('');
-
     // 3. จัดการสถานะปิดวัน
     const settle = f.settle || 0;
     let txt = "✅ ยอดพอดี", bg = "#dcfce7", clr = "#166534";
@@ -519,10 +515,11 @@ function handleSave()function handleSave() {
         alert("🚨 พังที่: " + e.message);
     }
 }
-======================================================
+*/======================================================
    GUARANTEE / INSURANCE
 ====================================================== */
-function handleInsurance() {
+
+ function handleInsurance() {
   const d = $("dateInp").value, g = +conf.guar || 0;
   if (!d || g <= 0) return alert(!d ? "เลือกวันที่ก่อน" : "⚠️ ตั้งค่ายอดประกันก่อน");
   if (archives.some(a => a.date === d)) return alert("❌ วันนี้ปิดงานไปแล้ว");
@@ -578,7 +575,22 @@ function handleHoliday() {
    SETTINGS
 ====================================================== */
 
-function openSettings(){const m = $("modalSet"); if(!m) return;m.style.display = "flex";const set = (id,v)=>$(id)&&( $(id).value=v );set("setShop",conf.shop||"");set("setTheme",conf.theme||"light");set("setVoice",conf.voice||"female");set("setSound",conf.sound||"on");set("setPerc",conf.perc||50);set("setGuar",conf.guar||0);}
+function openSettings() {
+    const m = $("modalSet"); 
+    if(!m) return;
+
+    // แก้ตรงนี้: ใช้ setProperty เพื่อบังคับให้มันแสดงผลแน่นอน
+    m.style.setProperty("display", "flex", "important"); 
+    
+    // บรรทัดพวกนี้ของเดิมมึง "ดีอยู่แล้ว" ไม่ต้องเปลี่ยนครับ เดี๋ยวพัง
+    const set = (id,v)=>$(id)&&( $(id).value=v );
+    set("setShop",conf.shop||"");
+    set("setTheme",conf.theme||"light");
+    set("setVoice",conf.voice||"female");
+    set("setSound",conf.sound||"on");
+    set("setPerc",conf.perc||50);
+    set("setGuar",conf.guar||0);
+}
 function saveSettings(){try{conf = {...conf,shop: $("setShop").value,perc: +$("setPerc").value || 0,guar: +$("setGuar").value || 0,theme: $("setTheme").value,voice: $("setVoice").value,sound: $("setSound").value};saveConf();applyTheme(conf.theme);$("shopNameDisp") && ($("shopNameDisp").innerText = conf.shop);alert("✅ บันทึกเรียบร้อย");closeAndGoHome();renderDay();}catch(e){alert("❌ error: " + e.message);}}
 function closeAndGoHome(){$("modalSet") && ($("modalSet").style.display="none");typeof go==="function" ? go(1) : location.reload();}
 /* ======================================================
@@ -614,7 +626,7 @@ function editTime(id){const r = db.find(x=>x.id===id); if(!r) return;const s = p
 ====================================================== */
 function closeHistoryModal(){ $("historyModal")&&( $("historyModal").style.display="none" ); }
 function clearAllData(){if(confirm("💣 ลบข้อมูลทั้งหมด?")){localStorage.clear();location.reload();}}
-function updateDateDisplay(v){if(!v) return;const d = new Date(v);$("dateDisplay")&&( $("dateDisplay").innerText =d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"}));renderDay();} 
+function updateDateDisplay(v) {if (!v) return;const d = new Date(v);const display = $("dateDisplay");if (display) {display.innerText = "📅 " + d.toLocaleDateString("th-TH", {day: "numeric",month: "short",year: "2-digit"});}if (typeof renderDay === "function") {renderDay();}}
 function go(n){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.querySelectorAll(".nav-item").forEach(b=>b.classList.remove("active"));$("p"+n)?.classList.add("active");document.querySelectorAll("nav .nav-item")[n-1]?.classList.add("active");if(n===2) renderDay();if(n===3) loadAccountStatus();}
 function applyTheme() {const t = (typeof conf !== 'undefined' && conf.theme) ? conf.theme : 'navy';document.body.className = 'theme-' + t;console.log("Theme applied:", t);}
 window.onload = () => {if(typeof applyTheme === 'function') applyTheme(); if(typeof renderDay === 'function') renderDay(); };
