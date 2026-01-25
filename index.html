@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12</title>
+    <title>Barber Note Pro v.2</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -178,11 +178,14 @@
             <button onclick="clearAccount()" style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800;">
                 <i class="fas fa-check-double"></i> ยืนยันเคลียร์เงิน
             </button>
-            <button onclick="openHistoryModal()" style="background:#fff; color:#3b82f6; border:2px solid #3b82f6; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800;">
-                <i class="fas fa-history"></i> ประวัติการเคลียร์
-            </button>
+            <div id="historyModal" class="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+    <div class="card" style="width:90%; max-width:400px; max-height:80vh; overflow-y:auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <b><i class="fas fa-history"></i> ประวัติการเคลียร์</b>
+            <i class="fas fa-times" onclick="$('historyModal').style.display='none'"></i>
         </div>
-    </div>
+        <div id="barber_acc_logs_list"></div> </div>
+</div>
 
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:15px;">
         <div onclick="$('histDate').showPicker()" style="background:linear-gradient(135deg, #f59e0b, #d97706); border-radius:25px; padding:20px 10px; text-align:center; color:#fff; position:relative; box-shadow:0 8px 15px rgba(245,158,11,0.2);">
@@ -454,43 +457,36 @@ function renderDay() {
     const container = $("settleBar").parentElement; container.style.cssText = "display:flex; gap:10px; margin-top:10px;";
     container.innerHTML = `<div id="settleBar" style="flex:8; height:55px; background:${bg}; display:flex; align-items:center; justify-content:center; border-radius:15px; font-weight:900; font-size:15px; color:#1e293b; border:1px solid rgba(0,0,0,0.05);">${txt}</div><button onclick="saveAndGo('${dInp}', ${tot}, ${sEarn}, ${bEarn})" style="flex:2; height:55px; background:#f97316; color:#fff; border-radius:15px; border:none; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"><i class="fas fa-paper-plane"></i></button>`;
 }
+// ✅ แก้ไข saveAndGo ให้เรียกฟังก์ชันที่มีจริง
 function saveAndGo(date, total, shop, barber) {
-  if (total === 0 && !confirm("ไม่มีข้อมูลยอด ปิดงานเลยมั้ย?")) return;
-  const dayRecs = db.filter(r => r.date === date);
-  // สถิติ
-  let stats = {};
-  dayRecs.forEach(r => {
-    (r.svcs || []).forEach(v => {
-      stats[v] = (stats[v] || 0) + 1;
-    });
-    if (r.hair) {
-      const k = "ทรง:" + r.hair;
-      stats[k] = (stats[k] || 0) + 1;
-    }
-  });
-  const entry = {
-    date,
-    total,
-    barber,
-    shop,               // ✅ ใช้ค่าที่ส่งมา
-    count: dayRecs.length,
-    stats,
-    details: dayRecs.map(r => ({   // ✅ สำคัญมาก
-      time: r.time,
-      svcs: r.svcs || [],
-      price: r.price,
-      tip: r.tip || 0,
-      pay: r.pay
-    }))
-  };
+    // คำนวณ settle (เงินสดที่ต้องคืนร้าน) ให้ตรงกับ Logic v.1.7
+    // สูตร: เงินสดที่รับมา - ค่าแรงช่าง
+    const todayData = db.filter(r => r.date === date);
+    const cash = todayData.filter(r => r.pay === 'Cash').reduce((a, b) => a + (Number(b.price) || 0), 0);
+    const settle = cash - barber;
 
-  const idx = archives.findIndex(a => a.date === date);
-  if (idx > -1) archives[idx] = entry;
-  else archives.push(entry);
+    const entry = { 
+        date, 
+        total, 
+        barber, 
+        shop, 
+        settle, // ใส่ settle เข้าไปด้วยตามที่เถ้าแก่เตือน (ข้อ 8)
+        count: todayData.length,
+        stats: getDailyStats(todayData) // แยกฟังก์ชันออกมาให้คลีน
+    };
 
-  save();   // localStorage
-  alert("✅ บันทึกเรียบร้อย!");
-  go(3);
+    archives = archives.filter(a => a.date !== date);
+    archives.push(entry);
+    
+    // ✅ เรียกใช้ให้ถูกตัว (ข้อ 1)
+    saveArc(); 
+    
+    // ล้าง db เฉพาะวันที่เซฟแล้ว
+    db = db.filter(r => r.date !== date);
+    saveDB();
+
+    alert("บันทึกสำเร็จ!");
+    go(3);
 }
 
   function updateAccountFromOrange() {
@@ -531,13 +527,25 @@ function saveAndGo(date, total, shop, barber) {
     $("accLight").style.background = light;
 }
 function updateNetAccount() {
-    // คำนวณยอดจาก Archives
-    let net = archives.reduce((sum, day) => sum + (Number(day.settle) || 0), 0);
+    const today = $("dateInp").value;
     
-    if($("accNet")) $("accNet").innerText = Math.floor(net).toLocaleString();
+    // ยอดรวมทั้งหมดที่มีในระบบ
+    const totalNet = archives.reduce((sum, day) => sum + (Number(day.settle) || 0), 0);
     
-    // โชว์แยก ค้างเดิม vs วันนี้ (ถ้ามี)
-    if($("accOldVal")) $("accOldVal").innerText = "฿" + Math.floor(net).toLocaleString();
+    // ยอดของวันที่เลือกอยู่ (วันนี้)
+    const dayEntry = archives.find(a => a.date === today);
+    const todaySettle = dayEntry ? (Number(dayEntry.settle) || 0) : 0;
+    
+    // ค้างเดิม = ยอดรวมทั้งหมด - ยอดของวันนี้
+    const oldNet = totalNet - todaySettle;
+
+    if($("accNet")) $("accNet").innerText = Math.floor(totalNet).toLocaleString();
+    if($("accOldVal")) $("accOldVal").innerText = "฿" + Math.floor(oldNet).toLocaleString();
+    if($("accTodayVal")) $("accTodayVal").innerText = "฿" + Math.floor(todaySettle).toLocaleString();
+    
+    // เปลี่ยนสีไฟสถานะ (ข้อ 7)
+    const light = $("accLight");
+    if(light) light.style.background = totalNet === 0 ? "#22c55e" : "#ef4444";
 }
 function clearAccount() {
     let currentNet = archives.reduce((sum, day) => sum + (Number(day.settle) || 0), 0);
