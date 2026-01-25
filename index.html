@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12</title>
+    <title>Barber Note Pro v.13</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -117,27 +117,26 @@ nav {
     <div style="position: relative; background: #ffffff; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.05);">
         <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 24px; color: #6366f1; font-weight: 900;">฿</span>
         <input type="number" id="priceInp" placeholder="0" inputmode="numeric" 
-            style="width: 100%; height: 85px !important; background: transparent !important; font-size: 45px !important; font-weight: 900 !important; color: #1e293b !important; padding-left: 40px !important; border: none !important;">
+            style="width: 100%; height: 85px !important; background: transparent !important; font-size: 45px !important; font-weight: 900 !important; color: #1e293b !important; padding-left: 40px !important; border: none !important; outline: none;">
     </div>
 
     <input type="number" id="tipInp" placeholder="ทิป" inputmode="numeric" 
-        style="width: 100%; height: 85px !important; background: #ccfbf1 !important; border-radius: 20px !important; font-size: 32px !important; font-weight: 900 !important; color: #0f766e !important; border: none !important;">
+        style="width: 100%; height: 85px !important; background: #ccfbf1 !important; border-radius: 20px !important; font-size: 32px !important; font-weight: 900 !important; color: #0f766e !important; border: none !important; outline: none; text-align: center;">
 </div>
 
 <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:20px;">
-    <button id="btnCash" onclick="selectPay('Cash')" style="height:75px; border-radius:22px; border:none; background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-weight:900; font-size:22px; box-shadow:0 8px 20px rgba(16,185,129,0.3); display:flex; align-items:center; justify-content:center; gap:10px;">
+    <button id="btnCash" style="height:75px; border-radius:22px; border:none; background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-weight:900; font-size:22px; box-shadow:0 8px 20px rgba(16,185,129,0.3); display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer;">
         <i class="fas fa-money-bill-wave"></i> เงินสด
     </button>
-    <button id="btnTrans" onclick="selectPay('Trans')" style="height:75px; border-radius:22px; border:none; background:linear-gradient(135deg, #6366f1, #4338ca); color:#fff; font-weight:900; font-size:22px; box-shadow:0 8px 20px rgba(99,102,241,0.3); display:flex; align-items:center; justify-content:center; gap:10px;">
+    <button id="btnTrans" style="height:75px; border-radius:22px; border:none; background:linear-gradient(135deg, #6366f1, #4338ca); color:#fff; font-weight:900; font-size:22px; box-shadow:0 8px 20px rgba(99,102,241,0.3); display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer;">
         <i class="fas fa-qrcode"></i> สแกนจ่าย
     </button>
 </div>
 
-<button class="btn-main" onclick="handleSave(event)" style="width:100%; height:90px; border-radius:28px; background:linear-gradient(135deg, #4338ca, #3730a3); color:#fff; border:none; box-shadow:0 15px 35px rgba(67,56,202,0.4); display:flex; align-items:center; justify-content:center; gap:15px;">
+<button id="btnSave" class="btn-main" style="width:100%; height:90px; border-radius:28px; background:linear-gradient(135deg, #4338ca, #3730a3); color:#fff; border:none; box-shadow:0 15px 35px rgba(67,56,202,0.4); display:flex; align-items:center; justify-content:center; gap:15px; cursor:pointer;">
     <i class="fas fa-save" style="font-size: 38px;"></i>
     <span style="font-size: 32px; font-weight: 900; letter-spacing:1px;">บันทึกข้อมูล</span>
-</button>  
-</div>
+</button>
 <div id="p2" class="page" style="max-width:480px; margin:0 auto; padding: 15px; padding-bottom: 100px;">
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
         <div style="background: white; padding:18px 15px; border-radius:20px; text-align:center; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
@@ -270,13 +269,18 @@ nav {
     <div onclick="go(3)" class="nav-item"><i class="fas fa-wallet"></i><span>บัญชี</span></div>
 </nav>
  <script>
-  // 1. ดึงข้อมูล (ถ้าไม่มีให้สร้างค่าว่าง)
+// [1] วางฟังก์ชัน $ ไว้บนสุดเพื่อให้ตัวอื่นเรียกใช้ได้
+function $(id) {
+    const el = document.getElementById(id);
+    if (!el) console.warn("หาไอดีนี้ไม่เจอจ้าเถ้าแก่: " + id);
+    return el;
+}
+// [2] ประกาศตัวแปรฐานข้อมูล (ต่อจาก $)
 let db = JSON.parse(localStorage.getItem("barber_db")) || [];
 let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
-let conf = JSON.parse(localStorage.getItem("barber_conf")) || { shop: "Barber Shop", perc: 50, guar: 0 };
+let conf = JSON.parse(localStorage.getItem("barber_conf")) || { perc: 50 };
 let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
-let payMethod = "";
-const $ = (id) => document.getElementById(id);
+let payMethod = ""; 
 function saveAll() {
     localStorage.setItem("barber_db", JSON.stringify(db));
     localStorage.setItem("barber_archives", JSON.stringify(archives));
@@ -313,17 +317,40 @@ window.onload = () => {
     d.setHours(h, m + mins, 0, 0);
     return d.toTimeString().slice(0, 5);
 }
-    function handleSave() {
-    const p = parseInt($("priceInp").value), t = parseInt($("tipInp").value) || 0;
-    if (!p || !payMethod) return alert("ใส่ราคาและเลือกวิธีจ่ายก่อน!");
-    const start = $("tStart").value || new Date().toTimeString().slice(0, 5);
+  function handleSave() {
+    // 1. ดึงค่า (parseInt กันพัง เผื่อเถ้าแก่พิมพ์ตัวอักษรปน)
+    const p = parseInt($("priceInp")?.value || 0);
+    const t = parseInt($("tipInp")?.value || 0);
+
+    // 2. เช็คจุดตาย (ถ้าไม่มีราคา หรือ payMethod เป็นค่าว่าง)
+    if (!p) return alert("ใส่ราคาก่อนโว้ย!");
+    if (!payMethod) return alert("เลือก 'เงินสด' หรือ 'สแกนจ่าย' ก่อน!");
+    const start = $("tStart")?.value || new Date().toTimeString().slice(0, 5);
     const rec = {
-        id: Date.now(), date: $("dateInp").value, time: start, endTime: $("tEnd").value || addMinutes(start, 30),
-        svcs: [$("hairStyle").value, $("extra1").value, $("extra2").value].filter(Boolean),
-        hair: $("hairStyle").value, price: p, tip: t, pay: payMethod, type: "SERVICE"
+        id: Date.now(),
+        date: $("dateInp")?.value,
+        time: start,
+        endTime: $("tEnd")?.value || addMinutes(start, 30),
+        svcs: [$("hairStyle")?.value, $("extra1")?.value, $("extra2")?.value].filter(Boolean),
+        hair: $("hairStyle")?.value,
+        price: p,
+        tip: t,
+        pay: payMethod,
+        type: "SERVICE"
     };
-    db.push(rec); saveDB(); renderDay(); // บันทึกและวาดหน้า 2 ใหม่
-    ["priceInp", "tipInp", "tStart", "tEnd"].forEach(id => $(id).value = ""); // ล้างช่องกรอก
+    db.push(rec);
+    saveAll(); 
+    if (typeof renderDay === "function") {
+        renderDay();
+    }
+    ["priceInp", "tipInp", "tStart", "tEnd"].forEach(id => {
+        if($(id)) $(id).value = "";
+    });
+    payMethod = "";
+    if($("btnCash")) $("btnCash").style.border = "none";
+    if($("btnTrans")) $("btnTrans").style.border = "none";
+    
+    alert("✅ บันทึกเข้าฐานข้อมูลเรียบร้อย!");
 }
   function handleInsurance() {
     const d = $("dateInp").value || new Date().toISOString().split('T')[0], g = parseInt(conf.guar) || 0;
@@ -639,7 +666,30 @@ function loadHistDaily() {
     function openHistoryModal() { $("historyModal").style.display = "block"; renderHistoryList(); }
     function closeHistoryModal() { $("historyModal").style.display = "none"; }
      window.onclick = function(e) { if (e.target == $("historyModal")) closeHistoryModal(); }
-     window.addEventListener('load', () => { const n = new Date(), t = n.getHours().toString().padStart(2, '0') + ':' + n.getMinutes().toString().padStart(2, '0'); if(document.getElementById('tStart')) document.getElementById('tStart').value = t; if(document.getElementById('tEnd')) document.getElementById('tEnd').value = t; });
-</script>
+ window.addEventListener('load', () => {
+    // 1. ส่วนเดิมของมึง: ตั้งเวลาปัจจุบันให้ช่อง tStart และ tEnd
+    const n = new Date();
+    const t = n.getHours().toString().padStart(2, '0') + ':' + n.getMinutes().toString().padStart(2, '0');
+    
+    if(document.getElementById('tStart')) document.getElementById('tStart').value = t;
+    if(document.getElementById('tEnd')) document.getElementById('tEnd').value = t;
+
+    // 2. ส่วนใหม่: เชื่อมปุ่ม (แก้ปัญหาโดน CSP บล็อก)
+    if (document.getElementById('btnCash')) {
+        document.getElementById('btnCash').addEventListener('click', () => selectPay('Cash'));
+    }
+
+    if (document.getElementById('btnTrans')) {
+        document.getElementById('btnTrans').addEventListener('click', () => selectPay('Trans'));
+    }
+
+    if (document.getElementById('btnSave')) {
+        document.getElementById('btnSave').addEventListener('click', (event) => {
+            event.preventDefault();
+            handleSave();
+        });
+    }
+});
+ </script>
 </body>
 </html>
