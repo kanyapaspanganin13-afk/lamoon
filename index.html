@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11</title>
+    <title>Barber Note Pro v.12</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -146,13 +146,7 @@ nav {
     <hr style="border:0; border-top:1px solid #e2e8f0; margin-top:15px;">
     <div id="dailyList"></div>
 </div>
-<div id="p3" class="page" 
-<div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); z-index:9999; align-items:center; justify-content:center;">  
-    <div style="background:#fff; width:92%; max-width:400px; border-radius:35px; box-shadow:0 20px 60px rgba(0,0,0,0.15); overflow:hidden; padding:10px 25px 30px;">
-        <div style="width:40px; height:5px; background:#f1f5f9; border-radius:10px; margin:5px auto 20px;"></div>
-        <h3 style="margin:0 0 20px; font-size:20px; color:#1a237e; font-weight:800; text-align:center;">⚙️ ตั้งค่าระบบ</h3>
-        </div>
-</div>
+<div id="p3" class="page">
  <div class="card" style="background:#fff; border-radius:25px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.08); margin-bottom:15px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><b style="font-size:16px; color:#92400e;"><i class="fas fa-wallet"></i> บัญชีสุทธิ</b><div id="accLight" style="background:#22c55e; width:10px; height:10px; border-radius:50%; box-shadow:0 0 8px #22c55e;"></div></div>
         <div style="display:flex; gap:12px; margin-bottom:25px;">
@@ -328,7 +322,7 @@ function saveAndGo() {
     // 🤵 เงินที่ช่างควรได้ (ค่าแรง + ทิป)
     const barberEarn = today.reduce((s, r) => s + (Number(r.price) * 0.5), 0); 
     // 📱 เงินที่อยู่ที่ร้าน (ยอดโอนทั้งหมด)
-    const transInShop = today.filter(r => r.pay === "Transfer").reduce((s, r) => s + Number(r.price || 0), 0);
+    const transInShop = today.filter(r => r.pay === "Trans").reduce((s, r) => s + Number(r.price || 0), 0);
     // ✅ ยอดเคลียร์ (Settle): เอาเงินโอนที่ร้านถืออยู่ หักลบกับ เงินที่ช่างต้องได้
     const settle = transInShop - barberEarn;
     // ถ้า settle เป็น + ร้านโอนคืนช่าง | ถ้า settle เป็น - ช่างควักสดจ่ายร้าน
@@ -483,38 +477,38 @@ const getSelectedSvcs = () =>
 /* ======================================================
    SAVE SERVICE
 ====================================================== */
-function handleSave()function handleSave() {
+function handleSave() {
     try {
         const d = d10($("dateInp")?.value);
         if (!d) return alert("เลือกวันที่ก่อน!");
 
         const s = $("tStart")?.value || new Date().toTimeString().slice(0,5);
-        const pVal = Number($("priceInp")?.value), p = isFinite(pVal) ? pVal : 0;
+        const pVal = Number($("priceInp")?.value);
+        const p = isFinite(pVal) ? pVal : 0;
 
         const record = {
             id: Date.now(),
             date: d,
             time: s,
-            endTime: (typeof addMinutes === "function") ? addMinutes(s, 30) : s,
+            endTime: addMinutes(s, 30),
             hair: $("hairStyle")?.value || "",
             svcs: [$("extra1")?.value, $("extra2")?.value].filter(v => v),
             price: p,
-            pay: payMethod || "Cash", 
+            pay: payMethod || "Cash",
             type: "SERVICE"
         };
 
         db.unshift(record);
-        saveDB(); // เรียกใช้ UTILS ของมึง
-        
-        if (typeof renderDay === "function") renderDay(d);
-        if ($("priceInp")) $("priceInp").value = "";
-        
-        alert("✅ บันทึกแล้วเถ้าแก่!");
+        saveDB();
+        renderDay();
+        $("priceInp").value = "";
+
+        alert("✅ บันทึกแล้ว");
     } catch (e) {
-        console.error(e);
-        alert("🚨 พังที่: " + e.message);
+        alert("🚨 error: " + e.message);
     }
 }
+
 */======================================================
    GUARANTEE / INSURANCE
 ====================================================== */
@@ -581,7 +575,6 @@ function openSettings() {
 
     // แก้ตรงนี้: ใช้ setProperty เพื่อบังคับให้มันแสดงผลแน่นอน
     m.style.setProperty("display", "flex", "important"); 
-    
     // บรรทัดพวกนี้ของเดิมมึง "ดีอยู่แล้ว" ไม่ต้องเปลี่ยนครับ เดี๋ยวพัง
     const set = (id,v)=>$(id)&&( $(id).value=v );
     set("setShop",conf.shop||"");
@@ -597,20 +590,21 @@ function closeAndGoHome(){$("modalSet") && ($("modalSet").style.display="none");
    PAYMENT
 ====================================================== */
 function selectPay(m) {
-  // 1. เก็บค่าลงตัวแปร global และลง input hidden ของมึง
-  payMethod = (m === 'Trans') ? 'Transfer' : 'Cash'; 
-  if($("payType")) $("payType").value = payMethod;
-
-  // 2. จัดการ UI (ให้ปุ่มที่ถูกเลือกดูเด่น ปุ่มที่ไม่เลือกดูจาง)
-  const isC = m === 'Cash';
-  if ($("btnCash")) $("btnCash").style.transform = isC ? "scale(1.05)" : "scale(1)";
-  if ($("btnCash")) $("btnCash").style.opacity = isC ? "1" : "0.5";
-  
-  if ($("btnTrans")) $("btnTrans").style.transform = isC ? "scale(1)" : "scale(1.05)";
-  if ($("btnTrans")) $("btnTrans").style.opacity = isC ? "0.5" : "1";
-
-  console.log("เลือกจ่าย:", payMethod);
+  // m ต้องเป็น 'Cash' หรือ 'Trans'
+  payMethod = m;
+  if ($("payType")) $("payType").value = m;
+  const isCash = m === 'Cash';
+  if ($("btnCash")) {
+    $("btnCash").style.transform = isCash ? "scale(1.05)" : "scale(1)";
+    $("btnCash").style.opacity = isCash ? "1" : "0.5";
+  }
+  if ($("btnTrans")) {
+    $("btnTrans").style.transform = isCash ? "scale(1)" : "scale(1.05)";
+    $("btnTrans").style.opacity = isCash ? "0.5" : "1";
+  }
+  console.log("เลือกจ่าย:", m);
 }
+
 /* ======================================================
    CLOSE DAY (manual fallback)
 ====================================================== */
@@ -628,7 +622,12 @@ function closeHistoryModal(){ $("historyModal")&&( $("historyModal").style.displ
 function clearAllData(){if(confirm("💣 ลบข้อมูลทั้งหมด?")){localStorage.clear();location.reload();}}
 function updateDateDisplay(v) {if (!v) return;const d = new Date(v);const display = $("dateDisplay");if (display) {display.innerText = "📅 " + d.toLocaleDateString("th-TH", {day: "numeric",month: "short",year: "2-digit"});}if (typeof renderDay === "function") {renderDay();}}
 function go(n){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.querySelectorAll(".nav-item").forEach(b=>b.classList.remove("active"));$("p"+n)?.classList.add("active");document.querySelectorAll("nav .nav-item")[n-1]?.classList.add("active");if(n===2) renderDay();if(n===3) loadAccountStatus();}
-function applyTheme() {const t = (typeof conf !== 'undefined' && conf.theme) ? conf.theme : 'navy';document.body.className = 'theme-' + t;console.log("Theme applied:", t);}
+function applyTheme() {
+  const t = (conf && conf.theme) ? conf.theme : "light";
+  document.body.className = t; // light / navy / dark
+  console.log("Theme applied:", t);
+}
+
 window.onload = () => {if(typeof applyTheme === 'function') applyTheme(); if(typeof renderDay === 'function') renderDay(); };
 /* ======================================================
    INIT
