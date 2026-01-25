@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12</title>
+    <title>Barber Note Pro v.1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -180,10 +180,12 @@ nav {
         <div id="barber_acc_logs_list"></div>
     </div>
 </div>
-<div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); z-index:9999; align-items:flex-end; justify-content:center;">
-    <div style="background:#fff; width:92%; max-width:400px; border-radius:35px; margin-bottom:110px; box-shadow:0 20px 60px rgba(0,0,0,0.15); overflow:hidden; padding:10px 25px 30px;">
+
+<div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); z-index:100000; align-items:center; justify-content:center;">
+    <div style="background:#fff; width:92%; max-width:400px; border-radius:35px; box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden; padding:25px; position:relative;">
         <div style="width:40px; height:5px; background:#f1f5f9; border-radius:10px; margin:5px auto 20px;"></div>
         <h3 style="margin:0 0 20px; font-size:20px; color:#1a237e; font-weight:800; text-align:center;">⚙️ ตั้งค่าระบบ</h3>
+        
         <label style="display:block; font-size:11px; font-weight:800; color:#94a3b8; margin-bottom:8px;">ชื่อร้าน</label>
         <input type="text" id="setShop" style="width:100%; height:55px; border-radius:18px; border:none; background:#f8fafc; text-align:center; font-size:16px; font-weight:700; outline:none; margin-bottom:12px;">
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
@@ -197,10 +199,12 @@ nav {
             <select id="setSound" style="height:55px; border-radius:18px; border:none; background:#f8fafc; text-align:center; font-weight:700; outline:none;"><option value="on">🔊 เปิดเสียง</option><option value="off">🔇 ปิดเสียง</option></select>
             <select id="setVoice" style="height:55px; border-radius:18px; border:none; background:#f8fafc; text-align:center; font-weight:700; outline:none;"><option value="female">👸 หญิง</option><option value="male">🤵 ชาย</option></select>
         </div>
-        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:15px;">
-            <button onclick="saveSettings()" style="background:#1e3a8a; color:#fff; height:65px; border-radius:22px; border:none; font-weight:800; font-size:18px;">บันทึกข้อมูล</button>
-            <button onclick="$('modalSet').style.display='none'" style="background:#fff5f5; color:#e11d48; height:65px; border-radius:22px; border:none; font-size:32px; display:flex; align-items:center; justify-content:center;">⏻</button>
+           <div style="display:grid; grid-template-columns: 2fr 1fr; gap:15px; margin-top:20px;">
+            <button onclick="saveSettings()" style="background:#1e3a8a; color:#fff; height:60px; border-radius:20px; border:none; font-weight:800; font-size:18px;">บันทึก</button>
+            <button onclick="$('modalSet').style.display='none'" style="background:#fff5f5; color:#e11d48; height:60px; border-radius:20px; border:none; font-size:24px;">✕</button>
         </div>
+    </div>
+</div>
         <button onclick="clearAllData()" style="width:100%; margin-top:20px; background:none; border:none; color:#fca5a5; font-size:14px; font-weight:700; text-decoration:underline;">ล้างข้อมูลระบบทั้งหมด</button>
     </div>
 </div>
