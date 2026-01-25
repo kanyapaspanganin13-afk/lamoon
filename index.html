@@ -4,43 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12.2</title>
+    <title>Barber Note Pro v.12</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-    :root { 
-        --primary: #6366f1; --accent: #0ea5e9; --danger: #ef4444; --success: #22c55e; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --border: #e2e8f0;
-    }
+    :root {--primary: #6366f1; --accent: #0ea5e9; --danger: #ef4444; --success: #22c55e; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --border: #e2e8f0;}
     * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
     body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 90px; overflow-x: hidden; }
     .container { padding: 15px 15px 100px 15px !important; max-width: 500px; margin: auto; position: relative; z-index: 1; }
-    .nav-bar {
-        position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important;
-        height: 75px !important; background: white !important; display: flex !important; 
-        justify-content: space-around !important; align-items: center !important; 
-        z-index: 99999 !important; 
-        border-top: 1px solid #eee;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-    }
-    .nav-item {
-        flex: 1 !important; display: flex !important; flex-direction: column !important;
-        align-items: center !important; justify-content: center !important; cursor: pointer !important;
-        pointer-events: auto !important;
-    }
-nav {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: #1a237e !important; /* น้ำเงินธนาคารเป๊ะๆ */
-    display: flex; justify-content: space-around; padding: 12px 0;
-    box-shadow: 0 -10px 30px rgba(0,0,0,0.4); /* ใส่เงาให้บาร์ลอยเด่นขึ้นมาจากพื้นหลัง */
-    z-index: 9999; border-top: 1px solid rgba(255,255,255,0.1);
-}
-.nav-item { text-align: center; color: rgba(255,255,255,0.5); flex: 1; transition: 0.2s; }
-.nav-item.active { color: #ffffff !important; opacity: 1; } /* ตัวที่เลือกจะขาวสว่างจ้า */
-.nav-item i { font-size: 22px; display: block; margin-bottom: 2px; }
-.nav-item span { font-size: 11px; font-weight: 700; }
-    body.navy { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --accent: #38bdf8; }
-     body.dark { --bg: #121212; --card: #1a1a1a; --text: #fbbf24; --accent: #fbbf24; }
-     body { background-color: var(--bg); color: var(--text); transition: all 0.3s ease; }
+    .nav-bar {position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important;height: 75px !important; background: white !important; display: flex !important;justify-content: space-around !important; align-items: center !important; z-index: 99999 !important;border-top: 1px solid #eee;box-shadow: 0 -2px 10px rgba(0,0,0,0.05);}
+    .nav-item {flex: 1 !important; display: flex !important; flex-direction: column !important;align-items: center !important; justify-content: center !important; cursor: pointer !important; pointer-events: auto !important;}
+     nav {position: fixed; bottom: 0; left: 0; right: 0;background: #1a237e !important;display: flex; justify-content: space-around; padding: 12px 0;box-shadow: 0 -10px 30px rgba(0,0,0,0.4);z-index: 9999; border-top: 1px solid rgba(255,255,255,0.1);}
+    .nav-item {text-align: center; color: rgba(255,255,255,0.5);flex: 1;transition: color .2s ease, opacity .2s ease;}
+    .nav-item.active {color: var(--accent);opacity: 1;}
+    .nav-item i {font-size: 22px; display: block;margin-bottom: 2px;}
+    .nav-item span { font-size: 11px;font-weight: 700;} 
+    /* ===== THEMES ===== */
+     body.navy {--bg: #0f172a;--card: #1e293b;--text: #f1f5f9;--accent: #38bdf8;}
+     body.dark {--bg: #121212;--card: #1a1a1a;--text: #fbbf24;--accent: #fbbf24;}
+     body {background-color: var(--bg);color: var(--text);transition: background-color .3s ease, color .3s ease;}
+    
     .icon-card, input, select { background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.1); }
     .grid-3 {display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 6px; margin-bottom: 8px;}
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
@@ -201,7 +184,7 @@ nav {
         </div>
     </div>
 
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:15px;">
         <div onclick="$('histDate').showPicker()" style="background:linear-gradient(135deg, #f59e0b, #d97706); border-radius:25px; padding:20px 10px; text-align:center; color:#fff; position:relative; box-shadow:0 8px 15px rgba(245,158,11,0.2);">
             <i class="fas fa-search-dollar" style="font-size:28px; margin-bottom:5px; display:block;"></i>
             <b style="font-size:14px;">ค้นหารายวัน</b>
@@ -213,6 +196,8 @@ nav {
             <input type="month" id="histMonth" onchange="loadHistMonth()" style="position:absolute; inset:0; opacity:0;">
         </div>
     </div>
+
+    <div id="histResult"></div> 
 </div>
 <div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); z-index:9999; align-items:flex-end; justify-content:center;">
     
@@ -270,18 +255,48 @@ nav {
     <div onclick="go(3)" class="nav-item"><i class="fas fa-wallet"></i><span>บัญชี</span></div>
 </nav>
  <script>
-    let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
-    function save() {localStorage.setItem("barber_archives", JSON.stringify(archives));}
-    let db = JSON.parse(localStorage.getItem("barber_db")) || [];
-    let conf = JSON.parse(localStorage.getItem("barber_conf")) || { shop: "Barber Shop", perc: 50, guar: 0 };
-    let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
-    let payMethod = "";
-    const $ = (id) => document.getElementById(id);
-    window.onload = () => {
-        const today = new Date().toISOString().split('T')[0];
-        if($("dateInp")) $("dateInp").value = today;if($("accDate")) $("accDate").value = today;if($("histDate")) $("histDate").value = today;if($("shopNameDisp")) $("shopNameDisp").innerText = conf.shop;
-        updateDateDisplay(today);
-    };
+  const $ = (id) => document.getElementById(id);
+// --- 1. โหลดข้อมูลจากความจำเครื่อง ---
+let archives = JSON.parse(localStorage.getItem("barber_arc")) || []; // ใช้ชื่อ "barber_arc" ตาม Logic v.1.7
+let db = JSON.parse(localStorage.getItem("barber_db")) || [];
+let conf = JSON.parse(localStorage.getItem("barber_conf")) || { shop: "BARBER SHOP", perc: 50, guar: 0 };
+
+// เปลี่ยนจาก "barber_account" เป็น "barber_acc_logs" เพื่อให้ตรงกับฟังก์ชัน openHistoryModal
+let accLogs = JSON.parse(localStorage.getItem("barber_acc_logs")) || []; 
+
+let payMethod = "Cash"; // ค่าเริ่มต้น
+
+// --- 2. ฟังก์ชันเซฟข้อมูล (Helper) ---
+function saveArc() { localStorage.setItem("barber_arc", JSON.stringify(archives)); }
+function saveDB() { localStorage.setItem("barber_db", JSON.stringify(db)); }
+function saveLogs() { localStorage.setItem("barber_acc_logs", JSON.stringify(accLogs)); }
+
+// --- 3. Setup เมื่อหน้าจอโหลดเสร็จ ---
+window.addEventListener("DOMContentLoaded", () => {
+  const today = new Date().toISOString().split('T')[0];
+
+  if ($("dateInp")) $("dateInp").value = today;
+  if ($("accDate")) $("accDate").value = today;
+  if ($("histDate")) $("histDate").value = today;
+
+  if ($("shopNameDisp")) {
+    $("shopNameDisp").innerText = conf.shop || "BARBER SHOP";
+  }
+
+  // อัปเดตการแสดงผลวันที่หน้าแรก
+  if (typeof updateDateDisplay === "function") {
+    updateDateDisplay(today);
+  }
+
+  // ตั้งค่าปุ่มเงินเป็น Cash ทันที
+  selectPay("Cash");
+  
+  // อัปเดตยอดเงินหน้าบัญชี
+  if (typeof updateNetAccount === "function") {
+    updateNetAccount();
+  }
+});
+
     function addMinutes(time, mins) {
     if (!time) return "";
     const [h, m] = time.split(":").map(Number);
@@ -311,26 +326,85 @@ function handleInsurance() {
         saveDB(); speak(`เปิดระบบประกัน ${g} บาท เรียบร้อย`); alert("✅ เปิดระบบประกันเรียบร้อย"); renderDay();
     }
 }
-  function handleHoliday(){const d=$("dateInp").value;if(!d)return alert("เลือกวันที่ก่อน");if(confirm(`ยืนยันบันทึกวันที่ ${d} เป็น "วันหยุด"?`)){db.push({id:Date.now(),date:d,time:"00:00",svcs:["🏖️ วันหยุด"],price:0,pay:"N/A",type:"HOLIDAY"});saveDB();const m=new SpeechSynthesisUtterance("บันทึกวันหยุดเรียบร้อย");m.lang='th-TH';if(conf.voice==='male'){const v=window.speechSynthesis.getVoices().find(x=>x.name.includes('Male')||x.name.includes('Google'));if(v)m.voice=v}window.speechSynthesis.speak(m);alert("🏖️ บันทึกวันหยุดเรียบร้อย");renderDay()}}   
-  function openSettings() {
-        const modal = $("modalSet");
-        if (modal) {
-            $("setShop").value = conf.shop || "";
-            $("setPerc").value = conf.perc || 50;
-            $("setGuar").value = conf.guar || 0;
-            modal.style.display = 'flex'; 
-        }
+function closeDay() {
+    const d = $("dateInp").value;
+    const today = db.filter(r => r.date === d);
+    
+    if(!today.length) return alert("วันนี้ยังไม่มีข้อมูล จะปิดยอดได้ไง!");
+    
+    if(confirm("ปิดยอดวันนี้และส่งไปหน้าบัญชีสุทธิ?")) {
+        const tot = today.reduce((a,b) => a + (Number(b.price) || 0), 0);
+        const cash = today.filter(r => r.pay === 'Cash').reduce((a,b) => a + (Number(b.price) || 0), 0);
+        const bEarn = Math.max(tot * (conf.perc/100), conf.guar);
+        
+        let dailyStats = {};
+        today.forEach(r => {
+            r.svcs.forEach(s => { dailyStats[s] = (dailyStats[s] || 0) + 1; });
+        });
+        const arc = {
+            date: d, 
+            total: tot, 
+            cash: cash, 
+            barber: bEarn, 
+            shop: tot - bEarn, 
+            settle: cash - bEarn, 
+            count: today.length, 
+            details: today, 
+            stats: dailyStats 
+        };
+        archives = archives.filter(a => a.date !== d);
+        archives.push(arc);
+        localStorage.setItem("barber_arc", JSON.stringify(archives));
+        db = db.filter(r => r.date !== d);
+        localStorage.setItem("barber_db", JSON.stringify(db));
+        alert("ส่งรายงานสำเร็จ! ยอดคืนร้าน: " + Math.floor(cash - bEarn));
+        go(3);
     }
-function applyTheme(t){document.body.className=t;const o=document.getElementById("navyStyle");if(o)o.remove();const s=document.documentElement.style;if(t==='dark'){s.setProperty('--card','#262626');s.setProperty('--text','#fbbf24');document.body.style.background='#171717'}else{s.setProperty('--card','#fff');s.setProperty('--text','#1a237e');document.body.style.background=(t==='navy')?'#1a237e':''}if(t==='navy'){const st=document.createElement("style");st.id="navyStyle";st.innerHTML=`body.navy{background:#1a237e!important;color:#fff!important}.navy .card b,.navy .card span,.navy div[style*="background:white"] b{color:#1e293b!important}.navy #dTotal,.navy #accNet{color:#1a237e!important}.nav-item{color:#fff!important;opacity:0.8}.nav-item.active{color:#8b5cf6!important;opacity:1}`;document.head.appendChild(st)}}
-function openSettings(){const m=document.getElementById("modalSet");if(m)m.style.display='flex';document.getElementById("setShop").value=conf.shop||'';document.getElementById("setTheme").value=conf.theme||'light';document.getElementById("setVoice").value=conf.voice||'female';document.getElementById("setSound").value=conf.sound||'on';document.getElementById("setPerc").value=conf.perc||50;document.getElementById("setGuar").value=conf.guar||0}
-function saveSettings(){try{conf={...conf,shop:document.getElementById("setShop").value,perc:parseInt(document.getElementById("setPerc").value)||0,guar:parseInt(document.getElementById("setGuar").value)||0,theme:document.getElementById("setTheme").value,voice:document.getElementById("setVoice").value,sound:document.getElementById("setSound").value};localStorage.setItem("barber_conf",JSON.stringify(conf));applyTheme(conf.theme);if(document.getElementById("shopNameDisp"))document.getElementById("shopNameDisp").innerText=conf.shop;alert("✅ บันทึกเรียบร้อย");closeAndGoHome();if(typeof renderDay==='function')renderDay()}catch(e){alert("❌ พังเพราะ:"+e.message)}}
+}
+function handleHoliday(){const d=$("dateInp").value;if(!d)return alert("เลือกวันที่ก่อน");if(confirm(`ยืนยันบันทึกวันที่ ${d} เป็น "วันหยุด"?`)){db.push({id:Date.now(),date:d,time:"00:00",svcs:["🏖️ วันหยุด"],price:0,pay:"N/A",type:"HOLIDAY"});saveDB();const m=new SpeechSynthesisUtterance("บันทึกวันหยุดเรียบร้อย");m.lang='th-TH';if(conf.voice==='male'){const v=window.speechSynthesis.getVoices().find(x=>x.name.includes('Male')||x.name.includes('Google'));if(v)m.voice=v}window.speechSynthesis.speak(m);alert("🏖️ บันทึกวันหยุดเรียบร้อย");renderDay()}}   
+function applyTheme(t = "light") {document.body.className = t;const s = document.documentElement.style;if (t === "dark") {s.setProperty('--card', '#262626');s.setProperty('--text', '#fbbf24');} else if (t === "navy") {  s.setProperty('--card', '#ffffff');s.setProperty('--text', '#1a237e');} else {s.setProperty('--card', '#ffffff');s.setProperty('--text', '#1e293b');}} 
+function openSettings() {
+    $("modalSet").style.display = "flex";
+    $("setShop").value = conf.shop;
+    $("setPerc").value = conf.perc;
+    $("setGuar").value = conf.guar;
+}
+function saveSettings() {
+    conf.shop = $("setShop").value;
+    conf.perc = $("setPerc").value;
+    conf.guar = $("setGuar").value;
+    localStorage.setItem("barber_conf", JSON.stringify(conf));
+    location.reload();
+}
+function applySettings() {
+    if($("shopNameDisp")) $("shopNameDisp").innerText = conf.shop;
+} 
 function closeAndGoHome(){const m=document.getElementById("modalSet");if(m)m.style.display='none';if(typeof go==='function')go(1);else location.reload()}
 function speak(t){if(conf.sound==='off')return;window.speechSynthesis.cancel();const m=new SpeechSynthesisUtterance(t);m.lang='th-TH';m.pitch=(conf.voice==='male')?0.8:1.1;window.speechSynthesis.speak(m)}
 function clearAllData(){if(confirm("💣 ลบข้อมูลทั้งหมด?")){localStorage.clear();location.reload()}}
-function updateDateDisplay(v){if(!v)return;const d=new Date(v);const el=$("dateDisplay");if(el)el.innerText=d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});if(typeof renderDay==="function")renderDay()}
-window.addEventListener('DOMContentLoaded',()=>{const i=$("dateInp"),t=new Date().toISOString().split('T')[0];if(i){i.value=t;updateDateDisplay(t)}});
-  
-  function selectPay(m) {
+function saveDB() { localStorage.setItem("barber_db", JSON.stringify(db)); localStorage.setItem("barber_conf", JSON.stringify(conf)); }
+function delRec(id) { if (confirm("ลบรายการนี้?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); } }
+function editTime(id) {const rec = db.find(r => r.id === id);if (!rec) return;const newStart = prompt("แก้เวลาเริ่ม (HH:MM)", rec.time);if (!newStart) return;const newEnd = prompt("แก้เวลาเสร็จ (HH:MM)", rec.endTime || "");rec.time = newStart;rec.endTime = newEnd || addMinutes(newStart, 30);saveDB();renderDay();}
+function openHistoryModal() {
+    const modal = $('historyModal');
+    const listArea = $('barber_acc_logs_list');
+    modal.style.display = 'flex';
+    let logs = JSON.parse(localStorage.getItem("barber_acc_logs")) || [];
+    
+    listArea.innerHTML = logs.length ? logs.reverse().map(log => `
+        <div style="background:#f1f5f9; padding:12px; border-radius:15px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between;">
+                <b>${log.date}</b> <b style="color:#10b981;">฿${Math.floor(log.amount).toLocaleString()}</b>
+            </div>
+            <small style="color:#64748b;">${log.note || '-'}</small>
+        </div>
+    `).join('') : "ไม่มีประวัติ";
+}
+function closeHistoryModal() { $("historyModal").style.display = "none"; }
+window.onclick = function(e) { if (e.target == $("historyModal")) closeHistoryModal(); }
+window.addEventListener('load', () => { const n = new Date(), t = n.getHours().toString().padStart(2, '0') + ':' + n.getMinutes().toString().padStart(2, '0'); if(document.getElementById('tStart')) document.getElementById('tStart').value = t; if(document.getElementById('tEnd')) document.getElementById('tEnd').value = t; });
+
+function selectPay(m) {
         payMethod = m;
         $("btnCash").className = `btn btn-pay ${m === 'Cash' ? 'active-cash' : ''}`;
         $("btnTrans").className = `btn btn-pay ${m === 'Trans' ? 'active-trans' : ''}`;
@@ -381,14 +455,44 @@ function renderDay() {
     container.innerHTML = `<div id="settleBar" style="flex:8; height:55px; background:${bg}; display:flex; align-items:center; justify-content:center; border-radius:15px; font-weight:900; font-size:15px; color:#1e293b; border:1px solid rgba(0,0,0,0.05);">${txt}</div><button onclick="saveAndGo('${dInp}', ${tot}, ${sEarn}, ${bEarn})" style="flex:2; height:55px; background:#f97316; color:#fff; border-radius:15px; border:none; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"><i class="fas fa-paper-plane"></i></button>`;
 }
 function saveAndGo(date, total, shop, barber) {
-    if (total === 0 && !confirm("ไม่มีข้อมูลยอด ปิดงานเลยมั้ย?")) return;
-    let s = {}; db.filter(r => r.date === date).forEach(r => { 
-        r.svcs.forEach(v => s[v] = (s[v]||0)+1); if(r.hair) s["ทรง:"+r.hair] = (s["ทรง:"+r.hair]||0)+1; 
+  if (total === 0 && !confirm("ไม่มีข้อมูลยอด ปิดงานเลยมั้ย?")) return;
+  const dayRecs = db.filter(r => r.date === date);
+  // สถิติ
+  let stats = {};
+  dayRecs.forEach(r => {
+    (r.svcs || []).forEach(v => {
+      stats[v] = (stats[v] || 0) + 1;
     });
-    const entry = { date, total, barber, shop: total-barber, count: db.filter(r => r.date === date).length, stats: s };
-    const i = archives.findIndex(a => a.date === date); (i > -1) ? archives[i] = entry : archives.push(entry);
-    save(); alert("✅ บันทึกเรียบร้อย!"); go(3);
+    if (r.hair) {
+      const k = "ทรง:" + r.hair;
+      stats[k] = (stats[k] || 0) + 1;
+    }
+  });
+  const entry = {
+    date,
+    total,
+    barber,
+    shop,               // ✅ ใช้ค่าที่ส่งมา
+    count: dayRecs.length,
+    stats,
+    details: dayRecs.map(r => ({   // ✅ สำคัญมาก
+      time: r.time,
+      svcs: r.svcs || [],
+      price: r.price,
+      tip: r.tip || 0,
+      pay: r.pay
+    }))
+  };
+
+  const idx = archives.findIndex(a => a.date === date);
+  if (idx > -1) archives[idx] = entry;
+  else archives.push(entry);
+
+  save();   // localStorage
+  alert("✅ บันทึกเรียบร้อย!");
+  go(3);
 }
+
   function updateAccountFromOrange() {
             const barberShareStr = document.getElementById('dBarber').innerText || "0";
             const barberShare = parseInt(barberShareStr.replace(/,/g, '')) || 0;
@@ -426,14 +530,33 @@ function saveAndGo(date, total, shop, barber) {
     $("accStatus").innerText = txt;
     $("accLight").style.background = light;
 }
+function updateNetAccount() {
+    // คำนวณยอดจาก Archives
+    let net = archives.reduce((sum, day) => sum + (Number(day.settle) || 0), 0);
+    
+    if($("accNet")) $("accNet").innerText = Math.floor(net).toLocaleString();
+    
+    // โชว์แยก ค้างเดิม vs วันนี้ (ถ้ามี)
+    if($("accOldVal")) $("accOldVal").innerText = "฿" + Math.floor(net).toLocaleString();
+}
+function clearAccount() {
+    let currentNet = archives.reduce((sum, day) => sum + (Number(day.settle) || 0), 0);
+    if (currentNet === 0) return alert("ยอดเป็นศูนย์!");
 
-function clearAccount(){
-    const d = $("accDate").value, settle = parseFloat(($('dSettle')?.innerText || "0").replace(/,/g,'')) || 0;
-    if(!d) return alert("เลือกวันที่!");
-    account.logs.unshift({ date: d, amount: (account.balance || 0) + settle, note: $("accNote").value || "เคลียร์ยอด" });
-    account.balance = -settle;
-    localStorage.setItem("barber_account", JSON.stringify(account));
-    speak("เคลียร์เงินเรียบร้อย"); $("accNote").value = ""; loadAccountHistory(); loadAccountStatus();
+    const note = $("accNote").value;
+    const date = $("accDate").value;
+
+    if (confirm(`ยืนยันเคลียร์เงิน ฿${Math.floor(currentNet).toLocaleString()} ?`)) {
+        accLogs.push({ date: date, amount: currentNet, note: note });
+        localStorage.setItem("barber_acc_logs", JSON.stringify(accLogs));
+
+        archives = []; // ล้างยอดค้าง
+        localStorage.setItem("barber_arc", JSON.stringify(archives));
+        
+        $("accNote").value = "";
+        alert("เคลียร์ยอดเรียบร้อย!");
+        updateNetAccount();
+    }
 }
 function renderHistoryList() {
     const db = JSON.parse(localStorage.getItem("barber_acc_logs") || "[]");
@@ -446,28 +569,174 @@ function renderHistoryList() {
         </div>`).join('') : "<p style='text-align:center; color:#94a3b8;'>ยังไม่มีประวัติการเคลียร์</p>";
 }
 function loadHistDaily() {
-    const d = $("histDate").value, f = archives.find(a => a.date === d);
-    if(!f) return openReportModal("🔍 ค้นหา", "<center style='padding:40px;color:#ccc;'>❌ ไม่พบข้อมูล</center>");
+    const d = $("histDate").value; 
+    const found = archives.find(a => a.date === d); 
+    const area = $("histResult"); // ✅ เปลี่ยนจาก histDailyArea เป็น histResult ให้ตรงกับ HTML
+    
+    if(!d) return;
+    if(!found) { 
+        area.innerHTML = `
+            <div style="text-align:center; padding:30px; color:#94a3b8; background:#fff; border-radius:20px; margin-top:15px; border:1px solid #f1f5f9;">
+                <i class="fas fa-search" style="font-size:30px; opacity:0.3; margin-bottom:10px;"></i><br>
+                ไม่พบข้อมูลวันที่ ${d}
+            </div>`; 
+        return; 
+    }
 
-    let rows = f.details.map(r => `<div style="font-size:12px;padding:8px 0;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;"><span><b>${r.time}</b> ${r.svcs.join('+')}</span><b>฿${r.price}</b></div>`).join('');
-    let st = ""; for(let s in f.stats) st += `<span style="background:${s.startsWith("ทรง:")?"#10b981":"#6366f1"};color:#fff;margin:2px;padding:2px 6px;border-radius:5px;font-size:10px;display:inline-block;">${s.replace("ทรง:","")}:${f.stats[s]}</span>`;
+    // รายการลูกค้าแต่ละคน
+    let rows = found.details.map(r => `
+        <div style="padding:12px 0; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <div style="font-size:14px; font-weight:700; color:#1e293b;">${r.time} | ${r.svcs.join(' + ')}</div>
+                <div style="font-size:12px; color:#64748b;">${r.hair || ''} <span style="opacity:0.6;">(${r.pay==='Cash'?'现金 เงินสด':'โอน'})</span></div>
+            </div>
+            <div style="font-size:16px; font-weight:800; color:#1a237e;">฿${r.price}</div>
+        </div>
+    `).join('');
 
-    const set = f.settle || 0, sTxt = set > 0 ? `🔴 คืนร้าน: ฿${Math.floor(set)}` : set < 0 ? `🔵 คืนช่าง: ฿${Math.floor(Math.abs(set))}` : "🟢 พอดีเป๊ะ";
-    openReportModal(`📅 ${d}`, `<div style="background:${set>0?"#fef2f2":set<0?"#eef2ff":"#f0fdf4"};padding:10px;border-radius:12px;font-weight:900;text-align:center;margin-bottom:10px;">${sTxt}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;font-size:11px;"><div style="background:#f8fafc;padding:6px;border-radius:8px;">ยอดรวม: <b>฿${f.total}</b></div><div style="background:#f0fdf4;padding:6px;border-radius:8px;">ช่าง: <b>฿${Math.floor(f.barber)}</b></div></div><div style="margin-bottom:10px;">${st}</div><div style="border-top:1px dashed #ddd;">${rows}</div>`);
+    // สถิติทรงผม/บริการ
+    let statBadges = ""; 
+    if (found.stats) { 
+        for(let s in found.stats) { 
+            statBadges += `<span style="background:#f1f5f9; color:#475569; padding:4px 10px; border-radius:8px; font-size:11px; font-weight:700; border:1px solid #e2e8f0;">${s}: ${found.stats[s]}</span>`; 
+        } 
+    }
+
+    const settle = found.settle || 0;
+    const settleText = settle > 0 ? `⚠️ ช่างคืนร้าน: ฿${Math.floor(settle).toLocaleString()}` : settle < 0 ? `✅ ร้านคืนช่าง: ฿${Math.floor(Math.abs(settle)).toLocaleString()}` : "💎 ยอดเคลียร์พอดี";
+    const settleBg = settle > 0 ? "#fef2f2" : settle < 0 ? "#f0fdf4" : "#f8fafc";
+    const settleColor = settle > 0 ? "#dc2626" : settle < 0 ? "#16a34a" : "#64748b";
+
+    area.innerHTML = `
+    <div class="card" style="margin-top:15px; background:#fff; border-radius:25px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.05);">
+        <div style="background:${settleBg}; color:${settleColor}; padding:12px; border-radius:15px; font-size:14px; font-weight:800; text-align:center; margin-bottom:20px; border:1px solid ${settleColor}22;">
+            ${settleText}
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
+            <div style="background:#f8fafc; padding:10px; border-radius:15px; text-align:center;">
+                <div style="font-size:10px; color:#94a3b8; font-weight:700;">ยอดรวม</div>
+                <div style="font-size:16px; font-weight:800; color:#1e293b;">฿${found.total.toLocaleString()}</div>
+            </div>
+            <div style="background:#f8fafc; padding:10px; border-radius:15px; text-align:center;">
+                <div style="font-size:10px; color:#94a3b8; font-weight:700;">เงินสด</div>
+                <div style="font-size:16px; font-weight:800; color:#1e293b;">฿${found.cash.toLocaleString()}</div>
+            </div>
+            <div style="background:#f8fafc; padding:10px; border-radius:15px; text-align:center;">
+                <div style="font-size:10px; color:#94a3b8; font-weight:700;">ส่วนช่าง</div>
+                <div style="font-size:16px; font-weight:800; color:#15803d;">฿${Math.floor(found.barber).toLocaleString()}</div>
+            </div>
+            <div style="background:#f8fafc; padding:10px; border-radius:15px; text-align:center;">
+                <div style="font-size:10px; color:#94a3b8; font-weight:700;">ส่วนร้าน</div>
+                <div style="font-size:16px; font-weight:800; color:#0369a1;">฿${Math.floor(found.shop).toLocaleString()}</div>
+            </div>
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:20px; padding-bottom:15px; border-bottom:1px dashed #e2e8f0;">
+            ${statBadges}
+        </div>
+
+        <div style="max-height:300px; overflow-y:auto;">
+            <div style="font-size:11px; color:#94a3b8; font-weight:800; margin-bottom:10px; text-transform:uppercase;">รายละเอียดรายการ</div>
+            ${rows}
+        </div>
+    </div>`;
+}
+function updateDateDisplay(val) {
+    if(!val) return;
+    const d = new Date(val);
+    const el = $("dateDisplay");
+    
+    if(el) {
+        // ใช้ months แบบ Array ของมึงก็ได้ ถ้าไม่อยากได้เลขปีให้รกตา
+        const months = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+        el.innerText = d.getDate() + " " + months[d.getMonth()];
+    }
+
+    // ✅ สั่งอัปเดตหน้าจอรายงาน (ถ้าอยู่ที่หน้า 2) 
+    // โดยการเช็คก่อนว่ามีฟังก์ชันนี้ไหม จะได้ไม่ Error
+    if (typeof renderDay === "function") {
+        renderDay(); 
+    }
 }
 
 function loadHistMonth() {
-    const m = $("histMonth").value, f = archives.filter(a => a.date.startsWith(m));
-    if(!f.length) return openReportModal("📊 รายงาน", "<center style='padding:40px;color:#ccc;'>🌑 ไม่มีข้อมูล</center>");
-
-    let t=0, b=0, c=0, ms={}, sB="", hB="";
-    f.forEach(a => { t+=a.total; b+=a.barber; c+=a.count; if(a.stats) for(let s in a.stats) ms[s]=(ms[s]||0)+a.stats[s] });
-    for(let s in ms) {
-        let tag = `<span style="background:${s.startsWith("ทรง:")?"#10b981":"#6366f1"};color:white;padding:2px 6px;border-radius:5px;margin:2px;font-size:10px;display:inline-block;">${s.replace("ทรง:","")}:${ms[s]}</span>`;
-        if(s.startsWith("ทรง:")) hB+=tag; else sB+=tag;
+    const m = $("histMonth").value; // ดึงค่าจาก input type="month"
+    const area = $("histResult");   // ใช้ ID histResult ที่มีในหน้า P3 เป็นที่โชว์ผล
+    
+    if(!m) return;
+    
+    // กรองข้อมูลจาก archives ตามเดือนที่เลือก
+    const filtered = archives.filter(a => a.date.startsWith(m));
+    
+    if(!filtered.length) { 
+        area.innerHTML = `
+            <div style="text-align:center; padding:40px 20px; background:#fff; border-radius:25px; margin-top:15px; border:1px solid #f1f5f9;">
+                <i class="fas fa-folder-open" style="font-size:40px; color:#cbd5e1; margin-bottom:10px;"></i>
+                <div style="color:#94a3b8; font-weight:600;">ไม่มีข้อมูลของเดือน ${m}</div>
+            </div>`; 
+        return; 
     }
 
-    openReportModal(`🗓️ เดือน ${m}`, `<div style="text-align:center;margin-bottom:10px;padding:10px;background:#f8fafc;border-radius:15px;"><b>รวมรายได้</b><div style="font-size:28px;font-weight:900;">฿${t.toLocaleString()}</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;font-size:11px;"><div style="background:#f0fdf4;padding:8px;border-radius:10px;text-align:center;">ช่าง: <b>฿${Math.floor(b).toLocaleString()}</b></div><div style="background:#eff6ff;padding:8px;border-radius:10px;text-align:center;">คน: <b>${c}</b></div></div><div style="font-size:11px;"><b>📊 บริการ:</b> ${sB||'-'}<br><b>💇 ทรงผม:</b> ${hB||'-'}</div>`);
+    let monthTotal = 0;   
+    let monthBarber = 0;  
+    let monthShop = 0;    
+    let monthCount = 0;   
+    let monthStats = {};
+
+    filtered.forEach(a => { 
+        monthTotal += (Number(a.total) || 0); 
+        monthBarber += (Number(a.barber) || 0); 
+        monthShop += ((Number(a.total) || 0) - (Number(a.barber) || 0)); 
+        monthCount += (Number(a.count) || 0); 
+        if(a.stats) { 
+            for(let s in a.stats) monthStats[s] = (monthStats[s] || 0) + a.stats[s]; 
+        } 
+    });
+
+    let sB = "", hB = "";
+    for(let s in monthStats) { 
+        // ตกแต่ง Badge ให้สวยแบบทันสมัย
+        const badgeStyle = `display:inline-block; padding:4px 12px; border-radius:10px; font-size:11px; font-weight:700; margin:2px; color:#fff;`;
+        if(s.startsWith("ทรง:")) {
+            hB += `<span style="${badgeStyle} background:#10b981;">${s.replace("ทรง:","")}: ${monthStats[s]}</span>`; 
+        } else {
+            sB += `<span style="${badgeStyle} background:#6366f1;">${s}: ${monthStats[s]}</span>`; 
+        }
+    }
+
+    area.innerHTML = `
+    <div class="card" style="margin-top:15px; background:#fff; border-radius:25px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.05); border:1px solid #f1f5f9;">
+        <div style="text-align:center; margin-bottom:20px;">
+            <div style="font-size:12px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:1px;">✂️ ยอดตัดรวมเดือนนี้</div>
+            <div style="font-size:36px; font-weight:900; color:#1a237e;">฿${monthTotal.toLocaleString()}</div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+            <div style="background:#f0fdf4; padding:15px; border-radius:20px; text-align:center; border:1px solid #dcfce7;">
+                <div style="font-size:11px; color:#166534; font-weight:700;">🤵 รายได้ช่าง</div>
+                <div style="font-size:18px; font-weight:800; color:#15803d;">฿${Math.floor(monthBarber).toLocaleString()}</div>
+            </div>
+            <div style="background:#f0f9ff; padding:15px; border-radius:20px; text-align:center; border:1px solid #e0f2fe;">
+                <div style="font-size:11px; color:#0369a1; font-weight:700;">🏠 รายได้ร้าน</div>
+                <div style="font-size:18px; font-weight:800; color:#075985;">฿${Math.floor(monthShop).toLocaleString()}</div>
+            </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:20px; padding:12px; background:#f8fafc; border-radius:15px;">
+            <div style="color:#64748b;">👥 ลูกค้า: <b style="color:#1e293b;">${monthCount} คน</b></div>
+            <div style="color:#64748b;">📅 วันทำงาน: <b style="color:#1e293b;">${filtered.length} วัน</b></div>
+        </div>
+
+        <div style="border-top:1px dashed #cbd5e1; padding-top:15px;">
+            <label style="font-size:11px; color:#94a3b8; font-weight:800; display:block; margin-bottom:8px;">📊 สถิติบริการ & ทรงผม:</label>
+            <div style="line-height:1.8;">
+                ${sB || '<span style="color:#cbd5e1; font-size:12px;">ไม่มีข้อมูลบริการ</span>'}
+                <div style="margin-top:5px;"></div>
+                ${hB || '<span style="color:#cbd5e1; font-size:12px;">ไม่มีข้อมูลทรงผม</span>'}
+            </div>
+        </div>
+    </div>`;
 }
   function shareLine() {
     const dInp = $("dateInp").value, today = db.filter(r => r.date === dInp); if (!today.length) return;
@@ -502,13 +771,6 @@ function loadHistMonth() {
         btn.classList.toggle('active', (i + 1) === p);
     });
 }
-    function saveDB() { localStorage.setItem("barber_db", JSON.stringify(db)); localStorage.setItem("barber_conf", JSON.stringify(conf)); }
-    function delRec(id) { if (confirm("ลบรายการนี้?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); } }
-    function editTime(id) {const rec = db.find(r => r.id === id);if (!rec) return;const newStart = prompt("แก้เวลาเริ่ม (HH:MM)", rec.time);if (!newStart) return;const newEnd = prompt("แก้เวลาเสร็จ (HH:MM)", rec.endTime || "");rec.time = newStart;rec.endTime = newEnd || addMinutes(newStart, 30);saveDB();renderDay();}
-    function openHistoryModal() { $("historyModal").style.display = "block"; renderHistoryList(); }
-    function closeHistoryModal() { $("historyModal").style.display = "none"; }
-     window.onclick = function(e) { if (e.target == $("historyModal")) closeHistoryModal(); }
-     window.addEventListener('load', () => { const n = new Date(), t = n.getHours().toString().padStart(2, '0') + ':' + n.getMinutes().toString().padStart(2, '0'); if(document.getElementById('tStart')) document.getElementById('tStart').value = t; if(document.getElementById('tEnd')) document.getElementById('tEnd').value = t; });
-</script>
+    </script>
 </body>
 </html>
