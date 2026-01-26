@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12.12</title>
+    <title>Barber Note Pro v.12.13</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -152,30 +152,47 @@
                 <input type="tel" id="tEnd" placeholder="เสร็จ" class="time-input" maxlength="4" style="height:60px; border-radius:18px; border:none; text-align:center; font-weight:700; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.03);">
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-                <select id="mainSvc" style="height:60px; border-radius:15px; border:none; font-weight:700; background:#fff; padding:0 15px;"><option value="">ไม่เลือก</option><option value="เด็ก">เด็ก</option></select>
-                <select id="hairStyle" style="height:60px; border-radius:15px; border:none; font-weight:700; background:#fff; padding:0 15px;"><option value="">✂️ ทรงผม</option><option>รองทรง</option><option>แฟชั่น</option><option>สกินเฟด</option><option>เปิดข้าง</option><option>วินเทจ</option><option>ตำรวจ/ทหาร</option><option>ทรงนักเรียน</option><option>แก้ทรงผม</option></select>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px;">
-                <select id="extra1" style="height:60px; border-radius:15px; border:none; font-weight:700; background:#fff; padding:0 15px;"><option value="">บริการเสริม 1</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option></select>
-                <select id="extra2" style="height:60px; border-radius:15px; border:none; font-weight:700; background:#fff; padding:0 15px;"><option value="">บริการเสริม 2</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option></select>
-            </div>
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 8px; margin-bottom: 15px;">
+    <select id="hairStyle" style="height: 70px; border-radius:18px; border:none; font-weight:800; padding:0 10px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.03); outline:none;">
+        <option value="">✂️ ทรงผม</option>
+        <option value="เด็ก">ตัดผมเด็ก</option>
+        <option>รองทรง</option><option>แฟชั่น</option><option>สกินเฟด</option><option>เปิดข้าง</option><option>ตำรวจ/ทหาร</option><option>ทรงนักเรียน</option>
+        <option>แก้ผม</option><option>โกนผม</option>
+    </select>
+    
+    <select id="extra1" style="height: 70px; border-radius:14px; border:none; font-weight:700; background:#fff; color:#64748b; box-shadow: 0 4px 10px rgba(0,0,0,0.03); outline:none;">
+        <option value="">บริการ1</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option>
+    </select>
+    
+    <select id="extra2" style="height: 70px; border-radius:14px; border:none; font-weight:700; background:#fff; color:#64748b; box-shadow: 0 4px 10px rgba(0,0,0,0.03); outline:none;">
+        <option value="">บริการ2</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option>
+    </select>
+</div>
 
-            <div style="background:#fff; border-radius:25px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.05); margin-bottom:20px;">
-                <div style="position:relative; margin-bottom:15px;">
-                    <span style="position:absolute; left:15px; top:50%; transform:translateY(-50%); font-size:24px; font-weight:900; color:#6366f1;">฿</span>
-                    <input type="number" id="priceInp" placeholder="0" inputmode="numeric" style="width:100%; height:80px; border:none; background:#f8fafc; border-radius:20px; font-size:45px; font-weight:900; color:#1e293b; text-align:right; padding-right:20px; box-sizing:border-box;">
-                </div>
-                <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                    <button id="btnCash" onclick="selectPay('Cash')" style="height:65px; border-radius:18px; border:none; background:#f1f5f9; color:#1e293b; font-weight:800; font-size:18px; display:flex; align-items:center; justify-content:center; gap:8px;"><i class="fas fa-money-bill-wave" style="color:#10b981;"></i> สด</button>
-                    <button id="btnTrans" onclick="selectPay('Trans')" style="height:65px; border-radius:18px; border:none; background:#f1f5f9; color:#1e293b; font-weight:800; font-size:18px; display:flex; align-items:center; justify-content:center; gap:8px;"><i class="fas fa-mobile-alt" style="color:#6366f1;"></i> โอน</button>
-                </div>
-            </div>
+<div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; margin: 10px 0;">
+    <div style="position: relative; background: #ffffff; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.05);">
+        <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 24px; color: #6366f1; font-weight: 900;">฿</span>
+        <input type="number" id="priceInp" placeholder="0" inputmode="numeric" 
+            style="width: 100%; height: 85px; background: transparent; font-size: 45px; font-weight: 900; color: #1e293b; text-align: right; padding-right: 20px; border: none; outline: none; box-sizing: border-box;">
+    </div>
 
-            <button class="btn-save" id="mainSaveBtn" onclick="handleSave()" style="width:100%; height:85px; border-radius:25px; border:none; background:linear-gradient(135deg, #4338ca, #3730a3); color:#fff; font-size:28px; font-weight:900; box-shadow:0 15px 30px rgba(67,56,202,0.3); display:flex; align-items:center; justify-content:center; gap:15px;">
-                <i class="fas fa-save"></i> บันทึกข้อมูล
-            </button>
-        </div>
+    <input type="number" id="tipInp" placeholder="ทิป" inputmode="numeric" 
+        style="width: 100%; height: 85px; background: #ccfbf1; border-radius: 20px; font-size: 32px; font-weight: 900; color: #0f766e; text-align: center; border: none; outline: none;">
+</div>
+
+<div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:20px;">
+    <button id="btnCash" onclick="selectPay('Cash')" style="height:75px; border-radius:22px; border:none; background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-weight:900; font-size:22px; box-shadow:0 8px 20px rgba(16,185,129,0.3); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;">
+        <i class="fas fa-money-bill-wave"></i> เงินสด
+    </button>
+    <button id="btnTrans" onclick="selectPay('Trans')" style="height:75px; border-radius:22px; border:none; background:linear-gradient(135deg, #6366f1, #4338ca); color:#fff; font-weight:900; font-size:22px; box-shadow:0 8px 20px rgba(99,102,241,0.3); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;">
+        <i class="fas fa-qrcode"></i> สแกนจ่าย
+    </button>
+</div>
+
+<button class="btn-main" onclick="handleSave(event)" style="width:100%; height:90px; border-radius:28px; background:linear-gradient(135deg, #4338ca, #3730a3); color:#fff; border:none; cursor:pointer; box-shadow:0 15px 35px rgba(67,56,202,0.4); display:flex; align-items:center; justify-content:center; gap:15px;">
+    <i class="fas fa-save" style="font-size: 38px;"></i>
+    <span style="font-size: 32px; font-weight: 900; letter-spacing:1px;">บันทึกข้อมูล</span>
+</button>
 
 <div id="p2" class="page" style="max-width:480px; margin:0 auto; padding: 15px; padding-bottom: 100px;">
     <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding:25px 20px; border-radius:28px; color:white; box-shadow:0 15px 30px rgba(30,58,138,0.25); margin-bottom: 20px; position:relative; overflow:hidden;">
@@ -202,16 +219,20 @@
 
     <div id="settleBarContainer" style="margin-bottom:18px;"><div id="settleBar"></div> </div>
     
-    <div style="background:white; border-radius:25px; padding:20px; box-shadow:0 10px 20px rgba(0,0,0,0.03);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <b style="font-size:16px; color:#1e293b;">📌 รายการวันนี้</b>
-            <div onclick="shareLine()" style="background:#f0fdf4; color:#16a34a; padding:6px 12px; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer;">
-                <i class="fab fa-line"></i> ส่งไลน์
-            </div>
+   <div style="background:white; border-radius:25px; padding:20px; box-shadow:0 10px 20px rgba(0,0,0,0.03);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <b style="font-size:16px; color:#1e293b;">📌 รายการวันนี้</b>
+        <div onclick="shareLine()" style="background:#f0fdf4; color:#16a34a; padding:6px 12px; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer;">
+            <i class="fab fa-line"></i> ส่งไลน์
         </div>
-        <div id="dServiceStats"></div>
-        <div id="dailyList"></div>
     </div>
+    
+    <div id="dServiceStats"></div>
+    <div id="dailyList"></div>
+
+    <button onclick="confirmCloseDay()" style="width:100%; height:60px; margin-top:15px; border-radius:15px; border:none; background:linear-gradient(135deg, #f59e0b, #d97706); color:white; font-size:18px; font-weight:900; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); cursor:pointer;">
+        <i class="fas fa-calendar-check"></i> ปิดยอดส่งข้อมูลหน้า 3
+    </button>
 </div>
 
 <div id="p3" class="page" style="max-width:480px; margin:0 auto; padding: 15px; padding-bottom: 100px;">
