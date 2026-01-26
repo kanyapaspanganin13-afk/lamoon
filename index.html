@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12.13</title>
+    <title>Barber Note Pro v.12.1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-        :root { --bg-color: #f8fafc; --card-bg: #ffffff; --primary: #1e1b4b; --accent: #4338ca; --cash: #10b981; --trans: #6366f1; }
+:root { --bg-color: #f8fafc; --card-bg: #ffffff; --primary: #1e1b4b; --accent: #4338ca; --cash: #10b981; --trans: #6366f1; }
         body { background-color: var(--bg-color); font-family: 'Kanit', sans-serif; margin: 0; padding-bottom: 120px; overflow-x: hidden; }
         .container { max-width: 480px; margin: 0 auto; padding: 0 15px; }
         .page { display: none; }
@@ -19,8 +19,32 @@
         header { display: flex; justify-content: center; padding: 25px 0; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .icon-card { background: #fff; border-radius: 20px; height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 8px 15px rgba(0,0,0,0.05); cursor: pointer; }
-        .icon-card i { font-size: 18px; color: #fff; width: 35px; height: 35px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 5px; }
-        .input-box { background:#fff; border-radius:18px; height:60px; border:none; text-align:center; font-weight:700; box-shadow:0 4px 10px rgba(0,0,0,0.03); width:100%; outline:none; }
+        .icon-card i { font-size: 18px; color: #fff; width: 35px; height: 35px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 5px; } 
+        /* แก้ไขตรงนี้: รวม Input ทุกแบบให้ขนาดเท่ากันเป๊ะ */
+        .input-box, 
+        input[type="date"], 
+        input[type="time"],
+        input[type="month"] { 
+            background:#fff; 
+            border-radius:18px; 
+            height:60px; 
+            border:none; 
+            text-align:center; 
+            font-weight:700; 
+            font-family: 'Kanit', sans-serif; /* เพิ่ม font ให้วันที่ด้วย */
+            box-shadow:0 4px 10px rgba(0,0,0,0.03); 
+            width:100%; 
+            outline:none; 
+            box-sizing: border-box; /* กันมันบวม */
+            color: var(--primary);
+            font-size: 16px;
+        }
+        /* เพิ่มเติม: จัดการระยะห่างข้างในของช่องวันที่/เวลา */
+        input[type="date"], input[type="time"] {
+            padding: 0 15px;
+        }
+        /* แถวสำหรับวางวันที่กับเวลาคู่กัน */
+        .input-row { display: flex; gap: 10px; margin-bottom: 15px; }
         
         /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #1e1b4b; height: 85px; display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; border-radius: 25px 25px 0 0; z-index: 1000; }
