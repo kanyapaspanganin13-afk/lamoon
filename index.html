@@ -4,54 +4,93 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12.17</title>
+    <title>Barber Note Pro v.12.1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root { --bg-color: #f8fafc; --card-bg: #ffffff; --primary: #1e1b4b; --accent: #4338ca; --cash: #10b981; --trans: #6366f1; }
-        body { background-color: var(--bg-color); font-family: 'Kanit', sans-serif; margin: 0; padding-bottom: 120px; overflow-x: hidden; }
-        .container { max-width: 480px; margin: 0 auto; padding: 0 15px; }
-        .page { display: none; }
-        .page.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+:root { 
+            --bg-color: #fcfcfd; 
+            --card-bg: #ffffff; 
+            --primary: #1e1b4b; 
+            --accent: #4338ca; 
+            --cash: #10b981; 
+            --trans: #6366f1; 
+            --danger: #f87171; /* สีแดงแบบละมุน */
+        }
 
-        /* UI Styling */
-        header { display: flex; justify-content: center; padding: 25px 0; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .icon-card { background: #fff; border-radius: 20px; height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 8px 15px rgba(0,0,0,0.05); cursor: pointer; }
-        .icon-card i { font-size: 18px; color: #fff; width: 35px; height: 35px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 5px; } 
-        /* แก้ไขตรงนี้: รวม Input ทุกแบบให้ขนาดเท่ากันเป๊ะ */
+        body { 
+            background-color: var(--bg-color); 
+            font-family: 'Kanit', sans-serif; 
+            font-weight: 300; /* ตัวอักษรบางแบบมินิมอล */
+            margin: 0; 
+            padding-bottom: 120px; 
+            overflow-x: hidden; 
+            color: #334155;
+        }
+
+        .container { max-width: 480px; margin: 0 auto; padding: 0 15px; }
+
+        /* ปรับ Input ให้มินิมอล: เอาเงาออก ใส่เส้นขอบบางๆ แทน */
         .input-box, 
         input[type="date"], 
         input[type="time"],
-        input[type="month"] { 
-            background:#fff; 
-            border-radius:18px; 
-            height:60px; 
-            border:none; 
-            text-align:center; 
-            font-weight:700; 
-            font-family: 'Kanit', sans-serif; /* เพิ่ม font ให้วันที่ด้วย */
-            box-shadow:0 4px 10px rgba(0,0,0,0.03); 
-            width:100%; 
-            outline:none; 
-            box-sizing: border-box; /* กันมันบวม */
+        input[type="month"],
+        input[type="text"],
+        input[type="number"] { 
+            background: #ffffff; 
+            border-radius: 14px; 
+            height: 55px; 
+            border: 1px solid #f1f5f9; 
+            text-align: center; 
+            font-weight: 400; 
+            font-family: 'Kanit', sans-serif;
+            box-shadow: none; 
+            width: 100%; 
+            outline: none; 
+            box-sizing: border-box; 
             color: var(--primary);
-            font-size: 16px;
+            font-size: 15px;
+            transition: all 0.2s ease;
         }
-        /* เพิ่มเติม: จัดการระยะห่างข้างในของช่องวันที่/เวลา */
-        input[type="date"], input[type="time"] {
-            padding: 0 15px;
+
+        .input-box::placeholder { color: #cbd5e1; font-weight: 300; }
+        .input-box:focus { border-color: var(--accent); background: #fff; }
+
+        /* ปุ่มกดแบบมินิมอล */
+        button {
+            border-radius: 14px !important;
+            font-weight: 500 !important;
+            transition: opacity 0.2s;
+            cursor: pointer;
         }
-        /* แถวสำหรับวางวันที่กับเวลาคู่กัน */
-        .input-row { display: flex; gap: 10px; margin-bottom: 15px; }
-        
-        /* Bottom Nav */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #1e1b4b; height: 85px; display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; border-radius: 25px 25px 0 0; z-index: 1000; }
-        .nav-btn { color: #94a3b8; text-align: center; text-decoration: none; font-size: 12px; font-weight: 700; display: flex; flex-direction: column; align-items: center; }
-        .nav-btn.active { color: white; }
-        .nav-btn i { font-size: 22px; margin-bottom: 4px; }
-    </style>
+
+        /* ปุ่มล้างข้อมูลแบบ Minimal Danger */
+        .btn-clear {
+            background: none;
+            border: 1px solid #fee2e2;
+            color: var(--danger);
+            padding: 8px 16px;
+            font-size: 12px;
+            margin-top: 40px;
+            display: inline-block;
+        }
+
+        /* Bottom Nav แบบคลีนๆ */
+        .bottom-nav { 
+            position: fixed; 
+            bottom: 0; left: 0; right: 0; 
+            background: var(--primary); 
+            height: 75px; 
+            display: grid; 
+            grid-template-columns: 1fr 1fr 1fr; 
+            align-items: center; 
+            border-radius: 20px 20px 0 0; 
+            z-index: 1000; 
+        }
+
+        .nav-btn { color: #94a3b8; text-decoration: none; font-size: 11px; font-weight: 400; display: flex; flex-direction: column; align-items: center; }
+        .nav-btn.active { color: white; font-weight: 500; }
+        .nav-btn i { font-size: 20px; margin-bottom: 4px; }
 <body id="mainBody">
    <div class="container" style="max-width: 480px; margin: 0 auto; padding-bottom: 120px;"> 
     
@@ -235,55 +274,55 @@
             </div>
         </div>
     </div>
-<div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(15, 23, 42, 0.7); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:99999; align-items:flex-end; justify-content:center;">
+<div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(15, 23, 42, 0.4); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:99999; align-items:flex-end; justify-content:center;">
     
-    <div style="background:#ffffff; width:100%; max-width:500px; border-radius:35px 35px 0 0; box-shadow:0 -10px 40px rgba(0,0,0,0.2); animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1); display:flex; flex-direction:column; overflow:hidden;">
+    <div style="background:#ffffff; width:100%; max-width:500px; border-radius:30px 30px 0 0; display:flex; flex-direction:column; overflow:hidden; animation: slideUp 0.3s ease-out;">
         
         <div style="padding:15px 0 5px; text-align:center; cursor:pointer;" onclick="document.getElementById('modalSet').style.display='none'">
-            <div style="width:50px; height:6px; background:#e2e8f0; border-radius:10px; margin:0 auto;"></div>
+            <div style="width:40px; height:4px; background:#f1f5f9; border-radius:10px; margin:0 auto;"></div>
         </div>
 
-        <div style="padding:15px 25px 40px;">
-            <h3 style="margin:0 0 25px; font-size:22px; color:#1e1b4b; font-weight:900; text-align:center;">⚙️ ตั้งค่าระบบ</h3>
+        <div style="padding:10px 25px 40px;">
+            <h3 style="margin:0 0 25px; font-size:18px; color:#1e1b4b; font-weight:500; text-align:center; letter-spacing:1px;">⚙️ การตั้งค่า</h3>
 
-          <div style="padding: 20px;">
-    <div style="margin-bottom: 20px;">
-        <input type="text" id="confStoreName" class="input-box" placeholder="🏠 ระบุชื่อร้านของคุณ">
-    </div>
+            <div style="margin-bottom: 15px;">
+                <input type="text" id="confStoreName" class="input-box" placeholder="🏠 ชื่อร้านของคุณ">
+            </div>
 
-    <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-        <input type="number" id="confCommission" class="input-box" placeholder="✂️ % แบ่งช่าง">
-        <input type="number" id="confMinIncome" class="input-box" placeholder="💰 ประกันรายได้">
-    </div>
-        <div style="margin-bottom:20px;">
-                <label style="display:block; font-size:11px; font-weight:800; color:#64748b; margin-bottom:8px;">รูปแบบสีแอป (Theme)</label>
-                <select id="setTheme" onchange="changeTheme(this.value)" style="width:100%; height:60px; border-radius:20px; border:2px solid #f1f5f9; background:#f8fafc; padding:0 20px; font-size:16px; font-weight:700; outline:none; appearance:none;">
+            <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                <input type="number" id="confCommission" class="input-box" placeholder="✂️ % แบ่งช่าง">
+                <input type="number" id="confMinIncome" class="input-box" placeholder="💰 ประกันรายได้">
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <select id="setTheme" onchange="changeTheme(this.value)" style="width:100%; height:55px; border-radius:14px; border:1px solid #f1f5f9; background:#fff; padding:0 15px; font-size:14px; color:#475569; outline:none; appearance:none; font-family:'Kanit'; font-weight:300;">
                     <option value="light">🌤 Light Mode (สว่าง)</option>
                     <option value="navy">🌌 Navy Premium (น้ำเงินเข้ม)</option>
                     <option value="dark">🌑 Midnight Gold (ดำ-ทอง)</option>
                 </select>
             </div>
 
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:30px;">
-                <select id="setSound" style="width:100%; height:60px; border-radius:20px; border:2px solid #f1f5f9; background:#f8fafc; padding:0 15px; font-weight:700; outline:none;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:25px;">
+                <select id="setSound" style="width:100%; height:55px; border-radius:14px; border:1px solid #f1f5f9; background:#fff; padding:0 15px; font-weight:300; font-family:'Kanit'; outline:none;">
                     <option value="on">🔊 เปิดเสียง</option>
                     <option value="off">🔇 ปิดเสียง</option>
                 </select>
-                <select id="setVoice" style="width:100%; height:60px; border-radius:20px; border:2px solid #f1f5f9; background:#f8fafc; padding:0 15px; font-weight:700; outline:none;">
-                    <option value="female">👧 เสียงผู้หญิง </option>
-                    <option value="male">👨 เสียงผู้ชาย </option>
+                <select id="setVoice" style="width:100%; height:55px; border-radius:14px; border:1px solid #f1f5f9; background:#fff; padding:0 15px; font-weight:300; font-family:'Kanit'; outline:none;">
+                    <option value="female">👧 เสียงผู้หญิง</option>
+                    <option value="male">👨 เสียงผู้ชาย</option>
                 </select>
             </div>
-            <div style="display:grid; grid-template-columns: 2.5fr 1fr; gap:15px;">
-                <button onclick="saveSettings()" style="background:linear-gradient(135deg, #4338ca, #1e1b4b); color:#fff; height:75px; border-radius:25px; border:none; font-weight:900; font-size:20px; box-shadow:0 10px 25px rgba(67,56,202,0.3); cursor:pointer;">
+
+            <div style="display:grid; grid-template-columns: 3fr 1fr; gap:12px;">
+                <button onclick="saveSettings()" style="background:#1e1b4b; color:#fff; height:60px; border-radius:16px; border:none; font-weight:500; font-size:16px; cursor:pointer;">
                     บันทึกการตั้งค่า
                 </button>
-                <button onclick="document.getElementById('modalSet').style.display='none'" style="background:#fff1f2; color:#e11d48; height:75px; border-radius:25px; border:none; font-size:35px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
-                    <i class="fas fa-power-off"></i>
+                <button onclick="document.getElementById('modalSet').style.display='none'" style="background:#fef2f2; color:#f87171; height:60px; border-radius:16px; border:none; font-size:24px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
 
-            <button id="dangerZone" onclick="clearAllData()" style="width:100%; margin-top:30px; background:none; border:none; color:#fca5a5; font-size:14px; font-weight:700; text-decoration:underline; cursor:pointer; opacity:0.6;">
+            <button id="dangerZone" onclick="clearAllData()" style="width:100%; margin-top:35px; background:none; border:none; color:#cbd5e1; font-size:12px; font-weight:300; text-decoration:underline; cursor:pointer;">
                 ล้างฐานข้อมูลระบบทั้งหมด
             </button>
         </div>
