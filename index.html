@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12.15</title>
+    <title>Barber Note Pro v.12.17</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -246,24 +246,20 @@
         <div style="padding:15px 25px 40px;">
             <h3 style="margin:0 0 25px; font-size:22px; color:#1e1b4b; font-weight:900; text-align:center;">⚙️ ตั้งค่าระบบ</h3>
 
-            <div style="margin-bottom:20px;">
-                <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:800; color:#64748b; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px;">
-                    <i class="fas fa-store"></i> ชื่อร้านของคุณ
-                </label>
-                <input type="text" id="setShop" placeholder="ระบุชื่อร้าน" style="width:100%; height:60px; border-radius:20px; border:2px solid #f1f5f9; background:#f8fafc; text-align:center; font-size:18px; font-weight:700; color:#1e293b; outline:none; transition:0.2s;">
-            </div>
+          <div style="padding: 20px;">
+    <div style="margin-bottom: 20px;">
+        <input type="text" id="confStoreName" class="input-box" placeholder="🏠 ระบุชื่อร้านของคุณ">
+    </div>
 
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:20px;">
-                <div>
-                    <label style="display:block; font-size:11px; font-weight:800; color:#64748b; margin-bottom:8px;">% ส่วนแบ่งช่าง</label>
-                    <input type="number" id="setPerc" placeholder="เช่น 50" style="width:100%; height:60px; border-radius:20px; border:2px solid #f1f5f9; background:#f8fafc; text-align:center; font-size:18px; font-weight:700; outline:none;">
-                </div>
-                <div>
-                    <label style="display:block; font-size:11px; font-weight:800; color:#64748b; margin-bottom:8px;">เงินประกันรายได้</label>
-                    <input type="number" id="setGuar" placeholder="0.00" style="width:100%; height:60px; border-radius:20px; border:2px solid #f1f5f9; background:#f8fafc; text-align:center; font-size:18px; font-weight:700; outline:none;">
-                </div>
-            </div>
+    <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <input type="number" id="confCommission" class="input-box" placeholder="✂️ % แบ่งช่าง">
+        <input type="number" id="confMinIncome" class="input-box" placeholder="💰 ประกันรายได้">
+    </div>
 
+    <button onclick="saveConfig()" style="width:100%; height:60px; background:var(--primary); color:#fff; border-radius:18px; border:none; font-weight:700; font-size:18px; box-shadow:0 10px 20px rgba(30,27,75,0.2);">
+        บันทึกการตั้งค่า
+    </button>
+</div>
             <div style="margin-bottom:20px;">
                 <label style="display:block; font-size:11px; font-weight:800; color:#64748b; margin-bottom:8px;">รูปแบบสีแอป (Theme)</label>
                 <select id="setTheme" onchange="changeTheme(this.value)" style="width:100%; height:60px; border-radius:20px; border:2px solid #f1f5f9; background:#f8fafc; padding:0 20px; font-size:16px; font-weight:700; outline:none; appearance:none;">
@@ -487,15 +483,18 @@
         else { txt = "✅ ยอดพอดี"; bg = "#dcfce7"; }
 
         $("dailyList").innerHTML = (isHoliday) ? `<div style="text-align:center; padding:40px;">🏖️ วันหยุด (ไม่มีรายการ) <i class="fas fa-trash-alt" style="color:#ef4444;" onclick="delRec(${allRec.find(x=>x.type==='HOLIDAY')?.id})"></i></div>` : listHtml;
-        
         const container = $("settleBar").parentElement;
+        container.style.display = "flex"; // บังคับให้เรียงแถวเดียวกัน
+        container.style.gap = "10px";    // ระยะห่างระหว่างแถบสถานะกับปุ่มส้ม
+        container.style.marginTop = "15px";
+      const container = $("settleBar").parentElement;
+        // บังคับให้แถบสถานะยืดเต็มความกว้าง (width: 100%) และเอาปุ่มส้มเล็กออก
         container.innerHTML = `
-            <div id="settleBar" style="flex:8; height:55px; background:${bg}; display:flex; align-items:center; justify-content:center; border-radius:15px; font-weight:900;">${txt}</div>
-            <button onclick="saveAndGo('${dInp}', ${tot}, ${bEarn}, ${JSON.stringify(stats).replace(/"/g, '&quot;')})" style="flex:2; background:#f97316; color:#fff; border-radius:15px; border:none; font-size:22px;"><i class="fas fa-paper-plane"></i></button>`;
-        
+            <div id="settleBar" style="width:100%; height:55px; background:${bg}; display:flex; align-items:center; justify-content:center; border-radius:15px; font-weight:900; font-size:14px;">
+                ${txt}
+            </div>`;
         updateAccountDisplay(bEarn);
     }
-
     function saveAndGo(date, total, barber, stats) {
         if (total === 0 && !confirm("ไม่มีข้อมูลยอด ปิดงานเลยมั้ย?")) return;
         const details = db.filter(r => r.date === date && r.type === 'SERVICE');
