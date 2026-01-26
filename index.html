@@ -4,306 +4,214 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12.1</title>
+    <title>Barber Note Pro v.12.11</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-        :root {
-            --bg-color: #f0f4f8;
-            --card-bg: #ffffff;
-            --primary-blue: #4338ca;
-            --cash-green: #10b981;
-            --trans-purple: #6366f1;
-            --tip-mint: #ccfbf1;
-            --text-main: #1e293b;
-        }
-
-        body { 
-            background-color: var(--bg-color); 
-            font-family: 'Kanit', sans-serif; 
-            margin: 0; 
-            padding-bottom: 120px; /* เผื่อที่ให้ Nav ล่าง */
-            overflow-x: hidden;
-        }
-
-        /* --- CSS ที่เถ้าแก่ส่งมา (ปรับปรุงความกริบ) --- */
-        .container { padding: 15px; max-width: 500px; margin: auto; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 15px; }
-        
-        .icon-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 15px 5px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-            border: none;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .icon-card:active { transform: scale(0.95); }
-        .icon-card i { font-size: 20px; margin-bottom: 8px; }
-        .icon-card span { font-size: 11px; font-weight: 700; color: #64748b; }
-
-        .input-group {
-            background: var(--card-bg);
-            border-radius: 20px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.03);
-            position: relative;
-            overflow: hidden;
-        }
-        .input-group input, .input-group select {
-            width: 100%; border: none; background: transparent;
-            text-align: center; font-size: 16px; font-weight: 700;
-            color: var(--text-main); outline: none; padding: 0 10px;
-        }
-
-        .price-box {
-            background: var(--card-bg);
-            border-radius: 25px;
-            height: 85px;
-            display: flex;
-            align-items: center;
-            padding: 0 25px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            margin-bottom: 15px;
-        }
-        .price-box span { font-size: 28px; font-weight: 900; color: var(--trans-purple); margin-right: 12px; }
-        .price-box input {
-            font-size: 42px; font-weight: 900; width: 100%;
-            border: none; outline: none; color: var(--text-main);
-        }
-
-        .btn-save-final {
-            width: 100%; height: 85px; border-radius: 28px;
-            background: linear-gradient(135deg, #4338ca, #1e1b4b);
-            color: white; font-size: 28px; font-weight: 900;
-            border: none; margin-top: 20px;
-            display: flex; align-items: center; justify-content: center;
-            gap: 15px; box-shadow: 0 15px 35px rgba(55, 48, 163, 0.3);
-            cursor: pointer;
-        }
-
-        /* Nav Bar แบบใหม่ที่เถ้าแก่ต้องการ */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: #1e1b4b; height: 85px;
-            display: grid; grid-template-columns: 1fr 1fr 1fr;
-            align-items: center; z-index: 1000;
-            border-radius: 25px 25px 0 0;
-        }
-        .nav-btn {
-            color: #94a3b8; text-align: center;
-            text-decoration: none; font-size: 12px; font-weight: 700;
-            display: flex; flex-direction: column; align-items: center;
-        }
-        .nav-btn.active { color: white; }
-        .nav-btn i { font-size: 24px; margin-bottom: 5px; }
-
-        /* Animation สำหรับ Modal */
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
+        :root { --bg-color: #f8fafc; --card-bg: #ffffff; --primary: #1e1b4b; --accent: #4338ca; --cash: #10b981; --trans: #6366f1; }
+        body { background-color: var(--bg-color); font-family: 'Kanit', sans-serif; margin: 0; padding-bottom: 120px; overflow-x: hidden; }
+        .container { max-width: 480px; margin: 0 auto; padding: 0 15px; }
         .page { display: none; }
         .page.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-</style>
+
+        /* UI Styling */
+        header { display: flex; justify-content: center; padding: 25px 0; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .icon-card { background: #fff; border-radius: 20px; height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 8px 15px rgba(0,0,0,0.05); cursor: pointer; }
+        .icon-card i { font-size: 18px; color: #fff; width: 35px; height: 35px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 5px; }
+        .input-box { background:#fff; border-radius:18px; height:60px; border:none; text-align:center; font-weight:700; box-shadow:0 4px 10px rgba(0,0,0,0.03); width:100%; outline:none; }
+        
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #1e1b4b; height: 85px; display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; border-radius: 25px 25px 0 0; z-index: 1000; }
+        .nav-btn { color: #94a3b8; text-align: center; text-decoration: none; font-size: 12px; font-weight: 700; display: flex; flex-direction: column; align-items: center; }
+        .nav-btn.active { color: white; }
+        .nav-btn i { font-size: 22px; margin-bottom: 4px; }
+    </style>
 <body id="mainBody">
-    <div class="container" style="max-width: 480px; margin: 0 auto; padding-bottom: 120px;"> 
-        
-        <header style="display: flex; justify-content: center; align-items: center; padding: 25px 15px;">
-            <h1 id="shopNameDisp" style="margin:0; font-size:24px; font-weight:900; color:#1e1b4b; letter-spacing:1px; text-transform:uppercase;">
-                BARBER SHOP
-            </h1>
-        </header>
+   <div class="container" style="max-width: 480px; margin: 0 auto; padding-bottom: 120px;"> 
+    
+    <header style="display: flex; justify-content: center; align-items: center; padding: 25px 15px;">
+        <h1 id="shopNameDisp" style="margin:0; font-size:24px; font-weight:900; color:#1e1b4b; letter-spacing:1px; text-transform:uppercase;">
+            BARBER SHOP
+        </h1>
+    </header>
 
-        <div id="p1" class="page active" style="padding: 0 15px;">
-            <div class="grid-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
-                <div class="icon-card" onclick="handleInsurance()" style="background:#fff; border-radius:20px; height:90px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 8px 15px rgba(0,0,0,0.05);">
-                    <div style="background:linear-gradient(135deg, #fbbf24, #f59e0b); width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; color:#fff;"><i class="fas fa-shield-alt"></i></div>
-                    <span style="font-size:11px; font-weight:800; color:#1e293b;">ประกันรายได้</span>
-                </div>
-                <div class="icon-card" onclick="handleHoliday()" style="background:#fff; border-radius:20px; height:90px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 8px 15px rgba(0,0,0,0.05);">
-                    <div style="background:linear-gradient(135deg, #f87171, #ef4444); width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; color:#fff;"><i class="fas fa-umbrella-beach"></i></div>
-                    <span style="font-size:11px; font-weight:800; color:#1e293b;">บันทึกวันหยุด</span>
-                </div>
-                <div class="icon-card" onclick="openSettings()" style="background:#fff; border-radius:20px; height:90px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 8px 15px rgba(0,0,0,0.05);">
-                    <div style="background:linear-gradient(135deg, #94a3b8, #475569); width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; color:#fff;"><i class="fas fa-tools"></i></div>
-                    <span style="font-size:11px; font-weight:800; color:#1e293b;">ตั้งค่าระบบ</span>
-                </div>
+    <div id="p1" class="page active" style="padding: 0 15px;">
+        <div class="grid-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
+            <div class="icon-card" onclick="handleInsurance()" style="background:#fff; border-radius:20px; height:90px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 8px 15px rgba(0,0,0,0.05);">
+                <div style="background:linear-gradient(135deg, #fbbf24, #f59e0b); width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; color:#fff;"><i class="fas fa-shield-alt"></i></div>
+                <span style="font-size:11px; font-weight:800; color:#1e293b;">ประกันรายได้</span>
             </div>
-            </div> </div> <nav class="bottom-nav">
-        </nav>
-</body>
-  <div class="grid-3" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;"> 
-    <div style="background:#fff; border-radius:18px; height:60px; position:relative; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.03); overflow:hidden;">
-        <span id="dateShow" style="font-weight:700; color:#475569; font-size:13px;">📅 วันที่</span>
-        <input type="date" id="dateInp" onchange="document.getElementById('dateShow').innerText = this.value" 
-               style="position:absolute; opacity:0; inset:0; cursor:pointer; width:100%; height:100%;">
-    </div>
-    <input type="tel" id="tStart" placeholder="🕒 เริ่ม" maxlength="4" 
-           style="height:60px; border-radius:18px; border:none; text-align:center; font-weight:700; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.03); outline:none; font-family: 'Kanit', sans-serif; font-size:14px; color:#475569;">
+            <div class="icon-card" onclick="handleHoliday()" style="background:#fff; border-radius:20px; height:90px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 8px 15px rgba(0,0,0,0.05);">
+                <div style="background:linear-gradient(135deg, #f87171, #ef4444); width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; color:#fff;"><i class="fas fa-umbrella-beach"></i></div>
+                <span style="font-size:11px; font-weight:800; color:#1e293b;">บันทึกวันหยุด</span>
+            </div>
+            <div class="icon-card" onclick="openSettings()" style="background:#fff; border-radius:20px; height:90px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 8px 15px rgba(0,0,0,0.05);">
+                <div style="background:linear-gradient(135deg, #94a3b8, #475569); width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; color:#fff;"><i class="fas fa-tools"></i></div>
+                <span style="font-size:11px; font-weight:800; color:#1e293b;">ตั้งค่าระบบ</span>
+            </div>
+        </div>
 
-    <input type="tel" id="tEnd" placeholder="🏁 เสร็จ" maxlength="4" 
-           style="height:60px; border-radius:18px; border:none; text-align:center; font-weight:700; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.03); outline:none; font-family: 'Kanit', sans-serif; font-size:14px; color:#475569;">
+        <div class="grid-3" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;"> 
+            <div style="background:#fff; border-radius:18px; height:60px; position:relative; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.03); overflow:hidden;">
+                <span id="dateShow" style="font-weight:700; color:#475569; font-size:13px;">📅 วันที่</span>
+                <input type="date" id="dateInp" onchange="document.getElementById('dateShow').innerText = this.value" 
+                       style="position:absolute; opacity:0; inset:0; cursor:pointer; width:100%; height:100%;">
+            </div>
+            <input type="tel" id="tStart" placeholder="🕒 เริ่ม" maxlength="4" 
+                   style="height:60px; border-radius:18px; border:none; text-align:center; font-weight:700; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.03); outline:none; font-family: 'Kanit', sans-serif; font-size:14px; color:#475569;">
+            <input type="tel" id="tEnd" placeholder="🏁 เสร็จ" maxlength="4" 
+                   style="height:60px; border-radius:18px; border:none; text-align:center; font-weight:700; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.03); outline:none; font-family: 'Kanit', sans-serif; font-size:14px; color:#475569;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 8px; margin-bottom: 15px;">
+            <select id="hairStyle" style="height: 70px; border-radius:18px; border:none; font-weight:800; padding:0 10px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.03); outline:none;">
+                <option value="">✂️ ทรงผม</option>
+                <option value="เด็ก">ตัดผมเด็ก</option>
+                <option>รองทรง</option><option>แฟชั่น</option><option>สกินเฟด</option><option>เปิดข้าง</option><option>ตำรวจ/ทหาร</option><option>ทรงนักเรียน</option>
+                <option>แก้ผม</option><option>โกนผม</option>
+            </select>
+            <select id="extra1" style="height: 70px; border-radius:14px; border:none; font-weight:700; background:#fff; color:#64748b; box-shadow: 0 4px 10px rgba(0,0,0,0.03); outline:none;">
+                <option value="">บริการ1</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option>
+            </select>
+            <select id="extra2" style="height: 70px; border-radius:14px; border:none; font-weight:700; background:#fff; color:#64748b; box-shadow: 0 4px 10px rgba(0,0,0,0.03); outline:none;">
+                <option value="">บริการ2</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option>
+            </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; margin: 10px 0;">
+            <div style="position: relative; background: #ffffff; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.05);">
+                <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 24px; color: #6366f1; font-weight: 900;">฿</span>
+                <input type="number" id="priceInp" placeholder="0" inputmode="numeric" 
+                    style="width: 100%; height: 85px; background: transparent; font-size: 45px; font-weight: 900; color: #1e293b; text-align: right; padding-right: 20px; border: none; outline: none; box-sizing: border-box;">
+            </div>
+            <input type="number" id="tipInp" placeholder="ทิป" inputmode="numeric" 
+                style="width: 100%; height: 85px; background: #ccfbf1; border-radius: 20px; font-size: 32px; font-weight: 900; color: #0f766e; text-align: center; border: none; outline: none;">
+        </div>
+
+        <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:20px;">
+            <button id="btnCash" onclick="selectPay('Cash')" style="height:75px; border-radius:22px; border:none; background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-weight:900; font-size:22px; box-shadow:0 8px 20px rgba(16,185,129,0.3); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;">
+                <i class="fas fa-money-bill-wave"></i> เงินสด
+            </button>
+            <button id="btnTrans" onclick="selectPay('Trans')" style="height:75px; border-radius:22px; border:none; background:linear-gradient(135deg, #6366f1, #4338ca); color:#fff; font-weight:900; font-size:22px; box-shadow:0 8px 20px rgba(99,102,241,0.3); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;">
+                <i class="fas fa-qrcode"></i> สแกนจ่าย
+            </button>
+        </div>
+
+        <button class="btn-main" onclick="handleSave(event)" style="width:100%; height:90px; border-radius:28px; background:linear-gradient(135deg, #4338ca, #3730a3); color:#fff; border:none; cursor:pointer; box-shadow:0 15px 35px rgba(67,56,202,0.4); display:flex; align-items:center; justify-content:center; gap:15px;">
+            <i class="fas fa-save" style="font-size: 38px;"></i>
+            <span style="font-size: 32px; font-weight: 900; letter-spacing:1px;">บันทึกข้อมูล</span>
+        </button>
+    </div> 
 </div>
-          <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 8px; margin-bottom: 15px;">
-    <select id="hairStyle" style="height: 70px; border-radius:18px; border:none; font-weight:800; padding:0 10px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.03); outline:none;">
-        <option value="">✂️ ทรงผม</option>
-        <option value="เด็ก">ตัดผมเด็ก</option>
-        <option>รองทรง</option><option>แฟชั่น</option><option>สกินเฟด</option><option>เปิดข้าง</option><option>ตำรวจ/ทหาร</option><option>ทรงนักเรียน</option>
-        <option>แก้ผม</option><option>โกนผม</option>
-    </select>
-    
-    <select id="extra1" style="height: 70px; border-radius:14px; border:none; font-weight:700; background:#fff; color:#64748b; box-shadow: 0 4px 10px rgba(0,0,0,0.03); outline:none;">
-        <option value="">บริการ1</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option>
-    </select>
-    
-    <select id="extra2" style="height: 70px; border-radius:14px; border:none; font-weight:700; background:#fff; color:#64748b; box-shadow: 0 4px 10px rgba(0,0,0,0.03); outline:none;">
-        <option value="">บริการ2</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option>
-    </select>
-</div>
-
-<div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; margin: 10px 0;">
-    <div style="position: relative; background: #ffffff; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.05);">
-        <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 24px; color: #6366f1; font-weight: 900;">฿</span>
-        <input type="number" id="priceInp" placeholder="0" inputmode="numeric" 
-            style="width: 100%; height: 85px; background: transparent; font-size: 45px; font-weight: 900; color: #1e293b; text-align: right; padding-right: 20px; border: none; outline: none; box-sizing: border-box;">
-    </div>
-
-    <input type="number" id="tipInp" placeholder="ทิป" inputmode="numeric" 
-        style="width: 100%; height: 85px; background: #ccfbf1; border-radius: 20px; font-size: 32px; font-weight: 900; color: #0f766e; text-align: center; border: none; outline: none;">
-</div>
-
-<div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:20px;">
-    <button id="btnCash" onclick="selectPay('Cash')" style="height:75px; border-radius:22px; border:none; background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-weight:900; font-size:22px; box-shadow:0 8px 20px rgba(16,185,129,0.3); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;">
-        <i class="fas fa-money-bill-wave"></i> เงินสด
-    </button>
-    <button id="btnTrans" onclick="selectPay('Trans')" style="height:75px; border-radius:22px; border:none; background:linear-gradient(135deg, #6366f1, #4338ca); color:#fff; font-weight:900; font-size:22px; box-shadow:0 8px 20px rgba(99,102,241,0.3); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;">
-        <i class="fas fa-qrcode"></i> สแกนจ่าย
-    </button>
-</div>
-
-<button class="btn-main" onclick="handleSave(event)" style="width:100%; height:90px; border-radius:28px; background:linear-gradient(135deg, #4338ca, #3730a3); color:#fff; border:none; cursor:pointer; box-shadow:0 15px 35px rgba(67,56,202,0.4); display:flex; align-items:center; justify-content:center; gap:15px;">
-    <i class="fas fa-save" style="font-size: 38px;"></i>
-    <span style="font-size: 32px; font-weight: 900; letter-spacing:1px;">บันทึกข้อมูล</span>
-</button>
-
 <div id="p2" class="page" style="max-width:480px; margin:0 auto; padding: 15px; padding-bottom: 100px;">
-    <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding:25px 20px; border-radius:28px; color:white; box-shadow:0 15px 30px rgba(30,58,138,0.25); margin-bottom: 20px; position:relative; overflow:hidden;">
-        <div style="position:absolute; right:-20px; top:-20px; width:100px; height:100px; background:rgba(255,255,255,0.1); border-radius:50%;"></div>
+        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding:25px 20px; border-radius:28px; color:white; box-shadow:0 15px 30px rgba(30,58,138,0.25); margin-bottom: 20px; position:relative; overflow:hidden;">
+            <div style="position:absolute; right:-20px; top:-20px; width:100px; height:100px; background:rgba(255,255,255,0.1); border-radius:50%;"></div>
+            
+            <small style="font-weight:600; opacity:0.8; text-transform: uppercase; letter-spacing:1px;">ยอดเงินรวมวันนี้</small>
+            <div style="display:flex; align-items:baseline; gap:5px; margin: 8px 0;">
+                <span style="font-size:24px; font-weight:700;">฿</span>
+                <div id="dTotal" style="font-size:45px; font-weight:900; line-height:1;">0</div>
+            </div>
+            <div id="dCounts" style="font-size:14px; font-weight:600; background:rgba(255,255,255,0.2); display:inline-block; padding:4px 15px; border-radius:12px; backdrop-filter:blur(5px);">ลูกค้า 0 คน</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+            <div style="background:white; padding:15px; border-radius:22px; box-shadow:0 8px 20px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px; font-weight:700; color:#64748b;"><span>📱 โอน</span><b id="dTrans" style="color:#6366f1;">0</b></div>
+                <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:700; color:#64748b;"><span>💵 เงินสด</span><b id="dCash" style="color:#10b981;">0</b></div>
+            </div>
+            <div style="background:white; padding:15px; border-radius:22px; box-shadow:0 8px 20px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px; font-weight:700; color:#64748b;"><span>🤵 ช่าง</span><b id="dBarber" style="color:#f59e0b;">0</b></div>
+                <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:800; color:#64748b;"><span>🏠 ร้าน</span><b id="dShop" style="color:#1e293b;">0</b></div>
+            </div>
+        </div>
+
+        <div id="settleBarContainer" style="margin-bottom:18px;"><div id="settleBar"></div> </div>
         
-        <small style="font-weight:600; opacity:0.8; text-transform: uppercase; letter-spacing:1px;">ยอดเงินรวมวันนี้</small>
-        <div style="display:flex; align-items:baseline; gap:5px; margin: 8px 0;">
-            <span style="font-size:24px; font-weight:700;">฿</span>
-            <div id="dTotal" style="font-size:45px; font-weight:900; line-height:1;">0</div>
-        </div>
-        <div id="dCounts" style="font-size:14px; font-weight:600; background:rgba(255,255,255,0.2); display:inline-block; padding:4px 15px; border-radius:12px; backdrop-filter:blur(5px);">ลูกค้า 0 คน</div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-        <div style="background:white; padding:15px; border-radius:22px; box-shadow:0 8px 20px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px; font-weight:700; color:#64748b;"><span>📱 โอน</span><b id="dTrans" style="color:#6366f1;">0</b></div>
-            <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:700; color:#64748b;"><span>💵 เงินสด</span><b id="dCash" style="color:#10b981;">0</b></div>
-        </div>
-        <div style="background:white; padding:15px; border-radius:22px; box-shadow:0 8px 20px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px; font-weight:700; color:#64748b;"><span>🤵 ช่าง</span><b id="dBarber" style="color:#f59e0b;">0</b></div>
-            <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:800; color:#64748b;"><span>🏠 ร้าน</span><b id="dShop" style="color:#1e293b;">0</b></div>
-        </div>
-    </div>
-
-    <div id="settleBarContainer" style="margin-bottom:18px;"><div id="settleBar"></div> </div>
-    
-   <div style="background:white; border-radius:25px; padding:20px; box-shadow:0 10px 20px rgba(0,0,0,0.03);">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-        <b style="font-size:16px; color:#1e293b;">📌 รายการวันนี้</b>
-        <div onclick="shareLine()" style="background:#f0fdf4; color:#16a34a; padding:6px 12px; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer;">
-            <i class="fab fa-line"></i> ส่งไลน์
-        </div>
-    </div>
-    
-    <div id="dServiceStats"></div>
-    <div id="dailyList"></div>
-
-    <button onclick="confirmCloseDay()" style="width:100%; height:60px; margin-top:15px; border-radius:15px; border:none; background:linear-gradient(135deg, #f59e0b, #d97706); color:white; font-size:18px; font-weight:900; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); cursor:pointer;">
-        <i class="fas fa-calendar-check"></i> ปิดยอดส่งข้อมูลหน้า 3
-    </button>
-</div>
-<div id="p3" class="page" style="max-width:480px; margin:0 auto; padding: 12px; padding-bottom: 100px; background: #f8fafc;">
-    <div class="card" style="background:#fff; border-radius:25px; padding:20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border:1px solid #fff; margin-bottom: 15px;">
-        
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <b style="font-size:16px; color:#92400e;"><i class="fas fa-file-invoice-dollar"></i> สถานะบัญชี</b>
-            <div id="accLight" style="background:#22c55e; width:10px; height:10px; border-radius:50%; box-shadow:0 0 8px #22c55e;"></div>
-        </div>
-
-        <div style="display:flex; gap:12px; margin-bottom:20px;">
-            <div style="flex:1; background:#fef2f2; border-radius:22px; padding:18px 10px; text-align:center; border: 1px solid #fee2e2;">
-                <small style="font-size:11px; color:#ef4444; font-weight:800; text-transform:uppercase;">ร้านค้างช่าง</small>
-                <b style="font-size:22px; color:#b91c1c; font-weight:900; display:block;" id="debtToBarber">฿0</b>
+        <div style="background:white; border-radius:25px; padding:20px; box-shadow:0 10px 20px rgba(0,0,0,0.03);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <b style="font-size:16px; color:#1e293b;">📌 รายการวันนี้</b>
+                <div onclick="shareLine()" style="background:#f0fdf4; color:#16a34a; padding:6px 12px; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer;">
+                    <i class="fab fa-line"></i> ส่งไลน์
+                </div>
             </div>
-            <div style="flex:1; background:#f0fdf4; border-radius:22px; padding:18px 10px; text-align:center; border: 1px solid #dcfce7;">
-                <small style="font-size:11px; color:#22c55e; font-weight:800; text-transform:uppercase;">ช่างค้างร้าน</small>
-                <b style="font-size:22px; color:#15803d; font-weight:900; display:block;" id="debtToShop">฿0</b>
-            </div>
-        </div>
+            
+            <div id="dServiceStats"></div>
+            <div id="dailyList"></div>
 
-        <div style="text-align:center; margin-bottom:20px; padding:15px; background:#f8fafc; border-radius:20px;">
-            <small id="netStatusLabel" style="font-weight:700; color:#64748b;">ยอดสุทธิที่ต้องจ่ายคืน</small>
-            <div style="font-size:48px; font-weight:900; color:#1a237e; letter-spacing:-1px;">฿<span id="accNet">0</span></div>
-        </div>
-
-        <div style="display:flex; gap:10px; margin-bottom:15px; opacity:0.7;">
-            <div style="flex:1; font-size:12px; font-weight:700; color:#64748b; text-align:center;">ค้างเดิม: <span id="accOldVal">฿0</span></div>
-            <div style="flex:1; font-size:12px; font-weight:700; color:#64748b; text-align:center;">วันนี้: <span id="accTodayVal">฿0</span></div>
-        </div>
-
-        <div style="margin-bottom:15px;">
-            <div style="display:flex; align-items:center; background:#f1f5f9; border-radius:15px; padding:0 15px; margin-bottom:8px; height:50px;">
-                <i class="fas fa-calendar-alt" style="color:#6366f1;"></i>
-                <input type="date" id="accDate" style="flex:1; border:none; background:none; font-size:16px; font-weight:600; padding-left:10px; outline:none;">
-            </div>
-            <div style="display:flex; align-items:center; background:#f1f5f9; border-radius:15px; padding:0 15px; height:50px;">
-                <i class="fas fa-pen-nib" style="color:#94a3b8;"></i>
-                <input type="text" id="accNote" placeholder="บันทึกหมายเหตุ" style="flex:1; border:none; background:none; font-size:15px; padding-left:10px; outline:none;">
-            </div>
-        </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <button onclick="clearAccount()" style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer;">
-                <i class="fas fa-check-double"></i> ยืนยันเคลียร์เงิน
-            </button>
-            <button onclick="openHistoryModal()" style="background:#fff; color:#3b82f6; border:2px solid #3b82f6; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer;">
-                <i class="fas fa-history"></i> ประวัติการเคลียร์
+            <button onclick="confirmCloseDay()" style="width:100%; height:60px; margin-top:15px; border-radius:15px; border:none; background:linear-gradient(135deg, #f59e0b, #d97706); color:white; font-size:18px; font-weight:900; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); cursor:pointer;">
+                <i class="fas fa-calendar-check"></i> ปิดยอดส่งข้อมูลหน้า 3
             </button>
         </div>
-    </div>
-</div>
+    </div> <div id="p3" class="page" style="max-width:480px; margin:0 auto; padding: 12px; padding-bottom: 100px; background: #f8fafc;">
+        <div class="card" style="background:#fff; border-radius:25px; padding:20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border:1px solid #fff; margin-bottom: 15px;">
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <b style="font-size:16px; color:#92400e;"><i class="fas fa-file-invoice-dollar"></i> สถานะบัญชี</b>
+                <div id="accLight" style="background:#22c55e; width:10px; height:10px; border-radius:50%; box-shadow:0 0 8px #22c55e;"></div>
+            </div>
 
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-        <div onclick="$('histDate').showPicker()" style="background:#ffffff; border-radius:25px; padding:22px 15px; text-align:center; position:relative; box-shadow:0 8px 20px rgba(0,0,0,0.03); border:1.5px solid #f1f5f9;">
-            <div style="background:#fff7ed; width:45px; height:45px; border-radius:15px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; color:#f59e0b;">
-                <i class="fas fa-search-dollar" style="font-size:22px;"></i>
+            <div style="display:flex; gap:12px; margin-bottom:20px;">
+                <div style="flex:1; background:#fef2f2; border-radius:22px; padding:18px 10px; text-align:center; border: 1px solid #fee2e2;">
+                    <small style="font-size:11px; color:#ef4444; font-weight:800; text-transform:uppercase;">ร้านค้างช่าง</small>
+                    <b style="font-size:22px; color:#b91c1c; font-weight:900; display:block;" id="debtToBarber">฿0</b>
+                </div>
+                <div style="flex:1; background:#f0fdf4; border-radius:22px; padding:18px 10px; text-align:center; border: 1px solid #dcfce7;">
+                    <small style="font-size:11px; color:#22c55e; font-weight:800; text-transform:uppercase;">ช่างค้างร้าน</small>
+                    <b style="font-size:22px; color:#15803d; font-weight:900; display:block;" id="debtToShop">฿0</b>
+                </div>
             </div>
-            <b style="font-size:14px; color:#1e293b;">ประวัติรายวัน</b>
-            <input type="date" id="histDate" onchange="loadHistDaily()" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
+
+            <div style="text-align:center; margin-bottom:20px; padding:15px; background:#f8fafc; border-radius:20px;">
+                <small id="netStatusLabel" style="font-weight:700; color:#64748b;">ยอดสุทธิที่ต้องจ่ายคืน</small>
+                <div style="font-size:48px; font-weight:900; color:#1a237e; letter-spacing:-1px;">฿<span id="accNet">0</span></div>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-bottom:15px; opacity:0.7;">
+                <div style="flex:1; font-size:12px; font-weight:700; color:#64748b; text-align:center;">ค้างเดิม: <span id="accOldVal">฿0</span></div>
+                <div style="flex:1; font-size:12px; font-weight:700; color:#64748b; text-align:center;">วันนี้: <span id="accTodayVal">฿0</span></div>
+            </div>
+
+            <div style="margin-bottom:15px;">
+                <div style="display:flex; align-items:center; background:#f1f5f9; border-radius:15px; padding:0 15px; margin-bottom:8px; height:50px;">
+                    <i class="fas fa-calendar-alt" style="color:#6366f1;"></i>
+                    <input type="date" id="accDate" style="flex:1; border:none; background:none; font-size:16px; font-weight:600; padding-left:10px; outline:none;">
+                </div>
+                <div style="display:flex; align-items:center; background:#f1f5f9; border-radius:15px; padding:0 15px; height:50px;">
+                    <i class="fas fa-pen-nib" style="color:#94a3b8;"></i>
+                    <input type="text" id="accNote" placeholder="บันทึกหมายเหตุ" style="flex:1; border:none; background:none; font-size:15px; padding-left:10px; outline:none;">
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <button onclick="clearAccount()" style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer;">
+                    <i class="fas fa-check-double"></i> ยืนยันเคลียร์เงิน
+                </button>
+                <button onclick="openHistoryModal()" style="background:#fff; color:#3b82f6; border:2px solid #3b82f6; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer;">
+                    <i class="fas fa-history"></i> ประวัติการเคลียร์
+                </button>
+            </div>
         </div>
-        <div onclick="$('histMonth').showPicker()" style="background:#ffffff; border-radius:25px; padding:22px 15px; text-align:center; position:relative; box-shadow:0 8px 20px rgba(0,0,0,0.03); border:1.5px solid #f1f5f9;">
-            <div style="background:#eef2ff; width:45px; height:45px; border-radius:15px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; color:#6366f1;">
-                <i class="fas fa-chart-pie" style="font-size:22px;"></i>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+            <div onclick="document.getElementById('histDate').showPicker()" style="background:#ffffff; border-radius:25px; padding:22px 15px; text-align:center; position:relative; box-shadow:0 8px 20px rgba(0,0,0,0.03); border:1.5px solid #f1f5f9;">
+                <div style="background:#fff7ed; width:45px; height:45px; border-radius:15px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; color:#f59e0b;">
+                    <i class="fas fa-search-dollar" style="font-size:22px;"></i>
+                </div>
+                <b style="font-size:14px; color:#1e293b;">ประวัติรายวัน</b>
+                <input type="date" id="histDate" onchange="loadHistDaily()" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
             </div>
-            <b style="font-size:14px; color:#1e293b;">สรุปรายเดือน</b>
-            <input type="month" id="histMonth" onchange="loadHistMonth()" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
+            <div onclick="document.getElementById('histMonth').showPicker()" style="background:#ffffff; border-radius:25px; padding:22px 15px; text-align:center; position:relative; box-shadow:0 8px 20px rgba(0,0,0,0.03); border:1.5px solid #f1f5f9;">
+                <div style="background:#eef2ff; width:45px; height:45px; border-radius:15px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; color:#6366f1;">
+                    <i class="fas fa-chart-pie" style="font-size:22px;"></i>
+                </div>
+                <b style="font-size:14px; color:#1e293b;">สรุปรายเดือน</b>
+                <input type="month" id="histMonth" onchange="loadHistMonth()" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
+            </div>
         </div>
     </div>
-</div>
 <div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(15, 23, 42, 0.7); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:99999; align-items:flex-end; justify-content:center;">
     
     <div style="background:#ffffff; width:100%; max-width:500px; border-radius:35px 35px 0 0; box-shadow:0 -10px 40px rgba(0,0,0,0.2); animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1); display:flex; flex-direction:column; overflow:hidden;">
@@ -352,7 +260,6 @@
                     <option value="male">👨 เสียงผู้ชาย </option>
                 </select>
             </div>
-
             <div style="display:grid; grid-template-columns: 2.5fr 1fr; gap:15px;">
                 <button onclick="saveSettings()" style="background:linear-gradient(135deg, #4338ca, #1e1b4b); color:#fff; height:75px; border-radius:25px; border:none; font-weight:900; font-size:20px; box-shadow:0 10px 25px rgba(67,56,202,0.3); cursor:pointer;">
                     บันทึกการตั้งค่า
@@ -369,18 +276,27 @@
     </div>
 </div>
 <nav class="bottom-nav">
-    <a href="javascript:go(1)" class="nav-btn active"><i class="fas fa-edit"></i>บันทึก</a>
-    <a href="javascript:go(2)" class="nav-btn"><i class="fas fa-history"></i>รายงาน</a>
-    <a href="javascript:go(3)" class="nav-btn"><i class="fas fa-wallet"></i>บัญชี</a>
+    <a href="javascript:go(1)" class="nav-btn active" id="n1"><i class="fas fa-edit"></i>บันทึก</a>
+    <a href="javascript:go(2)" class="nav-btn" id="n2"><i class="fas fa-history"></i>รายงาน</a>
+    <a href="javascript:go(3)" class="nav-btn" id="n3"><i class="fas fa-wallet"></i>บัญชี</a>
 </nav>
 <style>
+/* Animation ที่มึงให้มา ถูกต้องครับ เอาไว้ใช้กับ Modal หรือ Page ได้เลย */
 @keyframes slideUp {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
 }
+/* ส่วน Focus ของ Modal สวยงามครับ ทำให้ Input ดูแพงขึ้น */
 #modalSet input:focus, #modalSet select:focus {
     border-color: #6366f1 !important;
     background: #ffffff !important;
+    outline: none; /* กูแนะนำให้เพิ่มตัวนี้ เพื่อลบขอบดำเดิมของเบราว์เซอร์ออก */
+}
+/* ต้องมี CSS ตัวนี้ด้วยนะ เพื่อรองรับคลาส active ที่กดจากจาวาสคริปต์ */
+.nav-btn.active {
+    color: #ffffff !important;
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
 }
 </style>
 </body>
