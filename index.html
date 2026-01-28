@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12</title>
+    <title>Barber Note Pro v.1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -89,8 +89,28 @@
         .nav-btn { color: #94a3b8; text-decoration: none; font-size: 11px; font-weight: 400; display: flex; flex-direction: column; align-items: center; }
         .nav-btn.active { color: white; font-weight: 500; }
         .nav-btn i { font-size: 20px; margin-bottom: 4px; }
+/* Animation ที่มึงให้มา ถูกต้องครับ เอาไว้ใช้กับ Modal หรือ Page ได้เลย */
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+/* ส่วน Focus ของ Modal สวยงามครับ ทำให้ Input ดูแพงขึ้น */
+#modalSet input:focus, #modalSet select:focus {
+    border-color: #6366f1 !important;
+    background: #ffffff !important;
+    outline: none; /* กูแนะนำให้เพิ่มตัวนี้ เพื่อลบขอบดำเดิมของเบราว์เซอร์ออก */
+}
+/* ต้องมี CSS ตัวนี้ด้วยนะ เพื่อรองรับคลาส active ที่กดจากจาวาสคริปต์ */
+.nav-btn.active {
+    color: #ffffff !important;
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+}
+</style>
+</head> 
 <body id="mainBody">
-   <div class="container" style="max-width: 480px; margin: 0 auto; padding-bottom: 120px;"> 
+  
+    <div class="container" style="max-width: 480px; margin: 0 auto; padding-bottom: 120px;"> 
     
     <header style="display: flex; justify-content: center; align-items: center; padding: 25px 15px;">
         <h1 id="shopNameDisp" style="margin:0; font-size:24px; font-weight:900; color:#1e1b4b; letter-spacing:1px; text-transform:uppercase;">
@@ -159,7 +179,7 @@
             </button>
         </div>
 
-        <button class="btn-main" onclick="handleSave(event)" style="width:100%; height:90px; border-radius:28px; background:linear-gradient(135deg, #4338ca, #3730a3); color:#fff; border:none; cursor:pointer; box-shadow:0 15px 35px rgba(67,56,202,0.4); display:flex; align-items:center; justify-content:center; gap:15px;">
+        <button class="btn-main" onclick="handleSave" style="width:100%; height:90px; border-radius:28px; background:linear-gradient(135deg, #4338ca, #3730a3); color:#fff; border:none; cursor:pointer; box-shadow:0 15px 35px rgba(67,56,202,0.4); display:flex; align-items:center; justify-content:center; gap:15px;">
             <i class="fas fa-save" style="font-size: 38px;"></i>
             <span style="font-size: 32px; font-weight: 900; letter-spacing:1px;">บันทึกข้อมูล</span>
         </button>
@@ -212,18 +232,6 @@
                 <b style="font-size:16px; color:#92400e;"><i class="fas fa-file-invoice-dollar"></i> สถานะบัญชี</b>
                 <div id="accLight" style="background:#22c55e; width:10px; height:10px; border-radius:50%; box-shadow:0 0 8px #22c55e;"></div>
             </div>
-
-            <div style="display:flex; gap:12px; margin-bottom:20px;">
-                <div style="flex:1; background:#fef2f2; border-radius:22px; padding:18px 10px; text-align:center; border: 1px solid #fee2e2;">
-                    <small style="font-size:11px; color:#ef4444; font-weight:800; text-transform:uppercase;">ร้านค้างช่าง</small>
-                    <b style="font-size:22px; color:#b91c1c; font-weight:900; display:block;" id="debtToBarber">฿0</b>
-                </div>
-                <div style="flex:1; background:#f0fdf4; border-radius:22px; padding:18px 10px; text-align:center; border: 1px solid #dcfce7;">
-                    <small style="font-size:11px; color:#22c55e; font-weight:800; text-transform:uppercase;">ช่างค้างร้าน</small>
-                    <b style="font-size:22px; color:#15803d; font-weight:900; display:block;" id="debtToShop">฿0</b>
-                </div>
-            </div>
-
             <div style="text-align:center; margin-bottom:20px; padding:15px; background:#f8fafc; border-radius:20px;">
                 <small id="netStatusLabel" style="font-weight:700; color:#64748b;">ยอดสุทธิที่ต้องจ่ายคืน</small>
                 <div style="font-size:48px; font-weight:900; color:#1a237e; letter-spacing:-1px;">฿<span id="accNet">0</span></div>
@@ -249,11 +257,14 @@
                 <button onclick="clearAccount()" style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer;">
                     <i class="fas fa-check-double"></i> ยืนยันเคลียร์เงิน
                 </button>
-                <button onclick="openHistoryModal()" style="background:#fff; color:#3b82f6; border:2px solid #3b82f6; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer;">
-                    <i class="fas fa-history"></i> ประวัติการเคลียร์
-                </button>
-            </div>
-        </div>
+              <button onclick="openHistoryModal()" style="background:#fff; color:#3b82f6; border:2px solid #3b82f6; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer;">
+    <i class="fas fa-history"></i> ประวัติการเคลียร์
+</button>
+
+<div id="accHistoryList" style="margin-top:15px;"></div>
+</div>
+    </div>
+</div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
             <div onclick="document.getElementById('histDate').showPicker()" style="background:#ffffff; border-radius:25px; padding:22px 15px; text-align:center; position:relative; box-shadow:0 8px 20px rgba(0,0,0,0.03); border:1.5px solid #f1f5f9;">
@@ -321,7 +332,7 @@
             </div>
 
             <button id="dangerZone" onclick="clearAllData()" style="width:100%; margin-top:35px; background:none; border:none; color:#cbd5e1; font-size:12px; font-weight:300; text-decoration:underline; cursor:pointer;">
-                ล้างฐานข้อมูลระบบทั้งหมด
+                ล้างข้อมูลทั้งหมด
             </button>
         </div>
     </div>
@@ -331,26 +342,8 @@
     <a href="javascript:go(2)" class="nav-btn" id="n2"><i class="fas fa-history"></i>รายงาน</a>
     <a href="javascript:go(3)" class="nav-btn" id="n3"><i class="fas fa-wallet"></i>บัญชี</a>
 </nav>
-/* Animation ที่มึงให้มา ถูกต้องครับ เอาไว้ใช้กับ Modal หรือ Page ได้เลย */
-@keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-}
-/* ส่วน Focus ของ Modal สวยงามครับ ทำให้ Input ดูแพงขึ้น */
-#modalSet input:focus, #modalSet select:focus {
-    border-color: #6366f1 !important;
-    background: #ffffff !important;
-    outline: none; /* กูแนะนำให้เพิ่มตัวนี้ เพื่อลบขอบดำเดิมของเบราว์เซอร์ออก */
-}
-/* ต้องมี CSS ตัวนี้ด้วยนะ เพื่อรองรับคลาส active ที่กดจากจาวาสคริปต์ */
-.nav-btn.active {
-    color: #ffffff !important;
-    transform: translateY(-5px);
-    transition: all 0.3s ease;
-}
-</style>
-</body>
- <script>
+<script>
+    
     // --- 1. การประกาศตัวแปรและการโหลดข้อมูล (State Management) ---
     let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
     let db = JSON.parse(localStorage.getItem("barber_db")) || [];
@@ -393,14 +386,11 @@
         m.pitch = (conf.voice === 'male') ? 0.8 : 1.1;
         window.speechSynthesis.speak(m);
     }
-
-    // --- 3. ฟังก์ชันบันทึกงาน (Transaction Management) ---
     function selectPay(m) {
         payMethod = m;
         if($("btnCash")) $("btnCash").className = `btn btn-pay ${m === 'Cash' ? 'active-cash' : ''}`;
         if($("btnTrans")) $("btnTrans").className = `btn btn-pay ${m === 'Trans' ? 'active-trans' : ''}`;
     }
-
     function addMinutes(time, mins) {
         if (!time) return "";
         const [h, m] = time.split(":").map(Number);
@@ -413,8 +403,6 @@ function handleSaveClick(btn) {
     const total = parseFloat(btn.getAttribute('data-total'));
     const barber = parseFloat(btn.getAttribute('data-barber'));
     const stats = JSON.parse(btn.getAttribute('data-stats'));
-
-    // เรียกใช้ฟังก์ชันเซฟตัวเดิม
     saveAndGo(date, total, barber, stats);
 }
     function handleSave() {
@@ -582,7 +570,6 @@ function loadHistDaily() {
         area.innerHTML = "<center style='color:#ccc; padding:40px;'>❌ ไม่พบข้อมูลในประวัติ</center>"; 
         return; 
     }
-
     // 1. สร้างรายการลูกค้า
     let rows = found.details.map(r => `
         <div class="history-row" style="font-size:13px; padding:10px 0; border-bottom:1px solid #f1f5f9;">
@@ -604,11 +591,9 @@ function loadHistDaily() {
             statBadges += `<span class="badge" style="background:${bg}; color:#fff; margin:2px; padding:4px 8px; border-radius:6px; font-size:11px;">${s.replace("ทรง:","")}: ${found.stats[s]}</span>`; 
         } 
     }
-
     const settle = found.settle || 0;
     const settleText = settle > 0 ? `🔴 ช่างคืนร้าน: ฿${Math.floor(settle).toLocaleString()}` : settle < 0 ? `🔵 ร้านคืนช่าง: ฿${Math.floor(Math.abs(settle)).toLocaleString()}` : "🟢 ยอดพอดีเป๊ะ";
     const settleClass = settle > 0 ? "status-red" : settle < 0 ? "status-indigo" : "status-green";
-
     // 3. แสดงผลลงหน้าจอ
     area.innerHTML = `
     <div style="background:#fff; padding:15px; border-radius:20px; border:1px solid #e2e8f0; margin-top:10px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);">
@@ -625,7 +610,6 @@ function loadHistDaily() {
         <div style="border-top:2px dashed #f1f5f9; padding-top:10px;">${rows}</div>
     </div>`;
 }
-
 function loadHistMonth() {
     const m = $("histMonth").value; 
     const area = $("histMonthArea"); 
@@ -636,7 +620,6 @@ function loadHistMonth() {
         area.innerHTML = "<center style='color:#ccc; padding:40px;'>🌑 ไม่มีข้อมูลของเดือนนี้</center>"; 
         return; 
     }
-
     let mTotal = 0, mBarber = 0, mShop = 0, mCount = 0, mStats = {};
     filtered.forEach(a => { 
         mTotal += a.total; 
@@ -651,7 +634,6 @@ function loadHistMonth() {
         if(s.startsWith("ทรง:")) hB += `<span class="badge" style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; margin:2px; font-size:11px;">${s.replace("ทรง:","")}: ${mStats[s]}</span>`; 
         else sB += `<span class="badge" style="background:#6366f1; color:white; padding:4px 8px; border-radius:6px; margin:2px; font-size:11px;">${s}: ${mStats[s]}</span>`; 
     }
-
     area.innerHTML = `
     <div style="padding:15px; background:#fff; border-radius:20px; border:1px solid #e2e8f0; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);">
         <div style="text-align:center; margin-bottom:20px; padding:15px; background:linear-gradient(to bottom, #fff, #f8fafc); border-radius:15px; border:1px solid #f1f5f9;">
@@ -700,7 +682,6 @@ function clearAccount() {
         go(1);
     }
 }
-
     // --- 6. ตั้งค่าและธีม (Settings & Theme) ---
     function applyTheme(t) {
         document.body.className = t;
@@ -714,11 +695,10 @@ function clearAccount() {
             s.setProperty('--card', '#ffffff'); s.setProperty('--text', '#1a237e'); document.body.style.background = '#f1f5f9';
         }
     }
-
     function saveSettings() {
-        conf.shop = $("setShop").value;
-        conf.perc = parseInt($("setPerc").value) || 50;
-        conf.guar = parseInt($("setGuar").value) || 0;
+        conf.shop = $("confStoreName").value;
+        conf.perc = parseInt($("confCommission").value) || 50;
+        conf.guar = parseInt($("confMinIncome").value) || 0;
         conf.theme = $("setTheme").value;
         conf.voice = $("setVoice").value;
         conf.sound = $("setSound").value;
@@ -753,7 +733,7 @@ function clearAllData() {
         document.querySelectorAll('.page').forEach(pg => pg.style.display = 'none');
         const target = $("p" + p);
         if (target) target.style.display = 'block';
-        document.querySelectorAll('.nav-item').forEach((btn, i) => btn.classList.toggle('active', (i + 1) === p));
+        document.querySelectorAll('.nav-btn').forEach((btn, i) => btn.classList.toggle('active', (i + 1) === p));
         if (p === 2) renderDay();
         if (p === 3) renderHistoryList();
     }
@@ -774,7 +754,7 @@ function clearAllData() {
 
     function openSettings() { $("modalSet").style.display = 'flex'; }
     function closeSettings() { $("modalSet").style.display = 'none'; }
-
+    function openHistoryModal() {renderHistoryList();}
     function shareLine() {
         const dInp = $("dateInp").value, today = db.filter(r => r.date === dInp); 
         if (!today.length) return;
@@ -804,6 +784,8 @@ function clearAllData() {
         let msg = `💈 รายงานร้าน: ${conf.shop}\n📅 วันที่: ${fDate}\n-------------------------\n📝 ลูกค้า (${today.length} คน):\n${clientList}\n-------------------------\n📊 สรุปงาน:\n${statText || 'ไม่มีรายการพิเศษ'}\n-------------------------\n💰 ยอดรวม: ${tot.toLocaleString()} | 🧧 ทิป: ${tips.toLocaleString()}\n📱 โอน: ${trans.toLocaleString()} | 💵 สด: ${cash.toLocaleString()}\n🤵 ช่างได้: ${Math.floor(bEarn).toLocaleString()}\n🏠 ร้านได้: ${Math.floor(tot - (bEarn - tips)).toLocaleString()}\n-------------------------\n${settleMsg}`;
         window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`);
     }
-  </script></body></html>
+  </script>
+</body>
+</html>
 
 
