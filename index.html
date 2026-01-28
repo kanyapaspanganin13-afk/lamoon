@@ -4,47 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.1</title>
+    <title>Barber Note Pro v.11</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root { 
-    --bg-color: #fcfcfd; 
-    --card-bg: #ffffff; 
-    --primary: #1e1b4b; 
-    --accent: #4338ca; 
-    --cash: #10b981; 
-    --trans: #6366f1; 
-    --danger: #f87171; 
-}
-
-body { 
-    background-color: var(--bg-color); 
-    font-family: 'Kanit', sans-serif; 
-    font-weight: 300; 
-    margin: 0; 
-    padding-bottom: 120px; 
-    overflow-x: hidden; 
-    color: #334155;
-}
-
+:root {--bg-color: #fcfcfd;--card-bg: #ffffff;--primary: #1e1b4b;--accent: #4338ca;--cash: #10b981;--trans: #6366f1;--danger: #f87171;}
+body {background-color: var(--bg-color);font-family: 'Kanit', sans-serif;font-weight: 300;margin: 0;padding-bottom: 120px;overflow-x: hidden;color: #334155;}
 .container { max-width: 480px; margin: 0 auto; padding: 0 15px; }
-
 /* --- แก้หน้าซ้อน: สำคัญมาก --- */
-.page { 
-    display: none; /* ปิดทุกหน้าเป็นค่าเริ่มต้น */
-}
-
-.page.active { 
-    display: block !important; /* แสดงเฉพาะหน้าที่มีคลาส active */
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
+.page {display: none; /* ปิดทุกหน้าเป็นค่าเริ่มต้น */}
+.page.active {display: block !important; /* แสดงเฉพาะหน้าที่มีคลาส active */animation: fadeIn 0.3s ease;}
+@keyframes fadeIn {from { opacity: 0; }to { opacity: 1; }}
 /* --- Input & Select Styles --- */
 .input-box, 
 input[type="date"], 
@@ -52,100 +22,28 @@ input[type="time"],
 input[type="month"],
 input[type="text"],
 input[type="number"],
-select { 
-    background: #ffffff; 
-    border-radius: 14px; 
-    height: 55px; 
-    border: 1px solid #f1f5f9; 
-    text-align: center; 
-    font-weight: 400; 
-    font-family: 'Kanit', sans-serif;
-    box-shadow: none; 
-    width: 100%; 
-    outline: none; 
-    box-sizing: border-box; 
-    color: var(--primary);
-    font-size: 15px;
-    transition: all 0.2s ease;
-}
-
+select {background: #ffffff;border-radius: 15px;height: 55px;border: 1px solid #f1f5f9;text-align: center;font-weight: 400;font-family: 'Kanit', sans-serif;box-shadow: none;width: 100%;outline: none;box-sizing: border-box;color: var(--primary);font-size:18px;transition: all 0.2s ease;}
 .input-box::placeholder { color: #cbd5e1; font-weight: 300; }
-
 /* เมื่อคลิกหรือโฟกัส Input */
-.input-box:focus, 
-input:focus, 
-select:focus { 
-    border-color: var(--accent) !important; 
-    background: #fff !important;
-    outline: none; 
-}
-
+.input-box:focus,input:focus,select:focus {border-color: var(--accent) !important;background: #fff !important;outline: none;} 
 /* --- Buttons --- */
-button {
-    border-radius: 14px !important;
-    font-weight: 500 !important;
-    transition: all 0.2s;
-    cursor: pointer;
-}
-
-button:active {
-    transform: scale(0.98);
-}
-
-.btn-clear {
-    background: none;
-    border: 1px solid #fee2e2;
-    color: var(--danger);
-    padding: 8px 16px;
-    font-size: 12px;
-    margin-top: 40px;
-    display: inline-block;
-    border-radius: 12px;
-}
-
+button {border-radius: 14px !important;font-weight: 500 !important;transition: all 0.2s;cursor: pointer;}
+button:active {transform: scale(0.98);}
+.btn-clear {background: none;border: 1px solid #fee2e2;color: var(--danger);padding: 8px 16px;font-size: 12px;margin-top: 40px;display: inline-block;border-radius: 12px;}
 /* --- Bottom Nav --- */
-.bottom-nav { 
-    position: fixed; 
-    bottom: 0; left: 0; right: 0; 
-    background: var(--primary); 
-    height: 75px; 
-    display: grid; 
-    grid-template-columns: 1fr 1fr 1fr; 
-    align-items: center; 
-    border-radius: 20px 20px 0 0; 
-    z-index: 1000; 
-}
-
-.nav-btn { 
-    color: #94a3b8; 
-    text-decoration: none; 
-    font-size: 11px; 
-    font-weight: 400; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    transition: all 0.3s ease;
-}
-
+.bottom-nav {position: fixed;bottom: 0; left: 0; right: 0;background: var(--primary);height: 75px;display: grid;grid-template-columns: 1fr 1fr 1fr;align-items: center;border-radius: 20px 20px 0 0;z-index: 1000;}
+.nav-btn {color: #94a3b8;text-decoration: none;font-size: 14px;font-weight: 400;display: flex;flex-direction: column;align-items: center;transition: all 0.3s ease;}
 /* ปุ่มเมนูที่เลือกอยู่ */
-.nav-btn.active { 
-    color: #ffffff !important; 
-    transform: translateY(-5px); 
-}
-
+.nav-btn.active {color: #ffffff !important;transform: translateY(-5px);}
 .nav-btn i { font-size: 20px; margin-bottom: 4px; }
-
 /* --- Modal & Animation --- */
-@keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-}
+@keyframes slideUp {from { transform: translateY(100%); }to { transform: translateY(0); }}
+
 </style>
 </head> 
 <body id="mainBody">
   
-    <div class="container" style="max-width: 480px; margin: 0 auto; padding-bottom: 120px;"> 
-    
+<div class="container" style="max-width: 480px; margin: 0 auto;">
     <header style="display: flex; justify-content: center; align-items: center; padding: 25px 15px;">
         <h1 id="shopNameDisp" style="margin:0; font-size:24px; font-weight:900; color:#1e1b4b; letter-spacing:1px; text-transform:uppercase;">
             BARBER SHOP
@@ -168,17 +66,15 @@ button:active {
             </div>
         </div>
 
-       <div class="grid-3" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;"> 
-    <div style="background:#fff; border-radius:18px; height:60px; position:relative; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.03); overflow:hidden; border:1px solid #f1f5f9;">
-        <span id="dateDisplay" style="font-weight:700; color:#1e1b4b; font-size:13px;">📅 วันที่</span>
-        <input type="date" id="dateInp" onchange="updateDateDisplay(this.value)" 
-               style="position:absolute; opacity:0; inset:0; cursor:pointer; width:100%; height:100%;">
-    </div>
-    <input type="time" id="tStart" 
-           style="height:60px; border-radius:18px; border:none; text-align:center; font-weight:700; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.03); outline:none; font-family: 'Kanit', sans-serif; font-size:14px; color:#1e1b4b; width:100%; box-sizing:border-box;">
-    <input type="time" id="tEnd" 
-           style="height:60px; border-radius:18px; border:none; text-align:center; font-weight:700; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.03); outline:none; font-family: 'Kanit', sans-serif; font-size:14px; color:#1e1b4b; width:100%; box-sizing:border-box;">
-</div>
+        <div class="grid-3" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;"> 
+            <div style="background:#fff; border-radius:18px; height:60px; position:relative; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.03); overflow:hidden; border:1px solid #f1f5f9;">
+                <span id="dateDisplay" style="font-weight:700; color:#1e1b4b; font-size:13px;">📅 วันที่</span>
+                <input type="date" id="dateInp" onchange="updateDateDisplay(this.value)" style="position:absolute; opacity:0; inset:0; cursor:pointer; width:100%; height:100%;">
+            </div>
+            <input type="time" id="tStart" style="height:60px; border-radius:18px; border:none; text-align:center; font-weight:700; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.03); outline:none; font-family:'Kanit'; font-size:14px; color:#1e1b4b; width:100%; box-sizing:border-box;">
+            <input type="time" id="tEnd" style="height:60px; border-radius:18px; border:none; text-align:center; font-weight:700; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.03); outline:none; font-family:'Kanit'; font-size:14px; color:#1e1b4b; width:100%; box-sizing:border-box;">
+        </div>
+
         <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 8px; margin-bottom: 15px;">
             <select id="hairStyle" style="height: 70px; border-radius:18px; border:none; font-weight:800; padding:0 10px; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.03); outline:none;">
                 <option value="">✂️ ทรงผม</option>
@@ -197,65 +93,52 @@ button:active {
         <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; margin: 10px 0;">
             <div style="position: relative; background: #ffffff; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.05);">
                 <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 24px; color: #6366f1; font-weight: 900;">฿</span>
-                <input type="number" id="priceInp" placeholder="0" inputmode="numeric" 
-                    style="width: 100%; height: 85px; background: transparent; font-size: 45px; font-weight: 900; color: #1e293b; text-align: right; padding-right: 20px; border: none; outline: none; box-sizing: border-box;">
+                <input type="number" id="priceInp" placeholder="0" inputmode="numeric" style="width: 100%; height: 85px; background: transparent; font-size: 45px; font-weight: 900; color: #1e293b; text-align: right; padding-right: 20px; border: none; outline: none; box-sizing: border-box;">
             </div>
-            <input type="number" id="tipInp" placeholder="ทิป" inputmode="numeric" 
-                style="width: 100%; height: 85px; background: #ccfbf1; border-radius: 20px; font-size: 32px; font-weight: 900; color: #0f766e; text-align: center; border: none; outline: none;">
+            <input type="number" id="tipInp" placeholder="ทิป" inputmode="numeric" style="width: 100%; height: 85px; background: #ccfbf1; border-radius: 20px; font-size: 32px; font-weight: 900; color: #0f766e; text-align: center; border: none; outline: none;">
         </div>
 
         <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:20px;">
-            <button id="btnCash" onclick="selectPay('Cash')" style="height:75px; border-radius:22px; border:none; background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-weight:900; font-size:22px; box-shadow:0 8px 20px rgba(16,185,129,0.3); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;">
+            <button id="btnCash" onclick="selectPay('Cash')" style="height:75px; border-radius:22px; border:none; background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-weight:900; font-size:22px; box-shadow:0 8px 20px rgba(16,185,129,0.3); cursor:pointer;">
                 <i class="fas fa-money-bill-wave"></i> เงินสด
             </button>
-            <button id="btnTrans" onclick="selectPay('Trans')" style="height:75px; border-radius:22px; border:none; background:linear-gradient(135deg, #6366f1, #4338ca); color:#fff; font-weight:900; font-size:22px; box-shadow:0 8px 20px rgba(99,102,241,0.3); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;">
+            <button id="btnTrans" onclick="selectPay('Trans')" style="height:75px; border-radius:22px; border:none; background:linear-gradient(135deg, #6366f1, #4338ca); color:#fff; font-weight:900; font-size:22px; box-shadow:0 8px 20px rgba(99,102,241,0.3); cursor:pointer;">
                 <i class="fas fa-qrcode"></i> สแกนจ่าย
             </button>
         </div>
 
         <button class="btn-main" onclick="handleSave()" style="width:100%; height:90px; border-radius:28px; background:linear-gradient(135deg, #4338ca, #3730a3); color:#fff; border:none; cursor:pointer; box-shadow:0 15px 35px rgba(67,56,202,0.4); display:flex; align-items:center; justify-content:center; gap:15px;">
             <i class="fas fa-save" style="font-size: 38px;"></i>
-            <span style="font-size: 32px; font-weight: 900; letter-spacing:1px;">บันทึกข้อมูล</span>
+            <span style="font-size: 32px; font-weight: 900;">บันทึกข้อมูล</span>
         </button>
-    </div> 
-</div>
-<div id="p2" class="page" style="max-width:480px; margin:0 auto; padding: 15px; padding-bottom: 100px;">
-        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding:25px 20px; border-radius:28px; color:white; box-shadow:0 15px 30px rgba(30,58,138,0.25); margin-bottom: 20px; position:relative; overflow:hidden;">
-            <div style="position:absolute; right:-20px; top:-20px; width:100px; height:100px; background:rgba(255,255,255,0.1); border-radius:50%;"></div>
-            
-            <small style="font-weight:600; opacity:0.8; text-transform: uppercase; letter-spacing:1px;">ยอดเงินรวมวันนี้</small>
+    </div> <div id="p2" class="page" style="padding: 15px;">
+        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding:25px 20px; border-radius:28px; color:white; box-shadow:0 15px 30px rgba(30,58,138,0.25); margin-bottom: 20px;">
+            <small style="font-weight:600; opacity:0.8;">ยอดเงินรวมวันนี้</small>
             <div style="display:flex; align-items:baseline; gap:5px; margin: 8px 0;">
                 <span style="font-size:24px; font-weight:700;">฿</span>
-                <div id="dTotal" style="font-size:45px; font-weight:900; line-height:1;">0</div>
+                <div id="dTotal" style="font-size:45px; font-weight:900;">0</div>
             </div>
-            <div id="dCounts" style="font-size:14px; font-weight:600; background:rgba(255,255,255,0.2); display:inline-block; padding:4px 15px; border-radius:14px; backdrop-filter:blur(5px);">ลูกค้า 0 คน</div>
+            <div id="dCounts" style="font-size:14px; font-weight:600; background:rgba(255,255,255,0.2); padding:4px 15px; border-radius:14px;">ลูกค้า 0 คน</div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-            <div style="background:white; padding:15px; border-radius:22px; box-shadow:0 8px 20px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:18px; font-weight:700; color:#64748b;"><span>📱 โอน</span><b id="dTrans" style="color:#6366f1;">0</b></div>
-                <div style="display:flex; justify-content:space-between; font-size:18px; font-weight:700; color:#64748b;"><span>💵 เงินสด</span><b id="dCash" style="color:#10b981;">0</b></div>
+            <div style="background:white; padding:15px; border-radius:22px; border: 1px solid #f1f5f9; text-align:center;">
+                <div style="color:#6366f1; font-size:18px; font-weight:700;">โอน: <span id="dTrans">0</span></div>
+                <div style="color:#10b981; font-size:18px; font-weight:700;">เงินสด: <span id="dCash">0</span></div>
             </div>
-            <div style="background:white; padding:15px; border-radius:22px; box-shadow:0 8px 20px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:18px; font-weight:700; color:#64748b;"><span>🤵 ช่าง</span><b id="dBarber" style="color:#f59e0b;">0</b></div>
-                <div style="display:flex; justify-content:space-between; font-size:18px; font-weight:800; color:#64748b;"><span>🏠 ร้าน</span><b id="dShop" style="color:#1e293b;">0</b></div>
+            <div style="background:white; padding:15px; border-radius:22px; border: 1px solid #f1f5f9; text-align:center;">
+                <div style="color:#f59e0b; font-size:18px; font-weight:700;">ช่าง: <span id="dBarber">0</span></div>
+                <div style="color:#1e293b; font-size:18px; font-weight:800;">ร้าน: <span id="dShop">0</span></div>
             </div>
         </div>
-        <div id="settleBarContainer" style="margin-bottom:18px;"><div id="settleBar"></div> </div>
+
         <div style="background:white; border-radius:25px; padding:20px; box-shadow:0 10px 20px rgba(0,0,0,0.03);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <b style="font-size:16px; color:#1e293b;">📌 รายการวันนี้</b>
-                <div onclick="shareLine()" style="background:#f0fdf4; color:#16a34a; padding:6px 12px; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer;">
-                    <i class="fab fa-line"></i> ส่งไลน์
-                </div>
+                <b style="color:#1e293b;">📌 รายการวันนี้</b>
+                <div onclick="shareLine()" style="background:#f0fdf4; color:#16a34a; padding:6px 12px; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer;">ส่งไลน์</div>
             </div>
-            
-            <div id="dServiceStats"></div>
             <div id="dailyList"></div>
-
-            <button onclick="confirmCloseDay()" style="width:100%; height:60px; margin-top:15px; border-radius:15px; border:none; background:linear-gradient(135deg, #f59e0b, #d97706); color:white; font-size:18px; font-weight:900; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); cursor:pointer;">
-                <i class="fas fa-calendar-check"></i> ปิดยอดส่งข้อมูลหน้า 3
-            </button>
+            <button onclick="confirmCloseDay()" style="width:100%; height:60px; margin-top:15px; border-radius:15px; border:none; background:linear-gradient(135deg, #f59e0b, #d97706); color:white; font-weight:900; cursor:pointer;">ปิดยอดส่งข้อมูล</button>
         </div>
     </div> <div id="p3" class="page" style="max-width:480px; margin:0 auto; padding: 12px; padding-bottom: 100px; background: #f8fafc;">
         <div class="card" style="background:#fff; border-radius:25px; padding:20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border:1px solid #fff; margin-bottom: 15px;">
