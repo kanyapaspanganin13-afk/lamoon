@@ -9,102 +9,136 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root { 
-            --bg-color: #fcfcfd; 
-            --card-bg: #ffffff; 
-            --primary: #1e1b4b; 
-            --accent: #4338ca; 
-            --cash: #10b981; 
-            --trans: #6366f1; 
-            --danger: #f87171; /* สีแดงแบบละมุน */
-        }
-        body { 
-            background-color: var(--bg-color); 
-            font-family: 'Kanit', sans-serif; 
-            font-weight: 300; /* ตัวอักษรบางแบบมินิมอล */
-            margin: 0; 
-            padding-bottom: 120px; 
-            overflow-x: hidden; 
-            color: #334155;
-        }
-        .container { max-width: 480px; margin: 0 auto; padding: 0 15px; }
+    --bg-color: #fcfcfd; 
+    --card-bg: #ffffff; 
+    --primary: #1e1b4b; 
+    --accent: #4338ca; 
+    --cash: #10b981; 
+    --trans: #6366f1; 
+    --danger: #f87171; 
+}
 
-        /* ปรับ Input ให้มินิมอล: เอาเงาออก ใส่เส้นขอบบางๆ แทน */
-        .input-box, 
-        input[type="date"], 
-        input[type="time"],
-        input[type="month"],
-        input[type="text"],
-        input[type="number"] { 
-            background: #ffffff; 
-            border-radius: 14px; 
-            height: 55px; 
-            border: 1px solid #f1f5f9; 
-            text-align: center; 
-            font-weight: 400; 
-            font-family: 'Kanit', sans-serif;
-            box-shadow: none; 
-            width: 100%; 
-            outline: none; 
-            box-sizing: border-box; 
-            color: var(--primary);
-            font-size: 15px;
-            transition: all 0.2s ease;
-        }
+body { 
+    background-color: var(--bg-color); 
+    font-family: 'Kanit', sans-serif; 
+    font-weight: 300; 
+    margin: 0; 
+    padding-bottom: 120px; 
+    overflow-x: hidden; 
+    color: #334155;
+}
 
-        .input-box::placeholder { color: #cbd5e1; font-weight: 300; }
-        .input-box:focus { border-color: var(--accent); background: #fff; }
+.container { max-width: 480px; margin: 0 auto; padding: 0 15px; }
 
-        /* ปุ่มกดแบบมินิมอล */
-        button {
-            border-radius: 14px !important;
-            font-weight: 500 !important;
-            transition: opacity 0.2s;
-            cursor: pointer;
-        }
+/* --- แก้หน้าซ้อน: สำคัญมาก --- */
+.page { 
+    display: none; /* ปิดทุกหน้าเป็นค่าเริ่มต้น */
+}
 
-        /* ปุ่มล้างข้อมูลแบบ Minimal Danger */
-        .btn-clear {
-            background: none;
-            border: 1px solid #fee2e2;
-            color: var(--danger);
-            padding: 8px 16px;
-            font-size: 12px;
-            margin-top: 40px;
-            display: inline-block;
-        }
+.page.active { 
+    display: block !important; /* แสดงเฉพาะหน้าที่มีคลาส active */
+    animation: fadeIn 0.3s ease;
+}
 
-        /* Bottom Nav แบบคลีนๆ */
-        .bottom-nav { 
-            position: fixed; 
-            bottom: 0; left: 0; right: 0; 
-            background: var(--primary); 
-            height: 75px; 
-            display: grid; 
-            grid-template-columns: 1fr 1fr 1fr; 
-            align-items: center; 
-            border-radius: 20px 20px 0 0; 
-            z-index: 1000; 
-        }
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 
-        .nav-btn { color: #94a3b8; text-decoration: none; font-size: 11px; font-weight: 400; display: flex; flex-direction: column; align-items: center; }
-        .nav-btn.active { color: white; font-weight: 500; }
-        .nav-btn i { font-size: 20px; margin-bottom: 4px; }
-/* Animation ที่มึงให้มา ถูกต้องครับ เอาไว้ใช้กับ Modal หรือ Page ได้เลย */
+/* --- Input & Select Styles --- */
+.input-box, 
+input[type="date"], 
+input[type="time"],
+input[type="month"],
+input[type="text"],
+input[type="number"],
+select { 
+    background: #ffffff; 
+    border-radius: 14px; 
+    height: 55px; 
+    border: 1px solid #f1f5f9; 
+    text-align: center; 
+    font-weight: 400; 
+    font-family: 'Kanit', sans-serif;
+    box-shadow: none; 
+    width: 100%; 
+    outline: none; 
+    box-sizing: border-box; 
+    color: var(--primary);
+    font-size: 15px;
+    transition: all 0.2s ease;
+}
+
+.input-box::placeholder { color: #cbd5e1; font-weight: 300; }
+
+/* เมื่อคลิกหรือโฟกัส Input */
+.input-box:focus, 
+input:focus, 
+select:focus { 
+    border-color: var(--accent) !important; 
+    background: #fff !important;
+    outline: none; 
+}
+
+/* --- Buttons --- */
+button {
+    border-radius: 14px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+.btn-clear {
+    background: none;
+    border: 1px solid #fee2e2;
+    color: var(--danger);
+    padding: 8px 16px;
+    font-size: 12px;
+    margin-top: 40px;
+    display: inline-block;
+    border-radius: 12px;
+}
+
+/* --- Bottom Nav --- */
+.bottom-nav { 
+    position: fixed; 
+    bottom: 0; left: 0; right: 0; 
+    background: var(--primary); 
+    height: 75px; 
+    display: grid; 
+    grid-template-columns: 1fr 1fr 1fr; 
+    align-items: center; 
+    border-radius: 20px 20px 0 0; 
+    z-index: 1000; 
+}
+
+.nav-btn { 
+    color: #94a3b8; 
+    text-decoration: none; 
+    font-size: 11px; 
+    font-weight: 400; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    transition: all 0.3s ease;
+}
+
+/* ปุ่มเมนูที่เลือกอยู่ */
+.nav-btn.active { 
+    color: #ffffff !important; 
+    transform: translateY(-5px); 
+}
+
+.nav-btn i { font-size: 20px; margin-bottom: 4px; }
+
+/* --- Modal & Animation --- */
 @keyframes slideUp {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
-}
-/* ส่วน Focus ของ Modal สวยงามครับ ทำให้ Input ดูแพงขึ้น */
-#modalSet input:focus, #modalSet select:focus {
-    border-color: #6366f1 !important;
-    background: #ffffff !important;
-    outline: none; /* กูแนะนำให้เพิ่มตัวนี้ เพื่อลบขอบดำเดิมของเบราว์เซอร์ออก */
-}
-/* ต้องมี CSS ตัวนี้ด้วยนะ เพื่อรองรับคลาส active ที่กดจากจาวาสคริปต์ */
-.nav-btn.active {
-    color: #ffffff !important;
-    transform: translateY(-5px);
-    transition: all 0.3s ease;
 }
 </style>
 </head> 
@@ -179,7 +213,7 @@
             </button>
         </div>
 
-        <button class="btn-main" onclick="handleSave" style="width:100%; height:90px; border-radius:28px; background:linear-gradient(135deg, #4338ca, #3730a3); color:#fff; border:none; cursor:pointer; box-shadow:0 15px 35px rgba(67,56,202,0.4); display:flex; align-items:center; justify-content:center; gap:15px;">
+        <button class="btn-main" onclick="handleSave()" style="width:100%; height:90px; border-radius:28px; background:linear-gradient(135deg, #4338ca, #3730a3); color:#fff; border:none; cursor:pointer; box-shadow:0 15px 35px rgba(67,56,202,0.4); display:flex; align-items:center; justify-content:center; gap:15px;">
             <i class="fas fa-save" style="font-size: 38px;"></i>
             <span style="font-size: 32px; font-weight: 900; letter-spacing:1px;">บันทึกข้อมูล</span>
         </button>
@@ -194,22 +228,20 @@
                 <span style="font-size:24px; font-weight:700;">฿</span>
                 <div id="dTotal" style="font-size:45px; font-weight:900; line-height:1;">0</div>
             </div>
-            <div id="dCounts" style="font-size:14px; font-weight:600; background:rgba(255,255,255,0.2); display:inline-block; padding:4px 15px; border-radius:12px; backdrop-filter:blur(5px);">ลูกค้า 0 คน</div>
+            <div id="dCounts" style="font-size:14px; font-weight:600; background:rgba(255,255,255,0.2); display:inline-block; padding:4px 15px; border-radius:14px; backdrop-filter:blur(5px);">ลูกค้า 0 คน</div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
             <div style="background:white; padding:15px; border-radius:22px; box-shadow:0 8px 20px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px; font-weight:700; color:#64748b;"><span>📱 โอน</span><b id="dTrans" style="color:#6366f1;">0</b></div>
-                <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:700; color:#64748b;"><span>💵 เงินสด</span><b id="dCash" style="color:#10b981;">0</b></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:18px; font-weight:700; color:#64748b;"><span>📱 โอน</span><b id="dTrans" style="color:#6366f1;">0</b></div>
+                <div style="display:flex; justify-content:space-between; font-size:18px; font-weight:700; color:#64748b;"><span>💵 เงินสด</span><b id="dCash" style="color:#10b981;">0</b></div>
             </div>
             <div style="background:white; padding:15px; border-radius:22px; box-shadow:0 8px 20px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px; font-weight:700; color:#64748b;"><span>🤵 ช่าง</span><b id="dBarber" style="color:#f59e0b;">0</b></div>
-                <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:800; color:#64748b;"><span>🏠 ร้าน</span><b id="dShop" style="color:#1e293b;">0</b></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:18px; font-weight:700; color:#64748b;"><span>🤵 ช่าง</span><b id="dBarber" style="color:#f59e0b;">0</b></div>
+                <div style="display:flex; justify-content:space-between; font-size:18px; font-weight:800; color:#64748b;"><span>🏠 ร้าน</span><b id="dShop" style="color:#1e293b;">0</b></div>
             </div>
         </div>
-
         <div id="settleBarContainer" style="margin-bottom:18px;"><div id="settleBar"></div> </div>
-        
         <div style="background:white; border-radius:25px; padding:20px; box-shadow:0 10px 20px rgba(0,0,0,0.03);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <b style="font-size:16px; color:#1e293b;">📌 รายการวันนี้</b>
@@ -232,14 +264,14 @@
                 <b style="font-size:16px; color:#92400e;"><i class="fas fa-file-invoice-dollar"></i> สถานะบัญชี</b>
                 <div id="accLight" style="background:#22c55e; width:10px; height:10px; border-radius:50%; box-shadow:0 0 8px #22c55e;"></div>
             </div>
+            <div style="display:flex; gap:10px; margin-bottom:15px; opacity:0.7;">
+                <div style="flex:1; font-size:16px; font-weight:700; color:#64748b; text-align:center;">ค้างเดิม: <span id="accOldVal">฿0</span></div>
+                <div style="flex:1; font-size:16px; font-weight:700; color:#64748b; text-align:center;">วันนี้: <span id="accTodayVal">฿0</span></div>
+            </div>
+
             <div style="text-align:center; margin-bottom:20px; padding:15px; background:#f8fafc; border-radius:20px;">
                 <small id="netStatusLabel" style="font-weight:700; color:#64748b;">ยอดสุทธิที่ต้องจ่ายคืน</small>
                 <div style="font-size:48px; font-weight:900; color:#1a237e; letter-spacing:-1px;">฿<span id="accNet">0</span></div>
-            </div>
-
-            <div style="display:flex; gap:10px; margin-bottom:15px; opacity:0.7;">
-                <div style="flex:1; font-size:12px; font-weight:700; color:#64748b; text-align:center;">ค้างเดิม: <span id="accOldVal">฿0</span></div>
-                <div style="flex:1; font-size:12px; font-weight:700; color:#64748b; text-align:center;">วันนี้: <span id="accTodayVal">฿0</span></div>
             </div>
 
             <div style="margin-bottom:15px;">
@@ -260,12 +292,10 @@
               <button onclick="openHistoryModal()" style="background:#fff; color:#3b82f6; border:2px solid #3b82f6; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer;">
     <i class="fas fa-history"></i> ประวัติการเคลียร์
 </button>
-
 <div id="accHistoryList" style="margin-top:15px;"></div>
 </div>
     </div>
 </div>
-
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
             <div onclick="document.getElementById('histDate').showPicker()" style="background:#ffffff; border-radius:25px; padding:22px 15px; text-align:center; position:relative; box-shadow:0 8px 20px rgba(0,0,0,0.03); border:1.5px solid #f1f5f9;">
                 <div style="background:#fff7ed; width:45px; height:45px; border-radius:15px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; color:#f59e0b;">
@@ -283,8 +313,7 @@
             </div>
         </div>
     </div>
-<div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(15, 23, 42, 0.4); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:99999; align-items:flex-end; justify-content:center;">
-    
+    <div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(15, 23, 42, 0.4); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:99999; align-items:flex-end; justify-content:center;">    
     <div style="background:#ffffff; width:100%; max-width:500px; border-radius:30px 30px 0 0; display:flex; flex-direction:column; overflow:hidden; animation: slideUp 0.3s ease-out;">
         
         <div style="padding:15px 0 5px; text-align:center; cursor:pointer;" onclick="document.getElementById('modalSet').style.display='none'">
@@ -343,7 +372,6 @@
     <a href="javascript:go(3)" class="nav-btn" id="n3"><i class="fas fa-wallet"></i>บัญชี</a>
 </nav>
 <script>
-    
     // --- 1. การประกาศตัวแปรและการโหลดข้อมูล (State Management) ---
     let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
     let db = JSON.parse(localStorage.getItem("barber_db")) || [];
@@ -408,7 +436,7 @@ function handleSaveClick(btn) {
     function handleSave() {
         const p = parseInt($("priceInp").value), t = parseInt($("tipInp").value) || 0;
         if (!p || !payMethod) {
-            speak("ใส่ราคาและเลือกวิธีจ่ายก่อนค่ะ");
+            speak("กรุณาใส่ราคาและเลือกวิธีจ่าย");
             return alert("⚠️ ใส่ราคาและเลือกวิธีจ่ายก่อน!");
         }
         
