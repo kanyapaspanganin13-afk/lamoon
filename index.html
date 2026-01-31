@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 3</title>
+    <title>Barber Note Pro 333</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -349,7 +349,7 @@ window.addEventListener('DOMContentLoaded',()=>{const i=$("dateInp"),t=new Date(
         $("btnCash").className = `btn btn-pay ${m === 'Cash' ? 'active-cash' : ''}`;
         $("btnTrans").className = `btn btn-pay ${m === 'Trans' ? 'active-trans' : ''}`;
     }
-function renderDay() {
+  function renderDay() {
     const dInp = $("dateInp").value, 
           allRec = db.filter(r => r.date === dInp),
           today = allRec.filter(r => r.type !== 'HOLIDAY'),
@@ -365,26 +365,31 @@ function renderDay() {
 
         if (r.type !== 'GUARANTEE_CLAIM') {
             const svs = r.svcs || [];
-            // คีย์เวิร์ดตัดผม
-            const hairKeys = ["รองทรง", "แฟชั่น", "สกินเฟด", "เปิดข้าง", "ตำรวจ", "ทหาร", "นักเรียน", "แก้ผม", "โกนผม", "ตัดผม", "ตัด"];
+            const hairKeywords = ["รองทรง", "แฟชั่น", "สกินเฟด", "เปิดข้าง", "ตำรวจ", "ทหาร", "นักเรียน", "แก้ผม", "โกนผม", "ตัดผม", "ตัด"];
             
-            let billHasCut = false;
-            let billHasChild = false;
+            let currentBillIsCut = false;
+            let currentBillIsChild = false;
 
             svs.forEach(s => {
                 if (!s) return;
-                stats[s] = (stats[s] || 0) + 1; // นับชื่อทรงปกติ
+               
+                stats[s] = (stats[s] || 0) + 0;
 
-                // 🔥 จุดแก้: นับเด็ก (ถ้าเจอคำว่าเด็ก นับครั้งเดียวต่อบิล)
-                if (s.includes("เด็ก") && !billHasChild) {
-                    stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
-                    billHasChild = true;
-                }
-                
-                // 🔥 จุดแก้: นับตัดผมรวม (ถ้าเป็นเด็ก หรือ มีคำว่าตัด ให้บวกแค่ 1 ต่อบิล)
-                if ((s.includes("เด็ก") || hairKeys.some(k => s.includes(k))) && !billHasCut) {
-                    stats["[รวมตัดผม]"] = (stats["[รวมตัดผม]"] || 0) + 1;
-                    billHasCut = true;
+                if (s.includes("เด็ก")) {
+                    if (!currentBillIsChild) {
+                        stats["เด็ก"] = (stats["เด็ก"] || 0) + 0;
+                        currentBillIsChild = true;
+                    }
+                    if (!currentBillIsCut) {
+                        stats["[รวมตัดผม]"] = (stats["[รวมตัดผม]"] || 0) + 1;
+                        currentBillIsCut = true;
+                    }
+                } 
+                else if (hairKeywords.some(k => s.includes(k))) {
+                    if (!currentBillIsCut) {
+                        stats["[รวมตัดผม]"] = (stats["[รวมตัดผม]"] || 0) + 1;
+                        currentBillIsCut = true;
+                    }
                 }
             });
         }
@@ -415,28 +420,21 @@ function renderDay() {
     const sBar = $("settleBar");
     if(sBar) {
         sBar.innerText = txt;
-        sBar.style.cssText = `background:${bg}; color:#fff; display:flex; align-items:center; justify-content:center; height:55px; border-radius:16px; font-weight:800; font-size:19px; margin:15px 10px; width:calc(100% - 20px); border:none; cursor:pointer;`;
-        // 🔥 ฟังก์ชันส่งข้อมูลไปหน้า 3 (บัญชี)
-        sBar.onclick = () => {
-            if (isHoliday || tot === 0) return;
-            showPage(3); // ไปหน้าบัญชี
-            if (typeof renderMonth === "function") renderMonth(); // ถ้ามีฟังก์ชันทำสรุปเดือนให้รันด้วย
-        };
+        sBar.style.cssText = `background:${bg}; color:#fff; border:none; display:flex; align-items:center; justify-content:center; height:55px; border-radius:12px; font-weight:800; font-size:18px; margin:15px 0; width:100%;`;
     }
 
-    // --- ป้ายสถิติ ---
-    let sH = `<div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:15px;">`;
-    if (stats["[รวมตัดผม]"]) sH += `<span style="background:#0047ba;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:800;">ตัดผม: ${stats["[รวมตัดผม]"]}</span>`;
-    if (stats["เด็ก"]) sH += `<span style="background:#db2777;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:800;">เด็ก: ${stats["เด็ก"]}</span>`;
+   let sH = `<div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:15px; padding:0 10px;">`;
+    if (stats["[รวมตัดผม]"]) sH += `<span style="background:#0047ba;color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:800;">ตัดผมรวม: ${stats["[รวมตัดผม]"]}</span>`;
+    if (stats["เด็ก"]) sH += `<span style="background:#db2777;color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:800;">เด็ก: ${stats["เด็ก"]}</span>`;
     for (let s in stats) { 
         if (s !== "[รวมตัดผม]" && s !== "เด็ก") {
-            sH += `<span style="background:#f1f5f9;color:#475569;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;">${s}: ${stats[s]}</span>`; 
+            sH += `<span style="background:#f1f5f9;color:#475569;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid #e2e8f0;">${s}: ${stats[s]}</span>`; 
         }
     }
     $("dServiceStats").innerHTML = sH + `</div>`;
 
     document.body.style.backgroundColor = "#ffffff"; 
-    $("dailyList").innerHTML = (listHtml || "<center style='padding:50px; color:#94a3b8;'>ไม่มีข้อมูล</center>");
+    $("dailyList").innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin:15px 15px 10px 15px;"><b style="font-size:16px; color:#1e293b;">📋 รายงานวันนี้</b><i class="fab fa-line" style="color:#22c55e;font-size:32px;cursor:pointer" onclick="shareLine()"></i></div>` + (isHoliday ? `<div style="text-align:center; padding:50px; color:#94a3b8; font-weight:800;">🏖️ วันหยุดร้าน</div>` : (listHtml || "<center style='padding:50px; color:#cbd5e1;'>ไม่มีข้อมูล</center>"));
 }
   function saveAndGo(date, total, shop, barber) {
     if (total === 0 && !confirm("ไม่มีข้อมูลยอด ปิดงานเลยมั้ย?")) return;
