@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 7</title>
+    <title>Barber Note Pro 8</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -364,19 +364,26 @@ function renderDay() {
         (r.pay === 'Trans') ? trans += (p + t) : cash += p;
 
         // นับสถิติบริการแยกต่างหาก (เพื่อโชว์เป็นป้ายด้านล่าง)
-        if (r.type !== 'GUARANTEE_CLAIM') {
-            // นับ "ตัดผม" แค่ 1 ครั้งต่อ 1 บิล
-            stats["ตัดผม"] = (stats["ตัดผม"] || 0) + 1;
-            
-            // นับบริการเสริมอื่นๆ
-            if (r.hair && r.hair.includes("เด็ก")) stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
-            (r.svcs || []).forEach(s => { 
-                if (s && !["เด็ก","รองทรง","แฟชั่น","นักเรียน","ตัดผม"].some(x => s.includes(x))) {
-                    stats[s] = (stats[s] || 0) + 1;
-                }
-            });
+      if (r.type !== 'GUARANTEE_CLAIM') {
+
+    // ✅ นับตัดผม 1 ครั้ง ต่อ 1 บิลเท่านั้น
+    if ((r.svcs || []).some(s => s.includes("ตัด"))) {
+        stats["ตัดผม"] = (stats["ตัดผม"] || 0) + 1;
+    }
+    // นับเด็ก
+    if (r.hair && r.hair.includes("เด็ก")) {
+        stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
+    }
+    // นับบริการเสริมอื่น
+    (r.svcs || []).forEach(s => { 
+        if (
+            s &&
+            !["เด็ก","รองทรง","แฟชั่น","นักเรียน","ตัดผม","ตัด"].some(x => s.includes(x))
+        ) {
+            stats[s] = (stats[s] || 0) + 1;
         }
-       
+    });
+}
         const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
         const rowNum = r.type === 'GUARANTEE_CLAIM' ? "🛡️" : `${i+1}.`;
         
