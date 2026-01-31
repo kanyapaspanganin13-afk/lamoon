@@ -4,61 +4,110 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.1</title>
+    <title>Barber Note Pro v.12</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-    :root { 
-        --primary: #6366f1; --accent: #0ea5e9; --danger: #ef4444; --success: #22c55e; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --border: #e2e8f0;
-    }
-    * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 90px; overflow-x: hidden; }
-    .container { padding: 15px 15px 100px 15px !important; max-width: 500px; margin: auto; position: relative; z-index: 1; }
-    .nav-bar {
-        position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important;
-        height: 75px !important; background: white !important; display: flex !important; 
-        justify-content: space-around !important; align-items: center !important; 
-        z-index: 99999 !important; 
-        border-top: 1px solid #eee;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-    }
-    .nav-item {
-        flex: 1 !important; display: flex !important; flex-direction: column !important;
-        align-items: center !important; justify-content: center !important; cursor: pointer !important;
-        pointer-events: auto !important;
-    }
-nav {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: #1a237e !important; /* น้ำเงินธนาคารเป๊ะๆ */
-    display: flex; justify-content: space-around; padding: 12px 0;
-    box-shadow: 0 -10px 30px rgba(0,0,0,0.4); /* ใส่เงาให้บาร์ลอยเด่นขึ้นมาจากพื้นหลัง */
-    z-index: 9999; border-top: 1px solid rgba(255,255,255,0.1);
+/* 1. บังคับฟอนต์ Kanit และเอาเส้นขอบออกทุกจุดทั่วแอปตามสั่ง */
+* {
+    font-family: 'Kanit', sans-serif !important;
+    border: none !important; 
+    outline: none !important;
+    box-sizing: border-box;
 }
-.nav-item { text-align: center; color: rgba(255,255,255,0.5); flex: 1; transition: 0.2s; }
-.nav-item.active { color: #ffffff !important; opacity: 1; } /* ตัวที่เลือกจะขาวสว่างจ้า */
-.nav-item i { font-size: 22px; display: block; margin-bottom: 2px; }
-.nav-item span { font-size: 11px; font-weight: 700; }
-    body.navy { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --accent: #38bdf8; }
-     body.dark { --bg: #121212; --card: #1a1a1a; --text: #fbbf24; --accent: #fbbf24; }
-     body { background-color: var(--bg); color: var(--text); transition: all 0.3s ease; }
-    .icon-card, input, select { background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.1); }
-    .grid-3 {display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 6px; margin-bottom: 8px;}
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
-    .icon-card { position: relative; border-radius: 15px; padding: 10px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: none !important; background: #fff; height: 75px !important; font-size: 14px !important; }
-    input, select { width: 100%; height: 75px !important; border-radius: 20px !important; font-size: 20px !important; font-weight: 700; text-align: center; border: none !important; outline: none !important; background: #f1f5f9; appearance: none; -webkit-appearance: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03); color: #1e293b; }
-    .btn { border: none; padding: 12px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; transition: 0.2s; }
-    .btn-pay { background: #e2e8f0; color: #64748b; border:2px solid transparent; height: 70px; font-size: 18px;}
-    .btn-pay.active-cash { background: #dcfce7; color: #15803d; border-color: #22c55e; }
-    .btn-pay.active-trans { background: #e0f2fe; color: #0369a1; border-color: #0ea5e9; }
-   
-    .page { display: none; } 
-    .page.active { display: block; }
-    .modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); display: none; z-index: 100000; align-items: center; justify-content: center; }
-    .modal-content { background: #fff; width: 90%; max-width: 400px; border-radius: 25px; padding: 25px; max-height: 85vh; overflow-y: auto; }
-    .status-bar { padding: 12px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 14px; margin-bottom: 10px; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); }
-    .acc-main-card { background: white; padding: 20px; border-radius: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #fffbeb; }
-    .btn-save { background: var(--success); color: white; border: none; width: 100%; padding: 15px; border-radius: 15px; font-weight: 700; font-size: 16px; cursor: pointer; }
-    #accHistory { font-size: 12px; max-height: 150px; overflow-y: auto; }
+
+:root {
+    --bg-color: #fcfcfd;
+    --card-bg: #ffffff;
+    --primary: #1e1b4b;
+    --accent: #4338ca;
+    --cash: #10b981;
+    --trans: #6366f1;
+    --danger: #f87171;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'Kanit', sans-serif;
+    font-weight: 300;
+    margin: 0;
+    padding-bottom: 120px; /* กันบาร์ล่างทับเนื้อหา */
+    overflow-x: hidden;
+    color: #334155;
+}
+
+.container { max-width: 480px; margin: 0 auto; padding: 0 15px; }
+
+/* --- แก้หน้าซ้อน --- */
+.page { display: none; }
+.page.active { display: block !important; animation: fadeIn 0.3s ease; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* --- Input & Select: ไม่มีเส้นขอบ ใช้เงาแทน --- */
+.input-box, 
+input[type="date"], 
+input[type="time"],
+input[type="month"],
+input[type="text"],
+input[type="number"],
+select {
+    background: #ffffff;
+    border-radius: 15px;
+    height: 55px;
+    text-align: center;
+    font-weight: 400;
+    /* ใช้เงาแทนเส้นขอบเพื่อให้ดูนวลตามรูป */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
+    width: 100%;
+    color: var(--primary);
+    font-size: 18px;
+    transition: all 0.2s ease;
+}
+
+.input-box::placeholder { color: #cbd5e1; font-weight: 300; }
+
+/* --- Buttons --- */
+button {
+    border-radius: 14px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+button:active { transform: scale(0.98); }
+
+/* --- Bottom Nav: ต้องอยู่และไม่หาย --- */
+.bottom-nav {
+    position: fixed !important; /* บังคับให้อยู่กับที่ */
+    bottom: 0; 
+    left: 0; 
+    right: 0;
+    background: var(--primary);
+    height: 75px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    border-radius: 20px 20px 0 0;
+    z-index: 9999 !important; /* บังคับให้อยู่บนสุด */
+}
+
+.nav-btn {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 400;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.nav-btn.active {
+    color: #ffffff !important;
+    transform: translateY(-5px);
+}
+
+.nav-btn i { font-size: 20px; margin-bottom: 4px; }
 </style>
 </head> 
 <body id="mainBody">
