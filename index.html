@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.1</title>
+    <title>Barber Note Pro 2</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -50,23 +50,6 @@ nav {
     .btn-pay { background: #e2e8f0; color: #64748b; border:2px solid transparent; height: 70px; font-size: 18px;}
     .btn-pay.active-cash { background: #dcfce7; color: #15803d; border-color: #22c55e; }
     .btn-pay.active-trans { background: #e0f2fe; color: #0369a1; border-color: #0ea5e9; }
-   .floating-close{
-    position: fixed;
-    bottom: 85px; /* เหนือ nav bar */
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 30px);
-    max-width: 480px;
-    height: 60px;
-    border-radius: 18px;
-    background: #f59e0b;
-    color: #fff;
-    border: none;
-    font-weight: 800;
-    font-size: 18px;
-    z-index: 99999;
-    box-shadow: 0 10px 25px rgba(245,158,11,0.4);
-}
 
     .page { display: none; } 
     .page.active { display: block; }
@@ -290,7 +273,7 @@ nav {
     <div onclick="go(3)" class="nav-item"><i class="fas fa-wallet"></i><span>บัญชี</span></div>
 </nav>
  <script>
-    let archives = JSON.parse(localStorage.getItem(ARCHIVE_KEY)) || [];
+    let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
     function save() {localStorage.setItem("barber_archives", JSON.stringify(archives));}
     let db = JSON.parse(localStorage.getItem("barber_db")) || [];
     let conf = JSON.parse(localStorage.getItem("barber_conf")) || { shop: "Barber Shop", perc: 50, guar: 0 };
@@ -341,53 +324,7 @@ function handleInsurance() {
             modal.style.display = 'flex'; 
         }
     }
-function closeDay() {
-    const d = document.getElementById("dateInp").value;
-    const today = db.filter(r => r.date === d);
-    if (!today.length) return alert("ไม่มีข้อมูล");
-
-    if (confirm("ปิดยอดวันนี้และส่งไปหน้าสถิติ?")) {
-
-        const tot = today.reduce((a, b) => a + (b.price || 0), 0);
-        const cash = today
-            .filter(r => r.pay === 'Cash')
-            .reduce((a, b) => a + (b.price || 0), 0);
-
-        const bEarn = Math.max(tot * (conf.perc / 100), conf.guar);
-
-        let dailyStats = {};
-        today.forEach(r => {
-            (r.svcs || []).forEach(s => {
-                dailyStats[s] = (dailyStats[s] || 0) + 1;
-            });
-        });
-
-        const arc = {
-            date: d,
-            total: tot,
-            cash: cash,
-            barber: bEarn,
-            shop: tot - bEarn,
-            settle: cash - bEarn,
-            count: today.length,
-            details: today,
-            stats: dailyStats
-        };
-
-        // ✅ เก็บเข้าคลังรายงาน
-        archives = archives.filter(a => a.date !== d);
-        archives.push(arc);
-        localStorage.setItem("barber_archives", JSON.stringify(archives));
-
-        // ✅ ลบข้อมูลรายวันออกจาก db
-        db = db.filter(r => r.date !== d);
-        localStorage.setItem("barber_db", JSON.stringify(db));
-
-        speak("ส่งรายงานวันนี้สำเร็จ");
-        alert("ส่งรายงานสำเร็จ!");
-        go(3);
-    }
-}
+function closeDay() {const d = document.getElementById("dateInp").value;const today = db.filter(r => r.date === d);if(!today.length) return alert("ไม่มีข้อมูล");if(confirm("ปิดยอดวันนี้และส่งไปหน้าสถิติ?")) { const tot = today.reduce((a,b) => a+b.price, 0);const cash = today.filter(r=>r.pay==='Cash').reduce((a,b)=>a+b.price, 0);const bEarn = Math.max(tot * (conf.perc/100), conf.guar); let dailyStats = {};today.forEach(r => {r.svcs.forEach(s => { dailyStats[s] = (dailyStats[s] || 0) + 1;});}); const arc = {date: d, total: tot, cash: cash, barber: bEarn, shop: tot - bEarn, settle: cash - bEarn, count: today.length, details: today, stats: dailyStats }; archives = archives.filter(a => a.date !== d);archives.push(arc);localStorage.setItem("barber_archives", JSON.stringify(archives));db = db.filter(r => r.date !== d);localStorage.setItem("barber_db", JSON.stringify(db)); speak("ส่งรายงานวันนี้สำเร็จ");alert("ส่งรายงานสำเร็จ!");go(3);} }
 
 function applyTheme(t){document.body.className=t;const o=document.getElementById("navyStyle");if(o)o.remove();const s=document.documentElement.style;if(t==='dark'){s.setProperty('--card','#262626');s.setProperty('--text','#fbbf24');document.body.style.background='#171717'}else{s.setProperty('--card','#fff');s.setProperty('--text','#1a237e');document.body.style.background=(t==='navy')?'#1a237e':''}if(t==='navy'){const st=document.createElement("style");st.id="navyStyle";st.innerHTML=`body.navy{background:#1a237e!important;color:#fff!important}.navy .card b,.navy .card span,.navy div[style*="background:white"] b{color:#1e293b!important}.navy #dTotal,.navy #accNet{color:#1a237e!important}.nav-item{color:#fff!important;opacity:0.8}.nav-item.active{color:#8b5cf6!important;opacity:1}`;document.head.appendChild(st)}}
 function openSettings(){const m=document.getElementById("modalSet");if(m)m.style.display='flex';document.getElementById("setShop").value=conf.shop||'';document.getElementById("setTheme").value=conf.theme||'light';document.getElementById("setVoice").value=conf.voice||'female';document.getElementById("setSound").value=conf.sound||'on';document.getElementById("setPerc").value=conf.perc||50;document.getElementById("setGuar").value=conf.guar||0}
