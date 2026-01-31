@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12</title>
+    <title>Barber Note Pro v.11</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -157,9 +157,9 @@ nav {
    <hr style="border:0; border-top:1px solid #e2e8f0; margin-top:15px;">
     <div id="dailyList"></div>
 </div>
-  <button onclick="CloseDay()" style="width:100%; height:60px; margin-top:15px; border-radius:15px; background:#f59e0b; color:white;">ปิดยอดส่งข้อมูล</button>
- </div>
-
+ <button id="btnCloseDay" onclick="closeDay()" style="width:100%; height:60px; margin-top:15px; border-radius:15px; background:#f59e0b; color:white; border:none; outline:none; font-weight:800; font-size:18px; cursor:pointer;">
+   <i class="fas fa-check-circle"></i> ปิดยอดส่งข้อมูล
+</button>
 </div>
  <div id="p3" class="page" style="max-width:480px; margin:0 auto; padding: 12px; padding-bottom: 100px; background: #f8fafc;">
     <div class="card" style="background:#fff; border-radius:25px; padding:20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border:1px solid #fff; margin-bottom: 15px;">
@@ -399,7 +399,15 @@ function renderDay() {
     $("dailyList").innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0; padding:0 5px;"><b style="font-size:16px;">📋 รายงานวันนี้:</b><i class="fab fa-line" style="color:#22c55e;font-size:32px;cursor:pointer" onclick="shareLine()"></i></div>` + (isHoliday ? `<div style="text-align:center; padding:40px; color:#64748b; font-weight:800;">🏖️ วันหยุดร้าน (ไม่มีรายการ) <i class="fas fa-trash-alt" style="color:#ef4444; cursor:pointer; margin-left:8px;" onclick="delRec(${allRec.find(x=>x.type==='HOLIDAY')?.id})"></i></div>` : (listHtml || "<center style='padding:40px; opacity:0.3;'>ไม่มีข้อมูล</center>"));
     
 const settleBar = $("settleBar");settleBar.innerText = txt;settleBar.style.background = bg;const btnSave = $("btnSaveReport");btnSave.onclick = function() {saveAndGo(dInp, tot, sEarn, bEarn);};btnSave.style.display = isHoliday ? "none" : "flex";}
-
+const sBar = document.getElementById("settleBar");
+if(sBar) {
+    sBar.innerText = txt;
+    sBar.style.background = bg;
+}
+const btnO = document.getElementById("btnOrange");
+if(btnO) {
+    btnO.style.display = (isHoliday) ? "none" : "flex";
+    btnO.onclick = () => closeDay();}
   function saveAndGo(date, total, shop, barber) {
     if (total === 0 && !confirm("ไม่มีข้อมูลยอด ปิดงานเลยมั้ย?")) return;
     let s = {}; db.filter(r => r.date === date).forEach(r => { 
@@ -521,7 +529,10 @@ function loadHistMonth() {
     document.querySelectorAll('.nav-item').forEach((btn, i) => {
         btn.classList.toggle('active', (i + 1) === p);
     });
-}
+  const btnClose = document.getElementById("btnCloseDay");
+    if (btnClose) {
+        btnClose.style.display = (n === 2) ? "block" : "none";
+    }
     function saveDB() { localStorage.setItem("barber_db", JSON.stringify(db)); localStorage.setItem("barber_conf", JSON.stringify(conf)); }
     function delRec(id) { if (confirm("ลบรายการนี้?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); } }
     function editTime(id) {const rec = db.find(r => r.id === id);if (!rec) return;const newStart = prompt("แก้เวลาเริ่ม (HH:MM)", rec.time);if (!newStart) return;const newEnd = prompt("แก้เวลาเสร็จ (HH:MM)", rec.endTime || "");rec.time = newStart;rec.endTime = newEnd || addMinutes(newStart, 30);saveDB();renderDay();}
