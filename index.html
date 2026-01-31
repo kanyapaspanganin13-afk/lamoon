@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 17</title>
+    <title>Barber Note Pro 7</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -356,7 +356,7 @@ function renderDay() {
           stats = {};
     let tot = 0, trans = 0, cash = 0, tips = 0, listHtml = "";
 
-    // นับจำนวนลูกค้า (จำนวนคนจริงๆ)
+    // จำนวนลูกค้า นับจากจำนวน Transaction (ไม่เกี่ยวกับรายการบริการ)
     const realCustomerCount = today.filter(r => r.type !== 'GUARANTEE_CLAIM').length;
 
     today.slice().sort((a,b) => a.time.localeCompare(b.time)).forEach((r, i) => {
@@ -364,17 +364,17 @@ function renderDay() {
         (r.pay === 'Trans') ? trans += (p + t) : cash += p;
 
         if (r.type !== 'GUARANTEE_CLAIM') {
-            // ✅ บรรทัดนี้คือการนับ "ตัดผม" (นับ 1 ครั้งต่อ 1 บิลแน่นอน)
+            // ✅ นับสถิติ "ตัดผม" แค่ที่เดียวตรงนี้ (1 บิล = 1 ครั้ง)
             stats["ตัดผม"] = (stats["ตัดผม"] || 0) + 1;
 
             // นับเด็ก (ถ้ามี)
             if (r.hair && r.hair.includes("เด็ก")) {
                 stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
             }
-            // นับบริการเสริมอื่นๆ
+
+            // นับบริการเสริมอื่นๆ (คัดคำที่เกี่ยวกับการตัดออก เพื่อไม่ให้ขึ้นป้ายซ้ำ)
             (r.svcs || []).forEach(s => { 
-                // ยกเว้นคำที่เกี่ยวกับการตัดผมพื้นฐานออกไปเพื่อไม่ให้ป้ายสถิติซ้ำซ้อน
-                if (s && !["เด็ก","รองทรง","แฟชั่น","นักเรียน","ตัดผม"].some(x => s.includes(x))) {
+                if (s && !["เด็ก","รองทรง","แฟชั่น","นักเรียน","ตัดผม","ตัด"].some(x => s.includes(x))) {
                     stats[s] = (stats[s] || 0) + 1;
                 }
             });
@@ -395,12 +395,10 @@ function renderDay() {
     $("dCash").innerText = cash.toLocaleString();
     $("dBarber").innerText = Math.floor(bEarn).toLocaleString(); 
     $("dShop").innerText = Math.floor(sEarn).toLocaleString(); 
-    
-    // แสดงจำนวนคน
     $("dCounts").innerText = isHoliday ? "🏪 วันหยุด" : `ลูกค้า: ${realCustomerCount} คน`;
 
-    // --- [ปรับปรุง] ช่องแจ้งคืนเงิน (ธีมธนาคาร / ไร้ขอบ / ตรงกลาง) ---
-    let txt = "", bg = "#0047ba"; 
+    // --- [ช่องคืนเงิน] ธีมธนาคาร / ไม่เอาเส้นกรอบ / ตัวหนังสือตรงกลาง ---
+    let txt = "", bg = "#0047ba"; // สีน้ำเงินหลัก (K-Bank/SCB Style)
     if (isHoliday) { txt = "🏖️ พักผ่อนวันหยุด"; bg = "#64748b"; }
     else if (tot === 0) { txt = "🛡️ ร้านจ่ายประกัน"; } 
     else if (settle > 0) { txt = `🤵 ช่างคืนร้าน ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; } 
@@ -412,8 +410,9 @@ function renderDay() {
         sBar.innerText = txt;
         sBar.style.cssText = `
             background: ${bg}; 
-            color: white; 
+            color: #ffffff; 
             border: none; 
+            outline: none;
             display: flex; 
             align-items: center; 
             justify-content: center; 
@@ -421,13 +420,12 @@ function renderDay() {
             border-radius: 12px; 
             font-weight: 800; 
             font-size: 18px; 
-            margin: 10px 0; 
+            margin: 15px 0; 
             width: 100%;
-            box-shadow: none; /* เพื่อความแน่ใจว่าไม่มีเส้นเงาหรือขอบหลอก */
         `;
     }
 
-    // ป้ายสถิติ
+    // สรุปป้ายสถิติด้านล่าง
     let sH = `<div style="display:flex; flex-wrap:wrap; gap:5px; justify-content:center; margin-bottom:10px;">`;
     ["ตัดผม", "เด็ก"].forEach(k => { if (stats[k]) sH += `<span style="background:#4338ca;color:#fff;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;">${k}: ${stats[k]}</span>`; });
     for (let s in stats) { if (!["ตัดผม", "เด็ก"].includes(s)) sH += `<span style="background:#64748b;color:#fff;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;">${s}: ${stats[s]}</span>`; }
@@ -438,7 +436,6 @@ function renderDay() {
     const btnO = $("btnCloseDay") || $("btnOrange");
     if(btnO) {
         btnO.style.display = (isHoliday) ? "none" : "block";
-        btnO.style.marginTop = "20px";
     }
 }
   function saveAndGo(date, total, shop, barber) {
