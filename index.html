@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12</title>
+    <title>Barber Note Pro v.1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -338,36 +338,48 @@ window.addEventListener('DOMContentLoaded',()=>{const i=$("dateInp"),t=new Date(
 function renderDay() {
     const dInp = $("dateInp").value, 
           allRec = db.filter(r => r.date === dInp),
-          today = allRec.filter(r => r.type !== 'HOLIDAY'), // 👈 กรองวันหยุดออกจากการคำนวณ
-          isHoliday = allRec.some(r => r.type === 'HOLIDAY'), // เช็คว่าวันนี้กดปุ่มวันหยุดไว้ไหม
+          today = allRec.filter(r => r.type !== 'HOLIDAY'),
+          isHoliday = allRec.some(r => r.type === 'HOLIDAY'),
           stats = {};
     let tot = 0, trans = 0, cash = 0, tips = 0, listHtml = "";
 
     today.slice().sort((a,b) => a.time.localeCompare(b.time)).forEach((r, i) => {
         const p = Number(r.price)||0, t = Number(r.tip)||0; tot += p; tips += t;
         (r.pay === 'Trans') ? trans += (p + t) : cash += p;
-        const c = new Set(["ตัดผม"]); if (r.hair && r.hair.includes("เด็ก")) c.add("เด็ก");
-        (r.svcs || []).forEach(s => { if (s && !["เด็ก","รองทรง","แฟชั่น","นักเรียน","ตัดผม"].some(x => s.includes(x))) c.add(s); });
+
+        // --- [จุดแก้ที่ 1] เช็คก่อนว่าไม่ใช่ประกัน ถึงจะนับสถิติตัดผม ---
+        let c = new Set();
+        if (r.type !== 'GUARANTEE_CLAIM') { 
+            c.add("ตัดผม");
+            if (r.hair && r.hair.includes("เด็ก")) c.add("เด็ก");
+            (r.svcs || []).forEach(s => { if (s && !["เด็ก","รองทรง","แฟชั่น","นักเรียน","ตัดผม"].some(x => s.includes(x))) c.add(s); });
+        }
         c.forEach(k => stats[k] = (stats[k] || 0) + 1);
+        // --------------------------------------------------
+
         const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
-        listHtml += `<div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column;"><span style="font-weight:800; font-size:14px; color:#1e293b;">${i+1}. [${timeShow}] | ${(r.svcs||[]).join('+')}</span>${t?`<small style="color:#be185d; font-weight:700; font-size:11px;">🔹 ทิป: ฿${t}</small>`:''}</div><div style="text-align:right;"><b style="font-size:16px; display:block;">฿${p}${t?` <span style="color:#be185d;">(+${t})</span>`:''}</b><span style="font-size:12px; font-weight:700;">${r.pay==='Trans'?'📱 โอน':'💵 สด'} <i class="fas fa-trash-alt" style="color:#ef4444; cursor:pointer; margin-left:8px;" onclick="delRec(${r.id})"></i></span></div></div></div>`;
+        const rowNum = r.type === 'GUARANTEE_CLAIM' ? "🛡️" : `${i+1}.`; // เปลี่ยนเลขลำดับเป็นไอคอนถ้าเป็นประกัน
+        
+        listHtml += `<div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column;"><span style="font-weight:800; font-size:14px; color:#1e293b;">${rowNum} [${timeShow}] | ${(r.svcs||[]).join('+')}</span>${t?`<small style="color:#be185d; font-weight:700; font-size:11px;">🔹 ทิป: ฿${t}</small>`:''}</div><div style="text-align:right;"><b style="font-size:16px; display:block;">฿${p}${t?` <span style="color:#be185d;">(+${t})</span>`:''}</b><span style="font-size:12px; font-weight:700;">${r.pay==='Trans'?'📱 โอน':'💵 สด'} <i class="fas fa-trash-alt" style="color:#ef4444; cursor:pointer; margin-left:8px;" onclick="delRec(${r.id})"></i></span></div></div></div>`;
     });
 
-    // --- สูตรคำนวณ (ถ้าเป็นวันหยุด ยอดต้องเป็น 0 ทั้งหมด) ---
     const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc / 100), conf.guar) + tips;
     const sEarn = isHoliday ? 0 : tot - (bEarn - tips);
     const settle = isHoliday ? 0 : cash - bEarn;
 
     $("dTotal").innerText = tot.toLocaleString(); $("dTrans").innerText = trans.toLocaleString(); $("dCash").innerText = cash.toLocaleString();
     $("dBarber").innerText = Math.floor(bEarn).toLocaleString(); $("dShop").innerText = Math.floor(sEarn).toLocaleString(); 
-    $("dCounts").innerText = isHoliday ? "🏪 วันหยุด" : `ลูกค้า: ${today.length} คน`;
+    
+    // --- [จุดแก้ที่ 2] นับเฉพาะคนที่ไม่ใช่ประกัน ---
+    const realCustomerCount = today.filter(r => r.type !== 'GUARANTEE_CLAIM').length;
+    $("dCounts").innerText = isHoliday ? "🏪 วันหยุด" : `ลูกค้า: ${realCustomerCount} คน`;
+    // ------------------------------------------
 
     let sH = `<div style="display:flex; flex-wrap:wrap; gap:5px; justify-content:center; margin-bottom:10px;">`;
     ["ตัดผม", "เด็ก"].forEach(k => { if (stats[k]) sH += `<span style="background:#4338ca;color:#fff;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;">${k}: ${stats[k]}</span>`; });
     for (let s in stats) { if (!["ตัดผม", "เด็ก"].includes(s)) sH += `<span style="background:#64748b;color:#fff;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;">${s}: ${stats[s]}</span>`; }
     $("dServiceStats").innerHTML = sH + `</div>`;
 
-    // --- จัดการส่วนล่างสุด ---
     let txt = "", bg = ""; 
     if (isHoliday) { txt = "🏖️ พักผ่อนวันหยุด"; bg = "#f1f5f9"; }
     else if (tot === 0) { txt = "🟦 ร้านจ่ายประกัน"; bg = "#e0f2fe"; } 
