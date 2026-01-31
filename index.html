@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.1</title>
+    <title>Barber Note Pro v.13</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -153,7 +153,11 @@ nav {
             <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:800;"><span style="color:#64748b;">🏠 ร้าน:</span> <b id="dShop">0</b></div>
         </div>
     </div>
-    <div id="settleBarContainer" style="margin-bottom:18px;"><div id="settleBar"></div> </div>
+   <button id="btnSaveReport" style="flex:2; height:55px; background:#f97316; color:#fff; border-radius:15px; border:none; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <i class="fas fa-paper-plane"></i>
+    </button>
+</div>
+ <div id="settleBarContainer" style="margin-bottom:18px;"><div id="settleBar"></div> </div>
     <div id="dServiceStats"></div>
     <hr style="border:0; border-top:1px solid #e2e8f0; margin-top:15px;">
     <div id="dailyList"></div>
@@ -389,10 +393,9 @@ function renderDay() {
 
     $("dailyList").innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0; padding:0 5px;"><b style="font-size:16px;">📋 รายงานวันนี้:</b><i class="fab fa-line" style="color:#22c55e;font-size:32px;cursor:pointer" onclick="shareLine()"></i></div>` + (isHoliday ? `<div style="text-align:center; padding:40px; color:#64748b; font-weight:800;">🏖️ วันหยุดร้าน (ไม่มีรายการ) <i class="fas fa-trash-alt" style="color:#ef4444; cursor:pointer; margin-left:8px;" onclick="delRec(${allRec.find(x=>x.type==='HOLIDAY')?.id})"></i></div>` : (listHtml || "<center style='padding:40px; opacity:0.3;'>ไม่มีข้อมูล</center>"));
     
-    const container = $("settleBar").parentElement; container.style.cssText = "display:flex; gap:10px; margin-top:10px;";
-    container.innerHTML = `<div id="settleBar" style="flex:8; height:55px; background:${bg}; display:flex; align-items:center; justify-content:center; border-radius:15px; font-weight:900; font-size:15px; color:#1e293b; border:1px solid rgba(0,0,0,0.05);">${txt}</div><button onclick="saveAndGo('${dInp}', ${tot}, ${sEarn}, ${bEarn})" style="flex:2; height:55px; background:#f97316; color:#fff; border-radius:15px; border:none; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"><i class="fas fa-paper-plane"></i></button>`;
-}
-function saveAndGo(date, total, shop, barber) {
+const settleBar = $("settleBar");settleBar.innerText = txt;settleBar.style.background = bg;const btnSave = $("btnSaveReport");btnSave.onclick = function() {saveAndGo(dInp, tot, sEarn, bEarn);};btnSave.style.display = isHoliday ? "none" : "flex";}
+
+  function saveAndGo(date, total, shop, barber) {
     if (total === 0 && !confirm("ไม่มีข้อมูลยอด ปิดงานเลยมั้ย?")) return;
     let s = {}; db.filter(r => r.date === date).forEach(r => { 
         r.svcs.forEach(v => s[v] = (s[v]||0)+1); if(r.hair) s["ทรง:"+r.hair] = (s["ทรง:"+r.hair]||0)+1; 
