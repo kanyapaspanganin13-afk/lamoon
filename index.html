@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 17</title>
+    <title>Barber Note Pro 1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -384,9 +384,10 @@ function renderDay() {
                 }
             });
         }
+       
         const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
         const rowNum = r.type === 'GUARANTEE_CLAIM' ? "🛡️" : `${i+1}.`;
-        listHtml += `<div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column;"><span style="font-weight:800; font-size:14px; color:#1e293b;">${rowNum} [${timeShow}] | ${svs.join('+')}</span>${t?`<small style="color:#be185d; font-weight:700; font-size:11px;">🔹 ทิป: ฿${t}</small>`:''}</div><div style="text-align:right;"><b style="font-size:16px; display:block;">฿${p}${t?` <span style="color:#be185d;">(+${t})</span>`:''}</b><span style="font-size:12px; font-weight:700;">${r.pay==='Trans'?'📱 โอน':'💵 สด'} <i class="fas fa-trash-alt" style="color:#ef4444; cursor:pointer; margin-left:8px;" onclick="delRec(${r.id})"></i></span></div></div></div>`;
+        listHtml += `<div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column;"><span style="font-weight:800; font-size:14px; color:#1e293b;">${rowNum} [${timeShow}] | ${(r.svcs||[]).join('+')}</span>${t?`<small style="color:#be185d; font-weight:700; font-size:11px;">🔹 ทิป: ฿${t}</small>`:''}</div><div style="text-align:right;"><b style="font-size:16px; display:block;">฿${p}${t?` <span style="color:#be185d;">(+${t})</span>`:''}</b><span style="font-size:12px; font-weight:700;">${r.pay==='Trans'?'📱 โอน':'💵 สด'} <i class="fas fa-trash-alt" style="color:#ef4444; cursor:pointer; margin-left:8px;" onclick="delRec(${r.id})"></i></span></div></div></div>`;
     });
 
     const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc / 100), conf.guar) + tips;
@@ -400,7 +401,7 @@ function renderDay() {
     $("dShop").innerText = Math.floor(sEarn).toLocaleString(); 
     $("dCounts").innerText = isHoliday ? "🏪 วันหยุด" : `ลูกค้า: ${realCustomerCount} คน`;
 
-    // --- ช่องคืนเงินธีมธนาคาร (น้ำเงิน-ฟ้า) ไร้ขอบ กลางเป๊ะ ---
+    // --- ช่องคืนเงินธีมธนาคาร กลางเป๊ะ ไร้ขอบ ---
     let txt = "", bg = "#0047ba"; 
     if (isHoliday) { txt = "🏖️ พักผ่อนวันหยุด"; bg = "#64748b"; }
     else if (tot === 0) { txt = "🛡️ ร้านจ่ายประกัน"; } 
@@ -411,18 +412,15 @@ function renderDay() {
     const sBar = $("settleBar");
     if(sBar) {
         sBar.innerText = txt;
-        sBar.style.cssText = `background:${bg}; color:#fff; border:none; outline:none; display:flex; align-items:center; justify-content:center; height:55px; border-radius:12px; font-weight:800; font-size:18px; margin:15px 0; width:100%; box-shadow:none;`;
+        sBar.style.cssText = `background:${bg}; color:#fff; border:none; display:flex; align-items:center; justify-content:center; height:55px; border-radius:12px; font-weight:800; font-size:18px; margin:15px 0; width:100%;`;
     }
 
-    // ส่วนแสดงป้ายสถิติ
     let sH = `<div style="display:flex; flex-wrap:wrap; gap:5px; justify-content:center; margin-bottom:10px;">`;
     ["ตัดผม", "เด็ก"].forEach(k => { if (stats[k]) sH += `<span style="background:#4338ca;color:#fff;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;">${k}: ${stats[k]}</span>`; });
-    for (let s in stats) { 
-        if (!["ตัดผม", "เด็ก"].includes(s)) sH += `<span style="background:#64748b;color:#fff;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;">${s}: ${stats[s]}</span>`; 
-    }
+    for (let s in stats) { if (!["ตัดผม", "เด็ก"].includes(s)) sH += `<span style="background:#64748b;color:#fff;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;">${s}: ${stats[s]}</span>`; }
     $("dServiceStats").innerHTML = sH + `</div>`;
 
-    $("dailyList").innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0; padding:0 5px;"><b style="font-size:16px;">📋 รายงานวันนี้:</b><i class="fab fa-line" style="color:#22c55e;font-size:32px;cursor:pointer" onclick="shareLine()"></i></div>` + (isHoliday ? `<div style="text-align:center; padding:40px; color:#64748b; font-weight:800;">🏖️ วันหยุดร้าน</div>` : (listHtml || "<center style='padding:40px; opacity:0.3;'>ไม่มีข้อมูล</center>"));
+    $("dailyList").innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0; padding:0 5px;"><b style="font-size:16px;">📋 รายงานวันนี้:</b><i class="fab fa-line" style="color:#22c55e;font-size:32px;cursor:pointer" onclick="shareLine()"></i></div>` + (isHoliday ? `<div style="text-align:center; padding:40px; color:#64748b; font-weight:800;">🏖️ วันหยุด...</div>` : (listHtml || "<center style='padding:40px; opacity:0.3;'>ไม่มีข้อมูล</center>"));
 }
   function saveAndGo(date, total, shop, barber) {
     if (total === 0 && !confirm("ไม่มีข้อมูลยอด ปิดงานเลยมั้ย?")) return;
