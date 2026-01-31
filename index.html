@@ -4,69 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.13</title>
+    <title>Barber Note Pro v.1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-/* 1. บังคับฟอนต์ Kanit และเอาเส้นขอบออกทั้งหมด */
-* {
-    font-family: 'Kanit', sans-serif !important;
-    border: none !important; 
-    outline: none !important;
-    box-sizing: border-box;
-}
+        :root {
+            --primary: #3b337a; /* สีน้ำเงินเข้มตามปุ่มบันทึกในภาพ */
+            --accent: #6366f1;
+            --bg: #f3f6f9;
+            --card: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+        }
 
-:root {
-    --bg-color: #fcfcfd;
-    --card-bg: #ffffff;
-    --primary: #1e1b4b;
-    --accent: #4338ca;
-    --cash: #10b981;
-    --trans: #6366f1;
-}
+        * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 80px; }
+        .container { padding: 15px; max-width: 500px; margin: auto; }
 
-body {
-    background-color: var(--bg-color);
-    font-weight: 300;
-    margin: 0;
-    padding-bottom: 100px; /* เว้นที่ให้บาร์ล่าง */
-    color: #334155;
-}
+        /* ชื่อร้านด้านบน */
+        .shop-header { text-align: center; padding: 20px 0; }
+        .shop-header h1 { margin: 0; font-size: 24px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
 
-/* 2. สไตล์ Card/Input ให้ดูนวล (ใช้เงาแทนเส้นขอบ) */
-.card-btn, .input-box, select, input {
-    background: #ffffff !important;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.04) !important;
-    border-radius: 15px !important;
-    cursor: pointer;
-    transition: 0.2s;
-}
+        /* การจัดวางปุ่ม 3 ปุ่มบน */
+        .top-menu { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .menu-item { background: var(--card); border-radius: 15px; padding: 15px 5px; text-align: center; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; }
+        .menu-item i { font-size: 20px; margin-bottom: 8px; display: block; }
+        .menu-item span { font-size: 12px; font-weight: 500; color: #64748b; }
 
-.card-btn:active { transform: scale(0.95); }
+        /* Input Styles */
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 12px; font-size: 14px; background: var(--card); text-align: center; }
+        
+        .price-display { background: var(--card); border: 2px solid var(--accent); border-radius: 20px; padding: 20px; margin-bottom: 15px; text-align: center; }
+        .price-display input { border: none; font-size: 48px; font-weight: 700; color: #475569; width: 100%; outline: none; background: transparent; }
 
-/* 3. แถบบาร์ล่าง - ล็อคตายตัว */
-.bottom-nav {
-    position: fixed !important;
-    bottom: 0; left: 0; right: 0;
-    background: var(--primary);
-    height: 75px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    align-items: center;
-    border-radius: 20px 20px 0 0;
-    z-index: 9999;
-}
+        /* ปุ่มบันทึกใหญ่ */
+        .btn-save { background: var(--primary); color: white; width: 100%; padding: 18px; border-radius: 20px; border: none; font-size: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(59, 51, 122, 0.3); }
 
-.nav-btn {
-    color: #94a3b8;
-    text-decoration: none;
-    text-align: center;
-    font-size: 14px;
-}
-.nav-btn.active { color: #fff; }
-.page { display: none; }
-.page.active { display: block !important; }
-</style>
+        /* หน้าต่างตั้งค่า (Modal) */
+        .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+        .modal-content { background: var(--card); margin: 20% auto; padding: 25px; width: 85%; max-width: 400px; border-radius: 25px; }
+        .modal-content h3 { margin-top: 0; color: var(--primary); }
+
+        /* แถบเมนูล่าง */
+        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid var(--border); }
+        .nav-item { color: #94a3b8; text-align: center; font-size: 11px; text-decoration: none; flex: 1; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
+    </style>
 </head> 
 <body id="mainBody">
   
