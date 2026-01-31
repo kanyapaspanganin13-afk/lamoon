@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 3</title>
+    <title>Barber Note Pro 33</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -363,35 +363,31 @@ function renderDay() {
         const p = Number(r.price)||0, t = Number(r.tip)||0; tot += p; tips += t;
         (r.pay === 'Trans') ? trans += (p + t) : cash += p;
 
-if (r.type !== 'GUARANTEE_CLAIM') {
-    const svs = r.svcs || [];
-    const hairKeywords = ["รองทรง", "แฟชั่น", "สกินเฟด", "เปิดข้าง", "ตำรวจ", "ทหาร", "นักเรียน", "แก้ผม", "โกนผม", "ตัดผม", "ตัด"];
-    
-    let currentBillHasCountedCut = false;
-    let currentBillHasCountedChild = false;
+        if (r.type !== 'GUARANTEE_CLAIM') {
+            const svs = r.svcs || [];
+            // คีย์เวิร์ดตัดผม
+            const hairKeys = ["รองทรง", "แฟชั่น", "สกินเฟด", "เปิดข้าง", "ตำรวจ", "ทหาร", "นักเรียน", "แก้ผม", "โกนผม", "ตัดผม", "ตัด"];
+            
+            let billHasCut = false;
+            let billHasChild = false;
 
-    svs.forEach(s => {
-        if (!s) return;
-        
-        stats[s] = (stats[s] || 0) + 1;
-        if (s.includes("เด็ก")) {
-            if (!currentBillHasCountedChild) {
-                stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
-                currentBillHasCountedChild = true; // ล็อกว่านับเด็กแล้วนะ
-            }
-            if (!currentBillHasCountedCut) {
-                stats["[รวมตัดผม]"] = (stats["[รวมตัดผม]"] || 0) + 1;
-                currentBillHasCountedCut = true; // ล็อกว่านับตัดผมรวมแล้วนะ
-            }
-        } 
-        else if (hairKeywords.some(key => s.includes(key))) {
-            if (!currentBillHasCountedCut) {
-                stats["[รวมตัดผม]"] = (stats["[รวมตัดผม]"] || 0) + 1;
-                currentBillHasCountedCut = true;
-            }
+            svs.forEach(s => {
+                if (!s) return;
+                stats[s] = (stats[s] || 0) + 1; // นับชื่อทรงปกติ
+
+                // 🔥 จุดแก้: นับเด็ก (ถ้าเจอคำว่าเด็ก นับครั้งเดียวต่อบิล)
+                if (s.includes("เด็ก") && !billHasChild) {
+                    stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
+                    billHasChild = true;
+                }
+                
+                // 🔥 จุดแก้: นับตัดผมรวม (ถ้าเป็นเด็ก หรือ มีคำว่าตัด ให้บวกแค่ 1 ต่อบิล)
+                if ((s.includes("เด็ก") || hairKeys.some(k => s.includes(k))) && !billHasCut) {
+                    stats["[รวมตัดผม]"] = (stats["[รวมตัดผม]"] || 0) + 1;
+                    billHasCut = true;
+                }
+            });
         }
-    });
-}
         const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
         const rowNum = r.type === 'GUARANTEE_CLAIM' ? "🛡️" : `${i+1}.`;
         listHtml += `<div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column;"><span style="font-weight:800; font-size:14px; color:#1e293b;">${rowNum} [${timeShow}] | ${(r.svcs||[]).join('+')}</span>${t?`<small style="color:#be185d; font-weight:700; font-size:11px;">🔹 ทิป: ฿${t}</small>`:''}</div><div style="text-align:right;"><b style="font-size:16px; display:block;">฿${p}${t?` <span style="color:#be185d;">(+${t})</span>`:''}</b><span style="font-size:12px; font-weight:700;">${r.pay==='Trans'?'📱 โอน':'💵 สด'} <i class="fas fa-trash-alt" style="color:#ef4444; cursor:pointer; margin-left:8px;" onclick="delRec(${r.id})"></i></span></div></div></div>`;
