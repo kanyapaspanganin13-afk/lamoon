@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 8</title>
+    <title>Barber Note Pro 28</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -281,7 +281,8 @@ nav {
     <div onclick="go(3)" class="nav-item"><i class="fas fa-wallet"></i><span>บัญชี</span></div>
 </nav>
  <script>
-    let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
+  let currentSettle = 0;  
+  let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
     function save() {localStorage.setItem("barber_archives", JSON.stringify(archives));}
     let db = JSON.parse(localStorage.getItem("barber_db")) || [];
     let conf = JSON.parse(localStorage.getItem("barber_conf")) || { shop: "Barber Shop", perc: 50, guar: 0 };
@@ -393,18 +394,13 @@ function renderDay() {
     const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc / 100), conf.guar) + tips;
     const sEarn = isHoliday ? 0 : tot - (bEarn - tips);
     const settle = isHoliday ? 0 : cash - bEarn;
-
-    // อัปเดตตัวเลขหน้าจอ
     $("dTotal").innerText = tot.toLocaleString(); 
     $("dTrans").innerText = trans.toLocaleString(); 
     $("dCash").innerText = cash.toLocaleString();
     $("dBarber").innerText = Math.floor(bEarn).toLocaleString(); 
     $("dShop").innerText = Math.floor(sEarn).toLocaleString(); 
     
-    // แสดงจำนวนคน (นับจากแถวรายการ)
     $("dCounts").innerText = isHoliday ? "🏪 วันหยุด" : `ลูกค้า: ${realCustomerCount} คน`;
-
-    // --- [จุดแก้ที่ 2] ช่องแจ้งคืนเงิน (ธีมธนาคาร / ไร้ขอบ / ตรงกลาง) ---
     let txt = "", bg = "#0047ba"; // สีน้ำเงินธนาคาร
     if (isHoliday) { txt = "🏖️ พักผ่อนวันหยุด"; bg = "#64748b"; }
     else if (tot === 0) { txt = "🛡️ ร้านจ่ายประกัน"; } 
@@ -421,10 +417,7 @@ function renderDay() {
     $("dServiceStats").innerHTML = sH + `</div>`;
 
     $("dailyList").innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0; padding:0 5px;"><b style="font-size:16px;">📋 รายงานวันนี้:</b><i class="fab fa-line" style="color:#22c55e;font-size:32px;cursor:pointer" onclick="shareLine()"></i></div>` + (isHoliday ? `<div style="text-align:center; padding:40px; color:#64748b; font-weight:800;">🏖️ วันหยุดร้าน </div>` : (listHtml || "<center style='padding:40px; opacity:0.3;'>ไม่มีข้อมูล</center>"));
-    const btnO = $("btnCloseDay") || $("btnOrange");
-    if(btnO) {
-        btnO.style.display = (isHoliday) ? "none" : "block";
-        btnO.style.marginTop = "20px";
+  
     }
 }
   function saveAndGo(date, total, shop, barber) {
@@ -457,7 +450,7 @@ function renderDay() {
         $("accHistory").innerHTML = account.logs.map(l => `<div style="padding:5px; border-bottom:1px solid #eee;">${l.date}: ฿${l.amount} (${l.note})</div>`).join('') || "ไม่มีประวัติ";
     }
   function loadAccountStatus() {
-    const settle = parseFloat(($('dSettle')?.innerText || "0").replace(/,/g,'')) || 0;
+   const settle = currentSettle || 0;
     const net = (account.balance || 0) + settle;
     const d = new Date($("dateInp").value);
     const dThai = `${d.getDate()}/${d.getMonth()+1}/${(d.getFullYear()+543).toString().slice(-2)}`;
@@ -475,7 +468,7 @@ function renderDay() {
 }
 
 function clearAccount(){
-    const d = $("accDate").value, settle = parseFloat(($('dSettle')?.innerText || "0").replace(/,/g,'')) || 0;
+  const settle = currentSettle || 0;
     if(!d) return alert("เลือกวันที่!");
     account.logs.unshift({ date: d, amount: (account.balance || 0) + settle, note: $("accNote").value || "เคลียร์ยอด" });
     account.balance = -settle;
@@ -536,7 +529,6 @@ function loadHistMonth() {
     window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`);
 }
 function go(p) {
-    // 1. จัดการหน้า (เหมือนเดิมของพี่)
     document.querySelectorAll('.page').forEach(pg => {
         pg.classList.remove('active');
         pg.style.display = 'none';
@@ -547,8 +539,6 @@ function go(p) {
         targetPage.classList.add('active');
         targetPage.style.display = 'block';
     }
-
-    // 2. จัดการปุ่มเมนู (เหมือนเดิมของพี่)
     document.querySelectorAll('.nav-item').forEach((btn, i) => {
         btn.classList.toggle('active', (i + 1) === p);
     });
@@ -559,12 +549,7 @@ function go(p) {
         // ถ้าอยู่หน้า 2 ให้แสดงเป็น block ถ้าหน้าอื่นให้ซ่อน (none)
         btn.style.display = (p === 2) ? 'block' : 'none';
     }
-    
-    // 4. (แถม) ถ้ามีปุ่มส้ม btnOrange ก็ใส่เพิ่มตรงนี้ได้เลย
-    const btnO = document.getElementById('btnOrange');
-    if (btnO) {
-        btnO.style.display = (p === 2) ? 'flex' : 'none';
-    }
+   
 }
     function saveDB() { localStorage.setItem("barber_db", JSON.stringify(db)); localStorage.setItem("barber_conf", JSON.stringify(conf)); }
     function delRec(id) { if (confirm("ลบรายการนี้?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); } }
