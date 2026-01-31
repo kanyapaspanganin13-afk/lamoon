@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 1</title>
+    <title>Barber Note Pro 21</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -364,31 +364,29 @@ function renderDay() {
 
         if (r.type !== 'GUARANTEE_CLAIM') {
             const svs = r.svcs || [];
+            const hairKeywords = ["รองทรง", "แฟชั่น", "สกินเฟด", "เปิดข้าง", "ตำรวจ", "ทหาร", "นักเรียน", "แก้ผม", "โกนผม", "ตัดผม", "ตัด", "เด็ก"];
             
-            // คีย์เวิร์ดที่ถือว่าเป็นงาน "ตัดผม"
-            const hairKeywords = ["รองทรง", "แฟชั่น", "สกินเฟด", "เปิดข้าง", "ตำรวจ", "ทหาร", "นักเรียน", "แก้ผม", "โกนผม", "ตัดผม", "ตัด"];
-            
-            let hasCut = false;
+            let isAlreadyCountCut = false;
+            let isAlreadyCountChild = false;
+
             svs.forEach(s => {
                 if (s) {
-                    // 1. นับสถิติแยกตามชื่อทรงเป๊ะๆ (เพื่อให้โชว์ป้ายชื่อทรง)
+                    // 1. นับชื่อทรงแยก (เช่น สกินเฟด, แฟชั่น)
                     stats[s] = (stats[s] || 0) + 1;
                     
-                    // 2. เช็กว่าเป็นงานตัดผมไหม เพื่อจะเอานับรวมในหมวด "ตัดผม"
-                    if (hairKeywords.some(key => s.includes(key))) {
-                        hasCut = true;
+                    // 2. ถ้านามสกุลบริการมีคำที่เกี่ยวกับการตัด ให้เพิ่มยอด "ตัดผมรวม"
+                    if (!isAlreadyCountCut && hairKeywords.some(key => s.includes(key))) {
+                        stats["[รวมตัดผม]"] = (stats["[รวมตัดผม]"] || 0) + 1;
+                        isAlreadyCountCut = true; // กันนับซ้ำในบิลเดียว
+                    }
+
+                    // 3. ถ้านามสกุลบริการมีคำว่า "เด็ก" ให้เพิ่มยอด "เด็ก"
+                    if (!isAlreadyCountChild && s.includes("เด็ก")) {
+                        stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
+                        isAlreadyCountChild = true; // กันนับจาก 1 เป็น 2
                     }
                 }
             });
-            
-            // ถ้ายอดในบิลนั้นมีงานตัด ให้บวกสถิติรวม "ตัดผม" แยกต่างหาก
-            if (hasCut) {
-                stats["[รวมตัดผม]"] = (stats["[รวมตัดผม]"] || 0) + 1;
-            }
-
-            if (r.hair && r.hair.includes("เด็ก")) {
-                stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
-            }
         }
         const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
         const rowNum = r.type === 'GUARANTEE_CLAIM' ? "🛡️" : `${i+1}.`;
@@ -399,13 +397,23 @@ function renderDay() {
     const sEarn = isHoliday ? 0 : tot - (bEarn - tips);
     const settle = isHoliday ? 0 : cash - bEarn;
 
-    $("dTotal").innerText = tot.toLocaleString(); 
+  $("dTotal").innerText = tot.toLocaleString(); 
     $("dTrans").innerText = trans.toLocaleString(); 
     $("dCash").innerText = cash.toLocaleString();
+    
+    // 🔵 ปรับสีพื้นหลังกล่อง ช่าง (ซ้าย) และ ร้าน (ขวา) เป็นสีน้ำเงิน
+    const barberBox = $("dBarber").parentElement;
+    const shopBox = $("dShop").parentElement;
+    [barberBox, shopBox].forEach(el => {
+        el.style.backgroundColor = "#0047ba";
+        el.style.color = "#ffffff";
+        el.querySelectorAll('small, b').forEach(node => node.style.color = "#ffffff");
+    });
+
     $("dBarber").innerText = Math.floor(bEarn).toLocaleString(); 
     $("dShop").innerText = Math.floor(sEarn).toLocaleString(); 
     $("dCounts").innerText = isHoliday ? "🏪 วันหยุด" : `ลูกค้า: ${realCustomerCount} คน`;
-
+    
     // --- ช่องคืนเงินธีมธนาคาร กลางเป๊ะ ไร้ขอบ ---
     let txt = "", bg = "#0047ba"; 
     if (isHoliday) { txt = "🏖️ พักผ่อนวันหยุด"; bg = "#64748b"; }
@@ -433,8 +441,8 @@ function renderDay() {
     }
     $("dServiceStats").innerHTML = sH + `</div>`;
 
-    // 🎨 เปลี่ยนพื้นหลังเป็นสีน้ำเงินนวล (Navy Soft)
-    document.body.style.backgroundColor = "#1e293b"; 
+   // 🎨 เปลี่ยนพื้นหลังกลับเป็นสีขาว
+    document.body.style.backgroundColor = "#ffffff";
     // ปรับสีข้อความหัวข้อให้เด่นขึ้น
     const listLabel = `<div style="display:flex; justify-content:space-between; align-items:center; margin:15px 15px 10px 15px;"><b style="font-size:16px; color:#f8fafc;">📋 รายการวันนี้</b><i class="fab fa-line" style="color:#22c55e;font-size:32px;cursor:pointer" onclick="shareLine()"></i></div>`;
     
