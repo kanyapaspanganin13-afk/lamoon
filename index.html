@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.12</title>
+    <title>Barber Note Pro v.13</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-/* 1. บังคับฟอนต์ Kanit และเอาเส้นขอบออกทุกจุดทั่วแอปตามสั่ง */
+/* 1. บังคับฟอนต์ Kanit และเอาเส้นขอบออกทั้งหมด */
 * {
     font-family: 'Kanit', sans-serif !important;
     border: none !important; 
@@ -23,91 +23,49 @@
     --accent: #4338ca;
     --cash: #10b981;
     --trans: #6366f1;
-    --danger: #f87171;
 }
 
 body {
     background-color: var(--bg-color);
-    font-family: 'Kanit', sans-serif;
     font-weight: 300;
     margin: 0;
-    padding-bottom: 120px; /* กันบาร์ล่างทับเนื้อหา */
-    overflow-x: hidden;
+    padding-bottom: 100px; /* เว้นที่ให้บาร์ล่าง */
     color: #334155;
 }
 
-.container { max-width: 480px; margin: 0 auto; padding: 0 15px; }
-
-/* --- แก้หน้าซ้อน --- */
-.page { display: none; }
-.page.active { display: block !important; animation: fadeIn 0.3s ease; }
-
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-/* --- Input & Select: ไม่มีเส้นขอบ ใช้เงาแทน --- */
-.input-box, 
-input[type="date"], 
-input[type="time"],
-input[type="month"],
-input[type="text"],
-input[type="number"],
-select {
-    background: #ffffff;
-    border-radius: 15px;
-    height: 55px;
-    text-align: center;
-    font-weight: 400;
-    /* ใช้เงาแทนเส้นขอบเพื่อให้ดูนวลตามรูป */
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
-    width: 100%;
-    color: var(--primary);
-    font-size: 18px;
-    transition: all 0.2s ease;
-}
-
-.input-box::placeholder { color: #cbd5e1; font-weight: 300; }
-
-/* --- Buttons --- */
-button {
-    border-radius: 14px !important;
-    font-weight: 500 !important;
-    transition: all 0.2s;
+/* 2. สไตล์ Card/Input ให้ดูนวล (ใช้เงาแทนเส้นขอบ) */
+.card-btn, .input-box, select, input {
+    background: #ffffff !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04) !important;
+    border-radius: 15px !important;
     cursor: pointer;
+    transition: 0.2s;
 }
-button:active { transform: scale(0.98); }
 
-/* --- Bottom Nav: ต้องอยู่และไม่หาย --- */
+.card-btn:active { transform: scale(0.95); }
+
+/* 3. แถบบาร์ล่าง - ล็อคตายตัว */
 .bottom-nav {
-    position: fixed !important; /* บังคับให้อยู่กับที่ */
-    bottom: 0; 
-    left: 0; 
-    right: 0;
+    position: fixed !important;
+    bottom: 0; left: 0; right: 0;
     background: var(--primary);
     height: 75px;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     align-items: center;
     border-radius: 20px 20px 0 0;
-    z-index: 9999 !important; /* บังคับให้อยู่บนสุด */
+    z-index: 9999;
 }
 
 .nav-btn {
     color: #94a3b8;
     text-decoration: none;
+    text-align: center;
     font-size: 14px;
-    font-weight: 400;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: all 0.3s ease;
 }
-
-.nav-btn.active {
-    color: #ffffff !important;
-    transform: translateY(-5px);
-}
-
-.nav-btn i { font-size: 20px; margin-bottom: 4px; }
+.nav-btn.active { color: #fff; }
+.page { display: none; }
+.page.active { display: block !important; }
 </style>
 </head> 
 <body id="mainBody">
@@ -123,21 +81,23 @@ button:active { transform: scale(0.98); }
         <h1 id="shopNameDisp" style="margin:0; font-size:22px; font-weight:500; color:var(--primary); letter-spacing:1px; text-transform:uppercase;">BARBER SHOP</h1>
     </header>
 
-    <div id="p1" class="page active">
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
-            <div class="icon-card" onclick="handleInsurance()" style="background:#fff; border-radius:20px; height:90px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 8px 15px rgba(0,0,0,0.03);">
-                <div style="background:linear-gradient(135deg, #fbbf24, #f59e0b); width:35px; height:35px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; color:#fff;"><i class="fas fa-shield-alt"></i></div>
-                <span style="font-size:11px; font-weight:400; color:#1e293b;">ประกันรายได้</span>
-            </div>
-            <div class="icon-card" onclick="handleHoliday()" style="background:#fff; border-radius:20px; height:90px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 8px 15px rgba(0,0,0,0.03);">
-                <div style="background:linear-gradient(135deg, #f87171, #ef4444); width:35px; height:35px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; color:#fff;"><i class="fas fa-umbrella-beach"></i></div>
-                <span style="font-size:11px; font-weight:400; color:#1e293b;">บันทึกวันหยุด</span>
-            </div>
-            <div class="icon-card" onclick="openSettings()" style="background:#fff; border-radius:20px; height:90px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 8px 15px rgba(0,0,0,0.03);">
-                <div style="background:linear-gradient(135deg, #94a3b8, #475569); width:35px; height:35px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; color:#fff;"><i class="fas fa-tools"></i></div>
-                <span style="font-size:11px; font-weight:400; color:#1e293b;">ตั้งค่าระบบ</span>
-            </div>
+    <div class="container" style="max-width: 480px; margin: 0 auto; padding: 0 15px;">
+    <h2 style="text-align:center; color:var(--primary); padding: 20px 0;">BARBER SHOP</h2>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+        <div class="card-btn" onclick="openInsurance()" style="padding: 15px; text-align: center;">
+            <div style="background:#fbbf24; width:40px; height:40px; margin:0 auto 8px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff;">🛡️</div>
+            <span style="font-size: 12px;">ประกันรายได้</span>
         </div>
+        <div class="card-btn" onclick="openHoliday()" style="padding: 15px; text-align: center;">
+            <div style="background:#f87171; width:40px; height:40px; margin:0 auto 8px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff;">⛱️</div>
+            <span style="font-size: 12px;">บันทึกวันหยุด</span>
+        </div>
+        <div class="card-btn" onclick="openSettings()" style="padding: 15px; text-align: center;">
+            <div style="background:#94a3b8; width:40px; height:40px; margin:0 auto 8px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff;">⚙️</div>
+            <span style="font-size: 12px;">ตั้งค่าระบบ</span>
+        </div>
+    </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;"> 
             <div style="background:#fff; border-radius:18px; height:60px; position:relative; display:flex; align-items:center; justify-content:center; border:1px solid #f1f5f9;">
