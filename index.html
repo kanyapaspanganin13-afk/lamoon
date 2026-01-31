@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 333</title>
+    <title>Barber Note Pro 33</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -373,21 +373,21 @@ window.addEventListener('DOMContentLoaded',()=>{const i=$("dateInp"),t=new Date(
             svs.forEach(s => {
                 if (!s) return;
                
-                stats[s] = (stats[s] || 0) + 0;
+                stats[s] = (stats[s] || 0) + 1;
 
                 if (s.includes("เด็ก")) {
                     if (!currentBillIsChild) {
-                        stats["เด็ก"] = (stats["เด็ก"] || 0) + 0;
+                        stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
                         currentBillIsChild = true;
                     }
                     if (!currentBillIsCut) {
-                        stats["[รวมตัดผม]"] = (stats["[รวมตัดผม]"] || 0) + 1;
+                        stats["[ตัดผม]"] = (stats["[ตัดผม]"] || 0) + 1;
                         currentBillIsCut = true;
                     }
                 } 
                 else if (hairKeywords.some(k => s.includes(k))) {
                     if (!currentBillIsCut) {
-                        stats["[รวมตัดผม]"] = (stats["[รวมตัดผม]"] || 0) + 1;
+                        stats["[ตัดผม]"] = (stats["[ตัดผม]"] || 0) + 1;
                         currentBillIsCut = true;
                     }
                 }
@@ -424,10 +424,10 @@ window.addEventListener('DOMContentLoaded',()=>{const i=$("dateInp"),t=new Date(
     }
 
    let sH = `<div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:15px; padding:0 10px;">`;
-    if (stats["[รวมตัดผม]"]) sH += `<span style="background:#0047ba;color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:800;">ตัดผมรวม: ${stats["[รวมตัดผม]"]}</span>`;
+    if (stats["[ตัดผม]"]) sH += `<span style="background:#0047ba;color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:800;">ตัดผม: ${stats["[ตัดผม]"]}</span>`;
     if (stats["เด็ก"]) sH += `<span style="background:#db2777;color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:800;">เด็ก: ${stats["เด็ก"]}</span>`;
     for (let s in stats) { 
-        if (s !== "[รวมตัดผม]" && s !== "เด็ก") {
+        if (s !== "[ตัดผม]" && s !== "เด็ก") {
             sH += `<span style="background:#f1f5f9;color:#475569;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid #e2e8f0;">${s}: ${stats[s]}</span>`; 
         }
     }
