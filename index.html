@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 1</title>
+    <title>Barber Note Pro 11</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -365,20 +365,21 @@ function renderDay() {
         if (r.type !== 'GUARANTEE_CLAIM') {
             const svs = r.svcs || [];
             
-            // ✅ แก้ไข: นับ "ตัดผม" เฉพาะรายการที่มีคำว่า "ตัด" หรือ "ทรง" (ไม่นับ กันหน้า/โกนหนวด)
-            const isCutting = svs.some(s => s.includes("ตัด") || s.includes("ทรง") || s.includes("นักเรียน"));
-            if (isCutting) {
+            // ✅ นับ "ตัดผม" (1 ครั้งต่อบิล) : เฉพาะเมื่อมีคำว่า "ตัด" หรือ "ทรง" ในรายการบริการ
+            // เพื่อให้ "กันหน้า" หรือ "โกนหนวด" ไม่ถูกนับรวมมาเป็นตัดผม
+            const isCut = svs.some(s => s.includes("ตัด") || s.includes("ทรง"));
+            if (isCut) {
                 stats["ตัดผม"] = (stats["ตัดผม"] || 0) + 1;
             }
 
-            // นับเด็ก
+            // นับเด็ก (ถ้ามีคำว่าเด็กในประเภทผม)
             if (r.hair && r.hair.includes("เด็ก")) {
                 stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
             }
 
-            // นับบริการเสริมอื่นๆ (โกนหนวด, กันหน้า, สระ จะมาตกที่นี่แทน)
-            svs.forEach(s => { 
-                // ถ้าเป็นรายการที่ไม่ใช่การตัดผมหลัก ให้เอามาขึ้นป้ายสถิติเสริม
+            // นับสถิติบริการอื่นๆ ทั้งหมดที่เลือกมา
+            svs.forEach(s => {
+                // ถ้าเป็นบริการเสริมที่ไม่ใช่การตัดผมหลัก ให้เก็บชื่อมาโชว์ที่ป้ายสถิติด้วย
                 if (s && !["ตัดผม","รองทรง","แฟชั่น","นักเรียน","ตัด"].some(x => s.includes(x))) {
                     stats[s] = (stats[s] || 0) + 1;
                 }
