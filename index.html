@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 21</title>
+    <title>Barber Note Pro 2</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -137,19 +137,20 @@ nav {
     <span style="font-size: 32px; font-weight: 900; letter-spacing:1px;">บันทึกข้อมูล</span>
 </button>  
 </div>
-<div id="p2" class="page" style="max-width:480px; margin:0 auto; padding: 15px; padding-bottom: 120px; min-height: 100vh; position: relative;">
+<div id="p2" class="page" style="max-width:480px; margin:0 auto; padding: 15px; padding-bottom: 120px; min-height: 100vh; position: relative; background: white;">
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
-        <div style="background: white; padding:18px 15px; border-radius:20px; text-align:center; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
-            <small style="font-weight:800; color:#64748b; text-transform: uppercase;">ยอดรวมวันนี้</small>
-            <div id="dTotal" style="font-size:36px; font-weight:900; color:#4338ca; margin: 5px 0;">0</div>
-            <div id="dCounts" style="font-size:13px; font-weight:700; color:#1e293b; background:#e0e7ff; display:inline-block; padding:2px 10px; border-radius:10px;">ลูกค้า 0 คน</div>
+        
+        <div style="background: #0047ba; padding:18px 15px; border-radius:20px; text-align:center; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); border: none;">
+            <small style="font-weight:800; color:#e2e8f0; text-transform: uppercase;">ยอดรวมวันนี้</small>
+            <div id="dTotal" style="font-size:36px; font-weight:900; color:#ffffff; margin: 5px 0;">0</div>
+            <div id="dCounts" style="font-size:13px; font-weight:700; color:#ffffff; background:rgba(255,255,255,0.2); display:inline-block; padding:2px 10px; border-radius:10px;">ลูกค้า 0 คน</div>
         </div>
 
-        <div style="background:white; padding:15px; border-radius:20px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; display:flex; flex-direction:column; justify-content:center; gap:8px;">
-            <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:700;"><span style="color:#0ea5e9;">📱 โอน:</span> <b id="dTrans">0</b></div>
-            <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:700;"><span style="color:#f59e0b;">💵 สด:</span> <b id="dCash">0</b></div>
-            <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:700;"><span style="color:#6366f1;">🤵 ช่าง:</span> <b id="dBarber">0</b></div>
-            <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:800;"><span style="color:#64748b;">🏠 ร้าน:</span> <b id="dShop">0</b></div>
+        <div style="background:#0047ba; padding:15px; border-radius:20px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); border: none; display:flex; flex-direction:column; justify-content:center; gap:8px; color: white;">
+            <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:700;"><span style="color:#7dd3fc;">📱 โอน:</span> <b id="dTrans">0</b></div>
+            <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:700;"><span style="color:#fbbf24;">💵 สด:</span> <b id="dCash">0</b></div>
+            <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:700;"><span style="color:#a5b4fc;">🤵 ช่าง:</span> <b id="dBarber">0</b></div>
+            <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:800;"><span style="color:#cbd5e1;">🏠 ร้าน:</span> <b id="dShop">0</b></div>
         </div>
     </div>
 
@@ -366,29 +367,32 @@ function renderDay() {
             const svs = r.svcs || [];
             const hairKeywords = ["รองทรง", "แฟชั่น", "สกินเฟด", "เปิดข้าง", "ตำรวจ", "ทหาร", "นักเรียน", "แก้ผม", "โกนผม", "ตัดผม", "ตัด"];
             
-            let hasAddedCut = false;
-            let hasAddedChild = false;
+            let currentBillIsCut = false;
+            let currentBillIsChild = false;
 
             svs.forEach(s => {
                 if (!s) return;
-                
-                // 1. นับสถิติชื่อบริการ (เช่น แฟชั่น, โกนหนวด)
+               
                 stats[s] = (stats[s] || 0) + 1;
 
-                // 2. เช็กเพื่อนับ "ตัดผมรวม" (ถ้าเจอคีย์เวิร์ดตัด และยังไม่ได้นับในบิลนี้)
-                if (!hasAddedCut && (hairKeywords.some(k => s.includes(k)) || s.includes("เด็ก"))) {
-                    stats["[รวมตัดผม]"] = (stats["[รวมตัดผม]"] || 0) + 1;
-                    hasAddedCut = true;
-                }
-
-                // 3. เช็กเพื่อนับ "เด็ก" (ถ้าเจอคำว่าเด็ก และยังไม่ได้นับในบิลนี้)
-                if (!hasAddedChild && s.includes("เด็ก")) {
-                    stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
-                    hasAddedChild = true;
+                if (s.includes("เด็ก")) {
+                    if (!currentBillIsChild) {
+                        stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
+                        currentBillIsChild = true;
+                    }
+                    if (!currentBillIsCut) {
+                        stats["[รวมตัดผม]"] = (stats["[รวมตัดผม]"] || 0) + 1;
+                        currentBillIsCut = true;
+                    }
+                } 
+                else if (hairKeywords.some(k => s.includes(k))) {
+                    if (!currentBillIsCut) {
+                        stats["[รวมตัดผม]"] = (stats["[รวมตัดผม]"] || 0) + 1;
+                        currentBillIsCut = true;
+                    }
                 }
             });
         }
-       
         const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
         const rowNum = r.type === 'GUARANTEE_CLAIM' ? "🛡️" : `${i+1}.`;
         listHtml += `<div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column;"><span style="font-weight:800; font-size:14px; color:#1e293b;">${rowNum} [${timeShow}] | ${(r.svcs||[]).join('+')}</span>${t?`<small style="color:#be185d; font-weight:700; font-size:11px;">🔹 ทิป: ฿${t}</small>`:''}</div><div style="text-align:right;"><b style="font-size:16px; display:block;">฿${p}${t?` <span style="color:#be185d;">(+${t})</span>`:''}</b><span style="font-size:12px; font-weight:700;">${r.pay==='Trans'?'📱 โอน':'💵 สด'} <i class="fas fa-trash-alt" style="color:#ef4444; cursor:pointer; margin-left:8px;" onclick="delRec(${r.id})"></i></span></div></div></div>`;
@@ -405,19 +409,6 @@ function renderDay() {
     $("dShop").innerText = Math.floor(sEarn).toLocaleString(); 
     $("dCounts").innerText = isHoliday ? "🏪 วันหยุด" : `ลูกค้าวันนี้: ${realCustomerCount} คน`;
 
-    // 🔵 เปลี่ยนสีกล่องสรุปยอด (ซ้าย-ขวา) เป็นสีน้ำเงินธนาคาร
-    // สมมติว่าโครงสร้าง HTML ของพี่มีกล่องครอบ dBarber และ dShop
-    const barberBox = $("dBarber").closest('div'); 
-    const shopBox = $("dShop").closest('div');
-
-    if (barberBox) {
-        barberBox.style.cssText = "background:#0047ba !important; color:#ffffff !important; padding:10px; border-radius:12px; flex:1; text-align:center;";
-        barberBox.querySelectorAll('*').forEach(n => n.style.color = "#ffffff");
-    }
-    if (shopBox) {
-        shopBox.style.cssText = "background:#0047ba !important; color:#ffffff !important; padding:10px; border-radius:12px; flex:1; text-align:center;";
-        shopBox.querySelectorAll('*').forEach(n => n.style.color = "#ffffff");
-    }
     // --- ช่องคืนเงินธีมธนาคาร กลางเป๊ะ ไร้ขอบ ---
     let txt = "", bg = "#0047ba"; 
     if (isHoliday) { txt = "🏖️ พักผ่อนวันหยุด"; bg = "#64748b"; }
