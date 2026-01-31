@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.11</title>
+    <title>Barber Note Pro v.16</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -356,7 +356,6 @@ function renderDay() {
         const p = Number(r.price)||0, t = Number(r.tip)||0; tot += p; tips += t;
         (r.pay === 'Trans') ? trans += (p + t) : cash += p;
 
-        // --- [จุดแก้ที่ 1] เช็คก่อนว่าไม่ใช่ประกัน ถึงจะนับสถิติตัดผม ---
         let c = new Set();
         if (r.type !== 'GUARANTEE_CLAIM') { 
             c.add("ตัดผม");
@@ -364,10 +363,9 @@ function renderDay() {
             (r.svcs || []).forEach(s => { if (s && !["เด็ก","รองทรง","แฟชั่น","นักเรียน","ตัดผม"].some(x => s.includes(x))) c.add(s); });
         }
         c.forEach(k => stats[k] = (stats[k] || 0) + 1);
-        // --------------------------------------------------
-
+       
         const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
-        const rowNum = r.type === 'GUARANTEE_CLAIM' ? "🛡️" : `${i+1}.`; // เปลี่ยนเลขลำดับเป็นไอคอนถ้าเป็นประกัน
+        const rowNum = r.type === 'GUARANTEE_CLAIM' ? "🛡️" : `${i+1}.`;
         
         listHtml += `<div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column;"><span style="font-weight:800; font-size:14px; color:#1e293b;">${rowNum} [${timeShow}] | ${(r.svcs||[]).join('+')}</span>${t?`<small style="color:#be185d; font-weight:700; font-size:11px;">🔹 ทิป: ฿${t}</small>`:''}</div><div style="text-align:right;"><b style="font-size:16px; display:block;">฿${p}${t?` <span style="color:#be185d;">(+${t})</span>`:''}</b><span style="font-size:12px; font-weight:700;">${r.pay==='Trans'?'📱 โอน':'💵 สด'} <i class="fas fa-trash-alt" style="color:#ef4444; cursor:pointer; margin-left:8px;" onclick="delRec(${r.id})"></i></span></div></div></div>`;
     });
@@ -516,10 +514,10 @@ function loadHistMonth() {
     let msg = `💈 รายงานร้าน: Barber Shop\n📅 วันที่: ${fDate}\n-------------------------\n📝 ลูกค้า (${today.length} คน):\n${clientList}\n-------------------------\n📊 สรุปงาน:\n${statText}\n-------------------------\n💰 ยอด: ${tot} | 🧧 ทิป: ${tips}\n📱 โอน: ${trans} | 💵 สด: ${cash}\n🤵 ช่างได้: ${Math.floor(bEarn)}\n🏠 ร้านได้: ${Math.floor(tot-(bEarn-tips))}\n-------------------------\n${settleMsg}`;
     window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`);
 }
- function go(p) {
+function go(p) {
     document.querySelectorAll('.page').forEach(pg => {
         pg.classList.remove('active');
-        pg.style.display = 'none'; 
+        pg.style.display = 'none';
     });
     const targetPage = document.getElementById('p' + p);
     if (targetPage) {
@@ -529,10 +527,12 @@ function loadHistMonth() {
     document.querySelectorAll('.nav-item').forEach((btn, i) => {
         btn.classList.toggle('active', (i + 1) === p);
     });
-  const btnClose = document.getElementById("btnCloseDay");
-    if (btnClose) {
-        btnClose.style.display = (n === 2) ? "block" : "none";
+    const btn = document.getElementById('btnCloseDay');
+    if (btn) {
+        btn.style.display = (p === 2) ? 'block' : 'none';
     }
+}
+
     function saveDB() { localStorage.setItem("barber_db", JSON.stringify(db)); localStorage.setItem("barber_conf", JSON.stringify(conf)); }
     function delRec(id) { if (confirm("ลบรายการนี้?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); } }
     function editTime(id) {const rec = db.find(r => r.id === id);if (!rec) return;const newStart = prompt("แก้เวลาเริ่ม (HH:MM)", rec.time);if (!newStart) return;const newEnd = prompt("แก้เวลาเสร็จ (HH:MM)", rec.endTime || "");rec.time = newStart;rec.endTime = newEnd || addMinutes(newStart, 30);saveDB();renderDay();}
