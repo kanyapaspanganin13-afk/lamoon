@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 3</title>
+    <title>Barber Note Pro 39</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -505,13 +505,32 @@ window.addEventListener('DOMContentLoaded',()=>{const i=$("dateInp"),t=new Date(
     $("accLight").style.background = light;
 }
 
-function clearAccount(){
-    const d = $("accDate").value, settle = parseFloat(($('dSettle')?.innerText || "0").replace(/,/g,'')) || 0;
-    if(!d) return alert("เลือกวันที่!");
-    account.logs.unshift({ date: d, amount: (account.balance || 0) + settle, note: $("accNote").value || "เคลียร์ยอด" });
-    account.balance = -settle;
-    localStorage.setItem("barber_account", JSON.stringify(account));
-    speak("เคลียร์เงินเรียบร้อย"); $("accNote").value = ""; loadAccountHistory(); loadAccountStatus();
+function clearAccount() {
+    const d = $("accDate").value;
+    // ดึงค่าจากหน้าจอมาคำนวณ (ตัดเครื่องหมายคอมม่าออก)
+    const netAmount = parseFloat(($("accNet")?.innerText || "0").replace(/,/g, '')) || 0;
+
+    if (!d) return alert("กรุณาเลือกวันที่ก่อนเคลียร์เงิน!");
+    if (netAmount === 0) return alert("ยอดเป็น 0 ไม่ต้องเคลียร์ครับ");
+
+    if (!confirm(`ยืนยันเคลียร์เงินจำนวน ฿${netAmount.toLocaleString()} ใช่หรือไม่?`)) return;
+
+    let history = JSON.parse(localStorage.getItem("barber_acc_logs") || "[]");
+   
+    history.unshift({
+        date: d,
+        amount: netAmount,
+        note: $("accNote").value || "เคลียร์ยอดเงินสด"
+    });
+    localStorage.setItem("barber_acc_logs", JSON.stringify(history));
+
+    speak("เคลียร์เงินเรียบร้อย");
+    $("accNote").value = "";
+   
+    renderHistoryList(); 
+    
+    $("accTodayVal").innerText = "฿0";
+    $("accNet").innerText = "0";
 }
 function renderHistoryList() {
     const db = JSON.parse(localStorage.getItem("barber_acc_logs") || "[]");
@@ -567,34 +586,60 @@ function loadHistMonth() {
     window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`);
 }
 function go(p) {
-    // 1. จัดการหน้า (เหมือนเดิมของพี่)
+    // 1. จัดการการแสดงผลหน้าจอ
     document.querySelectorAll('.page').forEach(pg => {
         pg.classList.remove('active');
         pg.style.display = 'none';
     });
-    
+
     const targetPage = document.getElementById('p' + p);
     if (targetPage) {
         targetPage.classList.add('active');
         targetPage.style.display = 'block';
     }
 
-    // 2. จัดการปุ่มเมนู (เหมือนเดิมของพี่)
+    // 2. จัดการไฮไลท์ปุ่มเมนู (Navbar) ให้ตรงกับหน้าที่อยู่
     document.querySelectorAll('.nav-item').forEach((btn, i) => {
         btn.classList.toggle('active', (i + 1) === p);
     });
 
-    // 3. จัดการปุ่ม "ปิดยอด" (จุดที่พี่เช็ก)
-    const btn = document.getElementById('btnCloseDay');
-    if (btn) {
-        // ถ้าอยู่หน้า 2 ให้แสดงเป็น block ถ้าหน้าอื่นให้ซ่อน (none)
-        btn.style.display = (p === 2) ? 'block' : 'none';
+    // 3. จัดการปุ่มพิเศษที่ต้องการให้โชว์แค่บางหน้า (เช่น ปุ่มปิดยอด)
+    const btnClose = document.getElementById('btnCloseDay');
+    if (btnClose) {
+        btnClose.style.display = (p === 2) ? 'block' : 'none';
     }
-    
-    // 4. (แถม) ถ้ามีปุ่มส้ม btnOrange ก็ใส่เพิ่มตรงนี้ได้เลย
-    const btnO = document.getElementById('btnOrange');
-    if (btnO) {
-        btnO.style.display = (p === 2) ? 'flex' : 'none';
+
+    const btnOrange = document.getElementById('btnOrange');
+    if (btnOrange) {
+        btnOrange.style.display = (p === 2) ? 'flex' : 'none';
+    }
+
+    // 4. Logic พิเศษเมื่อเข้าสู่หน้า 3 (บัญชี/สถิติ)
+    if (p === 3) {
+        // ดึงวันที่ปัจจุบันจากหน้าหลักมาใส่ในช่องวันที่ของหน้าบัญชี
+        const d = $("dateInp")?.value;
+        if (d) {
+            if ($("accDate")) $("accDate").value = d;
+
+            // --- คำนวณยอด "วันนี้" เพื่อโชว์ใน Card ทันที ---
+            const todayRecs = db.filter(r => r.date === d);
+            let tot = 0;
+            todayRecs.forEach(r => { 
+                if (r.type === 'SERVICE') tot += (Number(r.price) || 0); 
+            });
+
+            // ใส่ยอดวันนี้
+            if ($("accTodayVal")) $("accTodayVal").innerText = `฿${tot.toLocaleString()}`;
+            
+            // คำนวณยอดสุทธิ (Net) 
+            // หมายเหตุ: ตรงนี้พี่สามารถดึงค่า "ค้างเดิม" มาบวกเพิ่มได้ถ้ามีตัวแปรเก็บไว้
+            if ($("accNet")) $("accNet").innerText = tot.toLocaleString();
+        }
+
+        // โหลดประวัติการเคลียร์เงินมาโชว์ที่ด้านล่าง
+        if (typeof renderHistoryList === 'function') {
+            renderHistoryList();
+        }
     }
 }
     function saveDB() { localStorage.setItem("barber_db", JSON.stringify(db)); localStorage.setItem("barber_conf", JSON.stringify(conf)); }
