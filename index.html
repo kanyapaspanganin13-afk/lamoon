@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 6</title>
+    <title>Barber Note Pro 7</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -356,17 +356,26 @@ function renderDay() {
           stats = {};
     let tot = 0, trans = 0, cash = 0, tips = 0, listHtml = "";
 
+    // --- [จุดแก้ที่ 1] นับจำนวนลูกค้าตามจำนวนแถวจริง (ไม่เกี่ยวกับรายการบริการ) ---
+    const realCustomerCount = today.filter(r => r.type !== 'GUARANTEE_CLAIM').length;
+
     today.slice().sort((a,b) => a.time.localeCompare(b.time)).forEach((r, i) => {
         const p = Number(r.price)||0, t = Number(r.tip)||0; tot += p; tips += t;
         (r.pay === 'Trans') ? trans += (p + t) : cash += p;
 
-        let c = new Set();
-        if (r.type !== 'GUARANTEE_CLAIM') { 
-            c.add("ตัดผม");
-            if (r.hair && r.hair.includes("เด็ก")) c.add("เด็ก");
-            (r.svcs || []).forEach(s => { if (s && !["เด็ก","รองทรง","แฟชั่น","นักเรียน","ตัดผม"].some(x => s.includes(x))) c.add(s); });
+        // นับสถิติบริการแยกต่างหาก (เพื่อโชว์เป็นป้ายด้านล่าง)
+        if (r.type !== 'GUARANTEE_CLAIM') {
+            // นับ "ตัดผม" แค่ 1 ครั้งต่อ 1 บิล
+            stats["ตัดผม"] = (stats["ตัดผม"] || 0) + 1;
+            
+            // นับบริการเสริมอื่นๆ
+            if (r.hair && r.hair.includes("เด็ก")) stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
+            (r.svcs || []).forEach(s => { 
+                if (s && !["เด็ก","รองทรง","แฟชั่น","นักเรียน","ตัดผม"].some(x => s.includes(x))) {
+                    stats[s] = (stats[s] || 0) + 1;
+                }
+            });
         }
-        c.forEach(k => stats[k] = (stats[k] || 0) + 1);
        
         const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
         const rowNum = r.type === 'GUARANTEE_CLAIM' ? "🛡️" : `${i+1}.`;
@@ -378,38 +387,39 @@ function renderDay() {
     const sEarn = isHoliday ? 0 : tot - (bEarn - tips);
     const settle = isHoliday ? 0 : cash - bEarn;
 
-    $("dTotal").innerText = tot.toLocaleString(); $("dTrans").innerText = trans.toLocaleString(); $("dCash").innerText = cash.toLocaleString();
-    $("dBarber").innerText = Math.floor(bEarn).toLocaleString(); $("dShop").innerText = Math.floor(sEarn).toLocaleString(); 
+    // อัปเดตตัวเลขหน้าจอ
+    $("dTotal").innerText = tot.toLocaleString(); 
+    $("dTrans").innerText = trans.toLocaleString(); 
+    $("dCash").innerText = cash.toLocaleString();
+    $("dBarber").innerText = Math.floor(bEarn).toLocaleString(); 
+    $("dShop").innerText = Math.floor(sEarn).toLocaleString(); 
     
-    // --- [จุดแก้ที่ 2] นับเฉพาะคนที่ไม่ใช่ประกัน ---
-    const realCustomerCount = today.filter(r => r.type !== 'GUARANTEE_CLAIM').length;
+    // แสดงจำนวนคน (นับจากแถวรายการ)
     $("dCounts").innerText = isHoliday ? "🏪 วันหยุด" : `ลูกค้า: ${realCustomerCount} คน`;
-    // ------------------------------------------
 
+    // --- [จุดแก้ที่ 2] ช่องแจ้งคืนเงิน (ธีมธนาคาร / ไร้ขอบ / ตรงกลาง) ---
+    let txt = "", bg = "#0047ba"; // สีน้ำเงินธนาคาร
+    if (isHoliday) { txt = "🏖️ พักผ่อนวันหยุด"; bg = "#64748b"; }
+    else if (tot === 0) { txt = "🛡️ ร้านจ่ายประกัน"; } 
+    else if (settle > 0) { txt = `🤵 ช่างคืนร้าน ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; } 
+    else if (settle < 0) { txt = `🏠 ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; bg = "#0ea5e9"; } 
+    else { txt = "✅ ยอดพอดี"; bg = "#059669"; }
+
+    const sBar = $("settleBar");if(sBar) {sBar.innerText = txt;sBar.style.cssText = `background: ${bg}; color: white;border: none;display: flex;align-items: center;justify-content: center; height: 55px; border-radius: 12px; font-weight: 800; font-size: 18px; margin: 10px 0;width: 100%;`;
+        
+    }
     let sH = `<div style="display:flex; flex-wrap:wrap; gap:5px; justify-content:center; margin-bottom:10px;">`;
     ["ตัดผม", "เด็ก"].forEach(k => { if (stats[k]) sH += `<span style="background:#4338ca;color:#fff;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;">${k}: ${stats[k]}</span>`; });
     for (let s in stats) { if (!["ตัดผม", "เด็ก"].includes(s)) sH += `<span style="background:#64748b;color:#fff;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;">${s}: ${stats[s]}</span>`; }
     $("dServiceStats").innerHTML = sH + `</div>`;
 
-    let txt = "", bg = ""; 
-    if (isHoliday) { txt = "🏖️ พักผ่อนวันหยุด"; bg = "#f1f5f9"; }
-    else if (tot === 0) { txt = "🟦 ร้านจ่ายประกัน"; bg = "#e0f2fe"; } 
-    else if (settle > 0) { txt = `🟥 ช่างคืนร้าน ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; bg = "#fee2e2"; } 
-    else if (settle < 0) { txt = `🟦 ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; bg = "#e0e7ff"; } 
-    else { txt = "✅ ยอดพอดี"; bg = "#dcfce7"; }
-
-    $("dailyList").innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0; padding:0 5px;"><b style="font-size:16px;">📋 รายงานวันนี้:</b><i class="fab fa-line" style="color:#22c55e;font-size:32px;cursor:pointer" onclick="shareLine()"></i></div>` + (isHoliday ? `<div style="text-align:center; padding:40px; color:#64748b; font-weight:800;">🏖️ วันหยุดร้าน (ไม่มีรายการ) <i class="fas fa-trash-alt" style="color:#ef4444; cursor:pointer; margin-left:8px;" onclick="delRec(${allRec.find(x=>x.type==='HOLIDAY')?.id})"></i></div>` : (listHtml || "<center style='padding:40px; opacity:0.3;'>ไม่มีข้อมูล</center>"));
-    
-const settleBar = $("settleBar");settleBar.innerText = txt;settleBar.style.background = bg;const btnSave = $("btnSaveReport");btnSave.onclick = function() {saveAndGo(dInp, tot, sEarn, bEarn);};btnSave.style.display = isHoliday ? "none" : "flex";}
-const sBar = document.getElementById("settleBar");
-if(sBar) {
-    sBar.innerText = txt;
-    sBar.style.background = bg;
+    $("dailyList").innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0; padding:0 5px;"><b style="font-size:16px;">📋 รายงานวันนี้:</b><i class="fab fa-line" style="color:#22c55e;font-size:32px;cursor:pointer" onclick="shareLine()"></i></div>` + (isHoliday ? `<div style="text-align:center; padding:40px; color:#64748b; font-weight:800;">🏖️ วันหยุดร้าน </div>` : (listHtml || "<center style='padding:40px; opacity:0.3;'>ไม่มีข้อมูล</center>"));
+    const btnO = $("btnCloseDay") || $("btnOrange");
+    if(btnO) {
+        btnO.style.display = (isHoliday) ? "none" : "block";
+        btnO.style.marginTop = "20px";
+    }
 }
-const btnO = document.getElementById("btnOrange");
-if(btnO) {
-    btnO.style.display = (isHoliday) ? "none" : "flex";
-    btnO.onclick = () => closeDay();}
   function saveAndGo(date, total, shop, barber) {
     if (total === 0 && !confirm("ไม่มีข้อมูลยอด ปิดงานเลยมั้ย?")) return;
     let s = {}; db.filter(r => r.date === date).forEach(r => { 
