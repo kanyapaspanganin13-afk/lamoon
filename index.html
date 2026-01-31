@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 3</title>
+    <title>Barber Note Pro 73</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -333,7 +333,96 @@ function handleInsurance() {
             modal.style.display = 'flex'; 
         }
     }
-function closeDay() {const d = document.getElementById("dateInp").value;const today = db.filter(r => r.date === d);if(!today.length) return alert("ไม่มีข้อมูล");if(confirm("ปิดยอดวันนี้และส่งไปหน้าสถิติ?")) { const tot = today.reduce((a,b) => a+b.price, 0);const cash = today.filter(r=>r.pay==='Cash').reduce((a,b)=>a+b.price, 0);const bEarn = Math.max(tot * (conf.perc/100), conf.guar); let dailyStats = {};today.forEach(r => {r.svcs.forEach(s => { dailyStats[s] = (dailyStats[s] || 0) + 1;});}); const arc = {date: d, total: tot, cash: cash, barber: bEarn, shop: tot - bEarn, settle: cash - bEarn, count: today.length, details: today, stats: dailyStats }; archives = archives.filter(a => a.date !== d);archives.push(arc);localStorage.setItem("barber_archives", JSON.stringify(archives));db = db.filter(r => r.date !== d);localStorage.setItem("barber_db", JSON.stringify(db)); speak("ส่งรายงานวันนี้สำเร็จ");alert("ส่งรายงานสำเร็จ!");go(3);} }
+function calcServiceStats(records) {
+    const stats = {};
+    const hairKeywords = [
+        "รองทรง","แฟชั่น","สกินเฟด","เปิดข้าง",
+        "ตำรวจ","ทหาร","นักเรียน","แก้ผม","โกนผม","ตัด"
+    ];
+
+    records.forEach(r => {
+        if (r.type !== "SERVICE") return;
+
+        let countedCut = false;
+        let countedChild = false;
+
+        (r.svcs || []).forEach(s => {
+            if (!s) return;
+
+            // เด็ก
+            if (s.includes("เด็ก")) {
+                if (!countedChild) {
+                    stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
+                    countedChild = true;
+                }
+                if (!countedCut) {
+                    stats["[ตัดผม]"] = (stats["[ตัดผม]"] || 0) + 1;
+                    countedCut = true;
+                }
+                return;
+            }
+
+            // ตัดผม
+            if (hairKeywords.some(k => s.includes(k))) {
+                if (!countedCut) {
+                    stats["[ตัดผม]"] = (stats["[ตัดผม]"] || 0) + 1;
+                    countedCut = true;
+                }
+                return;
+            }
+
+            // บริการเสริม
+            stats[s] = (stats[s] || 0) + 1;
+        });
+    });
+
+    return stats;
+}
+function saveDailyToArchives(date) {
+    const today = db.filter(r => r.date === date);
+    if (!today.length) return false;
+
+    const total = today.reduce((a,b)=>a + (b.price||0), 0);
+    const cash  = today.filter(r=>r.pay==='Cash')
+                       .reduce((a,b)=>a + (b.price||0), 0);
+
+    const barber = Math.max(total * (conf.perc / 100), conf.guar);
+    const stats = calcServiceStats(today);
+
+    const arc = {
+        date,
+        total,
+        cash,
+        barber,
+        shop: total - barber,
+        settle: cash - barber,
+        count: today.filter(r=>r.type==="SERVICE").length,
+        details: today,
+        stats
+    };
+
+    archives = archives.filter(a => a.date !== date);
+    archives.push(arc);
+    localStorage.setItem("barber_archives", JSON.stringify(archives));
+
+    return true;
+}
+
+  function closeDay() {
+    const d = $("dateInp").value;
+    if (!db.some(r => r.date === d)) return alert("ไม่มีข้อมูล");
+
+    if (!confirm("ปิดยอดวันนี้และส่งไปหน้าสถิติ?")) return;
+
+    saveDailyToArchives(d);
+
+    db = db.filter(r => r.date !== d);
+    localStorage.setItem("barber_db", JSON.stringify(db));
+
+    speak("ส่งรายงานวันนี้สำเร็จ");
+    alert("ส่งรายงานสำเร็จ!");
+    go(3);
+}
 
 function applyTheme(t){document.body.className=t;const o=document.getElementById("navyStyle");if(o)o.remove();const s=document.documentElement.style;if(t==='dark'){s.setProperty('--card','#262626');s.setProperty('--text','#fbbf24');document.body.style.background='#171717'}else{s.setProperty('--card','#fff');s.setProperty('--text','#1a237e');document.body.style.background=(t==='navy')?'#1a237e':''}if(t==='navy'){const st=document.createElement("style");st.id="navyStyle";st.innerHTML=`body.navy{background:#1a237e!important;color:#fff!important}.navy .card b,.navy .card span,.navy div[style*="background:white"] b{color:#1e293b!important}.navy #dTotal,.navy #accNet{color:#1a237e!important}.nav-item{color:#fff!important;opacity:0.8}.nav-item.active{color:#8b5cf6!important;opacity:1}`;document.head.appendChild(st)}}
 function openSettings(){const m=document.getElementById("modalSet");if(m)m.style.display='flex';document.getElementById("setShop").value=conf.shop||'';document.getElementById("setTheme").value=conf.theme||'light';document.getElementById("setVoice").value=conf.voice||'female';document.getElementById("setSound").value=conf.sound||'on';document.getElementById("setPerc").value=conf.perc||50;document.getElementById("setGuar").value=conf.guar||0}
