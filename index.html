@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.8.3</title>
+    <title>Barber Note Pro v.8.23</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -288,14 +288,22 @@ function renderDay() {
 }
 function saveAndGo(date, total, shop, barber) {
     const dayRecs = db.filter(r => r.date === date);
-    let cash = 0, trans = 0;
+
+    if (!dayRecs.length && !confirm("ไม่มีรายการวันนี้ ต้องการปิดวันไหม?")) return;
+
+    let cash = 0, trans = 0, tips = 0;
     dayRecs.forEach(r => {
-        if (r.pay === 'Cash') cash += Number(r.price || 0);
-        if (r.pay === 'Trans') trans += Number(r.price || 0);
+        const p = Number(r.price || 0);
+        const t = Number(r.tip || 0);
+        tips += t;
+        if (r.pay === "Cash") cash += p;
+        if (r.pay === "Trans") trans += p;
     });
 
-    let settle = cash - barber;
+    // 💰 เงินที่ต้องเคลียร์ (สด - ช่าง)
+    const settle = cash - barber;
 
+    /* ---------- 1. บันทึกรายวัน ---------- */
     let stats = {};
     dayRecs.forEach(r => {
         (r.svcs || []).forEach(v => stats[v] = (stats[v] || 0) + 1);
@@ -309,17 +317,31 @@ function saveAndGo(date, total, shop, barber) {
         shop: total - barber,
         cash,
         trans,
+        tips,
         settle,
         count: dayRecs.length,
         stats,
-        details: dayRecs   // ⭐ สำคัญมาก
+        details: dayRecs
     };
 
     const i = archives.findIndex(a => a.date === date);
     (i > -1) ? archives[i] = entry : archives.push(entry);
-
     save();
-    alert("✅ บันทึกรายวันเรียบร้อย");
+
+    /* ---------- 2. เคลียร์บัญชี ---------- */
+    account.balance += settle;
+    account.logs.unshift({
+        date,
+        amount: settle,
+        note: `ปิดยอดวันที่ ${date}`
+    });
+    localStorage.setItem("barber_account", JSON.stringify(account));
+
+    /* ---------- 3. ล้างข้อมูลรายวัน ---------- */
+    db = db.filter(r => r.date !== date);
+    saveDB();
+
+    alert("✅ เคลียร์ยอดและบันทึกบัญชีเรียบร้อย");
     go(3);
 }
 
