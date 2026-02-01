@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.9</title>
+    <title>Barber Note Pro v.09</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -263,25 +263,14 @@ function handleHoliday() {
         $("btnTrans").className = `btn btn-pay ${m === 'Trans' ? 'active-trans' : ''}`;
     }
 function updateAccount() {
-    // 1. ดึงข้อมูลดิบ (db) มาดูว่าวันนี้ยอดเท่าไหร่
     const data = JSON.parse(localStorage.getItem('BarberData')) || { recs: [], per: 50 };
     let todayTotal = 0;
     data.recs.forEach(r => todayTotal += parseFloat(r.p));
-
-    // 2. ดึงประวัติเก่าๆ (archives) มาเช็กยอดค้าง (ถ้ามี)
-    // อันนี้ผมทำเผื่อไว้ ถ้าพี่ไม่มีระบบยอดค้างเดิม มันจะเป็น 0
     let oldVal = 0; 
-
-    // 3. คำนวณยอดสุทธิ (Net)
-    // สมมติยอดสุทธิคือยอดวันนี้รวมกับยอดค้าง
     let net = todayTotal + oldVal;
-
-    // 4. ส่งข้อมูลไปโชว์ที่หน้าบัญชี (หน้า 3) ตาม ID ที่พี่มี
     if($("accTodayVal")) $("accTodayVal").innerText = "฿" + todayTotal.toLocaleString();
     if($("accOldVal")) $("accOldVal").innerText = "฿" + oldVal.toLocaleString();
     if($("accNet")) $("accNet").innerText = net.toLocaleString();
-
-    // 5. สั่งให้ "ไฟสถานะ" (accLight) ทำงาน
     const light = $("accLight");
     if(light) {
         if(net > 0) {
@@ -318,20 +307,17 @@ function updateAccount() {
     container.innerHTML = `<div id="settleBar" style="flex:8; height:55px; background:${bg}; display:flex; align-items:center; justify-content:center; border-radius:15px; font-weight:900; font-size:15px; color:#1e293b; border:1px solid rgba(0,0,0,0.05);">${txt}</div><button onclick="saveAndGo('${dInp}', ${tot}, ${sEarn}, ${bEarn})" style="flex:2; height:55px; background:#f97316; color:#fff; border-radius:15px; border:none; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"><i class="fas fa-paper-plane"></i></button>`;
 }
 function saveAndGo(date, total, shop, barber) {
-    // 1. เช็กก่อนว่ามีเงินไหม
     if (total === 0 && !confirm("ไม่มีข้อมูลยอด ปิดงานเลยมั้ย?")) return;
-
-    // 2. ดึงข้อมูลจาก db มากรอง (พี่ใช้ตัวแปร db ใช่ไหมครับ)
     const todayDetails = db.filter(r => r.date === date);
-
-    // 3. สรุปสถิติทรงผม (ส่วนนี้พี่เขียนไว้ถูกแล้ว)
-    let s = {}; 
-    todayDetails.forEach(r => { 
-        r.svcs.forEach(v => s[v] = (s[v]||0)+1); 
-        if(r.hair) s["ทรง:"+r.hair] = (s["ทรง:"+r.hair]||0)+1; 
+   let s = {}; 
+    db.filter(r => r.date === date).forEach(r => { 
+        r.svcs.forEach(v => {
+            s["svc:" + v] = (s["svc:" + v] || 0) + 1; 
+        }); 
+        if(r.hair) {
+            s["hair:" + r.hair] = (s["hair:" + r.hair] || 0) + 1;
+        }
     });
-
-    // 4. สร้างก้อนข้อมูล (นี่คือจุดสำคัญที่ต้องส่งไปหน้าบัญชี)
     const entry = { 
         date: date, 
         total: total, 
@@ -339,28 +325,23 @@ function saveAndGo(date, total, shop, barber) {
         shop: total - barber, 
         count: todayDetails.length, 
         stats: s,
-        details: todayDetails // ใส่ไว้ให้หน้ารายวันมันเรียกดูได้ด้วย
+        details: todayDetails 
     };
-
-    // 5. เอาเข้าแฟ้ม archives (ตัวเดียวกับที่หน้ารายเดือน/รายวันใช้เรียก)
     const i = archives.findIndex(a => a.date === date); 
     if (i > -1) {
-        archives[i] = entry; // ถ้ามีของเก่าให้ทับ
+        archives[i] = entry; 
     } else {
-        archives.push(entry); // ถ้าไม่มีให้เพิ่มใหม่
-    }
-
-    // 6. บันทึกและย้ายหน้า
-    save(); // บันทึกค่า archives ลง localStorage
+        archives.push(entry); 
+    }  
+    save(); 
     alert("✅ บันทึกเข้าบัญชีเรียบร้อย!"); 
+    if($("listArea")) $("listArea").innerHTML = ""; 
+    if($("totalDisplay")) $("totalDisplay").innerText = "0"; 
     
-    // 7. ล้างหน้าจอ (UI) แต่ไม่ลบข้อมูลใน db ตามที่พี่สั่ง
-    if($("listArea")) $("listArea").innerHTML = ""; // ล้างรายการที่โชว์
-    if($("totalDisplay")) $("totalDisplay").innerText = "0"; // รีเซ็ตเลขยอดรวม
-    
-    go(3); // ย้ายไปหน้าประวัติ/บัญชี ทันที!
+    go(3);
 }
-    function toggleAccHistory() {
+    
+  function toggleAccHistory() {
         const w = $("accHistoryWrapper");
         w.style.display = w.style.display === "none" ? "block" : "none";
         $("accHistory").innerHTML = account.logs.map(l => `<div style="padding:5px; border-bottom:1px solid #eee;">${l.date}: ฿${l.amount} (${l.note})</div>`).join('') || "ไม่มีประวัติ";
@@ -423,12 +404,14 @@ function saveAndGo(date, total, shop, barber) {
         mCount += a.count; 
         if(a.stats) { for(let s in a.stats) mStats[s] = (mStats[s] || 0) + a.stats[s]; } 
     });
-
-    let sB = "", hB = "";
-    for(let s in mStats) { 
-        if(s.startsWith("ทรง:")) hB += `<span class="badge" style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; margin:2px; font-size:11px;">${s.replace("ทรง:","")}: ${mStats[s]}</span>`; 
-        else sB += `<span class="badge" style="background:#6366f1; color:white; padding:4px 8px; border-radius:6px; margin:2px; font-size:11px;">${s}: ${mStats[s]}</span>`; 
+  let sB = "", hB = "";
+  for(let k in mStats) { 
+    if(k.startsWith("hair:")) {
+        hB += `<span class="badge" style="background:#10b981;">${k.replace("hair:","")}: ${mStats[k]}</span>`; 
+    } else if(k.startsWith("svc:")) {
+        sB += `<span class="badge" style="background:#6366f1;">${k.replace("svc:","")}: ${mStats[k]}</span>`; 
     }
+}
     area.innerHTML = `
     <div style="padding:15px; background:#fff; border-radius:20px; border:1px solid #e2e8f0; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);">
         <div style="text-align:center; margin-bottom:20px; padding:15px; background:linear-gradient(to bottom, #fff, #f8fafc); border-radius:15px; border:1px solid #f1f5f9;">
