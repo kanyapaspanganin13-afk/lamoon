@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-  <title>Barber Note Pro v.11</title>
+  <title>Barber Note Pro v.1</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
@@ -130,240 +130,255 @@ select.form-control{appearance:none;background-image:url("data:image/svg+xml,%3C
     💈 Barber Pro
    </div>
   </div>
-  <div class="container">
-   <div id="p1" class="page active">
+ <div id="toast" class="toast"></div>
+<div class="header">
+  <div class="shop-name" id="shopName"> 💈 Barber Pro </div>
+</div>
+<div class="container">
+  <div id="p1" class="page active">
     <div class="quick-actions">
-     <div class="quick-btn guarantee" onclick="claimGuarantee()">
-      <i class="fas fa-shield-alt"></i><span>ประกันรายได้</span>
-     </div>
-     <div class="quick-btn holiday" onclick="setHoliday()">
-      <i class="fas fa-umbrella-beach"></i><span>วันหยุด</span>
-     </div>
-     <div class="quick-btn settings" onclick="openSettings()">
-      <i class="fas fa-cog"></i><span>ตั้งค่า</span>
-     </div>
+      <div class="quick-btn guarantee" onclick="claimGuarantee()">
+        <i class="fas fa-shield-alt"></i><span>ประกันรายได้</span>
+      </div>
+      <div class="quick-btn holiday" onclick="setHoliday()">
+        <i class="fas fa-umbrella-beach"></i><span>วันหยุด</span>
+      </div>
+      <div class="quick-btn settings" onclick="openSettings()">
+        <i class="fas fa-cog"></i><span>ตั้งค่า</span>
+      </div>
     </div>
     <div class="card">
-     <div class="time-grid">
-      <div class="form-group">
-       <input type="date" id="entryDate" class="form-control">
+      <div class="time-grid">
+        <div class="form-group">
+          <input type="date" id="entryDate" class="form-control">
+        </div>
+        <div class="form-group">
+          <input type="time" id="timeStart" class="form-control" placeholder="เวลาเริ่ม">
+        </div>
+        <div class="form-group">
+          <input type="time" id="timeEnd" class="form-control" placeholder="เวลาจบ">
+        </div>
       </div>
-      <div class="form-group">
-       <input type="time" id="timeStart" class="form-control" placeholder="เวลาเริ่ม">
-      </div>
-      <div class="form-group">
-       <input type="time" id="timeEnd" class="form-control" placeholder="เวลาจบ">
-      </div>
-     </div>
     </div>
     <div class="card">
-     <div class="card-title">
-      บริการ
-     </div>
-     <div class="service-row"><select id="hairStyle" class="form-control"><option value="">ทรงผม</option><option value="รองทรงสูง">รองทรงสูง</option><option value="แฟชั่น">แฟชั่น</option><option value="นักเรียน">นักเรียน</option><option value="ตำรวจ/ทหาร">ตำรวจ/ทหาร</option><option value="สกินเฟด">สกินเฟด</option><option value="แก้ผม">แก้ผม</option><option value="โกนผม">โกนผม</option><option value="เด็ก">เด็ก</option><option value="อื่นๆ">อื่นๆ</option></select> <select id="addon1" class="form-control"><option value="">เสริม 1</option><option value="โกนหนวด">🪒 โกนหนวด</option><option value="กันหน้า">✨ กันหน้า</option><option value="สระผม">🚿 สระผม</option><option value="ย้อมผม">🎨 ย้อมผม</option><option value="ดัดผม">🌀 ดัดผม</option><option value="หยอดหู">👂 หยอดหู</option></select> <select id="addon2" class="form-control"><option value="">เสริม 2</option><option value="โกนหนวด">🪒 โกนหนวด</option><option value="กันหน้า">✨ กันหน้า</option><option value="สระผม">🚿 สระผม</option><option value="ย้อมผม">🎨 ย้อมผม</option><option value="ดัดผม">🌀 ดัดผม</option><option value="หยอดหู">👂 หยอดหู</option></select>
-     </div>
+      <div class="card-title"> บริการ </div>
+      <div class="service-row">
+        <select id="hairStyle" class="form-control">
+          <option value="">ทรงผม</option>
+          <option value="รองทรงสูง">รองทรงสูง</option>
+          <option value="แฟชั่น">แฟชั่น</option>
+          <option value="นักเรียน">นักเรียน</option>
+          <option value="ตำรวจ/ทหาร">ตำรวจ/ทหาร</option>
+          <option value="สกินเฟด">สกินเฟด</option>
+          <option value="แก้ผม">แก้ผม</option>
+          <option value="โกนผม">โกนผม</option>
+          <option value="เด็ก">เด็ก</option>
+          <option value="อื่นๆ">อื่นๆ</option>
+        </select>
+        <select id="addon1" class="form-control">
+          <option value="">เสริม 1</option>
+          <option value="โกนหนวด">🪒 โกนหนวด</option>
+          <option value="กันหน้า">✨ กันหน้า</option>
+          <option value="สระผม">🚿 สระผม</option>
+          <option value="ย้อมผม">🎨 ย้อมผม</option>
+          <option value="ดัดผม">🌀 ดัดผม</option>
+          <option value="หยอดหู">👂 หยอดหู</option>
+        </select>
+        <select id="addon2" class="form-control">
+          <option value="">เสริม 2</option>
+          <option value="โกนหนวด">🪒 โกนหนวด</option>
+          <option value="กันหน้า">✨ กันหน้า</option>
+          <option value="สระผม">🚿 สระผม</option>
+          <option value="ย้อมผม">🎨 ย้อมผม</option>
+          <option value="ดัดผม">🌀 ดัดผม</option>
+          <option value="หยอดหู">👂 หยอดหู</option>
+        </select>
+      </div>
     </div>
     <div class="card">
-     <div class="card-title">
-      ราคา
-     </div>
-     <div class="price-grid">
-      <div class="form-group">
-       <input type="number" id="price" class="form-control price-input" placeholder="฿ ราคา" min="0">
+      <div class="card-title"> ราคา </div>
+      <div class="price-grid">
+        <div class="form-group">
+          <input type="number" id="price" class="form-control price-input" placeholder="฿ ราคา" min="0">
+        </div>
+        <div class="form-group">
+          <input type="number" id="tip" class="form-control" placeholder="฿ ทิป" min="0">
+        </div>
       </div>
-      <div class="form-group">
-       <input type="number" id="tip" class="form-control" placeholder="฿ ทิป" min="0">
-      </div>
-     </div>
     </div>
     <div class="card">
-     <div class="card-title">
-      วิธีชำระเงิน
-     </div>
-     <div class="payment-btns"><button class="pay-btn" id="payCash" onclick="selectPayment('cash')"><i class="fas fa-money-bill-wave"></i> เงินสด</button> <button class="pay-btn" id="payTrans" onclick="selectPayment('trans')"><i class="fas fa-qrcode"></i> สแกนจ่าย</button>
-     </div>
-    </div><button class="btn-submit" onclick="saveEntry()"><i class="fas fa-check-circle"></i> บันทึกรายการ</button>
-   </div>
-   <div id="p2" class="page">
+      <div class="card-title"> วิธีชำระเงิน </div>
+      <div class="payment-btns">
+        <button class="pay-btn" id="payCash" onclick="selectPayment('cash')">
+          <i class="fas fa-money-bill-wave"></i> เงินสด </button>
+        <button class="pay-btn" id="payTrans" onclick="selectPayment('trans')">
+          <i class="fas fa-qrcode"></i> สแกนจ่าย </button>
+      </div>
+    </div>
+    <button class="btn-submit" onclick="saveEntry()">
+      <i class="fas fa-check-circle"></i> บันทึกรายการ </button>
+  </div>
+  <div id="p2" class="page">
     <div class="summary-grid">
-     <div class="summary-card">
-      <div class="summary-label">
-       ยอดรวมวันนี้
+      <div class="summary-card">
+        <div class="summary-label"> ยอดรวมวันนี้ </div>
+        <div class="summary-value" id="totalToday"> ฿0 </div>
+        <div class="summary-sub">
+          <span id="customerCount">0</span> ลูกค้า
+        </div>
       </div>
-      <div class="summary-value" id="totalToday">
-       ฿0
+      <div class="summary-card">
+        <div class="summary-label"> รายได้ช่าง </div>
+        <div class="summary-value" id="barberEarn"> ฿0 </div>
+        <div class="summary-sub" id="barberSub"> รวมทิป </div>
       </div>
-      <div class="summary-sub">
-       <span id="customerCount">0</span> ลูกค้า
-      </div>
-     </div>
-     <div class="summary-card">
-      <div class="summary-label">
-       รายได้ช่าง
-      </div>
-      <div class="summary-value" id="barberEarn">
-       ฿0
-      </div>
-      <div class="summary-sub" id="barberSub">
-       รวมทิป
-      </div>
-     </div>
     </div>
     <div class="card">
-     <h3 class="card-title">สรุปยอด</h3>
-     <div class="stats-grid">
-      <div class="stat-item">
-       <div class="stat-label">
-        💵 เงินสด
-       </div>
-       <div class="stat-value" id="cashTotal">
-        ฿0
-       </div>
+      <h3 class="card-title">สรุปยอด</h3>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-label"> 💵 เงินสด </div>
+          <div class="stat-value" id="cashTotal"> ฿0 </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label"> 📱 โอน </div>
+          <div class="stat-value" id="transTotal"> ฿0 </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label"> 👨‍🎨 ช่าง </div>
+          <div class="stat-value" id="barberTotal"> ฿0 </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label"> 🏠 ร้าน </div>
+          <div class="stat-value" id="shopTotal"> ฿0 </div>
+        </div>
       </div>
-      <div class="stat-item">
-       <div class="stat-label">
-        📱 โอน
-       </div>
-       <div class="stat-value" id="transTotal">
-        ฿0
-       </div>
-      </div>
-      <div class="stat-item">
-       <div class="stat-label">
-        👨‍🎨 ช่าง
-       </div>
-       <div class="stat-value" id="barberTotal">
-        ฿0
-       </div>
-      </div>
-      <div class="stat-item">
-       <div class="stat-label">
-        🏠 ร้าน
-       </div>
-       <div class="stat-value" id="shopTotal">
-        ฿0
-       </div>
-      </div>
-     </div>
     </div>
     <div class="card">
-     <h3 class="card-title">สถิติบริการ</h3>
-     <div class="service-tags" id="serviceTags"></div>
+      <h3 class="card-title">สถิติบริการ</h3>
+      <div class="service-tags" id="serviceTags"></div>
     </div>
     <div class="settle-bar" id="settleBar">
-     <div class="settle-label">
-      ยอดเคลียร์
-     </div>
-     <div class="settle-amount" id="settleAmount">
-      ฿0
-     </div>
-     <div class="settle-desc" id="settleDesc">
-      ยอดพอดี
-     </div>
+      <div class="settle-label"> ยอดเคลียร์ </div>
+      <div class="settle-amount" id="settleAmount"> ฿0 </div>
+      <div class="settle-desc" id="settleDesc"> ยอดพอดี </div>
     </div>
     <div class="card">
-     <h3 class="card-title">รายการลูกค้า</h3>
-     <div class="timeline" id="timeline"></div>
+      <h3 class="card-title">รายการลูกค้า</h3>
+      <div class="timeline" id="timeline"></div>
     </div>
-    <div class="action-btns"><button class="btn-action btn-line" onclick="shareLine()"><i class="fab fa-line"></i> แชร์ LINE</button> <button class="btn-action btn-archive" onclick="archiveToday()"><i class="fas fa-save"></i> บันทึกประวัติ</button>
+    <div class="action-btns">
+      <button class="btn-action btn-line" onclick="shareLine()">
+        <i class="fab fa-line"></i> แชร์ LINE </button>
+      <button class="btn-action btn-archive" onclick="archiveToday()">
+        <i class="fas fa-save"></i> บันทึกประวัติ </button>
     </div>
-   </div>
-   <div id="p3" class="page">
+  </div>
+  <div id="p3" class="page">
     <div class="balance-display">
-     <div class="balance-indicator" id="balanceIndicator"></div>
-     <div class="balance-label">
-      ยอดค้างเดิม
-     </div>
-     <div class="balance-amount" id="balanceAmount">
-      ฿0
-     </div>
-     <div class="balance-status" id="balanceStatus">
-      เคลียร์ครบถ้วน
-     </div>
+      <div class="balance-indicator" id="balanceIndicator"></div>
+      <div class="balance-label"> ยอดค้างเดิม </div>
+      <div class="balance-amount" id="balanceAmount"> ฿0 </div>
+      <div class="balance-status" id="balanceStatus"> เคลียร์ครบถ้วน </div>
     </div>
     <div class="card">
-     <div class="stats-grid">
-      <div class="stat-item">
-       <div class="stat-label">
-        ยอดวันนี้
-       </div>
-       <div class="stat-value" id="todaySettle">
-        ฿0
-       </div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-label"> ยอดวันนี้ </div>
+          <div class="stat-value" id="todaySettle"> ฿0 </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label"> ยอดสุทธิ </div>
+          <div class="stat-value" id="netBalance"> ฿0 </div>
+        </div>
       </div>
-      <div class="stat-item">
-       <div class="stat-label">
-        ยอดสุทธิ
-       </div>
-       <div class="stat-value" id="netBalance">
-        ฿0
-       </div>
+    </div>
+    <div class="card">
+      <h3 class="card-title">เคลียร์เงิน</h3>
+      <div class="form-group">
+        <input type="date" id="clearDate" class="form-control" placeholder="วันที่">
       </div>
-     </div>
+      <div class="form-group">
+        <input type="number" id="clearAmount" class="form-control" placeholder="฿ จำนวนเงิน">
+      </div>
+      <div class="form-group">
+        <input type="text" id="clearNote" class="form-control" placeholder="บันทึก...">
+      </div>
+      <button class="btn-submit" onclick="clearMoney()">
+        <i class="fas fa-check"></i> บันทึกการเคลียร์ </button>
     </div>
     <div class="card">
-     <h3 class="card-title">เคลียร์เงิน</h3>
-     <div class="form-group">
-      <input type="date" id="clearDate" class="form-control" placeholder="วันที่">
-     </div>
-     <div class="form-group">
-      <input type="number" id="clearAmount" class="form-control" placeholder="฿ จำนวนเงิน">
-     </div>
-     <div class="form-group">
-      <input type="text" id="clearNote" class="form-control" placeholder="บันทึก...">
-     </div><button class="btn-submit" onclick="clearMoney()"><i class="fas fa-check"></i> บันทึกการเคลียร์</button>
+      <h3 class="card-title">ค้นหารายงาน</h3>
+      <div class="form-group">
+        <input type="date" id="searchDate" class="form-control" placeholder="ค้นหารายวัน">
+      </div>
+      <div class="form-group">
+        <input type="month" id="searchMonth" class="form-control" placeholder="ค้นหารายเดือน">
+      </div>
+      <div class="action-btns">
+        <button class="btn-action btn-archive" onclick="searchByDate()">
+          <i class="fas fa-calendar-day"></i> รายวัน </button>
+        <button class="btn-action btn-line" onclick="searchByMonth()">
+          <i class="fas fa-calendar-alt"></i> รายเดือน </button>
+      </div>
     </div>
     <div class="card">
-     <h3 class="card-title">ค้นหารายงาน</h3>
-     <div class="form-group">
-      <input type="date" id="searchDate" class="form-control" placeholder="ค้นหารายวัน">
-     </div>
-     <div class="form-group">
-      <input type="month" id="searchMonth" class="form-control" placeholder="ค้นหารายเดือน">
-     </div>
-     <div class="action-btns"><button class="btn-action btn-archive" onclick="searchByDate()"><i class="fas fa-calendar-day"></i> รายวัน</button> <button class="btn-action btn-line" onclick="searchByMonth()"><i class="fas fa-calendar-alt"></i> รายเดือน</button>
-     </div>
+      <h3 class="card-title">ประวัติการเคลียร์</h3>
+      <div id="clearLogs"></div>
     </div>
-    <div class="card">
-     <h3 class="card-title">ประวัติการเคลียร์</h3>
-     <div id="clearLogs"></div>
-    </div>
-   </div>
   </div>
-  <div class="bottom-nav"><button class="nav-btn active" onclick="showPage('p1')"><i class="fas fa-edit"></i><span>บันทึก</span></button> <button class="nav-btn" onclick="showPage('p2')"><i class="fas fa-chart-line"></i><span>รายงาน</span></button> <button class="nav-btn" onclick="showPage('p3')"><i class="fas fa-wallet"></i><span>บัญชี</span></button>
-  </div>
-  <div id="settingsModal" class="modal">
-   <div class="modal-content">
+</div>
+<div class="bottom-nav">
+  <button class="nav-btn active" onclick="showPage('p1')">
+    <i class="fas fa-edit"></i><span>บันทึก</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('p2')">
+    <i class="fas fa-chart-line"></i><span>รายงาน</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('p3')">
+    <i class="fas fa-wallet"></i><span>บัญชี</span>
+  </button>
+</div>
+<div id="settingsModal" class="modal">
+  <div class="modal-content">
     <div class="modal-header">
-     <h3 class="modal-title">⚙️ ตั้งค่าระบบ</h3><button class="modal-close" onclick="closeSettings()">×</button>
+      <h3 class="modal-title">⚙️ ตั้งค่าระบบ</h3>
+      <button class="modal-close" onclick="closeSettings()">×</button>
     </div>
     <div class="form-group">
-     <input type="text" id="settingShop" class="form-control" placeholder="ชื่อร้าน">
+      <input type="text" id="settingShop" class="form-control" placeholder="ชื่อร้าน">
     </div>
     <div class="form-group">
-     <input type="number" id="settingPerc" class="form-control" placeholder="% ช่าง" min="0" max="100">
+      <input type="number" id="settingPerc" class="form-control" placeholder="% ช่าง" min="0" max="100">
     </div>
     <div class="form-group">
-     <input type="number" id="settingGuar" class="form-control" placeholder="฿ ประกันรายได้" min="0">
+      <input type="number" id="settingGuar" class="form-control" placeholder="฿ ประกันรายได้" min="0">
     </div>
     <div class="form-group">
-     <div class="card-title">
-      ธีมสี
-     </div>
-     <div class="theme-btns"><button class="theme-btn active" data-theme="light" onclick="setTheme('light')"><i class="fas fa-sun"></i> Light</button> <button class="theme-btn" data-theme="navy" onclick="setTheme('navy')"><i class="fas fa-moon"></i> Navy</button> <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')"><i class="fas fa-star"></i> Dark</button>
-     </div>
-    </div><button class="btn-submit" onclick="saveSettings()"><i class="fas fa-save"></i> บันทึกการตั้งค่า</button>
-   </div>
+      <div class="card-title"> ธีมสี </div>
+      <div class="theme-btns">
+        <button class="theme-btn active" data-theme="light" onclick="setTheme('light')">
+          <i class="fas fa-sun"></i> Light </button>
+        <button class="theme-btn" data-theme="navy" onclick="setTheme('navy')">
+          <i class="fas fa-moon"></i> Navy </button>
+        <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')">
+          <i class="fas fa-star"></i> Dark </button>
+      </div>
+    </div>
+    <button class="btn-submit" onclick="saveSettings()">
+      <i class="fas fa-save"></i> บันทึกการตั้งค่า </button>
   </div>
-  <div id="reportModal" class="modal">
-   <div class="modal-content">
+</div>
+<div id="reportModal" class="modal">
+  <div class="modal-content">
     <div class="modal-header">
-     <h3 class="modal-title" id="reportTitle">📊 รายงาน</h3><button class="modal-close" onclick="closeReport()">×</button>
+      <h3 class="modal-title" id="reportTitle">📊 รายงาน</h3>
+      <button class="modal-close" onclick="closeReport()">×</button>
     </div>
     <div id="reportContent"></div>
-   </div>
   </div>
-  <script>
+</div>
+<script>
 let db=[],conf={shop:'💈 Barber Pro',perc:60,guar:300,theme:'light'},archives={},account={balance:0,logs:[]},selectedPayment=null,guaranteeClaimedToday=!1,isHolidayToday=!1;
 function init(){loadData();setCurrentDateTime();updateShopName();applyTheme(conf.theme);renderReport();renderAccount();document.getElementById('clearDate').valueAsDate=new Date()}
 function loadData(){const a=localStorage.getItem('barber_db'),b=localStorage.getItem('barber_conf'),c=localStorage.getItem('barber_archives'),d=localStorage.getItem('barber_account');if(a)db=JSON.parse(a);if(b)conf=JSON.parse(b);if(c)archives=JSON.parse(c);if(d)account=JSON.parse(d);checkTodayStatus()}
