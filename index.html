@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.8.9</title>
+    <title>Barber Note Pro v.9</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -262,7 +262,38 @@ function handleHoliday() {
         $("btnCash").className = `btn btn-pay ${m === 'Cash' ? 'active-cash' : ''}`;
         $("btnTrans").className = `btn btn-pay ${m === 'Trans' ? 'active-trans' : ''}`;
     }
-function renderDay() {
+function updateAccount() {
+    // 1. ดึงข้อมูลดิบ (db) มาดูว่าวันนี้ยอดเท่าไหร่
+    const data = JSON.parse(localStorage.getItem('BarberData')) || { recs: [], per: 50 };
+    let todayTotal = 0;
+    data.recs.forEach(r => todayTotal += parseFloat(r.p));
+
+    // 2. ดึงประวัติเก่าๆ (archives) มาเช็กยอดค้าง (ถ้ามี)
+    // อันนี้ผมทำเผื่อไว้ ถ้าพี่ไม่มีระบบยอดค้างเดิม มันจะเป็น 0
+    let oldVal = 0; 
+
+    // 3. คำนวณยอดสุทธิ (Net)
+    // สมมติยอดสุทธิคือยอดวันนี้รวมกับยอดค้าง
+    let net = todayTotal + oldVal;
+
+    // 4. ส่งข้อมูลไปโชว์ที่หน้าบัญชี (หน้า 3) ตาม ID ที่พี่มี
+    if($("accTodayVal")) $("accTodayVal").innerText = "฿" + todayTotal.toLocaleString();
+    if($("accOldVal")) $("accOldVal").innerText = "฿" + oldVal.toLocaleString();
+    if($("accNet")) $("accNet").innerText = net.toLocaleString();
+
+    // 5. สั่งให้ "ไฟสถานะ" (accLight) ทำงาน
+    const light = $("accLight");
+    if(light) {
+        if(net > 0) {
+            light.style.background = "#ef4444"; // สีแดง (มียอดเงิน)
+            if($("accStatus")) $("accStatus").innerText = "⚠️ มียอดค้างชำระ";
+        } else {
+            light.style.background = "#10b981"; // สีเขียว (เคลียร์หมดแล้ว)
+            if($("accStatus")) $("accStatus").innerText = "✅ บัญชีเป็นปกติ";
+        }
+    }
+}
+  function renderDay() {
     const dInp = $("dateInp").value, today = db.filter(r => r.date === dInp), stats = {};
     let tot = 0, trans = 0, cash = 0, tips = 0, listHtml = "";
     today.slice().sort((a,b) => a.time.localeCompare(b.time)).forEach((r, i) => {
