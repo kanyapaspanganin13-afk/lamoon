@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.8.27</title>
+    <title>Barber Note Pro v.8.7</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -302,7 +302,24 @@ function renderAccount() {
     $("dServiceStats").innerHTML = sH + `</div>`;
     $("dailyList").innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0; padding:0 5px;"><b style="font-size:16px;">📋 รายงานวันนี้:</b><i class="fab fa-line" style="color:#22c55e;font-size:32px;cursor:pointer" onclick="shareLine()"></i></div>` + (listHtml || "<center style='padding:40px; opacity:0.3;'>ไม่มีข้อมูล</center>");
     let txt = "", bg = ""; if (tot === 0) { txt = "🟦 ร้านจ่ายประกัน"; bg = "#e0f2fe"; } else if (settle > 0) { txt = `🟥 ช่างคืนร้าน ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; bg = "#fee2e2"; } else if (settle < 0) { txt = `🟦 ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; bg = "#e0e7ff"; } else { txt = "✅ ยอดพอดี"; bg = "#dcfce7"; }
-   const container = $("settleBar").parentElement; container.style.cssText = "display:flex; gap:10px; margin-top:10px;"; container.innerHTML = <div id="settleBar" style="flex:8; height:55px; background:${bg}; display:flex; align-items:center; justify-content:center; border-radius:15px; font-weight:900; font-size:15px; color:#1e293b; border:1px solid rgba(0,0,0,0.05);">${txt}</div><button onclick="saveAndGo('${dInp}', ${tot}, ${bEarn})" style="flex:2; height:55px; background:#f97316; color:#fff; border-radius:15px; border:none; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"><i class="fas fa-paper-plane"></i></button>; }
+  container.innerHTML = `
+<div id="settleBar"
+     style="flex:8; height:55px; background:${bg};
+            display:flex; align-items:center; justify-content:center;
+            border-radius:15px; font-weight:900; font-size:15px;
+            color:#1e293b; border:1px solid rgba(0,0,0,0.05);">
+    ${txt}
+</div>
+
+<button
+    onclick="saveAndGo('${dInp}', ${tot}, ${bEarn})"
+    style="flex:2; height:55px; background:#f97316; color:#fff;
+           border-radius:15px; border:none; font-size:22px;
+           cursor:pointer; display:flex; align-items:center;
+           justify-content:center; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+    <i class="fas fa-paper-plane"></i>
+</button>
+`;
 
    function saveAndGo(date, total, barber) {
     const dayRecs = db.filter(r => r.date === date);
