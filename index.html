@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/27GqTXFn/Barber-Note.png">
-    <title>Barber Note v.11</title>
+    <title>Barber Note v.01</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -92,12 +92,45 @@
     </div>
     <button class="btn-close-day" onclick="closeDay()"><i class="fas fa-check-circle"></i></button>
 </div>
-<div id="p3" class="page"><div class="card" style="border-top: 4px solid var(--primary);"><label>เรียกดูประวัติรายวัน</label><input type="date" id="histDate" onchange="loadHistDaily()"><div id="histDailyArea" style="margin-top:15px"></div>
+<div id="p3" class="page">
+    <div class="card" style="border-top: 5px solid #f59e0b;">
+        <h3 style="margin:0 0 15px 0; font-size:16px;"><i class="fas fa-file-invoice-dollar"></i> สรุปยอดบัญชี</h3>
+        
+        <div class="grid-2">
+            <div style="background:#fff7ed; border:2px solid #ffedd5; border-radius:15px; padding:15px; text-align:center;">
+                <small style="color:#b45309;">📅 ค้างเดิม</small>
+                <div style="font-size:24px; font-weight:bold; color:#b45309;">฿<span id="oldTotal">0</span></div>
+            </div>
+            <div style="background:#f0f9ff; border:2px solid #e0f2fe; border-radius:15px; padding:15px; text-align:center;">
+                <small style="color:#0ea5e9;">📅 วันนี้</small>
+                <div style="font-size:24px; font-weight:bold; color:#0ea5e9;">฿<span id="todayNet">0</span></div>
+            </div>
+        </div>
+
+        <div style="text-align:center; margin:20px 0; font-weight:bold; color:#64748b;">
+            คำนวณยอด...
+        </div>
+
+        <hr style="border:0; border-top:1px dashed #cbd5e1; margin:15px 0;">
+
+        <label style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+            <input type="checkbox" id="confirmClear" style="width:20px; height:20px;"> ยืนยันการเคลียร์เงิน
+        </label>
+        
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+            <div style="background:#eef2ff; padding:10px; border-radius:12px; display:flex; align-items:center;">
+                <i class="fas fa-calendar-alt" style="color:#4338ca;"></i>
+            </div>
+            <input type="text" id="clearNote" placeholder="พิมพ์หมายเหตุการเคลียร์เงิน...">
+        </div>
+
+        <button class="btn-save" style="background:#10b981; margin-top:0;" onclick="clearMoney()">ยืนยันบันทึกการเคลียร์</button>
+        
+        <button style="width:100%; background:none; border:1px dashed #4338ca; color:#4338ca; padding:12px; border-radius:12px; margin-top:10px; font-size:14px;" onclick="viewHistory()">
+            <i class="fas fa-history"></i> ดูประวัติการเคลียร์เงินทั้งหมด
+        </button>
     </div>
-    <div class="card" style="border-top: 4px solid var(--warning);">
-        <label>สรุปสถิติรายเดือน</label>
-        <input type="month" id="histMonth" onchange="loadHistMonth()"><div id="histMonthArea" style="margin-top:15px"></div></div>
-</div> 
+</div>
 <div id="modalSet" class="modal"><div class="modal-content"><h3>⚙️ ตั้งค่า</h3><label>ชื่อร้าน</label><input id="setShop">
 <div class="grid-2" style="margin-top:10px"><div><label>% แบ่ง</label><input type="number" id="setPerc"></div><div><label>ประกัน</label><input type="number" id="setGuar"></div></div>
 <div class="grid-2" style="margin-top:15px"><div><label>🔊 เสียง</label><select id="setSound"><option value="on">เปิด</option><option value="off">ปิด</option></select></div><div><label>🎚️ เสียงพูด</label><select id="setVoice"><option value="female">👩 หญิง</option><option value="male">👨 ชาย</option></select></div></div>
@@ -120,6 +153,27 @@
     function handleSave(){const p=$("priceInp").value; if(!p||!payMethod){ speak("กรุณาระบุราคาและวิธีชำระเงิน"); return; }let svcs=[($("mainSvc").value||"ตัดผม"),$("extra1").value,$("extra2").value].filter(s=>s);db.push({id:Date.now(),date:$("dateInp").value,time:`${$("tStart").value}-${$("tEnd").value}`,mainSvc:$("mainSvc").value||"ตัดผม",svcs,hair:$("hairStyle").value,price:Number(p),pay:payMethod});
     localStorage.setItem("barber_db",JSON.stringify(db)); speak("บันทึก "+p+" บาท สำเร็จ");$("mainSaveBtn").innerText="บันทึกสำเร็จ ✓"; $("mainSaveBtn").style.background="var(--accent)";setTimeout(()=>{ $("mainSaveBtn").innerText="บันทึกข้อมูล"; $("mainSaveBtn").style.background="var(--primary)"; $("priceInp").value=""; if($("tEnd").value){ $("tStart").value=$("tEnd").value; $("tEnd").value=""; } $("extra1").value=$("extra2").value=""; selectPay(""); },600);
     }
+   function updateAccountPage() {
+    const data = JSON.parse(localStorage.getItem('BarberData')) || { recs: [], per: 50 };
+    const today = new Date().toISOString().split('T')[0];
+    let todayTotal = 0;
+    const todayRecs = data.recs.filter(r => r.d === today);
+    
+    todayRecs.forEach(r => {
+        let share = (parseFloat(r.p) * (data.per / 100)) + parseFloat(r.t || 0);
+        todayTotal += share;
+    });
+    let allTotal = 0;
+    data.recs.forEach(r => {
+        let share = (parseFloat(r.p) * (data.per / 100)) + parseFloat(r.t || 0);
+        allTotal += share;
+    });
+    document.getElementById('todayNet').innerText = todayTotal.toLocaleString();
+    document.getElementById('oldTotal').innerText = (allTotal - todayTotal).toLocaleString();
+}
+function goPage(p) {
+    if(p === 3) updateAccountPage(); 
+}
     function renderDay(){
     const d=$("dateInp").value, today=db.filter(r=>r.date===d); let tot=0,trans=0,cash=0,stats={},listHtml="";today.sort((a,b)=>a.time.localeCompare(b.time)).forEach(r=>{tot+=r.price; r.pay==='Trans'?trans+=r.price:cash+=r.price; r.svcs.forEach(s=>stats[s]=(stats[s]||0)+1);listHtml+=`<div class="history-row"><div style="display:flex; justify-content:space-between"><span>${r.time} | ${r.svcs.join('+')}</span><b>฿${r.price}</b></div><div style="display:flex; justify-content:space-between; opacity:0.7"><span>${r.hair||''}</span><span>${r.pay==='Cash'?'💵 สด':'📱 โอน'} <i class="fas fa-trash" style="margin-left:10px; color:var(--danger)" onclick="delRec(${r.id})"></i></span></div></div>`;
         });
