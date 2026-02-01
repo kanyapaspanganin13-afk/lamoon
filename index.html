@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.8.13</title>
+    <title>Barber Note Pro v.8.1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -300,12 +300,20 @@ function saveAndGo(date, total, shop, barber) {
         w.style.display = w.style.display === "none" ? "block" : "none";
         $("accHistory").innerHTML = account.logs.map(l => `<div style="padding:5px; border-bottom:1px solid #eee;">${l.date}: ฿${l.amount} (${l.note})</div>`).join('') || "ไม่มีประวัติ";
     }
-   function loadHistDaily() {const d = $("histDate").value; const found = archives.find(a => a.date === d); const area = $("histDailyArea"); 
-    if(!found) { area.innerHTML = "<center style='color:#ccc; padding:40px;'>❌ ไม่พบข้อมูลในประวัติ</center>"; return; }
-    let rows = found.details.map(r => `
+function loadHistDaily() {
+    const d = $("histDate").value; 
+    const found = archives.find(a => a.date.includes(d)); 
+    const area = $("histDailyArea"); 
+    
+    if(!found) { 
+        area.innerHTML = "<center style='color:#ccc; padding:40px;'>❌ ไม่พบข้อมูลในประวัติ</center>"; 
+        return; 
+    }
+
+    let rows = (found.details || []).map(r => `
         <div class="history-row" style="font-size:13px; padding:10px 0; border-bottom:1px solid #f1f5f9;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <b style="color:#1e293b;">${r.time} | ${r.svcs.join('+')}</b> 
+                <b style="color:#1e293b;">${r.time} | ${(r.svcs || []).join('+')}</b> 
                 <b style="color:#1e293b;">฿${r.price}</b>
             </div>
             <div style="font-size:12px; font-weight:600; color:#64748b; margin-top:4px;">
@@ -314,39 +322,39 @@ function saveAndGo(date, total, shop, barber) {
             </div>
         </div>`).join('');
 
-    // 2. ป้ายสถิติ (Badge)
-    let statBadges = ""; if (found.stats) { for(let s in found.stats) { let bg = s.startsWith("ทรง:") ? "#10b981" : "#6366f1"; statBadges += `<span class="badge" style="background:${bg}; color:#fff; margin:2px; padding:4px 8px; border-radius:6px; font-size:11px;">${s.replace("ทรง:","")}: ${found.stats[s]}</span>`; 
+    let statBadges = ""; 
+    if (found.stats) { 
+        for(let s in found.stats) {
+            let isHair = s.toLowerCase().includes("ทรง:") || s.toLowerCase().includes("hair:");
+            let bg = isHair ? "#10b981" : "#6366f1"; 
+            let label = s.replace(/ทรง:|งาน:|hair:|svc:/gi, ""); 
+            statBadges += `<span class="badge" style="background:${bg}; color:#fff; margin:2px; padding:4px 8px; border-radius:6px; font-size:11px; display:inline-block;">${label}: ${found.stats[s]}</span>`; 
         } 
     }
     const settle = found.settle || 0;
-    const settleText = settle > 0 ? `🔴 ช่างคืนร้าน: ฿${Math.floor(settle).toLocaleString()}` : settle < 0 ? `🔵 ร้านคืนช่าง: ฿${Math.floor(Math.abs(settle)).toLocaleString()}` : "🟢 ยอดพอดีเป๊ะ";
-    const settleClass = settle > 0 ? "status-red" : settle < 0 ? "status-indigo" : "status-green";
-
     area.innerHTML = `
-    <div style="background:#fff; padding:15px; border-radius:20px; border:1px solid #e2e8f0; margin-top:10px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);">
-        <div class="status-bar ${settleClass}" style="padding:10px; font-size:14px; margin-bottom:15px; border-radius:12px; font-weight:900; text-align:center;">
-            ${settleText}
+    <div style="background:#fff; padding:15px; border-radius:20px; border:1px solid #e2e8f0; margin-top:10px;">
+        <div class="status-bar ${settle > 0 ? "status-red" : "status-green"}" style="padding:10px; font-size:14px; margin-bottom:15px; border-radius:12px; font-weight:900; text-align:center;">
+            ${settle > 0 ? `🔴 ช่างคืนร้าน: ฿${Math.floor(settle)}` : `🟢 ร้านคืนช่าง: ฿${Math.floor(Math.abs(settle))}`}
         </div>
-        
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px; font-size:13px;">
-            <div style="background:#f8fafc; padding:10px; border-radius:10px; border:1px solid #f1f5f9;">ยอดตัด: <b>${found.total.toLocaleString()}</b></div>
-            <div style="background:#f8fafc; padding:10px; border-radius:10px; border:1px solid #f1f5f9;">เงินสด: <b>${found.cash.toLocaleString()}</b></div>
+            <div style="background:#f8fafc; padding:10px; border-radius:10px;">ยอดตัด: <b>${found.total.toLocaleString()}</b></div>
+            <div style="background:#f8fafc; padding:10px; border-radius:10px;">เงินสด: <b>${found.cash.toLocaleString()}</b></div>
             <div style="background:#f0fdf4; padding:10px; border-radius:10px; color:#166534;">ช่างได้: <b>${Math.floor(found.barber).toLocaleString()}</b></div>
             <div style="background:#eff6ff; padding:10px; border-radius:10px; color:#1e40af;">ร้านได้: <b>${Math.floor(found.shop).toLocaleString()}</b></div>
         </div>
-
-        <div style="margin-bottom:15px; display:flex; flex-wrap:wrap; gap:4px;">${statBadges}</div>
+        <div style="margin-bottom:15px;">${statBadges}</div>
         <div style="border-top:2px dashed #f1f5f9; padding-top:10px;">${rows}</div>
     </div>`;
 }
-  function loadHistMonth() {
+function loadHistMonth() {
     const m = $("histMonth").value; 
     const area = $("histMonthArea"); 
     if(!m) return;
     
     const filtered = archives.filter(a => a.date.startsWith(m));
     if(!filtered.length) { 
-        area.innerHTML = "<center style='color:#ccc; padding:40px;'>🌑 ไม่มีข้อมูลของเดือนนี้</center>"; 
+        area.innerHTML = "<center style='color:#ccc; padding:40px;'>🌑 ไม่มีข้อมูล</center>"; 
         return; 
     }
 
@@ -355,46 +363,43 @@ function saveAndGo(date, total, shop, barber) {
         mTotal += a.total; 
         mBarber += a.barber; 
         mShop += (a.total - a.barber); 
-        mCount += a.count; 
+        mCount += (a.count || 0); 
         if(a.stats) { for(let s in a.stats) mStats[s] = (mStats[s] || 0) + a.stats[s]; } 
     });
 
     let sB = "", hB = "";
-    for(let s in mStats) { 
-        if(s.startsWith("ทรง:")) hB += `<span class="badge" style="background:#10b981; color:white; padding:4px 8px; border-radius:6px; margin:2px; font-size:11px;">${s.replace("ทรง:","")}: ${mStats[s]}</span>`; 
-        else sB += `<span class="badge" style="background:#6366f1; color:white; padding:4px 8px; border-radius:6px; margin:2px; font-size:11px;">${s}: ${mStats[s]}</span>`; 
+    for(let k in mStats) { 
+        let isHair = k.toLowerCase().includes("ทรง:") || k.toLowerCase().includes("hair:");
+        let label = k.replace(/ทรง:|งาน:|hair:|svc:/gi, "");
+        let badge = `<span class="badge" style="background:${isHair ? "#10b981" : "#6366f1"}; color:#fff; padding:4px 8px; border-radius:6px; margin:2px; font-size:11px; display:inline-block;">${label}: ${mStats[k]}</span>`;
+        
+        if(isHair) hB += badge; else sB += badge;
     }
-    area.innerHTML = `
-    <div style="padding:15px; background:#fff; border-radius:20px; border:1px solid #e2e8f0; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);">
-        <div style="text-align:center; margin-bottom:20px; padding:15px; background:linear-gradient(to bottom, #fff, #f8fafc); border-radius:15px; border:1px solid #f1f5f9;">
-            <div style="font-size:12px; color:#64748b; font-weight:bold; margin-bottom:5px;">✂️ ยอดตัดรวมทั้งเดือน</div>
-            <div style="font-size:32px; font-weight:900; color:#1e293b;">฿${mTotal.toLocaleString()}</div>
-        </div>
 
+    area.innerHTML = `
+    <div style="padding:15px; background:#fff; border-radius:20px; border:1px solid #e2e8f0;">
+        <div style="text-align:center; margin-bottom:20px; padding:15px; background:#f8fafc; border-radius:15px;">
+            <div style="font-size:12px; color:#64748b;">✂️ ยอดตัดรวมทั้งเดือน</div>
+            <div style="font-size:32px; font-weight:900;">฿${mTotal.toLocaleString()}</div>
+        </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
-            <div style="background:#f0fdf4; padding:15px; border-radius:15px; text-align:center; border:1px solid #dcfce7;">
-                <div style="font-size:11px; color:#166534; font-weight:bold;">🤵 ช่างรวม</div>
+            <div style="background:#f0fdf4; padding:10px; border-radius:15px; text-align:center;">
+                <div style="font-size:11px; color:#166534;">🤵 ช่างรวม</div>
                 <div style="font-size:20px; font-weight:900; color:#15803d;">฿${Math.floor(mBarber).toLocaleString()}</div>
             </div>
-            <div style="background:#eff6ff; padding:15px; border-radius:15px; text-align:center; border:1px solid #dbeafe;">
-                <div style="font-size:11px; color:#1e40af; font-weight:bold;">🏠 ร้านรวม</div>
+            <div style="background:#eff6ff; padding:10px; border-radius:15px; text-align:center;">
+                <div style="font-size:11px; color:#1e40af;">🏠 ร้านรวม</div>
                 <div style="font-size:20px; font-weight:900; color:#1e40af;">฿${Math.floor(mShop).toLocaleString()}</div>
             </div>
         </div>
-
-        <div style="display:flex; justify-content:space-around; font-size:13px; margin-bottom:20px; padding:10px; background:#f8fafc; border-radius:12px;">
-            <div>👥 ลูกค้า: <b>${mCount} คน</b></div>
-            <div style="color:#e2e8f0;">|</div>
-            <div>📅 ทำงาน: <b>${filtered.length} วัน</b></div>
-        </div>
         <div style="border-top:2px dashed #f1f5f9; padding-top:15px;">
-            <label style="font-size:12px; color:#1e293b; font-weight:900;">📊 สถิติบริการ:</label>
-            <div style="margin:8px 0 15px 0; display:flex; flex-wrap:wrap; gap:2px;">${sB || '-'}</div>
-            <label style="font-size:12px; color:#1e293b; font-weight:900;">💇 ทรงผมยอดฮิต:</label>
-            <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:2px;">${hB || '-'}</div>
+            <label style="font-size:12px; font-weight:bold;">📊 สถิติบริการ (สีม่วง):</label>
+            <div style="margin:8px 0 15px 0;">${sB || '-'}</div>
+            <label style="font-size:12px; font-weight:bold;">💇 ทรงผมยอดฮิต (สีเขียว):</label>
+            <div style="margin-top:8px;">${hB || '-'}</div>
         </div>
     </div>`;
-    }
+}
 function shareLine() {
     const dInp = $("dateInp").value, today = db.filter(r => r.date === dInp); if (!today.length) return;
     const dp = dInp.split('-'), fDate = `${dp[2]}/${dp[1]}/${dp[0]}`;
