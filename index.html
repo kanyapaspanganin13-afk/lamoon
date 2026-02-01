@@ -1,414 +1,1879 @@
-<!doctype html>
-<html lang="th" class="h-full">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-  <title>Barber Note Pro v.1</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
-  <style>
-body{box-sizing:border-box}*{margin:0;padding:0;box-sizing:border-box}
-:root{--primary:#4E2A84;--primary-light:#6B3FA0;--secondary:#7C4DFF;--success:#00C853;--danger:#D32F2F;--warning:#FF6F00;--bg-main:#F5F5F7;--bg-card:#FFFFFF;--text-main:#1A1A1A;--text-sub:#757575;--border:#E0E0E0;--shadow:0 2px 8px rgba(0,0,0,0.08)}
-.theme-navy{--primary:#1A237E;--bg-main:#0A1929;--bg-card:#1E2A38;--text-main:#E3F2FD;--text-sub:#90CAF9;--border:#2C3E50}
-.theme-dark{--primary:#BB86FC;--bg-main:#121212;--bg-card:#1E1E1E;--text-main:#FFFFFF;--text-sub:#B0B0B0;--border:#2C2C2C}
-body{font-family:'IBM Plex Sans Thai',sans-serif;background:var(--bg-main);color:var(--text-main);min-height:100%;padding-bottom:80px}
-html,body{height:100%;overflow-x:hidden}
-.container{max-width:600px;margin:0 auto;padding:0 16px}
-.header{background:linear-gradient(135deg,var(--primary),var(--primary-light));padding:24px 20px;box-shadow:var(--shadow)}
-.shop-name{font-size:20px;font-weight:600;color:#FFF;text-align:left}
-.quick-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
-.quick-btn{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px 10px;text-align:center;cursor:pointer;transition:all .2s;box-shadow:var(--shadow)}
-.quick-btn:active{transform:scale(.95);background:var(--bg-main)}
-.quick-btn i{font-size:28px;display:block;margin-bottom:8px}
-.quick-btn.guarantee i{color:var(--warning)}
-.quick-btn.holiday i{color:#2196F3}
-.quick-btn.settings i{color:var(--text-sub)}
-.quick-btn span{font-size:13px;font-weight:500;color:var(--text-main)}
-.card{background:var(--bg-card);border-radius:16px;padding:20px;margin:16px 0;box-shadow:var(--shadow);border:1px solid var(--border)}
-.card-title{font-size:16px;font-weight:600;margin-bottom:16px;color:var(--text-main)}
-.form-group{margin-bottom:12px}
-.form-control{width:100%;padding:16px;border:1px solid var(--border);border-radius:12px;font-size:16px;font-family:'IBM Plex Sans Thai',sans-serif;background:var(--bg-card);color:var(--text-main);transition:all .2s}
-.form-control:focus{outline:0;border-color:var(--primary);box-shadow:0 0 0 3px rgba(78,42,132,0.1)}
-.form-control::placeholder{color:var(--text-sub);opacity:0.7}
-select.form-control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath fill='%23757575' d='M6 9L1 4h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px}
-.time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:center}
-.service-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.price-grid{display:grid;grid-template-columns:2fr 1fr;gap:12px}
-.price-input{font-size:28px;font-weight:700;text-align:center;color:var(--primary)}
-.payment-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.pay-btn{padding:18px;border:2px solid var(--border);border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;background:var(--bg-card);color:var(--text-main);transition:all .2s}
-.pay-btn:active{transform:scale(.97)}
-.pay-btn.active{border-color:var(--primary);background:var(--primary);color:#FFF}
-.btn-submit{width:100%;padding:18px;background:var(--primary);color:#FFF;border:none;border-radius:12px;font-size:18px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(78,42,132,0.3);transition:all .2s}
-.btn-submit:active{transform:scale(.98);background:var(--primary-light)}
-.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:16px 0}
-.summary-card{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#FFF;padding:20px;border-radius:12px;text-align:center}
-.summary-label{font-size:13px;opacity:.9;margin-bottom:8px}
-.summary-value{font-size:28px;font-weight:700}
-.summary-sub{font-size:12px;opacity:.8;margin-top:4px}
-.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.stat-item{background:var(--bg-card);border:1px solid var(--border);padding:16px;border-radius:12px;text-align:center}
-.stat-label{font-size:12px;color:var(--text-sub);margin-bottom:4px}
-.stat-value{font-size:22px;font-weight:700;color:var(--primary)}
-.service-tags{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
-.service-tag{padding:8px 16px;border-radius:20px;font-size:13px;font-weight:500}
-.tag-hair{background:#E3F2FD;color:#1565C0}
-.tag-addon{background:#FCE4EC;color:#C2185B}
-.timeline{margin:16px 0}
-.timeline-item{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
-.timeline-header{display:flex;justify-content:space-between;margin-bottom:12px}
-.timeline-time{font-size:13px;color:var(--text-sub);font-weight:500}
-.timeline-price{font-size:24px;font-weight:700;color:var(--primary)}
-.timeline-services{font-size:15px;font-weight:600;margin-bottom:8px}
-.timeline-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
-.timeline-pay{padding:6px 12px;border-radius:6px;font-size:13px;font-weight:500}
-.pay-cash{background:#C8E6C9;color:#2E7D32}
-.pay-trans{background:#BBDEFB;color:#1565C0}
-.btn-delete{background:#FFCDD2;color:#C62828;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer}
-.settle-bar{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#FFF;padding:20px;border-radius:12px;margin:16px 0;text-align:center}
-.settle-bar.positive{background:linear-gradient(135deg,#D32F2F,#C62828)}
-.settle-bar.negative{background:linear-gradient(135deg,#00C853,#00A344)}
-.settle-label{font-size:13px;opacity:.9;margin-bottom:8px}
-.settle-amount{font-size:36px;font-weight:700;margin-bottom:8px}
-.settle-desc{font-size:15px;font-weight:600}
-.action-btns{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:16px 0}
-.btn-action{padding:16px;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-line{background:#06C755;color:#FFF}
-.btn-archive{background:var(--primary);color:#FFF}
-.balance-display{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#FFF;padding:30px;border-radius:16px;text-align:center;margin:16px 0;position:relative}
-.balance-indicator{position:absolute;top:16px;right:16px;width:12px;height:12px;border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.balance-indicator.green{background:#00C853}
-.balance-indicator.red{background:#D32F2F}
-.balance-indicator.blue{background:#2196F3}
-.log-item{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
-.log-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.log-date{font-size:13px;font-weight:600}
-.log-amount{font-size:20px;font-weight:700}
-.log-amount.positive{color:#00C853}
-.log-amount.negative{color:#D32F2F}
-.log-note{font-size:13px;color:var(--text-sub);margin-top:4px}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg-card);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(3,1fr);padding:8px;box-shadow:0 -2px 8px rgba(0,0,0,0.08)}
-.nav-btn{background:transparent;border:none;padding:12px;cursor:pointer;text-align:center;border-radius:8px;color:var(--text-sub);transition:all .2s}
-.nav-btn.active{background:var(--primary);color:#FFF}
-.nav-btn i{font-size:22px;display:block;margin-bottom:4px}
-.nav-btn span{font-size:11px;font-weight:500}
-.page{display:none;animation:fadeIn .3s}
-.page.active{display:block}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:1000}
-.modal.active{display:flex;align-items:flex-end;justify-content:center}
-.modal-content{background:var(--bg-card);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:90%;overflow-y:auto;padding:24px;animation:slideUp .3s}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.modal-title{font-size:20px;font-weight:700}
-.modal-close{background:transparent;border:none;font-size:28px;cursor:pointer;color:var(--text-sub);padding:0;width:32px;height:32px}
-.theme-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.theme-btn{padding:16px;border:2px solid var(--border);border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;background:var(--bg-card);color:var(--text-main)}
-.theme-btn.active{border-color:var(--primary);background:var(--primary);color:#FFF}
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--bg-card);color:var(--text-main);padding:16px 24px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.2);z-index:2000;display:none;border:1px solid var(--border);font-weight:600}
-.toast.active{display:block;animation:slideDown .3s}
-@keyframes slideDown{from{transform:translate(-50%,-100%)}to{transform:translate(-50%,0)}}
-.toast.success{background:#00C853;color:#FFF;border-color:#00A344}
-.toast.error{background:#D32F2F;color:#FFF;border-color:#C62828}
-.toast.warning{background:#FF6F00;color:#FFF;border-color:#E65100}
-.empty-state{text-align:center;padding:60px 20px;color:var(--text-sub)}
-.empty-state i{font-size:64px;margin-bottom:16px;opacity:.5}
-.empty-state p{font-size:15px}
-.holiday-badge{display:inline-block;background:linear-gradient(135deg,#FF6F00,#E65100);color:#FFF;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;margin:12px 0}
-.guarantee-badge{background:linear-gradient(135deg,#00C853,#00A344);color:#FFF;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;display:inline-block}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Barber Note Pro v12.2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root {
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #1e293b;
+  --text-light: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Kanit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding-bottom: 80px;
+  overflow-x: hidden;
+}
+
+.page {
+  display: none;
+  padding: 20px;
+  padding-bottom: 100px;
+  animation: fadeIn 0.3s;
+}
+
+.page.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px 0;
+}
+
+.header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.header .subtitle {
+  color: var(--text-light);
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.quick-menu {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.quick-btn {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: var(--shadow);
+}
+
+.quick-btn:active {
+  transform: scale(0.95);
+}
+
+.quick-btn i {
+  font-size: 32px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.quick-btn.guar i { color: var(--success); }
+.quick-btn.holiday i { color: var(--warning); }
+.quick-btn.settings i { color: var(--text-light); }
+
+.quick-btn .label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: var(--text);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 16px;
+  font-family: 'Kanit', sans-serif;
+  transition: all 0.3s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.form-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 16px;
+  font-family: 'Kanit', sans-serif;
+  background: white;
+}
+
+.price-input {
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--primary);
+}
+
+.pay-methods {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.pay-btn {
+  padding: 14px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: white;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: 'Kanit', sans-serif;
+}
+
+.pay-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 16px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Kanit', sans-serif;
+  transition: all 0.3s;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+  background: var(--primary-dark);
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+}
+
+.summary-card.success {
+  background: linear-gradient(135deg, var(--success), #059669);
+}
+
+.summary-card.warning {
+  background: linear-gradient(135deg, var(--warning), #d97706);
+}
+
+.summary-card.danger {
+  background: linear-gradient(135deg, var(--danger), #dc2626);
+}
+
+.summary-card .label {
+  font-size: 13px;
+  opacity: 0.9;
+  margin-bottom: 5px;
+}
+
+.summary-card .value {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.stats-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.stat-tag {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--border);
+  color: var(--text);
+}
+
+.stat-tag.kid {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.stat-tag.haircut {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.customer-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.customer-time {
+  font-size: 14px;
+  color: var(--text-light);
+  margin-bottom: 8px;
+}
+
+.customer-services {
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.customer-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.customer-tip {
+  font-size: 13px;
+  color: var(--success);
+  margin-top: 4px;
+}
+
+.customer-pay {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.customer-pay.cash {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.customer-pay.trans {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.delete-btn {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: var(--danger);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: 'Kanit', sans-serif;
+}
+
+.settle-bar {
+  position: fixed;
+  bottom: 70px;
+  left: 0;
+  right: 0;
+  background: var(--card);
+  border-top: 2px solid var(--border);
+  padding: 16px 20px;
+  box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+}
+
+.settle-text {
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.settle-text.positive {
+  color: var(--success);
+}
+
+.settle-text.negative {
+  color: var(--danger);
+}
+
+.settle-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.btn-settle, .btn-line {
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Kanit', sans-serif;
+}
+
+.btn-settle {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-line {
+  background: #06c755;
+  color: white;
+}
+
+.account-summary {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white;
+  padding: 30px 20px;
+  border-radius: 20px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.account-balance {
+  font-size: 48px;
+  font-weight: 700;
+  margin: 10px 0;
+}
+
+.balance-status {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.balance-status.green {
+  background: #10b981;
+}
+
+.balance-status.red {
+  background: #ef4444;
+}
+
+.balance-status.blue {
+  background: #3b82f6;
+}
+
+.account-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.account-detail {
+  background: rgba(255,255,255,0.2);
+  padding: 15px;
+  border-radius: 12px;
+}
+
+.account-detail .label {
+  font-size: 13px;
+  opacity: 0.9;
+  margin-bottom: 5px;
+}
+
+.account-detail .value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 12px 0 8px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+}
+
+.nav-item {
+  text-align: center;
+  cursor: pointer;
+  padding: 8px;
+  transition: all 0.3s;
+}
+
+.nav-item i {
+  font-size: 24px;
+  color: var(--text-light);
+  margin-bottom: 4px;
+}
+
+.nav-item .nav-label {
+  font-size: 12px;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.nav-item.active i,
+.nav-item.active .nav-label {
+  color: var(--primary);
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  animation: fadeIn 0.3s;
+}
+
+.modal.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 30px 20px;
+  max-width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--text-light);
+}
+
+.btn-clear {
+  background: var(--danger);
+  color: white;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  font-family: 'Kanit', sans-serif;
+  margin-top: 20px;
+}
+
+.search-section {
+  margin-top: 30px;
+}
+
+.search-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.btn-search {
+  padding: 14px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Kanit', sans-serif;
+}
+
+.report-item {
+  background: var(--bg);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border-left: 4px solid var(--primary);
+}
+
+.report-date {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.report-stats {
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+.date-display {
+  background: var(--bg);
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 15px;
+  color: var(--primary);
+}
+
+.theme-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.theme-btn {
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'Kanit', sans-serif;
+  transition: all 0.3s;
+}
+
+.theme-btn.active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: white;
+}
+
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.switch {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  background: var(--border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.switch.active {
+  background: var(--success);
+}
+
+.switch-slider {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s;
+}
+
+.switch.active .switch-slider {
+  left: 25px;
+}
+
+.voice-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.voice-btn {
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'Kanit', sans-fonts;
+  transition: all 0.3s;
+}
+
+.voice-btn.active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: white;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-light);
+}
+
+.empty-state i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.service-select {
+  margin-bottom: 12px;
+}
+
+body.navy-mode {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --text: #f1f5f9;
+  --text-light: #94a3b8;
+  --border: #334155;
+}
+
+body.dark-mode {
+  --bg: #0a0a0a;
+  --card: #1a1a1a;
+  --text: #f5f5f5;
+  --text-light: #a3a3a3;
+  --border: #2a2a2a;
+}
+
+.holiday-badge {
+  display: inline-block;
+  background: var(--warning);
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.no-revenue {
+  text-align: center;
+  padding: 30px;
+  background: var(--bg);
+  border-radius: 16px;
+  margin-bottom: 20px;
+}
+
+.no-revenue i {
+  font-size: 40px;
+  color: var(--warning);
+  margin-bottom: 12px;
+}
+
+.no-revenue p {
+  color: var(--text-light);
+  font-size: 15px;
+}
 </style>
-  <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
-  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
-  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
- </head>
- <body>
-  <div id="toast" class="toast"></div>
+</head>
+<body>
+
+<!-- หน้า p1: บันทึกข้อมูล -->
+<div class="page active" id="p1">
   <div class="header">
-   <div class="shop-name" id="shopName">
-    💈 Barber Pro
-   </div>
+    <h1 id="shopName">Barber Note Pro</h1>
+    <div class="subtitle">v12.2 - ระบบบันทึกรายได้ช่างตัดผม</div>
   </div>
- <div id="toast" class="toast"></div>
-<div class="header">
-  <div class="shop-name" id="shopName"> 💈 Barber Pro </div>
+
+  <div class="quick-menu">
+    <div class="quick-btn guar" onclick="claimGuarantee()">
+      <i class="fas fa-shield-alt"></i>
+      <div class="label">ประกันรายได้</div>
+    </div>
+    <div class="quick-btn holiday" onclick="recordHoliday()">
+      <i class="fas fa-umbrella-beach"></i>
+      <div class="label">บันทึกวันหยุด</div>
+    </div>
+    <div class="quick-btn settings" onclick="openSettings()">
+      <i class="fas fa-cog"></i>
+      <div class="label">ตั้งค่าระบบ</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">บันทึกลูกค้า</div>
+    
+    <input type="date" id="dateInput" class="form-input" style="display:none;">
+    <div class="date-display" id="dateDisplay"></div>
+
+    <div class="form-group">
+      <label class="form-label">เวลาเริ่ม</label>
+      <input type="time" id="timeStart" class="form-input">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">เวลาจบ</label>
+      <input type="time" id="timeEnd" class="form-input">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">ทรงผม</label>
+      <select id="hairSelect" class="form-select">
+        <option value="">เลือกทรงผม</option>
+        <option value="เด็ก">เด็ก</option>
+        <option value="ทรงสั้น">ทรงสั้น</option>
+        <option value="ทรงกลาง">ทรงกลาง</option>
+        <option value="ทรงยาว">ทรงยาว</option>
+        <option value="ตัดผม">ตัดผม</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">บริการเสริม 1</label>
+      <select id="service1" class="form-select service-select">
+        <option value="">ไม่มี</option>
+        <option value="สระ">สระ</option>
+        <option value="โกน">โกน</option>
+        <option value="ย้อมสี">ย้อมสี</option>
+        <option value="ดัด">ดัด</option>
+        <option value="ยืด">ยืด</option>
+        <option value="นวด">นวด</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">บริการเสริม 2</label>
+      <select id="service2" class="form-select service-select">
+        <option value="">ไม่มี</option>
+        <option value="สระ">สระ</option>
+        <option value="โกน">โกน</option>
+        <option value="ย้อมสี">ย้อมสี</option>
+        <option value="ดัด">ดัด</option>
+        <option value="ยืด">ยืด</option>
+        <option value="นวด">นวด</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">ราคา (บาท)</label>
+      <input type="number" id="priceInput" class="form-input price-input" placeholder="0">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">ทิป (บาท)</label>
+      <input type="number" id="tipInput" class="form-input" placeholder="0">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">วิธีชำระเงิน</label>
+      <div class="pay-methods">
+        <button class="pay-btn" data-pay="CASH">
+          <i class="fas fa-money-bill-wave"></i> เงินสด
+        </button>
+        <button class="pay-btn" data-pay="TRANS">
+          <i class="fas fa-mobile-alt"></i> โอน
+        </button>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="saveCustomer()">
+      <i class="fas fa-save"></i> บันทึกลูกค้า
+    </button>
+  </div>
 </div>
-<div class="container">
-  <div id="p1" class="page active">
-    <div class="quick-actions">
-      <div class="quick-btn guarantee" onclick="claimGuarantee()">
-        <i class="fas fa-shield-alt"></i><span>ประกันรายได้</span>
-      </div>
-      <div class="quick-btn holiday" onclick="setHoliday()">
-        <i class="fas fa-umbrella-beach"></i><span>วันหยุด</span>
-      </div>
-      <div class="quick-btn settings" onclick="openSettings()">
-        <i class="fas fa-cog"></i><span>ตั้งค่า</span>
-      </div>
-    </div>
-    <div class="card">
-      <div class="time-grid">
-        <div class="form-group">
-          <input type="date" id="entryDate" class="form-control">
-        </div>
-        <div class="form-group">
-          <input type="time" id="timeStart" class="form-control" placeholder="เวลาเริ่ม">
-        </div>
-        <div class="form-group">
-          <input type="time" id="timeEnd" class="form-control" placeholder="เวลาจบ">
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title"> บริการ </div>
-      <div class="service-row">
-        <select id="hairStyle" class="form-control">
-          <option value="">ทรงผม</option>
-          <option value="รองทรงสูง">รองทรงสูง</option>
-          <option value="แฟชั่น">แฟชั่น</option>
-          <option value="นักเรียน">นักเรียน</option>
-          <option value="ตำรวจ/ทหาร">ตำรวจ/ทหาร</option>
-          <option value="สกินเฟด">สกินเฟด</option>
-          <option value="แก้ผม">แก้ผม</option>
-          <option value="โกนผม">โกนผม</option>
-          <option value="เด็ก">เด็ก</option>
-          <option value="อื่นๆ">อื่นๆ</option>
-        </select>
-        <select id="addon1" class="form-control">
-          <option value="">เสริม 1</option>
-          <option value="โกนหนวด">🪒 โกนหนวด</option>
-          <option value="กันหน้า">✨ กันหน้า</option>
-          <option value="สระผม">🚿 สระผม</option>
-          <option value="ย้อมผม">🎨 ย้อมผม</option>
-          <option value="ดัดผม">🌀 ดัดผม</option>
-          <option value="หยอดหู">👂 หยอดหู</option>
-        </select>
-        <select id="addon2" class="form-control">
-          <option value="">เสริม 2</option>
-          <option value="โกนหนวด">🪒 โกนหนวด</option>
-          <option value="กันหน้า">✨ กันหน้า</option>
-          <option value="สระผม">🚿 สระผม</option>
-          <option value="ย้อมผม">🎨 ย้อมผม</option>
-          <option value="ดัดผม">🌀 ดัดผม</option>
-          <option value="หยอดหู">👂 หยอดหู</option>
-        </select>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title"> ราคา </div>
-      <div class="price-grid">
-        <div class="form-group">
-          <input type="number" id="price" class="form-control price-input" placeholder="฿ ราคา" min="0">
-        </div>
-        <div class="form-group">
-          <input type="number" id="tip" class="form-control" placeholder="฿ ทิป" min="0">
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title"> วิธีชำระเงิน </div>
-      <div class="payment-btns">
-        <button class="pay-btn" id="payCash" onclick="selectPayment('cash')">
-          <i class="fas fa-money-bill-wave"></i> เงินสด </button>
-        <button class="pay-btn" id="payTrans" onclick="selectPayment('trans')">
-          <i class="fas fa-qrcode"></i> สแกนจ่าย </button>
-      </div>
-    </div>
-    <button class="btn-submit" onclick="saveEntry()">
-      <i class="fas fa-check-circle"></i> บันทึกรายการ </button>
+
+<!-- หน้า p2: รายงานรายวัน -->
+<div class="page" id="p2">
+  <div class="header">
+    <h1>รายงานรายวัน</h1>
+    <div class="subtitle" id="reportDate"></div>
   </div>
-  <div id="p2" class="page">
-    <div class="summary-grid">
-      <div class="summary-card">
-        <div class="summary-label"> ยอดรวมวันนี้ </div>
-        <div class="summary-value" id="totalToday"> ฿0 </div>
-        <div class="summary-sub">
-          <span id="customerCount">0</span> ลูกค้า
-        </div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-label"> รายได้ช่าง </div>
-        <div class="summary-value" id="barberEarn"> ฿0 </div>
-        <div class="summary-sub" id="barberSub"> รวมทิป </div>
-      </div>
-    </div>
-    <div class="card">
-      <h3 class="card-title">สรุปยอด</h3>
-      <div class="stats-grid">
-        <div class="stat-item">
-          <div class="stat-label"> 💵 เงินสด </div>
-          <div class="stat-value" id="cashTotal"> ฿0 </div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label"> 📱 โอน </div>
-          <div class="stat-value" id="transTotal"> ฿0 </div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label"> 👨‍🎨 ช่าง </div>
-          <div class="stat-value" id="barberTotal"> ฿0 </div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label"> 🏠 ร้าน </div>
-          <div class="stat-value" id="shopTotal"> ฿0 </div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <h3 class="card-title">สถิติบริการ</h3>
-      <div class="service-tags" id="serviceTags"></div>
-    </div>
-    <div class="settle-bar" id="settleBar">
-      <div class="settle-label"> ยอดเคลียร์ </div>
-      <div class="settle-amount" id="settleAmount"> ฿0 </div>
-      <div class="settle-desc" id="settleDesc"> ยอดพอดี </div>
-    </div>
-    <div class="card">
-      <h3 class="card-title">รายการลูกค้า</h3>
-      <div class="timeline" id="timeline"></div>
-    </div>
-    <div class="action-btns">
-      <button class="btn-action btn-line" onclick="shareLine()">
-        <i class="fab fa-line"></i> แชร์ LINE </button>
-      <button class="btn-action btn-archive" onclick="archiveToday()">
-        <i class="fas fa-save"></i> บันทึกประวัติ </button>
-    </div>
+
+  <div id="holidayBadge"></div>
+  <div id="noRevenue"></div>
+
+  <div class="summary-cards" id="summaryCards"></div>
+
+  <div class="card" id="statsCard" style="display:none;">
+    <div class="card-title">สถิติบริการ</div>
+    <div class="stats-tags" id="statsTags"></div>
   </div>
-  <div id="p3" class="page">
-    <div class="balance-display">
-      <div class="balance-indicator" id="balanceIndicator"></div>
-      <div class="balance-label"> ยอดค้างเดิม </div>
-      <div class="balance-amount" id="balanceAmount"> ฿0 </div>
-      <div class="balance-status" id="balanceStatus"> เคลียร์ครบถ้วน </div>
-    </div>
-    <div class="card">
-      <div class="stats-grid">
-        <div class="stat-item">
-          <div class="stat-label"> ยอดวันนี้ </div>
-          <div class="stat-value" id="todaySettle"> ฿0 </div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label"> ยอดสุทธิ </div>
-          <div class="stat-value" id="netBalance"> ฿0 </div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <h3 class="card-title">เคลียร์เงิน</h3>
-      <div class="form-group">
-        <input type="date" id="clearDate" class="form-control" placeholder="วันที่">
-      </div>
-      <div class="form-group">
-        <input type="number" id="clearAmount" class="form-control" placeholder="฿ จำนวนเงิน">
-      </div>
-      <div class="form-group">
-        <input type="text" id="clearNote" class="form-control" placeholder="บันทึก...">
-      </div>
-      <button class="btn-submit" onclick="clearMoney()">
-        <i class="fas fa-check"></i> บันทึกการเคลียร์ </button>
-    </div>
-    <div class="card">
-      <h3 class="card-title">ค้นหารายงาน</h3>
-      <div class="form-group">
-        <input type="date" id="searchDate" class="form-control" placeholder="ค้นหารายวัน">
-      </div>
-      <div class="form-group">
-        <input type="month" id="searchMonth" class="form-control" placeholder="ค้นหารายเดือน">
-      </div>
-      <div class="action-btns">
-        <button class="btn-action btn-archive" onclick="searchByDate()">
-          <i class="fas fa-calendar-day"></i> รายวัน </button>
-        <button class="btn-action btn-line" onclick="searchByMonth()">
-          <i class="fas fa-calendar-alt"></i> รายเดือน </button>
-      </div>
-    </div>
-    <div class="card">
-      <h3 class="card-title">ประวัติการเคลียร์</h3>
-      <div id="clearLogs"></div>
+
+  <div class="card" id="customersCard" style="display:none;">
+    <div class="card-title">รายการลูกค้า (<span id="customerCount">0</span>)</div>
+    <div id="customersList"></div>
+  </div>
+
+  <div class="settle-bar" id="settleBar" style="display:none;">
+    <div class="settle-text" id="settleText"></div>
+    <div class="settle-actions">
+      <button class="btn-settle" onclick="archiveDaily()">
+        <i class="fas fa-check-circle"></i> ส่งข้อมูล
+      </button>
+      <button class="btn-line" onclick="shareToLine()">
+        <i class="fab fa-line"></i> แชร์ LINE
+      </button>
     </div>
   </div>
 </div>
+
+<!-- หน้า p3: บัญชี -->
+<div class="page" id="p3">
+  <div class="header">
+    <h1>บัญชีรายได้</h1>
+  </div>
+
+  <div class="account-summary">
+    <div class="label">ยอดเงินสุทธิ</div>
+    <div>
+      <span class="balance-status" id="balanceStatus"></span>
+      <div class="account-balance" id="accountBalance">฿0</div>
+    </div>
+    <div class="account-details">
+      <div class="account-detail">
+        <div class="label">ยอดค้างเดิม</div>
+        <div class="value" id="oldBalance">฿0</div>
+      </div>
+      <div class="account-detail">
+        <div class="label">ยอดวันนี้</div>
+        <div class="value" id="todayBalance">฿0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">เคลียร์เงิน</div>
+    <div class="form-group">
+      <label class="form-label">วันที่</label>
+      <input type="date" id="clearDate" class="form-input">
+    </div>
+    <div class="form-group">
+      <label class="form-label">จำนวนเงิน (บาท)</label>
+      <input type="number" id="clearAmount" class="form-input" placeholder="0">
+    </div>
+    <div class="form-group">
+      <label class="form-label">โน้ต</label>
+      <input type="text" id="clearNote" class="form-input" placeholder="บันทึกเพิ่มเติม">
+    </div>
+    <button class="btn-clear" onclick="clearBalance()">
+      <i class="fas fa-money-check-alt"></i> เคลียร์เงิน
+    </button>
+  </div>
+
+  <div class="search-section">
+    <div class="card-title">ค้นหารายงาน</div>
+    <div class="search-buttons">
+      <button class="btn-search" onclick="searchDaily()">
+        <i class="fas fa-calendar-day"></i> รายวัน
+      </button>
+      <button class="btn-search" onclick="searchMonthly()">
+        <i class="fas fa-calendar-alt"></i> รายเดือน
+      </button>
+    </div>
+  </div>
+
+  <div class="card" id="logsCard" style="display:none;">
+    <div class="card-title">ประวัติการเคลียร์</div>
+    <div id="logsList"></div>
+  </div>
+</div>
+
+<!-- Bottom Navigation -->
 <div class="bottom-nav">
-  <button class="nav-btn active" onclick="showPage('p1')">
-    <i class="fas fa-edit"></i><span>บันทึก</span>
-  </button>
-  <button class="nav-btn" onclick="showPage('p2')">
-    <i class="fas fa-chart-line"></i><span>รายงาน</span>
-  </button>
-  <button class="nav-btn" onclick="showPage('p3')">
-    <i class="fas fa-wallet"></i><span>บัญชี</span>
-  </button>
+  <div class="nav-item active" onclick="showPage('p1')">
+    <i class="fas fa-edit"></i>
+    <div class="nav-label">บันทึก</div>
+  </div>
+  <div class="nav-item" onclick="showPage('p2')">
+    <i class="fas fa-chart-line"></i>
+    <div class="nav-label">รายงาน</div>
+  </div>
+  <div class="nav-item" onclick="showPage('p3')">
+    <i class="fas fa-wallet"></i>
+    <div class="nav-label">บัญชี</div>
+  </div>
 </div>
-<div id="settingsModal" class="modal">
+
+<!-- Modal ตั้งค่า -->
+<div class="modal" id="settingsModal">
   <div class="modal-content">
     <div class="modal-header">
-      <h3 class="modal-title">⚙️ ตั้งค่าระบบ</h3>
-      <button class="modal-close" onclick="closeSettings()">×</button>
+      <div class="modal-title">ตั้งค่าระบบ</div>
+      <button class="modal-close" onclick="closeSettings()">&times;</button>
     </div>
+
     <div class="form-group">
-      <input type="text" id="settingShop" class="form-control" placeholder="ชื่อร้าน">
+      <label class="form-label">ชื่อร้าน</label>
+      <input type="text" id="shopInput" class="form-input" placeholder="ชื่อร้านตัดผม">
     </div>
+
     <div class="form-group">
-      <input type="number" id="settingPerc" class="form-control" placeholder="% ช่าง" min="0" max="100">
+      <label class="form-label">เปอร์เซ็นต์ช่าง (%)</label>
+      <input type="number" id="percInput" class="form-input" placeholder="60">
     </div>
+
     <div class="form-group">
-      <input type="number" id="settingGuar" class="form-control" placeholder="฿ ประกันรายได้" min="0">
+      <label class="form-label">ประกันรายได้ (บาท/วัน)</label>
+      <input type="number" id="guarInput" class="form-input" placeholder="300">
     </div>
+
     <div class="form-group">
-      <div class="card-title"> ธีมสี </div>
-      <div class="theme-btns">
-        <button class="theme-btn active" data-theme="light" onclick="setTheme('light')">
-          <i class="fas fa-sun"></i> Light </button>
-        <button class="theme-btn" data-theme="navy" onclick="setTheme('navy')">
-          <i class="fas fa-moon"></i> Navy </button>
-        <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')">
-          <i class="fas fa-star"></i> Dark </button>
+      <label class="form-label">ธีม</label>
+      <div class="theme-options">
+        <button class="theme-btn" data-theme="light">สว่าง</button>
+        <button class="theme-btn" data-theme="navy">Navy</button>
+        <button class="theme-btn" data-theme="dark">มืด</button>
       </div>
     </div>
-    <button class="btn-submit" onclick="saveSettings()">
-      <i class="fas fa-save"></i> บันทึกการตั้งค่า </button>
+
+    <div class="form-group">
+      <label class="form-label">เสียง</label>
+      <div class="toggle-switch">
+        <span>เปิด/ปิดเสียง</span>
+        <div class="switch" id="soundSwitch">
+          <div class="switch-slider"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">เสียงพูด</label>
+      <div class="voice-options">
+        <button class="voice-btn" data-voice="male">ผู้ชาย</button>
+        <button class="voice-btn" data-voice="female">ผู้หญิง</button>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="saveSettings()">
+      <i class="fas fa-save"></i> บันทึกการตั้งค่า
+    </button>
   </div>
 </div>
-<div id="reportModal" class="modal">
+
+<!-- Modal รายงาน -->
+<div class="modal" id="reportModal">
   <div class="modal-content">
     <div class="modal-header">
-      <h3 class="modal-title" id="reportTitle">📊 รายงาน</h3>
-      <button class="modal-close" onclick="closeReport()">×</button>
+      <div class="modal-title" id="reportModalTitle">รายงาน</div>
+      <button class="modal-close" onclick="closeReportModal()">&times;</button>
     </div>
-    <div id="reportContent"></div>
+    <div id="reportModalContent"></div>
   </div>
 </div>
+
 <script>
-let db=[],conf={shop:'💈 Barber Pro',perc:60,guar:300,theme:'light'},archives={},account={balance:0,logs:[]},selectedPayment=null,guaranteeClaimedToday=!1,isHolidayToday=!1;
-function init(){loadData();setCurrentDateTime();updateShopName();applyTheme(conf.theme);renderReport();renderAccount();document.getElementById('clearDate').valueAsDate=new Date()}
-function loadData(){const a=localStorage.getItem('barber_db'),b=localStorage.getItem('barber_conf'),c=localStorage.getItem('barber_archives'),d=localStorage.getItem('barber_account');if(a)db=JSON.parse(a);if(b)conf=JSON.parse(b);if(c)archives=JSON.parse(c);if(d)account=JSON.parse(d);checkTodayStatus()}
-function saveData(){localStorage.setItem('barber_db',JSON.stringify(db));localStorage.setItem('barber_conf',JSON.stringify(conf));localStorage.setItem('barber_archives',JSON.stringify(archives));localStorage.setItem('barber_account',JSON.stringify(account))}
-function checkTodayStatus(){const a=getTodayDate(),b=db.filter(e=>e.date===a);guaranteeClaimedToday=b.some(e=>e.type==='GUARANTEE_CLAIM');isHolidayToday=b.some(e=>e.type==='HOLIDAY')}
-function getTodayDate(){return new Date().toISOString().split('T')[0]}
-function setCurrentDateTime(){const a=new Date();document.getElementById('entryDate').valueAsDate=a;const b=a.toTimeString().slice(0,5);document.getElementById('timeStart').value=b;const c=new Date(a.getTime()+30*6e4);document.getElementById('timeEnd').value=c.toTimeString().slice(0,5)}
-function showPage(a){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(a).classList.add('active');document.querySelectorAll('.nav-btn').forEach(btn=>btn.classList.remove('active'));event.currentTarget.classList.add('active');if(a==='p2')renderReport();if(a==='p3')renderAccount()}
-function selectPayment(a){selectedPayment=a;document.getElementById('payCash').classList.remove('active');document.getElementById('payTrans').classList.remove('active');if(a==='cash')document.getElementById('payCash').classList.add('active');else document.getElementById('payTrans').classList.add('active')}
-function saveEntry(){const a=document.getElementById('entryDate').value,b=document.getElementById('timeStart').value,c=document.getElementById('timeEnd').value,d=document.getElementById('hairStyle').value,e=document.getElementById('addon1').value,f=document.getElementById('addon2').value,g=parseInt(document.getElementById('price').value)||0,h=parseInt(document.getElementById('tip').value)||0;if(!d||g<=0||!selectedPayment){showToast('กรุณากรอกข้อมูลให้ครบถ้วน','error');return}const i=[e,f].filter(s=>s);db.push({id:Date.now(),date:a,time:b,endTime:c,svcs:i,hair:d,price:g,tip:h,pay:selectedPayment,type:'HAIRCUT'});saveData();document.getElementById('hairStyle').value='';document.getElementById('addon1').value='';document.getElementById('addon2').value='';document.getElementById('price').value='';document.getElementById('tip').value='';selectedPayment=null;document.getElementById('payCash').classList.remove('active');document.getElementById('payTrans').classList.remove('active');setCurrentDateTime();showToast('บันทึกสำเร็จ!','success');showPage('p2');document.querySelectorAll('.nav-btn')[1].classList.add('active')}
-function claimGuarantee(){if(!conf.guar||conf.guar<=0){showToast('กรุณาตั้งค่าประกันรายได้ก่อน','error');openSettings();return}if(guaranteeClaimedToday){showToast('วันนี้เคลมประกันไปแล้ว','warning');return}db.push({id:Date.now(),date:getTodayDate(),time:new Date().toTimeString().slice(0,5),endTime:'',svcs:[],hair:'',price:0,tip:0,pay:'cash',type:'GUARANTEE_CLAIM'});guaranteeClaimedToday=!0;saveData();showToast(`เคลมประกัน ฿${conf.guar.toLocaleString()} สำเร็จ`,'success')}
-function setHoliday(){if(isHolidayToday){showToast('วันนี้บันทึกวันหยุดไปแล้ว','warning');return}db.push({id:Date.now(),date:getTodayDate(),time:new Date().toTimeString().slice(0,5),endTime:'',svcs:[],hair:'',price:0,tip:0,pay:'cash',type:'HOLIDAY'});isHolidayToday=!0;saveData();showToast('บันทึกวันหยุดสำเร็จ','success');renderReport()}
-function calcEarnings(entries){const f=entries.reduce((s,e)=>s+e.price,0),g=entries.reduce((s,e)=>s+e.tip,0),h=entries.filter(e=>e.pay==='cash').reduce((s,e)=>s+e.price+e.tip,0),i=entries.filter(e=>e.pay==='trans').reduce((s,e)=>s+e.price+e.tip,0);let k,useG=!1;if(f<conf.guar){k=conf.guar;useG=!0}else{k=Math.round(f*(conf.perc/100))}const l=k+g,m=f-k,n=h-l;return{totalPrice:f,totalTip:g,cash:h,transfer:i,barberEarn:l,shopEarn:m,settle:n,useGuarantee:useG}}
-function renderReport(){const a=document.getElementById('entryDate').value||getTodayDate(),b=db.filter(e=>e.date===a&&e.type==='HAIRCUT'),c=db.find(e=>e.date===a&&e.type==='HOLIDAY');if(c){document.getElementById('totalToday').textContent='฿0';document.getElementById('customerCount').textContent='0';document.getElementById('barberEarn').textContent='฿0';document.getElementById('cashTotal').textContent='฿0';document.getElementById('transTotal').textContent='฿0';document.getElementById('barberTotal').textContent='฿0';document.getElementById('shopTotal').textContent='฿0';document.getElementById('settleBar').className='settle-bar';document.getElementById('settleAmount').textContent='฿0';document.getElementById('settleDesc').textContent='วันหยุด - ไม่มีรายได้';document.getElementById('timeline').innerHTML='<div class="empty-state"><div class="holiday-badge"><i class="fas fa-umbrella-beach"></i> วันหยุด</div><p>ไม่มีการบันทึกรายได้</p></div>';document.getElementById('serviceTags').innerHTML='<p style="color:var(--text-sub)">ไม่มีข้อมูล</p>';return}const{totalPrice:f,totalTip:g,cash:h,transfer:i,barberEarn:l,shopEarn:m,settle:n,useGuarantee:useG}=calcEarnings(b);document.getElementById('totalToday').textContent=`฿${(f+g).toLocaleString()}`;document.getElementById('customerCount').textContent=b.length;document.getElementById('barberEarn').textContent=`฿${l.toLocaleString()}`;document.getElementById('cashTotal').textContent=`฿${h.toLocaleString()}`;document.getElementById('transTotal').textContent=`฿${i.toLocaleString()}`;document.getElementById('barberTotal').textContent=`฿${l.toLocaleString()}`;document.getElementById('shopTotal').textContent=`฿${m.toLocaleString()}`;const o=document.getElementById('settleBar');document.getElementById('settleAmount').textContent=`฿${Math.abs(n).toLocaleString()}`;if(n>0){o.className='settle-bar positive';document.getElementById('settleDesc').innerHTML='<i class="fas fa-arrow-up"></i> ช่างคืนร้าน'}else if(n<0){o.className='settle-bar negative';document.getElementById('settleDesc').innerHTML='<i class="fas fa-arrow-down"></i> ร้านโอนช่าง'}else{o.className='settle-bar';document.getElementById('settleDesc').innerHTML='<i class="fas fa-check"></i> ยอดพอดี'}const r={};b.forEach(e=>{if(e.hair)r[e.hair]=(r[e.hair]||0)+1;e.svcs.forEach(sv=>r[sv]=(r[sv]||0)+1)});let u='';if(b.length>0)u+=`<span class="service-tag tag-hair"><i class="fas fa-cut"></i> ตัดผม: ${b.length}</span>`;Object.entries(r).forEach(([s,c])=>u+=`<span class="service-tag ${s.includes('🪒')||s.includes('✨')||s.includes('🚿')||s.includes('🎨')||s.includes('🌀')||s.includes('👂')?'tag-addon':'tag-hair'}">${s}: ${c}</span>`);if(useG)u+=`<span class="guarantee-badge"><i class="fas fa-shield-alt"></i> ใช้ประกัน ฿${conf.guar.toLocaleString()}</span>`;document.getElementById('serviceTags').innerHTML=u||'<p style="color:var(--text-sub)">ไม่มีข้อมูล</p>';const v=document.getElementById('timeline');if(b.length===0)v.innerHTML='<div class="empty-state"><i class="fas fa-inbox"></i><p>ยังไม่มีรายการ</p></div>';else{v.innerHTML=[...b].sort((a,b)=>b.time.localeCompare(a.time)).map(e=>`<div class="timeline-item"><div class="timeline-header"><div class="timeline-time"><i class="fas fa-clock"></i> ${e.time} - ${e.endTime||''}</div><div class="timeline-price">฿${(e.price+e.tip).toLocaleString()}</div></div><div class="timeline-services">${[e.hair,...e.svcs].filter(Boolean).join(', ')}</div>${e.tip>0?`<div style="color:var(--success);font-size:14px"><i class="fas fa-hand-holding-usd"></i> ทิป ฿${e.tip.toLocaleString()}</div>`:''}<div class="timeline-footer"><span class="timeline-pay ${e.pay==='cash'?'pay-cash':'pay-trans'}"><i class="fas ${e.pay==='cash'?'fa-money-bill-wave':'fa-qrcode'}"></i> ${e.pay==='cash'?'เงินสด':'สแกนจ่าย'}</span><button class="btn-delete" onclick="deleteEntry(${e.id})"><i class="fas fa-trash"></i> ลบ</button></div></div>`).join('')}document.getElementById('barberSub').textContent=g>0?`รวมทิป ฿${g.toLocaleString()}`:'ไม่มีทิป'}
-function deleteEntry(a){db=db.filter(e=>e.id!==a);saveData();renderReport();showToast('ลบรายการสำเร็จ','success')}
-function shareLine(){const a=document.getElementById('entryDate').value||getTodayDate(),b=db.filter(e=>e.date===a&&e.type==='HAIRCUT');if(b.length===0){showToast('ไม่มีรายการให้แชร์','error');return}const{totalPrice:f,totalTip:g,cash:h,transfer:i,barberEarn:l,shopEarn:m,settle:n,useGuarantee:useG}=calcEarnings(b),dt=new Date(a+'T00:00:00').toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});let s=n>0?`🔴 ช่างคืนร้าน: ฿${n.toLocaleString()}`:n<0?`🟢 ร้านโอนช่าง: ฿${Math.abs(n).toLocaleString()}`:`✅ ยอดพอดี`,txt=`📊 สรุปยอด${dt}\n${conf.shop}\n--------------------------\n💰 รายได้รวม: ฿${(f+g).toLocaleString()}\n👥 ลูกค้า: ${b.length} คน\n💵 เงินสด: ฿${h.toLocaleString()}\n📱 โอน: ฿${i.toLocaleString()}\n--------------------------\n👨‍🎨 ส่วนแบ่งช่าง: ฿${l.toLocaleString()}\n🏠 ส่วนแบ่งร้าน: ฿${m.toLocaleString()}\n--------------------------\n${s}\n`;if(useG)txt+=`\n🛡️ ใช้ประกันรายได้ ฿${conf.guar.toLocaleString()}`;window.open(`https://line.me/R/msg/text/?${encodeURIComponent(txt)}`,'_blank','noopener,noreferrer')}
-function archiveToday(){const a=document.getElementById('entryDate').value||getTodayDate(),b=db.filter(e=>e.date===a&&e.type==='HAIRCUT');if(b.length===0){showToast('ไม่มีรายการให้บันทึก','error');return}const{totalPrice:f,totalTip:g,cash:h,transfer:i,barberEarn:l,shopEarn:m,settle:n,useGuarantee:useG}=calcEarnings(b),hc={},ac={};b.forEach(e=>{if(e.hair)hc[e.hair]=(hc[e.hair]||0)+1;e.svcs.forEach(s=>ac[s]=(ac[s]||0)+1)});archives[a]={date:a,totalIncome:f+g,totalPrice:f,totalTip:g,barberEarning:l,shopEarning:m,cash:h,transfer:i,customerCount:b.length,hairCounts:hc,addonCounts:ac,settle:n,useGuarantee:useG,guaranteeAmount:useG?conf.guar:0};account.balance+=n;saveData();showToast('บันทึกประวัติสำเร็จ!','success');showPage('p3');document.querySelectorAll('.nav-btn')[2].classList.add('active');renderAccount()}
-function renderAccount(){const a=document.getElementById('entryDate').value||getTodayDate(),b=db.filter(e=>e.date===a&&e.type==='HAIRCUT');let c=0;if(b.length>0)c=calcEarnings(b).settle;const k=account.balance+c;document.getElementById('balanceAmount').textContent=`฿${Math.abs(account.balance).toLocaleString()}`;document.getElementById('todaySettle').textContent=`฿${Math.abs(c).toLocaleString()}`;document.getElementById('netBalance').textContent=`฿${Math.abs(k).toLocaleString()}`;const l=document.getElementById('balanceIndicator'),m=document.getElementById('balanceStatus');if(account.balance>0){l.className='balance-indicator red';m.textContent='ช่างค้างร้าน'}else if(account.balance<0){l.className='balance-indicator green';m.textContent='ร้านค้างช่าง'}else{l.className='balance-indicator blue';m.textContent='เคลียร์ครบถ้วน'}const n=document.getElementById('clearLogs');if(account.logs.length===0)n.innerHTML='<div class="empty-state"><i class="fas fa-clipboard-list"></i><p>ยังไม่มีประวัติ</p></div>';else n.innerHTML=[...account.logs].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(log=>`<div class="log-item"><div class="log-header"><div class="log-date"><i class="fas fa-calendar"></i> ${new Date(log.date+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'})}</div><div class="log-amount ${log.amount>0?'positive':log.amount<0?'negative':''}">${log.amount>0?'+':''}฿${Math.abs(log.amount).toLocaleString()}</div></div>${log.note?`<div class="log-note">${log.note}</div>`:''}</div>`).join('')}
-function clearMoney(){const a=document.getElementById('clearDate').value,b=parseInt(document.getElementById('clearAmount').value)||0,c=document.getElementById('clearNote').value;if(!a||b===0){showToast('กรุณากรอกข้อมูลให้ครบถ้วน','error');return}account.balance-=b;account.logs.push({date:a,amount:-b,note:c});saveData();renderAccount();document.getElementById('clearAmount').value='';document.getElementById('clearNote').value='';showToast('บันทึกการเคลียร์สำเร็จ','success')}
-function searchByDate(){const a=document.getElementById('searchDate').value;if(!a){showToast('กรุณาเลือกวันที่','error');return}const b=archives[a];if(!b){showToast('ยังไม่มีข้อมูลวันนี้','warning');return}const c=new Date(a+'T00:00:00').toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric',weekday:'long'});let d=`<div class="card"><h3 style="text-align:center;margin-bottom:20px">${c}</h3><div class="summary-grid"><div class="summary-card"><div class="summary-label">รายได้รวม</div><div class="summary-value">฿${b.totalIncome.toLocaleString()}</div><div class="summary-sub">${b.customerCount} ลูกค้า</div></div><div class="summary-card"><div class="summary-label">ช่าง</div><div class="summary-value">฿${b.barberEarning.toLocaleString()}</div><div class="summary-sub">ร้าน ฿${b.shopEarning.toLocaleString()}</div></div></div><div class="stats-grid"><div class="stat-item"><div class="stat-label">💰 รายได้ตัดผม</div><div class="stat-value">฿${b.totalPrice.toLocaleString()}</div></div><div class="stat-item"><div class="stat-label">💵 ทิป</div><div class="stat-value">฿${b.totalTip.toLocaleString()}</div></div><div class="stat-item"><div class="stat-label">💵 เงินสด</div><div class="stat-value">฿${b.cash.toLocaleString()}</div></div><div class="stat-item"><div class="stat-label">📱 โอน</div><div class="stat-value">฿${b.transfer.toLocaleString()}</div></div></div><div class="settle-bar ${b.settle>0?'positive':b.settle<0?'negative':''}"><div class="settle-label">ยอดเคลียร์</div><div class="settle-amount">฿${Math.abs(b.settle).toLocaleString()}</div>${b.settle>0?'<div class="settle-desc"><i class="fas fa-arrow-up"></i> ช่างคืนร้าน</div>':b.settle<0?'<div class="settle-desc"><i class="fas fa-arrow-down"></i> ร้านโอนช่าง</div>':'<div class="settle-desc"><i class="fas fa-check"></i> ยอดพอดี</div>'}</div>`;if(b.useGuarantee)d+=`<div style="margin-top:20px;padding:16px;background:#FFF3E0;border-radius:12px;text-align:center"><span class="guarantee-badge"><i class="fas fa-shield-alt"></i> ใช้ประกันรายได้ ฿${b.guaranteeAmount.toLocaleString()}</span></div>`;d+=`</div>`;document.getElementById('reportTitle').innerHTML=`📊 รายงานรายวัน`;document.getElementById('reportContent').innerHTML=d;document.getElementById('reportModal').classList.add('active')}
-function searchByMonth(){const a=document.getElementById('searchMonth').value;if(!a){showToast('กรุณาเลือกเดือน','error');return}const b=Object.values(archives).filter(arc=>arc.date.startsWith(a));if(b.length===0){showToast('ยังไม่มีข้อมูลเดือนนี้','warning');return}const c=new Date(a+'-01T00:00:00').toLocaleDateString('th-TH',{year:'numeric',month:'long'}),d=b.reduce((s,arc)=>s+arc.totalIncome,0),e=b.reduce((s,arc)=>s+arc.totalPrice,0),f=b.reduce((s,arc)=>s+arc.totalTip,0),g=b.reduce((s,arc)=>s+arc.barberEarning,0),h=b.reduce((s,arc)=>s+arc.shopEarning,0),i=b.reduce((s,arc)=>s+arc.cash,0),j=b.reduce((s,arc)=>s+arc.transfer,0),k=b.reduce((s,arc)=>s+arc.customerCount,0),l=b.reduce((s,arc)=>s+arc.settle,0),o=b.filter(arc=>arc.useGuarantee).length;let p=`<div class="card"><h3 style="text-align:center;margin-bottom:20px">${c}</h3><div class="summary-grid"><div class="summary-card"><div class="summary-label">รายได้รวม</div><div class="summary-value">฿${d.toLocaleString()}</div><div class="summary-sub">${k} ลูกค้า</div></div><div class="summary-card"><div class="summary-label">ช่าง</div><div class="summary-value">฿${g.toLocaleString()}</div><div class="summary-sub">ร้าน ฿${h.toLocaleString()}</div></div></div><div class="stats-grid"><div class="stat-item"><div class="stat-label">💰 รายได้ตัดผม</div><div class="stat-value">฿${e.toLocaleString()}</div></div><div class="stat-item"><div class="stat-label">💵 ทิป</div><div class="stat-value">฿${f.toLocaleString()}</div></div><div class="stat-item"><div class="stat-label">💵 เงินสด</div><div class="stat-value">฿${i.toLocaleString()}</div></div><div class="stat-item"><div class="stat-label">📱 โอน</div><div class="stat-value">฿${j.toLocaleString()}</div></div></div><div class="settle-bar ${l>0?'positive':l<0?'negative':''}"><div class="settle-label">ยอดเคลียร์รวม</div><div class="settle-amount">฿${Math.abs(l).toLocaleString()}</div>${l>0?'<div class="settle-desc"><i class="fas fa-arrow-up"></i> ช่างคืนร้าน</div>':l<0?'<div class="settle-desc"><i class="fas fa-arrow-down"></i> ร้านโอนช่าง</div>':'<div class="settle-desc"><i class="fas fa-check"></i> ยอดพอดี</div>'}</div><div class="stats-grid"><div class="stat-item"><div class="stat-label">วันทำงาน</div><div class="stat-value">${b.length}</div></div><div class="stat-item"><div class="stat-label">เฉลี่ย/วัน</div><div class="stat-value">฿${Math.round(d/b.length).toLocaleString()}</div></div></div>`;if(o>0)p+=`<div style="margin-top:20px;padding:16px;background:#FFF3E0;border-radius:12px;text-align:center"><span class="guarantee-badge"><i class="fas fa-shield-alt"></i> ใช้ประกัน ${o} วัน</span></div>`;p+=`</div>`;document.getElementById('reportTitle').innerHTML=`📊 รายงานรายเดือน`;document.getElementById('reportContent').innerHTML=p;document.getElementById('reportModal').classList.add('active')}
-function closeReport(){document.getElementById('reportModal').classList.remove('active')}
-function openSettings(){document.getElementById('settingShop').value=conf.shop;document.getElementById('settingPerc').value=conf.perc;document.getElementById('settingGuar').value=conf.guar;document.querySelectorAll('.theme-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.theme===conf.theme));document.getElementById('settingsModal').classList.add('active')}
-function closeSettings(){document.getElementById('settingsModal').classList.remove('active')}
-function saveSettings(){conf.shop=document.getElementById('settingShop').value||'💈 Barber Pro';conf.perc=parseInt(document.getElementById('settingPerc').value)||60;conf.guar=parseInt(document.getElementById('settingGuar').value)||300;saveData();updateShopName();closeSettings();showToast('บันทึกการตั้งค่าสำเร็จ','success')}
-function updateShopName(){document.getElementById('shopName').textContent=conf.shop}
-function setTheme(a){conf.theme=a;applyTheme(a);document.querySelectorAll('.theme-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.theme===a))}
-function applyTheme(a){document.body.classList.remove('theme-light','theme-navy','theme-dark');if(a!=='light')document.body.classList.add(`theme-${a}`)}
-function showToast(a,b='success'){const c=document.getElementById('toast');c.textContent=a;c.className=`toast ${b} active`;setTimeout(()=>c.classList.remove('active'),3e3)}
-window.addEventListener('DOMContentLoaded',init);
+// ตัวแปรสำหรับเก็บข้อมูล
+let db = [];
+let conf = {
+  shop: 'Barber Note Pro',
+  perc: 60,
+  guar: 300,
+  theme: 'light',
+  sound: true,
+  voice: 'male'
+};
+let archives = [];
+let account = {
+  balance: 0,
+  logs: []
+};
+
+let selectedPay = '';
+let lastGuaranteeClaim = '';
+
+// โหลดข้อมูลจาก localStorage
+function loadData() {
+  const savedDb = localStorage.getItem('barber_db');
+  if (savedDb) db = JSON.parse(savedDb);
+
+  const savedConf = localStorage.getItem('barber_conf');
+  if (savedConf) conf = JSON.parse(savedConf);
+
+  const savedArchives = localStorage.getItem('barber_archives');
+  if (savedArchives) archives = JSON.parse(savedArchives);
+
+  const savedAccount = localStorage.getItem('barber_account');
+  if (savedAccount) account = JSON.parse(savedAccount);
+
+  const savedLastClaim = localStorage.getItem('last_guarantee_claim');
+  if (savedLastClaim) lastGuaranteeClaim = savedLastClaim;
+}
+
+// บันทึกข้อมูลลง localStorage
+function saveData() {
+  localStorage.setItem('barber_db', JSON.stringify(db));
+  localStorage.setItem('barber_conf', JSON.stringify(conf));
+  localStorage.setItem('barber_archives', JSON.stringify(archives));
+  localStorage.setItem('barber_account', JSON.stringify(account));
+}
+
+// ฟังก์ชันพูด
+function speak(text) {
+  if (!conf.sound) return;
+  if ('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'th-TH';
+    utterance.pitch = conf.voice === 'female' ? 1.2 : 0.8;
+    window.speechSynthesis.speak(utterance);
+  }
+}
+
+// แสดงหน้า
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navItems = document.querySelectorAll('.nav-item');
+  if (pageId === 'p1') navItems[0].classList.add('active');
+  if (pageId === 'p2') navItems[1].classList.add('active');
+  if (pageId === 'p3') navItems[2].classList.add('active');
+
+  if (pageId === 'p2') renderReport();
+  if (pageId === 'p3') renderAccount();
+}
+
+// เคลมประกันรายได้
+function claimGuarantee() {
+  if (!conf.guar || conf.guar <= 0) {
+    alert('กรุณาตั้งค่าประกันรายได้ก่อนใช้งาน');
+    speak('กรุณาตั้งค่าประกันรายได้ก่อนใช้งาน');
+    openSettings();
+    return;
+  }
+
+  const today = getToday();
+  if (lastGuaranteeClaim === today) {
+    alert('วันนี้เคลมประกันรายได้ไปแล้ว');
+    speak('วันนี้เคลมประกันรายได้ไปแล้ว');
+    return;
+  }
+
+  const id = 'G' + Date.now();
+  db.push({
+    id: id,
+    date: today,
+    time: '',
+    endTime: '',
+    svcs: [],
+    hair: '',
+    price: 0,
+    tip: 0,
+    pay: '',
+    type: 'GUARANTEE_CLAIM'
+  });
+
+  lastGuaranteeClaim = today;
+  localStorage.setItem('last_guarantee_claim', today);
+  
+  saveData();
+  alert('บันทึกประกันรายได้สำเร็จ');
+  speak('บันทึกประกันรายได้สำเร็จ');
+}
+
+// บันทึกวันหยุด
+function recordHoliday() {
+  const today = getToday();
+  const existing = db.find(d => d.date === today && d.type === 'HOLIDAY');
+  
+  if (existing) {
+    if (confirm('ต้องการยกเลิกวันหยุดวันนี้หรือไม่?')) {
+      db = db.filter(d => d.id !== existing.id);
+      saveData();
+      alert('ยกเลิกวันหยุดแล้ว');
+      speak('ยกเลิกวันหยุดแล้ว');
+      renderReport();
+    }
+    return;
+  }
+
+  const id = 'H' + Date.now();
+  db.push({
+    id: id,
+    date: today,
+    time: '',
+    endTime: '',
+    svcs: [],
+    hair: '',
+    price: 0,
+    tip: 0,
+    pay: '',
+    type: 'HOLIDAY'
+  });
+
+  saveData();
+  alert('บันทึกวันหยุดสำเร็จ');
+  speak('บันทึกวันหยุดสำเร็จ วันนี้ไม่คำนวณรายได้');
+  renderReport();
+}
+
+// เปิดตั้งค่า
+function openSettings() {
+  document.getElementById('shopInput').value = conf.shop;
+  document.getElementById('percInput').value = conf.perc;
+  document.getElementById('guarInput').value = conf.guar;
+
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.dataset.theme === conf.theme) {
+      btn.classList.add('active');
+    }
+  });
+
+  const soundSwitch = document.getElementById('soundSwitch');
+  if (conf.sound) {
+    soundSwitch.classList.add('active');
+  } else {
+    soundSwitch.classList.remove('active');
+  }
+
+  document.querySelectorAll('.voice-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.dataset.voice === conf.voice) {
+      btn.classList.add('active');
+    }
+  });
+
+  document.getElementById('settingsModal').classList.add('active');
+}
+
+// ปิดตั้งค่า
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('active');
+}
+
+// บันทึกการตั้งค่า
+function saveSettings() {
+  conf.shop = document.getElementById('shopInput').value || 'Barber Note Pro';
+  conf.perc = parseInt(document.getElementById('percInput').value) || 60;
+  conf.guar = parseInt(document.getElementById('guarInput').value) || 300;
+
+  saveData();
+  document.getElementById('shopName').textContent = conf.shop;
+  closeSettings();
+  alert('บันทึกการตั้งค่าสำเร็จ');
+  speak('บันทึกการตั้งค่าสำเร็จ');
+}
+
+// Event listeners สำหรับ Theme
+document.querySelectorAll('.theme-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const theme = this.dataset.theme;
+    conf.theme = theme;
+    
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    
+    applyTheme(theme);
+  });
+});
+
+// ใช้ธีม
+function applyTheme(theme) {
+  document.body.className = '';
+  if (theme === 'navy') {
+    document.body.classList.add('navy-mode');
+  } else if (theme === 'dark') {
+    document.body.classList.add('dark-mode');
+  }
+}
+
+// Event listener สำหรับเสียง
+document.getElementById('soundSwitch').addEventListener('click', function() {
+  conf.sound = !conf.sound;
+  if (conf.sound) {
+    this.classList.add('active');
+  } else {
+    this.classList.remove('active');
+  }
+});
+
+// Event listeners สำหรับเสียงพูด
+document.querySelectorAll('.voice-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    conf.voice = this.dataset.voice;
+    document.querySelectorAll('.voice-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// เลือกวิธีชำระเงิน
+document.querySelectorAll('.pay-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    selectedPay = this.dataset.pay;
+    document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// ฟังก์ชันช่วยเหลือ
+function getToday() {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function formatThaiDate(dateStr) {
+  if (!dateStr) return '';
+  const [year, month, day] = dateStr.split('-');
+  const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  const thaiYear = parseInt(year) + 543;
+  return `${parseInt(day)} ${thaiMonths[parseInt(month) - 1]} ${thaiYear}`;
+}
+
+function getCurrentTime() {
+  const d = new Date();
+  const h = String(d.getHours()).padStart(2, '0');
+  const m = String(d.getMinutes()).padStart(2, '0');
+  return `${h}:${m}`;
+}
+
+function addMinutes(time, mins) {
+  const [h, m] = time.split(':').map(Number);
+  const d = new Date();
+  d.setHours(h);
+  d.setMinutes(m + mins);
+  const newH = String(d.getHours()).padStart(2, '0');
+  const newM = String(d.getMinutes()).padStart(2, '0');
+  return `${newH}:${newM}`;
+}
+
+// บันทึกลูกค้า
+function saveCustomer() {
+  const date = document.getElementById('dateInput').value || getToday();
+  const time = document.getElementById('timeStart').value;
+  const endTime = document.getElementById('timeEnd').value;
+  const hair = document.getElementById('hairSelect').value;
+  const service1 = document.getElementById('service1').value;
+  const service2 = document.getElementById('service2').value;
+  const price = parseInt(document.getElementById('priceInput').value) || 0;
+  const tip = parseInt(document.getElementById('tipInput').value) || 0;
+
+  if (!time || !endTime || !hair || price <= 0) {
+    alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+    return;
+  }
+
+  if (!selectedPay) {
+    alert('กรุณาเลือกวิธีชำระเงิน');
+    return;
+  }
+
+  const svcs = [];
+  if (service1) svcs.push(service1);
+  if (service2) svcs.push(service2);
+
+  const id = 'C' + Date.now();
+  const customer = {
+    id: id,
+    date: date,
+    time: time,
+    endTime: endTime,
+    svcs: svcs,
+    hair: hair,
+    price: price,
+    tip: tip,
+    pay: selectedPay,
+    type: 'CUSTOMER'
+  };
+
+  db.push(customer);
+  saveData();
+
+  // Reset form
+  document.getElementById('priceInput').value = '';
+  document.getElementById('tipInput').value = '';
+  document.getElementById('hairSelect').value = '';
+  document.getElementById('service1').value = '';
+  document.getElementById('service2').value = '';
+  document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
+  selectedPay = '';
+
+  // ตั้งเวลาใหม่
+  const newTime = addMinutes(endTime, 0);
+  document.getElementById('timeStart').value = newTime;
+  document.getElementById('timeEnd').value = addMinutes(newTime, 30);
+
+  alert('บันทึกลูกค้าสำเร็จ');
+  speak('บันทึกลูกค้าสำเร็จ');
+  
+  renderReport();
+}
+
+// ลบลูกค้า
+function deleteCustomer(id) {
+  if (confirm('ต้องการลบรายการนี้หรือไม่?')) {
+    db = db.filter(d => d.id !== id);
+    saveData();
+    renderReport();
+  }
+}
+
+// แสดงรายงาน
+function renderReport() {
+  const today = getToday();
+  const todayData = db.filter(d => d.date === today);
+  
+  document.getElementById('reportDate').textContent = formatThaiDate(today);
+
+  // ตรวจสอบวันหยุด
+  const isHoliday = todayData.some(d => d.type === 'HOLIDAY');
+
+  if (isHoliday) {
+    document.getElementById('holidayBadge').innerHTML = '<div class="holiday-badge"><i class="fas fa-umbrella-beach"></i> วันหยุด</div>';
+    document.getElementById('noRevenue').innerHTML = `
+      <div class="no-revenue">
+        <i class="fas fa-bed"></i>
+        <p>วันนี้เป็นวันหยุด<br>ไม่คำนวณรายได้</p>
+      </div>
+    `;
+    document.getElementById('summaryCards').innerHTML = '';
+    document.getElementById('statsCard').style.display = 'none';
+    document.getElementById('customersCard').style.display = 'none';
+    document.getElementById('settleBar').style.display = 'none';
+    return;
+  } else {
+    document.getElementById('holidayBadge').innerHTML = '';
+    document.getElementById('noRevenue').innerHTML = '';
+  }
+
+  // คำนวณ
+  const customers = todayData.filter(d => d.type === 'CUSTOMER');
+  const hasGuarantee = todayData.some(d => d.type === 'GUARANTEE_CLAIM');
+
+  let totalPrice = 0;
+  let totalTip = 0;
+  let cashTotal = 0;
+  let transTotal = 0;
+
+  customers.forEach(c => {
+    totalPrice += c.price;
+    totalTip += c.tip;
+    if (c.pay === 'CASH') cashTotal += c.price + c.tip;
+    if (c.pay === 'TRANS') transTotal += c.price + c.tip;
+  });
+
+  const totalRevenue = totalPrice + totalTip;
+  const barberBase = Math.max(totalPrice * (conf.perc / 100), hasGuarantee ? conf.guar : 0);
+  const barberEarn = barberBase + totalTip;
+  const shopEarn = totalPrice - (barberBase);
+  const settle = cashTotal - barberEarn;
+
+  // แสดงสรุป
+  const summaryHTML = `
+    <div class="summary-card">
+      <div class="label">ยอดรวมวันนี้</div>
+      <div class="value">฿${totalRevenue.toLocaleString()}</div>
+    </div>
+    <div class="summary-card success">
+      <div class="label">จำนวนลูกค้า</div>
+      <div class="value">${customers.length} คน</div>
+    </div>
+    <div class="summary-card warning">
+      <div class="label">เงินสด</div>
+      <div class="value">฿${cashTotal.toLocaleString()}</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">โอน</div>
+      <div class="value">฿${transTotal.toLocaleString()}</div>
+    </div>
+    <div class="summary-card success">
+      <div class="label">รายได้ช่าง</div>
+      <div class="value">฿${barberEarn.toLocaleString()}</div>
+    </div>
+    <div class="summary-card danger">
+      <div class="label">รายได้ร้าน</div>
+      <div class="value">฿${shopEarn.toLocaleString()}</div>
+    </div>
+  `;
+  document.getElementById('summaryCards').innerHTML = summaryHTML;
+
+  // สถิติบริการ
+  const serviceStats = {};
+  customers.forEach(c => {
+    const allServices = [c.hair, ...c.svcs].filter(s => s);
+    allServices.forEach(s => {
+      serviceStats[s] = (serviceStats[s] || 0) + 1;
+    });
+  });
+
+  let statsHTML = '';
+  for (const [service, count] of Object.entries(serviceStats)) {
+    let tagClass = 'stat-tag';
+    if (service === 'เด็ก') tagClass += ' kid';
+    if (service === 'ตัดผม') tagClass += ' haircut';
+    statsHTML += `<div class="${tagClass}">${service} (${count})</div>`;
+  }
+
+  if (statsHTML) {
+    document.getElementById('statsTags').innerHTML = statsHTML;
+    document.getElementById('statsCard').style.display = 'block';
+  } else {
+    document.getElementById('statsCard').style.display = 'none';
+  }
+
+  // รายการลูกค้า
+  if (customers.length > 0) {
+    let customersHTML = '';
+    customers.forEach(c => {
+      const services = [c.hair, ...c.svcs].filter(s => s).join(', ');
+      const payClass = c.pay === 'CASH' ? 'cash' : 'trans';
+      const payText = c.pay === 'CASH' ? 'เงินสด' : 'โอน';
+      
+      customersHTML += `
+        <div class="customer-item">
+          <div class="customer-time">${c.time} - ${c.endTime}</div>
+          <div class="customer-services">${services}</div>
+          <div class="customer-price">฿${c.price.toLocaleString()}</div>
+          ${c.tip > 0 ? `<div class="customer-tip">ทิป ฿${c.tip.toLocaleString()}</div>` : ''}
+          <div class="customer-pay ${payClass}">${payText}</div>
+          <button class="delete-btn" onclick="deleteCustomer('${c.id}')">ลบ</button>
+        </div>
+      `;
+    });
+
+    document.getElementById('customersList').innerHTML = customersHTML;
+    document.getElementById('customerCount').textContent = customers.length;
+    document.getElementById('customersCard').style.display = 'block';
+  } else {
+    document.getElementById('customersCard').style.display = 'none';
+  }
+
+  // Settle Bar
+  if (customers.length > 0) {
+    let settleText = '';
+    let settleClass = '';
+    
+    if (settle > 0) {
+      settleText = `ช่างคืนร้าน ฿${settle.toLocaleString()}`;
+      settleClass = 'positive';
+    } else if (settle < 0) {
+      settleText = `ร้านคืนช่าง ฿${Math.abs(settle).toLocaleString()}`;
+      settleClass = 'negative';
+    } else {
+      settleText = 'ยอดพอดี';
+      settleClass = '';
+    }
+
+    document.getElementById('settleText').textContent = settleText;
+    document.getElementById('settleText').className = 'settle-text ' + settleClass;
+    document.getElementById('settleBar').style.display = 'block';
+  } else {
+    document.getElementById('settleBar').style.display = 'none';
+  }
+}
+
+// บันทึกข้อมูลประจำวัน
+function archiveDaily() {
+  const today = getToday();
+  const todayData = db.filter(d => d.date === today);
+  
+  const isHoliday = todayData.some(d => d.type === 'HOLIDAY');
+  if (isHoliday) {
+    alert('วันนี้เป็นวันหยุด ไม่สามารถส่งข้อมูลได้');
+    return;
+  }
+
+  const customers = todayData.filter(d => d.type === 'CUSTOMER');
+  const hasGuarantee = todayData.some(d => d.type === 'GUARANTEE_CLAIM');
+
+  let totalPrice = 0;
+  let totalTip = 0;
+
+  customers.forEach(c => {
+    totalPrice += c.price;
+    totalTip += c.tip;
+  });
+
+  const barberBase = Math.max(totalPrice * (conf.perc / 100), hasGuarantee ? conf.guar : 0);
+  const barberEarn = barberBase + totalTip;
+  const shopEarn = totalPrice - barberBase;
+
+  const serviceStats = {};
+  customers.forEach(c => {
+    const allServices = [c.hair, ...c.svcs].filter(s => s);
+    allServices.forEach(s => {
+      serviceStats[s] = (serviceStats[s] || 0) + 1;
+    });
+  });
+
+  const archive = {
+    date: today,
+    total: totalPrice + totalTip,
+    barber: barberEarn,
+    shop: shopEarn,
+    count: customers.length,
+    stats: serviceStats
+  };
+
+  // ลบ archive เดิมของวันนี้ถ้ามี
+  archives = archives.filter(a => a.date !== today);
+  archives.push(archive);
+
+  // อัพเดทบัญชี
+  account.balance += (shopEarn - barberEarn);
+
+  saveData();
+  alert('ส่งข้อมูลสำเร็จ');
+  speak('ส่งข้อมูลสำเร็จ');
+  showPage('p3');
+}
+
+// แชร์ LINE
+function shareToLine() {
+  const today = getToday();
+  const todayData = db.filter(d => d.date === today);
+  
+  const isHoliday = todayData.some(d => d.type === 'HOLIDAY');
+  if (isHoliday) {
+    alert('วันนี้เป็นวันหยุด');
+    return;
+  }
+
+  const customers = todayData.filter(d => d.type === 'CUSTOMER');
+  const hasGuarantee = todayData.some(d => d.type === 'GUARANTEE_CLAIM');
+
+  let totalPrice = 0;
+  let totalTip = 0;
+  let cashTotal = 0;
+  let transTotal = 0;
+
+  customers.forEach(c => {
+    totalPrice += c.price;
+    totalTip += c.tip;
+    if (c.pay === 'CASH') cashTotal += c.price + c.tip;
+    if (c.pay === 'TRANS') transTotal += c.price + c.tip;
+  });
+
+  const barberBase = Math.max(totalPrice * (conf.perc / 100), hasGuarantee ? conf.guar : 0);
+  const barberEarn = barberBase + totalTip;
+  const shopEarn = totalPrice - barberBase;
+  const settle = cashTotal - barberEarn;
+
+  const serviceStats = {};
+  customers.forEach(c => {
+    const allServices = [c.hair, ...c.svcs].filter(s => s);
+    allServices.forEach(s => {
+      serviceStats[s] = (serviceStats[s] || 0) + 1;
+    });
+  });
+
+  let message = `📊 รายงาน ${conf.shop}\n`;
+  message += `📅 ${formatThaiDate(today)}\n\n`;
+  message += `👥 ลูกค้า: ${customers.length} คน\n`;
+  message += `💰 ยอดรวม: ฿${(totalPrice + totalTip).toLocaleString()}\n`;
+  message += `💵 เงินสด: ฿${cashTotal.toLocaleString()}\n`;
+  message += `📱 โอน: ฿${transTotal.toLocaleString()}\n\n`;
+  message += `👨‍💼 รายได้ช่าง: ฿${barberEarn.toLocaleString()}\n`;
+  message += `🏪 รายได้ร้าน: ฿${shopEarn.toLocaleString()}\n\n`;
+
+  if (Object.keys(serviceStats).length > 0) {
+    message += `📋 สถิติบริการ:\n`;
+    for (const [service, count] of Object.entries(serviceStats)) {
+      message += `• ${service}: ${count}\n`;
+    }
+    message += `\n`;
+  }
+
+  if (settle > 0) {
+    message += `💸 ช่างคืนร้าน: ฿${settle.toLocaleString()}`;
+  } else if (settle < 0) {
+    message += `💸 ร้านคืนช่าง: ฿${Math.abs(settle).toLocaleString()}`;
+  } else {
+    message += `✅ ยอดพอดี`;
+  }
+
+  const encodedMessage = encodeURIComponent(message);
+  window.open(`https://line.me/R/msg/text/?${encodedMessage}`, '_blank');
+}
+
+// แสดงบัญชี
+function renderAccount() {
+  const today = getToday();
+  const todayData = db.filter(d => d.date === today);
+  
+  const isHoliday = todayData.some(d => d.type === 'HOLIDAY');
+  
+  let todayBalance = 0;
+  
+  if (!isHoliday) {
+    const customers = todayData.filter(d => d.type === 'CUSTOMER');
+    const hasGuarantee = todayData.some(d => d.type === 'GUARANTEE_CLAIM');
+
+    let totalPrice = 0;
+    let totalTip = 0;
+
+    customers.forEach(c => {
+      totalPrice += c.price;
+      totalTip += c.tip;
+    });
+
+    const barberBase = Math.max(totalPrice * (conf.perc / 100), hasGuarantee ? conf.guar : 0);
+    const barberEarn = barberBase + totalTip;
+    const shopEarn = totalPrice - barberBase;
+    
+    todayBalance = shopEarn - barberEarn;
+  }
+
+  const totalBalance = account.balance + todayBalance;
+
+  document.getElementById('accountBalance').textContent = `฿${totalBalance.toLocaleString()}`;
+  document.getElementById('oldBalance').textContent = `฿${account.balance.toLocaleString()}`;
+  document.getElementById('todayBalance').textContent = `฿${todayBalance.toLocaleString()}`;
+
+  const statusEl = document.getElementById('balanceStatus');
+  statusEl.className = 'balance-status';
+  if (totalBalance > 0) {
+    statusEl.classList.add('green');
+  } else if (totalBalance < 0) {
+    statusEl.classList.add('red');
+  } else {
+    statusEl.classList.add('blue');
+  }
+
+  // แสดงประวัติ
+  if (account.logs.length > 0) {
+    let logsHTML = '';
+    account.logs.slice().reverse().forEach(log => {
+      logsHTML += `
+        <div class="report-item">
+          <div class="report-date">${formatThaiDate(log.date)}</div>
+          <div class="report-stats">฿${log.amount.toLocaleString()} - ${log.note}</div>
+        </div>
+      `;
+    });
+    document.getElementById('logsList').innerHTML = logsHTML;
+    document.getElementById('logsCard').style.display = 'block';
+  }
+
+  // ตั้งค่าวันที่เคลียร์
+  document.getElementById('clearDate').value = today;
+}
+
+// เคลียร์เงิน
+function clearBalance() {
+  const date = document.getElementById('clearDate').value;
+  const amount = parseInt(document.getElementById('clearAmount').value) || 0;
+  const note = document.getElementById('clearNote').value || 'เคลียร์เงิน';
+
+  if (!date || amount === 0) {
+    alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+    return;
+  }
+
+  if (!confirm(`ต้องการเคลียร์เงิน ฿${amount.toLocaleString()} หรือไม่?`)) {
+    return;
+  }
+
+  account.balance -= amount;
+  account.logs.push({
+    date: date,
+    amount: amount,
+    note: note
+  });
+
+  saveData();
+
+  document.getElementById('clearAmount').value = '';
+  document.getElementById('clearNote').value = '';
+
+  alert('เคลียร์เงินสำเร็จ');
+  speak('เคลียร์เงินสำเร็จ');
+  renderAccount();
+}
+
+// ค้นหารายวัน
+function searchDaily() {
+  const date = prompt('ระบุวันที่ (YYYY-MM-DD):');
+  if (!date) return;
+
+  const archive = archives.find(a => a.date === date);
+  if (!archive) {
+    alert('ไม่พบข้อมูล');
+    return;
+  }
+
+  let statsHTML = '';
+  for (const [service, count] of Object.entries(archive.stats)) {
+    statsHTML += `• ${service}: ${count}<br>`;
+  }
+
+  const content = `
+    <div class="report-item">
+      <div class="report-date">${formatThaiDate(archive.date)}</div>
+      <div class="report-stats">
+        ลูกค้า: ${archive.count} คน<br>
+        ยอดรวม: ฿${archive.total.toLocaleString()}<br>
+        รายได้ช่าง: ฿${archive.barber.toLocaleString()}<br>
+        รายได้ร้าน: ฿${archive.shop.toLocaleString()}<br><br>
+        ${statsHTML}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('reportModalTitle').textContent = 'รายงานรายวัน';
+  document.getElementById('reportModalContent').innerHTML = content;
+  document.getElementById('reportModal').classList.add('active');
+}
+
+// ค้นหารายเดือน
+function searchMonthly() {
+  const month = prompt('ระบุเดือน (YYYY-MM):');
+  if (!month) return;
+
+  const monthArchives = archives.filter(a => a.date.startsWith(month));
+  if (monthArchives.length === 0) {
+    alert('ไม่พบข้อมูล');
+    return;
+  }
+
+  let totalRevenue = 0;
+  let totalBarber = 0;
+  let totalShop = 0;
+  let totalCount = 0;
+
+  monthArchives.forEach(a => {
+    totalRevenue += a.total;
+    totalBarber += a.barber;
+    totalShop += a.shop;
+    totalCount += a.count;
+  });
+
+  const content = `
+    <div class="report-item">
+      <div class="report-date">สรุปเดือน ${month}</div>
+      <div class="report-stats">
+        จำนวนวัน: ${monthArchives.length} วัน<br>
+        ลูกค้าทั้งหมด: ${totalCount} คน<br>
+        ยอดรวม: ฿${totalRevenue.toLocaleString()}<br>
+        รายได้ช่าง: ฿${totalBarber.toLocaleString()}<br>
+        รายได้ร้าน: ฿${totalShop.toLocaleString()}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('reportModalTitle').textContent = 'รายงานรายเดือน';
+  document.getElementById('reportModalContent').innerHTML = content;
+  document.getElementById('reportModal').classList.add('active');
+}
+
+// ปิด modal รายงาน
+function closeReportModal() {
+  document.getElementById('reportModal').classList.remove('active');
+}
+
+// เริ่มต้น
+function init() {
+  loadData();
+  applyTheme(conf.theme);
+  
+  document.getElementById('shopName').textContent = conf.shop;
+
+  const today = getToday();
+  document.getElementById('dateInput').value = today;
+  document.getElementById('dateDisplay').textContent = formatThaiDate(today);
+
+  const currentTime = getCurrentTime();
+  document.getElementById('timeStart').value = currentTime;
+  document.getElementById('timeEnd').value = addMinutes(currentTime, 30);
+
+  renderReport();
+}
+
+// เรียกใช้เมื่อโหลดหน้า
+init();
 </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c7194c821b9705c',t:'MTc2OTk1MDI5Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
