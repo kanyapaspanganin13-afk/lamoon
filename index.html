@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.8.1</title>
+    <title>Barber Note Pro v.8.9</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -287,13 +287,47 @@ function renderDay() {
     container.innerHTML = `<div id="settleBar" style="flex:8; height:55px; background:${bg}; display:flex; align-items:center; justify-content:center; border-radius:15px; font-weight:900; font-size:15px; color:#1e293b; border:1px solid rgba(0,0,0,0.05);">${txt}</div><button onclick="saveAndGo('${dInp}', ${tot}, ${sEarn}, ${bEarn})" style="flex:2; height:55px; background:#f97316; color:#fff; border-radius:15px; border:none; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"><i class="fas fa-paper-plane"></i></button>`;
 }
 function saveAndGo(date, total, shop, barber) {
+    // 1. เช็กก่อนว่ามีเงินไหม
     if (total === 0 && !confirm("ไม่มีข้อมูลยอด ปิดงานเลยมั้ย?")) return;
-    let s = {}; db.filter(r => r.date === date).forEach(r => { 
-        r.svcs.forEach(v => s[v] = (s[v]||0)+1); if(r.hair) s["ทรง:"+r.hair] = (s["ทรง:"+r.hair]||0)+1; 
+
+    // 2. ดึงข้อมูลจาก db มากรอง (พี่ใช้ตัวแปร db ใช่ไหมครับ)
+    const todayDetails = db.filter(r => r.date === date);
+
+    // 3. สรุปสถิติทรงผม (ส่วนนี้พี่เขียนไว้ถูกแล้ว)
+    let s = {}; 
+    todayDetails.forEach(r => { 
+        r.svcs.forEach(v => s[v] = (s[v]||0)+1); 
+        if(r.hair) s["ทรง:"+r.hair] = (s["ทรง:"+r.hair]||0)+1; 
     });
-    const entry = { date, total, barber, shop: total-barber, count: db.filter(r => r.date === date).length, stats: s };
-    const i = archives.findIndex(a => a.date === date); (i > -1) ? archives[i] = entry : archives.push(entry);
-    save(); alert("✅ บันทึกเรียบร้อย!"); go(3);
+
+    // 4. สร้างก้อนข้อมูล (นี่คือจุดสำคัญที่ต้องส่งไปหน้าบัญชี)
+    const entry = { 
+        date: date, 
+        total: total, 
+        barber: barber, 
+        shop: total - barber, 
+        count: todayDetails.length, 
+        stats: s,
+        details: todayDetails // ใส่ไว้ให้หน้ารายวันมันเรียกดูได้ด้วย
+    };
+
+    // 5. เอาเข้าแฟ้ม archives (ตัวเดียวกับที่หน้ารายเดือน/รายวันใช้เรียก)
+    const i = archives.findIndex(a => a.date === date); 
+    if (i > -1) {
+        archives[i] = entry; // ถ้ามีของเก่าให้ทับ
+    } else {
+        archives.push(entry); // ถ้าไม่มีให้เพิ่มใหม่
+    }
+
+    // 6. บันทึกและย้ายหน้า
+    save(); // บันทึกค่า archives ลง localStorage
+    alert("✅ บันทึกเข้าบัญชีเรียบร้อย!"); 
+    
+    // 7. ล้างหน้าจอ (UI) แต่ไม่ลบข้อมูลใน db ตามที่พี่สั่ง
+    if($("listArea")) $("listArea").innerHTML = ""; // ล้างรายการที่โชว์
+    if($("totalDisplay")) $("totalDisplay").innerText = "0"; // รีเซ็ตเลขยอดรวม
+    
+    go(3); // ย้ายไปหน้าประวัติ/บัญชี ทันที!
 }
     function toggleAccHistory() {
         const w = $("accHistoryWrapper");
@@ -415,7 +449,22 @@ function shareLine() {
     window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`);
 }
     function saveDB() { localStorage.setItem("barber_db", JSON.stringify(db)); localStorage.setItem("barber_conf", JSON.stringify(conf)); }
-    function go(n) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); if(document.getElementById('p'+n)) document.getElementById('p'+n).classList.add('active'); if(document.getElementById('n'+n)) document.getElementById('n'+n).classList.add('active'); renderDay(); }
+  function go(n) { 
+    // 1. สลับหน้า (โค้ดเดิมของพี่)
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); 
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); 
+    if(document.getElementById('p'+n)) document.getElementById('p'+n).classList.add('active'); 
+    if(document.getElementById('n'+n)) document.getElementById('n'+n).classList.add('active'); 
+
+    // 2. เช็กว่าไปหน้าไหน ให้รันฟังก์ชันของหน้านั้น (อันนี้คือจุดที่พี่ขาด)
+    if (n === 1) {
+        renderDay(); // ถ้าไปหน้า 1 (หน้าหลัก) ค่อยวาดรายการวัน
+    } else if (n === 3) {
+        // ถ้าไปหน้า 3 (หน้าบัญชี/ประวัติ) ให้โหลดข้อมูลใหม่ทันที
+        if (typeof loadHistMonth === 'function') loadHistMonth(); 
+        // หรือถ้าพี่มีฟังก์ชันสรุปยอด ให้เรียกตรงนี้เลย ข้อมูลจะเด้งไปหน้าบัญชีทันที
+    }
+}
     function delRec(id) { if (confirm("จะลบรายการนี้ใช่ไหมครับพี่?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); } }
     function editTime(id) {const rec = db.find(r => r.id === id);if (!rec) return;const newStart = prompt("แก้เวลาเริ่ม (HH:MM)", rec.time);if (!newStart) return;const newEnd = prompt("แก้เวลาเสร็จ (HH:MM)", rec.endTime || "");rec.time = newStart;rec.endTime = newEnd || addMinutes(newStart, 30);saveDB();renderDay();}
 
