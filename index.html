@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro v.8.7</title>
+    <title>Barber Note Pro v.8.77</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -262,7 +262,34 @@ function handleHoliday() {
         $("btnCash").className = `btn btn-pay ${m === 'Cash' ? 'active-cash' : ''}`;
         $("btnTrans").className = `btn btn-pay ${m === 'Trans' ? 'active-trans' : ''}`;
     }
-function renderAccount() {
+function clearAccount() {
+    const date = $("accDate")?.value || new Date().toISOString().split("T")[0];
+    const note = $("accNote")?.value || "เคลียร์บัญชี";
+
+    if (!confirm("ยืนยันการเคลียร์บัญชีใช่ไหม?")) return;
+
+    const amount = account.balance;
+
+    if (amount === 0) {
+        alert("ไม่มีค้างบัญชีให้เคลียร์");
+        return;
+    }
+
+    account.logs.unshift({
+        date,
+        amount: -amount,
+        note
+    });
+
+    account.balance = 0;
+
+    localStorage.setItem("barber_account", JSON.stringify(account));
+
+    renderAccount();
+    alert("✅ เคลียร์บัญชีเรียบร้อย");
+}
+
+  function renderAccount() {
     const bal = account.balance || 0;
 
     $("accNet").innerText = Math.floor(bal).toLocaleString();
