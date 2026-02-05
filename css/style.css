@@ -1,1 +1,19 @@
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
 
+    <script>
+        // Service Worker คงไว้ที่นี่ตามเดิมดีแล้วครับ
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("./service-worker.js")
+                    .then(reg => console.log("✅ ระบบออฟไลน์พร้อมใช้งาน!"))
+                    .catch(err => console.error("❌ SW error:", err));
+            });
+        }
+    </script>
+</head>
+<body>
+    <script src="script.js"></script>
+</body>
+</html>
