@@ -1,1 +1,122 @@
+    /* 1. ตัวแปรหลัก */
+    :root { 
+        --primary: #6366f1; --accent: #0ea5e9; --danger: #ef4444; --success: #22c55e; 
+        --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --border: #e2e8f0;
+    }
+    /* 2. ระบบธีม (ต้องอยู่บนสุดเพื่อเตรียมตัวแปร) */
+    body.navy { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --accent: #38bdf8; }
+    body.dark { --bg: #121212; --card: #1a1a1a; --text: #fbbf24; --accent: #fbbf24; }
 
+    /* 3. รีเซ็ตพื้นฐาน */
+    * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { 
+        margin: 0; background: var(--bg); color: var(--text); 
+        padding-bottom: 90px; overflow-x: hidden; transition: all 0.3s ease; 
+    }
+   /* 4. ระบบเลย์เอาต์ (ปรับให้โปร่งแสง) */
+.container { 
+    padding: 15px; 
+    max-width: 500px; 
+    margin: auto; 
+    position: relative; 
+    z-index: 1; 
+}
+/* 4. ระบบเลย์เอาต์ (เวอร์ชันแก้ไขให้ไอคอนไม่หาย) */
+.page { 
+    display: none; 
+    background: var(--card);
+    opacity: 0.95; 
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    
+    border-radius: 25px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+
+    /* กำหนดความสูงให้เท่ากัน */
+    min-height: 75vh;    
+}
+
+.page.active { 
+    /* เปลี่ยนกลับเป็น block เพื่อให้เนื้อหาข้างใน (ไอคอน/ปุ่ม) เรียงลงมาเหมือนเดิม */
+    display: block; 
+    animation: slideUp 0.4s ease-out;
+}
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
+/* 5. เมนูบาร์ (ปรับให้รองรับระบบธีม) */
+nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    /* เปลี่ยนจาก #ffffff !important เป็น var(--card) เพื่อให้เปลี่ยนตามธีมที่เลือก */
+    background: var(--card) !important; 
+    display: flex; justify-content: space-around; 
+    height: 75px; align-items: center;
+    /* ปรับเงาให้ดูเข้ากับทั้งธีมสว่างและมืด */
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.15); 
+    z-index: 99999; 
+    /* ใช้สีเส้นขอบจากตัวแปรระบบธีม */
+    border-top: 1px solid var(--border); 
+    padding-bottom: env(safe-area-inset-bottom);
+    transition: background 0.3s ease; /* ทำให้ตอนเปลี่ยนธีมสีจะค่อยๆ เปลี่ยน ดูนุ่มนวลครับ */
+}
+.nav-item { 
+    flex: 1; text-align: center; 
+    /* ใช้สีตัวหนังสือจากธีม แต่ทำให้จางลงเล็กน้อยสำหรับปุ่มที่ไม่ได้เลือก */
+    color: var(--text);
+    opacity: 0.6; 
+    cursor: pointer; transition: 0.2s; 
+    display: flex; flex-direction: column; align-items: center;
+}
+.nav-item.active { 
+    /* สีไอคอนเมื่อถูกเลือก จะใช้สี Accent ของธีมนั้นๆ (เช่น สีฟ้า หรือ สีเหลือง) */
+    color: var(--accent) !important; 
+    opacity: 1; 
+}
+.nav-item i { font-size: 22px; display: block; margin-bottom: 2px; }
+.nav-item span { font-size: 11px; font-weight: 700; }
+    /* 6. ฟอร์มและอินพุต */
+    .icon-card, input, select { background: var(--card); color: var(--text); }
+
+    .icon-card { 
+        border-radius: 15px; padding: 10px 2px; display: flex; flex-direction: column; 
+        align-items: center; justify-content: center; gap: 4px; cursor: pointer; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: 75px; font-size: 14px; transition: 0.2s;
+    }
+    .icon-card:active { transform: scale(0.95); }
+
+    input, select { 
+        width: 100%; height: 75px; border-radius: 20px; font-size: 20px; font-weight: 700; 
+        text-align: center; border: none; outline: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
+        appearance: none; -webkit-appearance: none;
+    }
+
+    /* 7. ปุ่มและการจัดการ */
+    .btn { 
+        border: none; padding: 12px; border-radius: 15px; cursor: pointer; 
+        display: flex; align-items: center; justify-content: center; font-weight: 700; transition: 0.2s; 
+    }
+    .btn-save { background: var(--success); color: white; width: 100%; font-size: 16px; margin-top: 10px; }
+    
+    .btn-pay { background: #e2e8f0; color: #64748b; border: 2px solid transparent; height: 70px; font-size: 18px; width: 100%; }
+    .btn-pay.active-cash { background: #dcfce7; color: #15803d; border-color: #22c55e; }
+    .btn-pay.active-trans { background: #e0f2fe; color: #0369a1; border-color: #0ea5e9; }
+
+    /* 8. โมดอลและรายงาน */
+    .modal { 
+        position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); 
+        display: none; z-index: 1000000; align-items: center; justify-content: center; 
+    }
+    .modal-content { 
+        background: var(--card); color: var(--text); width: 90%; max-width: 400px; 
+        border-radius: 25px; padding: 25px; max-height: 85vh; overflow-y: auto; 
+    }
+
+    .status-bar { padding: 12px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 14px; margin-bottom: 10px; }
+    .acc-main-card { background: var(--card); padding: 20px; border-radius: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); margin-bottom: 15px; }
+    #accHistory { font-size: 12px; max-height: 150px; overflow-y: auto; }
+    @keyframes slideUp {
+        from { transform: translateY(100%); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
