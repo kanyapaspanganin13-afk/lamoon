@@ -9,13 +9,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V.091 </title>
+    <title>Barber Note Pro V.091</title>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 
     <script>
-        // Service Worker คงไว้ที่นี่ตามเดิมดีแล้วครับ
         if ("serviceWorker" in navigator) {
             window.addEventListener("load", () => {
                 navigator.serviceWorker.register("./service-worker.js")
@@ -23,6 +23,9 @@
                     .catch(err => console.error("❌ SW error:", err));
             });
         }
+    </script> </head>
+
+<body>
     <script src="script.js"></script>
 </body>
 </html>
