@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V.110 </title>
+    <title>Barber Note Pro V.16 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -313,16 +313,15 @@ nav {
             
             <div style="margin-top: 30px; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 10px;">
             
-            <button onclick="editDailyData()" style="height:55px; background:#f59e0b; border:none; border-radius:var(--radius-md); font-size:15px; font-weight:800; color:#ffffff; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;">
-                <i class="fas fa-edit" style="font-size: 18px;"></i>
-                <span style="line-height: 1;">แก้ไขข้อมูล</span>
-            </button>
-        
-            <button onclick="clearDailyData()" style="height:55px; background:var(--danger); border:none; border-radius:var(--radius-md); font-size:15px; font-weight:800; color:#ffffff; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;">
-                <i class="fas fa-trash-alt" style="font-size: 18px;"></i>
-                <span style="line-height: 1;">ลบรายงาน</span>
-            </button>
-        </div>
+           <div style="margin-top: 40px; margin-bottom: 20px; display: flex; justify-content: center; gap: 10px; width: 100%;">
+    <button onclick="editDailyData()" style="width: 140px; height: 45px; background: #f59e0b; color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <i class="fas fa-edit"></i> แก้ไขข้อมูล
+    </button>
+
+    <button onclick="clearDailyData()" style="width: 140px; height: 45px; background: #ef4444; color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <i class="fas fa-trash-alt"></i> ลบรายงาน
+    </button>
+</div>
     </div>
             
     <div id="p3" class="page" style="max-width:480px; margin:0 auto; padding: 12px; padding-bottom: 100px; background: #f8fafc;">
@@ -1114,58 +1113,63 @@ if (dList) {
     }
 }
     function editDailyData() {
-    // 1. ดึงวันที่จากหน้าบัญชี (ซึ่งปกติจะเป็นรูปแบบ ค.ศ. YYYY-MM-DD จาก Input Date)
-    const targetDate = $("accDate").value; 
+    // 1. ดึงวันที่จากช่องเลือกวันที่ (เช็คทั้ง accDate และ reportDateSelector)
+    const targetDate = $("accDate")?.value || $("reportDateSelector")?.value;
 
     if (!targetDate) {
         alert("กรุณาเลือกวันที่ต้องการแก้ไขก่อนครับ");
         return;
     }
-
-    // 2. ค้นหาข้อมูลใน archives โดยใช้ .find (เพราะ archives เป็น Array)
     const foundData = archives.find(a => a.date === targetDate);
-
     if (foundData && foundData.details) {
-        // 3. คัดลอกข้อมูลมาใส่ใน db ปัจจุบัน
+        // 2. ล้างค่า db ปัจจุบันแล้วเอาข้อมูลที่หาเจอใส่เข้าไปแทน
         db = JSON.parse(JSON.stringify(foundData.details));
-        
-        // 4. ส่งวันที่กลับไปที่หน้าแรกเพื่อให้บันทึกทับวันที่เดิมได้ถูกต้อง
-        if ($("dateInp")) $("dateInp").value = targetDate;
-        
-        // 5. วาดรายการใหม่และสลับหน้า
-        renderDay(targetDate);
-        
-        alert(`📂 ดึงข้อมูลวันที่ ${targetDate} มาเรียบร้อย\nคุณสามารถแก้ไขรายการในหน้าบันทึกได้ทันทีครับ`);
-        
-        // สลับไปหน้า 1 (หน้าบันทึก)
+        // 3. บังคับให้หน้าแรกเปลี่ยนวันที่ตามข้อมูลที่ดึงมา (สำคัญมาก!)
+        if ($("dateInp")) {
+            $("dateInp").value = targetDate;
+        }
+        // 4. สั่งวาดหน้ารายงานของ "วันที่เลือก" ใหม่
+        renderDay(targetDate); 
+        // 5. สลับหน้าไปที่หน้า 1
         go(1); 
+        // ใช้คำขอโทษที่ล่าช้าและแจ้งสถานะอย่างสุภาพ
+        alert(`✅ ดึงข้อมูลวันที่ ${targetDate} มาที่หน้าบันทึกเรียบร้อยครับ`);
     } else {
         alert("❌ ไม่พบข้อมูลบันทึกในวันที่เลือกครับ");
     }
 }
-    function saveAndGo(date, total) {
+   function saveAndGo(date, total) {
     const allToday = db.filter(r => r.date === date);
     const todayData = allToday.filter(r => r.type === 'SERVICE' || r.type === 'GUARANTEE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
+    
     let cash = 0, trans = 0, tips = 0, count = 0, stats = {};
     const extraSvcs = ["โกนหนวด", "กันหน้า", "สระผม"];
 
     todayData.forEach(r => {
         const p = Number(r.price) || 0, t = Number(r.tip) || 0;
         tips += t;
-        r.pay === "Cash" ? cash += p : trans += (p + t);
+
+        // ปรับปรุง: รองรับการคำนวณเงินแบบ Mix ในการบันทึกด้วย
+        if (r.pay === "Mix") {
+            const pCash = Number(r.payCash) || 0;
+            const pTrans = Number(r.payTrans) || 0;
+            cash += (pCash - t); // เงินสดที่เข้าร้าน (หักทิปช่าง)
+            trans += pTrans;
+        } else if (r.pay === "Trans" || r.pay === "โอน") {
+            trans += (p + t);
+        } else {
+            cash += p;
+        }
+
         const svcs = Array.isArray(r.svcs) ? r.svcs : [r.svcs];
-        
         if (r.type !== 'GUARANTEE') {
             const isRealCut = svcs.some(s => s && !extraSvcs.includes(s));
             if (isRealCut) count++;
-            svcs.forEach(s => { 
-                if(s) stats[s] = (stats[s] || 0) + 1; 
-            });
+            svcs.forEach(s => { if(s) stats[s] = (stats[s] || 0) + 1; });
         }
     });
 
-    // คำนวณรายได้
     const bEarn = isHoliday ? 0 : Math.max(total * (conf.perc / 100), conf.guar) + tips;
     const settle = isHoliday ? 0 : cash - bEarn;
     const idx = archives.findIndex(a => a.date === date);
@@ -1173,38 +1177,27 @@ if (dList) {
     const data = {
         date,
         total: Number(total),
-        cash,
-        trans,
-        tips,
+        cash, trans, tips,
         barber: Math.floor(bEarn),
         shop: isHoliday ? 0 : total - (bEarn - tips),
-        settle,
-        count,
-        stats,
-        details: allToday, 
-        off: isHoliday,     
+        settle, count, stats,
+        details: allToday,
+        off: isHoliday,
         type: isHoliday ? "HOLIDAY" : "WORK"
-    };    
-    // --- ส่วนจัดการยอดสะสม (Balance) ---
+    };
     if (idx > -1) {
-        // กรณีแก้ไขยอดเดิม: ต้องเอาส่วนต่างของ settle ไปปรับปรุง balance
+        // อัปเดตยอดสะสมโดยคิดจากส่วนต่าง (แม่นยำมากครับ)
         account.balance = (Number(account.balance) || 0) + (settle - (archives[idx].settle || 0));
         archives[idx] = data;
     } else {
-        // กรณีบันทึกใหม่: บวก settle เข้าไปตรงๆ
         account.balance = (Number(account.balance) || 0) + settle;
         archives.push(data);
     }
-    // ล้างข้อมูลใน db เฉพาะของวันที่ปิดยอด
     db = db.filter(r => r.date !== date);
-    // บันทึกข้อมูลลง Memory/Storage
-    save(); 
-    // --- ✅ จุดสำคัญที่ต้องเพิ่ม: สั่งให้หน้าบัญชีอัปเดตตัวเลขทันที ---
-    if (typeof loadAccountStatus === "function") {
-        loadAccountStatus();
-    }
-    alert("✅ บันทึกยอดเรียบร้อย!");
-    go(3); // ไปหน้าบัญชี
+    save();
+    if (typeof loadAccountStatus === "function") loadAccountStatus();
+    alert("✅ บันทึกและอัปเดตยอดบัญชีเรียบร้อย!");
+    go(3); 
 }
     function toggleAccHistory() {const w = $("accHistoryWrapper"); w.style.display = w.style.display === "none" ? "block" : "none";$("accHistory").innerHTML = account.logs.map(l => `<div style="padding:5px; border-bottom:1px solid #eee;">${l.date}: ฿${l.amount} (${l.note})</div>`).join('') || "ไม่มีประวัติ";}    
     function loadAccountHistory() {let h = account.logs.map(l => `<div style="padding:15px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;"><div><b style="font-size:14px; color:#1e293b;">${l.date}</b><br><small style="color:#64748b;">${l.note}</small></div><b style="color:${l.amount >= 0 ? '#16a34a' : '#dc2626'};">${l.amount >= 0 ? '+' : ''}฿${Math.abs(l.amount).toLocaleString()}</b></div> `).join('');if($("accHistory")) {$("accHistory").innerHTML = h || '<center style="padding:40px; color:#94a3b8;">ไม่มีประวัติการเคลียร์</center>';}}     
