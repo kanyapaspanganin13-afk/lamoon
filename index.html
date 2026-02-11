@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V.016 </title>
+    <title>Barber Note Pro V.01 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -1053,30 +1053,35 @@ if (dList) {
         displayDateBE = `${d}/${m}/${yBE}`;
     }
 
-    dList.innerHTML = `
+   dList.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 8px 12px; border-radius: 12px; border-bottom: 2px solid #f1f5f9; margin-bottom: 10px;">
-            
             <div style="display: flex; align-items: center; gap: 10px;">
                 <b style="font-size: 16px; color: #1e293b;">📋 รายงาน</b>
-              
-            <div style="position: relative; background: #f1f5f9; padding: 5px 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; cursor: pointer; width: 180px;"> 
-                <span style="font-size: 14px; font-weight: 700; color: #6366f1; width: 100%; text-align: center;">${displayDateBE}</span>
-                
-            <input type="date" id="reportDateSelector" value="${dInp}" 
-                   onchange="renderDay(this.value)" 
-                   style="position: absolute; opacity: 0; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer;">
-        </div>
-    </div>
-
+                <div style="position: relative; background: #f1f5f9; padding: 5px 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; cursor: pointer; width: 180px;"> 
+                    <span style="font-size: 14px; font-weight: 700; color: #6366f1; width: 100%; text-align: center;">${displayDateBE}</span>
+                    <input type="date" id="reportDateSelector" value="${dInp}" 
+                           onchange="renderDay(this.value)" 
+                           style="position: absolute; opacity: 0; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer;">
+                </div>
+            </div>
             <i class="fab fa-line" style="color: #22c55e; font-size: 32px; cursor: pointer;" onclick="shareLine()"></i>
         </div>
 
-        <div style="padding: 0 5px;">
+        <div style="padding: 0 5px; min-height: 100px;">
             ${isHoliday ? `<center style='padding:30px; color:#64748b;'>🏖️ วันหยุด (${displayDateBE})</center>` : (listHtml || "<center style='padding:30px; color:#94a3b8;'>ไม่มีข้อมูล</center>")}
         </div>
+
+        <div style="margin-top: 40px; margin-bottom: 20px; display: flex; justify-content: center; gap: 12px; padding: 0 10px;">
+            <button onclick="editDailyData()" style="flex: 1; max-width: 130px; height: 42px; background: #f59e0b; color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <i class="fas fa-edit"></i> แก้ทั้งวัน
+            </button>
+            <button onclick="clearDailyData()" style="flex: 1; max-width: 130px; height: 42px; background: #ef4444; color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <i class="fas fa-trash-alt"></i> ลบทั้งวัน
+            </button>
+        </div>
     `;
-}
-}               
+} 
+}       
 // ฟังก์ชันแก้ไขข้อมูล: ดึงข้อมูลจากประวัติกลับมาที่หน้าบันทึก
 function editDailyData() {
     // ดึงวันที่จากตัวเลือก (ปกติจะได้ค่า ค.ศ. เช่น 2026-02-11)
