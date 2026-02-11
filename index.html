@@ -311,16 +311,16 @@ nav {
                 <hr style="border:0; border-top:1px solid #e2e8f0; margin-top:15px;">
                 <div id="dailyList"></div>
         
-  <div style="margin-top: 50px; margin-bottom: 30px; display: flex; justify-content: center; gap: 12px; width: 100%; padding: 0 20px;">
-               <button onclick="editDailyData()" style="flex: 1; max-width: 140px; height: 48px; background: #f59e0b; color: white; border: none; border-radius: 14px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);">
-               <i class="fas fa-edit"></i> แก้ไข
+        <div style="margin-top: 60px; margin-bottom: 40px; display: flex; justify-content: center; gap: 15px; padding: 0 20px;">
+            <button onclick="editDailyData()" style="width: 125px; height: 42px; background: #f59e0b; color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <i class="fas fa-edit"></i> แก้ไข
             </button>
 
-             <button onclick="clearDailyData()" style="flex: 1; max-width: 140px; height: 48px; background: #ef4444; color: white; border: none; border-radius: 14px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);">
+            <button onclick="clearDailyData()" style="width: 125px; height: 42px; background: #ef4444; color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; shadow: 0 4px 6px rgba(0,0,0,0.1);">
             <i class="fas fa-trash-alt"></i> ลบ
             </button>
         </div>
-    </div>
+     </div>
             
     <div id="p3" class="page" style="max-width:480px; margin:0 auto; padding: 12px; padding-bottom: 100px; background: #f8fafc;">
     
@@ -1077,63 +1077,60 @@ if (dList) {
     `;
 }
 }               
-    function clearDailyData() {
-    // 1. ดึงวันที่จาก Input (รูปแบบ ค.ศ. YYYY-MM-DD)
-    const targetDate = $("accDate") ? $("accDate").value : ""; 
-    
-    if (!targetDate) {
-        alert("กรุณาเลือกวันที่ต้องการลบก่อนครับ");
-        return;
-    }
-
-    // แปลงวันที่เพื่อใช้แสดงผลในแจ้งเตือนเป็น พ.ศ. ให้ดูสุภาพและเข้าใจง่าย
-    const dateParts = targetDate.split('-');
-    const displayDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${parseInt(dateParts[0]) + 543}` : targetDate;
-
-    const confirmDelete = confirm(`⚠️ ยืนยันการลบรายงานวันที่ ${displayDate} ใช่หรือไม่?\n(ข้อมูลจะหายไปจากประวัติและยอดเงินจะถูกคำนวณใหม่ทั้งหมด)`);
-    
-    if (confirmDelete) {
-        // 2. ลบข้อมูลจาก archives (ใช้วิธี filter เพื่อสร้าง Array ใหม่ที่ไม่มีวันที่นี้)
-        if (typeof archives !== 'undefined' && Array.isArray(archives)) {
-            archives = archives.filter(a => a.date !== targetDate);
-        }
-
-        // 3. ถ้าวันที่เลือกตรงกับวันที่กำลังบันทึก (db) ให้ล้างค่าใน db ด้วย
-        if ($("dateInp") && $("dateInp").value === targetDate) {
-            db = []; 
-        }
-        
-        // 4. บันทึกการเปลี่ยนแปลงลง LocalStorage และรีโหลดหน้าจอ
-        save(); 
-        
-        alert(`✅ ดำเนินการลบข้อมูลวันที่ ${displayDate} เรียบร้อยแล้วครับ`);
-        location.reload(); // เพื่อให้หน้าบัญชีคำนวณยอดเงินสะสมใหม่ทันที
-    }
-}
-    function editDailyData() {
-    // 1. ดึงวันที่จากช่องเลือกวันที่ (เช็คทั้ง accDate และ reportDateSelector)
-    const targetDate = $("accDate")?.value || $("reportDateSelector")?.value;
+// ฟังก์ชันแก้ไขข้อมูล: ดึงข้อมูลจากประวัติกลับมาที่หน้าบันทึก
+function editDailyData() {
+    // ดึงวันที่จากตัวเลือก (ปกติจะได้ค่า ค.ศ. เช่น 2026-02-11)
+    const targetDate = document.getElementById("reportDateSelector")?.value || document.getElementById("accDate")?.value;
 
     if (!targetDate) {
         alert("กรุณาเลือกวันที่ต้องการแก้ไขก่อนครับ");
         return;
     }
+
+    // ค้นหาข้อมูลในคลัง (archives)
     const foundData = archives.find(a => a.date === targetDate);
+
     if (foundData && foundData.details) {
-        // 2. ล้างค่า db ปัจจุบันแล้วเอาข้อมูลที่หาเจอใส่เข้าไปแทน
+        // 1. คัดลอกรายการย่อยมาใส่ในตัวแปรทำงาน (db)
         db = JSON.parse(JSON.stringify(foundData.details));
-        // 3. บังคับให้หน้าแรกเปลี่ยนวันที่ตามข้อมูลที่ดึงมา (สำคัญมาก!)
-        if ($("dateInp")) {
-            $("dateInp").value = targetDate;
+
+        // 2. ปรับวันที่ในหน้าแรกให้ตรงกับวันที่ดึงมา
+        if (document.getElementById("dateInp")) {
+            document.getElementById("dateInp").value = targetDate;
         }
-        // 4. สั่งวาดหน้ารายงานของ "วันที่เลือก" ใหม่
-        renderDay(targetDate); 
-        // 5. สลับหน้าไปที่หน้า 1
+
+        // 3. สลับไปหน้าแรก (บันทึก)
         go(1); 
-        // ใช้คำขอโทษที่ล่าช้าและแจ้งสถานะอย่างสุภาพ
-        alert(`✅ ดึงข้อมูลวันที่ ${targetDate} มาที่หน้าบันทึกเรียบร้อยครับ`);
+
+        // 4. สั่งวาดรายการใหม่ (หน่วงเวลานิดหน่อยเพื่อให้หน้าจอเปลี่ยนเสร็จ)
+        setTimeout(() => {
+            if (typeof renderDay === 'function') renderDay(targetDate);
+            alert(`📂 ดึงข้อมูลวันที่ ${targetDate} มาเรียบร้อยครับ`);
+        }, 150);
     } else {
-        alert("❌ ไม่พบข้อมูลบันทึกในวันที่เลือกครับ");
+        alert("❌ ไม่พบข้อมูลในวันที่เลือกครับ");
+    }
+}
+
+// ฟังก์ชันลบข้อมูล: ลบและคำนวณยอดเงินสะสมใหม่
+function clearDailyData() {
+    const targetDate = document.getElementById("reportDateSelector")?.value;
+    if (!targetDate) return alert("กรุณาเลือกวันที่ก่อนครับ");
+
+    if (confirm(`⚠️ ยืนยันการลบรายงานวันที่ ${targetDate}?\nยอดเงินสะสมจะถูกคำนวณใหม่ทันที`)) {
+        const idx = archives.findIndex(a => a.date === targetDate);
+        if (idx > -1) {
+            // หักยอดที่ช่างต้องคืนร้านออกจากยอดสะสมรวมก่อนลบ
+            if (typeof account !== 'undefined') {
+                account.balance = (Number(account.balance) || 0) - (archives[idx].settle || 0);
+            }
+            archives.splice(idx, 1); // ลบข้อมูลออกจาก Array
+            save(); // บันทึกลงเครื่อง
+            alert("✅ ลบข้อมูลและอัปเดตบัญชีเรียบร้อยครับ");
+            location.reload(); // รีโหลดเพื่อให้ตัวเลขหน้าบัญชีอัปเดต
+        } else {
+            alert("ไม่พบข้อมูลที่ต้องการลบ");
+        }
     }
 }
    function saveAndGo(date, total) {
