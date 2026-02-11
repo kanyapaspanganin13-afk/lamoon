@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V.11 </title>
+    <title>Barber Note Pro V.181 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -109,8 +109,7 @@ nav {
         width: 100%; height: 75px; border-radius: 20px; font-size: 20px; font-weight: 700; 
         text-align: center; border: none; outline: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
         appearance: none; -webkit-appearance: none;
-    }
-        
+    }  
       /* 7. ปุ่มและการจัดการ (ขนาดนิ่งสนิท) */
 
 /* สีปกติของแต่ละปุ่ม */
@@ -1914,38 +1913,36 @@ function sendToLineFinal() {
     window.open(`https://line.me/R/msg/text/?${encodeURIComponent(finalMsg)}`);
     document.getElementById("linePreview").style.display = "none";
 }
-           function go(p) {
-    // 1. จัดการการซ่อน/แสดงหน้า Page
-    document.querySelectorAll('.page').forEach(pg => {
+   function go(p) {
+    // 1. จัดการหน้า Page (ใช้เฉพาะเจาะจงที่ ID เพื่อไม่ให้ไปโดน Nav)
+    const pages = document.querySelectorAll('.page');
+    pages.forEach(pg => {
         pg.classList.remove('active');
         pg.style.display = 'none'; 
     });
-
     const targetPage = document.getElementById('p' + p);
     if (targetPage) {
         targetPage.classList.add('active');
         targetPage.style.display = 'block';
     }
-
-    // 2. จัดการสถานะปุ่มเมนู (Navbar) ให้มีสีตามหน้าจอที่เลือก
-    document.querySelectorAll('.nav-item').forEach((btn, i) => {
+    // 2. อัปเดตสถานะปุ่มเมนู
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach((btn, i) => {
+        // อัปเดต class active เพื่อให้สีเปลี่ยนตาม CSS var(--accent)
         btn.classList.toggle('active', (i + 1) === p);
     });
-    // 3. เงื่อนไขพิเศษเมื่อเข้าแต่ละหน้า
+    // 3. เงื่อนไขพิเศษ (คงเดิมแต่ทำให้แม่นยำขึ้น)
     if (p === 2) {
-        // เมื่อไปหน้ารายงาน: ให้ดึงวันที่จากหน้าแรกไปแสดงผลรายงานทันที
-        const targetDate = $("dateInp")?.value || new Date().toISOString().split('T')[0];
+        const targetDate = document.getElementById("dateInp")?.value || new Date().toISOString().split('T')[0];
         if (typeof renderDay === 'function') renderDay(targetDate);
     }
-    if (p === 3) { 
-        // เมื่อไปหน้าบัญชี: บังคับวันที่ให้ตรงกันและคำนวณยอดเงินค้างชำระ
-        if ($("accDate") && $("dateInp")) $("accDate").value = $("dateInp").value;
-        if (typeof loadAccountStatus === 'function') loadAccountStatus(); 
+    if (p === 3) {
+        // เมื่อไปหน้าบัญชี ให้โหลดสถานะเงินสะสมล่าสุดเสมอ
+        if (typeof loadAccountStatus === 'function') loadAccountStatus();
     }
-    // 4. เลื่อนจอขึ้นบนสุด (เพื่อความสุภาพและใช้งานง่าย)
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-                function saveDB() {localStorage.setItem("barber_db", JSON.stringify(db));localStorage.setItem("barber_conf", JSON.stringify(conf));}
+     function saveDB() {localStorage.setItem("barber_db", JSON.stringify(db));localStorage.setItem("barber_conf", JSON.stringify(conf));}
                 function delRec(id) { if (confirm("ลบรายการนี้?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); } }
                 function editTime(id) {const rec = db.find(r => r.id === id);if (!rec) return;const newStart = prompt("แก้เวลาเริ่ม (HH:MM)", rec.time);if (!newStart) return;const newEnd = prompt("แก้เวลาเสร็จ (HH:MM)", rec.endTime || "");rec.time = newStart;rec.endTime = newEnd || addMinutes(newStart, 30);saveDB();renderDay();}
                 
