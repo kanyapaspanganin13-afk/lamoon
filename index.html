@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V.01 </title>
+    <title>Barber Note Pro V.121 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -109,7 +109,8 @@ nav {
         width: 100%; height: 75px; border-radius: 20px; font-size: 20px; font-weight: 700; 
         text-align: center; border: none; outline: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
         appearance: none; -webkit-appearance: none;
-    }  
+    }
+        
       /* 7. ปุ่มและการจัดการ (ขนาดนิ่งสนิท) */
 
 /* สีปกติของแต่ละปุ่ม */
@@ -310,19 +311,15 @@ nav {
                 <div id="dServiceStats"></div>
                 <hr style="border:0; border-top:1px solid #e2e8f0; margin-top:15px;">
                 <div id="dailyList"></div>
-        
-        <div style="margin-top: 60px; margin-bottom: 40px; display: flex; justify-content: center; gap: 15px; padding: 0 20px;">
-            <button onclick="editDailyData()" style="width: 125px; height: 42px; background: #f59e0b; color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; shadow: 0 4px 6px rgba(0,0,0,0.1);">
-            <i class="fas fa-edit"></i> แก้ไข
-            </button>
-
-            <button onclick="clearDailyData()" style="width: 125px; height: 42px; background: #ef4444; color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; shadow: 0 4px 6px rgba(0,0,0,0.1);">
-            <i class="fas fa-trash-alt"></i> ลบ
-            </button>
-        </div>
-     </div>
             
-    <div id="p3" class="page" style="max-width:480px; margin:0 auto; padding: 12px; padding-bottom: 100px; background: #f8fafc;">
+             <div style="margin-top: 115px; width: 100%; display: flex; justify-content: center;">
+                    <button onclick="clearDailyData()" style="width:70%; height:50px; background:#e51c23; border:none ; border-radius:15px; font-size:15px; font-weight:800; color:#ffffff; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow: none;">
+                        <i class="fas fa-trash-alt" style="font-size: 18px;"></i><span style="line-height: 1;">ลบรายงานวันนี้ทั้งหมด</span>
+                    </button>
+                </div>
+            </div>
+            
+               <div id="p3" class="page" style="max-width:480px; margin:0 auto; padding: 12px; padding-bottom: 100px; background: #f8fafc;">
     
     <div class="card" style="background:#fff; border-radius:25px; padding:20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border:1px solid #fff; margin-bottom: 15px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
@@ -1053,123 +1050,61 @@ if (dList) {
         displayDateBE = `${d}/${m}/${yBE}`;
     }
 
-   dList.innerHTML = `
+    dList.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 8px 12px; border-radius: 12px; border-bottom: 2px solid #f1f5f9; margin-bottom: 10px;">
+            
             <div style="display: flex; align-items: center; gap: 10px;">
                 <b style="font-size: 16px; color: #1e293b;">📋 รายงาน</b>
-                <div style="position: relative; background: #f1f5f9; padding: 5px 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; cursor: pointer; width: 180px;"> 
-                    <span style="font-size: 14px; font-weight: 700; color: #6366f1; width: 100%; text-align: center;">${displayDateBE}</span>
-                    <input type="date" id="reportDateSelector" value="${dInp}" 
-                           onchange="renderDay(this.value)" 
-                           style="position: absolute; opacity: 0; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer;">
-                </div>
-            </div>
+              
+            <div style="position: relative; background: #f1f5f9; padding: 5px 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; cursor: pointer; width: 180px;"> 
+                <span style="font-size: 14px; font-weight: 700; color: #6366f1; width: 100%; text-align: center;">${displayDateBE}</span>
+                
+            <input type="date" id="reportDateSelector" value="${dInp}" 
+                   onchange="renderDay(this.value)" 
+                   style="position: absolute; opacity: 0; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer;">
+        </div>
+    </div>
+
             <i class="fab fa-line" style="color: #22c55e; font-size: 32px; cursor: pointer;" onclick="shareLine()"></i>
         </div>
 
-        <div style="padding: 0 5px; min-height: 100px;">
+        <div style="padding: 0 5px;">
             ${isHoliday ? `<center style='padding:30px; color:#64748b;'>🏖️ วันหยุด (${displayDateBE})</center>` : (listHtml || "<center style='padding:30px; color:#94a3b8;'>ไม่มีข้อมูล</center>")}
         </div>
-
-        <div style="margin-top: 40px; margin-bottom: 20px; display: flex; justify-content: center; gap: 12px; padding: 0 10px;">
-            <button onclick="editDailyData()" style="flex: 1; max-width: 130px; height: 42px; background: #f59e0b; color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <i class="fas fa-edit"></i> แก้ทั้งวัน
-            </button>
-            <button onclick="clearDailyData()" style="flex: 1; max-width: 130px; height: 42px; background: #ef4444; color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <i class="fas fa-trash-alt"></i> ลบทั้งวัน
-            </button>
-        </div>
     `;
-} 
-}       
-// ฟังก์ชันแก้ไขข้อมูล: ดึงข้อมูลจากประวัติกลับมาที่หน้าบันทึก
-function editDailyData() {
-    // ดึงวันที่จากตัวเลือก (ปกติจะได้ค่า ค.ศ. เช่น 2026-02-11)
-    const targetDate = document.getElementById("reportDateSelector")?.value || document.getElementById("accDate")?.value;
-
-    if (!targetDate) {
-        alert("กรุณาเลือกวันที่ต้องการแก้ไขก่อนครับ");
-        return;
-    }
-
-    // ค้นหาข้อมูลในคลัง (archives)
-    const foundData = archives.find(a => a.date === targetDate);
-
-    if (foundData && foundData.details) {
-        // 1. คัดลอกรายการย่อยมาใส่ในตัวแปรทำงาน (db)
-        db = JSON.parse(JSON.stringify(foundData.details));
-
-        // 2. ปรับวันที่ในหน้าแรกให้ตรงกับวันที่ดึงมา
-        if (document.getElementById("dateInp")) {
-            document.getElementById("dateInp").value = targetDate;
-        }
-
-        // 3. สลับไปหน้าแรก (บันทึก)
-        go(1); 
-
-        // 4. สั่งวาดรายการใหม่ (หน่วงเวลานิดหน่อยเพื่อให้หน้าจอเปลี่ยนเสร็จ)
-        setTimeout(() => {
-            if (typeof renderDay === 'function') renderDay(targetDate);
-            alert(`📂 ดึงข้อมูลวันที่ ${targetDate} มาเรียบร้อยครับ`);
-        }, 150);
-    } else {
-        alert("❌ ไม่พบข้อมูลในวันที่เลือกครับ");
-    }
 }
-
-// ฟังก์ชันลบข้อมูล: ลบและคำนวณยอดเงินสะสมใหม่
-function clearDailyData() {
-    const targetDate = document.getElementById("reportDateSelector")?.value;
-    if (!targetDate) return alert("กรุณาเลือกวันที่ก่อนครับ");
-
-    if (confirm(`⚠️ ยืนยันการลบรายงานวันที่ ${targetDate}?\nยอดเงินสะสมจะถูกคำนวณใหม่ทันที`)) {
-        const idx = archives.findIndex(a => a.date === targetDate);
-        if (idx > -1) {
-            // หักยอดที่ช่างต้องคืนร้านออกจากยอดสะสมรวมก่อนลบ
-            if (typeof account !== 'undefined') {
-                account.balance = (Number(account.balance) || 0) - (archives[idx].settle || 0);
+}               
+        function clearDailyData() {
+                const confirmDelete = confirm("⚠️ คุณต้องการลบข้อมูลรายงานของวันนี้ทั้งหมดใช่หรือไม่? (ข้อมูลที่ลบแล้วจะไม่สามารถเรียกคืนได้)");
+                if (confirmDelete) {
+                    localStorage.removeItem("barber_db"); 
+                    alert("✅ ดำเนินการลบข้อมูลเรียบร้อยแล้ว");
+                    location.reload();
+                }
             }
-            archives.splice(idx, 1); // ลบข้อมูลออกจาก Array
-            save(); // บันทึกลงเครื่อง
-            alert("✅ ลบข้อมูลและอัปเดตบัญชีเรียบร้อยครับ");
-            location.reload(); // รีโหลดเพื่อให้ตัวเลขหน้าบัญชีอัปเดต
-        } else {
-            alert("ไม่พบข้อมูลที่ต้องการลบ");
-        }
-    }
-}
-   function saveAndGo(date, total) {
+    function saveAndGo(date, total) {
     const allToday = db.filter(r => r.date === date);
     const todayData = allToday.filter(r => r.type === 'SERVICE' || r.type === 'GUARANTEE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
-    
     let cash = 0, trans = 0, tips = 0, count = 0, stats = {};
     const extraSvcs = ["โกนหนวด", "กันหน้า", "สระผม"];
 
     todayData.forEach(r => {
         const p = Number(r.price) || 0, t = Number(r.tip) || 0;
         tips += t;
-
-        // ปรับปรุง: รองรับการคำนวณเงินแบบ Mix ในการบันทึกด้วย
-        if (r.pay === "Mix") {
-            const pCash = Number(r.payCash) || 0;
-            const pTrans = Number(r.payTrans) || 0;
-            cash += (pCash - t); // เงินสดที่เข้าร้าน (หักทิปช่าง)
-            trans += pTrans;
-        } else if (r.pay === "Trans" || r.pay === "โอน") {
-            trans += (p + t);
-        } else {
-            cash += p;
-        }
-
+        r.pay === "Cash" ? cash += p : trans += (p + t);
         const svcs = Array.isArray(r.svcs) ? r.svcs : [r.svcs];
+        
         if (r.type !== 'GUARANTEE') {
             const isRealCut = svcs.some(s => s && !extraSvcs.includes(s));
             if (isRealCut) count++;
-            svcs.forEach(s => { if(s) stats[s] = (stats[s] || 0) + 1; });
+            svcs.forEach(s => { 
+                if(s) stats[s] = (stats[s] || 0) + 1; 
+            });
         }
     });
 
+    // คำนวณรายได้
     const bEarn = isHoliday ? 0 : Math.max(total * (conf.perc / 100), conf.guar) + tips;
     const settle = isHoliday ? 0 : cash - bEarn;
     const idx = archives.findIndex(a => a.date === date);
@@ -1177,27 +1112,38 @@ function clearDailyData() {
     const data = {
         date,
         total: Number(total),
-        cash, trans, tips,
+        cash,
+        trans,
+        tips,
         barber: Math.floor(bEarn),
         shop: isHoliday ? 0 : total - (bEarn - tips),
-        settle, count, stats,
-        details: allToday,
-        off: isHoliday,
+        settle,
+        count,
+        stats,
+        details: allToday, 
+        off: isHoliday,     
         type: isHoliday ? "HOLIDAY" : "WORK"
-    };
+    };    
+    // --- ส่วนจัดการยอดสะสม (Balance) ---
     if (idx > -1) {
-        // อัปเดตยอดสะสมโดยคิดจากส่วนต่าง (แม่นยำมากครับ)
+        // กรณีแก้ไขยอดเดิม: ต้องเอาส่วนต่างของ settle ไปปรับปรุง balance
         account.balance = (Number(account.balance) || 0) + (settle - (archives[idx].settle || 0));
         archives[idx] = data;
     } else {
+        // กรณีบันทึกใหม่: บวก settle เข้าไปตรงๆ
         account.balance = (Number(account.balance) || 0) + settle;
         archives.push(data);
     }
+    // ล้างข้อมูลใน db เฉพาะของวันที่ปิดยอด
     db = db.filter(r => r.date !== date);
-    save();
-    if (typeof loadAccountStatus === "function") loadAccountStatus();
-    alert("✅ บันทึกและอัปเดตยอดบัญชีเรียบร้อย!");
-    go(3); 
+    // บันทึกข้อมูลลง Memory/Storage
+    save(); 
+    // --- ✅ จุดสำคัญที่ต้องเพิ่ม: สั่งให้หน้าบัญชีอัปเดตตัวเลขทันที ---
+    if (typeof loadAccountStatus === "function") {
+        loadAccountStatus();
+    }
+    alert("✅ บันทึกยอดเรียบร้อย!");
+    go(3); // ไปหน้าบัญชี
 }
     function toggleAccHistory() {const w = $("accHistoryWrapper"); w.style.display = w.style.display === "none" ? "block" : "none";$("accHistory").innerHTML = account.logs.map(l => `<div style="padding:5px; border-bottom:1px solid #eee;">${l.date}: ฿${l.amount} (${l.note})</div>`).join('') || "ไม่มีประวัติ";}    
     function loadAccountHistory() {let h = account.logs.map(l => `<div style="padding:15px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;"><div><b style="font-size:14px; color:#1e293b;">${l.date}</b><br><small style="color:#64748b;">${l.note}</small></div><b style="color:${l.amount >= 0 ? '#16a34a' : '#dc2626'};">${l.amount >= 0 ? '+' : ''}฿${Math.abs(l.amount).toLocaleString()}</b></div> `).join('');if($("accHistory")) {$("accHistory").innerHTML = h || '<center style="padding:40px; color:#94a3b8;">ไม่มีประวัติการเคลียร์</center>';}}     
@@ -1928,36 +1874,38 @@ function sendToLineFinal() {
     window.open(`https://line.me/R/msg/text/?${encodeURIComponent(finalMsg)}`);
     document.getElementById("linePreview").style.display = "none";
 }
-   function go(p) {
-    // 1. จัดการหน้า Page (ใช้เฉพาะเจาะจงที่ ID เพื่อไม่ให้ไปโดน Nav)
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(pg => {
+           function go(p) {
+    // 1. จัดการการซ่อน/แสดงหน้า Page
+    document.querySelectorAll('.page').forEach(pg => {
         pg.classList.remove('active');
         pg.style.display = 'none'; 
     });
+
     const targetPage = document.getElementById('p' + p);
     if (targetPage) {
         targetPage.classList.add('active');
         targetPage.style.display = 'block';
     }
-    // 2. อัปเดตสถานะปุ่มเมนู
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach((btn, i) => {
-        // อัปเดต class active เพื่อให้สีเปลี่ยนตาม CSS var(--accent)
+
+    // 2. จัดการสถานะปุ่มเมนู (Navbar) ให้มีสีตามหน้าจอที่เลือก
+    document.querySelectorAll('.nav-item').forEach((btn, i) => {
         btn.classList.toggle('active', (i + 1) === p);
     });
-    // 3. เงื่อนไขพิเศษ (คงเดิมแต่ทำให้แม่นยำขึ้น)
+    // 3. เงื่อนไขพิเศษเมื่อเข้าแต่ละหน้า
     if (p === 2) {
-        const targetDate = document.getElementById("dateInp")?.value || new Date().toISOString().split('T')[0];
+        // เมื่อไปหน้ารายงาน: ให้ดึงวันที่จากหน้าแรกไปแสดงผลรายงานทันที
+        const targetDate = $("dateInp")?.value || new Date().toISOString().split('T')[0];
         if (typeof renderDay === 'function') renderDay(targetDate);
     }
-    if (p === 3) {
-        // เมื่อไปหน้าบัญชี ให้โหลดสถานะเงินสะสมล่าสุดเสมอ
-        if (typeof loadAccountStatus === 'function') loadAccountStatus();
+    if (p === 3) { 
+        // เมื่อไปหน้าบัญชี: บังคับวันที่ให้ตรงกันและคำนวณยอดเงินค้างชำระ
+        if ($("accDate") && $("dateInp")) $("accDate").value = $("dateInp").value;
+        if (typeof loadAccountStatus === 'function') loadAccountStatus(); 
     }
+    // 4. เลื่อนจอขึ้นบนสุด (เพื่อความสุภาพและใช้งานง่าย)
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-     function saveDB() {localStorage.setItem("barber_db", JSON.stringify(db));localStorage.setItem("barber_conf", JSON.stringify(conf));}
+                function saveDB() {localStorage.setItem("barber_db", JSON.stringify(db));localStorage.setItem("barber_conf", JSON.stringify(conf));}
                 function delRec(id) { if (confirm("ลบรายการนี้?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); } }
                 function editTime(id) {const rec = db.find(r => r.id === id);if (!rec) return;const newStart = prompt("แก้เวลาเริ่ม (HH:MM)", rec.time);if (!newStart) return;const newEnd = prompt("แก้เวลาเสร็จ (HH:MM)", rec.endTime || "");rec.time = newStart;rec.endTime = newEnd || addMinutes(newStart, 30);saveDB();renderDay();}
                 
