@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V.121 </title>
+    <title>Barber Note Pro V.11 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -312,12 +312,19 @@ nav {
                 <hr style="border:0; border-top:1px solid #e2e8f0; margin-top:15px;">
                 <div id="dailyList"></div>
             
-             <div style="margin-top: 115px; width: 100%; display: flex; justify-content: center;">
-                    <button onclick="clearDailyData()" style="width:70%; height:50px; background:#e51c23; border:none ; border-radius:15px; font-size:15px; font-weight:800; color:#ffffff; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow: none;">
-                        <i class="fas fa-trash-alt" style="font-size: 18px;"></i><span style="line-height: 1;">ลบรายงานวันนี้ทั้งหมด</span>
-                    </button>
-                </div>
-            </div>
+            <div style="margin-top: 30px; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 10px;">
+            
+            <button onclick="editDailyData()" style="height:55px; background:#f59e0b; border:none; border-radius:var(--radius-md); font-size:15px; font-weight:800; color:#ffffff; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;">
+                <i class="fas fa-edit" style="font-size: 18px;"></i>
+                <span style="line-height: 1;">แก้ไขข้อมูล</span>
+            </button>
+        
+            <button onclick="clearDailyData()" style="height:55px; background:var(--danger); border:none; border-radius:var(--radius-md); font-size:15px; font-weight:800; color:#ffffff; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;">
+                <i class="fas fa-trash-alt" style="font-size: 18px;"></i>
+                <span style="line-height: 1;">ลบรายงาน</span>
+            </button>
+        
+        </div>
             
                <div id="p3" class="page" style="max-width:480px; margin:0 auto; padding: 12px; padding-bottom: 100px; background: #f8fafc;">
     
@@ -1074,15 +1081,48 @@ if (dList) {
     `;
 }
 }               
-        function clearDailyData() {
-                const confirmDelete = confirm("⚠️ คุณต้องการลบข้อมูลรายงานของวันนี้ทั้งหมดใช่หรือไม่? (ข้อมูลที่ลบแล้วจะไม่สามารถเรียกคืนได้)");
-                if (confirmDelete) {
-                    localStorage.removeItem("barber_db"); 
-                    alert("✅ ดำเนินการลบข้อมูลเรียบร้อยแล้ว");
-                    location.reload();
-                }
-            }
-    function saveAndGo(date, total) {
+     function clearDailyData() {
+    const targetDateBE = $("accDate").value; // วันที่ พ.ศ. ที่เลือกจากหน้าจอ
+    
+    if (!targetDateBE) {
+        alert("กรุณาเลือกวันที่ต้องการลบก่อนครับ");
+        return;
+    }
+    const confirmDelete = confirm(`⚠️ คุณต้องการลบข้อมูลของวันที่ ${targetDateBE} ใช่หรือไม่?\n(ข้อมูลเฉพาะวันนี้จะหายไปและยอดบัญชีจะคำนวณใหม่)`);
+    if (confirmDelete) {
+        // 1. ลบข้อมูลจาก archives (ตัวเก็บข้อมูลย้อนหลัง)
+        if (typeof archives !== 'undefined' && archives[targetDateBE]) {
+            delete archives[targetDateBE];
+        }
+
+        // 2. ถ้าวันที่ลบ ตรงกับวันที่กำลังบันทึกอยู่ ให้ล้างค่าใน db ด้วย
+        db = []; 
+        
+        // 3. บันทึกและรีโหลดเพื่ออัปเดตทุกค่า
+        save();
+        alert(`✅ ลบข้อมูลวันที่ ${targetDateBE} เรียบร้อยแล้วครับ`);
+        location.reload(); 
+    }
+}
+    function editDailyData() {
+    const targetDateBE = $("accDate").value;
+
+    if (typeof archives !== 'undefined' && archives[targetDateBE]) {
+        // ดึงข้อมูลรายชิ้น (details) ของวันนั้นกลับมาใส่ในตัวแปรทำงาน (db)
+        db = JSON.parse(JSON.stringify(archives[targetDateBE].details || []));
+        
+        // สั่งให้หน้าจอวาดรายการใหม่
+        renderDay();
+        
+        alert(`📂 ดึงข้อมูลวันที่ ${targetDateBE} มาเรียบร้อย\nคุณสามารถแก้ไขรายการ และกด "ส่งข้อมูล" เพื่อบันทึกทับได้เลยครับ`);
+        
+        // สลับหน้าไปที่หน้าบันทึก (หน้า 1)
+        showPage('p1', document.querySelectorAll('.nav-item')[0]);
+    } else {
+        alert("ไม่พบข้อมูลบันทึกในวันที่เลือกครับ");
+    }
+}
+     function saveAndGo(date, total) {
     const allToday = db.filter(r => r.date === date);
     const todayData = allToday.filter(r => r.type === 'SERVICE' || r.type === 'GUARANTEE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
