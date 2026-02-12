@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 1 </title>
+    <title>Barber Note Pro2</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -358,16 +358,19 @@ nav {
                 <i class="fas fa-history"></i> ประวัติเคลียร์เงิน
             </button>
         </div>  
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; margin-bottom: 12px;">
-        
-        <div onclick="$('histMonth').showPicker()" 
-             style="background: linear-gradient(135deg, #0b1e59, #190da8); border-radius: 20px; padding: 15px 10px; text-align: center; color: #fff; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-            <i class="fas fa-calendar-check" style="font-size: 20px; margin-bottom: 5px;"></i>
-            <b style="font-size: 14px;">สรุปรายเดือน</b>
-            <input type="month" id="histMonth" onchange="loadHistMonth()" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;">
-        </div>
+       <div onclick="$('histMonth').showPicker()" 
+     style="background:linear-gradient(135deg, #0b1e59, #190da8);border-radius:25px;padding:12px 10px;text-align:center;color:#fff;position:relative;box-shadow:0 8px 15px rgba(99,102,241,0.2);cursor:pointer;margin-top: 15px; margin-bottom: 12px;">
+           <i class="fas fa-calendar-check" style="font-size:24px; margin-bottom:5px; display:block;"></i><b style="font-size:16px;">สรุปรายเดือน</b>
+            <input type="month" id="histMonth" onchange="loadHistMonth()" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
+</div>
+
+    <div onclick="openComparisonSelector()" style="background: linear-gradient(135deg, #38bdf8, #1d4ed8); border-radius: 25px; padding: 15px; text-align: center; color: #fff; cursor: pointer; box-shadow: 0 8px 15px rgba(56,189,248,0.2); display: flex; align-items: center; justify-content: center; gap: 10px;">       
+    <i class="fas fa-chart-line" style="font-size: 24px;"></i>
+    <b style="font-size: 16px;">เปรียบเทียบช่วงวันที่</b>
+</div>
+     </div> 
   </div>                   
-        <div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); z-index:9999; display:flex; align-items:center; justify-content:center; padding:15px;">
+    <div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); z-index:9999; display:flex; align-items:center; justify-content:center; padding:15px;">
     
     <div style="background:#ffffff; width:95%; max-width:420px; border-radius:35px; display:flex; flex-direction:column; overflow:hidden; animation: slideUp 0.3s ease-out; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
         
@@ -597,6 +600,8 @@ function confirmDeleteDaily(dateStr) {
         }, 1200);
     }
 
+    // --- 🟢 ส่วนที่แก้ไข: รีเซ็ตค่าและส่งต่อเวลา ---
+    
     // 2. ส่งเวลาเสร็จงานนี้ ไปเป็นเวลาเริ่มงานหน้า
     if ($("tStart") && end) {
         $("tStart").value = end;
@@ -694,12 +699,15 @@ function confirmDeleteDaily(dateStr) {
     const shopTheme = $("setTheme").value;
     // --- 1. เพิ่มบรรทัดดึงค่าเสียงจากตัวเลือก (Select) ---
     const shopVoice = $("setVoice") ? $("setVoice").value : "default.mp3"; 
+
     conf.shop = shopName;
     conf.perc = parseFloat(shopPerc) || 0;
     conf.guar = parseFloat(shopGuar) || 0;
     conf.theme = shopTheme;
+    
     // --- 2. บันทึกค่าเสียงลงในตัวแปรกลาง (conf) ---
     conf.voice = shopVoice; 
+
     localStorage.setItem('shopName', shopName);
     localStorage.setItem('shopPerc', shopPerc);
     localStorage.setItem('shopGuar', shopGuar);
@@ -717,6 +725,7 @@ function confirmDeleteDaily(dateStr) {
     if (typeof playSuccessSound === "function") {
         playSuccessSound(shopVoice); 
     }
+
     if (typeof calculateMoney === "function") {
         calculateMoney(); 
     }
@@ -1099,11 +1108,13 @@ if (dList) {
     // 💰 ตรรกะ: เลือกค่าที่มากกว่าระหว่าง (ส่วนแบ่ง %) กับ (ประกันรายได้)
     const commission = total * (conf.perc / 100);
     const baseEarn = Math.max(commission, Number(conf.guar)); 
+    
     // รายได้ช่าง = (ค่าแรงที่เลือกแล้ว) + ทิปทั้งหมด
     const bEarn = isHoliday ? 0 : baseEarn + tips;
     
     // Settle = เงินสดในมือช่าง - รายได้ที่ควรได้
     const settle = isHoliday ? 0 : cash - bEarn;
+
     const data = {
         date, total, cash, trans, tips,
         barber: Math.floor(bEarn),
@@ -1367,10 +1378,10 @@ function updateStatusUI(net) {
     `);
 }
      function renderStats(obj, accentColor) {
-        const entries = Object.entries(obj).sort((a, b) => b[1] - a[1]);
-        if (!entries.length) return "<div style='color:rgba(255,255,255,0.2); padding:10px; font-size:13px;'>ไม่มีข้อมูลสถิติ</div>";
+    const entries = Object.entries(obj).sort((a, b) => b[1] - a[1]);
+    if (!entries.length) return "<div style='color:rgba(255,255,255,0.2); padding:10px; font-size:13px;'>ไม่มีข้อมูลสถิติ</div>";
     
-        return entries.map(([k, v]) => `
+    return entries.map(([k, v]) => `
         <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; margin-bottom:8px;">
             <div style="font-weight:600; color:#f1f5f9; font-size:14px;">${k}</div>
             <div style="font-weight:800; color:${accentColor}; font-size:16px;">${v} <span style="font-size:11px; opacity:0.5; color:#fff;">ครั้ง</span></div>
@@ -1543,7 +1554,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                 sumBarber += Number(day.barberEarn || 0);
             });
         }
-
         const wBarber = sumBarber;
         const wShop = weeklyTotalIncome - wBarber;
         const avg = data.workDays > 0 ? (data.customers / data.workDays).toFixed(1) : 0;
@@ -1665,7 +1675,145 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         </div>`
     );
 }
+function topN(obj, n = 5) {
+              if (!obj || Object.keys(obj).length === 0) return [];
+              return Object.entries(obj)
+                .filter(([_, count]) => count > 0)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, n);
+            }
+              function confirmShareLine() {
+              const m = $("histMonth").value;
+              if (!m) return alert("กรุณาเลือกเดือน");
+            
+              if (confirm(`คุณต้องการแชร์รายงานประจำเดือน ${m} เข้าสู่ LINE ใช่ไหม?`)) {
+                shareLineMonth();
+              }
+            }
+            
+// 1. ฟังก์ชันวิเคราะห์ภาพรวม (เพิ่ม Logic วันหยุดที่ละเอียดขึ้น)
+function buildMonthlyComments(data) {
+    const { weekly, monthHair, monthSvc, avgPerDay, workDays, monthKey } = data;
+    const comments = [];
 
+    // --- ส่วนวิเคราะห์วันหยุด (Calendar Logic) ---
+    const [year, month] = monthKey.split('-').map(Number);
+    const daysInMonth = new Date(year, month, 0).getDate(); 
+    const offDaysCount = daysInMonth - workDays;
+    
+    // หาวันหยุดประจำสัปดาห์ (วันไหนที่ไม่เคยมีการบันทึกข้อมูลเลย)
+    const dayNames = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
+    const workedWeekdays = new Set();
+    Object.values(weekly).forEach(w => {
+        w.days.forEach(dateStr => workedWeekdays.add(new Date(dateStr).getDay()));
+    });
+    const regularOffDays = dayNames.filter((name, index) => !workedWeekdays.has(index));
+
+    // ข้อความสรุปวันหยุด (สุภาพ)
+    let holidayMsg = `เดือนนี้หยุดรวม ${offDaysCount} วัน`;
+    if (regularOffDays.length > 0 && offDaysCount > 0) {
+        holidayMsg += ` (หยุดประจำวัน${regularOffDays.join("/")})`;
+    }
+    comments.push(holidayMsg);
+
+    // --- วิเคราะห์พฤติกรรมลูกค้า ---
+    let maxDaily = 0;
+    Object.values(weekly).forEach(w => {
+        Object.values(w.daily).forEach(count => { if (count > maxDaily) maxDaily = count; });
+    });
+    const behavior = (maxDaily > avgPerDay * 1.5)
+        ? 'สัปดาห์นี้มีบางช่วงลูกค้าหนาแน่นเป็นพิเศษ'
+        : 'ปริมาณลูกค้าสม่ำเสมอ รักษาระดับได้ดีเยี่ยม';
+    comments.push(`พฤติกรรม: ${behavior}`);
+
+    // --- วันที่ลูกค้าเยอะที่สุด ---
+    const dayTotals = {};
+    Object.values(weekly).forEach(w => {
+        Object.entries(w.daily).forEach(([day, count]) => { dayTotals[day] = (dayTotals[day] || 0) + count; });
+    });
+    const busiestDay = Object.entries(dayTotals).sort((a, b) => b[1] - a[1])[0];
+    if (busiestDay) comments.push(`วันยอดนิยม: "วัน${busiestDay[0]}" มีลูกค้ามาใช้บริการมากที่สุด`);
+
+    return comments;
+}
+
+// 2. ฟังก์ชันส่ง LINE (แสดงผลวันหยุดชัดเจน)
+function shareLineMonth() {
+    const m = $("histMonth").value;
+    if (!m) return alert("กรุณาเลือกเดือน");
+
+    const records = archives.filter(r => r.date && r.date.startsWith(m));
+    if (!records.length) return alert("ไม่พบข้อมูลเดือนนี้");
+
+    const shopName = $("setShop").value || "Barber Shop";
+    let total = 0, barberEarn = 0, clientCount = 0;
+    let weekly = {}, monthHair = {}, monthSvc = {};
+    const workDaysCount = records.length;
+
+    // Logic จัดกลุ่มข้อมูล
+    const weekOfMonth = d => Math.ceil((new Date(d).getDate()) / 7);
+    const weekdayTH = d => ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"][new Date(d).getDay()];
+
+    records.forEach(r => {
+        const w = weekOfMonth(r.date);
+        const day = weekdayTH(r.date);
+        total += Number(r.total) || 0;
+        barberEarn += Number(r.barber) || 0;
+        let dayCust = r.details ? r.details.length : 1;
+        clientCount += dayCust;
+
+        if (!weekly[w]) {
+            weekly[w] = { customers: 0, days: new Set(), daily: {}, hair: {}, service: {} };
+        }
+        weekly[w].customers += dayCust;
+        weekly[w].days.add(r.date);
+        weekly[w].daily[day] = (weekly[w].daily[day] || 0) + dayCust;
+
+        (r.details || []).forEach(d => {
+            (d.svcs || []).forEach(s => {
+                if(!s) return;
+                const haircutList = ["แฟชั่น","สกินเฟด","เปิดข้าง","รองทรง","ตำรวจ/ทหาร","ทรงนักเรียน","แก้ผม","โกนผม","เด็ก"];
+                if(haircutList.includes(s.trim())) { monthHair[s] = (monthHair[s]||0)+1; } 
+                else { monthSvc[s] = (monthSvc[s]||0)+1; }
+            });
+        });
+    });
+
+    const shopEarn = total - barberEarn;
+    const avgPerDay = workDaysCount > 0 ? (clientCount / workDaysCount) : 0;
+    
+    // เรียกใช้ AI Comments พร้อมส่ง monthKey ไปคำนวณวันหยุด
+    const aiComments = buildMonthlyComments({ 
+        weekly, monthHair, monthSvc, avgPerDay, workDays: workDaysCount, monthKey: m 
+    });
+
+    const msg = `
+💈 รายงาน: ${shopName}
+📅 ประจำเดือน: ${m}
+
+💰 สรุปรายได้:
+✂️ ยอดรวม: ฿${total.toLocaleString()}
+🤵 รายได้ช่าง: ฿${Math.floor(barberEarn).toLocaleString()}
+🏠 รายได้ร้าน: ฿${Math.floor(shopEarn).toLocaleString()}
+
+📊 สถิติการทำงาน:
+👤 ลูกค้าทั้งหมด: ${clientCount} คน
+📅 วันทำงาน: ${workDaysCount} วัน
+😴 วันหยุด: ${new Date(m.split('-')[0], m.split('-')[1], 0).getDate() - workDaysCount} วัน
+📈 เฉลี่ย: ${avgPerDay.toFixed(2)} คน/วัน
+
+📝 วิเคราะห์ภาพรวม:
+${aiComments.map(c => `• ${c}`).join("\n")}
+
+🏆 บริการยอดนิยม:
+${Object.entries(monthSvc).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>`• ${k} (${v} ครั้ง)`).join("\n") || "-"}
+
+💡 สรุปโดยระบบจัดการร้าน Barber
+`.trim();
+
+    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(msg)}`;
+    location.href = lineUrl;
+}
 function shareLine() {
     const dInp = $("dateInp").value, today = db.filter(r => r.date === dInp); 
     if (!today.length) return;
