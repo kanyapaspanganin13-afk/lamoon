@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V.12 </title>
+    <title>Barber Note Pro V.13 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -1076,8 +1076,7 @@ if (dList) {
                     location.reload();
                 }
             }
-  // 1. ฟังก์ชันคำนวณและบันทึกข้อมูล (ปรับปรุงให้กดบันทึกได้แน่นอน)
-function saveAndGo(date, total) {
+   function saveAndGo(date, total) {
     const allToday = db.filter(r => r.date === date);
     if (allToday.length === 0) {
         alert("⚠️ ไม่พบข้อมูลที่จะบันทึกครับ");
@@ -1086,7 +1085,6 @@ function saveAndGo(date, total) {
 
     const todayData = allToday.filter(r => r.type === 'SERVICE' || r.type === 'GUARANTEE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
-    
     let cash = 0, trans = 0, tips = 0, count = 0, stats = {};
     const extraSvcs = ["โกนหนวด", "กันหน้า", "สระผม"];
 
@@ -1094,17 +1092,11 @@ function saveAndGo(date, total) {
         const p = Number(r.price) || 0, t = Number(r.tip) || 0;
         tips += t;
         
-        // แยกยอดเงินสดและเงินโอน (รองรับแบบจ่ายผสม Mix)
+        // แก้ไขการแยก Cash / Trans ให้รองรับทิปเงินสด
         if (r.pay === "Cash") {
             cash += (p + t);
-        } else if (r.pay === "Trans" || r.pay === "โอน") {
-            trans += (p + t);
-        } else if (r.pay === "Mix") {
-            cash += (Number(r.payCash) || 0);
-            trans += (Number(r.payTrans) || 0);
         } else {
-            // กรณีอื่นๆ ให้ถือเป็น Cash ไว้ก่อนเพื่อความปลอดภัย
-            cash += p;
+            trans += (p + t);
         }
 
         const svcs = Array.isArray(r.svcs) ? r.svcs : [r.svcs];
@@ -1131,7 +1123,6 @@ function saveAndGo(date, total) {
         type: isHoliday ? "HOLIDAY" : "WORK"
     };
 
-    // จัดการยอดสะสม
     if (idx > -1) {
         account.balance = (Number(account.balance) || 0) + (settle - (archives[idx].settle || 0));
         archives[idx] = data;
@@ -1141,58 +1132,65 @@ function saveAndGo(date, total) {
     }
 
     db = db.filter(r => r.date !== date);
-    save(); // บันทึกข้อมูลลงเครื่อง
+    save();
 
-    // อัปเดตหน้าบัญชี
-    if (typeof loadAccountStatus === "function") {
-        loadAccountStatus();
-    }
+    // เรียกอัปเดตหน้าบัญชี
+    loadAccountStatus();
     
     alert("✅ บันทึกยอดเรียบร้อย!");
-    go(3); // ไปหน้าบัญชี
-}
-// 2. ฟังก์ชันแสดงผลหน้าบัญชี (แก้ไขจุดที่ทำให้ระบบค้าง)
-function loadAccountStatus() {
-    const now = new Date();
-    const dateLabel = now.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    if (document.getElementById("accDateLabel")) document.getElementById("accDateLabel").innerText = dateLabel;
-
-    const currentBalance = Number(account.balance) || 0;
-    if (document.getElementById("accTotalVal")) document.getElementById("accTotalVal").innerText = `฿${currentBalance.toLocaleString()}`;
-
-    // แสดงยอดสะสมเดิมในช่อง Old Value
-    if (document.getElementById("accOldVal")) document.getElementById("accOldVal").innerText = `฿${currentBalance.toLocaleString()}`;
-
-    updateStatusUI(currentBalance);
+    go(3);
 }
     function toggleAccHistory() {const w = $("accHistoryWrapper"); w.style.display = w.style.display === "none" ? "block" : "none";$("accHistory").innerHTML = account.logs.map(l => `<div style="padding:5px; border-bottom:1px solid #eee;">${l.date}: ฿${l.amount} (${l.note})</div>`).join('') || "ไม่มีประวัติ";}    
     function loadAccountHistory() {let h = account.logs.map(l => `<div style="padding:15px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;"><div><b style="font-size:14px; color:#1e293b;">${l.date}</b><br><small style="color:#64748b;">${l.note}</small></div><b style="color:${l.amount >= 0 ? '#16a34a' : '#dc2626'};">${l.amount >= 0 ? '+' : ''}฿${Math.abs(l.amount).toLocaleString()}</b></div> `).join('');if($("accHistory")) {$("accHistory").innerHTML = h || '<center style="padding:40px; color:#94a3b8;">ไม่มีประวัติการเคลียร์</center>';}}     
-  function loadAccountStatus() {
-    // 1. ดึงวันที่จากช่องเลือกวันที่ (เพื่อให้ตรงกับหน้ารายงานที่ผู้ใช้กำลังดู)
-    const targetDate = $("reportDateSelector")?.value || new Date().toISOString().split('T')[0];
-    // แสดงวันที่ภาษาไทยใน Label
-    const dateLabel = new Date(targetDate).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  
+    function loadAccountStatus() {
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+    const dateLabel = now.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    
     if ($("accDateLabel")) $("accDateLabel").innerText = dateLabel;
 
-    // 2. ดึงยอด "สะสมทั้งหมด" ที่บันทึกไปแล้วจากหน้าบัญชี
-    // ยอดนี้คือยอดสุทธิที่ผ่านการ 'ส่งข้อมูล' มาแล้วทุกวัน
+    // 1. ยอดสุทธิจากหน้าบัญชี (บันทึกแล้ว)
     const currentBalance = Number(account.balance) || 0;
-    if ($("accOldVal")) $("accOldVal").innerText = `฿${currentBalance.toLocaleString()}`;
 
-    // 3. คำนวณยอด "เฉพาะของวันที่เลือก" (จาก Archives)
-    const archivedData = archives.find(a => a.date === targetDate);
-    const settleSelectedDay = archivedData ? (Number(archivedData.settle) || 0) : 0;
-    
-    if ($("accTodayVal")) $("accTodayVal").innerText = `฿${settleSelectedDay.toLocaleString()}`;
+    // 2. ดึงยอด "เฉพาะวันนี้" จากประวัติที่บันทึกแล้ว
+    const archivedToday = archives.find(a => a.date === todayStr);
+    const settleToday = archivedToday ? Number(archivedToday.settle) : 0;
 
-    // 4. ยอดรวมสุทธิ (ใช้ยอดสะสมจากหน้าบัญชีเป็นหลัก)
-    // ตรงนี้สำคัญ: หน้าบัญชีควรโชว์ยอด account.balance เลย เพราะมันคือยอดรวมที่อัปเดตแล้ว
-    if ($("accTotalVal")) $("accTotalVal").innerText = `฿${currentBalance.toLocaleString()}`;
+    // ยอดสะสมก่อนหน้า (Old Balance)
+    if ($("accOldVal")) {
+        const oldVal = currentBalance - settleToday;
+        $("accOldVal").innerText = `฿${oldVal.toLocaleString()}`;
+    }
+    // ยอดของวันนี้ (ดึงจาก settle ในประวัติ)
+    if ($("accTodayVal")) {
+        $("accTodayVal").innerText = `฿${settleToday.toLocaleString()}`;
+    }
+    // 3. ยอดรวมสุทธิที่ต้องเคลียร์
+    if ($("accTotalVal")) {
+        $("accTotalVal").innerText = `฿${currentBalance.toLocaleString()}`;
+    }
 
-    // 5. อัปเดตสถานะ Badge
     updateStatusUI(currentBalance);
 }
-        
+
+// แยกฟังก์ชัน UI เพื่อความสะอาดของโค้ด
+function updateStatusUI(net) {
+    const badge = $("statusBadge");
+    const light = $("accLight");
+    let color = net > 0 ? "#dc2626" : (net < 0 ? "#1e3a8a" : "#16a34a");
+    let txt = net > 0 ? "👨‍🎨 ช่างคืนร้าน" : (net < 0 ? "🏠 ร้านคืนช่าง" : "⚖️ ยอดลงตัว");
+
+    if (badge) {
+        badge.innerText = txt;
+        badge.style.background = net > 0 ? "#fef2f2" : (net < 0 ? "#eff6ff" : "#f0fdf4");
+        badge.style.color = color;
+    }
+    if (light) {
+        light.style.background = color;
+        light.style.boxShadow = `0 0 12px ${color}`;
+    }
+}    
      function clearAccount() {
                 const d = $("accDate").value || new Date().toISOString().split('T')[0];
                 const net = Number(account.balance) || 0;
