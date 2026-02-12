@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V.3 </title>
+    <title>Barber Note Pro V. </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -1143,34 +1143,39 @@ if (dList) {
     function toggleAccHistory() {const w = $("accHistoryWrapper"); w.style.display = w.style.display === "none" ? "block" : "none";$("accHistory").innerHTML = account.logs.map(l => `<div style="padding:5px; border-bottom:1px solid #eee;">${l.date}: ฿${l.amount} (${l.note})</div>`).join('') || "ไม่มีประวัติ";}    
     function loadAccountHistory() {let h = account.logs.map(l => `<div style="padding:15px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;"><div><b style="font-size:14px; color:#1e293b;">${l.date}</b><br><small style="color:#64748b;">${l.note}</small></div><b style="color:${l.amount >= 0 ? '#16a34a' : '#dc2626'};">${l.amount >= 0 ? '+' : ''}฿${Math.abs(l.amount).toLocaleString()}</b></div> `).join('');if($("accHistory")) {$("accHistory").innerHTML = h || '<center style="padding:40px; color:#94a3b8;">ไม่มีประวัติการเคลียร์</center>';}}     
   
-    function loadAccountStatus() {
-    const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
-    const dateLabel = now.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+   function loadAccountStatus() {
+    // ดึงวันที่จากช่องเลือกวันที่ในหน้ารายงาน (เพื่อให้เลขตรงกัน)
+    const targetDate = document.getElementById("reportDateSelector")?.value || new Date().toISOString().split('T')[0];
     
+    // แสดงวันที่ในหน้าบัญชี
+    const dateObj = new Date(targetDate);
+    const dateLabel = dateObj.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
     if ($("accDateLabel")) $("accDateLabel").innerText = dateLabel;
 
-    // 1. ยอดสุทธิจากหน้าบัญชี (บันทึกแล้ว)
+    // 1. ดึงยอดสะสมสุทธิจากระบบ (ที่บันทึกผ่านปุ่มส่งข้อมูลแล้ว)
     const currentBalance = Number(account.balance) || 0;
 
-    // 2. ดึงยอด "เฉพาะวันนี้" จากประวัติที่บันทึกแล้ว
-    const archivedToday = archives.find(a => a.date === todayStr);
-    const settleToday = archivedToday ? Number(archivedToday.settle) : 0;
+    // 2. ดึงยอดของวันที่เลือกจากประวัติ (Archives)
+    const archivedData = archives.find(a => a.date === targetDate);
+    const settleToday = archivedData ? Number(archivedData.settle) : 0;
 
-    // ยอดสะสมก่อนหน้า (Old Balance)
+    // แสดงยอดค้างเดิม (ยอดก่อนหน้าจะรวมยอดวันนี้)
     if ($("accOldVal")) {
         const oldVal = currentBalance - settleToday;
         $("accOldVal").innerText = `฿${oldVal.toLocaleString()}`;
     }
-    // ยอดของวันนี้ (ดึงจาก settle ในประวัติ)
+
+    // แสดงยอดของวันนี้ (ดึงจากรายงานเป๊ะๆ)
     if ($("accTodayVal")) {
         $("accTodayVal").innerText = `฿${settleToday.toLocaleString()}`;
     }
-    // 3. ยอดรวมสุทธิที่ต้องเคลียร์
+
+    // 3. ยอดรวมสุทธิ (ใช้ค่าจากบัญชีโดยตรง)
     if ($("accTotalVal")) {
         $("accTotalVal").innerText = `฿${currentBalance.toLocaleString()}`;
     }
 
+    // 4. อัปเดตแสงไฟและป้ายสถานะ
     updateStatusUI(currentBalance);
 }
 
