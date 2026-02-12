@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V.8 </title>
+    <title>Barber Note Pro V. </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -1550,19 +1550,24 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     const weeklyHtml = weekEntries.map(([wk, data]) => {
     const avg = data.workDays > 0 ? (data.customers / data.workDays).toFixed(1) : 0;
     const weeklyTotalIncome = data.income || 0;
+
+    // --- 🟢 ส่วนที่แก้ไข: ดึงยอดช่าง/ร้าน จริงจากการสะสมรายวัน ---
+    let wBarber = 0;
+    if (data.dailyCounts) {
+        // วนลูปทุกวันในสัปดาห์นั้นเพื่อรวมยอดช่างที่บันทึกไว้จริง
+        data.dailyCounts.forEach(d => {
+            // ดึงค่า barberEarn หรือเงินที่ช่างได้รับจริงของแต่ละวันมาบวกกัน
+            wBarber += (Number(d.barberEarn) || 0);
+        });
+    }
     
-    // --- 🟢 แก้ไขจุดนี้: คำนวณรายได้ช่างและร้านจาก % ส่วนแบ่ง ---
-    // หากใน data ไม่มีค่า barberEarn ให้คำนวณจากยอดรวม * (เปอร์เซ็นต์/100)
-    const barberPercent = (typeof conf !== 'undefined' && conf.perc) ? conf.perc : 50; 
-    const wBarber = data.barberEarn || (weeklyTotalIncome * (barberPercent / 100));
+    // ยอดร้านคือ ยอดรวมลบด้วยยอดช่าง
     const wShop = weeklyTotalIncome - wBarber;
+    // ---------------------------------------------------
 
     const sortedDays = data.dailyCounts ? [...data.dailyCounts].sort((a,b) => b.count - a.count) : [];
     const bestDay = sortedDays.length > 0 && sortedDays[0].count > 0 ? `${sortedDays[0].dayName} (${sortedDays[0].count})` : "-";
     const worstDay = sortedDays.length > 0 ? `${sortedDays[sortedDays.length-1].dayName} (${sortedDays[sortedDays.length-1].count})` : "-";
-
-    const unusedHair = Object.keys(hairStats).filter(h => !data.popularHair[h]);
-    const unusedService = Object.keys(serviceStats).filter(s => !data.popularService[s]);
 
     const popHair = Object.entries(data.popularHair).sort((a,b) => b[1] - a[1]).slice(0, 2).map(([name, count]) => `
         <span style="background:rgba(190,242,100,0.1); color:#bef264; padding:2px 8px; border-radius:8px; font-size:11px; font-weight:600; border:1px solid rgba(190,242,100,0.2);">✂️ ${name} (${count})</span>
@@ -1585,7 +1590,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                 <div style="font-size:14px; font-weight:800; color:#ffffff;">฿${weeklyTotalIncome.toLocaleString()}</div>
             </div>
             <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:6px 8px; border-radius:12px; text-align:center;">
-                <div style="font-size:9px; color:#94a3b8; margin-bottom:2px;">ช่าง (${barberPercent}%)</div>
+                <div style="font-size:9px; color:#94a3b8; margin-bottom:2px;">ช่าง</div>
                 <div style="font-size:13px; font-weight:700; color:#bef264;">฿${Math.floor(wBarber).toLocaleString()}</div>
             </div>
             <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:6px 8px; border-radius:12px; text-align:center;">
@@ -1605,11 +1610,11 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
             </div>
         </div>
 
-        <div style="font-size:10px; color:#64748b; line-height:1.4; padding:0 4px 8px 4px; border-bottom:1px solid rgba(255,255,255,0.05); margin-bottom:8px;">
-            <div>📈 สูงสุด: <span style="color:#f1f5f9; font-weight:600;">${bestDay}</span> | 📉 ต่ำสุด: <span style="color:#f1f5f9; font-weight:600;">${worstDay}</span></div>
+        <div style="font-size:10px; color:#64748b; line-height:1.4; padding:0 4px 8px 4px;">
+            <div>📈 สูงสุด: <span style="color:#f1f5f9;">${bestDay}</span> | 📉 ต่ำสุด: <span style="color:#f1f5f9;">${worstDay}</span></div>
         </div>
 
-        <div style="display:flex; flex-wrap:wrap; gap:4px;">
+        <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">
             ${popHair}
             ${popService}
         </div>
