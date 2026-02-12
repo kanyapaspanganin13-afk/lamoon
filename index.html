@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 084</title>
+    <title>Barber Note Pro 014</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -96,22 +96,40 @@ function renderComparisonReport(v) {
     const d2 = fetchStats(v.s2, v.e2);
 
     // สร้าง Report HTML (ใช้โทนสีที่สุภาพและสะอาดตาตามที่ตั้งใจไว้)
+    // สร้าง Report HTML ที่ปรับปรุงตำแหน่งและรูปแบบวันที่
     const reportHtml = `
-        <div style="font-family:'Kanit', sans-serif; text-align:left;">
+        <div style="font-family:'Kanit', sans-serif; text-align:left; color: #1e293b;">
+            
             <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:20px; padding:15px; margin-bottom:12px;">
-                <small style="color:#64748b; font-weight:600;">📅 ช่วงที่ 1</small>
-                <div style="font-size:16px; font-weight:800; margin:5px 0; color:#1e293b;">👤 ${d1.sumC} คน | <span style="color:#15803d;">฿${d1.sumE.toLocaleString()}</span></div>
-                <div style="max-height:150px; overflow-y:auto; border-top:1px dashed #cbd5e1; margin-top:8px; -webkit-overflow-scrolling:touch;">
+                <div style="color:#64748b; font-weight:600; font-size:13px; margin-bottom:8px;">
+                    📅 ${d1.range.replace(' ถึง ', ' - ')}
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:5px 0; margin-bottom:8px;">
+                    <span style="flex:1.5; font-weight:800; color:#1e293b; font-size:15px;">สรุปรวม</span>
+                    <span style="flex:1; text-align:center; color:#4338ca; font-weight:800; font-size:16px;">👤 ${d1.sumC}</span>
+                    <span style="flex:1.2; text-align:right; color:#15803d; font-weight:800; font-size:16px;">฿${d1.sumE.toLocaleString()}</span>
+                </div>
+
+                <div style="max-height:180px; overflow-y:auto; border-top:1px dashed #cbd5e1; padding-top:8px; -webkit-overflow-scrolling:touch;">
                     ${d1.rowList}
                 </div>
             </div>
 
-            <div style="text-align:center; color:#cbd5e1; font-weight:900; margin:10px 0;">VS</div>
+            <div style="text-align:center; color:#cbd5e1; font-weight:900; margin:10px 0; font-size:12px;">VS</div>
 
             <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:20px; padding:15px;">
-                <small style="color:#64748b; font-weight:600;">📅 ช่วงที่ 2</small>
-                <div style="font-size:16px; font-weight:800; margin:5px 0; color:#1e293b;">👤 ${d2.sumC} คน | <span style="color:#15803d;">฿${d2.sumE.toLocaleString()}</span></div>
-                <div style="max-height:150px; overflow-y:auto; border-top:1px dashed #bae6fd; margin-top:8px; -webkit-overflow-scrolling:touch;">
+                <div style="color:#64748b; font-weight:600; font-size:13px; margin-bottom:8px;">
+                    📅 ${d2.range.replace(' ถึง ', ' - ')}
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:5px 0; margin-bottom:8px;">
+                    <span style="flex:1.5; font-weight:800; color:#1e293b; font-size:15px;">สรุปรวม</span>
+                    <span style="flex:1; text-align:center; color:#4338ca; font-weight:800; font-size:16px;">👤 ${d2.sumC}</span>
+                    <span style="flex:1.2; text-align:right; color:#15803d; font-weight:800; font-size:16px;">฿${d2.sumE.toLocaleString()}</span>
+                </div>
+
+                <div style="max-height:180px; overflow-y:auto; border-top:1px dashed #bae6fd; padding-top:8px; -webkit-overflow-scrolling:touch;">
                     ${d2.rowList}
                 </div>
             </div>
