@@ -1593,25 +1593,25 @@ const weeklyHtml = weekEntries.map(([wk, data]) => {
             </div>
         </div>
 
-        <div style="display:flex; gap:6px; margin-bottom:5px;">
-            <div style="flex:1; background:rgba(255,255,255,0.02); padding:4px 10px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:10px; color:#64748b;">👤 ลูกค้า</span>
-                <span style="font-size:11px; font-weight:700; color:#38bdf8;">${data.customers}</span>
+          <div style="display:flex; gap:8px; margin-bottom:10px;">
+                <div style="flex:1; background:rgba(255,255,255,0.03); padding:6px 10px; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:11px; color:#94a3b8;">👤 รวม</span>
+                    <span style="font-size:13px; font-weight:700; color:#38bdf8;">${data.customers}</span>
+                </div>
+                <div style="flex:1; background:rgba(255,255,255,0.03); padding:6px 10px; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:11px; color:#94a3b8;">📊 เฉลี่ย</span>
+                    <span style="font-size:13px; font-weight:700; color:#facc15;">${avg}</span>
+                </div>
             </div>
-            <div style="flex:1; background:rgba(255,255,255,0.02); padding:4px 10px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:10px; color:#64748b;">📊 เฉลี่ย</span>
-                <span style="font-size:11px; font-weight:700; color:#facc15;">${avg}</span>
-            </div>
-        </div>
 
-       <div style="font-size:11px; color:#64748b; line-height:1.6; padding:0 4px 10px 4px; border-bottom:1px solid rgba(255,255,255,0.05); margin-bottom:10px;">
-                <div>📈 สูงสุด: <span style="color:#f1f5f9; font-weight:600;">${bestDay}</span></div>
-                <div>📉 ต่ำสุด: <span style="color:#f1f5f9; font-weight:600;">${worstDay}</span></div>
+            <div style="font-size:11px; color:#64748b; line-height:1.6; padding:0 4px 10px 4px; border-bottom:1px solid rgba(255,255,255,0.05); margin-bottom:10px;">
+                <div>📈 เยอะที่สุด: <span style="color:#f1f5f9; font-weight:600;">${bestDay}</span></div>
+                <div>📉 น้อยที่สุด: <span style="color:#f1f5f9; font-weight:600;">${worstDay}</span></div>
                 
                 <div style="margin-top:6px; color:#fb7185; border-top:1px dashed rgba(251,113,133,0.2); padding-top:4px;">
                     🚨 <b>ยังไม่มีบริการ:</b> ${[...unusedHair, ...unusedService].length > 0 ? [...unusedHair, ...unusedService].join(", ") : "บันทึกครบทุกรายการ"}
                 </div>
-            </div>           
+            </div>
 
             <div style="display:flex; flex-wrap:wrap; gap:6px;">
                 ${popHair}
@@ -1619,6 +1619,8 @@ const weeklyHtml = weekEntries.map(([wk, data]) => {
             </div>
         </div>`;
     }).join("");
+
+
     
     // --- 4. แสดงผล Modal ---
     openReportModal(
@@ -1936,53 +1938,40 @@ function sendToLineFinal() {
                  // 1. ฟังก์ชันส่งออกข้อมูล
 function exportBackup() {
     try {
-        // เลือกดึงเฉพาะข้อมูลงานและประวัติการทำงานเท่านั้น
+        // 🟢 เลือกดึงเฉพาะข้อมูลที่จำเป็นต่อการแสดงรายงานงานเท่านั้น
         const data = {
-            // รายการงานที่ยังไม่ได้ปิดยอด
+            // รายการงานปัจจุบัน (ยังไม่ปิดยอด)
             db: JSON.parse(localStorage.getItem("barber_db") || localStorage.getItem("db") || "[]"),
-            // ประวัติการทำงานรายวันที่ปิดยอดแล้ว (หน้ารายงาน)
+            // ประวัติที่ปิดยอดแล้ว (สำคัญที่สุดสำหรับหน้ารายงาน)
             archives: JSON.parse(localStorage.getItem("barber_archives") || localStorage.getItem("archives") || "[]"),
-            // สรุปยอดรายวันอื่นๆ (ถ้ามี)
+            // ข้อมูลสรุปรายวันอื่นๆ
             dailySummary: JSON.parse(localStorage.getItem("daily_summary") || "[]"),
-            // การตั้งค่าแอป (เช่น ชื่อช่าง, ส่วนแบ่ง %)
+            // การตั้งค่าแอป (ชื่อช่าง, ส่วนแบ่ง %)
             settings: JSON.parse(localStorage.getItem("barber_settings") || "{}"),
+            
             exportDate: new Date().toISOString(),
-            backupType: "Work Only"
+            backupType: "Work Data Only"
         };
 
-        // ตรวจสอบข้อมูลใน localStorage 
-        // จะไม่ดึงข้อมูลที่มีคำว่า account, balance หรือ history ที่เกี่ยวกับการเงิน
-        const skipKeys = ["account", "balance", "clear_history", "account_history", "account_status"];
+        // --- 🛑 ลบส่วนที่วนลูปดึง localStorage ทั้งหมดออก เพื่อป้องกันข้อมูลบัญชีหลุด ---
         
-        Object.keys(localStorage).forEach(key => {
-            // ถ้า Key ไม่มีคำที่ต้องห้าม และยังไม่มีใน data ให้ดึงมา
-            const isForbidden = skipKeys.some(f => key.toLowerCase().includes(f));
-            if (!isForbidden && !data[key]) {
-                try {
-                    data[key] = JSON.parse(localStorage.getItem(key));
-                } catch (e) {
-                    data[key] = localStorage.getItem(key);
-                }
-            }
-        });
-
         const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         
         a.href = url;
-        // เปลี่ยนชื่อไฟล์ให้ชัดเจนว่าเป็นเฉพาะข้อมูลงาน
-        a.download = `work-report-barber-${new Date().toISOString().split('T')[0]}.json`;
+        // ตั้งชื่อไฟล์ให้ชัดเจน
+        a.download = `work-report-only-${new Date().toISOString().split('T')[0]}.json`;
         
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         
         URL.revokeObjectURL(url);
-        alert("✅ สำรองข้อมูลงานสำเร็จ!\n(ข้อมูลบัญชีและประวัติการเคลียร์เงินไม่ได้ถูกรวมในไฟล์นี้)");
+        alert("✅ สำรองข้อมูลงานสำเร็จ!\n(เฉพาะข้อมูลงานและรายงานเท่านั้น ข้อมูลบัญชีไม่ได้ถูกรวมในไฟล์นี้)");
     } catch (error) {
         console.error("Backup error:", error);
-        alert("ขออภัยครับ ไม่สามารถสำรองข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+        alert("ขออภัยครับ ไม่สามารถสำรองข้อมูลได้");
     }
 }
                     // 2. ฟังก์ชันนำเข้าข้อมูล
