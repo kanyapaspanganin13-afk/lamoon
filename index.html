@@ -9,16 +9,103 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 9 </title>
+    <title>Barber Note Pro  </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script>
+        // ระบบ Service Worker สำหรับใช้งานออฟไลน์
         if ("serviceWorker" in navigator) {
             window.addEventListener("load", () => {
                 navigator.serviceWorker.register("./service-worker.js")
                     .then(reg => console.log("✅ ระบบออฟไลน์พร้อมใช้งาน!"))
                     .catch(err => console.error("❌ SW error:", err));
             });
+        }
+
+        const $ = id => document.getElementById(id);
+
+        // ฟังก์ชันเรียกปฏิทินเลือก 2 ช่วงวันที่
+        async function openComparisonSelector() {
+            const { value: v } = await Swal.fire({
+                title: '📊 เปรียบเทียบข้อมูล',
+                background: 'var(--card)',
+                color: 'var(--text)',
+                confirmButtonText: 'วิเคราะห์ข้อมูล',
+                confirmButtonColor: 'var(--accent)',
+                html: `
+                    <div style="text-align: left; font-family: 'Kanit', sans-serif; font-size: 14px;">
+                        <p style="margin: 0 0 5px 0; color: #64748b;">📅 ช่วงที่ 1 (ตัวตั้ง)</p>
+                        <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                            <input id="s1" type="date" class="swal2-input" style="flex:1; margin:0; height:45px; font-size:14px; border-radius:12px; background: #fff; color: #000;">
+                            <input id="e1" type="date" class="swal2-input" style="flex:1; margin:0; height:45px; font-size:14px; border-radius:12px; background: #fff; color: #000;">
+                        </div>
+                        <p style="margin: 0 0 5px 0; color: #64748b;">📅 ช่วงที่ 2 (ตัวเทียบ)</p>
+                        <div style="display: flex; gap: 8px;">
+                            <input id="s2" type="date" class="swal2-input" style="flex:1; margin:0; height:45px; font-size:14px; border-radius:12px; background: #fff; color: #000;">
+                            <input id="e2" type="date" class="swal2-input" style="flex:1; margin:0; height:45px; font-size:14px; border-radius:12px; background: #fff; color: #000;">
+                        </div>
+                    </div>
+                `,
+                preConfirm: () => ({ s1: $('s1').value, e1: $('e1').value, s2: $('s2').value, e2: $('e2').value })
+            });
+
+            if (v && v.s1 && v.e1 && v.s2 && v.e2) renderComparisonReport(v);
+        }
+
+        // ฟังก์ชันประมวลผลข้อมูลและสร้าง UI รายบรรทัด
+        function renderComparisonReport(v) {
+            const fetchStats = (start, end) => {
+                // ตรวจสอบชื่อตัวแปรเก็บข้อมูล (allRecords) ให้ตรงกับในแอปของคุณ
+                const list = (typeof allRecords !== 'undefined' ? allRecords : []).filter(d => d.date >= start && d.date <= end);
+                const sumC = list.reduce((a, b) => a + Number(b.count || 0), 0);
+                const sumE = list.reduce((a, b) => a + Number(b.barberEarn || 0), 0);
+                const rowList = list.map(d => `
+                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f1f5f9; font-size:13px; color:#1e293b;">
+                        <span style="flex:1.5;">• ${d.date}</span>
+                        <span style="flex:1; text-align:center; color:#0284c7;">👤 ${d.count}</span>
+                        <span style="flex:1; text-align:right; font-weight:700; color:#10b981;">฿${Number(d.barberEarn).toLocaleString()}</span>
+                    </div>`).join("");
+                return { sumC, sumE, rowList, range: `${start} ถึง ${end}` };
+            };
+
+            const d1 = fetchStats(v.s1, v.e1);
+            const d2 = fetchStats(v.s2, v.e2);
+
+            const reportHtml = `
+                <div style="font-family:'Kanit',sans-serif; text-align:left; color:#1e293b;">
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:20px; padding:15px; margin-bottom:12px;">
+                        <small style="color:#64748b; font-weight:bold;">📅 ${d1.range}</small>
+                        <div style="font-size:16px; font-weight:800; margin:5px 0; color:#0f172a;">👤 ${d1.sumC} คน | <span style="color:#059669;">฿${d1.sumE.toLocaleString()}</span></div>
+                        <div style="max-height:120px; overflow-y:auto; -webkit-overflow-scrolling:touch; border-top:1px dashed #cbd5e1; padding-top:5px;">
+                            ${d1.rowList || '<center style="padding:10px; color:#94a3b8;">ไม่มีข้อมูล</center>'}
+                        </div>
+                    </div>
+                    <div style="text-align:center; color:#cbd5e1; font-weight:900; margin:5px 0;">V S</div>
+                    <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:20px; padding:15px;">
+                        <small style="color:#0369a1; font-weight:bold;">📅 ${d2.range}</small>
+                        <div style="font-size:16px; font-weight:800; margin:5px 0; color:#0f172a;">👤 ${d2.sumC} คน | <span style="color:#059669;">฿${d2.sumE.toLocaleString()}</span></div>
+                        <div style="max-height:120px; overflow-y:auto; -webkit-overflow-scrolling:touch; border-top:1px dashed #bae6fd; padding-top:5px;">
+                            ${d2.rowList || '<center style="padding:10px; color:#94a3b8;">ไม่มีข้อมูล</center>'}
+                        </div>
+                    </div>
+                </div>`;
+
+            openReportModal("สรุปเปรียบเทียบเชิงลึก", reportHtml);
+        }
+
+        function openReportModal(title, htmlContent) {
+            const modal = $('reportModal'), titleEl = $('reportTitle'), contentEl = $('reportContent');
+            if (!modal) return;
+            titleEl.innerText = title;
+            contentEl.innerHTML = htmlContent;
+            const inner = contentEl.parentElement;
+            Object.assign(inner.style, {
+                width: "95%", maxWidth: "500px", maxHeight: "85vh", overflowY: "auto",
+                webkitOverflowScrolling: "touch", borderRadius: "25px", padding: "20px", background: "#ffffff"
+            });
+            modal.style.display = "flex";
         }
     </script>
 </head>
@@ -363,10 +450,10 @@ nav {
            <i class="fas fa-calendar-check" style="font-size:24px; margin-bottom:5px; display:block;"></i><b style="font-size:16px;">สรุปรายเดือน</b>
             <input type="month" id="histMonth" onchange="loadHistMonth()" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
 </div>
-        <div onclick="openComparisonSelector()" style="background: linear-gradient(135deg, #38bdf8, #1d4ed8); border-radius: 25px; padding: 15px; text-align: center; color: #fff; cursor: pointer; box-shadow: 0 8px 15px rgba(56,189,248,0.2); display: flex; align-items: center; justify-content: center; gap: 10px;">       
+       <div onclick="openComparisonSelector()" style="background: linear-gradient(135deg, #38bdf8, #1d4ed8); border-radius: 25px; padding: 15px; text-align: center; color: #fff; cursor: pointer; box-shadow: 0 8px 15px rgba(56,189,248,0.2); display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 15px;">       
             <i class="fas fa-chart-line" style="font-size: 24px;"></i>
             <b style="font-size: 16px;">เปรียบเทียบช่วงวันที่</b>
-            </div>
+        </div>
      </div> 
   </div>                   
     <div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); z-index:9999; display:flex; align-items:center; justify-content:center; padding:15px;">
@@ -502,109 +589,8 @@ nav {
                 d.setHours(h, m + mins, 0, 0);
                 return d.toTimeString().slice(0, 5);
             }
-function openReportModal(title, htmlContent) {
-    const modal = $("reportModal");
-    const modalTitle = $("reportTitle");     
-    const modalContent = $("reportContent"); 
-    const modalInner = modalContent.parentElement; 
-    
-    if (!modal || !modalTitle || !modalContent) {
-        console.error("❌ หา ID Modal ไม่เจอ เช็ค HTML ด่วน!");
-        return;
-    }
 
-    modalTitle.innerText = title;
-    modalContent.innerHTML = htmlContent;
-
-    // --- ตั้งค่าสไตล์และการแสดงผล ---
-    modalInner.style.width = "95%";            
-    modalInner.style.maxWidth = "650px";       
-    modalInner.style.maxHeight = "85vh";       
-    modalInner.style.overflowY = "auto";       
-    
-    // ✅ เพิ่มเพื่อให้การ Scroll บน iPhone/iPad ลื่นไหลขึ้น (Momentum Scroll)
-    modalInner.style.webkitOverflowScrolling = "touch"; 
-
-    modalInner.style.borderRadius = "24px";    
-    modalInner.style.padding = "20px";
-    modalInner.style.margin = "auto";
-
-    // --- แสดงผล Modal กลางหน้าจอ ---
-    modal.style.display = "flex";
-    modal.style.alignItems = "center";
-    modal.style.justifyContent = "center";
-}
-     // ฟังก์ชันสำหรับรองรับการกดปุ่ม "เปรียบเทียบช่วงวันที่"
-
-async function openComparisonSelector() {
-    // 1. รับช่วงวันที่จากผู้ใช้
-    const dateRange1 = prompt("ระบุช่วงวันที่ 1 (เช่น 2026-01-01 ถึง 2026-01-10)", "2026-01-01 - 2026-01-10");
-    const dateRange2 = prompt("ระบุช่วงวันที่ 2 (เช่น 2026-02-01 ถึง 2026-02-10)", "2026-02-01 - 2026-02-10");
-
-    if (dateRange1 && dateRange2) {
-        // แยกวันที่เริ่มต้น-สิ้นสุด (สมมติว่าคุณป้อนด้วยรูปแบบ YYYY-MM-DD)
-        const [start1, end1] = dateRange1.split(" - ");
-        const [start2, end2] = dateRange2.split(" - ");
-
-        // 2. ฟังก์ชันกรองและสร้างข้อมูลรายบรรทัด (เปลี่ยนสีตัวหนังสือเป็นสีเข้มเพื่อให้อ่านชัด)
-        const getDetailedData = (start, end) => {
-            // กรองข้อมูลจากตัวแปรหลักของคุณ (สมมติว่าชื่อ allData)
-            const filtered = allData.filter(d => d.date >= start && d.date <= end);
-            
-            let totalC = 0;
-            let totalB = 0;
-            let rowsHtml = "";
-
-            filtered.forEach(day => {
-                totalC += Number(day.count || 0);
-                totalB += Number(day.barberEarn || 0);
-                rowsHtml += `
-                    <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #eee; font-size:13px; color:#334155;">
-                        <span style="flex:1.5;">• ${day.date}</span>
-                        <span style="flex:1; text-align:center; color:#0284c7;">👤 ${day.count}</span>
-                        <span style="flex:1; text-align:right; font-weight:bold; color:#059669;">฿${Number(day.barberEarn).toLocaleString()}</span>
-                    </div>`;
-            });
-
-            return { totalC, totalB, rowsHtml, count: filtered.length };
-        };
-
-        const res1 = getDetailedData(start1, end1);
-        const res2 = getDetailedData(start2, end2);
-
-        // 3. สร้างโครงสร้าง HTML (ปรับสีตัวหนังสือให้เข้ม ชัดเจนแน่นอน)
-        let reportHtml = `
-            <div style="color: #1e293b; line-height: 1.6; font-family: sans-serif;">
-                
-                <div style="background:#f8fafc; padding:15px; border-radius:18px; border:1px solid #e2e8f0; margin-bottom:15px;">
-                    <b style="color:#0f172a; font-size:14px;">📅 ช่วงที่ 1: ${dateRange1}</b><br>
-                    <div style="margin:8px 0; font-weight:bold; color:#0284c7;">
-                        👤 ลูกค้ารวม: ${res1.totalC} คน | 💰 ยอดช่าง: ฿${res1.totalB.toLocaleString()}
-                    </div>
-                    <div style="max-height:150px; overflow-y:auto; background:#fff; padding:10px; border-radius:10px; border:1px solid #f1f5f9;">
-                        ${res1.rowsHtml || '<div style="color:#94a3b8; text-align:center;">ไม่มีข้อมูล</div>'}
-                    </div>
-                </div>
-                
-                <div style="text-align:center; margin:10px 0; font-weight:bold; color:#cbd5e1;">V S</div>
-
-                <div style="background:#f0f9ff; padding:15px; border-radius:18px; border:1px solid #bae6fd;">
-                    <b style="color:#0369a1; font-size:14px;">📅 ช่วงที่ 2: ${dateRange2}</b><br>
-                    <div style="margin:8px 0; font-weight:bold; color:#0284c7;">
-                        👤 ลูกค้ารวม: ${res2.totalC} คน | 💰 ยอดช่าง: ฿${res2.totalB.toLocaleString()}
-                    </div>
-                    <div style="max-height:150px; overflow-y:auto; background:#fff; padding:10px; border-radius:10px; border:1px solid #f1f5f9;">
-                        ${res2.rowsHtml || '<div style="color:#94a3b8; text-align:center;">ไม่มีข้อมูล</div>'}
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // 4. แสดงผลใน Modal
-        openReportModal("เปรียบเทียบข้อมูลละเอียด", reportHtml);
-    }
-}
-     function closeReportModal() {
+function closeReportModal() {
                 $("reportModal").style.display = "none";
             }
 function openHistoryModal() { 
