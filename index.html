@@ -1335,32 +1335,38 @@ function loadAccountStatus() {
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
 
-    // 1. คำนวณยอดสะสมจากประวัติที่บันทึกแล้วเท่านั้น
-    let totalBalance = 0;
+    // 1. คำนวณยอดจากคลังประวัติ (Archives)
+    let totalFromArchives = 0;
     let todaySettle = 0;
 
-    if (archives && archives.length > 0) {
+    if (Array.isArray(archives)) {
         archives.forEach(item => {
-            const s = Number(item.settle) || 0;
-            totalBalance += s;
+            const s = Number(item.settle || item.barber || 0); // เช็คชื่อตัวแปรให้ตรงนะครับ
+            totalFromArchives += s;
             if (item.date === todayStr) { todaySettle = s; }
         });
     }
-    // อัปเดตยอดสะสมหลัก (account.balance) ให้ตรงกับผลรวมประวัติ
+    // 2. คำนวณยอดจากการ "จ่ายออก/รับเข้า" ในบัญชี (Account Logs)
+    // ถ้าคุณมีการ "ลบ" หรือ "จ่ายเงิน" รายการเหล่านั้นควรถูกหักลบที่นี่ด้วย
+    let logAdjustment = 0;
+    if (account.logs && account.logs.length > 0) {
+        logAdjustment = account.logs.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
+    }
+    // ยอดสุทธิ = (ยอดจากประวัติงาน) + (รายการปรับปรุงบัญชี/การจ่ายเงิน)
+    // หากคุณลบ archives ออก ยอด totalFromArchives จะกลายเป็น 0 ทันที
+    let totalBalance = totalFromArchives + logAdjustment;
     account.balance = totalBalance;
-    // 2. แสดงผล (ไม่มีการดึงค่า conf.guar มาโชว์ในหน้านี้)
+    // 3. แสดงผลหน้าจอ
     if (getEl("accDateLabel")) getEl("accDateLabel").innerText = now.toLocaleDateString('th-TH'); 
-    // ยอดวันนี้ (ดึงมาจากที่คำนวณเสร็จแล้วในรายงาน)
     if (getEl("accTodayVal")) getEl("accTodayVal").innerText = `฿${todaySettle.toLocaleString()}`;
-    // ยอดค้างเก่า
+    
     if (getEl("accOldVal")) {
         const oldVal = totalBalance - todaySettle;
         getEl("accOldVal").innerText = `฿${oldVal.toLocaleString()}`;
     }
-    // ยอดรวมสุทธิที่ต้องจ่ายจริง
     if (getEl("accTotalVal")) getEl("accTotalVal").innerText = `฿${totalBalance.toLocaleString()}`;
 
-    updateStatusUI(totalBalance);
+    if (typeof updateStatusUI === "function") updateStatusUI(totalBalance);
 }
 // แยกฟังก์ชัน UI
 function updateStatusUI(net) {
