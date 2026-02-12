@@ -1330,34 +1330,45 @@ function loadAccountStatus() {
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
 
-    // คำนวณจาก Logs ทั้งหมด (นี่คือจุดที่ทำให้หักลบยอดเงินได้จริง)
+    // ตรวจสอบความปลอดภัยของตัวแปร account
+    if (typeof account === "undefined") return;
+
+    // 1. คำนวณยอดสุทธิจาก Logs (ทำให้หักลบได้จริง)
     let totalBalance = 0;
     if (account.logs && account.logs.length > 0) {
         totalBalance = account.logs.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
     }
     account.balance = totalBalance;
 
-    // ดึงยอดจาก Archives เฉพาะของวันนี้
+    // 2. ดึงยอดจาก Archives เฉพาะของวันนี้
     let todaySettle = 0;
-    if (Array.isArray(archives)) {
+    if (typeof archives !== "undefined" && Array.isArray(archives)) {
         const todayData = archives.find(item => item.date === todayStr);
         if (todayData) todaySettle = Number(todayData.settle || todayData.barber || 0);
     }
 
+    // 3. แสดงผลตัวเลขบนหน้าจอ
     if (getEl("accDateLabel")) getEl("accDateLabel").innerText = now.toLocaleDateString('th-TH'); 
     if (getEl("accTodayVal")) getEl("accTodayVal").innerText = `฿${todaySettle.toLocaleString()}`;
     if (getEl("accTotalVal")) getEl("accTotalVal").innerText = `฿${totalBalance.toLocaleString()}`;
+    
     if (getEl("accOldVal")) {
+        // ยอดเก่า คือ ยอดรวมทั้งหมด หักลบยอดของวันนี้
         const oldVal = totalBalance - todaySettle;
-        getEl("accOldVal").innerText = `฿${(oldVal < 0 ? 0 : oldVal).toLocaleString()}`;
+        // ปรับเงื่อนไข: ถ้าเป็น 0 หรือติดลบ (กรณีเคลียร์แล้ว) ให้โชว์เป็น 0
+        getEl("accOldVal").innerText = `฿${(oldVal <= 0 ? 0 : oldVal).toLocaleString()}`;
     }
-// แยกฟังก์ชัน UI
+
+    // 4. สั่งอัปเดตสถานะสีและข้อความ (UI)
+    updateStatusUI(totalBalance);
+} // <--- ปิดปีกกาให้ถูกต้อง
+
 function updateStatusUI(net) {
     const getEl = (id) => document.getElementById(id);
     const badge = getEl("statusBadge");
     const light = getEl("accLight");
     
-    // ติดลบคือร้านคืนช่าง (น้ำเงิน) | เป็นบวกคือช่างคืนร้าน (แดง) | 0 คือลงตัว (เขียว)
+    // ตรรกะ: บวก=แดง (ช่างคืนร้าน) | ลบ=น้ำเงิน (ร้านคืนช่าง) | 0=เขียว (ลงตัว)
     let color = net > 0 ? "#dc2626" : (net < 0 ? "#1e3a8a" : "#16a34a");
     let txt = net > 0 ? "👨‍🎨 ช่างคืนร้าน" : (net < 0 ? "🏠 ร้านคืนช่าง" : "⚖️ ยอดลงตัว");
 
