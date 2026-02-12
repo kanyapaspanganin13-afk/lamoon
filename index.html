@@ -537,39 +537,71 @@ function openReportModal(title, htmlContent) {
      // ฟังก์ชันสำหรับรองรับการกดปุ่ม "เปรียบเทียบช่วงวันที่"
 
 async function openComparisonSelector() {
-    // 1. ตรวจสอบว่ามี Library SweetAlert2 หรือไม่ (ถ้าไม่มีให้ใช้ prompt ปกติ)
-    const date1 = prompt("ระบุช่วงวันที่ 1 (เช่น 01/01/2026 - 10/01/2026)");
-    const date2 = prompt("ระบุช่วงวันที่ 2 (เช่น 01/02/2026 - 10/02/2026)");
+    // 1. รับช่วงวันที่จากผู้ใช้
+    const dateRange1 = prompt("ระบุช่วงวันที่ 1 (เช่น 2026-01-01 ถึง 2026-01-10)", "2026-01-01 - 2026-01-10");
+    const dateRange2 = prompt("ระบุช่วงวันที่ 2 (เช่น 2026-02-01 ถึง 2026-02-10)", "2026-02-01 - 2026-02-10");
 
-    if (date1 && date2) {
-        // สร้างข้อมูลจำลองสำหรับแสดงผลรายบรรทัด
-        let mockHtml = `
-            <div style="color:#fff; line-height:1.8;">
-                <div style="background:rgba(255,255,255,0.1); padding:10px; border-radius:15px; margin-bottom:15px;">
-                    <b style="color:#facc15;">📅 ช่วงที่ 1: ${date1}</b><br>
-                    <small>👤 ลูกค้า: 110 | 💰 ยอดช่าง: ฿7,500</small>
-                    <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1);">
-                    <div style="font-size:12px;">
-                        • วันที่ 1 | 👤 12 | ฿850<br>
-                        • วันที่ 2 | 👤 15 | ฿1,100
+    if (dateRange1 && dateRange2) {
+        // แยกวันที่เริ่มต้น-สิ้นสุด (สมมติว่าคุณป้อนด้วยรูปแบบ YYYY-MM-DD)
+        const [start1, end1] = dateRange1.split(" - ");
+        const [start2, end2] = dateRange2.split(" - ");
+
+        // 2. ฟังก์ชันกรองและสร้างข้อมูลรายบรรทัด (เปลี่ยนสีตัวหนังสือเป็นสีเข้มเพื่อให้อ่านชัด)
+        const getDetailedData = (start, end) => {
+            // กรองข้อมูลจากตัวแปรหลักของคุณ (สมมติว่าชื่อ allData)
+            const filtered = allData.filter(d => d.date >= start && d.date <= end);
+            
+            let totalC = 0;
+            let totalB = 0;
+            let rowsHtml = "";
+
+            filtered.forEach(day => {
+                totalC += Number(day.count || 0);
+                totalB += Number(day.barberEarn || 0);
+                rowsHtml += `
+                    <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #eee; font-size:13px; color:#334155;">
+                        <span style="flex:1.5;">• ${day.date}</span>
+                        <span style="flex:1; text-align:center; color:#0284c7;">👤 ${day.count}</span>
+                        <span style="flex:1; text-align:right; font-weight:bold; color:#059669;">฿${Number(day.barberEarn).toLocaleString()}</span>
+                    </div>`;
+            });
+
+            return { totalC, totalB, rowsHtml, count: filtered.length };
+        };
+
+        const res1 = getDetailedData(start1, end1);
+        const res2 = getDetailedData(start2, end2);
+
+        // 3. สร้างโครงสร้าง HTML (ปรับสีตัวหนังสือให้เข้ม ชัดเจนแน่นอน)
+        let reportHtml = `
+            <div style="color: #1e293b; line-height: 1.6; font-family: sans-serif;">
+                
+                <div style="background:#f8fafc; padding:15px; border-radius:18px; border:1px solid #e2e8f0; margin-bottom:15px;">
+                    <b style="color:#0f172a; font-size:14px;">📅 ช่วงที่ 1: ${dateRange1}</b><br>
+                    <div style="margin:8px 0; font-weight:bold; color:#0284c7;">
+                        👤 ลูกค้ารวม: ${res1.totalC} คน | 💰 ยอดช่าง: ฿${res1.totalB.toLocaleString()}
+                    </div>
+                    <div style="max-height:150px; overflow-y:auto; background:#fff; padding:10px; border-radius:10px; border:1px solid #f1f5f9;">
+                        ${res1.rowsHtml || '<div style="color:#94a3b8; text-align:center;">ไม่มีข้อมูล</div>'}
                     </div>
                 </div>
                 
-                <div style="text-align:center; margin:10px 0;">VS</div>
+                <div style="text-align:center; margin:10px 0; font-weight:bold; color:#cbd5e1;">V S</div>
 
-                <div style="background:rgba(56,189,248,0.1); padding:10px; border-radius:15px; border:1px solid #38bdf8;">
-                    <b style="color:#38bdf8;">📅 ช่วงที่ 2: ${date2}</b><br>
-                    <small>👤 ลูกค้า: 128 | 💰 ยอดช่าง: ฿8,450</small>
-                    <hr style="border:0; border-top:1px solid rgba(56,189,248,0.1);">
-                    <div style="font-size:12px;">
-                        • วันที่ 1 | 👤 14 | ฿950<br>
-                        • วันที่ 2 | 👤 18 | ฿1,250
+                <div style="background:#f0f9ff; padding:15px; border-radius:18px; border:1px solid #bae6fd;">
+                    <b style="color:#0369a1; font-size:14px;">📅 ช่วงที่ 2: ${dateRange2}</b><br>
+                    <div style="margin:8px 0; font-weight:bold; color:#0284c7;">
+                        👤 ลูกค้ารวม: ${res2.totalC} คน | 💰 ยอดช่าง: ฿${res2.totalB.toLocaleString()}
+                    </div>
+                    <div style="max-height:150px; overflow-y:auto; background:#fff; padding:10px; border-radius:10px; border:1px solid #f1f5f9;">
+                        ${res2.rowsHtml || '<div style="color:#94a3b8; text-align:center;">ไม่มีข้อมูล</div>'}
                     </div>
                 </div>
             </div>
         `;
-        // 2. เรียกใช้ฟังก์ชันเปิด Modal ที่เราตรวจเช็คกันเมื่อสักครู่
-        openReportModal("รายงานเปรียบเทียบ", mockHtml);
+
+        // 4. แสดงผลใน Modal
+        openReportModal("เปรียบเทียบข้อมูลละเอียด", reportHtml);
     }
 }
      function closeReportModal() {
