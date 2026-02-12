@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 2</title>
+    <title>Barber Note Pro </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1943,101 +1943,94 @@ function sendToLineFinal() {
                     }
                 }
             });
-                 // 1. ฟังก์ชันส่งออกข้อมูล
 function exportBackup() {
     try {
-        // 🟢 เลือกดึงเฉพาะข้อมูลที่จำเป็นต่อการแสดงรายงานงานเท่านั้น
         const data = {
-            // รายการงานปัจจุบัน (ยังไม่ปิดยอด)
             db: JSON.parse(localStorage.getItem("barber_db") || localStorage.getItem("db") || "[]"),
-            // ประวัติที่ปิดยอดแล้ว (สำคัญที่สุดสำหรับหน้ารายงาน)
             archives: JSON.parse(localStorage.getItem("barber_archives") || localStorage.getItem("archives") || "[]"),
-            // ข้อมูลสรุปรายวันอื่นๆ
             dailySummary: JSON.parse(localStorage.getItem("daily_summary") || "[]"),
-            // การตั้งค่าแอป (ชื่อช่าง, ส่วนแบ่ง %)
             settings: JSON.parse(localStorage.getItem("barber_settings") || "{}"),
             
+            // 🔵 เพิ่มส่วนนี้: เพื่อให้ข้อมูลบัญชีถูกสำรองไปด้วย
+            account: JSON.parse(localStorage.getItem("barber_account") || "null"), 
+            
             exportDate: new Date().toISOString(),
-            backupType: "Work Data Only"
+            backupType: "Full Data (Work & Account)"
         };
 
-        // --- 🛑 ลบส่วนที่วนลูปดึง localStorage ทั้งหมดออก เพื่อป้องกันข้อมูลบัญชีหลุด ---
-        
         const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
-        
         a.href = url;
-        // ตั้งชื่อไฟล์ให้ชัดเจน
-        a.download = `work-report-only-${new Date().toISOString().split('T')[0]}.json`;
-        
+        a.download = `full-backup-${new Date().toISOString().split('T')[0]}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        
         URL.revokeObjectURL(url);
-        alert("✅ สำรองข้อมูลงานสำเร็จ!\n(เฉพาะข้อมูลงานและรายงานเท่านั้น ข้อมูลบัญชีไม่ได้ถูกรวมในไฟล์นี้)");
+        
+        alert("✅ สำรองข้อมูลสำเร็จ!\n(รวมข้อมูลงานและข้อมูลบัญชีเรียบร้อยแล้ว)");
     } catch (error) {
-        console.error("Backup error:", error);
         alert("ขออภัยครับ ไม่สามารถสำรองข้อมูลได้");
     }
 }
-                    // 2. ฟังก์ชันนำเข้าข้อมูล
-               function importBackup(input) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        const confirmImport = confirm("⚠️ ข้อมูลปัจจุบันจะถูกแทนที่ด้วยข้อมูลจากไฟล์สำรอง คุณต้องการดำเนินการต่อใช่หรือไม่?");
-                        if(confirmImport) {
-                            // บันทึกลงทั้งสองชื่อเพื่อความปลอดภัย (ทั้งแบบมี barber_ นำหน้าและไม่มี)
-                            const dbStr = JSON.stringify(data.db || []);
-                            const arcStr = JSON.stringify(data.archives || []);
-                            localStorage.setItem("barber_db", dbStr);
-                            localStorage.setItem("barber_archives", arcStr);
-                            // แถม: ถ้าโค้ดเก่าคุณใช้ชื่อสั้นๆ ก็บันทึกเผื่อไว้ด้วยครับ
-                            localStorage.setItem("db", dbStr);
-                            localStorage.setItem("archives", arcStr);
-                            alert("✅ นำเข้าข้อมูลเรียบร้อยแล้ว ระบบจะเริ่มทำงานใหม่");
-                            location.reload();
-                        }
-                    } catch(err) {
-                        alert("❌ รูปแบบไฟล์ไม่ถูกต้อง กรุณาใช้ไฟล์สำรองที่ถูกต้อง");
-                    }
-                    input.value = '';
-                };
+   function importBackup(input) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            const confirmImport = confirm("⚠️ ข้อมูลปัจจุบันจะถูกแทนที่ด้วยไฟล์นี้ คุณต้องการดำเนินการต่อใช่หรือไม่?");
             
-                if (input.files && input.files[0]) {
-                    reader.readAsText(input.files[0]);
+            if(confirmImport) {
+                // 🛑 ล้างของเก่าทิ้งให้หมดก่อนเพื่อไม่ให้ยอดค้าง
+                localStorage.clear(); 
+
+                // 🟢 นำข้อมูลใหม่ลงไป
+                const dbStr = JSON.stringify(data.db || []);
+                const arcStr = JSON.stringify(data.archives || []);
+                localStorage.setItem("barber_db", dbStr);
+                localStorage.setItem("barber_archives", arcStr);
+                
+                // 🔵 จัดการข้อมูลบัญชี (ถ้าไม่มีในไฟล์ให้เซ็ตเป็น 0)
+                if (data.account) {
+                    localStorage.setItem("barber_account", JSON.stringify(data.account));
+                } else {
+                    localStorage.setItem("barber_account", JSON.stringify({ balance: 0, logs: [] }));
                 }
+
+                if (data.settings) localStorage.setItem("barber_settings", JSON.stringify(data.settings));
+
+                alert("✅ นำเข้าข้อมูลสำเร็จ ระบบจะเริ่มทำงานใหม่");
+                location.reload();
             }
-                    // 3. ตัวลงทะเบียน Service Worker (เพื่อให้ใช้งานออฟไลน์ได้)
-                    if ('serviceWorker' in navigator) {
-                        window.addEventListener('load', () => {
-                            navigator.serviceWorker.register('./service-worker.js')
-                                .then(reg => console.log('Service Worker จดทะเบียนสำเร็จ!'))
-                                .catch(err => console.log('จดทะเบียนไม่สำเร็จ:', err));
-                        });
-                    }
-            function restoreData(jsonData) {
+        } catch(err) {
+            alert("❌ รูปแบบไฟล์ไม่ถูกต้อง");
+        }
+        input.value = '';
+    };
+    if (input.files && input.files[0]) reader.readAsText(input.files[0]);
+}
+  function restoreData(jsonData) {
     try {
         const data = JSON.parse(jsonData);
         
-        // 1. คืนค่าข้อมูลบัญชีและประวัติ
+        // 1. คืนค่าตัวแปร
         account = data.account || { balance: 0, logs: [] };
         archives = data.archives || [];
         
-        // 2. บันทึกลง Storage ทันทีเพื่อความชัวร์
+        // 2. บันทึกลง Storage ทันที (ใช้ชื่อ Key ให้ตรงกับระบบของคุณ)
+        localStorage.setItem("barber_account", JSON.stringify(account));
+        localStorage.setItem("barber_archives", JSON.stringify(archives));
+        
+        // ถ้าคุณมีฟังก์ชัน save() ที่ใช้เขียนค่าอยู่แล้ว ให้เรียกใช้
         if (typeof save === "function") save();
         
-        // 3. สำคัญ: ต้องสั่ง Render หน้าจอใหม่ทุกจุด
-        alert("✅ คืนค่าข้อมูลสำเร็จแล้วครับ");
+        alert("✅ คืนค่าข้อมูลและล้างยอดบัญชีเดิมเรียบร้อยแล้วครับ");
         
-        if (typeof loadAccountStatus === "function") loadAccountStatus();
-        if (typeof renderHistoryList === "function") renderHistoryList(); // อัปเดตแฟ้มรายเดือน
+        // 3. รีเฟรชหน้าจอเพื่อล้างค่าค้างในความจำเครื่อง
+        location.reload(); 
         
     } catch (e) {
-        alert("❌ รูปแบบข้อมูลไม่ถูกต้อง ไม่สามารถคืนค่าได้ครับ");
+        alert("❌ ไม่สามารถคืนค่าได้ รูปแบบข้อมูลไม่ถูกต้อง");
     }
 }
     function clearData() {
