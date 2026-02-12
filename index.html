@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V.0 </title>
+    <title>Barber Note Pro V.02 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -1142,38 +1142,31 @@ if (dList) {
 }
     function toggleAccHistory() {const w = $("accHistoryWrapper"); w.style.display = w.style.display === "none" ? "block" : "none";$("accHistory").innerHTML = account.logs.map(l => `<div style="padding:5px; border-bottom:1px solid #eee;">${l.date}: ฿${l.amount} (${l.note})</div>`).join('') || "ไม่มีประวัติ";}    
     function loadAccountHistory() {let h = account.logs.map(l => `<div style="padding:15px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;"><div><b style="font-size:14px; color:#1e293b;">${l.date}</b><br><small style="color:#64748b;">${l.note}</small></div><b style="color:${l.amount >= 0 ? '#16a34a' : '#dc2626'};">${l.amount >= 0 ? '+' : ''}฿${Math.abs(l.amount).toLocaleString()}</b></div> `).join('');if($("accHistory")) {$("accHistory").innerHTML = h || '<center style="padding:40px; color:#94a3b8;">ไม่มีประวัติการเคลียร์</center>';}}     
-  function loadAccountStatus() {
-    const now = new Date();
-    const dateLabel = now.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+ function loadAccountStatus() {
+    // 1. ดึงวันที่จากช่องเลือกวันที่ (เพื่อให้ตรงกับหน้ารายงานที่ผู้ใช้กำลังดู)
+    const targetDate = $("reportDateSelector")?.value || new Date().toISOString().split('T')[0];
+    
+    // แสดงวันที่ภาษาไทยใน Label
+    const dateLabel = new Date(targetDate).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
     if ($("accDateLabel")) $("accDateLabel").innerText = dateLabel;
 
-    // 1. ดึงยอดสะสมรวม (อันนี้จะขึ้นแน่นอน)
-    const totalBalance = Number(account.balance) || 0;
+    // 2. ดึงยอด "สะสมทั้งหมด" ที่บันทึกไปแล้วจากหน้าบัญชี
+    // ยอดนี้คือยอดสุทธิที่ผ่านการ 'ส่งข้อมูล' มาแล้วทุกวัน
+    const currentBalance = Number(account.balance) || 0;
+    if ($("accOldVal")) $("accOldVal").innerText = `฿${currentBalance.toLocaleString()}`;
 
-    // 2. ดึงข้อมูลล่าสุดที่เพิ่งบันทึกไป (Archives ตัวสุดท้าย)
-    // วิธีนี้ชัวร์กว่าการหาตามวันที่ เพราะถ้าเพิ่งกดเซฟมา ข้อมูลตัวนี้คือตัวล่าสุด
-    const lastEntry = archives.length > 0 ? archives[archives.length - 1] : null;
-    const settleToday = lastEntry ? Number(lastEntry.settle) : 0;
+    // 3. คำนวณยอด "เฉพาะของวันที่เลือก" (จาก Archives)
+    const archivedData = archives.find(a => a.date === targetDate);
+    const settleSelectedDay = archivedData ? (Number(archivedData.settle) || 0) : 0;
+    
+    if ($("accTodayVal")) $("accTodayVal").innerText = `฿${settleSelectedDay.toLocaleString()}`;
 
-    // --- อัปเดตตัวเลขลงหน้าจอ ---
+    // 4. ยอดรวมสุทธิ (ใช้ยอดสะสมจากหน้าบัญชีเป็นหลัก)
+    // ตรงนี้สำคัญ: หน้าบัญชีควรโชว์ยอด account.balance เลย เพราะมันคือยอดรวมที่อัปเดตแล้ว
+    if ($("accTotalVal")) $("accTotalVal").innerText = `฿${currentBalance.toLocaleString()}`;
 
-    // ยอดค้างเดิม (ยอดรวม ลบด้วย ยอดล่าสุดที่เพิ่งบันทึก)
-    if ($("accOldVal")) {
-        const oldVal = totalBalance - settleToday;
-        $("accOldVal").innerText = `฿${oldVal.toLocaleString()}`;
-    }
-
-    // ยอดวันนี้ (ดึงจากรายการล่าสุด)
-    if ($("accTodayVal")) {
-        $("accTodayVal").innerText = `฿${settleToday.toLocaleString()}`;
-    }
-
-    // ยอดรวมสุทธิ
-    if ($("accTotalVal")) {
-        $("accTotalVal").innerText = `฿${totalBalance.toLocaleString()}`;
-    }
-
-    updateStatusUI(totalBalance);
+    // 5. อัปเดตสถานะ Badge
+    updateStatusUI(currentBalance);
 }
 // แยกฟังก์ชัน UI เพื่อความสะอาดของโค้ด
 function updateStatusUI(net) {
