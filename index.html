@@ -1906,23 +1906,30 @@ function sendToLineFinal() {
                 }
             });
                  // 1. ฟังก์ชันส่งออกข้อมูล
-       function exportBackup() {
+function exportBackup() {
     try {
+        // เลือกดึงเฉพาะข้อมูลงานและประวัติการทำงานเท่านั้น
         const data = {
-    
+            // รายการงานที่ยังไม่ได้ปิดยอด
             db: JSON.parse(localStorage.getItem("barber_db") || localStorage.getItem("db") || "[]"),
+            // ประวัติการทำงานรายวันที่ปิดยอดแล้ว (หน้ารายงาน)
             archives: JSON.parse(localStorage.getItem("barber_archives") || localStorage.getItem("archives") || "[]"),
-            clearHistory: JSON.parse(localStorage.getItem("clear_history") || localStorage.getItem("account_history") || "[]"),
+            // สรุปยอดรายวันอื่นๆ (ถ้ามี)
             dailySummary: JSON.parse(localStorage.getItem("daily_summary") || "[]"),
-            
-            // ข้อมูลการตั้งค่าอื่นๆ
+            // การตั้งค่าแอป (เช่น ชื่อช่าง, ส่วนแบ่ง %)
             settings: JSON.parse(localStorage.getItem("barber_settings") || "{}"),
-            exportDate: new Date().toISOString()
+            exportDate: new Date().toISOString(),
+            backupType: "Work Only"
         };
 
-        // ตรวจสอบข้อมูลใน localStorage ทั้งหมดเพื่อกันเหนียว (กรณีมี Key ชื่อแปลกๆ)
+        // ตรวจสอบข้อมูลใน localStorage 
+        // จะไม่ดึงข้อมูลที่มีคำว่า account, balance หรือ history ที่เกี่ยวกับการเงิน
+        const skipKeys = ["account", "balance", "clear_history", "account_history", "account_status"];
+        
         Object.keys(localStorage).forEach(key => {
-            if (!data[key]) {
+            // ถ้า Key ไม่มีคำที่ต้องห้าม และยังไม่มีใน data ให้ดึงมา
+            const isForbidden = skipKeys.some(f => key.toLowerCase().includes(f));
+            if (!isForbidden && !data[key]) {
                 try {
                     data[key] = JSON.parse(localStorage.getItem(key));
                 } catch (e) {
@@ -1936,17 +1943,18 @@ function sendToLineFinal() {
         const a = document.createElement("a");
         
         a.href = url;
-        a.download = `full-backup-barber-${new Date().toISOString().split('T')[0]}.json`;
+        // เปลี่ยนชื่อไฟล์ให้ชัดเจนว่าเป็นเฉพาะข้อมูลงาน
+        a.download = `work-report-barber-${new Date().toISOString().split('T')[0]}.json`;
         
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         
         URL.revokeObjectURL(url);
-        alert("สำรองข้อมูลสำเร็จ! ข้อมูลบัญชีและประวัติการเคลียร์เงินถูกบันทึกเรียบร้อยครับ");
+        alert("✅ สำรองข้อมูลงานสำเร็จ!\n(ข้อมูลบัญชีและประวัติการเคลียร์เงินไม่ได้ถูกรวมในไฟล์นี้)");
     } catch (error) {
         console.error("Backup error:", error);
-        alert("ขออภัยครับ ไม่สามารถดึงข้อมูลได้ครบถ้วน กรุณาลองใหม่อีกครั้ง");
+        alert("ขออภัยครับ ไม่สามารถสำรองข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
     }
 }
                     // 2. ฟังก์ชันนำเข้าข้อมูล
