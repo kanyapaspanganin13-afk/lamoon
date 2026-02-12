@@ -1285,13 +1285,12 @@ if (dList) {
 }
 }               
         
-   function saveAndGo(date, total) {
+  function saveAndGo(date, total) {
     const allToday = db.filter(r => r.date === date);
     if (allToday.length === 0) return alert("⚠️ ไม่พบข้อมูล");
 
     const todayData = allToday.filter(r => r.type === 'SERVICE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
-    
     let cash = 0, tips = 0, trans = 0;
     
     todayData.forEach(r => {
@@ -1302,29 +1301,25 @@ if (dList) {
         else if (r.pay === "Mix") { cash += Number(r.payCash) || 0; trans += Number(r.payTrans) || 0; }
     });
 
-    // 💰 ตรรกะ: เลือกค่าที่มากกว่าระหว่าง (ส่วนแบ่ง %) กับ (ประกันรายได้)
     const commission = total * (conf.perc / 100);
     const baseEarn = Math.max(commission, Number(conf.guar)); 
-    
-    // รายได้ช่าง = (ค่าแรงที่เลือกแล้ว) + ทิปทั้งหมด
     const bEarn = isHoliday ? 0 : baseEarn + tips;
-    
-    // Settle = เงินสดในมือช่าง - รายได้ที่ควรได้
     const settle = isHoliday ? 0 : cash - bEarn;
 
-    const data = {
-        date, total, cash, trans, tips,
-        barber: Math.floor(bEarn),
-        settle: settle, // ยอดนี้คือยอดสุทธิที่ต้องใช้เคลียร์
-        type: isHoliday ? "HOLIDAY" : "WORK"
-    };
+    const data = { date, total, cash, trans, tips, barber: Math.floor(bEarn), settle: settle, type: isHoliday ? "HOLIDAY" : "WORK" };
 
     const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
 
+    // ส่งยอดเข้า Account Logs อัตโนมัติเพื่อให้หน้าบัญชีหักลบยอดได้
+    if (!isHoliday) {
+        account.logs = account.logs.filter(l => l.date !== date || !l.note.includes("ยอดปิดงาน"));
+        account.logs.push({ date: date, amount: settle, note: `ยอดปิดงานวันที่ ${date}` });
+    }
+
     db = db.filter(r => r.date !== date);
     save();
-    loadAccountStatus(); // อัปเดตหน้าบัญชีทันที
+    loadAccountStatus();
     alert("✅ บันทึกเรียบร้อย");
     go(3);
 }
@@ -1335,46 +1330,27 @@ function loadAccountStatus() {
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
 
-    // 1. คำนวณยอดเงินจากประวัติการทำรายการ (Logs) 
-    // เพื่อให้ยอดบันทึกใหม่ (เช่น ถอน/จ่าย) ถูกนำมาหักลบจริงๆ
-    let totalLogs = 0;
+    // คำนวณจาก Logs ทั้งหมด (นี่คือจุดที่ทำให้หักลบยอดเงินได้จริง)
+    let totalBalance = 0;
     if (account.logs && account.logs.length > 0) {
-        totalLogs = account.logs.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
+        totalBalance = account.logs.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
     }
+    account.balance = totalBalance;
 
-    // ยอดรวมสุทธิในบัญชีตอนนี้ (จะดึงค่าจากยอด balance ที่บันทึกไว้ล่าสุด)
-    // หากมีการบันทึก Log ใหม่ ยอดนี้จะเปลี่ยนตาม
-    let currentBalance = totalLogs; 
-
-    // 2. หาเฉพาะยอดของ "วันนี้" (โชว์เพื่อให้รู้ว่าวันนี้ทำเงินได้เท่าไหร่)
+    // ดึงยอดจาก Archives เฉพาะของวันนี้
     let todaySettle = 0;
     if (Array.isArray(archives)) {
         const todayData = archives.find(item => item.date === todayStr);
-        if (todayData) {
-            todaySettle = Number(todayData.settle || todayData.barber || 0);
-        }
+        if (todayData) todaySettle = Number(todayData.settle || todayData.barber || 0);
     }
 
-    // 3. แสดงผลหน้าจอ
     if (getEl("accDateLabel")) getEl("accDateLabel").innerText = now.toLocaleDateString('th-TH'); 
-    
-    // ยอดวันนี้: ดึงจาก Archives วันนี้ตรงๆ
     if (getEl("accTodayVal")) getEl("accTodayVal").innerText = `฿${todaySettle.toLocaleString()}`;
-    
-    // ยอดรวมสุทธิ: จะเป็นยอดที่หักลบรายการใหม่ๆ แล้ว (จาก Logs ทั้งหมด)
-    if (getEl("accTotalVal")) getEl("accTotalVal").innerText = `฿${currentBalance.toLocaleString()}`;
-    
-    // ยอดค้างเก่า: คือ ยอดทั้งหมด ลบด้วยยอดที่หาได้จากของวันนี้
+    if (getEl("accTotalVal")) getEl("accTotalVal").innerText = `฿${totalBalance.toLocaleString()}`;
     if (getEl("accOldVal")) {
-        const oldVal = currentBalance - todaySettle;
+        const oldVal = totalBalance - todaySettle;
         getEl("accOldVal").innerText = `฿${(oldVal < 0 ? 0 : oldVal).toLocaleString()}`;
     }
-
-    // อัปเดตค่ากลับไปที่ตัวแปรหลักเพื่อให้ระบบอื่นจำค่าที่ถูกต้อง
-    account.balance = currentBalance;
-
-    if (typeof updateStatusUI === "function") updateStatusUI(currentBalance);
-}
 // แยกฟังก์ชัน UI
 function updateStatusUI(net) {
     const getEl = (id) => document.getElementById(id);
@@ -1959,66 +1935,36 @@ function sendToLineFinal() {
 function exportBackup() {
     try {
         const data = {
-            db: JSON.parse(localStorage.getItem("barber_db") || localStorage.getItem("db") || "[]"),
-            archives: JSON.parse(localStorage.getItem("barber_archives") || localStorage.getItem("archives") || "[]"),
-            dailySummary: JSON.parse(localStorage.getItem("daily_summary") || "[]"),
-            settings: JSON.parse(localStorage.getItem("barber_settings") || "{}"),
-            
-            // 🔵 เพิ่มส่วนนี้: เพื่อให้ข้อมูลบัญชีถูกสำรองไปด้วย
-            account: JSON.parse(localStorage.getItem("barber_account") || "null"), 
-            
-            exportDate: new Date().toISOString(),
-            backupType: "Full Data (Work & Account)"
+            db: JSON.parse(localStorage.getItem("barber_db") || "[]"),
+            archives: JSON.parse(localStorage.getItem("barber_archives") || "[]"),
+            account: account, // รวมข้อมูลบัญชีไปด้วย
+            settings: JSON.parse(localStorage.getItem("barber_settings") || "{}")
         };
-
         const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
         a.download = `full-backup-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        alert("✅ สำรองข้อมูลสำเร็จ!\n(รวมข้อมูลงานและข้อมูลบัญชีเรียบร้อยแล้ว)");
-    } catch (error) {
-        alert("ขออภัยครับ ไม่สามารถสำรองข้อมูลได้");
-    }
+        alert("✅ สำรองข้อมูลรวมบัญชีสำเร็จ");
+    } catch (e) { alert("ไม่สามารถสำรองข้อมูลได้"); }
 }
-   function importBackup(input) {
+
+function importBackup(input) {
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            const confirmImport = confirm("⚠️ ข้อมูลปัจจุบันจะถูกแทนที่ด้วยไฟล์นี้ คุณต้องการดำเนินการต่อใช่หรือไม่?");
-            
-            if(confirmImport) {
-                // 🛑 ล้างของเก่าทิ้งให้หมดก่อนเพื่อไม่ให้ยอดค้าง
-                localStorage.clear(); 
-
-                // 🟢 นำข้อมูลใหม่ลงไป
-                const dbStr = JSON.stringify(data.db || []);
-                const arcStr = JSON.stringify(data.archives || []);
-                localStorage.setItem("barber_db", dbStr);
-                localStorage.setItem("barber_archives", arcStr);
-                
-                // 🔵 จัดการข้อมูลบัญชี (ถ้าไม่มีในไฟล์ให้เซ็ตเป็น 0)
-                if (data.account) {
-                    localStorage.setItem("barber_account", JSON.stringify(data.account));
-                } else {
-                    localStorage.setItem("barber_account", JSON.stringify({ balance: 0, logs: [] }));
-                }
-
-                if (data.settings) localStorage.setItem("barber_settings", JSON.stringify(data.settings));
-
-                alert("✅ นำเข้าข้อมูลสำเร็จ ระบบจะเริ่มทำงานใหม่");
+            if(confirm("⚠️ ยืนยันการนำเข้า? ข้อมูลเดิมจะถูกลบทั้งหมดเพื่อให้ยอดเงินถูกต้อง")) {
+                localStorage.clear(); // ล้างของเก่าทิ้งทั้งหมด
+                localStorage.setItem("barber_db", JSON.stringify(data.db || []));
+                localStorage.setItem("barber_archives", JSON.stringify(data.archives || []));
+                localStorage.setItem("barber_account", JSON.stringify(data.account || { balance: 0, logs: [] }));
+                localStorage.setItem("barber_settings", JSON.stringify(data.settings || {}));
+                alert("✅ นำเข้าข้อมูลสำเร็จ ระบบจะเริ่มใหม่ครับ");
                 location.reload();
             }
-        } catch(err) {
-            alert("❌ รูปแบบไฟล์ไม่ถูกต้อง");
-        }
-        input.value = '';
+        } catch(err) { alert("❌ ไฟล์ไม่ถูกต้อง"); }
     };
     if (input.files && input.files[0]) reader.readAsText(input.files[0]);
 }
