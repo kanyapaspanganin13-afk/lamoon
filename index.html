@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V.9 </title>
+    <title>Barber Note Pro V.09 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -1143,48 +1143,43 @@ if (dList) {
     function toggleAccHistory() {const w = $("accHistoryWrapper"); w.style.display = w.style.display === "none" ? "block" : "none";$("accHistory").innerHTML = account.logs.map(l => `<div style="padding:5px; border-bottom:1px solid #eee;">${l.date}: ฿${l.amount} (${l.note})</div>`).join('') || "ไม่มีประวัติ";}    
     function loadAccountHistory() {let h = account.logs.map(l => `<div style="padding:15px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;"><div><b style="font-size:14px; color:#1e293b;">${l.date}</b><br><small style="color:#64748b;">${l.note}</small></div><b style="color:${l.amount >= 0 ? '#16a34a' : '#dc2626'};">${l.amount >= 0 ? '+' : ''}฿${Math.abs(l.amount).toLocaleString()}</b></div> `).join('');if($("accHistory")) {$("accHistory").innerHTML = h || '<center style="padding:40px; color:#94a3b8;">ไม่มีประวัติการเคลียร์</center>';}}     
   
-   function loadAccountStatus() {
+  function loadAccountStatus() {
+    // 1. จัดการเรื่องวันที่ (ให้ตรงกับเครื่องและรูปแบบในระบบ)
     const now = new Date();
     const dateLabel = now.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const todayStr = now.toISOString().split('T')[0]; // รูปแบบ 2026-02-12
+
     if ($("accDateLabel")) $("accDateLabel").innerText = dateLabel;
 
-    // 1. ดึงยอดค้างเดิม
-    const oldBalance = Number(account.balance) || 0;
-    if ($("accOldVal")) $("accOldVal").innerText = `฿${oldBalance.toLocaleString()}`;
+    // 2. ดึงยอดสะสมรวมทั้งหมดจากระบบ (ที่บันทึกผ่านปุ่มส่งข้อมูลแล้ว)
+    const totalBalance = Number(account.balance) || 0;
 
-    // 2. คำนวณยอดวันนี้
-    const today = now.toISOString().split('T')[0];
-    const todayEntries = db.filter(r => r.date === today && (r.type === 'SERVICE' || r.type === 'GUARANTEE'));
-    
-    let tCash = 0, tTotal = 0, tTips = 0;
-    todayEntries.forEach(r => {
-        tTotal += (Number(r.price) || 0);
-        tTips += (Number(r.tip) || 0);
-        if (r.pay === "Cash") tCash += (Number(r.price) || 0) + (Number(r.tip) || 0);
-    });
+    // 3. ดึงยอด "เฉพาะของวันนี้" จากประวัติที่บันทึกแล้ว (Archives)
+    // เปลี่ยนจากคำนวณสดใน db มาเป็นการดึงจากประวัติที่ยืนยันแล้ว
+    const archivedToday = archives.find(a => a.date === todayStr);
+    const settleToday = archivedToday ? Number(archivedToday.settle) : 0;
 
-    let settleToday = 0;
-    // --- ตรรกะ: ถ้าไม่มีงาน ให้เป็น 0 / ถ้ามีงาน ให้เช็กคอมมิชชัน VS ประกัน ---
-    if (todayEntries.length > 0) {
-        const commissionEarn = tTotal * (conf.perc / 100);
-        const baseEarn = (commissionEarn >= conf.guar) ? commissionEarn : Number(conf.guar);
-        const bEarn = baseEarn + tTips;
-        settleToday = tCash - bEarn;
-    } else {
-        settleToday = 0; 
+    // --- อัปเดตตัวเลขลงหน้าจอ ---
+
+    // ยอดค้างเดิม (คือยอดรวมทั้งหมด ลบด้วยยอดของวันนี้)
+    if ($("accOldVal")) {
+        const oldVal = totalBalance - settleToday;
+        $("accOldVal").innerText = `฿${oldVal.toLocaleString()}`;
     }
 
-    if ($("accTodayVal")) $("accTodayVal").innerText = `฿${settleToday.toLocaleString()}`;
+    // ยอดวันนี้ (ดึงมาจากหน้ารายงานที่บันทึกแล้ว)
+    if ($("accTodayVal")) {
+        $("accTodayVal").innerText = `฿${settleToday.toLocaleString()}`;
+    }
 
-    // 3. ยอดรวมสุทธิ
-    const net = oldBalance + settleToday;
-    if ($("accTotalVal")) $("accTotalVal").innerText = `฿${net.toLocaleString()}`;
+    // ยอดรวมสุทธิ (ใช้ค่าจากบัญชีโดยตรง)
+    if ($("accTotalVal")) {
+        $("accTotalVal").innerText = `฿${totalBalance.toLocaleString()}`;
+    }
 
-    // 4. อัปเดตสถานะ Badge และไฟสถานะ
-    updateStatusUI(net);
+    // 4. อัปเดตสถานะสีและข้อความ
+    updateStatusUI(totalBalance);
 }
-
-
 // แยกฟังก์ชัน UI เพื่อความสะอาดของโค้ด
 function updateStatusUI(net) {
     const badge = $("statusBadge");
