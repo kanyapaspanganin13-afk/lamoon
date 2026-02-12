@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V. </title>
+    <title>Barber Note Pro V.9 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -1144,40 +1144,46 @@ if (dList) {
     function loadAccountHistory() {let h = account.logs.map(l => `<div style="padding:15px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;"><div><b style="font-size:14px; color:#1e293b;">${l.date}</b><br><small style="color:#64748b;">${l.note}</small></div><b style="color:${l.amount >= 0 ? '#16a34a' : '#dc2626'};">${l.amount >= 0 ? '+' : ''}฿${Math.abs(l.amount).toLocaleString()}</b></div> `).join('');if($("accHistory")) {$("accHistory").innerHTML = h || '<center style="padding:40px; color:#94a3b8;">ไม่มีประวัติการเคลียร์</center>';}}     
   
    function loadAccountStatus() {
-    // ดึงวันที่จากช่องเลือกวันที่ในหน้ารายงาน (เพื่อให้เลขตรงกัน)
-    const targetDate = document.getElementById("reportDateSelector")?.value || new Date().toISOString().split('T')[0];
-    
-    // แสดงวันที่ในหน้าบัญชี
-    const dateObj = new Date(targetDate);
-    const dateLabel = dateObj.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const now = new Date();
+    const dateLabel = now.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
     if ($("accDateLabel")) $("accDateLabel").innerText = dateLabel;
 
-    // 1. ดึงยอดสะสมสุทธิจากระบบ (ที่บันทึกผ่านปุ่มส่งข้อมูลแล้ว)
-    const currentBalance = Number(account.balance) || 0;
+    // 1. ดึงยอดค้างเดิม
+    const oldBalance = Number(account.balance) || 0;
+    if ($("accOldVal")) $("accOldVal").innerText = `฿${oldBalance.toLocaleString()}`;
 
-    // 2. ดึงยอดของวันที่เลือกจากประวัติ (Archives)
-    const archivedData = archives.find(a => a.date === targetDate);
-    const settleToday = archivedData ? Number(archivedData.settle) : 0;
+    // 2. คำนวณยอดวันนี้
+    const today = now.toISOString().split('T')[0];
+    const todayEntries = db.filter(r => r.date === today && (r.type === 'SERVICE' || r.type === 'GUARANTEE'));
+    
+    let tCash = 0, tTotal = 0, tTips = 0;
+    todayEntries.forEach(r => {
+        tTotal += (Number(r.price) || 0);
+        tTips += (Number(r.tip) || 0);
+        if (r.pay === "Cash") tCash += (Number(r.price) || 0) + (Number(r.tip) || 0);
+    });
 
-    // แสดงยอดค้างเดิม (ยอดก่อนหน้าจะรวมยอดวันนี้)
-    if ($("accOldVal")) {
-        const oldVal = currentBalance - settleToday;
-        $("accOldVal").innerText = `฿${oldVal.toLocaleString()}`;
+    let settleToday = 0;
+    // --- ตรรกะ: ถ้าไม่มีงาน ให้เป็น 0 / ถ้ามีงาน ให้เช็กคอมมิชชัน VS ประกัน ---
+    if (todayEntries.length > 0) {
+        const commissionEarn = tTotal * (conf.perc / 100);
+        const baseEarn = (commissionEarn >= conf.guar) ? commissionEarn : Number(conf.guar);
+        const bEarn = baseEarn + tTips;
+        settleToday = tCash - bEarn;
+    } else {
+        settleToday = 0; 
     }
 
-    // แสดงยอดของวันนี้ (ดึงจากรายงานเป๊ะๆ)
-    if ($("accTodayVal")) {
-        $("accTodayVal").innerText = `฿${settleToday.toLocaleString()}`;
-    }
+    if ($("accTodayVal")) $("accTodayVal").innerText = `฿${settleToday.toLocaleString()}`;
 
-    // 3. ยอดรวมสุทธิ (ใช้ค่าจากบัญชีโดยตรง)
-    if ($("accTotalVal")) {
-        $("accTotalVal").innerText = `฿${currentBalance.toLocaleString()}`;
-    }
+    // 3. ยอดรวมสุทธิ
+    const net = oldBalance + settleToday;
+    if ($("accTotalVal")) $("accTotalVal").innerText = `฿${net.toLocaleString()}`;
 
-    // 4. อัปเดตแสงไฟและป้ายสถานะ
-    updateStatusUI(currentBalance);
+    // 4. อัปเดตสถานะ Badge และไฟสถานะ
+    updateStatusUI(net);
 }
+
 
 // แยกฟังก์ชัน UI เพื่อความสะอาดของโค้ด
 function updateStatusUI(net) {
