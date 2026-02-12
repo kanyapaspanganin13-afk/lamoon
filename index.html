@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V.0 </title>
+    <title>Barber Note Pro V.05 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -1482,83 +1482,10 @@ function loadHistMonth() {
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
     generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats);
 }
-function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats) {
-    // --- 1. เตรียมข้อมูลสำหรับวิเคราะห์ (Logic) ---
-    const weekEntries = Object.entries(weeklyData);
-    const dayStats = {};
-    let dailyTimeline = []; // ประกาศตัวแปรนี้ไว้ด้านบนสุดเพื่อให้ส่วนอื่นเรียกใช้ได้
-
-    // วนลูปเพื่อเก็บข้อมูลรายวันลงใน dailyTimeline และคำนวณสถิติวัน
-    weekEntries.forEach(([wk, data]) => {
-        if (data.dailyCounts) {
-            data.dailyCounts.forEach(d => {
-                dailyTimeline.push(d); // เก็บข้อมูลวันจริงลงใน Timeline
-                const dayName = d.dayName.split(' ')[0]; 
-                if (!dayStats[dayName]) dayStats[dayName] = { total: 0, count: 0 };
-                if (d.count > 0) {
-                    dayStats[dayName].total += d.count;
-                    dayStats[dayName].count += 1;
-                }
-            });
-        }
-    });
-
-    // หาสัปดาห์ที่รายได้สูงสุด
-    const topIncomeWeek = weekEntries.length > 0 
-        ? weekEntries.reduce((prev, curr) => (curr[1].income > prev[1].income ? curr : prev))
-        : null;
-
-    // หาสัปดาห์ที่ลูกค้าเยอะที่สุด
-    const topCustomerWeek = weekEntries.length > 0 
-        ? weekEntries.reduce((prev, curr) => (curr[1].customers > prev[1].customers ? curr : prev))
-        : null;
-
-    const dayAverages = Object.entries(dayStats)
-        .filter(([name, data]) => data.count > 0)
-        .map(([name, data]) => ({ name, avg: data.total / data.count }));
-
-    const busiestDay = dayAverages.sort((a, b) => b.avg - a.avg)[0];
-    const quietestDay = dayAverages.sort((a, b) => a.avg - b.avg)[0];
-
-    // ✅ คำนวณหาช่วงวันที่จริง (แก้ไข Error จากจุดนี้)
-    const dates = dailyTimeline.map(d => d.date).filter(Boolean).sort();
-    const startDate = dates.length > 0 ? dates[0] : "";
-    const endDate = dates.length > 0 ? dates[dates.length - 1] : "";
-
-    const fmt = (dStr) => {
-        if(!dStr) return "";
-        const p = dStr.split('-');
-        return p.length === 3 ? `${p[2]}/${p[1]}` : dStr;
-    };
-
-    const periodLabel = (startDate && endDate) 
-        ? `ช่วงวันที่ ${fmt(startDate)} - ${fmt(endDate)}` 
-        : "ในเดือนนี้";
-
-    // วิเคราะห์พฤติกรรม
-    const maxDailyCount = dailyTimeline.length > 0 ? Math.max(...dailyTimeline.map(d => d.count)) : 0;
-    const behavior = (maxDailyCount > avgCustomerPerDay * 1.5)
-        ? `${periodLabel} มีช่วงที่ลูกค้าเข้ามามากกว่าปกติในบางวัน`
-        : `${periodLabel} ลูกค้าเข้าร้านในระดับใกล้เคียงกัน`;
-    
-    const topHair = Object.entries(hairStats).sort((a,b) => b[1] - a[1])[0];
-    const topService = Object.entries(serviceStats).sort((a,b) => b[1] - a[1])[0];
-
-    // --- 2. สร้าง Array ข้อความสรุป Insights ---
-    const insights = [
-        `เดือนนี้เปิดให้บริการทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
-        `วิเคราะห์พฤติกรรมลูกค้า: ${behavior}`,
-        topIncomeWeek ? `สัปดาห์ที่ทำรายได้สูงสุดคือ <b>${topIncomeWeek[0]}</b>` : `ยังไม่มีข้อมูลรายได้`,
-        topCustomerWeek ? `สัปดาห์ที่มีลูกค้าเยอะที่สุดคือ <b>${topCustomerWeek[0]}</b>` : `ยังไม่มีข้อมูลลูกค้า`,
-        `สถิติรายวัน: ลูกค้าเข้าเยอะใน <b>วัน${busiestDay?.name || '-'}</b> และน้อยใน <b>วัน${quietestDay?.name || '-'}</b>`,
-        `ทรงผมยอดนิยม: <b>${topHair ? topHair[0] : '-'}</b> (บริการยอดนิยม: ${topService ? topService[0] : '-'})`
-    ];
-
-    // --- 3. ส่วนการสร้าง HTML ของแต่ละสัปดาห์ ---
 const weeklyHtml = weekEntries.map(([wk, data]) => {
-    // 1. กำหนดรายได้รวมสัปดาห์
     const weeklyTotalIncome = data.income || 0;
-    // 2. วางทับส่วนคำนวณ sumBarber ที่คุณก๊อปปี้มา (วางตรงนี้)
+    
+    // 1. คำนวณรายได้ช่าง
     let sumBarber = 0;
     if (data.dailyCounts && data.dailyCounts.length > 0) {
         data.dailyCounts.forEach(day => {
@@ -1567,9 +1494,32 @@ const weeklyHtml = weekEntries.map(([wk, data]) => {
     }
     const wBarber = sumBarber;
     const wShop = weeklyTotalIncome - wBarber;
+
+    // 2. สถิติพื้นฐาน
     const avg = data.workDays > 0 ? (data.customers / data.workDays).toFixed(1) : 0;
     const sortedDays = data.dailyCounts ? [...data.dailyCounts].sort((a,b) => b.count - a.count) : [];
     const bestDay = sortedDays.length > 0 && sortedDays[0].count > 0 ? `${sortedDays[0].dayName} (${sortedDays[0].count})` : "-";
+    const worstDay = sortedDays.length > 0 ? `${sortedDays[sortedDays.length-1].dayName} (${sortedDays[sortedDays.length-1].count})` : "-";
+
+    // 🟢 3. ส่วนที่เพิ่ม: คำนวณหาบริการที่ "ยังไม่มีลูกค้า" ในสัปดาห์นี้
+    // ดึงรายการทั้งหมดจาก haircutList (ต้องแน่ใจว่า haircutList ถูกประกาศไว้ใน loadHistMonth หรือเป็น Global)
+    const allHair = ["แฟชั่น","สกินเฟด","เปิดข้าง","รองทรง","ตำรวจ/ทหาร","ทรงนักเรียน","แก้ผม","โกนผม","เด็ก"];
+    const usedHair = Object.keys(data.popularHair || {});
+    const unusedHair = allHair.filter(h => !usedHair.includes(h));
+    
+    // สำหรับบริการอื่นๆ (ถ้ามีรายการอ้างอิงหลัก สามารถเพิ่มได้ ตรงนี้ผมดึงเฉพาะที่บันทึกแล้วแต่เป็น 0)
+    const unusedService = []; 
+
+    // 4. เตรียม Tag ทรงผม/บริการยอดนิยม
+    const popHair = Object.entries(data.popularHair || {})
+        .sort((a,b) => b[1] - a[1]).slice(0, 2)
+        .map(([name, count]) => `<span style="background:rgba(190,242,100,0.1); color:#bef264; padding:2px 8px; border-radius:8px; font-size:10px;">${name} ${count}</span>`)
+        .join("");
+
+    const popService = Object.entries(data.popularService || {})
+        .sort((a,b) => b[1] - a[1]).slice(0, 2)
+        .map(([name, count]) => `<span style="background:rgba(56,189,248,0.1); color:#38bdf8; padding:2px 8px; border-radius:8px; font-size:10px;">${name} ${count}</span>`)
+        .join("");
 
     return `
     <div style="background:#020617; border:1px solid rgba(255,255,255,0.08); padding:14px; border-radius:22px; margin-bottom:12px;">
@@ -1593,89 +1543,34 @@ const weeklyHtml = weekEntries.map(([wk, data]) => {
             </div>
         </div>
 
-          <div style="display:flex; gap:8px; margin-bottom:10px;">
-                <div style="flex:1; background:rgba(255,255,255,0.03); padding:6px 10px; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:11px; color:#94a3b8;">👤 รวม</span>
-                    <span style="font-size:13px; font-weight:700; color:#38bdf8;">${data.customers}</span>
-                </div>
-                <div style="flex:1; background:rgba(255,255,255,0.03); padding:6px 10px; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:11px; color:#94a3b8;">📊 เฉลี่ย</span>
-                    <span style="font-size:13px; font-weight:700; color:#facc15;">${avg}</span>
-                </div>
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+            <div style="flex:1; background:rgba(255,255,255,0.03); padding:6px 10px; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:11px; color:#94a3b8;">👤 รวม</span>
+                <span style="font-size:13px; font-weight:700; color:#38bdf8;">${data.customers}</span>
             </div>
-
-            <div style="font-size:11px; color:#64748b; line-height:1.6; padding:0 4px 10px 4px; border-bottom:1px solid rgba(255,255,255,0.05); margin-bottom:10px;">
-                <div>📈 เยอะที่สุด: <span style="color:#f1f5f9; font-weight:600;">${bestDay}</span></div>
-                <div>📉 น้อยที่สุด: <span style="color:#f1f5f9; font-weight:600;">${worstDay}</span></div>
-                
-                <div style="margin-top:6px; color:#fb7185; border-top:1px dashed rgba(251,113,133,0.2); padding-top:4px;">
-                    🚨 <b>ยังไม่มีบริการ:</b> ${[...unusedHair, ...unusedService].length > 0 ? [...unusedHair, ...unusedService].join(", ") : "บันทึกครบทุกรายการ"}
-                </div>
+            <div style="flex:1; background:rgba(255,255,255,0.03); padding:6px 10px; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:11px; color:#94a3b8;">📊 เฉลี่ย</span>
+                <span style="font-size:13px; font-weight:700; color:#facc15;">${avg}</span>
             </div>
+        </div>
 
-            <div style="display:flex; flex-wrap:wrap; gap:6px;">
-                ${popHair}
-                ${popService}
+        <div style="font-size:11px; color:#64748b; line-height:1.6; padding:0 4px 10px 4px; border-bottom:1px solid rgba(255,255,255,0.05); margin-bottom:10px;">
+            <div>📈 เยอะที่สุด: <span style="color:#f1f5f9; font-weight:600;">${bestDay}</span></div>
+            <div>📉 น้อยที่สุด: <span style="color:#f1f5f9; font-weight:600;">${worstDay}</span></div>
+            
+            <div style="margin-top:6px; color:#fb7185; border-top:1px dashed rgba(251,113,133,0.2); padding-top:4px;">
+                🚨 <b>ยังไม่มีบริการ:</b> ${[...unusedHair, ...unusedService].length > 0 ? [...unusedHair, ...unusedService].join(", ") : "บันทึกครบทุกรายการ"}
             </div>
-        </div>`;
-    }).join("");
+        </div>
 
-
-    
-    // --- 4. แสดงผล Modal ---
-    openReportModal(
-        `สรุปรายงานเดือน ${m}`,
-        `<div style="background:#0f172a; padding:24px; color:#f1f5f9; border-radius:20px; font-family: sans-serif; margin-bottom:50px;">
-            <div style="text-align:center; padding:10px 0 20px 0;">
-                <div style="font-size:16px; color:#94a3b8; font-weight:700; margin-bottom:5px;">✂️ รายได้รวมประจำเดือน</div>
-                <div style="font-size:48px; font-weight:900; color:#ffffff;">฿${monthTotal.toLocaleString()}</div>
-            </div>
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
-                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); padding:15px; border-radius:20px; text-align:center;">
-                    <div style="font-size:11px; color:#94a3b8;">รายได้ช่าง</div>
-                    <div style="font-size:20px; font-weight:800; color:#f8fafc;">฿${Math.floor(monthBarber).toLocaleString()}</div>
-                </div>
-                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); padding:15px; border-radius:20px; text-align:center;">
-                    <div style="font-size:11px; color:#94a3b8;">รายได้ร้าน</div>
-                    <div style="font-size:20px; font-weight:800; color:#f8fafc;">฿${Math.floor(monthTotal - monthBarber).toLocaleString()}</div>
-                </div>
-            </div>
-
-            <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-bottom:25px;">
-                <div style="background:rgba(56,189,248,0.15); padding:6px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#38bdf8;">👤 ลูกค้า ${monthCount} คน</div>
-                <div style="background:rgba(255,255,255,0.08); padding:6px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#f8fafc;">📅 เปิดร้าน ${workDays} วัน</div>
-                <div style="background:rgba(244,63,94,0.15); padding:6px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#fb7185;">🛑 หยุด ${offDays} วัน</div>
-                <div style="background:rgba(250,204,21,0.15); padding:6px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#facc15;">📊 เฉลี่ย ${avgCustomerPerDay.toFixed(2)}</div>
-            </div>
-
-            <div style="margin-bottom:25px;">
-                <div style="font-size:14px; font-weight:800; color:#facc15; margin-bottom:12px;">📅 วิเคราะห์รายสัปดาห์</div>
-                ${weeklyHtml}
-            </div>
-
-            <div style="background:rgba(250,204,21,0.08); border:1px solid rgba(250,204,21,0.25); padding:18px; border-radius:20px; margin-bottom:30px;">
-                <div style="font-size:14px; font-weight:800; color:#facc15; margin-bottom:10px;">💡 วิเคราะห์ภาพรวม</div>
-                ${insights.map(i => `<div style="font-size:13px; color:#f8fafc; margin-bottom:6px;">• ${i}</div>`).join("")}
-            </div>
-
-            <div style="margin-bottom:25px;">
-                <div style="font-size:15px; font-weight:800; color:#bef264; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
-                    <div style="width:4px; height:16px; background:#bef264; border-radius:2px;"></div> ทรงผมยอดนิยม
-                </div>
-                ${renderStats ? renderStats(hairStats, "#bef264") : ""}
-            </div>
-
-            <div style="padding-bottom:20px;">
-                <div style="font-size:15px; font-weight:800; color:#38bdf8; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
-                    <div style="width:4px; height:16px; background:#38bdf8; border-radius:2px;"></div> บริการยอดนิยม
-                </div>
-                ${renderStats ? renderStats(serviceStats, "#38bdf8") : ""}
-            </div>
-        </div>`
-    );
-}
-     function topN(obj, n = 5) {
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+            ${popHair}
+            ${popService}
+        </div>
+    </div>`;
+}).join("");
+     
+function topN(obj, n = 5) {
               if (!obj || Object.keys(obj).length === 0) return [];
               return Object.entries(obj)
                 .filter(([_, count]) => count > 0)
