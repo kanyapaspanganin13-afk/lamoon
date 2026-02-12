@@ -1335,10 +1335,18 @@ function loadAccountStatus() {
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
 
-    // 1. ดึงยอดเงินจากตัวแปรบัญชีโดยตรง (ยอดนี้จะเป็น 0 ถ้าคุณเคลียร์แล้ว)
-    let currentBalance = Number(account.balance) || 0;
+    // 1. คำนวณยอดเงินจากประวัติการทำรายการ (Logs) 
+    // เพื่อให้ยอดบันทึกใหม่ (เช่น ถอน/จ่าย) ถูกนำมาหักลบจริงๆ
+    let totalLogs = 0;
+    if (account.logs && account.logs.length > 0) {
+        totalLogs = account.logs.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
+    }
 
-    // 2. หาเฉพาะยอดของ "วันนี้" (เพื่อโชว์ให้รู้ว่าวันนี้มีรายได้เท่าไหร่)
+    // ยอดรวมสุทธิในบัญชีตอนนี้ (จะดึงค่าจากยอด balance ที่บันทึกไว้ล่าสุด)
+    // หากมีการบันทึก Log ใหม่ ยอดนี้จะเปลี่ยนตาม
+    let currentBalance = totalLogs; 
+
+    // 2. หาเฉพาะยอดของ "วันนี้" (โชว์เพื่อให้รู้ว่าวันนี้ทำเงินได้เท่าไหร่)
     let todaySettle = 0;
     if (Array.isArray(archives)) {
         const todayData = archives.find(item => item.date === todayStr);
@@ -1346,18 +1354,26 @@ function loadAccountStatus() {
             todaySettle = Number(todayData.settle || todayData.barber || 0);
         }
     }
-    // 3. แสดงผลหน้าจอ (ยอดจะขึ้นตามที่บัญชีมีจริง ไม่มีการไปบวกประวัติเก่า)
+
+    // 3. แสดงผลหน้าจอ
     if (getEl("accDateLabel")) getEl("accDateLabel").innerText = now.toLocaleDateString('th-TH'); 
-    // ยอดวันนี้ (ถ้าวันนี้ยังไม่ได้ปิดยอด ก็จะเป็น 0)
+    
+    // ยอดวันนี้: ดึงจาก Archives วันนี้ตรงๆ
     if (getEl("accTodayVal")) getEl("accTodayVal").innerText = `฿${todaySettle.toLocaleString()}`;
-    // ยอดค้างเก่า (ถ้าเคลียร์เงินหมดแล้ว ส่วนนี้ต้องเป็น 0)
+    
+    // ยอดรวมสุทธิ: จะเป็นยอดที่หักลบรายการใหม่ๆ แล้ว (จาก Logs ทั้งหมด)
+    if (getEl("accTotalVal")) getEl("accTotalVal").innerText = `฿${currentBalance.toLocaleString()}`;
+    
+    // ยอดค้างเก่า: คือ ยอดทั้งหมด ลบด้วยยอดที่หาได้จากของวันนี้
     if (getEl("accOldVal")) {
         const oldVal = currentBalance - todaySettle;
         getEl("accOldVal").innerText = `฿${(oldVal < 0 ? 0 : oldVal).toLocaleString()}`;
     }
-    // ยอดรวมสุทธิ (ถ้าคุณเคลียร์แล้ว ตรงนี้จะเป็น ฿0 แน่นอนครับ)
-    if (getEl("accTotalVal")) getEl("accTotalVal").innerText = `฿${currentBalance.toLocaleString()}`;
-     if (typeof updateStatusUI === "function") updateStatusUI(currentBalance);
+
+    // อัปเดตค่ากลับไปที่ตัวแปรหลักเพื่อให้ระบบอื่นจำค่าที่ถูกต้อง
+    account.balance = currentBalance;
+
+    if (typeof updateStatusUI === "function") updateStatusUI(currentBalance);
 }
 // แยกฟังก์ชัน UI
 function updateStatusUI(net) {
