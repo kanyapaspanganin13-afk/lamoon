@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V.1 </title>
+    <title>Barber Note Pro V.12 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -1076,8 +1076,14 @@ if (dList) {
                     location.reload();
                 }
             }
-   function saveAndGo(date, total) {
+  // 1. ฟังก์ชันคำนวณและบันทึกข้อมูล (ปรับปรุงให้กดบันทึกได้แน่นอน)
+function saveAndGo(date, total) {
     const allToday = db.filter(r => r.date === date);
+    if (allToday.length === 0) {
+        alert("⚠️ ไม่พบข้อมูลที่จะบันทึกครับ");
+        return;
+    }
+
     const todayData = allToday.filter(r => r.type === 'SERVICE' || r.type === 'GUARANTEE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
     
@@ -1085,42 +1091,32 @@ if (dList) {
     const extraSvcs = ["โกนหนวด", "กันหน้า", "สระผม"];
 
     todayData.forEach(r => {
-        const p = Number(r.price) || 0, 
-              t = Number(r.tip) || 0;
-        
+        const p = Number(r.price) || 0, t = Number(r.tip) || 0;
         tips += t;
-
-        // แยกการเก็บเงินให้ชัดเจน
+        
+        // แยกยอดเงินสดและเงินโอน (รองรับแบบจ่ายผสม Mix)
         if (r.pay === "Cash") {
-            // ถ้าจ่ายเงินสด: เงินสดเข้าระบบ = ราคา + ทิป (เพราะช่างถือไว้ทั้งหมด)
             cash += (p + t);
         } else if (r.pay === "Trans" || r.pay === "โอน") {
-            // ถ้าโอน: เงินโอนเข้าระบบ = ราคา + ทิป (เพราะโอนเข้าร้านทั้งหมด)
             trans += (p + t);
         } else if (r.pay === "Mix") {
-            // ถ้าจ่ายผสม: ดึงค่าจาก payCash และ payTrans ที่ระบุไว้
             cash += (Number(r.payCash) || 0);
             trans += (Number(r.payTrans) || 0);
+        } else {
+            // กรณีอื่นๆ ให้ถือเป็น Cash ไว้ก่อนเพื่อความปลอดภัย
+            cash += p;
         }
 
-        // เก็บสถิติการทำงาน
         const svcs = Array.isArray(r.svcs) ? r.svcs : [r.svcs];
         if (r.type !== 'GUARANTEE') {
             const isRealCut = svcs.some(s => s && !extraSvcs.includes(s));
             if (isRealCut) count++;
-            svcs.forEach(s => { 
-                if(s) stats[s] = (stats[s] || 0) + 1; 
-            });
+            svcs.forEach(s => { if(s) stats[s] = (stats[s] || 0) + 1; });
         }
     });
 
-    // --- คำนวณรายได้ (รายได้ช่างรวมทิปเสมอ) ---
     const bEarn = isHoliday ? 0 : Math.max(total * (conf.perc / 100), conf.guar) + tips;
-    
-    // ยอดที่ต้องเคลียร์ (Settle): เงินสดในมือช่าง ลบด้วย รายได้ที่ช่างควรได้รับ
-    // ค่าติดลบ (-) = ร้านคืนช่าง | ค่าเป็นบวก (+) = ช่างคืนร้าน
     const settle = isHoliday ? 0 : cash - bEarn;
-
     const idx = archives.findIndex(a => a.date === date);
 
     const data = {
@@ -1134,24 +1130,40 @@ if (dList) {
         off: isHoliday,
         type: isHoliday ? "HOLIDAY" : "WORK"
     };
-    // --- ส่วนจัดการยอดสะสม (Balance) ---
+
+    // จัดการยอดสะสม
     if (idx > -1) {
-        // แก้ไข: เอาค่าใหม่ลบค่านเดิม เพื่อหา "ส่วนต่าง" ไปปรับ balance
-        const oldSettle = Number(archives[idx].settle) || 0;
-        account.balance = (Number(account.balance) || 0) + (settle - oldSettle);
+        account.balance = (Number(account.balance) || 0) + (settle - (archives[idx].settle || 0));
         archives[idx] = data;
     } else {
-        // บันทึกใหม่
         account.balance = (Number(account.balance) || 0) + settle;
         archives.push(data);
     }
+
     db = db.filter(r => r.date !== date);
-    save();
+    save(); // บันทึกข้อมูลลงเครื่อง
+
+    // อัปเดตหน้าบัญชี
     if (typeof loadAccountStatus === "function") {
         loadAccountStatus();
     }
+    
     alert("✅ บันทึกยอดเรียบร้อย!");
-    go(3); 
+    go(3); // ไปหน้าบัญชี
+}
+// 2. ฟังก์ชันแสดงผลหน้าบัญชี (แก้ไขจุดที่ทำให้ระบบค้าง)
+function loadAccountStatus() {
+    const now = new Date();
+    const dateLabel = now.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    if (document.getElementById("accDateLabel")) document.getElementById("accDateLabel").innerText = dateLabel;
+
+    const currentBalance = Number(account.balance) || 0;
+    if (document.getElementById("accTotalVal")) document.getElementById("accTotalVal").innerText = `฿${currentBalance.toLocaleString()}`;
+
+    // แสดงยอดสะสมเดิมในช่อง Old Value
+    if (document.getElementById("accOldVal")) document.getElementById("accOldVal").innerText = `฿${currentBalance.toLocaleString()}`;
+
+    updateStatusUI(currentBalance);
 }
     function toggleAccHistory() {const w = $("accHistoryWrapper"); w.style.display = w.style.display === "none" ? "block" : "none";$("accHistory").innerHTML = account.logs.map(l => `<div style="padding:5px; border-bottom:1px solid #eee;">${l.date}: ฿${l.amount} (${l.note})</div>`).join('') || "ไม่มีประวัติ";}    
     function loadAccountHistory() {let h = account.logs.map(l => `<div style="padding:15px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;"><div><b style="font-size:14px; color:#1e293b;">${l.date}</b><br><small style="color:#64748b;">${l.note}</small></div><b style="color:${l.amount >= 0 ? '#16a34a' : '#dc2626'};">${l.amount >= 0 ? '+' : ''}฿${Math.abs(l.amount).toLocaleString()}</b></div> `).join('');if($("accHistory")) {$("accHistory").innerHTML = h || '<center style="padding:40px; color:#94a3b8;">ไม่มีประวัติการเคลียร์</center>';}}     
