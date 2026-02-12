@@ -9,18 +9,95 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro2</title>
+    <title>Barber Note Pro42</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script>
-        if ("serviceWorker" in navigator) {
-            window.addEventListener("load", () => {
-                navigator.serviceWorker.register("./service-worker.js")
-                    .then(reg => console.log("✅ ระบบออฟไลน์พร้อมใช้งาน!"))
-                    .catch(err => console.error("❌ SW error:", err));
-            });
-        }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // 1. ตัวช่วยดึง ID แบบสั้น
+    const $ = id => document.getElementById(id);
+    // 2. ฟังก์ชันเรียกปฏิทินเลือก 2 ช่วงวันที่
+    async function openComparisonSelector() {
+        const { value: v } = await Swal.fire({
+            title: '📊 เปรียบเทียบข้อมูล',
+            background: 'var(--card)',
+            color: 'var(--text)',
+            confirmButtonText: 'วิเคราะห์ข้อมูล',
+            confirmButtonColor: 'var(--accent)',
+            html: `
+                <div style="text-align: left; font-family: 'Kanit', sans-serif; font-size: 14px;">
+                    <p style="margin: 0 0 5px 0; color: #64748b;">📅 ช่วงที่ 1 (ตัวตั้ง)</p>
+                    <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                        <input id="s1" type="date" class="swal2-input" style="flex:1; margin:0; height:45px; font-size:14px; border-radius:12px;">
+                        <input id="e1" type="date" class="swal2-input" style="flex:1; margin:0; height:45px; font-size:14px; border-radius:12px;">
+                    </div>
+                    <p style="margin: 0 0 5px 0; color: #64748b;">📅 ช่วงที่ 2 (ตัวเทียบ)</p>
+                    <div style="display: flex; gap: 8px;">
+                        <input id="s2" type="date" class="swal2-input" style="flex:1; margin:0; height:45px; font-size:14px; border-radius:12px;">
+                        <input id="e2" type="date" class="swal2-input" style="flex:1; margin:0; height:45px; font-size:14px; border-radius:12px;">
+                    </div>
+                </div>
+            `,
+            preConfirm: () => ({ s1: $('s1').value, e1: $('e1').value, s2: $('s2').value, e2: $('e2').value })
+        });
+
+        if (v && v.s1 && v.e1 && v.s2 && v.e2) renderComparisonReport(v);
+    }
+    // 3. ฟังก์ชันประมวลผลข้อมูลและสร้าง UI รายบรรทัด
+    function renderComparisonReport(v) {
+        // ดึงข้อมูลจากตัวแปรหลัก (เปลี่ยนชื่อ allRecords ให้ตรงกับตัวแปรที่เก็บข้อมูลจริงของคุณ)
+        const fetchStats = (start, end) => {
+            const list = (typeof allRecords !== 'undefined' ? allRecords : []).filter(d => d.date >= start && d.date <= end);
+            const sumC = list.reduce((a, b) => a + Number(b.count || 0), 0);
+            const sumE = list.reduce((a, b) => a + Number(b.barberEarn || 0), 0);
+            const rowList = list.map(d => `
+                <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f1f5f9; font-size:13px; color:#1e293b;">
+                    <span style="flex:1.5;">• ${d.date}</span>
+                    <span style="flex:1; text-align:center; color:#0284c7;">👤 ${d.count}</span>
+                    <span style="flex:1; text-align:right; font-weight:700; color:#10b981;">฿${Number(d.barberEarn).toLocaleString()}</span>
+                </div>`).join("");
+            return { sumC, sumE, rowList, range: `${start} ถึง ${end}` };
+        };
+
+        const d1 = fetchStats(v.s1, v.e1);
+        const d2 = fetchStats(v.s2, v.e2);
+
+        const reportHtml = `
+            <div style="font-family:'Kanit',sans-serif; text-align:left; color:#1e293b;">
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:20px; padding:15px; margin-bottom:12px;">
+                    <small style="color:#64748b;">📅 ${d1.range}</small>
+                    <div style="font-size:16px; font-weight:800; margin:5px 0;">👤 ${d1.sumC} คน | <span style="color:#10b981;">฿${d1.sumE.toLocaleString()}</span></div>
+                    <div style="max-height:120px; overflow-y:auto; -webkit-overflow-scrolling:touch; border-top:1px dashed #cbd5e1; padding-top:5px;">
+                        ${d1.rowList || '<center style="padding:10px; color:#94a3b8;">ไม่มีข้อมูล</center>'}
+                    </div>
+                </div>
+                <div style="text-align:center; color:#cbd5e1; font-weight:900; margin:5px 0;">VS</div>
+                <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:20px; padding:15px;">
+                    <small style="color:#0369a1;">📅 ${d2.range}</small>
+                    <div style="font-size:16px; font-weight:800; margin:5px 0;">👤 ${d2.sumC} คน | <span style="color:#10b981;">฿${d2.sumE.toLocaleString()}</span></div>
+                    <div style="max-height:120px; overflow-y:auto; -webkit-overflow-scrolling:touch; border-top:1px dashed #bae6fd; padding-top:5px;">
+                        ${d2.rowList || '<center style="padding:10px; color:#94a3b8;">ไม่มีข้อมูล</center>'}
+                    </div>
+                </div>
+            </div>`;
+
+        openReportModal("สรุปเปรียบเทียบเชิงลึก", reportHtml);
+    }
+    // 4. ฟังก์ชันเปิด Modal พร้อมสไตล์ที่ชัดเจน
+    function openReportModal(title, htmlContent) {
+        const modal = $('reportModal'), titleEl = $('reportTitle'), contentEl = $('reportContent');
+        if (!modal) return;
+        titleEl.innerText = title;
+        contentEl.innerHTML = htmlContent;
+        const inner = contentEl.parentElement;
+        Object.assign(inner.style, {
+            width: "95%", maxWidth: "500px", maxHeight: "85vh", overflowY: "auto",
+            webkitOverflowScrolling: "touch", borderRadius: "25px", padding: "20px", background: "#ffffff"
+        });
+        modal.style.display = "flex";
+    }
+</script>
 </head>
 <style>
     /* 1. ตัวแปรหลัก */
@@ -1675,145 +1752,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         </div>`
     );
 }
-function topN(obj, n = 5) {
-              if (!obj || Object.keys(obj).length === 0) return [];
-              return Object.entries(obj)
-                .filter(([_, count]) => count > 0)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, n);
-            }
-              function confirmShareLine() {
-              const m = $("histMonth").value;
-              if (!m) return alert("กรุณาเลือกเดือน");
-            
-              if (confirm(`คุณต้องการแชร์รายงานประจำเดือน ${m} เข้าสู่ LINE ใช่ไหม?`)) {
-                shareLineMonth();
-              }
-            }
-            
-// 1. ฟังก์ชันวิเคราะห์ภาพรวม (เพิ่ม Logic วันหยุดที่ละเอียดขึ้น)
-function buildMonthlyComments(data) {
-    const { weekly, monthHair, monthSvc, avgPerDay, workDays, monthKey } = data;
-    const comments = [];
-
-    // --- ส่วนวิเคราะห์วันหยุด (Calendar Logic) ---
-    const [year, month] = monthKey.split('-').map(Number);
-    const daysInMonth = new Date(year, month, 0).getDate(); 
-    const offDaysCount = daysInMonth - workDays;
-    
-    // หาวันหยุดประจำสัปดาห์ (วันไหนที่ไม่เคยมีการบันทึกข้อมูลเลย)
-    const dayNames = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
-    const workedWeekdays = new Set();
-    Object.values(weekly).forEach(w => {
-        w.days.forEach(dateStr => workedWeekdays.add(new Date(dateStr).getDay()));
-    });
-    const regularOffDays = dayNames.filter((name, index) => !workedWeekdays.has(index));
-
-    // ข้อความสรุปวันหยุด (สุภาพ)
-    let holidayMsg = `เดือนนี้หยุดรวม ${offDaysCount} วัน`;
-    if (regularOffDays.length > 0 && offDaysCount > 0) {
-        holidayMsg += ` (หยุดประจำวัน${regularOffDays.join("/")})`;
-    }
-    comments.push(holidayMsg);
-
-    // --- วิเคราะห์พฤติกรรมลูกค้า ---
-    let maxDaily = 0;
-    Object.values(weekly).forEach(w => {
-        Object.values(w.daily).forEach(count => { if (count > maxDaily) maxDaily = count; });
-    });
-    const behavior = (maxDaily > avgPerDay * 1.5)
-        ? 'สัปดาห์นี้มีบางช่วงลูกค้าหนาแน่นเป็นพิเศษ'
-        : 'ปริมาณลูกค้าสม่ำเสมอ รักษาระดับได้ดีเยี่ยม';
-    comments.push(`พฤติกรรม: ${behavior}`);
-
-    // --- วันที่ลูกค้าเยอะที่สุด ---
-    const dayTotals = {};
-    Object.values(weekly).forEach(w => {
-        Object.entries(w.daily).forEach(([day, count]) => { dayTotals[day] = (dayTotals[day] || 0) + count; });
-    });
-    const busiestDay = Object.entries(dayTotals).sort((a, b) => b[1] - a[1])[0];
-    if (busiestDay) comments.push(`วันยอดนิยม: "วัน${busiestDay[0]}" มีลูกค้ามาใช้บริการมากที่สุด`);
-
-    return comments;
-}
-
-// 2. ฟังก์ชันส่ง LINE (แสดงผลวันหยุดชัดเจน)
-function shareLineMonth() {
-    const m = $("histMonth").value;
-    if (!m) return alert("กรุณาเลือกเดือน");
-
-    const records = archives.filter(r => r.date && r.date.startsWith(m));
-    if (!records.length) return alert("ไม่พบข้อมูลเดือนนี้");
-
-    const shopName = $("setShop").value || "Barber Shop";
-    let total = 0, barberEarn = 0, clientCount = 0;
-    let weekly = {}, monthHair = {}, monthSvc = {};
-    const workDaysCount = records.length;
-
-    // Logic จัดกลุ่มข้อมูล
-    const weekOfMonth = d => Math.ceil((new Date(d).getDate()) / 7);
-    const weekdayTH = d => ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"][new Date(d).getDay()];
-
-    records.forEach(r => {
-        const w = weekOfMonth(r.date);
-        const day = weekdayTH(r.date);
-        total += Number(r.total) || 0;
-        barberEarn += Number(r.barber) || 0;
-        let dayCust = r.details ? r.details.length : 1;
-        clientCount += dayCust;
-
-        if (!weekly[w]) {
-            weekly[w] = { customers: 0, days: new Set(), daily: {}, hair: {}, service: {} };
-        }
-        weekly[w].customers += dayCust;
-        weekly[w].days.add(r.date);
-        weekly[w].daily[day] = (weekly[w].daily[day] || 0) + dayCust;
-
-        (r.details || []).forEach(d => {
-            (d.svcs || []).forEach(s => {
-                if(!s) return;
-                const haircutList = ["แฟชั่น","สกินเฟด","เปิดข้าง","รองทรง","ตำรวจ/ทหาร","ทรงนักเรียน","แก้ผม","โกนผม","เด็ก"];
-                if(haircutList.includes(s.trim())) { monthHair[s] = (monthHair[s]||0)+1; } 
-                else { monthSvc[s] = (monthSvc[s]||0)+1; }
-            });
-        });
-    });
-
-    const shopEarn = total - barberEarn;
-    const avgPerDay = workDaysCount > 0 ? (clientCount / workDaysCount) : 0;
-    
-    // เรียกใช้ AI Comments พร้อมส่ง monthKey ไปคำนวณวันหยุด
-    const aiComments = buildMonthlyComments({ 
-        weekly, monthHair, monthSvc, avgPerDay, workDays: workDaysCount, monthKey: m 
-    });
-
-    const msg = `
-💈 รายงาน: ${shopName}
-📅 ประจำเดือน: ${m}
-
-💰 สรุปรายได้:
-✂️ ยอดรวม: ฿${total.toLocaleString()}
-🤵 รายได้ช่าง: ฿${Math.floor(barberEarn).toLocaleString()}
-🏠 รายได้ร้าน: ฿${Math.floor(shopEarn).toLocaleString()}
-
-📊 สถิติการทำงาน:
-👤 ลูกค้าทั้งหมด: ${clientCount} คน
-📅 วันทำงาน: ${workDaysCount} วัน
-😴 วันหยุด: ${new Date(m.split('-')[0], m.split('-')[1], 0).getDate() - workDaysCount} วัน
-📈 เฉลี่ย: ${avgPerDay.toFixed(2)} คน/วัน
-
-📝 วิเคราะห์ภาพรวม:
-${aiComments.map(c => `• ${c}`).join("\n")}
-
-🏆 บริการยอดนิยม:
-${Object.entries(monthSvc).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>`• ${k} (${v} ครั้ง)`).join("\n") || "-"}
-
-💡 สรุปโดยระบบจัดการร้าน Barber
-`.trim();
-
-    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(msg)}`;
-    location.href = lineUrl;
-}
 function shareLine() {
     const dInp = $("dateInp").value, today = db.filter(r => r.date === dInp); 
     if (!today.length) return;
@@ -1828,7 +1766,6 @@ function shareLine() {
         tot += p; 
         tips += t;
         r.pay === 'Trans' ? trans += (p + t) : cash += p; // แก้ให้โอนรวมทิปตามตรรกะร้าน
-
         // 🚨 เช็คว่าใช่งานจริงหรือไม่ (ไม่นับประกัน/วันหยุด/ยอด0)
         if (rType !== 'GUARANTEE' && rType !== 'HOLIDAY' && p > 0) {
             realCustomerCount++;
