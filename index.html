@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 9 </title>
+    <title>Barber Note Pro </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -643,18 +643,108 @@ nav {
             function closeReportModal() {
                 $("reportModal").style.display = "none";
             }
-              function openHistoryModal() { 
-                $("historyModal").style.display = "flex"; 
-                if (typeof renderHistoryList === "function") {
-                    renderHistoryList(); 
-                } else { 
-                    console.error("ไม่พบฟังก์ชัน renderHistoryList ในระบบ");
-                }
-            }
-            function closeHistoryModal() { 
-                $("historyModal").style.display = "none"; 
-            }
+ // 1. ฟังก์ชันเปิด/ปิด Modal (ของเดิมของคุณ)
+function openHistoryModal() { 
+    $("historyModal").style.display = "flex"; 
+    if (typeof renderHistoryList === "function") {
+        renderHistoryList(); 
+    } else { 
+        console.error("ไม่พบฟังก์ชัน renderHistoryList ในระบบ");
+    }
+}
 
+function closeHistoryModal() { 
+    $("historyModal").style.display = "none"; 
+}
+
+// 2. ฟังก์ชันวาดรายการแบบแยกแฟ้มรายเดือน (ปรับปรุงใหม่)
+function renderHistoryList() {
+    if (!account.logs || account.logs.length === 0) {
+        $("accHistory").innerHTML = '<center style="padding:50px; color:#94a3b8; font-size:15px;">ไม่มีประวัติการเคลียร์ครับ</center>';
+        return;
+    }
+
+    const groups = {};
+    account.logs.forEach((log, index) => {
+        // แยกเดือนและปีเพื่อจัดแฟ้ม (รองรับทั้งรูปแบบ - และ /)
+        const dateParts = log.date.includes('-') ? log.date.split('-') : log.date.split('/');
+        let m = dateParts[1];
+        let y = dateParts[0].length === 4 ? parseInt(dateParts[0]) + 543 : dateParts[2];
+        const monthYear = `${m}/${y}`;
+
+        if (!groups[monthYear]) groups[monthYear] = [];
+        groups[monthYear].push({ ...log, originalIndex: index });
+    });
+    // เรียงเดือนล่าสุดขึ้นก่อน
+    const sortedMonths = Object.keys(groups).sort((a, b) => b.split('/').reverse().join().localeCompare(a.split('/').reverse().join()));
+
+    let finalHtml = "";
+    sortedMonths.forEach(my => {
+        const monthLogs = groups[my];
+        const monthSum = monthLogs.reduce((s, l) => s + (parseFloat(l.amount) || 0), 0);
+
+        finalHtml += `
+            <details style="margin-bottom:12px; border:1px solid #e2e8f0; border-radius:18px; overflow:hidden; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,0.02);" open>
+                <summary style="padding:15px; background:#f8fafc; cursor:pointer; display:flex; justify-content:space-between; align-items:center; list-style:none; border-bottom:1px solid #f1f5f9;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:18px;">📂</span>
+                        <b style="font-size:15px; color:#1e293b;">แฟ้มเดือน ${my}</b>
+                    </div>
+                    <b style="color:${monthSum >= 0 ? '#16a34a' : '#dc2626'}; font-size:15px;">฿${monthSum.toLocaleString()}</b>
+                </summary>
+                <div style="padding:5px;">
+                    ${monthLogs.reverse().map(l => `
+                        <div style="padding:12px 10px; border-bottom:1px solid #f8fafc; display:flex; justify-content:space-between; align-items:center;">
+                            <div style="flex:1;">
+                                <div style="font-size:12px; color:#94a3b8; margin-bottom:2px;">📅 ${l.date}</div>
+                                <div style="font-weight:600; color:#334155; font-size:14px;">${l.note || 'เคลียร์ยอดค้าง'}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="color:${l.amount >= 0 ? '#16a34a' : '#dc2626'}; font-weight:800; font-size:16px; margin-bottom:5px;">
+                                    ${l.amount >= 0 ? '+' : ''}${Math.abs(l.amount).toLocaleString()}
+                                </div>
+                                <div style="display:flex; gap:5px; justify-content:flex-end;">
+                                    <button onclick="editAccountLog(${l.originalIndex})" style="background:#fffbeb; color:#92400e; border:none; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; cursor:pointer;">แก้ไข</button>
+                                    <button onclick="deleteAccountLog(${l.originalIndex})" style="background:#fff1f2; color:#be123c; border:none; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; cursor:pointer;">ลบ</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </details>
+        `;
+    });
+
+    $("accHistory").innerHTML = finalHtml;
+}
+// 3. ฟังก์ชันลบ (Delete)
+function deleteAccountLog(index) {
+    if (confirm("⚠️ คุณต้องการลบประวัตินี้ใช่หรือไม่?\nยอดเงินรวมจะถูกคำนวณใหม่ตามรายการที่เหลืออยู่ครับ")) {
+        account.logs.splice(index, 1);
+        if (typeof save === "function") save();
+        alert("ลบข้อมูลเรียบร้อยแล้วครับ");
+        renderHistoryList();
+        if (typeof loadAccountStatus === "function") loadAccountStatus();
+    }
+}
+// 4. ฟังก์ชันแก้ไข (Edit - ของเดิมที่ปรับจูนแล้ว)
+function editAccountLog(index) {
+    let l = account.logs[index];
+    const newNote = prompt("📝 แก้ไขหมายเหตุ:", l.note);
+    const newAmount = prompt("💰 แก้ไขจำนวนเงิน:", Math.abs(l.amount));
+    
+    if (newNote !== null && newAmount !== null) {
+        const isNegative = l.amount < 0;
+        const val = parseFloat(newAmount.replace(/,/g, '')) || 0;
+        account.logs[index].note = newNote;
+        account.logs[index].amount = isNegative ? -val : val;
+        
+        if (typeof save === "function") save();
+        alert("✅ แก้ไขข้อมูลเรียบร้อย");
+        renderHistoryList();
+        if (typeof loadAccountStatus === "function") loadAccountStatus();
+    }
+}            
 function confirmDeleteDaily(dateStr) {
     const isConfirm = confirm(`ขออนุญาตยืนยันการลบข้อมูล\n\nคุณต้องการลบข้อมูลทั้งหมดของวันที่ ${dateStr} ใช่หรือไม่?\n(ข้อมูลที่ลบแล้วจะไม่สามารถกู้คืนได้)`);
     
@@ -1316,56 +1406,7 @@ function updateStatusUI(net) {
                 loadAccountHistory(); 
                 loadAccountStatus();  
             }
-            function renderHistoryList() {
-                // 1. ตรวจสอบว่ามีข้อมูลหรือไม่
-                if (!account.logs || account.logs.length === 0) {
-                    $("accHistory").innerHTML = '<center style="padding:50px; color:#94a3b8; font-size:15px;">ไม่มีประวัติการเคลียร์ครับ</center>';
-                    return;
-                }
-                let h = "";
-                for (let i = account.logs.length - 1; i >= 0; i--) {
-                    let l = account.logs[i];
-                    h += `
-                        <div style="padding:20px 15px; border-bottom:1px solid #e2e8f0; background:#ffffff; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-radius:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                            <div style="flex: 1;">
-                                <b style="font-size:17px; color:#0f172a; display:block; margin-bottom:5px;">📅 ${l.date}</b>
-                                <span style="color:#475569; font-size:15px; font-weight:500;">📌 ${l.note || 'เคลียร์ยอดค้าง'}</span>
-                            </div>
-                            <div style="text-align:right; min-width:120px;">
-                                <b style="color:${l.amount >= 0 ? '#16a34a' : '#dc2626'}; font-size:20px; display:block; margin-bottom:10px;">
-                                    ฿${Math.abs(l.amount).toLocaleString()}
-                                </b>
-                                
-                                <button onclick="editAccountLog(${i})" style="background:#fef3c7; color:#92400e; border:1px solid #fcd34d; border-radius:10px; padding:10px 20px; font-size:14px; font-weight:800; cursor:pointer; width:100%;">
-                                    <i class="fas fa-edit"></i> แก้ไข
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                $("accHistory").innerHTML = h;
-            }
-            // ฟังก์ชันสำหรับแก้ไขประวัติการเคลียร์เงิน
-            function editAccountLog(index) {
-                let l = account.logs[index];
-                const newNote = prompt("📝 แก้ไขหมายเหตุ:", l.note);
-                const newAmount = prompt("💰 แก้ไขจำนวนเงิน:", Math.abs(l.amount));
-                if (newNote !== null && newAmount !== null) {
-                    const isNegative = l.amount < 0;
-                    const val = parseFloat(newAmount.replace(/,/g, '')) || 0;
-                    account.logs[index].note = newNote;
-                    account.logs[index].amount = isNegative ? -val : val;
-                    if (typeof save === "function") {
-                        save();
-                    }
-                    alert("✅ แก้ไขข้อมูลและบันทึกเรียบร้อย");
-                    renderHistoryList();
-                    if (typeof loadAccountStatus === "function") {
-                        loadAccountStatus();
-                    }
-                }
-            }
+ 
     function loadHistDaily() {
     const d = $("histDate").value;
     if (!d) return;
