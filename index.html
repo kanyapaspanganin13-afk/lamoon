@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V.06 </title>
+    <title>Barber Note Pro V.16 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -1078,105 +1078,80 @@ if (dList) {
             }
    function saveAndGo(date, total) {
     const allToday = db.filter(r => r.date === date);
-    if (allToday.length === 0) {
-        alert("⚠️ ไม่พบข้อมูลที่จะบันทึกครับ");
-        return;
-    }
+    if (allToday.length === 0) return alert("⚠️ ไม่พบข้อมูล");
 
-    const todayData = allToday.filter(r => r.type === 'SERVICE' || r.type === 'GUARANTEE');
+    const todayData = allToday.filter(r => r.type === 'SERVICE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
-    let cash = 0, trans = 0, tips = 0, count = 0, stats = {};
-    const extraSvcs = ["โกนหนวด", "กันหน้า", "สระผม"];
-
+    
+    let cash = 0, tips = 0, trans = 0;
+    
     todayData.forEach(r => {
         const p = Number(r.price) || 0, t = Number(r.tip) || 0;
         tips += t;
-        
-        // แยกยอดเงินสดและเงินโอน (รวมทิปเข้ากับวิธีที่ลูกค้าจ่าย)
-        if (r.pay === "Cash" || r.pay === "cash") {
-            cash += (p + t);
-        } else {
-            trans += (p + t);
-        }
-
-        // เก็บสถิติช่าง
-        const svcs = Array.isArray(r.svcs) ? r.svcs : [r.svcs];
-        if (r.type !== 'GUARANTEE') {
-            const isRealCut = svcs.some(s => s && !extraSvcs.includes(s));
-            if (isRealCut) count++;
-            svcs.forEach(s => { if(s) stats[s] = (stats[s] || 0) + 1; });
-        }
+        if (r.pay === "Cash") { cash += (p + t); } 
+        else if (r.pay === "Trans") { trans += (p + t); }
+        else if (r.pay === "Mix") { cash += Number(r.payCash) || 0; trans += Number(r.payTrans) || 0; }
     });
 
-    // คำนวณรายได้ช่าง (ใช้สูตรเดียวกับหน้ารายงาน)
-    const bEarn = isHoliday ? 0 : Math.max(total * (conf.perc / 100), conf.guar) + tips;
+    // 💰 ตรรกะ: เลือกค่าที่มากกว่าระหว่าง (ส่วนแบ่ง %) กับ (ประกันรายได้)
+    const commission = total * (conf.perc / 100);
+    const baseEarn = Math.max(commission, Number(conf.guar)); 
+    
+    // รายได้ช่าง = (ค่าแรงที่เลือกแล้ว) + ทิปทั้งหมด
+    const bEarn = isHoliday ? 0 : baseEarn + tips;
+    
+    // Settle = เงินสดในมือช่าง - รายได้ที่ควรได้
     const settle = isHoliday ? 0 : cash - bEarn;
-    const idx = archives.findIndex(a => a.date === date);
 
     const data = {
-        date,
-        total: Number(total),
-        cash, trans, tips,
+        date, total, cash, trans, tips,
         barber: Math.floor(bEarn),
-        shop: isHoliday ? 0 : total - (bEarn - tips),
-        settle, count, stats,
-        details: allToday,
-        off: isHoliday,
+        settle: settle, // ยอดนี้คือยอดสุทธิที่ต้องใช้เคลียร์
         type: isHoliday ? "HOLIDAY" : "WORK"
     };
-    // บันทึกเข้าประวัติ
-    if (idx > -1) {
-        archives[idx] = data;
-    } else {
-        archives.push(data);
-    }
-    // ล้างหน้าบันทึกและเซฟลงเครื่อง
+
+    const idx = archives.findIndex(a => a.date === date);
+    if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
+
     db = db.filter(r => r.date !== date);
     save();
-    // อัปเดตหน้าบัญชีให้ยอดล่าสุดแสดงผลทันที
-    loadAccountStatus();
-    alert("✅ บันทึกยอดเรียบร้อย!");
-    go(3); // ไปหน้าบัญชี
+    loadAccountStatus(); // อัปเดตหน้าบัญชีทันที
+    alert("✅ บันทึกเรียบร้อย");
+    go(3);
 }
     function toggleAccHistory() {const w = $("accHistoryWrapper"); w.style.display = w.style.display === "none" ? "block" : "none";$("accHistory").innerHTML = account.logs.map(l => `<div style="padding:5px; border-bottom:1px solid #eee;">${l.date}: ฿${l.amount} (${l.note})</div>`).join('') || "ไม่มีประวัติ";}    
     function loadAccountHistory() {let h = account.logs.map(l => `<div style="padding:15px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;"><div><b style="font-size:14px; color:#1e293b;">${l.date}</b><br><small style="color:#64748b;">${l.note}</small></div><b style="color:${l.amount >= 0 ? '#16a34a' : '#dc2626'};">${l.amount >= 0 ? '+' : ''}฿${Math.abs(l.amount).toLocaleString()}</b></div> `).join('');if($("accHistory")) {$("accHistory").innerHTML = h || '<center style="padding:40px; color:#94a3b8;">ไม่มีประวัติการเคลียร์</center>';}}     
 function loadAccountStatus() {
     const getEl = (id) => document.getElementById(id);
     const now = new Date();
-    // แสดงวันที่ปัจจุบันภาษาไทย
-    const dateLabel = now.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    if (getEl("accDateLabel")) getEl("accDateLabel").innerText = dateLabel;
+    const todayStr = now.toISOString().split('T')[0];
 
-    // 🟢 ตรรกะใหม่: ไล่บวกยอดจากประวัติทั้งหมด (Recalculate Every Time)
-    let totalSettle = 0;
-    let lastDaySettle = 0;
+    // 1. คำนวณยอดสะสมจากประวัติที่บันทึกแล้วเท่านั้น
+    let totalBalance = 0;
+    let todaySettle = 0;
 
     if (archives && archives.length > 0) {
-        archives.forEach((item, index) => {
+        archives.forEach(item => {
             const s = Number(item.settle) || 0;
-            totalSettle += s;
-            
-            // ดึงค่าของรายการล่าสุดมาโชว์ในช่องวันนี้
-            if (index === archives.length - 1) {
-                lastDaySettle = s;
-            }
+            totalBalance += s;
+            if (item.date === todayStr) { todaySettle = s; }
         });
     }
-    // อัปเดตยอดสะสมหลักของระบบให้ตรงกับประวัติ
-    account.balance = totalSettle;
-    // แสดงผลบนหน้าจอ
+    // อัปเดตยอดสะสมหลัก (account.balance) ให้ตรงกับผลรวมประวัติ
+    account.balance = totalBalance;
+    // 2. แสดงผล (ไม่มีการดึงค่า conf.guar มาโชว์ในหน้านี้)
+    if (getEl("accDateLabel")) getEl("accDateLabel").innerText = now.toLocaleDateString('th-TH'); 
+    // ยอดวันนี้ (ดึงมาจากที่คำนวณเสร็จแล้วในรายงาน)
+    if (getEl("accTodayVal")) getEl("accTodayVal").innerText = `฿${todaySettle.toLocaleString()}`;
+    // ยอดค้างเก่า
     if (getEl("accOldVal")) {
-        const prevBalance = totalSettle - lastDaySettle;
-        getEl("accOldVal").innerText = `฿${prevBalance.toLocaleString()}`;
+        const oldVal = totalBalance - todaySettle;
+        getEl("accOldVal").innerText = `฿${oldVal.toLocaleString()}`;
     }
-    if (getEl("accTodayVal")) {
-        getEl("accTodayVal").innerText = `฿${lastDaySettle.toLocaleString()}`;
-    }
-    if (getEl("accTotalVal")) {
-        getEl("accTotalVal").innerText = `฿${totalSettle.toLocaleString()}`;
-    }
-    // อัปเดตสถานะสีไฟ (UI)
-    updateStatusUI(totalSettle);
+    // ยอดรวมสุทธิที่ต้องจ่ายจริง
+    if (getEl("accTotalVal")) getEl("accTotalVal").innerText = `฿${totalBalance.toLocaleString()}`;
+
+    updateStatusUI(totalBalance);
 }
 // แยกฟังก์ชัน UI
 function updateStatusUI(net) {
