@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V. </title>
+    <title>Barber Note Pro V.8 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -1551,8 +1551,10 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     const avg = data.workDays > 0 ? (data.customers / data.workDays).toFixed(1) : 0;
     const weeklyTotalIncome = data.income || 0;
     
-    // --- คำนวณรายได้แยก ช่าง/ร้าน รายสัปดาห์ ---
-    const wBarber = data.barberEarn || 0; 
+    // --- 🟢 แก้ไขจุดนี้: คำนวณรายได้ช่างและร้านจาก % ส่วนแบ่ง ---
+    // หากใน data ไม่มีค่า barberEarn ให้คำนวณจากยอดรวม * (เปอร์เซ็นต์/100)
+    const barberPercent = (typeof conf !== 'undefined' && conf.perc) ? conf.perc : 50; 
+    const wBarber = data.barberEarn || (weeklyTotalIncome * (barberPercent / 100));
     const wShop = weeklyTotalIncome - wBarber;
 
     const sortedDays = data.dailyCounts ? [...data.dailyCounts].sort((a,b) => b.count - a.count) : [];
@@ -1583,7 +1585,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                 <div style="font-size:14px; font-weight:800; color:#ffffff;">฿${weeklyTotalIncome.toLocaleString()}</div>
             </div>
             <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:6px 8px; border-radius:12px; text-align:center;">
-                <div style="font-size:9px; color:#94a3b8; margin-bottom:2px;">ช่าง</div>
+                <div style="font-size:9px; color:#94a3b8; margin-bottom:2px;">ช่าง (${barberPercent}%)</div>
                 <div style="font-size:13px; font-weight:700; color:#bef264;">฿${Math.floor(wBarber).toLocaleString()}</div>
             </div>
             <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:6px 8px; border-radius:12px; text-align:center;">
@@ -1605,9 +1607,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
 
         <div style="font-size:10px; color:#64748b; line-height:1.4; padding:0 4px 8px 4px; border-bottom:1px solid rgba(255,255,255,0.05); margin-bottom:8px;">
             <div>📈 สูงสุด: <span style="color:#f1f5f9; font-weight:600;">${bestDay}</span> | 📉 ต่ำสุด: <span style="color:#f1f5f9; font-weight:600;">${worstDay}</span></div>
-            <div style="margin-top:4px; color:#fb7185;">
-                🚨 <b>ขาด:</b> ${[...unusedHair, ...unusedService].length > 0 ? [...unusedHair, ...unusedService].join(", ") : "ครบ"}
-            </div>
         </div>
 
         <div style="display:flex; flex-wrap:wrap; gap:4px;">
