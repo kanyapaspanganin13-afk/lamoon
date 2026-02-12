@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V.20 </title>
+    <title>Barber Note Pro V.0 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -1604,11 +1604,21 @@ const weeklyHtml = weekEntries.map(([wk, data]) => {
             </div>
         </div>
 
-        <div style="font-size:10px; color:#64748b; line-height:1.4; padding:2px 4px 0 4px;">
-            <div>📈 วันดีที่สุด: <span style="color:#f1f5f9;">${bestDay}</span></div>
-        </div>
-    </div>`;
-}).join("");
+       <div style="font-size:11px; color:#64748b; line-height:1.6; padding:0 4px 10px 4px; border-bottom:1px solid rgba(255,255,255,0.05); margin-bottom:10px;">
+                <div>📈 สูงสุด: <span style="color:#f1f5f9; font-weight:600;">${bestDay}</span></div>
+                <div>📉 ต่ำสุด: <span style="color:#f1f5f9; font-weight:600;">${worstDay}</span></div>
+                
+                <div style="margin-top:6px; color:#fb7185; border-top:1px dashed rgba(251,113,133,0.2); padding-top:4px;">
+                    🚨 <b>ยังไม่มีบริการ:</b> ${[...unusedHair, ...unusedService].length > 0 ? [...unusedHair, ...unusedService].join(", ") : "บันทึกครบทุกรายการ"}
+                </div>
+            </div>           
+
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                ${popHair}
+                ${popService}
+            </div>
+        </div>`;
+    }).join("");
     
     // --- 4. แสดงผล Modal ---
     openReportModal(
