@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro V.16 </title>
+    <title>Barber Note Pro V. </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -556,14 +556,13 @@ function confirmDeleteDaily(dateStr) {
 }
    function handleSave(event) {
     const p = parseInt($("priceInp").value), t = parseInt($("tipInp").value) || 0;
-    
     if (!p || !payMethod) {
         return alert("กรุณาใส่ราคาและเลือกวิธีจ่ายเงินก่อน!");
     }
-
+    // 1. ดึงเวลาเริ่มและเวลาเสร็จปัจจุบันไว้
     const start = $("tStart").value || new Date().toTimeString().slice(0, 5);
+    const end = $("tEnd").value; // ดึงเวลาเสร็จไว้เพื่อใช้ต่อหัวถัดไป
     let cashAmt = 0, transAmt = 0;
-
     if (payMethod === 'Mix') {
         cashAmt = parseInt($("mixCash").value) || 0;
         transAmt = parseInt($("mixTrans").value) || 0;
@@ -573,42 +572,54 @@ function confirmDeleteDaily(dateStr) {
     } else {
         payMethod === 'Cash' ? cashAmt = p + t : transAmt = p + t;
     }
-
     const rec = {
         id: Date.now(), 
         date: $("dateInp").value, 
         time: start, 
-        endTime: $("tEnd").value || (typeof addMinutes === 'function' ? addMinutes(start, 30) : start),
+        endTime: end || (typeof addMinutes === 'function' ? addMinutes(start, 30) : start),
         svcs: [$("hairStyle")?.value, $("extra1")?.value, $("extra2")?.value].filter(Boolean),
         price: p, tip: t, pay: payMethod, payCash: cashAmt, payTrans: transAmt, type: "SERVICE"
     };
 
-    // บันทึกและคำนวณใหม่ทันที
+    // บันทึกข้อมูล
     db.push(rec); 
     saveDB(); 
     renderDay(); 
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
 
-    // ✅ แสดงสถานะปุ่มบันทึกสำเร็จ
+    // ✅ แสดงสถานะบันทึกสำเร็จ (คงเดิม)
     const btnSave = event.currentTarget || document.querySelector(".btn-main");
     if (btnSave) {
         const oldContent = btnSave.innerHTML;
         const oldBg = btnSave.style.background;
-
         btnSave.style.setProperty("background", "linear-gradient(135deg, #10b981, #059669)", "important");
         btnSave.innerHTML = `<i class="fas fa-check-circle" style="font-size:38px;"></i> <span style="font-size:32px; font-weight:900;">บันทึกสำเร็จ</span>`;
-
         setTimeout(() => {
             btnSave.style.background = oldBg;
             btnSave.innerHTML = oldContent;
         }, 1200);
     }
 
-    // ล้างค่าฟอร์ม
-    ["priceInp", "tipInp", "mixCash", "mixTrans"].forEach(id => { if($(id)) $(id).value = ""; });
+    // --- 🟢 ส่วนที่แก้ไข: รีเซ็ตค่าและส่งต่อเวลา ---
+    
+    // 2. ส่งเวลาเสร็จงานนี้ ไปเป็นเวลาเริ่มงานหน้า
+    if ($("tStart") && end) {
+        $("tStart").value = end;
+    }
+    // 3. ล้างค่าช่องข้อมูลต่างๆ ให้สะอาด
+    ["priceInp", "tipInp", "mixCash", "mixTrans", "tEnd"].forEach(id => { 
+        if($(id)) $(id).value = ""; 
+    });
+    // ล้างตัวเลือกบริการ (Select)
+    ["hairStyle", "extra1", "extra2"].forEach(id => {
+        if($(id)) $(id).selectedIndex = 0; 
+    });
+    // รีเซ็ตปุ่มวิธีจ่ายเงิน
     payMethod = ""; 
     ["btnCash", "btnTrans", "btnMix"].forEach(id => { if($(id)) $(id).className = "icon-card"; });
     if($("mixPanel")) $("mixPanel").style.display = 'none';
+    // ให้พิมพ์ราคางานต่อไปได้ทันที
+    if ($("priceInp")) $("priceInp").focus();
 }
             function handleInsurance() {
                 const d = $("dateInp").value || new Date().toISOString().split('T')[0], g = parseInt(conf.guar) || 0;
@@ -728,7 +739,8 @@ function confirmDeleteDaily(dateStr) {
              function speak(txt) {if ('speechSynthesis' in window) {const msg = new SpeechSynthesisUtterance(txt); msg.lang = 'th-TH'; window.speechSynthesis.speak(msg);}}       
              function clearAllData(){if(confirm("ลบข้อมูลทั้งหมด?")){localStorage.clear();location.reload()}}
              function updateDateDisplay(v){if(!v)return;const d=new Date(v);const el=$("dateDisplay");if(el)el.innerText=d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});if(typeof renderDay==="function")renderDay()}window.addEventListener('DOMContentLoaded',()=>{const i=$("dateInp"),t=new Date().toISOString().split('T')[0];if(i){i.value=t;updateDateDisplay(t)}});
-function setPaymentType(m) {
+
+     function setPaymentType(m) {
     // 1. ตรวจสอบว่าเป็นการกดซ้ำปุ่มเดิมหรือไม่
     if (typeof payMethod !== 'undefined' && payMethod === m) {
         payMethod = ''; // ล้างค่า
