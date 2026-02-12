@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro  </title>
+    <title>Barber Note Pro 7 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -363,11 +363,10 @@ nav {
            <i class="fas fa-calendar-check" style="font-size:24px; margin-bottom:5px; display:block;"></i><b style="font-size:16px;">สรุปรายเดือน</b>
             <input type="month" id="histMonth" onchange="loadHistMonth()" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
 </div>
-
-    <div onclick="confirmShareLine()" style="background: linear-gradient(135deg, #25d366, #075e54); border-radius: 25px; padding: 15px; text-align: center; color: #fff; cursor: pointer; box-shadow: 0 8px 15px rgba(37,211,102,0.2); display: flex; align-items: center; justify-content: center; gap: 10px;">       
-        <i class="fab fa-line" style="font-size: 24px;"></i>
-        <b style="font-size: 16px;">รายงานสรุปประจำเดือน</b>
-        </div>
+        <div onclick="openComparisonSelector()" style="background: linear-gradient(135deg, #38bdf8, #1d4ed8); border-radius: 25px; padding: 15px; text-align: center; color: #fff; cursor: pointer; box-shadow: 0 8px 15px rgba(56,189,248,0.2); display: flex; align-items: center; justify-content: center; gap: 10px;">       
+            <i class="fas fa-chart-line" style="font-size: 24px;"></i>
+            <b style="font-size: 16px;">เปรียบเทียบช่วงวันที่</b>
+            </div>
      </div> 
   </div>                   
     <div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); z-index:9999; display:flex; align-items:center; justify-content:center; padding:15px;">
@@ -503,33 +502,42 @@ nav {
                 d.setHours(h, m + mins, 0, 0);
                 return d.toTimeString().slice(0, 5);
             }
-            function openReportModal(title, htmlContent) {
-                const modal = $("reportModal");
-                const modalTitle = $("reportTitle");     
-                const modalContent = $("reportContent"); 
-                const modalInner = modalContent.parentElement; 
-            
-                if (!modal || !modalTitle || !modalContent) {
-                    console.error("❌ หา ID Modal ไม่เจอ เช็ค HTML ด่วน!");
-                    return;
-                }
-                modalTitle.innerText = title;
-                modalContent.innerHTML = htmlContent;
-                modalInner.style.width = "95%";            
-                modalInner.style.maxWidth = "650px";       
-                modalInner.style.maxHeight = "85vh";       
-                modalInner.style.overflowY = "auto";       
-                modalInner.style.borderRadius = "24px";    
-                modalInner.style.padding = "20px";
-                modalInner.style.margin = "auto";
-                modal.style.display = "flex";
-                modal.style.alignItems = "center";
-                modal.style.justifyContent = "center";
-            }
-            function closeReportModal() {
+function openReportModal(title, htmlContent) {
+    const modal = $("reportModal");
+    const modalTitle = $("reportTitle");     
+    const modalContent = $("reportContent"); 
+    const modalInner = modalContent.parentElement; 
+    
+    if (!modal || !modalTitle || !modalContent) {
+        console.error("❌ หา ID Modal ไม่เจอ เช็ค HTML ด่วน!");
+        return;
+    }
+
+    modalTitle.innerText = title;
+    modalContent.innerHTML = htmlContent;
+
+    // --- ตั้งค่าสไตล์และการแสดงผล ---
+    modalInner.style.width = "95%";            
+    modalInner.style.maxWidth = "650px";       
+    modalInner.style.maxHeight = "85vh";       
+    modalInner.style.overflowY = "auto";       
+    
+    // ✅ เพิ่มเพื่อให้การ Scroll บน iPhone/iPad ลื่นไหลขึ้น (Momentum Scroll)
+    modalInner.style.webkitOverflowScrolling = "touch"; 
+
+    modalInner.style.borderRadius = "24px";    
+    modalInner.style.padding = "20px";
+    modalInner.style.margin = "auto";
+
+    // --- แสดงผล Modal กลางหน้าจอ ---
+    modal.style.display = "flex";
+    modal.style.alignItems = "center";
+    modal.style.justifyContent = "center";
+}
+function closeReportModal() {
                 $("reportModal").style.display = "none";
             }
-              function openHistoryModal() { 
+function openHistoryModal() { 
                 $("historyModal").style.display = "flex"; 
                 if (typeof renderHistoryList === "function") {
                     renderHistoryList(); 
@@ -537,7 +545,7 @@ nav {
                     console.error("ไม่พบฟังก์ชัน renderHistoryList ในระบบ");
                 }
             }
-            function closeHistoryModal() { 
+function closeHistoryModal() { 
                 $("historyModal").style.display = "none"; 
             }
 
@@ -1676,144 +1684,80 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         </div>`
     );
 }
-function topN(obj, n = 5) {
-              if (!obj || Object.keys(obj).length === 0) return [];
-              return Object.entries(obj)
-                .filter(([_, count]) => count > 0)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, n);
-            }
-              function confirmShareLine() {
-              const m = $("histMonth").value;
-              if (!m) return alert("กรุณาเลือกเดือน");
-            
-              if (confirm(`คุณต้องการแชร์รายงานประจำเดือน ${m} เข้าสู่ LINE ใช่ไหม?`)) {
-                shareLineMonth();
-              }
-            }
-            
-// 1. ฟังก์ชันวิเคราะห์ภาพรวม (เพิ่ม Logic วันหยุดที่ละเอียดขึ้น)
-function buildMonthlyComments(data) {
-    const { weekly, monthHair, monthSvc, avgPerDay, workDays, monthKey } = data;
-    const comments = [];
-
-    // --- ส่วนวิเคราะห์วันหยุด (Calendar Logic) ---
-    const [year, month] = monthKey.split('-').map(Number);
-    const daysInMonth = new Date(year, month, 0).getDate(); 
-    const offDaysCount = daysInMonth - workDays;
-    
-    // หาวันหยุดประจำสัปดาห์ (วันไหนที่ไม่เคยมีการบันทึกข้อมูลเลย)
-    const dayNames = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
-    const workedWeekdays = new Set();
-    Object.values(weekly).forEach(w => {
-        w.days.forEach(dateStr => workedWeekdays.add(new Date(dateStr).getDay()));
-    });
-    const regularOffDays = dayNames.filter((name, index) => !workedWeekdays.has(index));
-
-    // ข้อความสรุปวันหยุด (สุภาพ)
-    let holidayMsg = `เดือนนี้หยุดรวม ${offDaysCount} วัน`;
-    if (regularOffDays.length > 0 && offDaysCount > 0) {
-        holidayMsg += ` (หยุดประจำวัน${regularOffDays.join("/")})`;
-    }
-    comments.push(holidayMsg);
-
-    // --- วิเคราะห์พฤติกรรมลูกค้า ---
-    let maxDaily = 0;
-    Object.values(weekly).forEach(w => {
-        Object.values(w.daily).forEach(count => { if (count > maxDaily) maxDaily = count; });
-    });
-    const behavior = (maxDaily > avgPerDay * 1.5)
-        ? 'สัปดาห์นี้มีบางช่วงลูกค้าหนาแน่นเป็นพิเศษ'
-        : 'ปริมาณลูกค้าสม่ำเสมอ รักษาระดับได้ดีเยี่ยม';
-    comments.push(`พฤติกรรม: ${behavior}`);
-
-    // --- วันที่ลูกค้าเยอะที่สุด ---
-    const dayTotals = {};
-    Object.values(weekly).forEach(w => {
-        Object.entries(w.daily).forEach(([day, count]) => { dayTotals[day] = (dayTotals[day] || 0) + count; });
-    });
-    const busiestDay = Object.entries(dayTotals).sort((a, b) => b[1] - a[1])[0];
-    if (busiestDay) comments.push(`วันยอดนิยม: "วัน${busiestDay[0]}" มีลูกค้ามาใช้บริการมากที่สุด`);
-
-    return comments;
-}
-
-// 2. ฟังก์ชันส่ง LINE (แสดงผลวันหยุดชัดเจน)
-function shareLineMonth() {
-    const m = $("histMonth").value;
-    if (!m) return alert("กรุณาเลือกเดือน");
-
-    const records = archives.filter(r => r.date && r.date.startsWith(m));
-    if (!records.length) return alert("ไม่พบข้อมูลเดือนนี้");
-
-    const shopName = $("setShop").value || "Barber Shop";
-    let total = 0, barberEarn = 0, clientCount = 0;
-    let weekly = {}, monthHair = {}, monthSvc = {};
-    const workDaysCount = records.length;
-
-    // Logic จัดกลุ่มข้อมูล
-    const weekOfMonth = d => Math.ceil((new Date(d).getDate()) / 7);
-    const weekdayTH = d => ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"][new Date(d).getDay()];
-
-    records.forEach(r => {
-        const w = weekOfMonth(r.date);
-        const day = weekdayTH(r.date);
-        total += Number(r.total) || 0;
-        barberEarn += Number(r.barber) || 0;
-        let dayCust = r.details ? r.details.length : 1;
-        clientCount += dayCust;
-
-        if (!weekly[w]) {
-            weekly[w] = { customers: 0, days: new Set(), daily: {}, hair: {}, service: {} };
+async function openComparisonSelector() {
+    // ใช้ Swal (SweetAlert2) เพื่อความสวยงามและใช้ง่ายบนมือถือ
+    const { value: formValues } = await Swal.fire({
+        title: '📊 เปรียบเทียบช่วงวันที่',
+        html:
+            '<div style="text-align:left; font-size:14px; color:#64748b; margin-bottom:5px;">ช่วงที่ 1 (ตัวตั้ง):</div>' +
+            '<input id="swal-input1-start" type="date" class="swal2-input" style="margin-top:0;">' +
+            '<input id="swal-input1-end" type="date" class="swal2-input">' +
+            '<div style="text-align:left; font-size:14px; color:#64748b; margin-top:15px; margin-bottom:5px;">ช่วงที่ 2 (ตัวเทียบ):</div>' +
+            '<input id="swal-input2-start" type="date" class="swal2-input" style="margin-top:0;">' +
+            '<input id="swal-input2-end" type="date" class="swal2-input">',
+        focusConfirm: false,
+        confirmButtonText: 'ดูรายงานเปรียบเทียบ',
+        confirmButtonColor: '#38bdf8',
+        preConfirm: () => {
+            return [
+                { start: document.getElementById('swal-input1-start').value, end: document.getElementById('swal-input1-end').value },
+                { start: document.getElementById('swal-input2-start').value, end: document.getElementById('swal-input2-end').value }
+            ]
         }
-        weekly[w].customers += dayCust;
-        weekly[w].days.add(r.date);
-        weekly[w].daily[day] = (weekly[w].daily[day] || 0) + dayCust;
-
-        (r.details || []).forEach(d => {
-            (d.svcs || []).forEach(s => {
-                if(!s) return;
-                const haircutList = ["แฟชั่น","สกินเฟด","เปิดข้าง","รองทรง","ตำรวจ/ทหาร","ทรงนักเรียน","แก้ผม","โกนผม","เด็ก"];
-                if(haircutList.includes(s.trim())) { monthHair[s] = (monthHair[s]||0)+1; } 
-                else { monthSvc[s] = (monthSvc[s]||0)+1; }
-            });
-        });
     });
 
-    const shopEarn = total - barberEarn;
-    const avgPerDay = workDaysCount > 0 ? (clientCount / workDaysCount) : 0;
+    if (formValues && formValues[0].start && formValues[1].start) {
+        processComparisonReport(formValues[0], formValues[1]);
+    }
+}
+function processComparisonReport(range1, range2) {
+    // สมมติว่า database ของคุณคือ allData (Array ของข้อมูลรายวัน)
+    const filterData = (range) => allData.filter(d => d.date >= range.start && d.date <= range.end);
     
-    // เรียกใช้ AI Comments พร้อมส่ง monthKey ไปคำนวณวันหยุด
-    const aiComments = buildMonthlyComments({ 
-        weekly, monthHair, monthSvc, avgPerDay, workDays: workDaysCount, monthKey: m 
-    });
+    const data1 = filterData(range1);
+    const data2 = filterData(range2);
 
-    const msg = `
-💈 รายงาน: ${shopName}
-📅 ประจำเดือน: ${m}
+    const renderRows = (data) => data.map(d => `
+        <div style="display:flex; justify-content:space-between; padding:10px 0; border-top:1px solid rgba(255,255,255,0.05); font-size:13px;">
+            <span style="flex:1.5; color:#f8fafc;">${d.dayName}</span>
+            <span style="flex:1; text-align:center; color:#38bdf8; font-weight:700;">${d.count}</span>
+            <span style="flex:1; text-align:right; color:#bef264; font-weight:700;">฿${Number(d.barberEarn).toLocaleString()}</span>
+        </div>
+    `).join("");
 
-💰 สรุปรายได้:
-✂️ ยอดรวม: ฿${total.toLocaleString()}
-🤵 รายได้ช่าง: ฿${Math.floor(barberEarn).toLocaleString()}
-🏠 รายได้ร้าน: ฿${Math.floor(shopEarn).toLocaleString()}
+    const htmlContent = `
+    <div style="background:#0f172a; padding:15px; border-radius:24px; font-family:sans-serif; text-align:left;">
+        
+        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:15px; margin-bottom:15px;">
+            <div style="color:#facc15; font-size:12px; margin-bottom:10px; font-weight:700;">📅 ${range1.start} ถึง ${range1.end}</div>
+            <div style="background:rgba(0,0,0,0.2); border-radius:15px; padding:10px;">
+                <div style="display:flex; font-size:11px; color:#64748b; margin-bottom:8px; font-weight:600;">
+                    <span style="flex:1.5;">วันที่</span>
+                    <span style="flex:1; text-align:center;">ลูกค้า</span>
+                    <span style="flex:1; text-align:right;">ยอดช่าง</span>
+                </div>
+                ${renderRows(data1)}
+            </div>
+        </div>
 
-📊 สถิติการทำงาน:
-👤 ลูกค้าทั้งหมด: ${clientCount} คน
-📅 วันทำงาน: ${workDaysCount} วัน
-😴 วันหยุด: ${new Date(m.split('-')[0], m.split('-')[1], 0).getDate() - workDaysCount} วัน
-📈 เฉลี่ย: ${avgPerDay.toFixed(2)} คน/วัน
+        <div style="text-align:center; color:#64748b; font-weight:900; margin-bottom:15px;">VS</div>
 
-📝 วิเคราะห์ภาพรวม:
-${aiComments.map(c => `• ${c}`).join("\n")}
+        <div style="background:rgba(56,189,248,0.05); border:1px solid rgba(56,189,248,0.2); border-radius:20px; padding:15px;">
+            <div style="color:#38bdf8; font-size:12px; margin-bottom:10px; font-weight:700;">📅 ${range2.start} ถึง ${range2.end}</div>
+            <div style="background:rgba(0,0,0,0.2); border-radius:15px; padding:10px;">
+                <div style="display:flex; font-size:11px; color:#64748b; margin-bottom:8px; font-weight:600;">
+                    <span style="flex:1.5;">วันที่</span>
+                    <span style="flex:1; text-align:center;">ลูกค้า</span>
+                    <span style="flex:1; text-align:right;">ยอดช่าง</span>
+                </div>
+                ${renderRows(data2)}
+            </div>
+        </div>
 
-🏆 บริการยอดนิยม:
-${Object.entries(monthSvc).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>`• ${k} (${v} ครั้ง)`).join("\n") || "-"}
+    </div>`;
 
-💡 สรุปโดยระบบจัดการร้าน Barber
-`.trim();
-
-    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(msg)}`;
-    location.href = lineUrl;
+    // แสดงผลบน Modal เดิมที่คุณมี
+    openReportModal("รายงานเปรียบเทียบละเอียด", htmlContent);
 }
 function shareLine() {
     const dInp = $("dateInp").value, today = db.filter(r => r.date === dInp); 
