@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro </title>
+    <title>Barber Note Pro 2</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1880,7 +1880,7 @@ function sendToLineFinal() {
     window.open(`https://line.me/R/msg/text/?${encodeURIComponent(finalMsg)}`);
     document.getElementById("linePreview").style.display = "none";
 }
-           function go(p) {
+     function go(p) {
     // 1. จัดการการซ่อน/แสดงหน้า Page
     document.querySelectorAll('.page').forEach(pg => {
         pg.classList.remove('active');
@@ -2019,9 +2019,29 @@ function exportBackup() {
                                 .catch(err => console.log('จดทะเบียนไม่สำเร็จ:', err));
                         });
                     }
-            
-                function clearData() {
-                const confirmDelete = confirm("⚠️ คุณต้องการลบข้อมูลทั้งหมดในระบบใช่หรือไม่? ข้อมูลบัญชีและรายงานจะถูกล้างใหม่ทั้งหมด");
+            function restoreData(jsonData) {
+    try {
+        const data = JSON.parse(jsonData);
+        
+        // 1. คืนค่าข้อมูลบัญชีและประวัติ
+        account = data.account || { balance: 0, logs: [] };
+        archives = data.archives || [];
+        
+        // 2. บันทึกลง Storage ทันทีเพื่อความชัวร์
+        if (typeof save === "function") save();
+        
+        // 3. สำคัญ: ต้องสั่ง Render หน้าจอใหม่ทุกจุด
+        alert("✅ คืนค่าข้อมูลสำเร็จแล้วครับ");
+        
+        if (typeof loadAccountStatus === "function") loadAccountStatus();
+        if (typeof renderHistoryList === "function") renderHistoryList(); // อัปเดตแฟ้มรายเดือน
+        
+    } catch (e) {
+        alert("❌ รูปแบบข้อมูลไม่ถูกต้อง ไม่สามารถคืนค่าได้ครับ");
+    }
+}
+    function clearData() {
+        const confirmDelete = confirm("⚠️ คุณต้องการลบข้อมูลทั้งหมดในระบบใช่หรือไม่? ข้อมูลบัญชีและรายงานจะถูกล้างใหม่ทั้งหมด");
                 if (confirmDelete) {
                     // ล้างข้อมูลทุกอย่างที่แอปเก็บไว้
                     localStorage.clear(); 
