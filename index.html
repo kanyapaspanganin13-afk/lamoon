@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 0672</title>
+    <title>Barber Note Pro 084</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -52,61 +52,73 @@ async function openComparisonSelector() {
 
 function renderComparisonReport(v) {
     const fetchStats = (start, end) => {
-        // ตรวจสอบชื่อตัวแปรข้อมูล (allRecords หรือ allData)
-        let sourceData = [];
-        if (typeof allRecords !== 'undefined') sourceData = allRecords;
-        else if (typeof allData !== 'undefined') sourceData = allData;
+        // ✅ ดึงข้อมูลโดยการวนลูปช่วงวันที่ที่เลือก เพื่อไปหาใน archives
+        let list = [];
+        let currentDate = new Date(start);
+        const stopDate = new Date(end);
 
-        // ฟิลเตอร์ข้อมูลตามช่วงวันที่
-        const list = sourceData.filter(d => d.date >= start && d.date <= end);
+        while (currentDate <= stopDate) {
+            const dateStr = currentDate.toISOString().split('T')[0];
+            // ค้นหาข้อมูลใน archives เหมือนที่ renderDay ทำ
+            if (typeof archives !== 'undefined') {
+                const dayData = archives.find(a => a.date === dateStr);
+                if (dayData) {
+                    list.push({
+                        date: dateStr,
+                        count: dayData.count || (dayData.details ? dayData.details.length : 0),
+                        barber: dayData.barber || 0
+                    });
+                }
+            }
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
         
+        // คำนวณยอดรวมจากรายการที่หาเจอ
         const sumC = list.reduce((a, b) => a + Number(b.count || 0), 0);
-        const sumE = list.reduce((a, b) => a + Number(b.barberEarn || 0), 0);
+        const sumE = list.reduce((a, b) => a + Number(b.barber || 0), 0);
         
-        // สร้างรายการรายบรรทัด (ปรับสีเข้มให้อ่านง่ายบนพื้นหลังขาว)
-        const rowList = list.length > 0 ? list.map(d => `
-            <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f1f5f9; font-size:13px; color:#334155;">
-                <span style="flex:1.5;">• ${d.date}</span>
-                <span style="flex:1; text-align:center; font-weight:600; color:#0284c7;">👤 ${d.count}</span>
-                <span style="flex:1.2; text-align:right; font-weight:700; color:#059669;">฿${Number(d.barberEarn).toLocaleString()}</span>
-            </div>`).join("") : `<div style="padding:15px; text-align:center; color:#94a3b8; font-size:13px;">❌ ไม่มีข้อมูลในช่วงนี้</div>`;
+        // สร้าง HTML รายบรรทัด (จัดรูปแบบวันที่เป็น พ.ศ. ให้อ่านง่ายขึ้น)
+        const rowList = list.length > 0 ? list.map(d => {
+            const [y, m, day] = d.date.split('-');
+            const dateBE = `${day}/${m}/${parseInt(y)+543}`;
+            return `
+                <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f1f5f9; font-size:13px; color:#1e293b;">
+                    <span style="flex:1.5; font-weight:500;">• ${dateBE}</span>
+                    <span style="flex:1; text-align:center; color:#4338ca; font-weight:700;">👤 ${d.count}</span>
+                    <span style="flex:1.2; text-align:right; font-weight:700; color:#15803d;">฿${Number(d.barber).toLocaleString()}</span>
+                </div>`;
+        }).join("") : `<div style="padding:15px; text-align:center; color:#94a3b8; font-size:13px;">❌ ไม่พบข้อมูลสรุปในช่วงนี้</div>`;
         
-        return { sumC, sumE, rowList, range: `${start} ถึง ${end}` };
+        return { sumC, sumE, rowList, range: start + " ถึง " + end };
     };
 
     const d1 = fetchStats(v.s1, v.e1);
     const d2 = fetchStats(v.s2, v.e2);
 
+    // สร้าง Report HTML (ใช้โทนสีที่สุภาพและสะอาดตาตามที่ตั้งใจไว้)
     const reportHtml = `
-        <div style="font-family:'Kanit',sans-serif; text-align:left; color: #1e293b;">
+        <div style="font-family:'Kanit', sans-serif; text-align:left;">
             <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:20px; padding:15px; margin-bottom:12px;">
-                <small style="color:#64748b;">📅 ช่วงที่ 1: ${d1.range}</small>
-                <div style="font-size:17px; font-weight:800; margin:5px 0; display:flex; justify-content:space-between;">
-                    <span style="color:#0284c7;">👤 ${d1.sumC} คน</span>
-                    <span style="color:#059669;">฿${d1.sumE.toLocaleString()}</span>
-                </div>
-                <div style="max-height:160px; overflow-y:auto; border-top:2px solid #e2e8f0; margin-top:8px; webkit-overflow-scrolling: touch;">
+                <small style="color:#64748b; font-weight:600;">📅 ช่วงที่ 1</small>
+                <div style="font-size:16px; font-weight:800; margin:5px 0; color:#1e293b;">👤 ${d1.sumC} คน | <span style="color:#15803d;">฿${d1.sumE.toLocaleString()}</span></div>
+                <div style="max-height:150px; overflow-y:auto; border-top:1px dashed #cbd5e1; margin-top:8px; -webkit-overflow-scrolling:touch;">
                     ${d1.rowList}
                 </div>
             </div>
 
-            <div style="text-align:center; color:#cbd5e1; font-weight:900; margin-bottom:12px;">VS</div>
+            <div style="text-align:center; color:#cbd5e1; font-weight:900; margin:10px 0;">VS</div>
 
             <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:20px; padding:15px;">
-                <small style="color:#64748b;">📅 ช่วงที่ 2: ${d2.range}</small>
-                <div style="font-size:17px; font-weight:800; margin:5px 0; display:flex; justify-content:space-between;">
-                    <span style="color:#0284c7;">👤 ${d2.sumC} คน</span>
-                    <span style="color:#059669;">฿${d2.sumE.toLocaleString()}</span>
-                </div>
-                <div style="max-height:160px; overflow-y:auto; border-top:2px solid #bae6fd; margin-top:8px; webkit-overflow-scrolling: touch;">
+                <small style="color:#64748b; font-weight:600;">📅 ช่วงที่ 2</small>
+                <div style="font-size:16px; font-weight:800; margin:5px 0; color:#1e293b;">👤 ${d2.sumC} คน | <span style="color:#15803d;">฿${d2.sumE.toLocaleString()}</span></div>
+                <div style="max-height:150px; overflow-y:auto; border-top:1px dashed #bae6fd; margin-top:8px; -webkit-overflow-scrolling:touch;">
                     ${d2.rowList}
                 </div>
             </div>
         </div>`;
 
-    openReportModal("สรุปเปรียบเทียบเชิงลึก", reportHtml);
+    openReportModal("วิเคราะห์เปรียบเทียบข้อมูล", reportHtml);
 }
-
 function openReportModal(title, htmlContent) {
     const modal = getEl('reportModal');
     const modalTitle = getEl('reportTitle');
@@ -1175,14 +1187,7 @@ if (dList) {
     `;
 }
 }               
-        function clearDailyData() {
-                const confirmDelete = confirm("⚠️ คุณต้องการลบข้อมูลรายงานของวันนี้ทั้งหมดใช่หรือไม่? (ข้อมูลที่ลบแล้วจะไม่สามารถเรียกคืนได้)");
-                if (confirmDelete) {
-                    localStorage.removeItem("barber_db"); 
-                    alert("✅ ดำเนินการลบข้อมูลเรียบร้อยแล้ว");
-                    location.reload();
-                }
-            }
+        
    function saveAndGo(date, total) {
     const allToday = db.filter(r => r.date === date);
     if (allToday.length === 0) return alert("⚠️ ไม่พบข้อมูล");
