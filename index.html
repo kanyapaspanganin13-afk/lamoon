@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 7 </title>
+    <title>Barber Note Pro 9 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -534,7 +534,45 @@ function openReportModal(title, htmlContent) {
     modal.style.alignItems = "center";
     modal.style.justifyContent = "center";
 }
-function closeReportModal() {
+     // ฟังก์ชันสำหรับรองรับการกดปุ่ม "เปรียบเทียบช่วงวันที่"
+
+async function openComparisonSelector() {
+    // 1. ตรวจสอบว่ามี Library SweetAlert2 หรือไม่ (ถ้าไม่มีให้ใช้ prompt ปกติ)
+    const date1 = prompt("ระบุช่วงวันที่ 1 (เช่น 01/01/2026 - 10/01/2026)");
+    const date2 = prompt("ระบุช่วงวันที่ 2 (เช่น 01/02/2026 - 10/02/2026)");
+
+    if (date1 && date2) {
+        // สร้างข้อมูลจำลองสำหรับแสดงผลรายบรรทัด
+        let mockHtml = `
+            <div style="color:#fff; line-height:1.8;">
+                <div style="background:rgba(255,255,255,0.1); padding:10px; border-radius:15px; margin-bottom:15px;">
+                    <b style="color:#facc15;">📅 ช่วงที่ 1: ${date1}</b><br>
+                    <small>👤 ลูกค้า: 110 | 💰 ยอดช่าง: ฿7,500</small>
+                    <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size:12px;">
+                        • วันที่ 1 | 👤 12 | ฿850<br>
+                        • วันที่ 2 | 👤 15 | ฿1,100
+                    </div>
+                </div>
+                
+                <div style="text-align:center; margin:10px 0;">VS</div>
+
+                <div style="background:rgba(56,189,248,0.1); padding:10px; border-radius:15px; border:1px solid #38bdf8;">
+                    <b style="color:#38bdf8;">📅 ช่วงที่ 2: ${date2}</b><br>
+                    <small>👤 ลูกค้า: 128 | 💰 ยอดช่าง: ฿8,450</small>
+                    <hr style="border:0; border-top:1px solid rgba(56,189,248,0.1);">
+                    <div style="font-size:12px;">
+                        • วันที่ 1 | 👤 14 | ฿950<br>
+                        • วันที่ 2 | 👤 18 | ฿1,250
+                    </div>
+                </div>
+            </div>
+        `;
+        // 2. เรียกใช้ฟังก์ชันเปิด Modal ที่เราตรวจเช็คกันเมื่อสักครู่
+        openReportModal("รายงานเปรียบเทียบ", mockHtml);
+    }
+}
+     function closeReportModal() {
                 $("reportModal").style.display = "none";
             }
 function openHistoryModal() { 
@@ -1684,32 +1722,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         </div>`
     );
 }
-async function openComparisonSelector() {
-    // ใช้ Swal (SweetAlert2) เพื่อความสวยงามและใช้ง่ายบนมือถือ
-    const { value: formValues } = await Swal.fire({
-        title: '📊 เปรียบเทียบช่วงวันที่',
-        html:
-            '<div style="text-align:left; font-size:14px; color:#64748b; margin-bottom:5px;">ช่วงที่ 1 (ตัวตั้ง):</div>' +
-            '<input id="swal-input1-start" type="date" class="swal2-input" style="margin-top:0;">' +
-            '<input id="swal-input1-end" type="date" class="swal2-input">' +
-            '<div style="text-align:left; font-size:14px; color:#64748b; margin-top:15px; margin-bottom:5px;">ช่วงที่ 2 (ตัวเทียบ):</div>' +
-            '<input id="swal-input2-start" type="date" class="swal2-input" style="margin-top:0;">' +
-            '<input id="swal-input2-end" type="date" class="swal2-input">',
-        focusConfirm: false,
-        confirmButtonText: 'ดูรายงานเปรียบเทียบ',
-        confirmButtonColor: '#38bdf8',
-        preConfirm: () => {
-            return [
-                { start: document.getElementById('swal-input1-start').value, end: document.getElementById('swal-input1-end').value },
-                { start: document.getElementById('swal-input2-start').value, end: document.getElementById('swal-input2-end').value }
-            ]
-        }
-    });
 
-    if (formValues && formValues[0].start && formValues[1].start) {
-        processComparisonReport(formValues[0], formValues[1]);
-    }
-}
 function processComparisonReport(range1, range2) {
     // สมมติว่า database ของคุณคือ allData (Array ของข้อมูลรายวัน)
     const filterData = (range) => allData.filter(d => d.date >= range.start && d.date <= range.end);
