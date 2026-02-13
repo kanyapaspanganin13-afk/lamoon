@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 02</title>
+    <title>Barber Note Pro 0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1069,11 +1069,13 @@ function saveAndGo(date, total) {
         if (r.pay === "Cash" || r.pay === "เงินสด") { cash += (p + t); }
         else if (r.pay === "Mix") { cash += Number(r.payCash) || 0; }
     });
+
     const commission = total * (Number(conf.perc) / 100);
     const baseEarn = Math.max(commission, Number(conf.guar) || 0); 
     const bEarn = isHoliday ? 0 : baseEarn + tips;
     const settle = isHoliday ? 0 : cash - bEarn;
-    // 4. บันทึกลง Archives (เก็บยอดจริงเพื่อรายงานรายเดือน)
+
+    // 1. บันทึกลง Archives (รายงานรายเดือน)
     const data = { 
         date, total, cash, 
         barber: Math.floor(bEarn), 
@@ -1083,28 +1085,18 @@ function saveAndGo(date, total) {
     };
     const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
-    // 5. อัปเดตสมุดบัญชี (Account Logs)
-   if (!isHoliday) {
-    account.logs = account.logs.filter(l => !(l.date === date && l.note.includes("ยอดปิดงาน")));     
-    
-    // 🎯 ตรรกะจบงาน:
-    // เราใช้ -settle เพื่อกลับค่าไปเก็บในบัญชี
-    // ถ้า settle เป็น (+) ช่างถือเงินเกิน -> บัญชีจะเก็บเป็น (-) เพื่อโชว์ว่า "ช่างค้างร้าน"
-    // ถ้า settle เป็น (-) ร้านต้องทบเงิน -> บัญชีจะเก็บเป็น (+) เพื่อโชว์ว่า "ร้านค้างช่าง"
-    const amountToLog = -settle; 
-    
-    account.logs.push({ 
-        date: date, 
-        amount: amountToLog, 
-        note: `ยอดปิดงานวันที่ ${date} (ถือเงินสด ฿${cash})`,
-        type: 'SYSTEM'
-    });
-}
+
+    // 2. 🎯 จุดสำคัญ: ตัดการ push ลง account.logs ออก
+    // ข้อมูลจะไม่ถูกส่งไปแฟ้มประวัติบัญชีจนกว่าช่างจะกดปุ่ม "เคลียร์เงิน" เอง
+
     db = db.filter(r => r.date !== date);
     if (typeof saveDB === "function") { saveDB(); } else { save(); }
+    
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
     
-    alert(`✅ ส่งข้อมูลสำเร็จ\n💰 ยอดที่ต้องเคลียร์วันนี้: ฿${(settle > 0 ? settle : 0).toLocaleString()}`);
+    // 3. ✅ ปรับการแจ้งเตือนตามที่ช่างสั่ง
+    alert(`✅ ส่งข้อมูลสำเร็จ`);
+    
     if (typeof go === "function") go(3); 
 }
 // --- ระบบประกันรายได้ ---
