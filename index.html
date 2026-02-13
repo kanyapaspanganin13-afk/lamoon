@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 1</title>
+    <title>Barber Note Pro 01</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1084,20 +1084,22 @@ function saveAndGo(date, total) {
     const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
     // 5. อัปเดตสมุดบัญชี (Account Logs)
-    if (!isHoliday) {
-        account.logs = account.logs.filter(l => !(l.date === date && l.note.includes("ยอดปิดงาน")));    
-        // 🟢 ตรรกะใหม่: ยอดค้างในบัญชีต้องมาจาก "เงินสดที่ต้องคืนร้าน" เท่านั้น
-        // ถ้า settle ติดลบ (ยอดประกัน) ให้บันทึกเป็น 0 เพื่อไม่ให้ขึ้นยอดค้างเดิม
-        const amountToLog = settle > 0 ? -settle : 0;
-        
-        account.logs.push({ 
-            date: date, 
-            amount: amountToLog, 
-            note: `ยอดปิดงานวันที่ ${date} (ถือเงินสด ฿${cash})`,
-            type: 'SYSTEM'
-        });
-    }
-
+   if (!isHoliday) {
+    account.logs = account.logs.filter(l => !(l.date === date && l.note.includes("ยอดปิดงาน")));     
+    
+    // 🎯 ตรรกะจบงาน:
+    // เราใช้ -settle เพื่อกลับค่าไปเก็บในบัญชี
+    // ถ้า settle เป็น (+) ช่างถือเงินเกิน -> บัญชีจะเก็บเป็น (-) เพื่อโชว์ว่า "ช่างค้างร้าน"
+    // ถ้า settle เป็น (-) ร้านต้องทบเงิน -> บัญชีจะเก็บเป็น (+) เพื่อโชว์ว่า "ร้านค้างช่าง"
+    const amountToLog = -settle; 
+    
+    account.logs.push({ 
+        date: date, 
+        amount: amountToLog, 
+        note: `ยอดปิดงานวันที่ ${date} (ถือเงินสด ฿${cash})`,
+        type: 'SYSTEM'
+    });
+}
     db = db.filter(r => r.date !== date);
     if (typeof saveDB === "function") { saveDB(); } else { save(); }
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
@@ -1364,37 +1366,28 @@ if (dList) {
 function loadAccountStatus() {
     const getEl = (id) => document.getElementById(id);
     const now = new Date(); 
-    
-    // 1. เพิ่มส่วนนี้: จัดการวันที่ให้เป็นรูปแบบไทย (14 ก.พ. 2569)
-    const dateStr = now.toLocaleDateString('th-TH', { 
-        day: 'numeric', 
-        month: 'short', 
-        year: 'numeric' 
-    }); 
+    const dateStr = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }); 
 
     if (typeof account === "undefined") return;
 
-    // 2. คำนวณยอดสุทธิ
     let totalBalance = account.logs.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
     account.balance = totalBalance;
 
-    // 3. แสดงวันที่บนหน้าจอ (ตรวจสอบ ID ให้ตรงกับ HTML ของช่างนะครับ)
     if (getEl("accDateLabel")) getEl("accDateLabel").innerText = dateStr;
     if (getEl("accTodayDate")) getEl("accTodayDate").innerText = dateStr;
 
-    // 4. แสดงยอดเงินกลางหน้าจอ
     if (getEl("accTotalVal")) {
         getEl("accTotalVal").innerText = `฿${Math.abs(totalBalance).toLocaleString()}`;
     }
 
-    // 5. อัปเดตป้ายสถานะ (ติดลบ = ช่างคืนร้าน | เป็นบวก = ร้านคืนช่าง)
     const badge = getEl("statusBadge");
     if (badge) {
-        if (totalBalance < 0) {
+        // ✅ ตรรกะเดียวกับ -settle:
+        if (totalBalance < 0) { // เป็นลบ = ช่างถือเงินเกิน
             badge.innerText = "👨‍🎨 ช่างคืนร้าน";
             badge.style.backgroundColor = "#fee2e2"; 
             badge.style.color = "#991b1b";
-        } else if (totalBalance > 0) {
+        } else if (totalBalance > 0) { // เป็นบวก = ร้านต้องทบเงิน
             badge.innerText = "🏠 ร้านคืนช่าง";
             badge.style.backgroundColor = "#dcfce7";
             badge.style.color = "#166534";
@@ -1404,20 +1397,20 @@ function loadAccountStatus() {
             badge.style.color = "#64748b";
         }
     }
-    
     if (typeof updateStatusUI === 'function') updateStatusUI(totalBalance);
 }
 function updateStatusUI(net) {
     const getEl = (id) => document.getElementById(id);
     const badge = getEl("statusBadge");
     const light = getEl("accLight"); 
-    // ตรรกะ: บวก=แดง (ช่างคืนร้าน) | ลบ=น้ำเงิน (ร้านคืนช่าง) | 0=เขียว (ลงตัว)
-    let color = net > 0 ? "#dc2626" : (net < 0 ? "#1e3a8a" : "#16a34a");
-    let txt = net > 0 ? "👨‍🎨 ช่างคืนร้าน" : (net < 0 ? "🏠 ร้านคืนช่าง" : "⚖️ ยอดลงตัว");
+
+    // ✅ ปรับตรรกะสี: ลบ=แดง (ช่างคืนร้าน) | บวก=น้ำเงิน (ร้านคืนช่าง)
+    let color = net < 0 ? "#dc2626" : (net > 0 ? "#1e3a8a" : "#16a34a");
+    let txt = net < 0 ? "👨‍🎨 ช่างคืนร้าน" : (net > 0 ? "🏠 ร้านคืนช่าง" : "⚖️ ยอดลงตัว");
 
     if (badge) {
         badge.innerText = txt;
-        badge.style.background = net > 0 ? "#fef2f2" : (net < 0 ? "#eff6ff" : "#f0fdf4");
+        badge.style.background = net < 0 ? "#fef2f2" : (net > 0 ? "#eff6ff" : "#f0fdf4");
         badge.style.color = color;
     }
     if (light) {
@@ -1432,7 +1425,7 @@ function clearAccount() {
     const accNoteEl = document.getElementById("accNote");
     const d = document.getElementById("accDate")?.value || new Date().toISOString().split('T')[0];
 
-    // ถ้า net ติดลบ (ช่างค้าง) ต้องส่งค่าบวกไปล้างเพื่อให้รวมกันเป็น 0
+    // ✅ ใช้ -net เพื่อกลับค่าเสมอ ไม่ว่ายอดจะเป็นบวกหรือลบ มันจะรวมกันเป็น 0
     account.logs.push({
         date: d,
         amount: -net, 
