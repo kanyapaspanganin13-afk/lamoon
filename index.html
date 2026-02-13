@@ -1840,32 +1840,30 @@ function loadHistMonth() {
         weeklyData[wKey].income += dailyIncome;
 
         let dayCustomerCount = 0;
-        if (day.details && Array.isArray(day.details)) {
+       if (day.details && Array.isArray(day.details)) {
             day.details.forEach(d => {
+                // 🟢 แก้ไข: ถ้าเป็นประเภท SERVICE ให้นับเป็นลูกค้า 1 คนทันที
                 if (d.type === "SERVICE") {
+                    monthCount++;
+                    dayCustomerCount++;
+                    weeklyData[wKey].customers++;
+
                     const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
-                    let isHaircut = false;
                     svcs.forEach(s => {
                         if (!s) return;
                         const cleanS = s.trim();
+                        // เก็บสถิติแยกตามประเภทเหมือนเดิม
                         if (haircutList.includes(cleanS)) {
                             hairStats[cleanS] = (hairStats[cleanS] || 0) + 1;
                             weeklyData[wKey].popularHair[cleanS] = (weeklyData[wKey].popularHair[cleanS] || 0) + 1;
-                            isHaircut = true;
                         } else {
                             serviceStats[cleanS] = (serviceStats[cleanS] || 0) + 1;
                             weeklyData[wKey].popularService[cleanS] = (weeklyData[wKey].popularService[cleanS] || 0) + 1;
                         }
                     });
-                    if (isHaircut) {
-                        monthCount++;
-                        dayCustomerCount++;
-                        weeklyData[wKey].customers++;
-                    }
                 }
             });
         }
-
         if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
         
         weeklyData[wKey].dailyCounts.push({ 
