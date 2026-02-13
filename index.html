@@ -1364,35 +1364,57 @@ if (dList) {
    ========================================================== */
 function loadAccountStatus() {
     const getEl = (id) => document.getElementById(id);
-    const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
+    const now = new Date(); 
+    // 1. จัดการวันที่ให้เป็นรูปแบบไทย (เช่น 13 ก.พ. 2569)
+    const dateStr = now.toLocaleDateString('th-TH', { 
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric' 
+    }); 
+    // สำหรับค้นหาข้อมูลในระบบ (2026-02-13)
+    const todayKey = now.toISOString().split('T')[0];
 
     if (typeof account === "undefined") return;
-
-    // 1. คำนวณยอดสุทธิทั้งหมดที่ยังไม่ได้เคลียร์
+    // 2. คำนวณยอดสุทธิรวม (Balance)
     let totalBalance = account.logs.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
     account.balance = totalBalance;
+    // 3. ดึงยอดของ "วันนี้"
+    const todayLog = account.logs.find(l => l.date === todayKey && l.type === 'SYSTEM');
+    let todayAmount = todayLog ? Number(todayLog.amount) : 0;
+    // 4. แสดงผลวันที่ (ตรวจสอบ ID ให้ตรงกับใน HTML ส่วนแสดงวันที่ของคุณ)
+    if (getEl("accDateLabel")) getEl("accDateLabel").innerText = dateStr;
+    if (getEl("accTodayDate")) getEl("accTodayDate").innerText = dateStr;
 
-    // 2. ดึงยอด "วันนี้" จาก Log
-    const todayLog = account.logs.find(l => l.date === todayStr && l.type === 'SYSTEM');
-    let todayVal = todayLog ? Math.abs(Number(todayLog.amount)) : 0;
-
-    // 3. แสดงผลตัวเลข
-    if (getEl("accDateLabel")) getEl("accDateLabel").innerText = now.toLocaleDateString('th-TH'); 
-    
-    // ยอดวันนี้ = เงินสดที่ต้องส่งคืนของวันนี้
-    if (getEl("accTodayVal")) getEl("accTodayVal").innerText = `฿${todayVal.toLocaleString()}`;
-    
-    // ยอดรวม = ยอดค้างทั้งหมดในระบบ
-    if (getEl("accTotalVal")) getEl("accTotalVal").innerText = `฿${Math.abs(totalBalance).toLocaleString()}`;
-    
-    // 🟢 ยอดค้างเดิม = ยอดรวมทั้งหมด หักลบยอดของวันนี้
-    // จะเป็นยอดจากวันที่ผ่านๆ มาที่ยังไม่ได้กดปุ่มเคลียร์ยอดเงิน
-    if (getEl("accOldVal")) {
-        const oldVal = Math.abs(totalBalance) - todayVal;
-        getEl("accOldVal").innerText = `฿${(oldVal > 0 ? oldVal : 0).toLocaleString()}`;
+    // 5. อัปเดตยอดเงินกลางหน้าจอ (accTotalVal)
+    if (getEl("accTotalVal")) {
+        getEl("accTotalVal").innerText = `฿${Math.abs(totalBalance).toLocaleString()}`;
     }
-
+    // 6. อัปเดตสถานะที่ป้าย statusBadge
+    const badge = getEl("statusBadge");
+    if (badge) {
+        if (totalBalance > 0) {
+            // กรณีร้านคืนช่าง (ยอดเป็นบวก)
+            badge.innerText = "🏠 ร้านคืนช่าง";
+            badge.style.backgroundColor = "#dcfce7"; // สีเขียวอ่อน
+            badge.style.color = "#166534";
+        } else if (totalBalance < 0) {
+            // กรณีช่างคืนร้าน (ยอดเป็นลบ)
+            badge.innerText = "👨‍🦱 ช่างคืนร้าน";
+            badge.style.backgroundColor = "#fee2e2"; // สีแดงอ่อน
+            badge.style.color = "#991b1b";
+        } else {
+            // กรณีเคลียร์ยอดแล้ว
+            badge.innerText = "✅ เคลียร์ยอดแล้ว";
+            badge.style.backgroundColor = "#f1f5f9"; // สีเทา
+            badge.style.color = "#64748b";
+        }
+    }
+    // 7. อัปเดตยอดค้างเดิม
+    if (getEl("accOldVal")) {
+        const oldVal = totalBalance - todayAmount;
+        getEl("accOldVal").innerText = `฿${Math.abs(oldVal).toLocaleString()}`;
+    }
+    // เรียกฟังก์ชัน UI อื่นๆ (ถ้ามี)
     if (typeof updateStatusUI === 'function') updateStatusUI(totalBalance);
 }
 function updateStatusUI(net) {
