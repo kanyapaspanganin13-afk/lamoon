@@ -1360,29 +1360,32 @@ function loadAccountStatus() {
     const todayStr = now.toISOString().split('T')[0];
 
     if (typeof account === "undefined") return;
-    // 1. คำนวณยอดสุทธิทั้งหมดจาก Logs
-    let totalBalance = 0;
-    if (account.logs && account.logs.length > 0) {
-        totalBalance = account.logs.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
-    }
+
+    // 1. คำนวณยอดสุทธิทั้งหมดที่ยังไม่ได้เคลียร์
+    let totalBalance = account.logs.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
     account.balance = totalBalance;
-    // 2. ดึงยอด "ที่ต้องเคลียร์" ของวันนี้จาก Archives
-    let todaySettleFromLog = 0;
+
+    // 2. ดึงยอด "วันนี้" จาก Log
     const todayLog = account.logs.find(l => l.date === todayStr && l.type === 'SYSTEM');
-    if (todayLog) todaySettleFromLog = Number(todayLog.amount) || 0;
+    let todayVal = todayLog ? Math.abs(Number(todayLog.amount)) : 0;
+
     // 3. แสดงผลตัวเลข
     if (getEl("accDateLabel")) getEl("accDateLabel").innerText = now.toLocaleDateString('th-TH'); 
-    // ยอดวันนี้: แสดงยอดที่ต้องเคลียร์ของวันนี้
-    if (getEl("accTodayVal")) getEl("accTodayVal").innerText = `฿${todaySettleFromLog.toLocaleString()}`;
-    // ยอดรวม: ยอดสุทธิในบัญชีทั้งหมด
-    if (getEl("accTotalVal")) getEl("accTotalVal").innerText = `฿${totalBalance.toLocaleString()}`;
-    // 🟢 ยอดเก่า: คือยอดรวมทั้งหมด ลบด้วยยอดของวันนี้ (จะได้ยอดค้างจากวันก่อนๆ ที่แท้จริง)
+    
+    // ยอดวันนี้ = เงินสดที่ต้องส่งคืนของวันนี้
+    if (getEl("accTodayVal")) getEl("accTodayVal").innerText = `฿${todayVal.toLocaleString()}`;
+    
+    // ยอดรวม = ยอดค้างทั้งหมดในระบบ
+    if (getEl("accTotalVal")) getEl("accTotalVal").innerText = `฿${Math.abs(totalBalance).toLocaleString()}`;
+    
+    // 🟢 ยอดค้างเดิม = ยอดรวมทั้งหมด หักลบยอดของวันนี้
+    // จะเป็นยอดจากวันที่ผ่านๆ มาที่ยังไม่ได้กดปุ่มเคลียร์ยอดเงิน
     if (getEl("accOldVal")) {
-        const oldVal = totalBalance - todaySettleFromLog;
-        getEl("accOldVal").innerText = `฿${(oldVal < 0 ? 0 : oldVal).toLocaleString()}`;
+        const oldVal = Math.abs(totalBalance) - todayVal;
+        getEl("accOldVal").innerText = `฿${(oldVal > 0 ? oldVal : 0).toLocaleString()}`;
     }
 
-    updateStatusUI(totalBalance);
+    if (typeof updateStatusUI === 'function') updateStatusUI(totalBalance);
 }
 function updateStatusUI(net) {
     const getEl = (id) => document.getElementById(id);
