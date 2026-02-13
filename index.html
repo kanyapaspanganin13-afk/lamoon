@@ -861,17 +861,23 @@ $("mixCash").addEventListener("input", function() {
 
 function speak(txt) {
     if ('speechSynthesis' in window) {
-        // 1. สั่งให้หยุดพูดประโยคก่อนหน้าทันที (ป้องกันเสียงพูดซ้อนกันจนฟังไม่รู้เรื่อง)
+        // 1. สั่งให้หยุดพูดประโยคก่อนหน้าทันที
         window.speechSynthesis.cancel();
 
         const msg = new SpeechSynthesisUtterance(txt);
         // 2. ตั้งค่าเสียงภาษาไทย
         msg.lang = 'th-TH'; 
-        // 3. ปรับระดับเสียงและความเร็ว (Optional)
-        msg.pitch = 1;  // ระดับเสียง (0 ถึง 2)
-        msg.rate = 1.1;  // ความเร็วในการพูด (เพื่อให้ดูคล่องแคล่วขึ้น)
-        msg.volume = 1; // ความดัง
+        // 3. ✨ ปรับแต่งให้ดูเหมือนเสียงผู้ชายมากขึ้น
+        msg.pitch = 0.8;  // ลดระดับเสียงลง (จาก 1 เหลือ 0.8) เพื่อให้เสียงทุ้มเหมือนผู้ชาย
+        msg.rate = 1.0;   // ปรับความเร็วให้ปกติ เพื่อให้ฟังดูสุขุมขึ้น
+        msg.volume = 1;   // ความดัง
 
+        // 4. พยายามค้นหาเสียงผู้ชายในระบบ (ถ้าเครื่องมีติดตั้งไว้)
+        const voices = window.speechSynthesis.getVoices();
+        const maleVoice = voices.find(v => v.lang === 'th-TH' && (v.name.includes('Male') || v.name.includes('ชาย')));
+        if (maleVoice) {
+            msg.voice = maleVoice;
+        }
         window.speechSynthesis.speak(msg);
     } else {
         console.warn("เบราว์เซอร์นี้ไม่รองรับระบบเสียงพูดครับ");
