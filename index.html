@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 0</title>
+    <title>Barber Note Pro 03</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -797,7 +797,7 @@ function addRecord() {
         finalCash = 0;
         finalTrans = total;
     }
-    const newRec = {
+   const newRec = {
         id: Date.now(),
         date: dInp,
         time: timeInp,
@@ -805,14 +805,36 @@ function addRecord() {
         tip: tip,
         pay: currentPay, 
         svcs: selectedServices,
-        // ✅ บันทึกแยกทั้งสองยอดเสมอเพื่อให้ระบบรายงานดึงไปใช้ได้
         payCash: finalCash,
         payTrans: finalTrans
     };
-
     db.push(newRec);
     localStorage.setItem("barber_db", JSON.stringify(db));
+    // 🎯 --- ส่วนที่ต้องเพิ่มเพื่อให้ยอด "ดีด" ไปหน้าบัญชี ---
+    // สั่งคำนวณเงินของวันนี้ใหม่ทันที แล้วบันทึกลง Archives
+    if (typeof calculateMoney === "function") {
+        const result = calculateMoney(); // สมมติว่าฟังก์ชันนี้คืนค่า { settle, ... }
+        // อัปเดตยอดลงใน Archives ของวันนี้
+        const idx = archives.findIndex(a => a.date === dInp);
+        const archiveData = {
+            date: dInp,
+            settle: result.settle, // ยอดที่ต้องหักลบ
+            type: (currentPay === 'Holiday') ? 'HOLIDAY' : 'WORK'
+        };
+        if (idx > -1) {
+            archives[idx].settle = result.settle; // ปรับปรุงยอดเดิม
+        } else {
+            archives.push(archiveData); // เพิ่มยอดใหม่ถ้ายังไม่มี
+        }
+        // บันทึก Archives ลงเครื่องด้วย
+        localStorage.setItem("barber_archives", JSON.stringify(archives));
+    }
     alert("บันทึกข้อมูลเรียบร้อยแล้วครับ");
+    if (typeof resetForm === 'function') resetForm();
+    renderDay(); 
+    // 🎯 เรียกให้หน้าบัญชีอัปเดตยอดทันที (ถ้ามันเปิดค้างอยู่หลังฉาก)
+    if (typeof loadAccountStatus === 'function') loadAccountStatus();
+}
     
     // ล้างค่าหลังจากบันทึก
     if (typeof resetForm === 'function') resetForm();
@@ -1359,50 +1381,46 @@ if (dList) {
    ========================================================== */
 function loadAccountStatus() {
     const getEl = (id) => document.getElementById(id);
-    const now = new Date(); 
-    const dateStr = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }); 
-    
-    // ดึงวันที่ปัจจุบันในรูปแบบที่เก็บใน Archives (เช่น 13/02/2026)
-    const todayKey = document.getElementById("accDate")?.value || new Date().toISOString().split('T')[0];
+    const todayKey = getEl("accDate")?.value || new Date().toLocaleDateString('th-TH');
 
-    if (typeof account === "undefined" || typeof archives === "undefined") return;
-
-    // 🎯 1. เปลี่ยนจุดดึงข้อมูล: ดึงจาก Archives ของวันนี้ที่เพิ่งส่งมาจาก saveAndGo
+    if (typeof archives === "undefined") return;
+    // 🎯 1. ดึงยอด "ค้างวันนี้" (ที่เพิ่งกดบันทึกมาจากหน้าแรก)
     const todayData = archives.find(a => a.date === todayKey);
-    
-    // 🎯 2. คำนวณยอดรอเคลียร์ (กลับค่า settle ตามตรรกะ -settle)
-    // ถ้าไม่มีข้อมูลวันนี้ ให้เป็น 0
-    let totalBalance = todayData ? -todayData.settle : 0;
-    
-    // เก็บยอดนี้ไว้ใน account.balance เพื่อให้ปุ่ม "เคลียร์เงิน" ดึงไปลงแฟ้มประวัติได้
+    let todaySettle = todayData ? -todayData.settle : 0;
+
+    // 🎯 2. ดึงยอด "ค้างเดิม" (กวาดจาก Archives วันอื่นทั้งหมดที่ยังไม่เคลียร์)
+    let oldSettle = archives.reduce((sum, day) => {
+        if (day.date !== todayKey) {
+            return sum + (Number(-day.settle) || 0);
+        }
+        return sum;
+    }, 0);
+    // 🎯 3. หักลบกันเป็น "ยอดต้องเคลียร์"
+    let totalBalance = oldSettle + todaySettle;
     account.balance = totalBalance;
 
-    if (getEl("accDateLabel")) getEl("accDateLabel").innerText = dateStr;
-    if (getEl("accTodayDate")) getEl("accTodayDate").innerText = dateStr;
-
-    // 3. แสดงยอดกลางหน้าจอ (ยอดที่รอช่างกดปุ่มเคลียร์)
+    // 📊 แสดงผลให้ครบ 3 จุดตามที่ช่างต้องการ
+    if (getEl("accTodayVal")) getEl("accTodayVal").innerText = `฿${todaySettle.toLocaleString()}`; // ค้างวันนี้
+    if (getEl("accOldVal"))   getEl("accOldVal").innerText = `฿${oldSettle.toLocaleString()}`;   // ค้างเดิม
+    
+    // 🎯 ยอดสุทธิ (ยอดต้องเคลียร์)
     if (getEl("accTotalVal")) {
         getEl("accTotalVal").innerText = `฿${Math.abs(totalBalance).toLocaleString()}`;
     }
-
+    // อัปเดตสถานะป้าย (ช่างคืนร้าน / ร้านคืนช่าง)
     const badge = getEl("statusBadge");
     if (badge) {
-        // ตรรกะแสดงสถานะตามยอดที่รอเคลียร์
-        if (totalBalance < 0) { 
+        if (totalBalance < 0) {
             badge.innerText = "👨‍🎨 ช่างคืนร้าน";
-            badge.style.backgroundColor = "#fee2e2"; 
-            badge.style.color = "#991b1b";
-        } else if (totalBalance > 0) { 
+            badge.style.backgroundColor = "#fee2e2"; badge.style.color = "#991b1b";
+        } else if (totalBalance > 0) {
             badge.innerText = "🏠 ร้านคืนช่าง";
-            badge.style.backgroundColor = "#dcfce7";
-            badge.style.color = "#166534";
+            badge.style.backgroundColor = "#dcfce7"; badge.style.color = "#166534";
         } else {
             badge.innerText = "✅ ยอดลงตัว";
-            badge.style.backgroundColor = "#f1f5f9";
-            badge.style.color = "#64748b";
+            badge.style.backgroundColor = "#f1f5f9"; badge.style.color = "#64748b";
         }
     }
-    
     if (typeof updateStatusUI === 'function') updateStatusUI(totalBalance);
 }
 function updateStatusUI(net) {
