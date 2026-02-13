@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 32</title>
+    <title>Barber Note Pro 3</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -663,22 +663,24 @@ function go(p) {
 }
 function updateDateDisplay(v) {
     if (!v) return;
-    // 1. จัดการแปลงวันที่เป็นรูปแบบภาษาไทย (พ.ศ.)
+    // 1. แยกวันที่ (v จะเป็นรูปแบบ 2026-02-13)
     const [y, m, d] = v.split('-');
-    const thaiYear = parseInt(y) + 543;
+    // 2. คำนวณปี พ.ศ. แบบสองหลัก (2026 + 543 = 2569 -> ตัดเหลือ 69)
+    const thaiYearFull = parseInt(y) + 543;
+    const thaiYearShort = thaiYearFull.toString().slice(-2); 
+    // 3. รายชื่อเดือนย่อ
     const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-    const formattedDate = `📅 ${parseInt(d)} ${months[parseInt(m)-1]} ${thaiYear}`;
-
-    // 2. แสดงผลในช่องเลือกวันที่ (id="dateDisplay")
+    // 4. ✨ จัดรูปแบบที่ต้องการ: "13 ก.พ. 69"
+    const formattedDate = `${parseInt(d)} ${months[parseInt(m)-1]} ${thaiYearShort}`;
+    // 5. นำไปแสดงผลในจุดต่างๆ
     const el = document.getElementById("dateDisplay");
     if (el) el.innerText = formattedDate;
-
-    // 3. สั่งให้ฟังก์ชันแสดงผลรายงาน (หน้าบันทึก) ทำงานต่อทันที
-    if (typeof renderDay === "function") {
-        renderDay(v);
-    }
+    // ถ้ามีจุดแสดงผลในหน้าบันทึก (หน้า 2) ก็อัปเดตด้วยครับ
+    const el2 = document.getElementById("displayDateThai");
+    if (el2) el2.innerText = formattedDate;
+    // สั่งโหลดข้อมูลใหม่ตามวันที่เลือก
+    if (typeof renderDay === "function") renderDay(v);
 }
-
 /* ==========================================================
    SECTION 2: CORE DATA & BACKUP SYSTEM
    (การบันทึกข้อมูลและระบบสำรอง/กู้คืน)
