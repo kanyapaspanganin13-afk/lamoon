@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 2</title>
+    <title>Barber Note Pro 32</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -336,14 +336,19 @@ nav {
                     </div>
                 </div>
             
-               <div class="grid-3" style="gap:10px; margin-bottom:15px;">
-                    <div style="background:#fff; border-radius:18px; border:none; height:75px; position:relative; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                        <span id="c" style="font-weight:800; color:#475569; font-size:18px;">📅 เลือกวันที่</span>
-                       <input type="date" id="dateInp" onchange="document.getElementById('dateDisplay').innerText = this.value; if(window.updateDateDisplay) updateDateDisplay(this.value); renderDay();" style="position:absolute; opacity:0; width:100%; height:100%; cursor:pointer; z-index:2;">
-                    </div>
-                    <input type="time" id="tStart" style="height:75px; border-radius:22px; border:none; text-align:center; font-weight:700; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                    <input type="time" id="tEnd" style="height:75px; border-radius:22px; border:none; text-align:center; font-weight:700; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                </div>
+              <div class="grid-3" style="gap:10px; margin-bottom:15px;">
+    <div style="background:#fff; border-radius:18px; border:none; height:75px; position:relative; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+        
+        <span id="dateDisplay" style="font-weight:800; color:#475569; font-size:18px;">📅 เลือกวันที่</span>
+        
+        <input type="date" id="dateInp" 
+               onchange="if(window.updateDateDisplay) updateDateDisplay(this.value);" 
+               style="position:absolute; opacity:0; width:100%; height:100%; cursor:pointer; z-index:2;">
+    </div>
+
+    <input type="time" id="tStart" style="height:75px; border-radius:22px; border:none; text-align:center; font-weight:700; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+    <input type="time" id="tEnd" style="height:75px; border-radius:22px; border:none; text-align:center; font-weight:700; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+</div>
             <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
                 <select id="hairStyle" style="height:70px; border-radius:14px; border:none; font-weight:700; background:#fff; color:#1e293b; box-shadow:0 4px 10px rgba(0,0,0,0.03); padding:0 10px;">
                     <option value="">✂️ ทรงผม</option>
@@ -656,37 +661,39 @@ function go(p) {
     // 4. เลื่อนจอขึ้นบนสุด (เพื่อความสุภาพและใช้งานง่าย)
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-function updateDateDisplay(v){if(!v)return;
-    const d=new Date(v);const el=$("dateDisplay");
-    if(el)el.innerText=d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
-    if(typeof renderDay==="function")renderDay()}window.addEventListener('DOMContentLoaded',()=>{
-    const i=$("dateInp"),t=new Date().toISOString().split('T')[0];
-    if(i){i.value=t;updateDateDisplay(t)}});
+function updateDateDisplay(v) {
+    if (!v) return;
+    // 1. จัดการแปลงวันที่เป็นรูปแบบภาษาไทย (พ.ศ.)
+    const [y, m, d] = v.split('-');
+    const thaiYear = parseInt(y) + 543;
+    const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    const formattedDate = `📅 ${parseInt(d)} ${months[parseInt(m)-1]} ${thaiYear}`;
+
+    // 2. แสดงผลในช่องเลือกวันที่ (id="dateDisplay")
+    const el = document.getElementById("dateDisplay");
+    if (el) el.innerText = formattedDate;
+
+    // 3. สั่งให้ฟังก์ชันแสดงผลรายงาน (หน้าบันทึก) ทำงานต่อทันที
+    if (typeof renderDay === "function") {
+        renderDay(v);
+    }
+}
 
 /* ==========================================================
    SECTION 2: CORE DATA & BACKUP SYSTEM
    (การบันทึกข้อมูลและระบบสำรอง/กู้คืน)
    ========================================================== */
-function save() {
-                localStorage.setItem("barber_db", JSON.stringify(db));
-                localStorage.setItem("barber_archives", JSON.stringify(archives));
-                localStorage.setItem("barber_account", JSON.stringify(account));
-                localStorage.setItem("barber_conf", JSON.stringify(conf));
-            }
-            window.onload = () => {
-                const today = new Date().toISOString().split('T')[0];
-            
-                if ($("dateInp")) $("dateInp").value = today;
-                if ($("accDate")) $("accDate").value = today;
-                if ($("histDate")) $("histDate").value = today;
-                if (conf.shop) $("shopNameDisp").innerText = conf.shop;
-                if (conf.theme) applyTheme(conf.theme);
-            
-                renderDay();
-                loadAccountStatus();
-            };
- function saveDB() {localStorage.setItem("barber_db", JSON.stringify(db));localStorage.setItem("barber_conf", JSON.stringify(conf));}
-     
+function saveDB() {
+    try {
+        localStorage.setItem("barber_db", JSON.stringify(db));
+        localStorage.setItem("barber_archives", JSON.stringify(archives));
+        localStorage.setItem("barber_account", JSON.stringify(account));
+        localStorage.setItem("barber_conf", JSON.stringify(conf));
+        console.log("💾 บันทึกข้อมูลเรียบร้อยแล้วครับ");
+    } catch (e) {
+        console.error("❌ ไม่สามารถบันทึกได้:", e);
+    }
+}
 // 1. ฟังก์ชันส่งออกข้อมูล (Backup)
 function exportBackup() {
     try {
@@ -2412,7 +2419,7 @@ function applyTheme(t) {
    SECTION 9: SYSTEM STARTUP & EVENT LISTENERS
    (สวิตช์เปิดเครื่อง: การเริ่มต้นและดักจับเหตุการณ์)
    ========================================================== */
-// 1. ดักจับการคลิกพื้นหลังเพื่อปิด Modal (อยู่นอก Load ได้)
+// 1. ดักจับการคลิกพื้นหลังเพื่อปิด Modal 
 window.onclick = function(e) {
     const modals = [
         { id: "reportModal", close: typeof closeReportModal === "function" ? closeReportModal : null },
@@ -2421,26 +2428,34 @@ window.onclick = function(e) {
     ]; 
     modals.forEach(m => {
         const modalEl = $(m.id);
-        // ถ้าสิ่งที่คลิก (e.target) คือตัวพื้นหลัง Modal เอง ให้สั่งปิด
         if (modalEl && e.target === modalEl && m.close) m.close();
     });
 };
-// 2. การทำงานทันทีที่โหลดหน้าเว็บเสร็จ (รวม Event Listeners ไว้ข้างใน)
+// 2. การทำงานทันทีที่โหลดหน้าเว็บเสร็จ
 window.addEventListener('load', () => {
     console.log("🚀 Barber App System Started...");
     // --- ส่วนตั้งค่าเริ่มต้น ---
-    if (typeof loadAccountStatus === 'function') loadAccountStatus();
-    // ตั้งค่าวันที่ปัจจุบันลงใน Input (ถ้ามี)
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0]; 
+    // ตั้งค่าวันที่ปัจจุบันลงใน Input
     if ($("dateInp")) $("dateInp").value = today;
+    if ($("accDate")) $("accDate").value = today;
+    if ($("histDate")) $("histDate").value = today;
+
+    // ✨ ส่วนสำคัญที่สุด: สั่งให้อัปเดตตัวเลขวันที่บนหน้าจอเป็นภาษาไทยทันที
+    if (typeof updateDateDisplay === 'function') {
+        updateDateDisplay(today);
+    } else {
+        // กรณีไม่มีฟังก์ชัน ให้ลองสั่ง renderDay ตรงๆ เพื่อโหลดข้อมูล
+        if (typeof renderDay === 'function') renderDay(today);
+    }
+    if (typeof loadAccountStatus === 'function') loadAccountStatus();
     // --- ส่วนดักจับเหตุการณ์ (Event Listeners) ---
-    // การคำนวณเงินอัตโนมัติ
     if ($("mixCash")) $("mixCash").addEventListener("input", updateMixValues);
     if ($("priceInp")) $("priceInp").addEventListener("input", updateMixValues);
     if ($("tipInp")) $("tipInp").addEventListener("input", updateMixValues);
 
     console.log("⚡ ระบบคำนวณเงินและ Event Listeners พร้อมทำงาน");
-}); // ปิดวงเล็บของ addEventListener('load') แค่อันเดียวที่นี่
+});
  </script>
             </body>
             </html>
