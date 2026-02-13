@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 11</title>
+    <title>Barber Note Pro 1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1061,7 +1061,6 @@ function saveAndGo(date, total) {
     const todayData = allToday.filter(r => r.type === 'SERVICE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
 
-    // บังคับเป็นตัวเลขเพื่อป้องกันยอดเพี้ยน
     const numTotal = Number(total) || 0; 
     let cash = 0, tips = 0;
 
@@ -1077,41 +1076,36 @@ function saveAndGo(date, total) {
         const commission = numTotal * (Number(conf.perc) / 100);
         const baseEarn = Math.max(commission, Number(conf.guar) || 0);
         bEarn = baseEarn + tips;
-        // settle คือยอดเงินที่ช่างถือเกิน (ต้องคืนร้าน)
-        settle = cash - bEarn;
+        // settle ตรงๆ: (รายได้ช่าง - เงินสด) 
+        // บวก = ร้านทบให้ช่าง | ลบ = ช่างคืนเงินร้าน
+        settle = bEarn - cash; 
     }
 
-    // 1. ✅ บันทึกลงรายงาน (Archives) - ต้องบันทึกก่อนล้าง db ข้อมูลถึงจะไม่หาย
+    // --- บันทึกรายงาน (Archives) ---
     const data = { 
-        date, 
-        total: numTotal, 
-        cash, tips, 
+        date, total: numTotal, cash, tips, 
         barber: Math.floor(bEarn), 
-        settle: settle, // เก็บค่านี้ไว้ดูในรายงาน
+        settle: settle, 
         type: isHoliday ? "HOLIDAY" : "WORK"
     };
-
     const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
 
-    // 2. ✅ ส่งลงบัญชี - ใช้ค่า -settle เพื่อให้ยอดติดลบ (ช่างค้างร้าน)
+    // --- บันทึกบัญชี (Account) ---
     if (!isHoliday) {
         if (!account.logs) account.logs = [];
         account.logs = account.logs.filter(l => !(l.date === date && l.note.includes("ยอดปิดงาน")));
         account.logs.push({ 
-            date, 
-            amount: -settle, 
-            note: `ยอดปิดงานวันที่ ${date}`,
-            type: 'SYSTEM'
+            date, amount: settle, note: `ยอดปิดงานวันที่ ${date}`, type: 'SYSTEM' 
         });
     }
-    // 3. ✅ ล้างข้อมูลหน้างานและเซฟทันที
+
+    // ล้างหน้างานและเซฟ (ทำทีหลังสุด ข้อมูลจะไม่หาย)
     db = db.filter(r => r.date !== date);
     if (typeof save === "function") save(); else if (typeof saveDB === "function") saveDB();
 
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
-    
-    alert(`✅ บันทึกสำเร็จ!\nยอดเคลียร์: ฿${settle.toLocaleString()}`);
+    alert(`✅ บันทึกสำเร็จ!\nยอดส่วนต่าง: ฿${settle.toLocaleString()}`);
     if (typeof go === "function") go(1); 
 }
 // --- ระบบประกันรายได้ ---
