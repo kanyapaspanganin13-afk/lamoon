@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro </title>
+    <title>Barber Note Pro 2</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -667,42 +667,26 @@ function updateDateDisplay(v){if(!v)return;
    SECTION 2: CORE DATA & BACKUP SYSTEM
    (การบันทึกข้อมูลและระบบสำรอง/กู้คืน)
    ========================================================== */
-// ฟังก์ชันบันทึกข้อมูล (รวมเป็นชื่อเดียว)
-function saveDB() {
-    try {
-        localStorage.setItem("barber_db", JSON.stringify(db));
-        localStorage.setItem("barber_archives", JSON.stringify(archives));
-        localStorage.setItem("barber_account", JSON.stringify(account));
-        localStorage.setItem("barber_conf", JSON.stringify(conf));
-        console.log("💾 บันทึกข้อมูลเรียบร้อยแล้ว");
-    } catch (e) {
-        console.error("❌ บันทึกไม่สำเร็จ:", e);
-    }
-}
-// เมื่อโหลดหน้าเว็บเสร็จสมบูรณ์
-window.onload = () => {
-    const today = new Date().toISOString().split('T')[0];
-
-    // 1. ตั้งค่าวันที่ให้กับทุก Input
-    if ($("dateInp")) $("dateInp").value = today;
-    if ($("accDate")) $("accDate").value = today;
-    if ($("histDate")) $("histDate").value = today;
-
-    // 2. ✨ เพิ่มการอัปเดตตัวหนังสือวันที่ไทยทันทีที่เปิดแอป
-    if (typeof updateDateDisplay === "function") {
-        updateDateDisplay(today);
-    }
-    // 3. ตั้งค่าหน้าตาตามที่ตั้งไว้ใน Config
-    if (conf.shop && $("shopNameDisp")) {
-        $("shopNameDisp").innerText = conf.shop;
-    }
-    if (conf.theme && typeof applyTheme === "function") {
-        applyTheme(conf.theme);
-    }
-    // 4. โหลดข้อมูลมาแสดงผล
-    if (typeof renderDay === "function") renderDay();
-    if (typeof loadAccountStatus === "function") loadAccountStatus();
-};
+function save() {
+                localStorage.setItem("barber_db", JSON.stringify(db));
+                localStorage.setItem("barber_archives", JSON.stringify(archives));
+                localStorage.setItem("barber_account", JSON.stringify(account));
+                localStorage.setItem("barber_conf", JSON.stringify(conf));
+            }
+            window.onload = () => {
+                const today = new Date().toISOString().split('T')[0];
+            
+                if ($("dateInp")) $("dateInp").value = today;
+                if ($("accDate")) $("accDate").value = today;
+                if ($("histDate")) $("histDate").value = today;
+                if (conf.shop) $("shopNameDisp").innerText = conf.shop;
+                if (conf.theme) applyTheme(conf.theme);
+            
+                renderDay();
+                loadAccountStatus();
+            };
+ function saveDB() {localStorage.setItem("barber_db", JSON.stringify(db));localStorage.setItem("barber_conf", JSON.stringify(conf));}
+     
 // 1. ฟังก์ชันส่งออกข้อมูล (Backup)
 function exportBackup() {
     try {
