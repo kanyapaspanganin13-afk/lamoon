@@ -1051,12 +1051,10 @@ function updateMixValues() {
    ========================================================== */
  function saveAndGo(date, total) {
     const allToday = db.filter(r => r.date === date);
-    if (allToday.length === 0) return alert("⚠️ ไม่พบข้อมูล");
-
     const todayData = allToday.filter(r => r.type === 'SERVICE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
+
     let cash = 0, tips = 0, trans = 0;
-    
     todayData.forEach(r => {
         const p = Number(r.price) || 0, t = Number(r.tip) || 0;
         tips += t;
@@ -1065,28 +1063,44 @@ function updateMixValues() {
         else if (r.pay === "Mix") { cash += Number(r.payCash) || 0; trans += Number(r.payTrans) || 0; }
     });
 
-    const commission = total * (conf.perc / 100);
-    const baseEarn = Math.max(commission, Number(conf.guar)); 
-    const bEarn = isHoliday ? 0 : baseEarn + tips;
-    const settle = isHoliday ? 0 : cash - bEarn;
+    const commission = (Number(total) || 0) * (Number(conf.perc) / 100);
+    const baseEarn = Math.max(commission, Number(conf.guar) || 0); 
+    const bEarn = isHoliday ? 0 : (total > 0 ? baseEarn + tips : 0);
+    const settle = isHoliday ? 0 : (total > 0 ? cash - bEarn : 0);
 
-    const data = { date, total, cash, trans, tips, barber: Math.floor(bEarn), settle: settle, type: isHoliday ? "HOLIDAY" : "WORK" };
+    // 1. ✅ บันทึกเข้า Archives: เก็บเฉพาะค่าที่ใช้ทำ "รายงานสรุป"
+    // แต่ "ไม่เก็บ" ข้อมูลที่จะไปโชว์ในหน้า "ประวัติการเคลียร์เงิน"
+    const data = { 
+        date, 
+        total, 
+        cash, 
+        trans, 
+        tips, 
+        barber: Math.floor(bEarn), 
+        // ไม่ส่งค่า settle เข้ามาในนี้ เพื่อไม่ให้โชว์ยอดในหน้าประวัติเคลียร์เงิน
+        type: isHoliday ? "HOLIDAY" : "WORK" 
+    };
+
     const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
 
-    // ส่งยอดเข้า Account Logs อัตโนมัติเพื่อให้หน้าบัญชีหักลบยอดได้
+    // 2. ✅ ส่งยอดเข้าหน้าบัญชี: หักลบยอดค้างจริง (หน้าบัญชีจะยังแม่นยำ)
     if (!isHoliday) {
-        account.logs = account.logs.filter(l => l.date !== date || !l.note.includes("ยอดปิดงาน"));
-        account.logs.push({ date: date, amount: settle, note: `ยอดปิดงานวันที่ ${date}` });
+        account.logs = account.logs.filter(l => !(l.date === date && l.note.includes("ยอดปิดงาน")));
+        account.logs.push({ 
+            date: date, 
+            amount: -settle, // ส่งยอดเงินจริงๆ ไปหักลบในหน้าบัญชี
+            note: `ยอดปิดงานวันที่ ${date}` 
+        });
     }
 
     db = db.filter(r => r.date !== date);
-    save();
-    loadAccountStatus();
-    alert("✅ บันทึกเรียบร้อย");
-    go(3);
+    if (typeof saveDB === "function") { saveDB(); } else { save(); }
+    if (typeof loadAccountStatus === 'function') loadAccountStatus();
+    
+    alert(`✅ บันทึกสำเร็จ (รายงานอยู่ครบ / หน้าบัญชีอัปเดตแล้ว)`);
+    if (typeof go === "function") go(3); 
 }
-
 // --- ระบบประกันรายได้ ---
 function handleInsurance() {
     const d = $("dateInp")?.value || new Date().toISOString().split('T')[0];
