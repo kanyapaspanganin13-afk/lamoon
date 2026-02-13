@@ -703,8 +703,6 @@ window.onload = () => {
     if (typeof renderDay === "function") renderDay();
     if (typeof loadAccountStatus === "function") loadAccountStatus();
 };
- function saveDB() {localStorage.setItem("barber_db", JSON.stringify(db));localStorage.setItem("barber_conf", JSON.stringify(conf));}
-
 // 1. ฟังก์ชันส่งออกข้อมูล (Backup)
 function exportBackup() {
     try {
