@@ -508,7 +508,7 @@ nav {
 </div>
         </div>  
        <div onclick="$('histMonth').showPicker()" 
-     style="background:linear-gradient(135deg, #0b1e59, #190da8);border-radius:25px;padding:12px 10px;text-align:center;color:#fff;position:relative;box-shadow:0 8px 15px rgba(99,102,241,0.2);cursor:pointer;margin-top: 15px; margin-bottom: 12px;">
+     style="background:linear-gradient(135deg,#190da8,#0b1e59);border-radius:25px;padding:12px 10px;text-align:center;color:#fff;position:relative;box-shadow:0 8px 15px rgba(99,102,241,0.2);cursor:pointer;margin-top: 15px; margin-bottom: 12px;">
            <i class="fas fa-calendar-check" style="font-size:24px; margin-bottom:5px; display:block;"></i><b style="font-size:16px;">สรุปรายเดือน</b>
             <input type="month" id="histMonth" onchange="loadHistMonth()" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
 </div>
@@ -2414,8 +2414,8 @@ function handleSave(event) {
     
     if($("mixPanel")) $("mixPanel").style.display = 'none';
 
-    if ($("priceInp")) $("priceInp").focus();
-}
+    if ($("tStart")) {$("tStart").focus();
+    }
 function applyTheme(t) {
     // 1. จัดการ Class และลบ Style พิเศษเดิมออกก่อน
     document.body.className = t;
