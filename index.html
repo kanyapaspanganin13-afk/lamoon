@@ -497,13 +497,15 @@ nav {
             </div>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <button onclick="clearAccount()" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; border:none; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer;">
-                <i class="fas fa-check-double"></i> เคลียร์เงิน
-            </button>
-            <button onclick="openHistoryModal()" style="background:#fff; color:#3b82f6; border:2px solid #3b82f6; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer;">
-                <i class="fas fa-history"></i> ประวัติเคลียร์เงิน
-            </button>
+       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+    <button onclick="clearAccount()" style="background:#22c55e; color:#fff; border:none; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <i class="fas fa-check-double"></i> เคลียร์เงิน
+    </button>
+
+    <button onclick="openHistoryModal()" style="background:#f59e0b; color:#fff; border:none; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <i class="fas fa-history"></i> ประวัติเคลียร์เงิน
+    </button>
+</div>
         </div>  
        <div onclick="$('histMonth').showPicker()" 
      style="background:linear-gradient(135deg, #0b1e59, #190da8);border-radius:25px;padding:12px 10px;text-align:center;color:#fff;position:relative;box-shadow:0 8px 15px rgba(99,102,241,0.2);cursor:pointer;margin-top: 15px; margin-bottom: 12px;">
