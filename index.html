@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro</title>
+    <title>Barber Note Pro1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1375,20 +1375,30 @@ if (dList) {
 function loadAccountStatus() {
     const getEl = (id) => document.getElementById(id);
     const now = new Date(); 
-    const todayKey = now.toISOString().split('T')[0];
+    
+    // 1. เพิ่มส่วนนี้: จัดการวันที่ให้เป็นรูปแบบไทย (14 ก.พ. 2569)
+    const dateStr = now.toLocaleDateString('th-TH', { 
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric' 
+    }); 
 
     if (typeof account === "undefined") return;
 
-    // คำนวณยอดสุทธิ (ยอดติดลบ = ช่างคืนร้าน | ยอดบวก = ร้านคืนช่าง)
+    // 2. คำนวณยอดสุทธิ
     let totalBalance = account.logs.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
     account.balance = totalBalance;
 
-    // แสดงผลยอดเงินกลาง (ใส่ Math.abs เพื่อให้โชว์เป็นตัวเลขบวกสวยๆ)
+    // 3. แสดงวันที่บนหน้าจอ (ตรวจสอบ ID ให้ตรงกับ HTML ของช่างนะครับ)
+    if (getEl("accDateLabel")) getEl("accDateLabel").innerText = dateStr;
+    if (getEl("accTodayDate")) getEl("accTodayDate").innerText = dateStr;
+
+    // 4. แสดงยอดเงินกลางหน้าจอ
     if (getEl("accTotalVal")) {
         getEl("accTotalVal").innerText = `฿${Math.abs(totalBalance).toLocaleString()}`;
     }
 
-    // อัปเดตสถานะป้าย Status (ปรับให้ตรงกับ saveAndGo)
+    // 5. อัปเดตป้ายสถานะ (ติดลบ = ช่างคืนร้าน | เป็นบวก = ร้านคืนช่าง)
     const badge = getEl("statusBadge");
     if (badge) {
         if (totalBalance < 0) {
@@ -1406,7 +1416,6 @@ function loadAccountStatus() {
         }
     }
     
-    // อัปเดตไฟสถานะ (ถ้ามีฟังก์ชันนี้)
     if (typeof updateStatusUI === 'function') updateStatusUI(totalBalance);
 }
 function updateStatusUI(net) {
