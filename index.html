@@ -1051,10 +1051,9 @@ function updateMixValues() {
    ========================================================== */
 function saveAndGo(date, total) {
     const allToday = db.filter(r => r.date === date);
-    // ตรวจสอบสถานะวันหยุด
-    const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
-    // คำนวณยอดเงินจริง
     const todayData = allToday.filter(r => r.type === 'SERVICE');
+    const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
+
     let cash = 0, tips = 0, trans = 0;
     todayData.forEach(r => {
         const p = Number(r.price) || 0, t = Number(r.tip) || 0;
@@ -1063,11 +1062,12 @@ function saveAndGo(date, total) {
         else if (r.pay === "Trans") { trans += (p + t); }
         else if (r.pay === "Mix") { cash += Number(r.payCash) || 0; trans += Number(r.payTrans) || 0; }
     });
-    const commission = total * (Number(conf.perc) / 100);
+    const commission = (Number(total) || 0) * (Number(conf.perc) / 100);
     const baseEarn = Math.max(commission, Number(conf.guar) || 0); 
     const bEarn = isHoliday ? 0 : (total > 0 ? baseEarn + tips : 0);
     const settle = isHoliday ? 0 : (total > 0 ? cash - bEarn : 0);
-    // 1. บันทึกเข้า Archives (เก็บค่าจริงเพื่อให้รายงานมีข้อมูล)
+    // 1. ✅ บันทึกเข้า Archives: เก็บค่าจริงเพื่อให้ดูรายงานย้อนหลังได้ 
+    // แต่เซ็ท settle เป็น 0 เพื่อไม่ให้โชว์ยอดเงินใน "แฟ้มเคลียร์ประวัติ"
     const data = { 
         date, 
         total, 
@@ -1075,27 +1075,26 @@ function saveAndGo(date, total) {
         trans, 
         tips, 
         barber: Math.floor(bEarn), 
-        settle: settle, 
+        settle: 0, // 👈 ใส่ 0 ตรงนี้ ยอดในแฟ้มเคลียร์ประวัติจะกลายเป็น 0 บาททันที
         type: isHoliday ? "HOLIDAY" : "WORK" 
     };
     const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
-    // 2. ส่งยอดเข้า Account Logs (เพื่อให้หน้าบัญชีหักลบยอดได้จริง)
+    // 2. ✅ ส่งยอดเข้าหน้าบัญชี: หักลบยอดค้างจริง (หน้าบัญชีจะยังแม่นยำ)
     if (!isHoliday) {
-        account.logs = account.logs.filter(l => l.date !== date || !l.note.includes("ยอดปิดงาน"));
+        account.logs = account.logs.filter(l => !(l.date === date && l.note.includes("ยอดปิดงาน")));
         account.logs.push({ 
             date: date, 
-            amount: -settle, 
+            amount: -settle, // ส่งยอดจริงไปคำนวณเงินค้างหน้าบัญชี
             note: `ยอดปิดงานวันที่ ${date}` 
         });
     }
-    // 3. ล้างข้อมูลหน้าบันทึกและเซฟ
     db = db.filter(r => r.date !== date);
     if (typeof saveDB === "function") { saveDB(); } else { save(); }
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
     
-    alert(`✅ บันทึกวันที่ ${date} เรียบร้อย`);
-    if (typeof go === "function") go(3);
+    alert(`✅ บันทึกสำเร็จ (รายงานอยู่ครบ / แฟ้มเคลียร์เงินเป็น 0)`);
+    if (typeof go === "function") go(3); 
 }
 // --- ระบบประกันรายได้ ---
 function handleInsurance() {
