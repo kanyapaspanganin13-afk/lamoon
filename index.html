@@ -656,6 +656,22 @@ function go(p) {
     // 4. เลื่อนจอขึ้นบนสุด (เพื่อความสุภาพและใช้งานง่าย)
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+   function updateDateDisplay(v) {
+    if (!v) return; 
+    // แยกวันที่ออกมาโดยตรงเพื่อเลี่ยงปัญหา Timezone
+    const [y, m, d] = v.split('-');
+    const thaiYear = parseInt(y) + 543;
+    const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    
+    const formattedDate = `${parseInt(d)} ${months[parseInt(m)-1]} ${thaiYear}`;
+    // อัปเดตทุกจุดที่มีการแสดงวันที่ (ใส่ ID ที่เกี่ยวข้องทั้งหมด)
+    ["dateDisplay", "displayDateThai", "dayDateDisp"].forEach(id => {
+        const el = $(id);
+        if (el) el.innerText = formattedDate;
+    });
+
+    if (typeof renderDay === "function") renderDay(v);
+}
 /* ==========================================================
    SECTION 2: CORE DATA & BACKUP SYSTEM
    (การบันทึกข้อมูลและระบบสำรอง/กู้คืน)
