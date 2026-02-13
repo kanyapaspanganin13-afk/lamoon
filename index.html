@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 01</title>
+    <title>Barber Note Pro 02</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1485,23 +1485,21 @@ function editAccountLog(index) {
 function loadAccountHistory() {
     const historyContainer = $("accHistory");
     if (!historyContainer) return;
-    // ตรวจสอบว่ามีข้อมูลหรือไม่
+
     if (!account.logs || account.logs.length === 0) {
         historyContainer.innerHTML = '<center style="padding:40px; color:#94a3b8;">ไม่มีประวัติการบันทึกบัญชี</center>';
         return;
     }
-    // สร้างรายการประวัติ (เรียงจากใหม่ไปเก่าด้วย .reverse)
-    // ใช้ slice() เพื่อไม่ให้กระทบข้อมูลจริงใน Array หลัก
+
     const historyHtml = account.logs.slice().reverse().map((l, originalIndex) => {
-        // หา index จริงที่อยู่ใน Array (เพราะเรา reverse มา)
         const realIdx = account.logs.length - 1 - originalIndex;
         
-        // กำหนดสีและเครื่องหมายตามประเภทเงิน
-        // บวก = ช่างคืนร้าน/รายได้สะสม (สีแดง เพราะเป็นหนี้ที่ช่างต้องเคลียร์)
-        // ลบ = ร้านคืนช่าง/เบิกเงิน (สีน้ำเงิน)
-        const isDebt = l.amount > 0;
-        const color = isDebt ? '#dc2626' : '#1e3a8a';
-        const sign = l.amount > 0 ? '+' : '';
+        // 🎯 แก้จุดนี้ให้ตรงกับ -settle:
+        // ลบ (-) = ช่างคืนร้าน (สีแดง)
+        // บวก (+) = ร้านคืนช่าง (สีน้ำเงิน)
+        const isBarberDebt = l.amount < 0; 
+        const color = isBarberDebt ? '#dc2626' : '#1e3a8a';
+        const sign = l.amount > 0 ? '+' : (l.amount < 0 ? '-' : '');
 
         return `
         <div class="log-item" style="padding:15px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; background:#fff;">
