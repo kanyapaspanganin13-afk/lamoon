@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 3</title>
+    <title>Barber Note Pro </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -2178,7 +2178,7 @@ function shareLine() {
         ? `⚠️ ช่างคืนร้าน: ${Math.floor(Math.abs(settle))} บาท` 
         : `🟦 ร้านคืนช่าง: ${Math.floor(Math.abs(settle))} บาท`;
     // 4. ประกอบข้อความ (Template)
-    let msg = `💈 รายงานร้าน: Barber Shop\n`;
+    let msg = `💈 รายงานร้าน: ${shopName}\n`;
     msg += `📅 วันที่: ${fDate}\n`;
     msg += `-------------------------\n`;
     msg += `📝 ลูกค้า (${realCustomerCount} คน):\n${clientList}\n`;
