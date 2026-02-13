@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro </title>
+    <title>Barber Note Pro4 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1047,69 +1047,55 @@ function updateMixValues() {
    (ระบบคำนวณส่วนแบ่งและการปิดยอดรายวัน)
    ========================================================== */
 function saveAndGo(date, total) {
-    // 1. ตรวจสอบข้อมูลเบื้องต้น
     const allToday = db.filter(r => r.date === date);
     if (allToday.length === 0) return alert("⚠️ ไม่พบข้อมูลงานของวันที่เลือก");
 
     const todayData = allToday.filter(r => r.type === 'SERVICE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
 
-    let cash = 0, tips = 0, trans = 0;
-    // 2. คำนวณยอดเงิน
+    let cash = 0, tips = 0;
     todayData.forEach(r => {
         const p = Number(r.price) || 0;
         const t = Number(r.tip) || 0;
         tips += t;
-
-        if (r.pay === "Cash" || r.pay === "เงินสด") { 
-            cash += (p + t); 
-        } else if (r.pay === "Trans" || r.pay === "โอน") { 
-            trans += (p + t); 
-        } else if (r.pay === "Mix") { 
-            cash += Number(r.payCash) || 0; 
-            trans += Number(r.payTrans) || 0; 
-        }
+        if (r.pay === "Cash" || r.pay === "เงินสด") { cash += (p + t); }
+        else if (r.pay === "Mix") { cash += Number(r.payCash) || 0; }
     });
-    // 3. คำนวณส่วนแบ่ง
+
     const commission = total * (Number(conf.perc) / 100);
     const baseEarn = Math.max(commission, Number(conf.guar) || 0); 
     const bEarn = isHoliday ? 0 : baseEarn + tips;
     const settle = isHoliday ? 0 : cash - bEarn;
-    // 4. บันทึกลงคลังประวัติ (Archives) - 🟢 เพิ่ม details ตรงนี้
+    // 4. บันทึกลง Archives (เก็บยอดจริงเพื่อรายงานรายเดือน)
     const data = { 
-        date, 
-        total, 
-        cash, 
-        trans, 
-        tips, 
+        date, total, cash, 
         barber: Math.floor(bEarn), 
         settle: settle, 
         type: isHoliday ? "HOLIDAY" : "WORK",
-        details: allToday // เก็บรายการย่อยไว้ดูย้อนหลัง
+        details: allToday 
     };
     const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
-    // 5. อัปเดตสมุดบัญชี
+    // 5. อัปเดตสมุดบัญชี (Account Logs)
     if (!isHoliday) {
-        account.logs = account.logs.filter(l => !(l.date === date && l.note.includes("ยอดปิดงาน")));  
+        account.logs = account.logs.filter(l => !(l.date === date && l.note.includes("ยอดปิดงาน")));    
+        // 🟢 ตรรกะใหม่: ยอดค้างในบัญชีต้องมาจาก "เงินสดที่ต้องคืนร้าน" เท่านั้น
+        // ถ้า settle ติดลบ (ยอดประกัน) ให้บันทึกเป็น 0 เพื่อไม่ให้ขึ้นยอดค้างเดิม
+        const amountToLog = settle > 0 ? -settle : 0;
+        
         account.logs.push({ 
             date: date, 
-            amount: -settle, 
-            note: `ยอดปิดงานวันที่ ${date} (ถือเงินสด ${cash})`,
+            amount: amountToLog, 
+            note: `ยอดปิดงานวันที่ ${date} (ถือเงินสด ฿${cash})`,
             type: 'SYSTEM'
         });
     }
-    // 6. ล้างข้อมูลงานรายวันและบันทึก
+
     db = db.filter(r => r.date !== date);
-    
-    if (typeof saveDB === "function") {
-        saveDB();
-    } else {
-        save();
-    }
-    // 7. อัปเดตหน้าจอ
+    if (typeof saveDB === "function") { saveDB(); } else { save(); }
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
-    alert(`✅ ส่งข้อมูลวันที่ ${date} สำเร็จ\n💰 ยอดเงิน: ${settle.toLocaleString()} บาท`);
+    
+    alert(`✅ ส่งข้อมูลสำเร็จ\n💰 ยอดที่ต้องเคลียร์วันนี้: ฿${(settle > 0 ? settle : 0).toLocaleString()}`);
     if (typeof go === "function") go(3); 
 }
 // --- ระบบประกันรายได้ ---
@@ -1373,37 +1359,31 @@ function loadAccountStatus() {
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
 
-    // ตรวจสอบความปลอดภัยของตัวแปร account
     if (typeof account === "undefined") return;
-
-    // 1. คำนวณยอดสุทธิจาก Logs (ทำให้หักลบได้จริง)
+    // 1. คำนวณยอดสุทธิทั้งหมดจาก Logs
     let totalBalance = 0;
     if (account.logs && account.logs.length > 0) {
         totalBalance = account.logs.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
     }
     account.balance = totalBalance;
-
-    // 2. ดึงยอดจาก Archives เฉพาะของวันนี้
-    let todaySettle = 0;
-    if (typeof archives !== "undefined" && Array.isArray(archives)) {
-        const todayData = archives.find(item => item.date === todayStr);
-        if (todayData) todaySettle = Number(todayData.settle || todayData.barber || 0);
-    }
-
-    // 3. แสดงผลตัวเลขบนหน้าจอ
+    // 2. ดึงยอด "ที่ต้องเคลียร์" ของวันนี้จาก Archives
+    let todaySettleFromLog = 0;
+    const todayLog = account.logs.find(l => l.date === todayStr && l.type === 'SYSTEM');
+    if (todayLog) todaySettleFromLog = Number(todayLog.amount) || 0;
+    // 3. แสดงผลตัวเลข
     if (getEl("accDateLabel")) getEl("accDateLabel").innerText = now.toLocaleDateString('th-TH'); 
-    if (getEl("accTodayVal")) getEl("accTodayVal").innerText = `฿${todaySettle.toLocaleString()}`;
+    // ยอดวันนี้: แสดงยอดที่ต้องเคลียร์ของวันนี้
+    if (getEl("accTodayVal")) getEl("accTodayVal").innerText = `฿${todaySettleFromLog.toLocaleString()}`;
+    // ยอดรวม: ยอดสุทธิในบัญชีทั้งหมด
     if (getEl("accTotalVal")) getEl("accTotalVal").innerText = `฿${totalBalance.toLocaleString()}`;
-    
+    // 🟢 ยอดเก่า: คือยอดรวมทั้งหมด ลบด้วยยอดของวันนี้ (จะได้ยอดค้างจากวันก่อนๆ ที่แท้จริง)
     if (getEl("accOldVal")) {
-        // ยอดเก่า คือ ยอดรวมทั้งหมด หักลบยอดของวันนี้
-        const oldVal = totalBalance - todaySettle;
-        // ปรับเงื่อนไข: ถ้าเป็น 0 หรือติดลบ (กรณีเคลียร์แล้ว) ให้โชว์เป็น 0
-        getEl("accOldVal").innerText = `฿${(oldVal <= 0 ? 0 : oldVal).toLocaleString()}`;
+        const oldVal = totalBalance - todaySettleFromLog;
+        getEl("accOldVal").innerText = `฿${(oldVal < 0 ? 0 : oldVal).toLocaleString()}`;
     }
-    // 4. สั่งอัปเดตสถานะสีและข้อความ (UI)
+
     updateStatusUI(totalBalance);
-} 
+}
 function updateStatusUI(net) {
     const getEl = (id) => document.getElementById(id);
     const badge = getEl("statusBadge");
