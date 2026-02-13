@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 03</title>
+    <title>Barber Note Pro </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -774,30 +774,28 @@ function addRecord() {
     const timeInp = $("timeInp").value;
     const price = parseFloat($("priceInp").value) || 0;
     const tip = parseFloat($("tipInp").value) || 0;
-    const total = price + tip; // ยอดรวมทั้งหมดที่ต้องได้รับ 
-    // ใช้ตัวแปร payMethod จากฟังก์ชัน setPaymentType ที่เราสร้างไว้ก่อนหน้านี้// (หรือถ้าใช้จาก Input ให้ใช้ payType)
+    const total = price + tip; 
+    
     const currentPay = payMethod; 
     if (price === 0 && currentPay !== 'Holiday' && currentPay !== 'Guarantee') {
         alert("กรุณาระบุราคาด้วยครับ");
         return;
     }
-    // --- ส่วนสำคัญ: จัดการแยกยอดเงินให้ถูกต้องก่อนบันทึก ---
+
     let finalCash = 0;
     let finalTrans = 0;
     if (currentPay === 'Mix') {
-        // กรณีจ่ายผสม: ดึงจากช่อง Mix
         finalCash = parseFloat($("mixCash").value) || 0;
         finalTrans = parseFloat($("mixTrans").value) || 0;
     } else if (currentPay === 'Cash' || currentPay === 'เงินสด') {
-        // กรณีเงินสด: ยอดทั้งหมดลงที่ช่องเงินสด
         finalCash = total;
         finalTrans = 0;
     } else if (currentPay === 'Trans' || currentPay === 'โอน') {
-        // กรณีโอน: ยอดทั้งหมดลงที่ช่องโอน
         finalCash = 0;
         finalTrans = total;
     }
-   const newRec = {
+
+    const newRec = {
         id: Date.now(),
         date: dInp,
         time: timeInp,
@@ -808,38 +806,36 @@ function addRecord() {
         payCash: finalCash,
         payTrans: finalTrans
     };
+
     db.push(newRec);
     localStorage.setItem("barber_db", JSON.stringify(db));
-    // 🎯 --- ส่วนที่ต้องเพิ่มเพื่อให้ยอด "ดีด" ไปหน้าบัญชี ---
-    // สั่งคำนวณเงินของวันนี้ใหม่ทันที แล้วบันทึกลง Archives
+
+    // 🎯 ส่วนที่ทำให้ยอด "ดีด" ไปหน้าบัญชี
     if (typeof calculateMoney === "function") {
-        const result = calculateMoney(); // สมมติว่าฟังก์ชันนี้คืนค่า { settle, ... }
-        // อัปเดตยอดลงใน Archives ของวันนี้
+        const result = calculateMoney(); 
         const idx = archives.findIndex(a => a.date === dInp);
         const archiveData = {
             date: dInp,
-            settle: result.settle, // ยอดที่ต้องหักลบ
+            settle: result.settle, 
             type: (currentPay === 'Holiday') ? 'HOLIDAY' : 'WORK'
         };
+
         if (idx > -1) {
-            archives[idx].settle = result.settle; // ปรับปรุงยอดเดิม
+            archives[idx].settle = result.settle; 
         } else {
-            archives.push(archiveData); // เพิ่มยอดใหม่ถ้ายังไม่มี
+            archives.push(archiveData); 
         }
-        // บันทึก Archives ลงเครื่องด้วย
         localStorage.setItem("barber_archives", JSON.stringify(archives));
     }
+
     alert("บันทึกข้อมูลเรียบร้อยแล้วครับ");
+
     if (typeof resetForm === 'function') resetForm();
-    renderDay(); 
-    // 🎯 เรียกให้หน้าบัญชีอัปเดตยอดทันที (ถ้ามันเปิดค้างอยู่หลังฉาก)
-    if (typeof loadAccountStatus === 'function') loadAccountStatus();
-}
+    if (typeof renderDay === 'function') renderDay(); 
     
-    // ล้างค่าหลังจากบันทึก
-    if (typeof resetForm === 'function') resetForm();
-    renderDay(); 
-}  
+    // 🎯 เรียกอัปเดตยอดหน้าบัญชีทันที
+    if (typeof loadAccountStatus === 'function') loadAccountStatus();
+} // <--- 🟢 ปิดปีกกาตัวสุดท้ายแค่ตรงนี้พอครับช่าง
  // ฟังก์ชันล้างค่าในฟอร์มหลังจากบันทึก
 function resetForm() {
     $("priceInp").value = "";
@@ -850,7 +846,6 @@ function resetForm() {
     selectedServices = []; // ล้างรายการบริการที่เลือกไว้
     // หากมีพวก checkbox หรือปุ่มกดเลือกบริการ ก็ควรสั่งให้กลับไปค่าเริ่มต้นที่นี่ครับ
 }
-// ฟังก์ชันเปิด/ปิด mixPanel ตามการเลือกวิธีชำระเงิน
 // ฟังก์ชันเปิด/ปิด mixPanel ตามการเลือกวิธีชำระเงิน
 function togglePayType() {
     const payType = $("payTypeInp").value;
@@ -1384,11 +1379,10 @@ function loadAccountStatus() {
     const todayKey = getEl("accDate")?.value || new Date().toLocaleDateString('th-TH');
 
     if (typeof archives === "undefined") return;
-    // 🎯 1. ดึงยอด "ค้างวันนี้" (ที่เพิ่งกดบันทึกมาจากหน้าแรก)
+    // 🎯 1. ดึงยอด "ค้างวันนี้"
     const todayData = archives.find(a => a.date === todayKey);
     let todaySettle = todayData ? -todayData.settle : 0;
-
-    // 🎯 2. ดึงยอด "ค้างเดิม" (กวาดจาก Archives วันอื่นทั้งหมดที่ยังไม่เคลียร์)
+    // 🎯 2. ดึงยอด "ค้างเดิม"
     let oldSettle = archives.reduce((sum, day) => {
         if (day.date !== todayKey) {
             return sum + (Number(-day.settle) || 0);
@@ -1397,17 +1391,17 @@ function loadAccountStatus() {
     }, 0);
     // 🎯 3. หักลบกันเป็น "ยอดต้องเคลียร์"
     let totalBalance = oldSettle + todaySettle;
-    account.balance = totalBalance;
-
-    // 📊 แสดงผลให้ครบ 3 จุดตามที่ช่างต้องการ
-    if (getEl("accTodayVal")) getEl("accTodayVal").innerText = `฿${todaySettle.toLocaleString()}`; // ค้างวันนี้
-    if (getEl("accOldVal"))   getEl("accOldVal").innerText = `฿${oldSettle.toLocaleString()}`;   // ค้างเดิม
+    if (typeof account !== "undefined") {
+        account.balance = totalBalance;
+    }
+    // 📊 แสดงผลให้ครบ 3 จุด
+    if (getEl("accTodayVal")) getEl("accTodayVal").innerText = `฿${todaySettle.toLocaleString()}`;
+    if (getEl("accOldVal"))   getEl("accOldVal").innerText = `฿${oldSettle.toLocaleString()}`;
     
-    // 🎯 ยอดสุทธิ (ยอดต้องเคลียร์)
     if (getEl("accTotalVal")) {
         getEl("accTotalVal").innerText = `฿${Math.abs(totalBalance).toLocaleString()}`;
     }
-    // อัปเดตสถานะป้าย (ช่างคืนร้าน / ร้านคืนช่าง)
+    // อัปเดตสถานะป้าย
     const badge = getEl("statusBadge");
     if (badge) {
         if (totalBalance < 0) {
@@ -1421,8 +1415,9 @@ function loadAccountStatus() {
             badge.style.backgroundColor = "#f1f5f9"; badge.style.color = "#64748b";
         }
     }
+
     if (typeof updateStatusUI === 'function') updateStatusUI(totalBalance);
-}
+} // <--- 🟢 ปีกกาปิดตัวสุดท้ายอยู่ตรงนี้ครับช่าง
 function updateStatusUI(net) {
     const getEl = (id) => document.getElementById(id);
     const badge = getEl("statusBadge");
