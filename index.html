@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro </title>
+    <title>Barber Note Pro 4</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1376,31 +1376,56 @@ if (dList) {
    ========================================================== */
 function loadAccountStatus() {
     const getEl = (id) => document.getElementById(id);
-    const todayKey = getEl("accDate")?.value || new Date().toLocaleDateString('th-TH');
+    
+    // 🎯 แก้จุดนี้: ดึงวันที่จาก Input "accDate" ตรงๆ เพราะมันคือรูปแบบเดียวกับที่บันทึก
+    // ถ้าไม่มีให้ดึงวันที่ปัจจุบันในรูปแบบ ISO (YYYY-MM-DD) ซึ่งมักจะตรงกับที่ระบบใช้เก็บ
+    let todayKey = getEl("accDate")?.value;
+    
+    if (!todayKey) {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        todayKey = `${y}-${m}-${d}`; // รูปแบบ 2026-02-14
+    }
 
     if (typeof archives === "undefined") return;
+
     // 🎯 1. ดึงยอด "ค้างวันนี้"
     const todayData = archives.find(a => a.date === todayKey);
     let todaySettle = todayData ? -todayData.settle : 0;
-    // 🎯 2. ดึงยอด "ค้างเดิม"
+
+    // 🎯 2. ดึงยอด "ค้างเดิม" (เอาเฉพาะวันที่ยังค้างอยู่และไม่ใช่วันนี้)
     let oldSettle = archives.reduce((sum, day) => {
-        if (day.date !== todayKey) {
+        // ต้องไม่ใช่วันนี้ 
+        // และต้องเป็นยอดที่ "ยังไม่ถูกเคลียร์" (ถ้าช่างมีระบบเคลียร์แล้วยอดจะกลายเป็น 0)
+        if (day.date !== todayKey && day.settle !== 0) {
             return sum + (Number(-day.settle) || 0);
         }
         return sum;
     }, 0);
+
     // 🎯 3. หักลบกันเป็น "ยอดต้องเคลียร์"
     let totalBalance = oldSettle + todaySettle;
     if (typeof account !== "undefined") {
         account.balance = totalBalance;
     }
-    // 📊 แสดงผลให้ครบ 3 จุด
+
+    // 📊 แสดงผลตัวเลข
     if (getEl("accTodayVal")) getEl("accTodayVal").innerText = `฿${todaySettle.toLocaleString()}`;
     if (getEl("accOldVal"))   getEl("accOldVal").innerText = `฿${oldSettle.toLocaleString()}`;
     
     if (getEl("accTotalVal")) {
         getEl("accTotalVal").innerText = `฿${Math.abs(totalBalance).toLocaleString()}`;
     }
+
+    // ส่วนของวันที่แสดงบนหัว (โชว์ให้สวยงาม)
+    if (getEl("accDateLabel")) {
+        getEl("accDateLabel").innerText = new Date(todayKey).toLocaleDateString('th-TH', { 
+            day: 'numeric', month: 'short', year: 'numeric' 
+        });
+    }
+
     // อัปเดตสถานะป้าย
     const badge = getEl("statusBadge");
     if (badge) {
@@ -1417,7 +1442,7 @@ function loadAccountStatus() {
     }
 
     if (typeof updateStatusUI === 'function') updateStatusUI(totalBalance);
-} // <--- 🟢 ปีกกาปิดตัวสุดท้ายอยู่ตรงนี้ครับช่าง
+}
 function updateStatusUI(net) {
     const getEl = (id) => document.getElementById(id);
     const badge = getEl("statusBadge");
@@ -1442,18 +1467,33 @@ function clearAccount() {
     if (net === 0) return alert("💎 ยอดเป็นศูนย์อยู่แล้ว");
 
     const accNoteEl = document.getElementById("accNote");
-    const d = document.getElementById("accDate")?.value || new Date().toISOString().split('T')[0];
+    const d = document.getElementById("accDate")?.value || new Date().toLocaleDateString('th-TH');
 
-    // ✅ ใช้ -net เพื่อกลับค่าเสมอ ไม่ว่ายอดจะเป็นบวกหรือลบ มันจะรวมกันเป็น 0
+    // 1. บันทึกยอดหักล้างลงใน logs (เพื่อให้ยอดสะสมในแฟ้มเป็น 0)
     account.logs.push({
         date: d,
         amount: -net, 
         note: (accNoteEl && accNoteEl.value) || "เคลียร์ยอดค้าง"
     });
 
-    if (typeof save === "function") save();
+    // 🎯 2. หัวใจสำคัญ: ล้างยอดใน Archives ทั้งหมดให้เป็น 0
+    // เพื่อให้ loadAccountStatus ครั้งหน้า ไม่ไปดึงยอดเก่าๆ มาบวกทบอีก
+    archives.forEach(day => {
+        day.settle = 0; // ล้างยอดค้างสะสมในรายงานทุกวันให้จบไป
+    });
+
+    // 3. บันทึกค่าทั้งหมดลงเครื่อง
+    if (typeof save === "function") {
+        save(); 
+    } else {
+        localStorage.setItem("barber_account", JSON.stringify(account));
+        localStorage.setItem("barber_archives", JSON.stringify(archives));
+    }
+
+    // 4. อัปเดต UI
     if (typeof loadAccountHistory === 'function') loadAccountHistory();
-    loadAccountStatus();
+    loadAccountStatus(); // รอบนี้ยอดจะกลายเป็น 0 ของจริง เพราะ archives โดนล้างแล้ว
+    
     alert("✅ เคลียร์บัญชีเรียบร้อย!");
 }
 // 1. ฟังก์ชันลบประวัติบัญชี
