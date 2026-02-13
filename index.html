@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro1</title>
+    <title>Barber Note Pro 11</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1055,65 +1055,63 @@ function updateMixValues() {
    (ระบบคำนวณส่วนแบ่งและการปิดยอดรายวัน)
    ========================================================== */
 function saveAndGo(date, total) {
-    // เช็คว่ามีข้อมูลไหม
-    if (typeof db === 'undefined') return;
+    if (typeof db === 'undefined' || typeof archives === 'undefined') return;
 
     const allToday = db.filter(r => r.date === date);
     const todayData = allToday.filter(r => r.type === 'SERVICE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
 
-    let cash = 0, tips = 0, trans = 0;
+    // บังคับเป็นตัวเลขเพื่อป้องกันยอดเพี้ยน
+    const numTotal = Number(total) || 0; 
+    let cash = 0, tips = 0;
+
     todayData.forEach(r => {
         const p = Number(r.price) || 0, t = Number(r.tip) || 0;
         tips += t;
         if (r.pay === "Cash" || r.pay === "เงินสด") { cash += (p + t); }
-        else if (r.pay === "Trans" || r.pay === "โอน") { trans += (p + t); }
-        else if (r.pay === "Mix") { 
-            cash += Number(r.payCash) || 0; 
-            trans += Number(r.payTrans) || 0; 
-        }
+        else if (r.pay === "Mix") { cash += Number(r.payCash) || 0; }
     });
 
     let bEarn = 0, settle = 0;
-    if (!isHoliday && total > 0) {
-        const commission = total * (Number(conf.perc) / 100);
+    if (!isHoliday && numTotal > 0) {
+        const commission = numTotal * (Number(conf.perc) / 100);
         const baseEarn = Math.max(commission, Number(conf.guar) || 0);
         bEarn = baseEarn + tips;
+        // settle คือยอดเงินที่ช่างถือเกิน (ต้องคืนร้าน)
         settle = cash - bEarn;
     }
 
-    // 1. บันทึกลง Archives (เพื่อรายงาน)
+    // 1. ✅ บันทึกลงรายงาน (Archives) - ต้องบันทึกก่อนล้าง db ข้อมูลถึงจะไม่หาย
     const data = { 
-        date, total, cash, trans, tips, 
+        date, 
+        total: numTotal, 
+        cash, tips, 
         barber: Math.floor(bEarn), 
-        settle: settle, 
+        settle: settle, // เก็บค่านี้ไว้ดูในรายงาน
         type: isHoliday ? "HOLIDAY" : "WORK"
     };
 
     const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
 
-    // 2. ส่งยอดลง Account
+    // 2. ✅ ส่งลงบัญชี - ใช้ค่า -settle เพื่อให้ยอดติดลบ (ช่างค้างร้าน)
     if (!isHoliday) {
         if (!account.logs) account.logs = [];
         account.logs = account.logs.filter(l => !(l.date === date && l.note.includes("ยอดปิดงาน")));
         account.logs.push({ 
             date, 
             amount: -settle, 
-            note: `ยอดปิดงานวันที่ ${date} (มาทำงานปกติ)`,
+            note: `ยอดปิดงานวันที่ ${date}`,
             type: 'SYSTEM'
         });
     }
-    // 3. ล้างข้อมูลและเซฟ
+    // 3. ✅ ล้างข้อมูลหน้างานและเซฟทันที
     db = db.filter(r => r.date !== date);
-    
-    // ตรวจสอบฟังก์ชันเซฟ
-    if (typeof saveDB === "function") { saveDB(); } 
-    else if (typeof save === "function") { save(); }
+    if (typeof save === "function") save(); else if (typeof saveDB === "function") saveDB();
 
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
     
-    alert(`✅ บันทึกวันที่ ${date} สำเร็จ`);
+    alert(`✅ บันทึกสำเร็จ!\nยอดเคลียร์: ฿${settle.toLocaleString()}`);
     if (typeof go === "function") go(1); 
 }
 // --- ระบบประกันรายได้ ---
@@ -1437,25 +1435,13 @@ function updateStatusUI(net) {
     }
 }
 function clearAccount() {
-    // เปลี่ยนจาก $("...") เป็น document.getElementById(...) เพื่อไม่ให้ Error
-    const accDateEl = document.getElementById("accDate");
-    const accNoteEl = document.getElementById("accNote");
-    
-    const d = (accDateEl && accDateEl.value) || new Date().toISOString().split('T')[0];
     const net = Number(account.balance) || 0;
+    if (net === 0) return alert("💎 ยอดเป็นศูนย์อยู่แล้ว");
 
-    if (net === 0) {
-        alert("💎 ยอดเป็นศูนย์ ไม่ต้องเคลียร์");
-        return;
-    }
+    const accNoteEl = document.getElementById("accNote");
+    const d = document.getElementById("accDate")?.value || new Date().toISOString().split('T')[0];
 
-    const confirmMsg = net < 0  // ยอดลบ = ช่างคืนร้าน
-        ? `ยืนยันว่าช่าง "คืนเงิน" ให้ร้าน ฿${Math.abs(net).toLocaleString()} ใช่ไหม?`
-        : `ยืนยันว่าร้าน "จ่ายเงิน" ให้ช่าง ฿${net.toLocaleString()} ใช่ไหม?`;
-
-    if (!confirm(confirmMsg)) return;
-
-    if (!account.logs) account.logs = [];
+    // ถ้า net ติดลบ (ช่างค้าง) ต้องส่งค่าบวกไปล้างเพื่อให้รวมกันเป็น 0
     account.logs.push({
         date: d,
         amount: -net, 
@@ -1463,12 +1449,9 @@ function clearAccount() {
     });
 
     if (typeof save === "function") save();
-    else if (typeof saveDB === "function") saveDB();
-
+    if (typeof loadAccountHistory === 'function') loadAccountHistory();
+    loadAccountStatus();
     alert("✅ เคลียร์บัญชีเรียบร้อย!");
-    if (accNoteEl) accNoteEl.value = "";
-    if (typeof loadAccountHistory === 'function') loadAccountHistory(); 
-    loadAccountStatus();  
 }
 // 1. ฟังก์ชันลบประวัติบัญชี
 function deleteAccountLog(index) {
