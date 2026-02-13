@@ -1372,18 +1372,14 @@ function loadAccountStatus() {
     const todayStr = now.toISOString().split('T')[0];
 
     if (typeof account === "undefined") return;
-
     // 1. ยอดสุทธิรวมทั้งหมดในกระเป๋า (Balance)
     let totalBalance = account.logs.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
     account.balance = totalBalance;
-
     // 2. ยอดของ "วันนี้" ที่เพิ่งบันทึกไป
     const todayLog = account.logs.find(l => l.date === todayStr && l.type === 'SYSTEM');
     let todayAmount = todayLog ? Number(todayLog.amount) : 0;
-
     // 3. แสดงผลตัวเลข
     if (getEl("accDateLabel")) getEl("accDateLabel").innerText = now.toLocaleDateString('th-TH'); 
-    
     // แสดงยอดวันนี้: ถ้าเป็นบวกคือช่างคืนร้าน / ถ้าเป็นลบคือร้านคืนช่าง
     if (getEl("accTodayVal")) {
         let val = Math.abs(todayAmount);
@@ -1394,12 +1390,10 @@ function loadAccountStatus() {
         getEl("accTodayVal").innerText = `฿${Math.abs(actualSettle).toLocaleString()}`;
         getEl("accTodayVal").style.color = actualSettle >= 0 ? "#bef264" : "#fb7185"; 
     }
-    
     // ยอดรวมทั้งหมด (Net Balance)
     if (getEl("accTotalVal")) {
         getEl("accTotalVal").innerText = `฿${Math.abs(totalBalance).toLocaleString()}`;
     }
-    
     // 🟢 ยอดค้างเดิม = ยอดรวมทั้งหมด หักลบยอดของวันนี้
     // นี่คือยอดสะสมจาก "ผลต่าง" ของวันก่อนหน้าจริงๆ ที่ยังไม่ได้กดเคลียร์เงิน
     if (getEl("accOldVal")) {
@@ -1411,7 +1405,6 @@ function loadAccountStatus() {
         else if (oldVal > 0) statusText = " (ช่างค้างจ่าย)";
         getEl("accOldVal").innerHTML += ` <small style='font-size:10px; font-weight:normal;'>${statusText}</small>`;
     }
-
     if (typeof updateStatusUI === 'function') updateStatusUI(totalBalance);
 }
 function updateStatusUI(net) {
