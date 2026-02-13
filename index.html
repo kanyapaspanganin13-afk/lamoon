@@ -676,16 +676,12 @@ function saveDB() {
     try {
         // บันทึกรายการงานปัจจุบัน
         localStorage.setItem("barber_db", JSON.stringify(db));
-        
         // บันทึกการตั้งค่าร้าน (ชื่อร้าน, %, ประกันรายได้)
         localStorage.setItem("barber_conf", JSON.stringify(conf));
-        
         // 🔵 เพิ่ม: บันทึกประวัติงานที่ปิดยอดแล้ว (สำคัญมากสำหรับรายงาน)
         localStorage.setItem("barber_archives", JSON.stringify(archives));
-        
         // 🔵 เพิ่ม: บันทึกข้อมูลบัญชีและ Logs (เพื่อให้ยอดเงินไม่หาย)
         localStorage.setItem("barber_account", JSON.stringify(account));
-
         console.log("💾 ข้อมูลทั้งหมดถูกบันทึกลงเครื่องเรียบร้อยครับ");
     } catch (e) {
         console.error("❌ ไม่สามารถบันทึกข้อมูลได้:", e);
@@ -702,7 +698,6 @@ function exportBackup() {
             account: account || { balance: 0, logs: [] }, 
             conf: JSON.parse(localStorage.getItem("barber_conf") || "{}")
         };
-
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -723,7 +718,6 @@ function exportBackup() {
         alert("❌ ไม่สามารถสำรองข้อมูลได้"); 
     }
 }
-
 // 2. ฟังก์ชันนำเข้าข้อมูลจากไฟล์ (Import)
 function importBackup(input) {
     if (!input.files || !input.files[0]) return;
@@ -828,7 +822,6 @@ function addRecord() {
         alert("⚠️ กรุณาระบุราคาตัดผมด้วยครับ");
         return;
     }
-
     // --- ส่วนจัดการแยกยอดเงิน (Cash / Trans) ---
     let finalCash = 0;
     let finalTrans = 0;
@@ -1875,7 +1868,6 @@ function loadHistMonth() {
             weeklyData[wKey].offDays++;
             return;
         }
-
         // กรณีวันทำงานปกติ
         workDays++;
         weeklyData[wKey].workDays++;
@@ -1912,7 +1904,6 @@ function loadHistMonth() {
                 }
             });
         }
-
         if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
         
         weeklyData[wKey].dailyCounts.push({ 
@@ -1922,7 +1913,6 @@ function loadHistMonth() {
             barberEarn: dailyBarber 
         });
     });
-
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
     generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats);
 }
@@ -1994,7 +1984,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         const popService = Object.entries(data.popularService || {}).sort((a,b) => b[1] - a[1]).slice(0, 2).map(([name, count]) => `
             <span style="background:rgba(56,189,248,0.1); color:#38bdf8; padding:2px 8px; border-radius:8px; font-size:10px; border:1px solid rgba(56,189,248,0.2); margin-right:4px;">🧴 ${name} ${count}</span>
         `).join("");
-
+        
         return `
         <div style="background:#020617; border:1px solid rgba(255,255,255,0.08); padding:16px; border-radius:22px; margin-bottom:12px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -2043,7 +2033,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                 <div style="font-size:16px; color:#94a3b8; font-weight:700; margin-bottom:5px;">✂️ รายได้รวมประจำเดือน</div>
                 <div style="font-size:48px; font-weight:900; color:#ffffff;">฿${monthTotal.toLocaleString()}</div>
             </div>
-
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
                 <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); padding:15px; border-radius:20px; text-align:center;">
                     <div style="font-size:11px; color:#94a3b8;">รายได้ช่าง</div>
@@ -2061,24 +2050,20 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                 <div style="background:rgba(244,63,94,0.15); padding:6px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#fb7185;">🛑 หยุด ${offDays} วัน</div>
                 <div style="background:rgba(250,204,21,0.15); padding:6px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#facc15;">📊 เฉลี่ย ${avgCustomerPerDay.toFixed(2)}</div>
             </div>
-
             <div style="margin-bottom:25px;">
                 <div style="font-size:14px; font-weight:800; color:#facc15; margin-bottom:12px;">📅 วิเคราะห์รายสัปดาห์</div>
                 ${weeklyHtml}
             </div>
-
             <div style="background:rgba(250,204,21,0.08); border:1px solid rgba(250,204,21,0.25); padding:18px; border-radius:20px; margin-bottom:30px;">
                 <div style="font-size:14px; font-weight:800; color:#facc15; margin-bottom:10px;">💡 วิเคราะห์ภาพรวม</div>
                 ${insights.map(i => `<div style="font-size:13px; color:#f8fafc; margin-bottom:6px;">• ${i}</div>`).join("")}
             </div>
-
             <div style="margin-bottom:25px;">
                 <div style="font-size:15px; font-weight:800; color:#bef264; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
                     <div style="width:4px; height:16px; background:#bef264; border-radius:2px;"></div> ทรงผมยอดนิยม
                 </div>
                 ${renderStats(hairStats, "#bef264")}
             </div>
-
             <div style="padding-bottom:20px;">
                 <div style="font-size:15px; font-weight:800; color:#38bdf8; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
                     <div style="width:4px; height:16px; background:#38bdf8; border-radius:2px;"></div> บริการยอดนิยม
