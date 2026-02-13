@@ -1722,11 +1722,11 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
             <span style="background:rgba(56,189,248,0.1); color:#38bdf8; padding:2px 8px; border-radius:8px; font-size:10px; border:1px solid rgba(56,189,248,0.2); margin-right:4px;">🧴 ${name} ${count}</span>
         `).join("");
 
-        return `
-        <div style="background:#020617; border:1px solid rgba(255,255,255,0.08); padding:14px; border-radius:22px; margin-bottom:12px;">
+       return `
+        <div style="background:#020617; border:1px solid rgba(255,255,255,0.08); padding:16px; border-radius:22px; margin-bottom:12px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <div style="font-size:14px; font-weight:800; color:#f8fafc;">📅 ${wk}</div>
-                <div style="font-size:10px; color:#94a3b8;">เปิด ${data.workDays} วัน</div>
+                <div style="font-size:15px; font-weight:800; color:#f8fafc;">📅 ${wk}</div>
+                <div style="font-size:10px; color:#94a3b8;">เปิด ${data.workDays} | หยุด ${data.offDays}</div>
             </div>
 
             <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-bottom:10px;">
