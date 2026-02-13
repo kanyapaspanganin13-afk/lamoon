@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 0</title>
+    <title>Barber Note Pro 01</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1086,15 +1086,19 @@ function saveAndGo(date, total) {
     const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
 
-    // 2. 🎯 จุดสำคัญ: ตัดการ push ลง account.logs ออก
-    // ข้อมูลจะไม่ถูกส่งไปแฟ้มประวัติบัญชีจนกว่าช่างจะกดปุ่ม "เคลียร์เงิน" เอง
+    // 🎯 2. แก้จุดนี้จุดเดียว เพื่อให้ยอดโชว์หน้าบัญชี:
+    // เราไม่ใช้ account.logs.push (เพื่อไม่ให้เข้าแฟ้มประวัติ)
+    // แต่เราจะเอาค่า -settle ไปใส่ใน account.balance โดยตรงเพื่อให้หน้าบัญชีโชว์เลข
+    if (!isHoliday) {
+        account.balance = -settle; 
+    }
 
     db = db.filter(r => r.date !== date);
     if (typeof saveDB === "function") { saveDB(); } else { save(); }
     
+    // เรียกโหลดหน้าบัญชีเพื่อให้เลขที่ฝากไว้ใน balance แสดงผล
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
     
-    // 3. ✅ ปรับการแจ้งเตือนตามที่ช่างสั่ง
     alert(`✅ ส่งข้อมูลสำเร็จ`);
     
     if (typeof go === "function") go(3); 
