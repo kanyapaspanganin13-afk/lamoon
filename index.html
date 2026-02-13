@@ -1061,52 +1061,49 @@ function saveAndGo(date, total) {
     const todayData = allToday.filter(r => r.type === 'SERVICE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
 
-    const numTotal = Number(total) || 0; 
     let cash = 0, tips = 0;
-
     todayData.forEach(r => {
-        const p = Number(r.price) || 0, t = Number(r.tip) || 0;
+        const p = Number(r.price) || 0;
+        const t = Number(r.tip) || 0;
         tips += t;
         if (r.pay === "Cash" || r.pay === "เงินสด") { cash += (p + t); }
         else if (r.pay === "Mix") { cash += Number(r.payCash) || 0; }
     });
-
-    let bEarn = 0, settle = 0;
-    if (!isHoliday && numTotal > 0) {
-        const commission = numTotal * (Number(conf.perc) / 100);
-        const baseEarn = Math.max(commission, Number(conf.guar) || 0);
-        bEarn = baseEarn + tips;
-        // settle ตรงๆ: (รายได้ช่าง - เงินสด) 
-        // บวก = ร้านทบให้ช่าง | ลบ = ช่างคืนเงินร้าน
-        settle = bEarn - cash; 
-    }
-
-    // --- บันทึกรายงาน (Archives) ---
+    const commission = total * (Number(conf.perc) / 100);
+    const baseEarn = Math.max(commission, Number(conf.guar) || 0); 
+    const bEarn = isHoliday ? 0 : baseEarn + tips;
+    const settle = isHoliday ? 0 : cash - bEarn;
+    // 4. บันทึกลง Archives (เก็บยอดจริงเพื่อรายงานรายเดือน)
     const data = { 
-        date, total: numTotal, cash, tips, 
+        date, total, cash, 
         barber: Math.floor(bEarn), 
         settle: settle, 
-        type: isHoliday ? "HOLIDAY" : "WORK"
+        type: isHoliday ? "HOLIDAY" : "WORK",
+        details: allToday 
     };
     const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
-
-    // --- บันทึกบัญชี (Account) ---
+    // 5. อัปเดตสมุดบัญชี (Account Logs)
     if (!isHoliday) {
-        if (!account.logs) account.logs = [];
-        account.logs = account.logs.filter(l => !(l.date === date && l.note.includes("ยอดปิดงาน")));
+        account.logs = account.logs.filter(l => !(l.date === date && l.note.includes("ยอดปิดงาน")));    
+        // 🟢 ตรรกะใหม่: ยอดค้างในบัญชีต้องมาจาก "เงินสดที่ต้องคืนร้าน" เท่านั้น
+        // ถ้า settle ติดลบ (ยอดประกัน) ให้บันทึกเป็น 0 เพื่อไม่ให้ขึ้นยอดค้างเดิม
+        const amountToLog = settle > 0 ? -settle : 0;
+        
         account.logs.push({ 
-            date, amount: settle, note: `ยอดปิดงานวันที่ ${date}`, type: 'SYSTEM' 
+            date: date, 
+            amount: amountToLog, 
+            note: `ยอดปิดงานวันที่ ${date} (ถือเงินสด ฿${cash})`,
+            type: 'SYSTEM'
         });
     }
 
-    // ล้างหน้างานและเซฟ (ทำทีหลังสุด ข้อมูลจะไม่หาย)
     db = db.filter(r => r.date !== date);
-    if (typeof save === "function") save(); else if (typeof saveDB === "function") saveDB();
-
+    if (typeof saveDB === "function") { saveDB(); } else { save(); }
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
-    alert(`✅ บันทึกสำเร็จ!\nยอดส่วนต่าง: ฿${settle.toLocaleString()}`);
-    if (typeof go === "function") go(1); 
+    
+    alert(`✅ ส่งข้อมูลสำเร็จ\n💰 ยอดที่ต้องเคลียร์วันนี้: ฿${(settle > 0 ? settle : 0).toLocaleString()}`);
+    if (typeof go === "function") go(3); 
 }
 // --- ระบบประกันรายได้ ---
 function handleInsurance() {
