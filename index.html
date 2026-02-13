@@ -1049,7 +1049,7 @@ function updateMixValues() {
 function saveAndGo(date, total) {
     // 1. ตรวจสอบข้อมูลเบื้องต้น
     const allToday = db.filter(r => r.date === date);
-    if (allToday.length === 0) return alert("⚠️ ไม่พบข้อมูลงานของวันที่เลือกครับ");
+    if (allToday.length === 0) return alert("⚠️ ไม่พบข้อมูลงานของวันที่เลือก");
     // แยกประเภทงานและการหยุด
     const todayData = allToday.filter(r => r.type === 'SERVICE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
@@ -1125,8 +1125,8 @@ function handleInsurance() {
     const g = parseInt(conf.guar) || 0;
     // 1. ตรวจสอบว่ามีการตั้งค่ายอดประกันหรือยัง
     if (g <= 0) {
-        if (typeof speak === "function") speak("กรุณาตั้งค่าประกันรายวันก่อนค่ะ");
-        alert("⚠️ กรุณาตั้งค่ายอดประกันใน 'ตั้งค่าระบบ' ก่อนใช้งานครับ");
+        if (typeof speak === "function") speak("กรุณาตั้งค่าประกันรายวันก่อน");
+        alert("⚠️ กรุณาตั้งค่ายอดประกันใน 'ตั้งค่าระบบ' ก่อนใช้งาน");
         return;
     }
     // 2. ตรวจสอบว่าวันนี้เคยเปิดประกันไปหรือยัง
@@ -1477,7 +1477,7 @@ function clearAccount() {
 }
 // 1. ฟังก์ชันลบประวัติบัญชี
 function deleteAccountLog(index) {
-    if (confirm("⚠️ คุณต้องการลบประวัตินี้ใช่หรือไม่?\nยอดเงินสุทธิจะถูกคำนวณใหม่ตามรายการที่เหลืออยู่ครับ")) {
+    if (confirm("⚠️ คุณต้องการลบประวัตินี้ใช่หรือไม่?\nยอดเงินสุทธิจะถูกคำนวณใหม่ตามรายการที่เหลืออยู่")) {
         // ลบข้อมูลจาก Array
         account.logs.splice(index, 1);
         // บันทึกลง LocalStorage (ใช้ saveDB เพื่อความครอบคลุม)
@@ -1512,7 +1512,7 @@ function editAccountLog(index) {
         
         if (typeof saveDB === "function") saveDB(); else if (typeof save === "function") save();
         
-        alert("✅ แก้ไขข้อมูลเรียบร้อยแล้วครับ");
+        alert("✅ แก้ไขข้อมูลเรียบร้อยแล้ว");
         
         if (typeof loadAccountHistory === "function") loadAccountHistory();
         else if (typeof renderHistoryList === "function") renderHistoryList();
@@ -1582,14 +1582,14 @@ function toggleAccHistory() {
    ========================================================== */
 function openHistoryModal() { 
     const modal = $("historyModal");
-    if (!modal) return alert("⚠️ ไม่พบโครงสร้าง historyModal ในระบบครับ");
+    if (!modal) return alert("⚠️ ไม่พบโครงสร้าง historyModal ในระบบ");
     // แสดง Modal ด้วยการจัดวางแบบ Flex
     modal.style.display = "flex"; 
     // เรียกใช้ฟังก์ชันแสดงรายการ (พร้อมตรวจสอบความพร้อมของข้อมูล)
     if (typeof renderHistoryList === "function") {
         renderHistoryList(); 
     } else { 
-        console.warn("⚠️ ฟังก์ชัน renderHistoryList ยังไม่ถูกติดตั้ง หรือถูกเขียนไว้ด้านล่างครับ");
+        console.warn("⚠️ ฟังก์ชัน renderHistoryList ยังไม่ถูกติดตั้ง หรือถูกเขียนไว้ด้านล่าง");
     }
 }
 function closeHistoryModal() { 
@@ -1620,7 +1620,7 @@ function renderHistoryList() {
         $("accHistory").innerHTML = `
             <div style="padding:50px; text-align:center; color:#94a3b8;">
                 <span style="font-size:40px;">📂</span><br>
-                <p style="font-size:15px; margin-top:10px;">ไม่มีประวัติการเคลียร์ยอดครับ</p>
+                <p style="font-size:15px; margin-top:10px;">ไม่มีประวัติการเคลียร์ยอด</p>
             </div>`;
         return;
     }
@@ -1768,7 +1768,7 @@ function loadHistDaily() {
     openReportModal(`รายงาน ${d}`, `
         <div style="font-family:system-ui, -apple-system, sans-serif; background:#0f172a; margin:-16px; padding:24px; color:#f1f5f9; min-height:100vh;">
             <div style="text-align:center; padding:10px 0 25px 0;">
-                <div style="font-size:14px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:1px;">ยอดเงินรวมประจำวัน</div>
+                <div style="font-size:14px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:1px;">ยอดเงินรวม</div>
                 <div style="font-size:42px; font-weight:900; color:#ffffff; margin-top:5px;">฿${totalRevenue.toLocaleString()}</div>
             </div>
 
@@ -1789,11 +1789,11 @@ function loadHistDaily() {
 
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
                 <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:15px; border-radius:18px; text-align:center;">
-                    <div style="font-size:12px; color:#94a3b8; margin-bottom:2px;">ส่วนแบ่งช่าง</div>
+                    <div style="font-size:12px; color:#94a3b8; margin-bottom:2px;">ช่าง</div>
                     <div style="font-size:18px; font-weight:800; color:#f8fafc;">฿${barberEarn.toLocaleString()}</div>
                 </div>
                 <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:15px; border-radius:18px; text-align:center;">
-                    <div style="font-size:12px; color:#94a3b8; margin-bottom:2px;">ส่วนแบ่งร้าน</div>
+                    <div style="font-size:12px; color:#94a3b8; margin-bottom:2px;">ร้าน</div>
                     <div style="font-size:18px; font-weight:800; color:#f8fafc;">฿${shopEarn.toLocaleString()}</div>
                 </div>
             </div>
@@ -1801,13 +1801,13 @@ function loadHistDaily() {
             ${settleHTML}
 
             <div style="margin-bottom:25px; text-align:center;">
-                <div style="font-size:12px; color:#64748b; font-weight:700; text-transform:uppercase; margin-bottom:10px;">รายการงานที่ทำ</div>
+                <div style="font-size:12px; color:#64748b; font-weight:700; text-transform:uppercase; margin-bottom:10px;">สรุปประเภทงาน</div>
                 ${svcHTML}
             </div>
 
             <div style="font-weight:800; font-size:15px; color:#f8fafc; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
                 <div style="width:4px; height:16px; background:#6366f1; border-radius:2px;"></div>
-                รายละเอียดลูกค้า
+                รายละเอียดงาน
             </div>
             <div style="max-height:350px; overflow-y:auto; padding-right:5px;">
                 ${rows}
@@ -2196,9 +2196,9 @@ function shareLine() {
     msg += `-------------------------\n`;
     msg += `📝 ลูกค้า (${realCustomerCount} คน):\n${clientList}\n`;
     msg += `-------------------------\n`;
-    msg += `📊 รายการเสริม:\n${statText || '(ไม่มีรายการ)'}\n`;
+    msg += `📊 สรุปงาน:\n${statText || '(ไม่มีรายการ)'}\n`;
     msg += `-------------------------\n`;
-    msg += `💰 ยอดรวม: ${tot.toLocaleString()} | 🧧 ทิป: ${tips}\n`;
+    msg += `💰 ยอด: ${tot.toLocaleString()} | 🧧 ทิป: ${tips}\n`;
     msg += `📱 โอน: ${trans.toLocaleString()} | 💵 เงินสด: ${cash.toLocaleString()}\n`;
     msg += `🤵 ช่าง: ${Math.floor(bEarn).toLocaleString()}\n`;
     msg += `🏠 ร้าน: ${Math.floor(shopEarn).toLocaleString()}\n`;
