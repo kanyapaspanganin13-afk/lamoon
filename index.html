@@ -1055,18 +1055,13 @@ function updateMixValues() {
    (ระบบคำนวณส่วนแบ่งและการปิดยอดรายวัน)
    ========================================================== */
 function saveAndGo(date, total) {
-    // 1. ตรวจสอบข้อมูลเบื้องต้น
     const allToday = db.filter(r => r.date === date);
-    // หากไม่มีลูกค้าเลย และยังไม่มีการบันทึกงานใดๆ ให้สร้างข้อมูลเปล่าเพื่อให้นับวันได้
     const todayData = allToday.filter(r => r.type === 'SERVICE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
 
     let cash = 0, tips = 0, trans = 0;
-    
-    // 2. คำนวณยอดเงิน (กรณีไม่มีลูกค้า ค่าจะเป็น 0 ทั้งหมด)
     todayData.forEach(r => {
-        const p = Number(r.price) || 0;
-        const t = Number(r.tip) || 0;
+        const p = Number(r.price) || 0, t = Number(r.tip) || 0;
         tips += t;
         if (r.pay === "Cash" || r.pay === "เงินสด") { cash += (p + t); }
         else if (r.pay === "Trans" || r.pay === "โอน") { trans += (p + t); }
@@ -1076,64 +1071,46 @@ function saveAndGo(date, total) {
         }
     });
 
-    // 3. คำนวณรายได้ช่าง (ตรรกะ: ไม่มีลูกค้า = รายได้ 0 และไม่มียอดค้าง)
-    let bEarn = 0;
-    let settle = 0;
-
+    let bEarn = 0, settle = 0;
     if (!isHoliday) {
         if (total > 0) {
-            // กรณีมีลูกค้า: คำนวณตามปกติ (เทียบประกันรายได้)
             const commission = total * (Number(conf.perc) / 100);
             const baseEarn = Math.max(commission, Number(conf.guar) || 0);
             bEarn = baseEarn + tips;
-            settle = cash - bEarn;
-        } else {
-            // กรณีไม่มีลูกค้า: รายได้ช่างเป็น 0 และยอดส่งคืนร้านเป็น 0
-            bEarn = 0;
-            settle = 0;
+            settle = cash - bEarn; // ยอดส่วนต่าง
         }
     }
 
-    // 4. บันทึกลงคลังประวัติ (Archives) - เพื่อให้นับวันทำงานในหน้ารายงาน
+    // 1. ✅ บันทึกลง Archives (เพื่อให้รายงานสรุปมีข้อมูลย้อนหลัง)
     const data = { 
-        date, 
-        total, 
-        cash, 
-        trans, 
-        tips, 
+        date, total, cash, trans, tips, 
         barber: Math.floor(bEarn), 
-        settle: settle, 
-        type: isHoliday ? "HOLIDAY" : "WORK", // บันทึกเป็น WORK เสมอแม้ยอดเป็น 0
-        details: allToday 
+        settle: settle, // เก็บค่าบวกปกติในรายงาน
+        type: isHoliday ? "HOLIDAY" : "WORK"
     };
 
     const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
 
-    // 5. อัปเดตสมุดบัญชี (Account Logs)
+    // 2. ✅ ส่งยอดลง Account (ต้องเป็น -settle เพื่อให้หน้าบัญชีมียอด "ช่างคืนร้าน")
     if (!isHoliday) {
-        // ล้าง Log เก่าของวันนี้ออกก่อน
-        account.logs = account.logs.filter(l => !(l.date === date && l.note.includes("ยอดปิดงาน")));  
-        
-        // 🟢 บันทึกยอดลงบัญชี (ถ้าไม่มีลูกค้า settle เป็น 0 ยอดค้างเดิมจะไม่เพิ่ม)
+        account.logs = account.logs.filter(l => !(l.date === date && l.note.includes("ยอดปิดงาน")));
         account.logs.push({ 
-            date: date, 
-            amount: -settle, 
+            date, 
+            amount: -settle, // 👈 ลบค่านี้ออกเพื่อให้ยอดคงเหลือในบัญชีลดลง (ติดลบคือช่างค้าง)
             note: `ยอดปิดงานวันที่ ${date} (มาทำงานปกติ)`,
             type: 'SYSTEM'
         });
     }
-    // 6. ล้างข้อมูลชั่วคราวและบันทึกข้อมูลลงเครื่อง
-    db = db.filter(r => r.date !== date);
-    if (typeof saveDB === "function") { saveDB(); } else { save(); }
 
-    // 7. แจ้งเตือนและโหลดสถานะใหม่
+    // 3. บันทึกและล้างข้อมูล
+    db = db.filter(r => r.date !== date);
+    save(); // เรียกใช้ฟังก์ชันเซฟมาตรฐานของช่าง
+
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
     
-    let msg = total === 0 ? "บันทึกวันทำงาน (ไม่มีลูกค้า)" : `ยอดที่ต้องเคลียร์: ฿${Math.abs(settle).toLocaleString()}`;
-    alert(`✅ บันทึกวันที่ ${date} สำเร็จ\n📊 ${msg}`);
-    
-    if (typeof go === "function") go(3); 
+    alert(`✅ บันทึกวันที่ ${date} สำเร็จ`);
+    if (typeof go === "function") go(1); // กลับหน้าหลัก
 }
 // --- ระบบประกันรายได้ ---
 function handleInsurance() {
@@ -1394,56 +1371,38 @@ if (dList) {
 function loadAccountStatus() {
     const getEl = (id) => document.getElementById(id);
     const now = new Date(); 
-    // 1. จัดการวันที่ให้เป็นรูปแบบไทย (เช่น 13 ก.พ. 2569)
-    const dateStr = now.toLocaleDateString('th-TH', { 
-        day: 'numeric', 
-        month: 'short', 
-        year: 'numeric' 
-    }); 
-    // สำหรับค้นหาข้อมูลในระบบ (2026-02-13)
     const todayKey = now.toISOString().split('T')[0];
 
     if (typeof account === "undefined") return;
-    // 2. คำนวณยอดสุทธิรวม (Balance)
+
+    // คำนวณยอดสุทธิ (ยอดติดลบ = ช่างคืนร้าน | ยอดบวก = ร้านคืนช่าง)
     let totalBalance = account.logs.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
     account.balance = totalBalance;
-    // 3. ดึงยอดของ "วันนี้"
-    const todayLog = account.logs.find(l => l.date === todayKey && l.type === 'SYSTEM');
-    let todayAmount = todayLog ? Number(todayLog.amount) : 0;
-    // 4. แสดงผลวันที่ (ตรวจสอบ ID ให้ตรงกับใน HTML ส่วนแสดงวันที่ของคุณ)
-    if (getEl("accDateLabel")) getEl("accDateLabel").innerText = dateStr;
-    if (getEl("accTodayDate")) getEl("accTodayDate").innerText = dateStr;
 
-    // 5. อัปเดตยอดเงินกลางหน้าจอ (accTotalVal)
+    // แสดงผลยอดเงินกลาง (ใส่ Math.abs เพื่อให้โชว์เป็นตัวเลขบวกสวยๆ)
     if (getEl("accTotalVal")) {
         getEl("accTotalVal").innerText = `฿${Math.abs(totalBalance).toLocaleString()}`;
     }
-    // 6. อัปเดตสถานะที่ป้าย statusBadge
+
+    // อัปเดตสถานะป้าย Status (ปรับให้ตรงกับ saveAndGo)
     const badge = getEl("statusBadge");
     if (badge) {
-        if (totalBalance > 0) {
-            // กรณีร้านคืนช่าง (ยอดเป็นบวก)
-            badge.innerText = "🏠 ร้านคืนช่าง";
-            badge.style.backgroundColor = "#dcfce7"; // สีเขียวอ่อน
-            badge.style.color = "#166534";
-        } else if (totalBalance < 0) {
-            // กรณีช่างคืนร้าน (ยอดเป็นลบ)
-            badge.innerText = "👨‍🦱 ช่างคืนร้าน";
-            badge.style.backgroundColor = "#fee2e2"; // สีแดงอ่อน
+        if (totalBalance < 0) {
+            badge.innerText = "👨‍🎨 ช่างคืนร้าน";
+            badge.style.backgroundColor = "#fee2e2"; 
             badge.style.color = "#991b1b";
+        } else if (totalBalance > 0) {
+            badge.innerText = "🏠 ร้านคืนช่าง";
+            badge.style.backgroundColor = "#dcfce7";
+            badge.style.color = "#166534";
         } else {
-            // กรณีเคลียร์ยอดแล้ว
             badge.innerText = "✅ เคลียร์ยอดแล้ว";
-            badge.style.backgroundColor = "#f1f5f9"; // สีเทา
+            badge.style.backgroundColor = "#f1f5f9";
             badge.style.color = "#64748b";
         }
     }
-    // 7. อัปเดตยอดค้างเดิม
-    if (getEl("accOldVal")) {
-        const oldVal = totalBalance - todayAmount;
-        getEl("accOldVal").innerText = `฿${Math.abs(oldVal).toLocaleString()}`;
-    }
-    // เรียกฟังก์ชัน UI อื่นๆ (ถ้ามี)
+    
+    // อัปเดตไฟสถานะ (ถ้ามีฟังก์ชันนี้)
     if (typeof updateStatusUI === 'function') updateStatusUI(totalBalance);
 }
 function updateStatusUI(net) {
@@ -1465,29 +1424,32 @@ function updateStatusUI(net) {
     }
 }
 function clearAccount() {
-                const d = $("accDate").value || new Date().toISOString().split('T')[0];
-                const net = Number(account.balance) || 0;
-                if (net === 0) {
-                    alert("💎 ยอดเป็นศูนย์ ไม่ต้องเคลียร์");
-                    return;
-                }
-                const confirmMsg = net > 0 
-                    ? `ยืนยันว่าช่าง "คืนเงิน" ให้ร้าน ฿${net.toLocaleString()} ใช่ไหม?`
-                    : `ยืนยันว่าร้าน "จ่ายเงิน" ให้ช่าง ฿${Math.abs(net).toLocaleString()} ใช่ไหม?`;
-                if (!confirm(confirmMsg)) return;
-                if (!account.logs) account.logs = [];
-                account.logs.unshift({
-                    date: d,
-                    amount: net,
-                    note: $("accNote")?.value || "เคลียร์ยอดค้าง"
-                });
-                account.balance = 0;
-                save(); 
-                alert("✅ เคลียร์บัญชีเรียบร้อย!");
-                if ($("accNote")) $("accNote").value = "";
-                loadAccountHistory(); 
-                loadAccountStatus();  
-            }
+    const d = $("accDate").value || new Date().toISOString().split('T')[0];
+    const net = Number(account.balance) || 0; // ยอดรวมที่ค้างอยู่
+    if (net === 0) {
+        alert("💎 ยอดเป็นศูนย์ ไม่ต้องเคลียร์");
+        return;
+    }
+
+    const confirmMsg = net < 0 
+        ? `ยืนยันว่าช่าง "คืนเงิน" ให้ร้าน ฿${Math.abs(net).toLocaleString()} ใช่ไหม?`
+        : `ยืนยันว่าร้าน "จ่ายเงิน" ให้ช่าง ฿${net.toLocaleString()} ใช่ไหม?`;
+
+    if (!confirm(confirmMsg)) return;
+
+    // แก้ไขตรงนี้: ต้องส่งค่า "ติดลบของ net" เพื่อให้ไปล้างยอดเดิมเป็น 0
+    account.logs.push({
+        date: d,
+        amount: -net, // ตัวอย่าง: ถ้าค้าง -500 (ช่างคืนร้าน) ต้องส่ง +500 ไปหักล้าง
+        note: $("accNote")?.value || "เคลียร์ยอดค้าง"
+    });
+
+    save(); 
+    alert("✅ เคลียร์บัญชีเรียบร้อย!");
+    if ($("accNote")) $("accNote").value = "";
+    if (typeof loadAccountHistory === 'function') loadAccountHistory(); 
+    loadAccountStatus();  
+}
 
 // 1. ฟังก์ชันลบประวัติบัญชี
 function deleteAccountLog(index) {
