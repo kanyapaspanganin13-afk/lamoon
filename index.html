@@ -1368,47 +1368,63 @@ if (dList) {
 function loadAccountStatus() {
     const getEl = (id) => document.getElementById(id);
     const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
+    
+    // 1. จัดการวันที่ให้เป็นรูปแบบไทย (เช่น 13 ก.พ. 2569)
+    const dateStr = now.toLocaleDateString('th-TH', { 
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric' 
+    });
+    
+    // สำหรับค้นหาข้อมูลในระบบ (2026-02-13)
+    const todayKey = now.toISOString().split('T')[0];
+
     if (typeof account === "undefined") return;
 
-    // 1. ยอดรวมสุทธิ (ถ้าติดลบแปลว่าร้านคืนช่าง)
+    // 2. คำนวณยอดสุทธิรวม (Balance)
     let totalBalance = account.logs.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
     account.balance = totalBalance;
-    // 2. ดึงยอดวันนี้ (ใช้ filter เพื่อรวมทุกรายการของวันนี้ป้องกันยอดค้างเดิมไม่ยอมหาย)
-    const todayLogs = account.logs.filter(l => l.date === todayStr && l.type === 'SYSTEM');
-    let todayAmount = todayLogs.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
-    // 3. แสดงยอดรวมหลัก
+
+    // 3. ดึงยอดของ "วันนี้"
+    const todayLog = account.logs.find(l => l.date === todayKey && l.type === 'SYSTEM');
+    let todayAmount = todayLog ? Number(todayLog.amount) : 0;
+
+    // 4. แสดงผลวันที่ (ตรวจสอบ ID ให้ตรงกับใน HTML ส่วนแสดงวันที่ของคุณ)
+    if (getEl("accDateLabel")) getEl("accDateLabel").innerText = dateStr;
+    if (getEl("accTodayDate")) getEl("accTodayDate").innerText = dateStr;
+
+    // 5. อัปเดตยอดเงินกลางหน้าจอ (accTotalVal)
     if (getEl("accTotalVal")) {
         getEl("accTotalVal").innerText = `฿${Math.abs(totalBalance).toLocaleString()}`;
     }
-    // 🟢 4. แก้ไขสถานะป้าย (Label) ให้ตรงกับหน้ารายงาน
-    const statusLabel = getEl("accStatusLabel"); 
-    if (statusLabel) {
-        if (totalBalance < 0) { 
-            // ค่าติดลบ = ร้านคืนช่าง (เหมือนในรูป 75 บาท)
-            statusLabel.innerText = "🏠 ร้านคืนช่าง";
-            statusLabel.style.color = "#bef264"; 
-        } else if (totalBalance > 0) {
-            // ค่าเป็นบวก = ช่างถือเงินสดเกิน ต้องคืนร้าน
-            statusLabel.innerText = "👨‍🦱 ช่างคืนร้าน";
-            statusLabel.style.color = "#fb7185"; 
+
+    // 6. อัปเดตสถานะที่ป้าย statusBadge
+    const badge = getEl("statusBadge");
+    if (badge) {
+        if (totalBalance > 0) {
+            // กรณีร้านคืนช่าง (ยอดเป็นบวก)
+            badge.innerText = "🏠 ร้านคืนช่าง";
+            badge.style.backgroundColor = "#dcfce7"; // สีเขียวอ่อน
+            badge.style.color = "#166534";
+        } else if (totalBalance < 0) {
+            // กรณีช่างคืนร้าน (ยอดเป็นลบ)
+            badge.innerText = "👨‍🦱 ช่างคืนร้าน";
+            badge.style.backgroundColor = "#fee2e2"; // สีแดงอ่อน
+            badge.style.color = "#991b1b";
         } else {
-            statusLabel.innerText = "✅ เคลียร์ยอดแล้ว";
-            statusLabel.style.color = "#ffffff";
+            // กรณีเคลียร์ยอดแล้ว
+            badge.innerText = "✅ เคลียร์ยอดแล้ว";
+            badge.style.backgroundColor = "#f1f5f9"; // สีเทา
+            badge.style.color = "#64748b";
         }
     }
-    // 5. ยอดวันนี้
-    if (getEl("accTodayVal")) {
-        getEl("accTodayVal").innerText = `฿${Math.abs(todayAmount).toLocaleString()}`;
-    }
-    // 6. ยอดค้างเดิม (หักลบยอดวันนี้ออกให้สะอาด)
+    // 7. อัปเดตยอดค้างเดิม
     if (getEl("accOldVal")) {
         const oldVal = totalBalance - todayAmount;
         getEl("accOldVal").innerText = `฿${Math.abs(oldVal).toLocaleString()}`;
-        
-        let statusText = oldVal < 0 ? " (ร้านค้างช่าง)" : (oldVal > 0 ? " (ช่างค้างร้าน)" : "");
-        getEl("accOldVal").innerHTML += ` <small style='font-size:10px;'>${statusText}</small>`;
     }
+    // เรียกฟังก์ชัน UI อื่นๆ (ถ้ามี)
+    if (typeof updateStatusUI === 'function') updateStatusUI(totalBalance);
 }
 function updateStatusUI(net) {
     const getEl = (id) => document.getElementById(id);
@@ -2232,42 +2248,41 @@ function openSettings() {
     }
 }
 function saveSettings() {
-    // 1. ดึงค่าจากฟอร์ม
+    // 1. ดึงค่าจากฟอร์ม (เพิ่ม sound เข้าไปครับ)
     const settings = {
         shop:  $("setShop")?.value || "",
         perc:  parseFloat($("setPerc")?.value) || 0,
         guar:  parseFloat($("setGuar")?.value) || 0,
         theme: $("setTheme")?.value || "light",
-        voice: $("setVoice")?.value || "default.mp3"
+        voice: $("setVoice")?.value || "default.mp3",
+        sound: $("setSound")?.value || "on"  // 🟢 เพิ่มบรรทัดนี้ครับ
     };
     // 2. อัปเดตตัวแปรกลาง (conf) ทันที 
-    // สำคัญมาก: ต้องมั่นใจว่าตัวแปร conf ตัวนี้คือตัวเดียวกับที่ใช้คำนวณใน saveAndGo
     Object.assign(conf, settings);
-    // 3. บันทึกลง LocalStorage
-    // ผมแนะนำให้บันทึกเป็น 'barber_conf' ก้อนเดียวเพื่อให้โหลดกลับมาง่ายและไม่หายครับ
+    // 3. บันทึกลง LocalStorage (ก้อนเดียว JSON)
     localStorage.setItem('barber_conf', JSON.stringify(conf));
-    // 🟢 เพิ่มเติม: บันทึกแยก Key ตามที่ช่างต้องการเพื่อความปลอดภัย
+    // 🟢 บันทึกแยก Key (เพิ่ม shopSound เข้าไปด้วยครับ)
     localStorage.setItem('shopName',  settings.shop);
     localStorage.setItem('shopPerc',  settings.perc);
     localStorage.setItem('shopGuar',  settings.guar);
     localStorage.setItem('shopTheme', settings.theme);
     localStorage.setItem('shopVoice', settings.voice);
+    localStorage.setItem('shopSound', settings.sound); // 🟢 เพิ่มบรรทัดนี้ครับ
     // 4. อัปเดตการแสดงผลทันที
     if ($("shopNameDisp")) {
         $("shopNameDisp").innerText = settings.shop.toUpperCase();
     } 
-    // แสดงชื่อร้านในส่วนอื่นๆ (ถ้ามี)
     if (document.getElementById("shopNameDisplay")) {
         document.getElementById("shopNameDisplay").innerText = settings.shop;
     }
-    // 5. เรียกฟังก์ชันอัปเดต UI
+    // 5. เรียกฟังก์ชันอัปเดต UI และคำนวณใหม่
     if (typeof applyTheme === "function")        applyTheme(settings.theme);
     if (typeof calculateMoney === "function")    calculateMoney(); 
-    // 🚨 สำคัญ: ต้องโหลดข้อมูลวันใหม่ด้วยค่าที่ตั้งใหม่ (เช่น เปอร์เซ็นต์ใหม่)
     if (typeof renderDay === "function")         renderDay(); 
+    // 🟢 ถ้าช่างมีฟังก์ชันเปิด/ปิดเสียง ให้เรียกที่นี่ได้เลยครับ
+    // if (typeof updateSoundStatus === "function") updateSoundStatus(settings.sound);
     // 6. ปิด Modal และแจ้งเตือน
     if ($("modalSet")) $("modalSet").style.display = 'none';
-    
     alert("✅ บันทึกการตั้งค่าเรียบร้อยแล้ว");
 }
 function handleSave(event) {
