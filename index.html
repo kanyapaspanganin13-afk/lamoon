@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 07</title>
+    <title>Barber Note Pro 0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1086,29 +1086,19 @@ function saveAndGo(date, total) {
     const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
 
-    // 🎯 2. แก้จุดนี้จุดเดียว เพื่อให้ยอด "มาโชว์" หน้าบัญชี
-    // เราจะบันทึกลง logs เพื่อให้ loadAccountStatus ดึงไปคำนวณตัวเลขมาโชว์ได้
+    // 🎯 แก้จุดนี้: ห้ามมี account.logs.push เด็ดขาด!!
+    // แต่เราจะส่งยอดไป "ฝาก" ไว้ที่ตัวแปร account.balance เพื่อให้หน้าบัญชีดึงไปโชว์
     if (!isHoliday) {
-        // ล้างยอดปิดงานเก่าของวันนี้ (ถ้ามี)
-        account.logs = account.logs.filter(l => !(l.date === date && l.note.includes("ยอดปิดงาน")));     
-        
-        // ส่งยอดไป "รอ" ใน logs (หน้าบัญชีจะดึงเลขนี้ไปโชว์ทันที)
-        account.logs.push({ 
-            date: date, 
-            amount: -settle, 
-            note: `ยอดปิดงานวันที่ ${date}`,
-            type: 'SYSTEM'
-        });
+        account.balance = -settle; 
     }
 
     db = db.filter(r => r.date !== date);
     if (typeof saveDB === "function") { saveDB(); } else { save(); }
     
-    // พอบรรทัดนี้ทำงาน มันจะไปดึงยอดที่เราเพิ่ง push เข้าไปมาโชว์เลข 65 บาทให้ช่างเห็นครับ
+    // เรียกแสดงผลยอดที่ฝากไว้
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
     
     alert(`✅ ส่งข้อมูลสำเร็จ`);
-    
     if (typeof go === "function") go(3); 
 }
 // --- ระบบประกันรายได้ ---
@@ -1371,36 +1361,48 @@ function loadAccountStatus() {
     const getEl = (id) => document.getElementById(id);
     const now = new Date(); 
     const dateStr = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }); 
+    
+    // ดึงวันที่ปัจจุบันในรูปแบบที่เก็บใน Archives (เช่น 13/02/2026)
+    const todayKey = document.getElementById("accDate")?.value || new Date().toISOString().split('T')[0];
 
-    if (typeof account === "undefined") return;
+    if (typeof account === "undefined" || typeof archives === "undefined") return;
 
-    let totalBalance = account.logs.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
+    // 🎯 1. เปลี่ยนจุดดึงข้อมูล: ดึงจาก Archives ของวันนี้ที่เพิ่งส่งมาจาก saveAndGo
+    const todayData = archives.find(a => a.date === todayKey);
+    
+    // 🎯 2. คำนวณยอดรอเคลียร์ (กลับค่า settle ตามตรรกะ -settle)
+    // ถ้าไม่มีข้อมูลวันนี้ ให้เป็น 0
+    let totalBalance = todayData ? -todayData.settle : 0;
+    
+    // เก็บยอดนี้ไว้ใน account.balance เพื่อให้ปุ่ม "เคลียร์เงิน" ดึงไปลงแฟ้มประวัติได้
     account.balance = totalBalance;
 
     if (getEl("accDateLabel")) getEl("accDateLabel").innerText = dateStr;
     if (getEl("accTodayDate")) getEl("accTodayDate").innerText = dateStr;
 
+    // 3. แสดงยอดกลางหน้าจอ (ยอดที่รอช่างกดปุ่มเคลียร์)
     if (getEl("accTotalVal")) {
         getEl("accTotalVal").innerText = `฿${Math.abs(totalBalance).toLocaleString()}`;
     }
 
     const badge = getEl("statusBadge");
     if (badge) {
-        // ✅ ตรรกะเดียวกับ -settle:
-        if (totalBalance < 0) { // เป็นลบ = ช่างถือเงินเกิน
+        // ตรรกะแสดงสถานะตามยอดที่รอเคลียร์
+        if (totalBalance < 0) { 
             badge.innerText = "👨‍🎨 ช่างคืนร้าน";
             badge.style.backgroundColor = "#fee2e2"; 
             badge.style.color = "#991b1b";
-        } else if (totalBalance > 0) { // เป็นบวก = ร้านต้องทบเงิน
+        } else if (totalBalance > 0) { 
             badge.innerText = "🏠 ร้านคืนช่าง";
             badge.style.backgroundColor = "#dcfce7";
             badge.style.color = "#166534";
         } else {
-            badge.innerText = "✅ เคลียร์ยอดแล้ว";
+            badge.innerText = "✅ ยอดลงตัว";
             badge.style.backgroundColor = "#f1f5f9";
             badge.style.color = "#64748b";
         }
     }
+    
     if (typeof updateStatusUI === 'function') updateStatusUI(totalBalance);
 }
 function updateStatusUI(net) {
