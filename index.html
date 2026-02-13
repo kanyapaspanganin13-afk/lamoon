@@ -1376,105 +1376,84 @@ if (dList) {
    (ระบบสมุดบัญชี สถานะการเงิน และไฟเตือน)
    ========================================================== */
 function loadAccountStatus() {
+    const getEl = (id) => document.getElementById(id);
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
-    // ตรวจสอบความปลอดภัยของตัวแปรหลัก
+
+    // ตรวจสอบความปลอดภัยของตัวแปร account
     if (typeof account === "undefined") return;
-    // 1. คำนวณยอดสุทธิสะสมจาก Logs ทั้งหมด (Single Source of Truth)
+
+    // 1. คำนวณยอดสุทธิจาก Logs (ทำให้หักลบได้จริง)
     let totalBalance = 0;
-    if (account.logs && Array.isArray(account.logs)) {
+    if (account.logs && account.logs.length > 0) {
         totalBalance = account.logs.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
     }
     account.balance = totalBalance;
-    // 2. ดึงยอด "กำไร/ยอดที่ต้องเคลียร์" ของวันนี้จาก Archives
+
+    // 2. ดึงยอดจาก Archives เฉพาะของวันนี้
     let todaySettle = 0;
     if (typeof archives !== "undefined" && Array.isArray(archives)) {
         const todayData = archives.find(item => item.date === todayStr);
-        // ใช้ค่า settle (ยอดที่ต้องส่งคืนร้าน) เป็นตัวตั้งต้น
-        if (todayData) todaySettle = Number(todayData.settle || 0);
+        if (todayData) todaySettle = Number(todayData.settle || todayData.barber || 0);
     }
-    // 3. แสดงผลตัวเลขบนหน้าจอ (UI)
-    const setTxt = (id, val) => { if ($(id)) $(id).innerText = val; };
 
-    setTxt("accDateLabel", now.toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'2-digit' })); 
-    setTxt("accTodayVal", `฿${Math.abs(todaySettle).toLocaleString()}`);
-    setTxt("accTotalVal", `฿${Math.abs(totalBalance).toLocaleString()}`);
-    // ยอดค้างเก่า (ยอดรวมทั้งหมด หักยอดของวันนี้ออก)
-    const oldVal = totalBalance - todaySettle;
-    setTxt("accOldVal", `฿${(oldVal <= 0 ? 0 : oldVal).toLocaleString()}`);
-    // 4. สั่งอัปเดตสถานะสีและไฟแจ้งเตือน
-    updateStatusUI(totalBalance);
-}
-function updateStatusUI(net) {
-    const badge = $("statusBadge");
-    const light = $("accLight");
+    // 3. แสดงผลตัวเลขบนหน้าจอ
+    if (getEl("accDateLabel")) getEl("accDateLabel").innerText = now.toLocaleDateString('th-TH'); 
+    if (getEl("accTodayVal")) getEl("accTodayVal").innerText = `฿${todaySettle.toLocaleString()}`;
+    if (getEl("accTotalVal")) getEl("accTotalVal").innerText = `฿${totalBalance.toLocaleString()}`;
     
-    if (!badge && !light) return;
-    /* ตรรกะสีไฟสถานะ:
-       - net > 0 : ช่างถือเงินสดเกินรายได้ (ต้องคืนร้าน) -> สีแดง
-       - net < 0 : ร้านค้างเงินช่าง (ร้านต้องจ่ายเพิ่ม) -> สีน้ำเงิน
-       - net = 0 : เคลียร์ยอดเรียบร้อย -> สีเขียว
-    */
-    let color = "#16a34a"; // เขียว (Default)
-    let bg = "#f0fdf4";
-    let txt = "⚖️ ยอดลงตัว";
-
-    if (net > 0) {
-        color = "#dc2626"; // แดง
-        bg = "#fef2f2";
-        txt = "👨‍🎨 ช่างคืนร้าน";
-    } else if (net < 0) {
-        color = "#1e3a8a"; // น้ำเงิน
-        bg = "#eff6ff";
-        txt = "🏠 ร้านคืนช่าง";
+    if (getEl("accOldVal")) {
+        // ยอดเก่า คือ ยอดรวมทั้งหมด หักลบยอดของวันนี้
+        const oldVal = totalBalance - todaySettle;
+        // ปรับเงื่อนไข: ถ้าเป็น 0 หรือติดลบ (กรณีเคลียร์แล้ว) ให้โชว์เป็น 0
+        getEl("accOldVal").innerText = `฿${(oldVal <= 0 ? 0 : oldVal).toLocaleString()}`;
     }
+    // 4. สั่งอัปเดตสถานะสีและข้อความ (UI)
+    updateStatusUI(totalBalance);
+} 
+function updateStatusUI(net) {
+    const getEl = (id) => document.getElementById(id);
+    const badge = getEl("statusBadge");
+    const light = getEl("accLight"); 
+    // ตรรกะ: บวก=แดง (ช่างคืนร้าน) | ลบ=น้ำเงิน (ร้านคืนช่าง) | 0=เขียว (ลงตัว)
+    let color = net > 0 ? "#dc2626" : (net < 0 ? "#1e3a8a" : "#16a34a");
+    let txt = net > 0 ? "👨‍🎨 ช่างคืนร้าน" : (net < 0 ? "🏠 ร้านคืนช่าง" : "⚖️ ยอดลงตัว");
 
     if (badge) {
         badge.innerText = txt;
-        badge.style.background = bg;
+        badge.style.background = net > 0 ? "#fef2f2" : (net < 0 ? "#eff6ff" : "#f0fdf4");
         badge.style.color = color;
     }
-    
     if (light) {
         light.style.background = color;
         light.style.boxShadow = `0 0 12px ${color}`;
     }
 }
 function clearAccount() {
-    const d = $("accDate")?.value || new Date().toISOString().split('T')[0];
-    const currentBalance = Number(account.balance) || 0;
-    // 1. ตรวจสอบว่ามียอดให้เคลียร์หรือไม่
-    if (currentBalance === 0) {
-        alert("💎 ยอดเป็นศูนย์ ไม่ต้องเคลียร์");
-        return;
-    }
-    // 2. สร้างข้อความยืนยันตามสถานะเงิน
-    const confirmMsg = currentBalance > 0 
-        ? `ยืนยันว่าช่าง "คืนเงิน" ให้ร้าน ฿${currentBalance.toLocaleString()} ใช่ไหม?\n(ยอดเงินในระบบจะกลับเป็น 0)`
-        : `ยืนยันว่าร้าน "จ่ายเงิน" ให้ช่าง ฿${Math.abs(currentBalance).toLocaleString()} ใช่ไหม?\n(ยอดเงินในระบบจะกลับเป็น 0)`;
+                const d = $("accDate").value || new Date().toISOString().split('T')[0];
+                const net = Number(account.balance) || 0;
+                if (net === 0) {
+                    alert("💎 ยอดเป็นศูนย์ ไม่ต้องเคลียร์");
+                    return;
+                }
+                const confirmMsg = net > 0 
+                    ? `ยืนยันว่าช่าง "คืนเงิน" ให้ร้าน ฿${net.toLocaleString()} ใช่ไหม?`
+                    : `ยืนยันว่าร้าน "จ่ายเงิน" ให้ช่าง ฿${Math.abs(net).toLocaleString()} ใช่ไหม?`;
+                if (!confirm(confirmMsg)) return;
+                if (!account.logs) account.logs = [];
+                account.logs.unshift({
+                    date: d,
+                    amount: net,
+                    note: $("accNote")?.value || "เคลียร์ยอดค้าง"
+                });
+                account.balance = 0;
+                save(); 
+                alert("✅ เคลียร์บัญชีเรียบร้อย!");
+                if ($("accNote")) $("accNote").value = "";
+                loadAccountHistory(); 
+                loadAccountStatus();  
+            }
 
-    if (!confirm(confirmMsg)) return;
-    // 3. บันทึก Log เพื่อหักลบยอด (Accounting Offset)
-    if (!account.logs) account.logs = [];
-    // บันทึกค่าที่ "ตรงข้าม" กับยอดปัจจุบันเพื่อให้รวมกันแล้วเป็น 0
-    account.logs.push({
-        date: d,
-        amount: -currentBalance, // สำคัญมาก: ต้องใช้ค่าติดลบของยอดปัจจุบัน
-        note: $("accNote")?.value || (currentBalance > 0 ? "ช่างคืนเงินเคลียร์ยอด" : "ร้านจ่ายเงินเคลียร์ยอด"),
-        type: 'CLEARING'
-    });
-    // 4. บันทึกและอัปเดตหน้าจอ
-    saveDB(); // ใช้ฟังก์ชันกลางที่เราสร้างไว้ใน Section 2
-    
-    alert("✅ เคลียร์บัญชีเรียบร้อยแล้ว!");
-
-    // ล้างค่าในช่องกรอก (ถ้ามี)
-    if ($("accNote")) $("accNote").value = "";
-    
-    // รีโหลดข้อมูลทั้งหมด
-    if (typeof loadAccountHistory === 'function') loadAccountHistory(); 
-    if (typeof loadAccountStatus === 'function') loadAccountStatus(); 
-}
 // 1. ฟังก์ชันลบประวัติบัญชี
 function deleteAccountLog(index) {
     if (confirm("⚠️ คุณต้องการลบประวัตินี้ใช่หรือไม่?\nยอดเงินสุทธิจะถูกคำนวณใหม่ตามรายการที่เหลืออยู่")) {
@@ -1691,20 +1670,17 @@ function renderHistoryList() {
    SECTION 7: ANALYTICS, REPORTS & SHARING
    (ส่วนสถิติ รายงาน และการส่งข้อมูลเข้า LINE)
    ========================================================== */
-function loadHistDaily() {
+ function loadHistDaily() {
     const d = $("histDate").value;
     if (!d) return;
-    // 1. ค้นหาข้อมูลจากคลัง Archives
     const f = archives.find(a => a.date === d);
-    if (!f) return alert("📅 ไม่พบข้อมูลของวันที่เลือกครับ");
-    // 2. คำนวณสรุปยอดเบื้องต้น
-    let cashTotal = Number(f.cash) || 0;
-    let transTotal = Number(f.trans) || 0;
+    if (!f) return alert("ไม่พบข้อมูลของวันนี้");
+    let cashTotal = f.cash || 0;
+    let transTotal = f.trans || 0;
     let totalRevenue = cashTotal + transTotal;
     let customerCount = f.count || (f.details ? f.details.length : 0);
     const barberEarn = Math.floor(f.barber || 0);
     const shopEarn = Math.floor(f.shop || 0);
-    // 3. สรุปประเภทบริการ (Tag Cloud)
     const svcCounts = {};
     (f.details || []).forEach(r => {
         const services = Array.isArray(r.svcs) ? r.svcs : [r.svcs];
@@ -1718,24 +1694,21 @@ function loadHistDaily() {
             ${name} <span style="opacity:0.7; margin-left:4px;">x${count}</span>
         </div>
     `).join("");
-    // 4. คำนวณการหักลบเงิน (Settle)
+
     let settleHTML = "";
     if (cashTotal > barberEarn) {
         const toShop = cashTotal - barberEarn;
-        settleHTML = `
-        <div style="background:rgba(251,146,60,0.1); padding:16px; border-radius:16px; margin-bottom:20px; text-align:center; border:1px solid rgba(251,146,60,0.3);">
+        settleHTML = `<div style="background:rgba(251,146,60,0.1); padding:16px; border-radius:16px; margin-bottom:20px; text-align:center; border:1px solid rgba(251,146,60,0.3);">
             <div style="font-size:16px; color:#fdba74; font-weight:600; margin-bottom:4px;">👨‍🎨 ช่างคืนร้าน</div>
             <div style="font-size:24px; color:#fb923c; font-weight:800;">฿${toShop.toLocaleString()}</div>
         </div>`;
     } else if (barberEarn > cashTotal) {
         const toBarber = barberEarn - cashTotal;
-        settleHTML = `
-        <div style="background:rgba(56,189,248,0.1); padding:16px; border-radius:16px; margin-bottom:20px; text-align:center; border:1px solid rgba(56,189,248,0.3);">
+        settleHTML = `<div style="background:rgba(56,189,248,0.1); padding:16px; border-radius:16px; margin-bottom:20px; text-align:center; border:1px solid rgba(56,189,248,0.3);">
             <div style="font-size:16px; color:#7dd3fc; font-weight:600; margin-bottom:4px;">🏠 ร้านคืนช่าง</div>
             <div style="font-size:24px; color:#38bdf8; font-weight:800;">฿${toBarber.toLocaleString()}</div>
         </div>`;
     }
-    // 5. สร้างรายการงานย่อย (Rows)
     const rows = (f.details || [])
         .slice()
         .sort((a, b) => (a.time || "").localeCompare(b.time || ""))
@@ -1743,76 +1716,76 @@ function loadHistDaily() {
             const p = Number(r.price) || 0;
             const t = Number(r.tip) || 0;
             const fullTime = (r.time && r.endTime) ? `${r.time}-${r.endTime}` : (r.time || "--:--");
-            
-            let payText = (r.pay === 'Mix') 
-                ? `🌓 ผสม (สด:${(r.payCash||0)}/โอน:${(r.payTrans||0)})` 
-                : (r.pay === 'Trans' ? '📱 โอน' : '💵 เงินสด');
-
+            let payText = "";
+            if (r.pay === 'Mix') {
+                payText = `🌓 ผสม (สด:${(r.payCash||0)}/โอน:${(r.payTrans||0)})`;
+            } else {
+                payText = r.pay === 'Trans' ? '📱 โอน' : '💵 เงินสด';
+            }
             return `
             <div style="padding:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
                 <div style="display:flex; align-items:center; gap:12px;">
                     <div style="width:28px; height:28px; background:rgba(255,255,255,0.08); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:#94a3b8;">${index + 1}</div>
                     <div>
                         <div style="font-weight:700; font-size:14px; color:#f8fafc;">${Array.isArray(r.svcs) ? r.svcs.join(' + ') : r.svcs}</div>
-                        <div style="font-size:12px; color:#94a3b8; margin-top:2px;">⏱ ${fullTime} • ${payText}</div>
+                        <div style="font-size:13px; color:#94a3b8; font-weight:500; margin-top:2px;">⏱ ${fullTime} • ${payText}</div>
                     </div>
                 </div>
                 <div style="text-align:right;">
                     <div style="font-size:16px; font-weight:800; color:#f8fafc;">฿${p.toLocaleString()}</div>
-                    ${t > 0 ? `<div style="font-size:11px; font-weight:600; color:#f472b6;">+ Tip ฿${t.toLocaleString()}</div>` : ''}
+                    ${t > 0 ? `<div style="font-size:12px; font-weight:600; color:#f472b6;">+ Tip ฿${t.toLocaleString()}</div>` : ''}
                 </div>
             </div>`;
         }).join("");
 
-    // 6. ส่งข้อมูลไปแสดงผลที่ Modal
     openReportModal(`รายงาน ${d}`, `
-        <div style="font-family:system-ui, -apple-system, sans-serif; background:#0f172a; margin:-16px; padding:24px; color:#f1f5f9; min-height:100vh;">
-            <div style="text-align:center; padding:10px 0 25px 0;">
-                <div style="font-size:14px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:1px;">ยอดเงินรวม</div>
-                <div style="font-size:42px; font-weight:900; color:#ffffff; margin-top:5px;">฿${totalRevenue.toLocaleString()}</div>
+        <div style="font-family:'Inter', system-ui, sans-serif; background:#0f172a; margin:-16px; padding:24px; color:#f1f5f9; min-height:100vh;">
+            <div style="text-align:center; padding:20px 0 30px 0;">
+                <div style="font-size:16px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:1px;">ยอดเงินรวม</div>
+                <div style="font-size:48px; font-weight:900; color:#ffffff; margin-top:5px;">฿${totalRevenue.toLocaleString()}</div>
             </div>
 
-            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:20px;">
-                <div style="background:#064e3b; padding:12px 5px; border-radius:16px; text-align:center;">
-                    <div style="font-size:11px; opacity:0.7; margin-bottom:2px;">เงินสด</div>
-                    <div style="font-size:14px; font-weight:800;">฿${cashTotal.toLocaleString()}</div>
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:24px;">
+                <div style="background:#14532d; padding:14px 8px; border-radius:18px; text-align:center; color:#ffffff;">
+                    <div style="font-size:13px; opacity:0.8; font-weight:600; margin-bottom:4px;">💵 เงินสด</div>
+                    <div style="font-size:16px; font-weight:800;">฿${cashTotal.toLocaleString()}</div>
                 </div>
-                <div style="background:#1e3a8a; padding:12px 5px; border-radius:16px; text-align:center;">
-                    <div style="font-size:11px; opacity:0.7; margin-bottom:2px;">เงินโอน</div>
-                    <div style="font-size:14px; font-weight:800;">฿${transTotal.toLocaleString()}</div>
+                <div style="background:#1e3a8a; padding:14px 8px; border-radius:18px; text-align:center; color:#ffffff;">
+                    <div style="font-size:13px; opacity:0.8; font-weight:600; margin-bottom:4px;">📱 เงินโอน</div>
+                    <div style="font-size:16px; font-weight:800;">฿${transTotal.toLocaleString()}</div>
                 </div>
-                <div style="background:#78350f; padding:12px 5px; border-radius:16px; text-align:center;">
-                    <div style="font-size:11px; opacity:0.7; margin-bottom:2px;">ลูกค้า</div>
-                    <div style="font-size:14px; font-weight:800;">${customerCount}</div>
+                <div style="background:#78350f; padding:14px 8px; border-radius:18px; text-align:center; color:#ffffff;">
+                    <div style="font-size:13px; opacity:0.8; font-weight:600; margin-bottom:4px;">👥 ลูกค้า</div>
+                    <div style="font-size:16px; font-weight:800;">${customerCount}</div>
                 </div>
             </div>
 
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
-                <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:15px; border-radius:18px; text-align:center;">
-                    <div style="font-size:12px; color:#94a3b8; margin-bottom:2px;">ช่าง</div>
-                    <div style="font-size:18px; font-weight:800; color:#f8fafc;">฿${barberEarn.toLocaleString()}</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+                <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:16px; border-radius:20px; text-align:center;">
+                    <div style="font-size:14px; color:#94a3b8; font-weight:600; margin-bottom:4px;">ยอดเงินช่าง</div>
+                    <div style="font-size:20px; font-weight:800; color:#f8fafc;">฿${barberEarn.toLocaleString()}</div>
                 </div>
-                <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:15px; border-radius:18px; text-align:center;">
-                    <div style="font-size:12px; color:#94a3b8; margin-bottom:2px;">ร้าน</div>
-                    <div style="font-size:18px; font-weight:800; color:#f8fafc;">฿${shopEarn.toLocaleString()}</div>
+                <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:16px; border-radius:20px; text-align:center;">
+                    <div style="font-size:14px; color:#94a3b8; font-weight:600; margin-bottom:4px;">ยอดเงินร้าน</div>
+                    <div style="font-size:20px; font-weight:800; color:#f8fafc;">฿${shopEarn.toLocaleString()}</div>
                 </div>
             </div>
 
             ${settleHTML}
 
-            <div style="margin-bottom:25px; text-align:center;">
-                <div style="font-size:12px; color:#64748b; font-weight:700; text-transform:uppercase; margin-bottom:10px;">สรุปประเภทงาน</div>
-                ${svcHTML}
+            <div style="margin-bottom:30px;">
+                <div style="font-size:14px; color:#94a3b8; font-weight:700; text-transform:uppercase; margin-bottom:12px; text-align:center;">สรุปประเภทงาน</div>
+                <div style="text-align:center;">${svcHTML}</div>
             </div>
 
-            <div style="font-weight:800; font-size:15px; color:#f8fafc; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
-                <div style="width:4px; height:16px; background:#6366f1; border-radius:2px;"></div>
+            <div style="font-weight:800; font-size:16px; color:#f8fafc; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+                <div style="width:4px; height:18px; background:#cbd5e1; border-radius:2px;"></div>
                 รายละเอียดงาน
             </div>
-            <div style="max-height:350px; overflow-y:auto; padding-right:5px;">
+            <div style="max-height:400px; overflow-y:auto;">
                 ${rows}
             </div>
-        </div>
+            </div>
     `);
 }
 function loadHistMonth() {
@@ -2104,19 +2077,13 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     );
 }    
 function renderStats(obj, accentColor) {
-    // 1. แปลง Object เป็น Array และเรียงลำดับจากมากไปน้อย
     const entries = Object.entries(obj).sort((a, b) => b[1] - a[1]);
-    // 2. กรณีไม่มีข้อมูล ให้แสดงข้อความแจ้งเตือนแบบจางๆ
-    if (!entries.length) {
-        return `<div style='color:rgba(255,255,255,0.2); padding:10px; font-size:13px; text-align:center;'>ไม่มีข้อมูลสถิติ</div>`;
-    }
-    // 3. วนลูปสร้าง HTML Card สำหรับแต่ละรายการ
+    if (!entries.length) return "<div style='color:rgba(255,255,255,0.2); padding:10px; font-size:13px;'>ไม่มีข้อมูลสถิติ</div>";
+    
     return entries.map(([k, v]) => `
         <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; margin-bottom:8px;">
             <div style="font-weight:600; color:#f1f5f9; font-size:14px;">${k}</div>
-            <div style="font-weight:800; color:${accentColor}; font-size:16px;">
-                ${v} <span style="font-size:11px; opacity:0.5; color:#fff;">ครั้ง</span>
-            </div>
+            <div style="font-weight:800; color:${accentColor}; font-size:16px;">${v} <span style="font-size:11px; opacity:0.5; color:#fff;">ครั้ง</span></div>
         </div>`).join("");
 }
 function shareLine() {
