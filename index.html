@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 4</title>
+    <title>Barber Note Pro </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -251,46 +251,50 @@ nav {
 #btnTrans { background: linear-gradient(135deg, #6366f1, #4338ca); color: white; }
 #btnMix   { background: linear-gradient(135deg, #81d4fa, #01579b); color: white; }
 
+/* 🔵 ปุ่มบันทึกข้อมูล (หรือปุ่มจ่ายเงินหลัก) */
 .btn-pay { 
     height: 75px; 
     font-size: 18px; 
     width: 100%; 
     border-radius: 18px;
     border: 3px solid transparent;
-    transition: background 0.2s, opacity 0.2s, filter 0.2s; /* ลบ transform ออกจาก transition */
+    transition: background 0.2s, opacity 0.2s, filter 0.2s;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    transform: none !important; /* บังคับไม่ให้มีการขยับ */
+    transform: none !important; 
+
+    /* เติมสีตรงนี้ครับช่าง */
+    background-color: #003399; 
+    color: #ffffff;
 }
+
 /* ล็อคขนาดไอคอนไม่ให้ขยาย */
 .btn-pay i {
     transform: none !important;
     display: inline-block;
     margin-bottom: 4px;
 }
-/* 🟢 เมื่อถูกเลือก: เปลี่ยนเฉพาะขอบและเงา (ขนาดเท่าเดิม) */
+/* 🟢 เมื่อถูกเลือก: ให้ขอบสีขาวเด่นขึ้นมา */
 .btn-pay.active-cash, 
 .btn-pay.active-trans, 
 .btn-pay.active-mix { 
     opacity: 1 !important;
     filter: grayscale(0) !important;
-    border-color: #ffffff !important; 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    transform: none !important; /* ล็อคตำแหน่งปุ่ม */
+    border-color: #ffffff !important; /* ขอบขาวตัดกับพื้นน้ำเงินจะสวยมาก */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transform: none !important;
 }
-
-/* ⚪ เมื่อไม่ได้ถูกเลือก: เป็นสีเทา */
+/* ⚪ เมื่อไม่ได้ถูกเลือก: เป็นสีเทา (สำหรับปุ่มจ่ายเงินตัวอื่นที่ไม่ได้กด) */
 .btn-pay.is-inactive { 
     background: #e2e8f0 !important; 
     color: #94a3b8 !important; 
     filter: grayscale(1); 
     opacity: 0.5;
-    transform: none !important; /* ล็อคตำแหน่งปุ่ม */
-}
-    /* 8. โมดอลและรายงาน */
+    transform: none !important;
+}    /* 8. โมดอลและรายงาน */
     .modal { 
         position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); 
         display: none; z-index: 1000000; align-items: center; justify-content: center; 
@@ -400,8 +404,13 @@ nav {
         </div>
     </div>
 </div>
-
-<button class="btn-main" onclick="handleSave(event)" style="width:100%; height:90px; border-radius:28px; background:linear-gradient(135deg, #4338ca, #3730a3); color:#fff; border:none; box-shadow:0 15px 35px rgba(67,56,202,0.4); display:flex; align-items:center; justify-content:center; gap:15px;">
+<button class="btn-main" onclick="handleSave(event)" 
+    style="width:100%; height:90px; border-radius:28px; 
+    background: linear-gradient(135deg, #0044cc, #003399); /* 🔵 ปรับเป็นน้ำเงินกรุงเทพไล่เฉด */
+    color:#fff; border:none; 
+    box-shadow: 0 15px 35px rgba(0, 51, 153, 0.4); /* 🔵 ปรับเงาให้เป็นสีน้ำเงินเข้ากัน */
+    display:flex; align-items:center; justify-content:center; gap:15px;">
+    
     <i class="fas fa-save" style="font-size: 38px;"></i>
     <span style="font-size: 32px; font-weight: 900; letter-spacing:1px;">บันทึกข้อมูล</span>
 </button>
