@@ -615,7 +615,7 @@ let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
 let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
 let conf = JSON.parse(localStorage.getItem("barber_conf")) || { shop: "Barber Shop", perc: 50, guar: 0 };
 let payMethod = "";
- function go(p) {
+function go(p) {
     // 1. จัดการการซ่อน/แสดงหน้า Page
     document.querySelectorAll('.page').forEach(pg => {
         pg.classList.remove('active');
