@@ -656,45 +656,53 @@ function go(p) {
     // 4. เลื่อนจอขึ้นบนสุด (เพื่อความสุภาพและใช้งานง่าย)
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-   function updateDateDisplay(v) {
-    if (!v) return; 
-    // แยกวันที่ออกมาโดยตรงเพื่อเลี่ยงปัญหา Timezone
-    const [y, m, d] = v.split('-');
-    const thaiYear = parseInt(y) + 543;
-    const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-    
-    const formattedDate = `${parseInt(d)} ${months[parseInt(m)-1]} ${thaiYear}`;
-    // อัปเดตทุกจุดที่มีการแสดงวันที่ (ใส่ ID ที่เกี่ยวข้องทั้งหมด)
-    ["dateDisplay", "displayDateThai", "dayDateDisp"].forEach(id => {
-        const el = $(id);
-        if (el) el.innerText = formattedDate;
-    });
+function updateDateDisplay(v){if(!v)return;
+    const d=new Date(v);const el=$("dateDisplay");
+    if(el)el.innerText=d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
+    if(typeof renderDay==="function")renderDay()}window.addEventListener('DOMContentLoaded',()=>{
+    const i=$("dateInp"),t=new Date().toISOString().split('T')[0];
+    if(i){i.value=t;updateDateDisplay(t)}});
 
-    if (typeof renderDay === "function") renderDay(v);
-}
 /* ==========================================================
    SECTION 2: CORE DATA & BACKUP SYSTEM
    (การบันทึกข้อมูลและระบบสำรอง/กู้คืน)
    ========================================================== */
-function save() {
-                localStorage.setItem("barber_db", JSON.stringify(db));
-                localStorage.setItem("barber_archives", JSON.stringify(archives));
-                localStorage.setItem("barber_account", JSON.stringify(account));
-                localStorage.setItem("barber_conf", JSON.stringify(conf));
-            }
-            window.onload = () => {
-                const today = new Date().toISOString().split('T')[0];
-            
-                if ($("dateInp")) $("dateInp").value = today;
-                if ($("accDate")) $("accDate").value = today;
-                if ($("histDate")) $("histDate").value = today;
-                if (conf.shop) $("shopNameDisp").innerText = conf.shop;
-                if (conf.theme) applyTheme(conf.theme);
-            
-                renderDay();
-                loadAccountStatus();
-            };
+// ฟังก์ชันบันทึกข้อมูล (รวมเป็นชื่อเดียว)
+function saveDB() {
+    try {
+        localStorage.setItem("barber_db", JSON.stringify(db));
+        localStorage.setItem("barber_archives", JSON.stringify(archives));
+        localStorage.setItem("barber_account", JSON.stringify(account));
+        localStorage.setItem("barber_conf", JSON.stringify(conf));
+        console.log("💾 บันทึกข้อมูลเรียบร้อยแล้ว");
+    } catch (e) {
+        console.error("❌ บันทึกไม่สำเร็จ:", e);
+    }
+}
+// เมื่อโหลดหน้าเว็บเสร็จสมบูรณ์
+window.onload = () => {
+    const today = new Date().toISOString().split('T')[0];
 
+    // 1. ตั้งค่าวันที่ให้กับทุก Input
+    if ($("dateInp")) $("dateInp").value = today;
+    if ($("accDate")) $("accDate").value = today;
+    if ($("histDate")) $("histDate").value = today;
+
+    // 2. ✨ เพิ่มการอัปเดตตัวหนังสือวันที่ไทยทันทีที่เปิดแอป
+    if (typeof updateDateDisplay === "function") {
+        updateDateDisplay(today);
+    }
+    // 3. ตั้งค่าหน้าตาตามที่ตั้งไว้ใน Config
+    if (conf.shop && $("shopNameDisp")) {
+        $("shopNameDisp").innerText = conf.shop;
+    }
+    if (conf.theme && typeof applyTheme === "function") {
+        applyTheme(conf.theme);
+    }
+    // 4. โหลดข้อมูลมาแสดงผล
+    if (typeof renderDay === "function") renderDay();
+    if (typeof loadAccountStatus === "function") loadAccountStatus();
+};
  function saveDB() {localStorage.setItem("barber_db", JSON.stringify(db));localStorage.setItem("barber_conf", JSON.stringify(conf));}
 
 // 1. ฟังก์ชันส่งออกข้อมูล (Backup)
