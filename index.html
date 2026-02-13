@@ -1051,60 +1051,51 @@ function updateMixValues() {
    ========================================================== */
 function saveAndGo(date, total) {
     const allToday = db.filter(r => r.date === date);
-    const todayData = allToday.filter(r => r.type === 'SERVICE');
+    // ตรวจสอบสถานะวันหยุด
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
-
-    let cash = 0, tips = 0;
+    // คำนวณยอดเงินจริง
+    const todayData = allToday.filter(r => r.type === 'SERVICE');
+    let cash = 0, tips = 0, trans = 0;
     todayData.forEach(r => {
-        const p = Number(r.price) || 0;
-        const t = Number(r.tip) || 0;
+        const p = Number(r.price) || 0, t = Number(r.tip) || 0;
         tips += t;
-        if (r.pay === "Cash" || r.pay === "เงินสด") { cash += (p + t); }
-        else if (r.pay === "Mix") { cash += Number(r.payCash) || 0; }
+        if (r.pay === "Cash") { cash += (p + t); } 
+        else if (r.pay === "Trans") { trans += (p + t); }
+        else if (r.pay === "Mix") { cash += Number(r.payCash) || 0; trans += Number(r.payTrans) || 0; }
     });
-    let bEarn = 0;
-    let settle = 0;
-
-    if (!isHoliday) {
-        if (total > 0) {
-            const commission = total * (Number(conf.perc) / 100);
-            const baseEarn = Math.max(commission, Number(conf.guar) || 0); 
-            bEarn = baseEarn + tips;
-            settle = cash - bEarn;
-        } else {
-            bEarn = 0;
-            settle = 0;
-        }
-    }
-    // 🟢 2. บันทึกเข้า Archives (ส่งค่าเป็น 0 ทั้งหมดเพื่อไม่ให้เก็บยอดเงินในแฟ้มประวัติ)
+    const commission = total * (Number(conf.perc) / 100);
+    const baseEarn = Math.max(commission, Number(conf.guar) || 0); 
+    const bEarn = isHoliday ? 0 : (total > 0 ? baseEarn + tips : 0);
+    const settle = isHoliday ? 0 : (total > 0 ? cash - bEarn : 0);
+    // 1. บันทึกเข้า Archives (เก็บค่าจริงเพื่อให้รายงานมีข้อมูล)
     const data = { 
         date, 
-        total: 0,      // ไม่ส่งยอดเงินรวมไปประวัติ
-        cash: 0,       // ไม่ส่งยอดเงินสด
-        barber: 0,     // ไม่ส่งยอดรายได้ช่าง
-        settle: 0,     // ไม่ส่งยอดส่วนต่าง
-        type: isHoliday ? "HOLIDAY" : "WORK", // ยังเก็บสถานะ WORK เพื่อนับวันทำงาน
-        details: []    // ล้างรายละเอียดงานเพื่อประหยัดพื้นที่
-    }; 
+        total, 
+        cash, 
+        trans, 
+        tips, 
+        barber: Math.floor(bEarn), 
+        settle: settle, 
+        type: isHoliday ? "HOLIDAY" : "WORK" 
+    };
     const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
-    // 3. บันทึกลงสมุดบัญชี (ยังส่งยอดไปตามปกติ เพื่อให้มาแสดงที่หน้าบัญชีให้ช่างกดเคลียร์เอง)
+    // 2. ส่งยอดเข้า Account Logs (เพื่อให้หน้าบัญชีหักลบยอดได้จริง)
     if (!isHoliday) {
-        account.logs = account.logs.filter(l => !(l.date === date && l.note.includes("ยอดปิดงาน")));  
-        
+        account.logs = account.logs.filter(l => l.date !== date || !l.note.includes("ยอดปิดงาน"));
         account.logs.push({ 
             date: date, 
-            amount: -settle, // ยอดนี้จะไปโผล่ที่หน้าบัญชี (สถานะ: ร้านคืนช่าง / ช่างคืนร้าน)
-            note: `ยอดปิดงานวันที่ ${date}`,
-            type: 'SYSTEM'
+            amount: -settle, 
+            note: `ยอดปิดงานวันที่ ${date}` 
         });
     }
+    // 3. ล้างข้อมูลหน้าบันทึกและเซฟ
     db = db.filter(r => r.date !== date);
     if (typeof saveDB === "function") { saveDB(); } else { save(); }
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
     
-    alert(`✅ บันทึกวันที่ ${date} สำเร็จ (นับวันทำงานแล้ว)`);
-    if (typeof go === "function") go(3); 
+    alert(`✅ บันทึกวันที่ ${date} เรียบร้อย`);
+    if (typeof go === "function") go(3);
 }
 // --- ระบบประกันรายได้ ---
 function handleInsurance() {
@@ -1427,13 +1418,18 @@ function updateStatusUI(net) {
     const getEl = (id) => document.getElementById(id);
     const badge = getEl("statusBadge");
     const light = getEl("accLight"); 
-    // ตรรกะ: บวก=แดง (ช่างคืนร้าน) | ลบ=น้ำเงิน (ร้านคืนช่าง) | 0=เขียว (ลงตัว)
-    let color = net > 0 ? "#dc2626" : (net < 0 ? "#1e3a8a" : "#16a34a");
-    let txt = net > 0 ? "👨‍🎨 ช่างคืนร้าน" : (net < 0 ? "🏠 ร้านคืนช่าง" : "⚖️ ยอดลงตัว");
+    
+    // ตรรกะมาตรฐาน: 
+    // ค่าลบ (-) = ช่างถือเงินสดไว้เยอะ ต้องคืนร้าน (สีแดง)
+    // ค่าบวก (+) = ร้านค้างเงินช่าง (สีน้ำเงิน/เขียว)
+    // 0 = เคลียร์จบ
+    
+    let color = net < 0 ? "#dc2626" : (net > 0 ? "#1e3a8a" : "#16a34a");
+    let txt = net < 0 ? "👨‍🎨 ช่างคืนร้าน" : (net > 0 ? "🏠 ร้านคืนช่าง" : "✅ เคลียร์ยอดแล้ว");
 
     if (badge) {
         badge.innerText = txt;
-        badge.style.background = net > 0 ? "#fef2f2" : (net < 0 ? "#eff6ff" : "#f0fdf4");
+        badge.style.background = net < 0 ? "#fef2f2" : (net > 0 ? "#eff6ff" : "#f0fdf4");
         badge.style.color = color;
     }
     if (light) {
