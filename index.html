@@ -246,55 +246,60 @@ nav {
         
       /* 7. ปุ่มและการจัดการ (ขนาดนิ่งสนิท) */
 
-/* สีปกติของแต่ละปุ่ม */
-#btnCash { background: linear-gradient(135deg, #10b981, #059669); color: white; }
-#btnTrans { background: linear-gradient(135deg, #6366f1, #4338ca); color: white; }
-#btnMix   { background: linear-gradient(135deg, #81d4fa, #01579b); color: white; }
-
-/* 🔵 ปุ่มบันทึกข้อมูล (หรือปุ่มจ่ายเงินหลัก) */
+    /* สีปกติของแต่ละปุ่ม */
+    #btnCash { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+    #btnTrans { background: linear-gradient(135deg, #6366f1, #4338ca); color: white; }
+    #btnMix   { background: linear-gradient(135deg, #81d4fa, #01579b); color: white; }
+    /* 7. ปุ่มและการจัดการ (ขนาดนิ่งสนิท) */
+/* 🔵 ปุ่มจ่ายเงินหลัก */
 .btn-pay { 
     height: 75px; 
     font-size: 18px; 
     width: 100%; 
     border-radius: 18px;
     border: 3px solid transparent;
-    transition: background 0.2s, opacity 0.2s, filter 0.2s;
+    /* ใช้ transition แค่สีและเงาพอครับ ไม่ต้องใส่ all เพื่อป้องกันการขยาย */
+    transition: background 0.2s, opacity 0.2s, border 0.2s;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    
+    /* 🔒 ล็อคตัวปุ่มไม่ให้ขยายเด็ดขาด */
     transform: none !important; 
-
-    /* เติมสีตรงนี้ครับช่าง */
-    background-color: #190da8, #0b1e59; 
+    
+    /* ✅ แก้ไขการใส่สี Gradient ให้ถูกต้อง */
+    background: linear-gradient(135deg, #190da8, #0b1e59); 
     color: #ffffff;
 }
 
-/* ล็อคขนาดไอคอนไม่ให้ขยาย */
+/* 🟢 สถานะเมื่อปุ่มถูกเลือก (Active) - เน้นที่ขอบแทนการขยาย */
+.btn-pay.active-cash, 
+.btn-pay.active-trans, 
+.btn-pay.active-mix {
+    border: 3px solid #ffffff !important; /* ใช้ขอบขาวเน้นว่าเลือก */
+    box-shadow: 0 0 15px rgba(255,255,255,0.3);
+    transform: none !important; /* ล็อคซ้ำอีกชั้น */
+    opacity: 1 !important;
+}
+
+/* ⚪ สถานะปุ่มที่ไม่ได้เลือก */
+.btn-pay.is-inactive {
+    opacity: 0.4;
+    filter: grayscale(0.5);
+    transform: none !important; /* ไม่ให้หดหรือขยาย */
+}
+
+/* 🔒 ล็อคขนาดไอคอนข้างใน (ตามที่ช่างเขียนมา ถูกต้องแล้วครับ) */
 .btn-pay i {
     transform: none !important;
     display: inline-block;
     margin-bottom: 4px;
-}
-/* 🟢 เมื่อถูกเลือก: ให้ขอบสีขาวเด่นขึ้นมา */
-.btn-pay.active-cash, 
-.btn-pay.active-trans, 
-.btn-pay.active-mix { 
-    opacity: 1 !important;
-    filter: grayscale(0) !important;
-    border-color: #ffffff !important; /* ขอบขาวตัดกับพื้นน้ำเงินจะสวยมาก */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    transform: none !important;
-}
-/* ⚪ เมื่อไม่ได้ถูกเลือก: เป็นสีเทา (สำหรับปุ่มจ่ายเงินตัวอื่นที่ไม่ได้กด) */
-.btn-pay.is-inactive { 
-    background: #e2e8f0 !important; 
-    color: #94a3b8 !important; 
-    filter: grayscale(1); 
-    opacity: 0.5;
-    transform: none !important;
-}    /* 8. โมดอลและรายงาน */
+    font-size: 24px; /* คุมขนาดไอคอนให้คงที่ */
+} 
+   
+     /* 8. โมดอลและรายงาน */
     .modal { 
         position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); 
         display: none; z-index: 1000000; align-items: center; justify-content: center; 
