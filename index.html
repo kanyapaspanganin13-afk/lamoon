@@ -506,14 +506,13 @@ nav {
         <i class="fas fa-history"></i> ประวัติเคลียร์เงิน
     </button>
 </div>
-        </div>  
-       <div onclick="$('histMonth').showPicker()" 
-    <div style="background:linear-gradient(135deg, #1e40af, #4338ca); border-radius:25px; padding:15px 10px; text-align:center; color:#fff; position:relative; box-shadow:0 8px 20px rgba(67, 56, 202, 0.3); cursor:pointer; margin-top: 15px; margin-bottom: 12px; transition: 0.3s;">
+    <div onclick="$('histMonth').showPicker()" 
+     style="background:linear-gradient(135deg, #1e40af, #4338ca); border-radius:25px; padding:15px 10px; text-align:center; color:#fff; position:relative; box-shadow:0 8px 20px rgba(67, 56, 202, 0.3); cursor:pointer; margin-top: 15px; margin-bottom: 12px; transition: 0.3s;">
     <i class="fas fa-calendar-check" style="font-size:26px; margin-bottom:8px; display:block; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></i>
     <b style="font-size:18px; letter-spacing: 0.5px;">สรุปรายเดือน</b>
-    <input type="month" id="histMonth" onchange="loadHistMonth()" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
+    <input type="month" id="histMonth" onchange="loadHistMonth()" 
+           style="position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer;">
 </div>
-
     <div onclick="openComparisonSelector()" style="background: linear-gradient(135deg, #38bdf8, #1d4ed8); border-radius: 25px; padding: 15px; text-align: center; color: #fff; cursor: pointer; box-shadow: 0 8px 15px rgba(56,189,248,0.2); display: flex; align-items: center; justify-content: center; gap: 10px;">       
     <i class="fas fa-chart-line" style="font-size: 24px;"></i>
     <b style="font-size: 16px;">เปรียบเทียบช่วงวันที่</b>
