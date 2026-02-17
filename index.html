@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro </title>
+    <title>Barber Note Pro 1 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -55,44 +55,59 @@ function renderComparisonReport(v) {
         const [y, m, d] = dateStr.split('-');
         return `${dayName} ${d}/${m}/${(parseInt(y) + 543).toString().slice(-2)}`;
     };
+
     const fetchStats = (start, end) => {
         let list = [];
         let currentDate = new Date(start);
         const stopDate = new Date(end);
+
         while (currentDate <= stopDate) {
             const dateStr = currentDate.toISOString().split('T')[0];
             if (typeof archives !== 'undefined') {
                 const dayData = archives.find(a => a.date === dateStr);
                 if (dayData) {
+                    // 🟢 แก้ไขจุดนี้: กรองรายการ "ประกันรายได้" ออกก่อนนับจำนวนลูกค้า
+                    let realCustomerCount = 0;
+                    if (dayData.details && Array.isArray(dayData.details)) {
+                        realCustomerCount = dayData.details.filter(d => 
+                            // ตรวจสอบว่า svcs ต้องไม่เท่ากับ "ประกันรายได้" (หรือคำที่ช่างใช้บันทึก)
+                            d.svcs !== "ประกันรายได้" && d.svcs !== "ประกันรายได้ช่าง"
+                        ).length;
+                    } else {
+                        realCustomerCount = dayData.count || 0;
+                    }
+
                     list.push({
                         date: formatThaiDate(dateStr),
-                        count: dayData.count || (dayData.details ? dayData.details.length : 0),
+                        count: realCustomerCount, // ใช้จำนวนที่กรองแล้ว
                         barber: dayData.barber || 0
                     });
                 }
             }
             currentDate.setDate(currentDate.getDate() + 1);
         }
+
         const sumC = list.reduce((a, b) => a + Number(b.count || 0), 0);
         const sumE = list.reduce((a, b) => a + Number(b.barber || 0), 0);
+        
         const rowList = list.length > 0 ? list.map(d => `
             <div style="display:flex; justify-content:space-between; padding:10px 8px; border-bottom:1px solid rgba(0,0,0,0.05); font-size:13px; color:#334155;">
                 <span style="flex:1.5; font-weight:500;">${d.date}</span>
                 <span style="flex:1; text-align:center; color:#1d4ed8; font-weight:700;">👤 ${d.count}</span>
                 <span style="flex:1.2; text-align:right; color:#059669; font-weight:700;">฿${Number(d.barber).toLocaleString()}</span>
             </div>`).join("") : `<div style="padding:15px; text-align:center; color:#94a3b8;">❌ ไม่พบข้อมูล</div>`;
+        
         return { sumC, sumE, rowList, range: `${formatThaiDate(start)} - ${formatThaiDate(end)}` };
     };
 
     const d1 = fetchStats(v.s1, v.e1);
     const d2 = fetchStats(v.s2, v.e2);
 
+    // ... ส่วนที่เหลือ (reportHtml และ openReportModal) ใช้ของเดิมได้เลยครับ ...
     const reportHtml = `
         <div style="font-family:'Kanit', sans-serif; text-align:left; background:#ffffff; margin:-20px; padding:20px; color:#1e293b;">
-            
             <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:24px; padding:18px; margin-bottom:15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
                 <div style="color:#0369a1; font-weight:700; font-size:13px; margin-bottom:10px; display:flex; align-items:center; gap:5px;">📅 ${d1.range}</div>
-                
                 <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:12px; border-radius:16px; border:1px solid #e0f2fe; margin-bottom:10px;">
                     <span style="flex:1.5; font-weight:800; color:#1e293b; font-size:14px;">สรุปรวม</span>
                     <span style="flex:1; text-align:center; color:#1d4ed8; font-weight:800; font-size:18px;">👤 ${d1.sumC}</span>
@@ -107,7 +122,6 @@ function renderComparisonReport(v) {
 
             <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius: 24px; padding: 18px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
                 <div style="color:#15803d; font-weight:700; font-size:13px; margin-bottom:10px; display:flex; align-items:center; gap:5px;">📅 ${d2.range}</div>
-
                 <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:12px; border-radius:16px; border:1px solid #dcfce7; margin-bottom:10px;">
                     <span style="flex:1.5; font-weight:800; color:#1e293b; font-size:14px;">สรุปรวม</span>
                     <span style="flex:1; text-align:center; color:#1d4ed8; font-weight:800; font-size:18px;">👤 ${d2.sumC}</span>
@@ -117,8 +131,7 @@ function renderComparisonReport(v) {
                     ${d2.rowList}
                 </div>
             </div>
-
-            <div style="text-align:center; font-size:11px; color:#94a3b8; margin-top:15px;">เปรียบเทียบข้อมูลเฉพาะรายได้ของช่าง</div>
+            <div style="text-align:center; font-size:11px; color:#94a3b8; margin-top:15px;">เปรียบเทียบข้อมูลเฉพาะรายได้ของช่าง (ไม่นับประกันรายได้เป็นจำนวนลูกค้า)</div>
         </div>`;
 
     openReportModal("วิเคราะห์เปรียบเทียบข้อมูล", reportHtml);
