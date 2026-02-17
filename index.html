@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 1 </title>
+    <title>Barber Note Pro  </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -65,28 +65,30 @@ function renderComparisonReport(v) {
             const dateStr = currentDate.toISOString().split('T')[0];
             if (typeof archives !== 'undefined') {
                 const dayData = archives.find(a => a.date === dateStr);
-                if (dayData) {
-                    // 🟢 แก้ไขจุดนี้: กรองรายการ "ประกันรายได้" ออกก่อนนับจำนวนลูกค้า
+               if (dayData) {
                     let realCustomerCount = 0;
+                    
                     if (dayData.details && Array.isArray(dayData.details)) {
-                        realCustomerCount = dayData.details.filter(d => 
-                            // ตรวจสอบว่า svcs ต้องไม่เท่ากับ "ประกันรายได้" (หรือคำที่ช่างใช้บันทึก)
-                            d.svcs !== "ประกันรายได้" && d.svcs !== "ประกันรายได้ช่าง"
-                        ).length;
-                    } else {
-                        realCustomerCount = dayData.count || 0;
+                        realCustomerCount = dayData.details.filter(d => {
+                            // 1. ดึงชื่อรายการออกมา (เช่น "🛡️ ประกันรายวัน")
+                            const itemName = Array.isArray(d.svcs) ? d.svcs.join("") : String(d.svcs || "");
+                            // 2. เช็คว่ามีประเภทเป็น GUARANTEE_CLAIM หรือมีคำว่า "ประกัน" ไหม
+                            // ถ้าเป็นประกัน ให้คืนค่า false เพื่อ "ไม่นับ" เป็นลูกค้า
+                            const isInsurance = d.type === "GUARANTEE_CLAIM" || itemName.includes("ประกัน");
+                            
+                            return !isInsurance; 
+                        }).length;
                     }
 
                     list.push({
                         date: formatThaiDate(dateStr),
-                        count: realCustomerCount, // ใช้จำนวนที่กรองแล้ว
+                        count: realCustomerCount,
                         barber: dayData.barber || 0
                     });
                 }
             }
             currentDate.setDate(currentDate.getDate() + 1);
         }
-
         const sumC = list.reduce((a, b) => a + Number(b.count || 0), 0);
         const sumE = list.reduce((a, b) => a + Number(b.barber || 0), 0);
         
@@ -255,10 +257,8 @@ nav {
         width: 100%; height: 75px; border-radius: 20px; font-size: 20px; font-weight: 700; 
         text-align: center; border: none; outline: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
         appearance: none; -webkit-appearance: none;
-    }
-        
+    }     
       /* 7. ปุ่มและการจัดการ (ขนาดนิ่งสนิท) */
-
     /* สีปกติของแต่ละปุ่ม */
     #btnCash { background: linear-gradient(135deg, #10b981, #059669); color: white; }
     #btnTrans { background: linear-gradient(135deg, #6366f1, #4338ca); color: white; }
@@ -291,13 +291,11 @@ nav {
 .btn-pay.active-trans, 
 .btn-pay.active-mix {
     border: 3px solid #ffffff !important; /* ใช้ขอบขาวเน้นว่าเลือก */
-    box-shadow: 0 0 15px rgba(255,255,255,0.3);
-    
+    box-shadow: 0 0 15px rgba(255,255,255,0.3);   
     /* 🔒 ล็อคขนาดปุ่มไม่ให้ขยายเด็ดขาด */
     transform: scale(1) !important; 
     opacity: 1 !important;
 }
-
 /* 🔒 ล็อคไอคอนข้างในปุ่มที่เลือก ไม่ให้ขยายตามไปด้วย */
 .btn-pay.active-cash i, 
 .btn-pay.active-trans i, 
@@ -305,7 +303,6 @@ nav {
     transform: scale(1) !important;
     display: inline-block !important;
 }
-
 /* ⚪ สถานะปุ่มที่ไม่ได้เลือก */
 .btn-pay.is-inactive {
     opacity: 0.4;
