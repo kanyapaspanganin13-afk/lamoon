@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro  </title>
+    <title>Barber Note Pro 1 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1851,7 +1851,6 @@ function loadHistMonth() {
     const m = $("histMonth").value;
     if (!m) return alert("กรุณาเลือกเดือนก่อนครับ");
 
-    // ตรวจสอบฐานข้อมูล (ตรวจสอบทั้ง db และ archives เพื่อให้ชัวร์ว่ามีข้อมูล)
     if (typeof archives === 'undefined') return alert("ไม่พบฐานข้อมูลหลัก (archives)");
 
     const filtered = archives.filter(a => a.date && a.date.startsWith(m));
@@ -1859,7 +1858,8 @@ function loadHistMonth() {
         return openReportModal("📊 สรุปรายเดือน", `<div style='text-align:center;padding:50px;color:#94a3b8;'>ไม่พบข้อมูลของเดือน ${m}</div>`);
     }
 
-    let monthTotal = 0, monthBarber = 0, monthCount = 0;
+    // 🟢 เพิ่มตัวนับ monthGuarDays (จำนวนวันประกันรายได้)
+    let monthTotal = 0, monthBarber = 0, monthCount = 0, monthGuarDays = 0; 
     let hairStats = {}, serviceStats = {};
     let offDays = 0, workDays = 0;
     let weeklyData = {};
@@ -1876,7 +1876,7 @@ function loadHistMonth() {
         if (!weeklyData[wKey]) {
             weeklyData[wKey] = { 
                 customers: 0, workDays: 0, offDays: 0, 
-                zeroDays: 0, dailyCounts: [], 
+                zeroDays: 0, guarDays: 0, dailyCounts: [], // เพิ่ม guarDays ในระดับสัปดาห์ด้วย
                 popularHair: {}, 
                 popularService: {}, 
                 income: 0 
@@ -1891,6 +1891,14 @@ function loadHistMonth() {
 
         workDays++;
         weeklyData[wKey].workDays++;
+        
+        // 🛡️ ตรวจสอบว่าในรายละเอียดวันนั้น มีรายการ "GUARANTEE_CLAIM" หรือไม่
+        const hasInsurance = day.details && day.details.some(d => d.type === "GUARANTEE_CLAIM");
+        if (hasInsurance) {
+            monthGuarDays++;
+            weeklyData[wKey].guarDays++;
+        }
+
         const dailyIncome = Number(day.total) || 0;
         const dailyBarber = Number(day.barber) || 0; 
         
@@ -1901,6 +1909,7 @@ function loadHistMonth() {
         let dayCustomerCount = 0;
         if (day.details && Array.isArray(day.details)) {
             day.details.forEach(d => {
+                // 👤 นับเฉพาะ SERVICE จริงๆ (ไม่นับ GUARANTEE_CLAIM เป็นลูกค้า)
                 if (d.type === "SERVICE") {
                     monthCount++;
                     dayCustomerCount++;
@@ -1932,9 +1941,11 @@ function loadHistMonth() {
     });
 
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
-    generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, haircutList);
+    
+    // 🎯 ส่งค่า monthGuarDays เข้าไปในฟังก์ชันสรุปรายงานด้วย
+    generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays);
 }
-function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats) {
+function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays) {
     // --- 1. เตรียมข้อมูลสำหรับวิเคราะห์ (Logic) ---
     const weekEntries = Object.entries(weeklyData);
     const dayStats = {};
@@ -2001,7 +2012,8 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
 
     const insights = [
         `เดือนนี้เปิดให้บริการทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
-        (topIncomeWeek && maxIncomeAmount > 0) 
+        // 🛡️ แสดงเฉพาะจำนวนวันที่ใช้ประกันรายได้เท่านั้นตามที่ช่างต้องการ
+        `ใช้ประกันรายได้ทั้งหมด <b>${monthGuarDays || 0} วัน</b>`,
             ? `สัปดาห์ที่ทำรายได้สูงสุดคือ <b>${topIncomeWeek[0]}</b>` 
             : `สัปดาห์ที่ทำรายได้สูงสุดคือ <b>-</b>`,
         (topCountWeek && maxWeekCount > 0)
@@ -2076,14 +2088,20 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                     <div style="font-size:13px; font-weight:800; color:#38bdf8;">฿${Math.floor(wShop).toLocaleString()}</div>
                 </div>
             </div>
-            <div style="display:flex; gap:6px; margin-bottom:10px;">
+           <div style="display:flex; gap:6px; margin-bottom:10px;">
                 <div style="flex:1; background:rgba(255,255,255,0.02); padding:4px 10px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-size:10px; color:#64748b;">👤 ลูกค้า</span>
                     <span style="font-size:11px; font-weight:700; color:#38bdf8;">${data.customers}</span>
                 </div>
+
+                <div style="flex:1; background:rgba(250,204,21,0.05); border:1px solid rgba(250,204,21,0.1); padding:4px 10px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:10px; color:#facc15;">🛡️ ประกัน</span>
+                    <span style="font-size:11px; font-weight:700; color:#facc15;">${data.guarDays || 0}</span>
+                </div>
+
                 <div style="flex:1; background:rgba(255,255,255,0.02); padding:4px 10px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-size:10px; color:#64748b;">📊 เฉลี่ย</span>
-                    <span style="font-size:11px; font-weight:700; color:#facc15;">${avg}</span>
+                    <span style="font-size:11px; font-weight:700; color:#ffffff;">${avg}</span>
                 </div>
             </div>
             <div style="font-size:11px; color:#64748b; line-height:1.6; padding:0 4px 10px 4px; border-bottom:1px solid rgba(255,255,255,0.05); margin-bottom:10px;">
@@ -2119,12 +2137,17 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                     <div style="font-size:20px; font-weight:800; color:#f8fafc;">฿${Math.floor(monthTotal - monthBarber).toLocaleString()}</div>
                 </div>
             </div>
-            <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-bottom:25px;">
-                <div style="background:rgba(56,189,248,0.15); padding:6px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#38bdf8;">👤 ลูกค้า ${monthCount} คน</div>
-                <div style="background:rgba(255,255,255,0.08); padding:6px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#f8fafc;">📅 เปิดร้าน ${workDays} วัน</div>
-                <div style="background:rgba(244,63,94,0.15); padding:6px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#fb7185;">🛑 หยุด ${offDays} วัน</div>
-                <div style="background:rgba(250,204,21,0.15); padding:6px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#facc15;">📊 เฉลี่ย ${avgCustomerPerDay.toFixed(2)}</div>
-            </div>
+           <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-bottom:25px;">
+    <div style="background:rgba(56,189,248,0.15); padding:6px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#38bdf8;">👤 ลูกค้า ${monthCount} คน</div>
+    
+    <div style="background:rgba(255,255,255,0.08); padding:6px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#f8fafc;">📅 เปิดร้าน ${workDays} วัน</div>
+    
+    <div style="background:rgba(250,204,21,0.15); padding:6px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#facc15;">🛡️ ประกัน ${monthGuarDays || 0} วัน</div>
+    
+    <div style="background:rgba(244,63,94,0.15); padding:6px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#fb7185;">🛑 หยุด ${offDays} วัน</div>
+    
+    <div style="background:rgba(147, 51, 234, 0.15); padding:6px 14px; border-radius:12px; font-size:13px; font-weight:600; color:#a855f7;">📊 เฉลี่ย ${avgCustomerPerDay.toFixed(2)}</div>
+</div>
             <div style="margin-bottom:25px;">
                 <div style="font-size:14px; font-weight:800; color:#facc15; margin-bottom:12px;">📅 วิเคราะห์รายสัปดาห์</div>
                 ${weeklyHtml}
