@@ -1107,43 +1107,82 @@ function updateMixValues() {
 async function saveAndGo(date, total) {
     if (typeof db === 'undefined' || typeof archives === 'undefined') return;
 
-    // 🛡️ ถามเพื่อยืนยันก่อน (กันมือลั่น)
-    if (!confirm(`ยืนยันการส่งข้อมูลวันที่ ${date} ใช่ไหม?`)) return;
-
+    // --- 🛡️ ส่วนที่ 1: แจ้งเตือน และ ล็อกปุ่มเป็น "สีเขียว" ---
     const btn = document.getElementById("btnSubmitSend");
     const icon = document.getElementById("btnIcon");
 
+    // แจ้งเตือนก่อนส่งกันพลาด
+    if (!confirm(`ยืนยันการส่งข้อมูลวันที่ ${date} ใช่ไหมครับ?`)) return;
+
     if (btn) {
         if (btn.disabled) return; 
-        btn.disabled = true; // ล็อกปุ่มทันที
-        btn.style.background = "#94a3b8"; // เปลี่ยนเป็นสีเทา (Slate)
-        if (icon) icon.className = "fas fa-spinner fa-spin"; 
+        btn.disabled = true;             // ล็อกปุ่มทันที
+        btn.style.background = "#22c55e"; // 🟢 เปลี่ยนเป็นสีเขียว (ขณะกำลังส่ง)
+        if (icon) icon.className = "fas fa-spinner fa-spin"; // เปลี่ยนไอคอนเป็นรูปหมุน
     }
 
-    try {
-        // ... (Logic การบันทึกเดิมของช่าง) ...
-        if (typeof saveDB === "function") { await saveDB(); } 
-        else if (typeof save === "function") { await save(); }
+    const allToday = db.filter(r => r.date === date);
+    const todayData = allToday.filter(r => r.type === 'SERVICE');
+    const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
 
-        // ✅ เมื่อส่งสำเร็จ: เปลี่ยนเป็นสีเขียวและล็อกปุ่มค้างไว้
+    let cash = 0, tips = 0;
+    todayData.forEach(r => {
+        const p = Number(r.price) || 0;
+        const t = Number(r.tip) || 0;
+        tips += t;
+        if (r.pay === "Cash" || r.pay === "เงินสด") { cash += (p + t); }
+        else if (r.pay === "Mix") { cash += Number(r.payCash) || 0; }
+    });
+
+    const commission = total * (Number(conf.perc) / 100);
+    const baseEarn = Math.max(commission, Number(conf.guar) || 0); 
+    const bEarn = isHoliday ? 0 : baseEarn + tips;
+    const settle = isHoliday ? 0 : cash - bEarn;
+
+    const data = { 
+        date, total, cash, 
+        barber: Math.floor(bEarn), 
+        settle: settle, 
+        type: isHoliday ? "HOLIDAY" : "WORK",
+        details: allToday 
+    };
+    
+    const idx = archives.findIndex(a => a.date === date);
+    if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
+
+    if (!isHoliday) {
+        account.balance = -settle; 
+    }
+
+    db = db.filter(r => r.date !== date);
+
+    try {
+        // ประมวลผลการบันทึกข้อมูล
+        if (typeof saveDB === "function") { await saveDB(); } else { await save(); }
+        
+        // --- 🛡️ ส่วนที่ 2: เมื่อสำเร็จ เปลี่ยนเป็น "สีเทา" และค้างไว้ ---
         if (btn) {
-            btn.disabled = true; // ยังคงล็อกอยู่
-            btn.style.background = "#22c55e"; // เปลี่ยนเป็นสีเขียว Success
-            if (icon) icon.className = "fas fa-check"; 
+            btn.style.background = "#94a3b8"; // 🔘 เปลี่ยนเป็นสีเทา (สำเร็จแล้ว)
+            if (icon) icon.className = "fas fa-check-double"; 
+            btn.disabled = true;             // ล็อกค้างไว้จนกว่าจะเพิ่มงานใหม่
             btn.style.cursor = "default";
         }
 
         if (typeof loadAccountStatus === 'function') loadAccountStatus();
-        alert(`✅ ส่งข้อมูลสำเร็จ`);
+        
+        setTimeout(() => {
+            alert(`✅ ส่งข้อมูลสำเร็จ`);
+            // if (typeof go === "function") go(3); // ปิดไว้ถ้าช่างอยากดูหน้าสีเทาค้างไว้ก่อน
+        }, 500);
 
     } catch (e) {
-        // ❌ กรณีผิดพลาด: ให้กลับเป็นสีส้มเพื่อให้กดส่งใหม่ได้
+        // กรณีผิดพลาด ให้กลับเป็นสีส้มเพื่อให้กดส่งใหม่ได้
         if (btn) {
             btn.disabled = false;
-            btn.style.background = "#ff6f00";
+            btn.style.background = "#ff6f00"; // 🟠 กลับเป็นสีส้ม
             if (icon) icon.className = "fas fa-paper-plane";
         }
-        alert("❌ ผิดพลาด: " + e);
+        alert("❌ เกิดข้อผิดพลาด: " + e);
     }
 }
 // --- ระบบประกันรายได้ ---
