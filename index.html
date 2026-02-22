@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 1</title>
+    <title>Barber Note Pro 12</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -2681,6 +2681,76 @@ window.addEventListener('load', () => {
 
     console.log("⚡ ระบบพร้อมทำงาน: ชื่อร้านคือ " + savedName);
 });
+ /* ==========================================================
+   SECTION 10: KNOWLEDGE BASE & HAIR STYLE GUIDE
+   (ส่วนคลังความรู้ เทรนด์ทรงผมปี 2026 และการเชื่อมต่อลิงก์ภายนอก)
+   ========================================================== */
+
+function showHairExpert(type) {
+    const display = $("hair-info-display"); // ใช้ตัวแปร $ ที่ช่างประกาศไว้ใน Section 1
+    if (!display) return;
+    
+    let content = '';
+
+    // หัวข้อที่ 1: วิเคราะห์เส้นผม (Source: All Things Beauty)
+    if (type === 1) { 
+        content = `
+            <div style="animation: fadeIn 0.4s ease;">
+                <h4 style="color:#1e3a8a; margin-bottom:10px; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-microscope" style="color:#fbbf24;"></i> วิเคราะห์เส้นผม (Texture)
+                </h4>
+                <p style="font-size:14px; color:#475569; line-height:1.5;">เจาะลึกความแตกต่างของผมเส้นเล็ก เส้นใหญ่ และผมหยักศก เพื่อเลือกเทคนิคการตัดให้เหมาะสมที่สุด</p>
+                <a href="https://www.allthingsbeauty.com/th/mens-corner/hairstyle-men/men-haircut-names.html" target="_blank" 
+                   style="display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; height:55px; background:linear-gradient(135deg, #6366f1, #4338ca); color:#fff; border-radius:15px; text-decoration:none; font-weight:700; margin-top:12px; box-shadow:0 4px 12px rgba(99,102,241,0.3);">
+                   <i class="fas fa-external-link-alt"></i> เปิดอ่านเนื้อหาแบบเต็ม
+                </a>
+            </div>`;
+    } 
+    // หัวข้อที่ 2: โครงหน้ากับทรงผม (Source: Hairtran Clinic)
+    else if (type === 2) { 
+        content = `
+            <div style="animation: fadeIn 0.4s ease;">
+                <h4 style="color:#1e3a8a; margin-bottom:10px; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-user-check" style="color:#60a5fa;"></i> ทรงที่ใช่ตามรูปหน้า
+                </h4>
+                <p style="font-size:14px; color:#475569; line-height:1.5;">หลักการเลือกทรงผมให้เข้ากับโครงหน้าแต่ละแบบ (กลม, เหลี่ยม, ไข่) เพื่อดึงจุดเด่นของลูกค้าออกมา</p>
+                <a href="https://hairtranclinic.com/knowledge/mens-popular-hairstyles-2026/" target="_blank" 
+                   style="display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; height:55px; background:linear-gradient(135deg, #10b981, #059669); color:#fff; border-radius:15px; text-decoration:none; font-weight:700; margin-top:12px; box-shadow:0 4px 12px rgba(16,185,129,0.3);">
+                   <i class="fas fa-book-reader"></i> ดูเทคนิควิเคราะห์รูปหน้า
+                </a>
+            </div>`;
+    }
+    // หัวข้อที่ 3: ทรงมาตรฐาน/แฟชั่น (Source: Hairtran Clinic)
+    else if (type === 3) { 
+        content = `
+            <div style="animation: fadeIn 0.4s ease;">
+                <h4 style="color:#1e3a8a; margin-bottom:10px; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-cut" style="color:#a5b4fc;"></i> เทรนด์ทรงผมยอดฮิต 2026
+                </h4>
+                <p style="font-size:14px; color:#475569; line-height:1.5;">อัปเดตทรง Ivy League, Broccoli Cut และ Modern Mullet พร้อมแคตตาล็อกภาพประกอบจากผู้เชี่ยวชาญ</p>
+                <a href="https://hairtranclinic.com/knowledge/mens-popular-hairstyles-2026/" target="_blank" 
+                   style="display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; height:55px; background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; border-radius:15px; text-decoration:none; font-weight:700; margin-top:12px; box-shadow:0 4px 12px rgba(245,158,11,0.3);">
+                   <i class="fas fa-images"></i> ดูแคตตาล็อกทรงผม 2026
+                </a>
+            </div>`;
+    }
+    // หัวข้อที่ 4: การเซต/จัดทรง (Source: All Things Beauty)
+    else if (type === 4) { 
+        content = `
+            <div style="animation: fadeIn 0.4s ease;">
+                <h4 style="color:#1e3a8a; margin-bottom:10px; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-pump-soap" style="color:#6ee7b7;"></i> วิธีการเซตและดูแลผมชาย
+                </h4>
+                <p style="font-size:14px; color:#475569; line-height:1.5;">รวมชื่อทรงผมมาตรฐานและขั้นตอนการเซตผมให้เป๊ะเหมือนออกจากร้าน พร้อมการเลือกผลิตภัณฑ์ที่ถูกต้อง</p>
+                <a href="https://www.allthingsbeauty.com/th/mens-corner/hairstyle-men/men-haircut-names.html" target="_blank" 
+                   style="display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; height:55px; background:linear-gradient(135deg, #1e293b, #334155); color:#fff; border-radius:15px; text-decoration:none; font-weight:700; margin-top:12px; box-shadow:0 4px 12px rgba(30,41,59,0.3);">
+                   <i class="fas fa-magic"></i> เรียนรู้วิธีการเซตผม
+                </a>
+            </div>`;
+    }
+
+    display.innerHTML = content;
+}
  </script>
             </body>
             </html>
