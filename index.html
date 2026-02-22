@@ -564,71 +564,63 @@ nav {
      </div> 
   </div>                   
     <div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); z-index:9999; display:flex; align-items:center; justify-content:center; padding:15px;">
-    
     <div style="background:#ffffff; width:95%; max-width:420px; border-radius:35px; display:flex; flex-direction:column; overflow:hidden; animation: slideUp 0.3s ease-out; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
-        
-     <div style="padding: 20px 20px 5px; text-align: center;">
-    <h3 style="margin: 0; font-size: 24px; color: #1e3a8a; font-weight: 900;">⚙️ ตั้งค่าระบบ</h3>
-</div>
+    
+    <div style="padding: 20px 20px 5px; text-align: center;">
+        <h3 style="margin: 0; font-size: 22px; color: #1e3a8a; font-weight: 900;">⚙️ ตั้งค่าระบบ</h3>
+    </div>
 
-<div style="padding: 0px 25px 35px;">
-    <input type="text" id="setShop" placeholder="ชื่อร้าน" 
-           style="width: 100%; height: 55px; border-radius: 18px; border: 1px solid #e2e8f0; 
-                  background: #f1f5f9; text-align: center; font-size: 18px; font-weight: 700; 
-                  color: #1e3a8a; margin-top: 0px; margin-bottom: 12px; outline: none;">
-</div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
-                <input type="number" id="setPerc" placeholder="% ช่าง" style="width:100%; height:55px; border-radius:18px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:18px; font-weight:700; outline:none;">
-                <input type="number" id="setGuar" placeholder="ประกัน" style="width:100%; height:55px; border-radius:18px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:18px; font-weight:700; outline:none;">
-            </div>
+    <div style="padding: 0px 20px 20px;"> <input type="text" id="setShop" placeholder="ชื่อร้าน" 
+               style="width: 100%; height: 50px; border-radius: 15px; border: 1px solid #e2e8f0; background: #f1f5f9; text-align: center; font-size: 17px; font-weight: 700; color: #1e3a8a; margin-bottom: 10px; outline: none;">
 
-            <div style="margin-bottom:12px;">
-                <select id="setTheme" style="width:100%; height:55px; border-radius:18px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:16px; font-weight:700; color:#475569; outline:none;">
-                    <option value="light">🌤 ธีมสว่าง</option>
-                    <option value="navy">🌌 ธีมน้ำเงิน</option>
-                    <option value="dark">🌑 ธีมดำ-ทอง</option>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+            <input type="number" id="setPerc" placeholder="% ช่าง" style="width:100%; height:50px; border-radius:15px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:17px; font-weight:700; outline:none;">
+            <input type="number" id="setGuar" placeholder="ประกัน" style="width:100%; height:50px; border-radius:15px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:17px; font-weight:700; outline:none;">
+        </div>
+
+        <div style="margin-bottom:10px;">
+            <select id="setTheme" style="width:100%; height:50px; border-radius:15px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:15px; font-weight:700; color:#475569; outline:none;">
+                <option value="light">🌤 ธีมสว่าง</option>
+                <option value="navy">🌌 ธีมน้ำเงิน</option>
+                <option value="dark">🌑 ธีมดำ-ทอง</option>
+            </select>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+            <div style="position: relative; display: flex; align-items: center;">
+                <select id="setSound" style="width:100%; height:50px; border-radius:15px; border:1px solid #cbd5e1; background:#f1f5f9; text-align:center; font-size:14px; font-weight:700; outline:none; appearance:none; padding-left: 20px;">
+                    <option value="on">เปิดเสียง</option>
+                    <option value="off">ปิดเสียง</option>
                 </select>
             </div>
-<div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:20px;">
-    <div style="position: relative; display: flex; align-items: center;">
-        <select id="setSound" style="width:100%; height:55px; border-radius:18px; border:1px solid #cbd5e1; background:#f1f5f9; text-align:center; font-size:15px; font-weight:700; outline:none; appearance:none; -webkit-appearance:none; padding-left: 40px;">
-            <option value="on">เปิดเสียง</option>
-            <option value="off">ปิดเสียง</option>
-        </select>
-        <i class="fas fa-volume-up" style="position: absolute; left: 15px; color: #475569; pointer-events: none;"></i>
-    </div>
+            <div style="position: relative; display: flex; align-items: center;">
+                <select id="setVoice" style="width:100%; height:50px; border-radius:15px; border:1px solid #cbd5e1; background:#f1f5f9; text-align:center; font-size:14px; font-weight:700; outline:none; appearance:none; padding-left: 20px;">
+                    <option value="female">เสียงหญิง</option>
+                    <option value="male">เสียงชาย</option>
+                </select>
+            </div>
+        </div>
 
-    <div style="position: relative; display: flex; align-items: center;">
-        <select id="setVoice" style="width:100%; height:55px; border-radius:18px; border:1px solid #cbd5e1; background:#f1f5f9; text-align:center; font-size:15px; font-weight:700; outline:none; appearance:none; -webkit-appearance:none; padding-left: 40px;">
-            <option value="female">เสียงหญิง</option>
-            <option value="male">เสียงชาย</option>
-        </select>
-        <i class="fas fa-user-friends" style="position: absolute; left: 15px; color: #475569; pointer-events: none;"></i>
-    </div>
-</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:15px;">
+            <button onclick="exportBackup()" style="height:45px; background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; font-size:12px; font-weight:800; color:#1e293b; cursor:pointer;">
+                <span>สำรอง</span>
+            </button>
+            <button onclick="$('fileInput').click()" style="height:45px; background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; font-size:12px; font-weight:800; color:#1e293b; cursor:pointer;">
+                <span>คืนค่า</span>
+            </button>
+            <button onclick="clearData()" style="height:45px; background:#fff1f2; border:1px solid #fecaca; border-radius:10px; font-size:12px; font-weight:800; color:#e11d48; cursor:pointer;">
+                <span>ลบ</span>
+            </button>
+        </div>
 
-<div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:25px;">
-    <button onclick="exportBackup()" style="height:50px; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; font-size:13px; font-weight:800; color:#1e293b; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
-        <i class="fas fa-file-download" style="font-size:14px;"></i> <span>สำรองข้อมูล</span>
-    </button>
-    
-    <input type="file" id="fileInput" style="display:none;" onchange="importBackup(this)">
+        <div style="display:grid; grid-template-columns: 2fr 1.2fr; gap:10px;">
+            <button onclick="saveSettings()" style="background:#1e3a8a; color:#fff; height:55px; border-radius:18px; border:none; font-weight:800; font-size:18px; box-shadow: 0 8px 20px rgba(30,58,138,0.2);">บันทึก</button>
+            <button onclick="$('modalSet').style.display='none'" style="background:#f1f5f9; color:#64748b; height:55px; border-radius:18px; border:none; font-weight:800; font-size:16px;">ปิด</button>
+        </div>
 
-    <button onclick="$('fileInput').click()" style="height:50px; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; font-size:13px; font-weight:800; color:#1e293b; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
-        <i class="fas fa-file-upload" style="font-size:14px;"></i> <span>คืนค่า</span>
-    </button>
-    
-    <button onclick="clearData()" style="height:50px; background:#fff1f2; border:1px solid #fecaca; border-radius:12px; font-size:13px; font-weight:800; color:#e11d48; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
-        <i class="fas fa-trash-alt" style="font-size:14px;"></i> <span>ลบทั้งหมด</span>
-    </button>
-</div>
-
-<div style="display:grid; grid-template-columns: 2fr 1.2fr; gap:12px;">
-    <button onclick="saveSettings()" style="background:#1e3a8a; color:#fff; height:65px; border-radius:22px; border:none; font-weight:800; font-size:20px; box-shadow: 0 10px 25px rgba(30,58,138,0.3);">บันทึกข้อมูล</button>
-    <button onclick="$('modalSet').style.display='none'" style="background:#f1f5f9; color:#64748b; height:65px; border-radius:22px; border:none; font-weight:800; font-size:18px;">ปิดหน้านี้</button>
-</div>
-   <div style="text-align:center; padding-top: 10px; padding-bottom: 10px; line-height: 1.5;"><div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 1px;">V.<span id="display-version">1.0.3</span></div>
-    <div style="font-size:9px; color:#cbd5e1; font-weight:400;"> Update: <span id="display-date">22/02/2026</span>
+        <div style="text-align:center; margin-top: 15px;">
+            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 1px;">V.<span id="display-version">1.0.4</span></div>
+            <div style="font-size:9px; color:#cbd5e1;">Update: 22/02/2026</div>
             </div>
         </div>
     </div>
@@ -673,7 +665,7 @@ nav {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.3"; 
+const APP_VERSION = "1.0.4"; 
 const LAST_UPDATED = "22/02/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
