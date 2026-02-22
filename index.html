@@ -2529,30 +2529,52 @@ window.onclick = function(e) {
         if (modalEl && e.target === modalEl && m.close) m.close();
     });
 };
-// 2. การทำงานทันทีที่โหลดหน้าเว็บเสร็จ
+
+// 2. ระบบ Pull-to-Refresh (รูดหน้าจอลงเพื่อรีเฟรช) 🚀
+let touchStart = 0;
+window.addEventListener('touchstart', (e) => {
+    touchStart = e.targetTouches[0].pageY;
+}, {passive: true});
+
+window.addEventListener('touchmove', (e) => {
+    let touchMove = e.targetTouches[0].pageY;
+    // ถ้าอยู่ที่บนสุดของหน้าจอ และรูดลงมาเกิน 200px
+    if (window.scrollY === 0 && touchMove - touchStart > 200) {
+        // บังคับรีเฟรชหน้าจอเพื่อล้างแคชไฟล์
+        location.reload(); 
+    }
+}, {passive: true});
+
+// 3. การทำงานทันทีที่โหลดหน้าเว็บเสร็จ
 window.addEventListener('load', () => {
     console.log("🚀 Barber App System Started...");
+    
     // --- ส่วนตั้งค่าเริ่มต้น ---
     const today = new Date().toISOString().split('T')[0]; 
-    // ตั้งค่าวันที่ปัจจุบันลงใน Input
     if ($("dateInp")) $("dateInp").value = today;
     if ($("accDate")) $("accDate").value = today;
     if ($("histDate")) $("histDate").value = today;
 
-    // ✨ ส่วนสำคัญที่สุด: สั่งให้อัปเดตตัวเลขวันที่บนหน้าจอเป็นภาษาไทยทันที
+    // ✨ สั่งให้แสดงหน้าบันทึกงาน (หน้าหลัก) ทันทีที่เปิดแอป
+    // โดยปกติหน้าหลักคือ go(0) หรือหน้าที่มีฟังก์ชัน renderDay
+    if (typeof go === 'function') {
+        go(0); // บังคับให้ไปหน้า 0 (หน้าบันทึก) แทนการไปหน้าตั้งค่า
+    }
+
     if (typeof updateDateDisplay === 'function') {
         updateDateDisplay(today);
-    } else {
-        // กรณีไม่มีฟังก์ชัน ให้ลองสั่ง renderDay ตรงๆ เพื่อโหลดข้อมูล
-        if (typeof renderDay === 'function') renderDay(today);
+    } else if (typeof renderDay === 'function') {
+        renderDay(today);
     }
+    
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
+
     // --- ส่วนดักจับเหตุการณ์ (Event Listeners) ---
     if ($("mixCash")) $("mixCash").addEventListener("input", updateMixValues);
     if ($("priceInp")) $("priceInp").addEventListener("input", updateMixValues);
     if ($("tipInp")) $("tipInp").addEventListener("input", updateMixValues);
 
-    console.log("⚡ ระบบคำนวณเงินและ Event Listeners พร้อมทำงาน");
+    console.log("⚡ ระบบ Pull-to-Refresh และหน้าหลักพร้อมทำงาน");
 });
  </script>
             </body>
