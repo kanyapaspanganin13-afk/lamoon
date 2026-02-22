@@ -626,7 +626,7 @@ nav {
         </div>
 
         <div style="text-align:center; line-height: 1.4;">
-            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.6</span></div>
+            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.7</span></div>
             <div style="font-size:9px; color:#cbd5e1; font-weight:400;">Update: <span id="display-date">22/02/2026</span></div>
         </div>
     </div>
@@ -672,7 +672,7 @@ nav {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.6"; 
+const APP_VERSION = "1.0.7"; 
 const LAST_UPDATED = "22/02/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
@@ -700,44 +700,48 @@ document.addEventListener("DOMContentLoaded", () => {
     if ($("display-date")) $("display-date").innerText = LAST_UPDATED;
 });
 function go(p) {
-    // 1. จัดการการซ่อน/แสดงหน้า Page
+    // 1. ซ่อน/แสดงหน้า (โค้ดเดิมของช่างดีอยู่แล้วครับ)
     document.querySelectorAll('.page').forEach(pg => {
         pg.classList.remove('active');
         pg.style.display = 'none'; 
     });
+    
     const targetPage = document.getElementById('p' + p);
     if (targetPage) {
         targetPage.classList.add('active');
         targetPage.style.display = 'block';
     }
-    // 2. จัดการสถานะปุ่มเมนู (Navbar) ให้มีสีตามหน้าจอที่เลือก
+    // 2. จัดการเมนู Active
     document.querySelectorAll('.nav-item').forEach((btn, i) => {
         btn.classList.toggle('active', (i + 1) === p);
     });
-    // 3. เงื่อนไขพิเศษเมื่อเข้าแต่ละหน้า
+    // --- ✨ ส่วนที่เพิ่ม: โหลดชื่อร้านทุกครั้งที่สลับหน้า (ป้องกันชื่อหาย) ---
+    const savedShopName = localStorage.getItem("shopName") || "BARBER SHOP";
+    const shopTitleEl = document.querySelector('h2'); 
+    if (shopTitleEl) shopTitleEl.innerText = savedShopName;
+
+    // 3. เงื่อนไขพิเศษ
     const dateInpValue = $("dateInp")?.value || new Date().toISOString().split('T')[0];
 
     if (p === 2) {
-        // --- 🟢 ส่วนที่แก้ไข: แสดงวันที่ไทยในหน้าบันทึก/รายงาน ---
-        if (typeof renderDay === 'function') {
-            renderDay(dateInpValue);
-        }  
-        // ถ้าคุณมี Element สำหรับแสดงหัวข้อวันที่ เช่น <span id="displayDateThai"></span>
+        if (typeof renderDay === 'function') renderDay(dateInpValue);
         if ($("displayDateThai")) {
             const [y, m, d] = dateInpValue.split('-');
             $("displayDateThai").innerText = `${d}/${m}/${parseInt(y) + 543}`;
         }
     }
+
     if (p === 3) { 
-        // เมื่อไปหน้าบัญชี: บังคับวันที่ให้ตรงกัน
+        // หน้าบัญชี: ให้เช็คก่อนว่าข้อมูลเปลี่ยนไหม ค่อยโหลด (ลดการกระตุก)
         if ($("accDate") && $("dateInp")) {
             $("accDate").value = $("dateInp").value;
         }
         if (typeof loadAccountStatus === 'function') {
+            // เรียกใช้ฟังก์ชันเดิม แต่ไม่ต้องรีเฟรชหน้าจอ
             loadAccountStatus(); 
         }
     }
-    // 4. เลื่อนจอขึ้นบนสุด (เพื่อความสุภาพและใช้งานง่าย)
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function updateDateDisplay(v) {
@@ -2568,22 +2572,21 @@ function applyTheme(t) {
    SECTION 9: SYSTEM STARTUP & EVENT LISTENERS
    (สวิตช์เปิดเครื่อง: การเริ่มต้นและดักจับเหตุการณ์)
    ========================================================== */
-// 1. ดักจับการคลิกพื้นหลังเพื่อปิด Modal (ปรับให้รองรับ modalSet ที่ช่างใช้ด้วย)
+// 1. ดักจับการคลิกพื้นหลังเพื่อปิด Modal (คงเดิมแต่เพิ่มความปลอดภัย)
 window.onclick = function(e) {
     const modals = [
         { id: "reportModal", close: typeof closeReportModal === "function" ? closeReportModal : null },
         { id: "historyModal", close: typeof closeHistoryModal === "function" ? closeHistoryModal : null },
-        { id: "modalSet", close: typeof closeAndGoHome === "function" ? closeAndGoHome : null }, // เพิ่มตัวนี้ครับ
+        { id: "modalSet", close: typeof closeAndGoHome === "function" ? closeAndGoHome : null },
         { id: "configModal", close: typeof closeConfigModal === "function" ? closeConfigModal : null } 
     ]; 
     modals.forEach(m => {
-        const modalEl = $(m.id);
-        // ถ้าคลิกโดนพื้นที่ว่างรอบๆ Modal ให้รันฟังก์ชันปิด
+        const modalEl = document.getElementById(m.id);
         if (modalEl && e.target === modalEl && m.close) m.close();
     });
 };
 
-// 2. ระบบ Pull-to-Refresh (ปรับระยะให้ลื่นขึ้น)
+// 2. ระบบ Pull-to-Refresh (แก้ไข: ป้องกันรีเฟรชขณะเลื่อนดูรายงาน)
 let touchStart = 0;
 window.addEventListener('touchstart', (e) => {
     touchStart = e.targetTouches[0].pageY;
@@ -2591,49 +2594,62 @@ window.addEventListener('touchstart', (e) => {
 
 window.addEventListener('touchmove', (e) => {
     let touchMove = e.targetTouches[0].pageY;
-    // ถ้าอยู่ที่บนสุด และลากลงมา (ระยะ 180px กำลังดีครับ ไม่เหนื่อยนิ้ว)
-    if (window.scrollY === 0 && touchMove - touchStart > 180) {
-        // ใส่ Effect นิดหน่อยให้รู้ว่ากำลังรีเฟรช
+    let swipeDistance = touchMove - touchStart;
+    // 🟢 แก้ไขจุดนี้: 
+    // 1. ต้องอยู่บนสุดของหน้าจอจริงๆ (window.scrollY === 0)
+    // 2. ระยะลากต้องยาวขึ้น (เปลี่ยนจาก 180 เป็น 250px) เพื่อไม่ให้ลั่นง่าย
+    // 3. ป้องกันการรีเฟรชถ้ากำลังเลื่อนดูตารางที่มีการ Scroll อยู่
+    if (window.scrollY === 0 && swipeDistance > 250) {
+        // เช็คว่านิ้วไม่ได้กำลังลากอยู่บน Element ที่เลื่อนได้ (เช่น ตารางรายงาน)
+        if (e.target.closest('.scrollable-table') || e.target.closest('#reportModal')) {
+            return; // ถ้าลากบนตาราง ให้ยกเลิกการรีเฟรช
+        }
+        
         document.body.style.opacity = "0.5";
         location.reload(); 
     }
 }, {passive: true});
 
-// 3. การทำงานทันทีที่โหลดหน้าเว็บเสร็จ
+// 3. การทำงานทันทีที่โหลดหน้าเว็บเสร็จ (เพิ่มการจำชื่อร้านแบบสมบูรณ์)
 window.addEventListener('load', () => {
     console.log("🚀 Barber App System Started...");
+
+    // --- 🟢 ส่วนที่แก้ไข: โหลดชื่อร้านจากทั้งสองแหล่งให้แม่นยำ ---
+    const savedName = localStorage.getItem("shopName") || "BARBER SHOP";
     
-    // --- 🟢 ส่วนที่เพิ่ม: สั่งซ่อนหน้าต่างตั้งค่าก่อนเป็นอันดับแรก ---
-    if ($("modalSet")) $("modalSet").style.display = "none";
-    if ($("reportModal")) $("reportModal").style.display = "none";
+    // อัปเดตทุกจุดที่แสดงชื่อร้าน
+    const shopElements = [
+        document.querySelector('h2'), 
+        document.getElementById("shopNameDisplay"),
+        document.getElementById("shopNameDisp")
+    ];
+    
+    shopElements.forEach(el => {
+        if (el) el.innerText = savedName;
+    });
+
+    // --- ส่วนจัดการหน้าจอ (Modal) ---
+    if (document.getElementById("modalSet")) document.getElementById("modalSet").style.display = "none";
+    if (document.getElementById("reportModal")) document.getElementById("reportModal").style.display = "none";
 
     // --- ส่วนตั้งค่าวันที่เริ่มต้น ---
     const today = new Date().toISOString().split('T')[0]; 
-    if ($("dateInp")) $("dateInp").value = today;
-    if ($("accDate")) $("accDate").value = today;
-    if ($("histDate")) $("histDate").value = today;
+    ["dateInp", "accDate", "histDate"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = today;
+    });
 
-    // ✨ แก้ไขจุดสำคัญ: บังคับไปหน้าหลัก
-    // ช่างครับ ถ้า ID ของหน้าบันทึกคือ "p1" ต้องใช้ go(1) นะครับ
-    // แต่ถ้าช่างตั้ง ID เป็น "p0" ก็ใช้ go(0) ตามเดิมได้เลยครับ
-    if (typeof go === 'function') {
-        go(1); // 👈 ลองเปลี่ยนเป็น 1 ดูครับ เพราะปกติ p1 คือหน้าแรก
-    }
-
-    if (typeof updateDateDisplay === 'function') {
-        updateDateDisplay(today);
-    } else if (typeof renderDay === 'function') {
-        renderDay(today);
-    }
+    // ✨ บังคับไปหน้าหลัก (p1) และคืนค่าความใสหน้าจอ
+    if (typeof go === 'function') go(1); 
     
+    document.body.style.opacity = "1"; 
+    document.body.style.overflow = "auto";
+
+    // โหลดข้อมูลรายงานและบัญชี
+    if (typeof updateDateDisplay === 'function') updateDateDisplay(today);
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
 
-    // --- ส่วนดักจับเหตุการณ์ (Event Listeners) ---
-    if ($("mixCash")) $("mixCash").addEventListener("input", updateMixValues);
-    if ($("priceInp")) $("priceInp").addEventListener("input", updateMixValues);
-    if ($("tipInp")) $("tipInp").addEventListener("input", updateMixValues);
-
-    console.log("⚡ ระบบพร้อมทำงาน: หน้าหลักถูกตั้งค่าเป็นหน้าที่ 1");
+    console.log("⚡ ระบบพร้อมทำงาน: ชื่อร้านคือ " + savedName);
 });
  </script>
             </body>
