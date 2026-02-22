@@ -588,27 +588,31 @@ nav {
 </div>
 
 <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:25px;">
-    <button onclick="exportBackup()" style="height:50px; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; font-size:13px; font-weight:800; color:#1e293b; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
-        <i class="fas fa-file-download" style="font-size:14px;"></i> 
-        <span>สำรองข้อมูล</span>
-    </button>
-    
-    <input type="file" id="fileInput" style="display:none;" onchange="importBackup(this)">
+    <button onclick="exportBackup()" style="height:50px; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; font-size:13px; font-weight:800; color:#1e293b; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
+        <i class="fas fa-file-download" style="font-size:14px;"></i> 
+        <span>สำรองข้อมูล</span>
+    </button>
+    
+    <input type="file" id="fileInput" style="display:none;" onchange="importBackup(this)">
 
 <button onclick="document.getElementById('fileInput').click()" style="height:50px; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; font-size:13px; font-weight:800; color:#1e293b; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
-    <i class="fas fa-file-upload" style="font-size:14px;"></i> 
-    <span>คืนค่า</span>
+    <i class="fas fa-file-upload" style="font-size:14px;"></i> 
+    <span>คืนค่า</span>
 </button>
-    
-    <button onclick="clearData()" style="height:50px; background:#fff1f2; border:1px solid #fecaca; border-radius:12px; font-size:13px; font-weight:800; color:#e11d48; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
-        <i class="fas fa-trash-alt" style="font-size:14px;"></i> 
-        <span>ลบทั้งหมด</span>
-    </button>
+    
+    <button onclick="clearData()" style="height:50px; background:#fff1f2; border:1px solid #fecaca; border-radius:12px; font-size:13px; font-weight:800; color:#e11d48; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
+        <i class="fas fa-trash-alt" style="font-size:14px;"></i> 
+        <span>ลบทั้งหมด</span>
+    </button>
 </div>
 
-            <div style="display:grid; grid-template-columns: 2fr 1.2fr; gap:12px;">
-                <button onclick="saveSettings()" style="background:#1e3a8a; color:#fff; height:65px; border-radius:22px; border:none; font-weight:800; font-size:20px; box-shadow: 0 10px 25px rgba(30,58,138,0.3);">บันทึกข้อมูล</button>
-                <button onclick="$('modalSet').style.display='none'" style="background:#f1f5f9; color:#64748b; height:65px; border-radius:22px; border:none; font-weight:800; font-size:18px;">ปิดหน้านี้</button>
+            <div style="display:grid; grid-template-columns: 2fr 1.2fr; gap:12px;">
+                <button onclick="saveSettings()" style="background:#1e3a8a; color:#fff; height:65px; border-radius:22px; border:none; font-weight:800; font-size:20px; box-shadow: 0 10px 25px rgba(30,58,138,0.3);">บันทึกข้อมูล</button>
+                <button onclick="$('modalSet').style.display='none'" style="background:#f1f5f9; color:#64748b; height:65px; border-radius:22px; border:none; font-weight:800; font-size:18px;">ปิดหน้านี้</button>
+            </div>
+            <div style="height:50px; background:#f1f5f9; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px solid #e2e8f0;">
+        <span style="font-size:9px; color:#94a3b8; font-weight:bold;">VERSION</span>
+        <span id="display-version" style="font-size:14px; color:#1e293b; font-weight:800;">1.0.0</span>
             </div>
         </div>
     </div>
@@ -653,11 +657,20 @@ nav {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 
+// 🟢 วางเลขเวอร์ชันตรงนี้ครับช่าง
+const APP_VERSION = "1.0.1"; 
+
 let db = JSON.parse(localStorage.getItem("barber_db")) || [];
 let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
 let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
 let conf = JSON.parse(localStorage.getItem("barber_conf")) || { shop: "Barber Shop", perc: 50, guar: 0 };
 let payMethod = "";
+
+// 🔵 สั่งให้แสดงผลบนหน้าจอ (ใส่ต่อกันได้เลย)
+document.addEventListener("DOMContentLoaded", () => {
+    const vEl = $("display-version");
+    if (vEl) vEl.innerText = APP_VERSION;
+});
 function go(p) {
     // 1. จัดการการซ่อน/แสดงหน้า Page
     document.querySelectorAll('.page').forEach(pg => {
