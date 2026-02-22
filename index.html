@@ -185,8 +185,7 @@ function openReportModal(title, htmlContent) {
     body { 
         margin: 0; background: var(--bg); color: var(--text); 
         padding-bottom: 90px; overflow-x: hidden; transition: all 0.3s ease; 
-    }
-    
+    } 
     /* 4. ระบบเลย์เอาต์ */
     .container { 
         padding: 15px; 
@@ -195,7 +194,6 @@ function openReportModal(title, htmlContent) {
         position: relative; 
         z-index: 1; 
     }
-
     .page { 
         display: none; 
         background: var(--bg); /* 🟢 แก้ไข: ใช้ตัวแปรตามธีมเพื่อให้มองเห็นตัวหนังสือในโหมดมืด */
@@ -214,7 +212,6 @@ function openReportModal(title, htmlContent) {
     }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
     .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
-
     /* 5. เมนูบาร์ (รองรับ 4 ปุ่ม) */
     nav {
         position: fixed; bottom: 0; left: 0; right: 0;
@@ -269,12 +266,10 @@ function openReportModal(title, htmlContent) {
         text-align: center; border: none; outline: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
         appearance: none; -webkit-appearance: none;
     }      
-
     /* 7. ปุ่มและการจัดการ */
     #btnCash { background: linear-gradient(135deg, #10b981, #059669); color: white; }
     #btnTrans { background: linear-gradient(135deg, #6366f1, #4338ca); color: white; }
     #btnMix   { background: linear-gradient(135deg, #81d4fa, #01579b); color: white; }
-
     .btn-pay { 
         height: 75px; font-size: 18px; width: 100%; border-radius: 18px;
         border: 3px solid transparent;
@@ -285,7 +280,6 @@ function openReportModal(title, htmlContent) {
         background: linear-gradient(135deg, #190da8, #0b1e59); 
         color: #ffffff;
     }
-
     .btn-pay.active-cash, .btn-pay.active-trans, .btn-pay.active-mix {
         border: 3px solid #ffffff !important; 
         box-shadow: 0 0 15px rgba(255,255,255,0.3);   
@@ -295,32 +289,32 @@ function openReportModal(title, htmlContent) {
         transform: none !important; display: inline-block !important; 
         margin-bottom: 8px; font-size: 24px; transition: none !important;
     } 
-
     /* 8. โมดอลและรายงาน - 🟢 แก้ไขจุดที่กดปิดไม่ได้ตรงนี้ครับ */
     .modal { 
-        position: fixed; 
-        inset: 0; 
-        background: rgba(0, 0, 0, 0.7); 
-        display: none; 
-        z-index: 1000000; /* สูงกว่า nav */
-        align-items: center; 
-        justify-content: center;
-        padding-bottom: 80px; 
-    }
-    .modal-content { 
-        background: var(--card); 
-        color: var(--text); 
-        width: 90%; 
-        max-width: 400px; 
-        border-radius: 25px; 
-        padding: 25px; 
-        max-height: 75vh; 
-        overflow-y: auto; 
-        box-shadow: 0 20px 50px rgba(0,0,0,0.3); 
-        position: relative;
-        z-index: 1000001; /* 🟢 เพิ่ม z-index ให้เนื้อหาอยู่บนสุด */
-    }
-    
+    position: fixed; 
+    top: 0; left: 0; right: 0; bottom: 0; /* ใช้แบบนี้แทน inset: 0; เพื่อความชัวร์ */
+    background: rgba(0, 0, 0, 0.7); 
+    display: none; 
+    z-index: 1000000; 
+    align-items: center; 
+    justify-content: center;
+    /* 🔴 สำคัญ: ห้ามใช้ padding-bottom ใน .modal เพราะจะทำให้พื้นที่มีปัญหา */
+}
+.modal-content { 
+    background: var(--card); 
+    color: var(--text); 
+    width: 92%; 
+    max-width: 400px; 
+    border-radius: 25px; 
+    padding: 25px; 
+    max-height: 80vh; /* 🟢 ปรับให้สูงขึ้นนิดแต่ไม่ให้ชนขอบล่าง */
+    overflow-y: auto; 
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3); 
+    position: relative;
+    z-index: 1000001;
+    /* 🔴 เพิ่ม margin-bottom เพื่อดันตัวเองให้พ้นเมนูบาร์ */
+    margin-bottom: 70px; 
+}  
     /* 🔴 เพิ่มส่วนนี้เพื่อให้ปุ่มปิดอยู่บนสุดและกดติดชัวร์ๆ */
     .modal-content .close, .close-btn {
         position: absolute;
@@ -333,7 +327,6 @@ function openReportModal(title, htmlContent) {
         padding: 10px; /* เพิ่มพื้นที่ให้กดง่ายขึ้น */
         color: var(--text);
     }
-
     .status-bar { padding: 12px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 14px; margin-bottom: 10px; }
     .acc-main-card { background: var(--card); padding: 20px; border-radius: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); margin-bottom: 15px; }
     #accHistory { font-size: 12px; max-height: 150px; overflow-y: auto; }
