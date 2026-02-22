@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro  </title>
+    <title>Barber Note Pro 1 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -814,7 +814,7 @@ function addRecord() {
     
     const currentPay = payMethod; 
     if (price === 0 && currentPay !== 'Holiday' && currentPay !== 'Guarantee') {
-        alert("กรุณาระบุราคาด้วยครับ");
+        alert("กรุณาระบุราคา");
         return;
     }
 
@@ -846,7 +846,6 @@ function addRecord() {
     db.push(newRec);
     localStorage.setItem("barber_db", JSON.stringify(db));
 
-    // 🎯 ส่วนที่ทำให้ยอด "ดีด" ไปหน้าบัญชี
     if (typeof calculateMoney === "function") {
         const result = calculateMoney(); 
         const idx = archives.findIndex(a => a.date === dInp);
@@ -864,10 +863,20 @@ function addRecord() {
         localStorage.setItem("barber_archives", JSON.stringify(archives));
     }
 
-    alert("บันทึกข้อมูลเรียบร้อยแล้วครับ");
+    // --- 🛡️ ส่วนที่เพิ่มใหม่: ปลดล็อคปุ่มส่งข้อมูลทันทีที่มีงานใหม่ ---
+    const btn = document.getElementById("btnSubmitSend");
+    if (btn) {
+        btn.disabled = false; // ปลดล็อค
+        btn.style.background = "#ff6f00"; // กลับเป็นสีส้มสดใส
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i>'; // กลับเป็นไอคอนจรวด
+        btn.style.cursor = "pointer";
+    }
+    // -------------------------------------------------------
+
+    alert("บันทึกข้อมูลเรียบร้อย");
 
     if (typeof resetForm === 'function') resetForm();
-    if (typeof renderDay === 'function') renderDay(); 
+    if (typeof renderDay === 'function') renderDay();
     
     // 🎯 เรียกอัปเดตยอดหน้าบัญชีทันที
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
@@ -1095,9 +1104,22 @@ function updateMixValues() {
    SECTION 4: CALCULATION & CLOSING DAILY REPORT
    (ระบบคำนวณส่วนแบ่งและการปิดยอดรายวัน)
    ========================================================== */
-function saveAndGo(date, total) {
+async function saveAndGo(date, total) {
     if (typeof db === 'undefined' || typeof archives === 'undefined') return;
 
+    // --- 🛡️ ส่วนที่ 1: แจ้งเตือนกันพลาด และ ล็อคปุ่มทันที ---
+    const confirmSend = confirm(`ยืนยันการส่งข้อมูลวันที่ ${date} ใช่ไหม?`);
+    if (!confirmSend) return; // ถ้ากด Cancel ให้ยกเลิกการส่ง
+
+    const btn = document.getElementById("btnSubmitSend");
+    if (btn) {
+        if (btn.disabled) return; 
+        btn.disabled = true;
+        btn.style.background = "#94a3b8"; // สีเทา Slate (เริ่มส่ง)
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; 
+    }
+
+    // ... (Logic การคำนวณเหมือนเดิมของช่าง) ...
     const allToday = db.filter(r => r.date === date);
     const todayData = allToday.filter(r => r.type === 'SERVICE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
@@ -1116,7 +1138,6 @@ function saveAndGo(date, total) {
     const bEarn = isHoliday ? 0 : baseEarn + tips;
     const settle = isHoliday ? 0 : cash - bEarn;
 
-    // 1. บันทึกลง Archives (รายงานรายเดือน)
     const data = { 
         date, total, cash, 
         barber: Math.floor(bEarn), 
@@ -1124,23 +1145,40 @@ function saveAndGo(date, total) {
         type: isHoliday ? "HOLIDAY" : "WORK",
         details: allToday 
     };
+
     const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
 
-    // 🎯 แก้จุดนี้: ห้ามมี account.logs.push เด็ดขาด!!
-    // แต่เราจะส่งยอดไป "ฝาก" ไว้ที่ตัวแปร account.balance เพื่อให้หน้าบัญชีดึงไปโชว์
-    if (!isHoliday) {
-        account.balance = -settle; 
-    }
+    if (!isHoliday) { account.balance = -settle; }
 
     db = db.filter(r => r.date !== date);
-    if (typeof saveDB === "function") { saveDB(); } else { save(); }
-    
-    // เรียกแสดงผลยอดที่ฝากไว้
-    if (typeof loadAccountStatus === 'function') loadAccountStatus();
-    
-    alert(`✅ ส่งข้อมูลสำเร็จ`);
-    if (typeof go === "function") go(3); 
+
+    try {
+        if (typeof saveDB === "function") { await saveDB(); } 
+        else if (typeof save === "function") { await save(); }
+
+        // --- 🛡️ ส่วนที่ 2: ส่งเสร็จแล้วให้ค้างสีเทาไว้ ---
+        if (btn) {
+            btn.disabled = true; // ล็อคค้างไว้
+            btn.style.background = "#475569"; // สีเทาเข้ม (แสดงว่าบันทึกแล้ว)
+            btn.innerHTML = '<i class="fas fa-check-double"></i> ส่งแล้ว';
+            btn.style.cursor = "default";
+        }
+
+        if (typeof loadAccountStatus === 'function') loadAccountStatus();
+
+        alert(`✅ ส่งข้อมูลสำเร็จ`);
+        // ถ้าช่างต้องการให้ค้างหน้านี้ไว้ดูสีเทา ให้ปิดบรรทัด go(3) ครับ
+        // if (typeof go === "function") go(3); 
+
+    } catch (e) {
+        if (btn) {
+            btn.disabled = false;
+            btn.style.background = "#ff6f00"; // ถ้าพลาดให้กลับเป็นสีส้ม
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        }
+        alert("❌ ผิดพลาด: " + e);
+    }
 }
 // --- ระบบประกันรายได้ ---
 function handleInsurance() {
@@ -1357,9 +1395,9 @@ function renderDay(selectedDate){
             <div id="settleBar" style="flex:8; height:55px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; border-radius:18px; font-weight:800; font-size:14px; color:${statusColor}; border:1px solid #e2e8f0;">
                 <span style="margin-right:8px; font-size:18px;">${icon}</span> ${txt}
             </div>
-            <button onclick="saveAndGo('${dInp}', ${tot})" style="flex:2.2; height:55px; background:#ff6f00; color:#fff; border-radius:18px; border:none; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
-                <i class="fas fa-paper-plane"></i>
-            </button>`;
+           <button id="btnSubmitSend" onclick="saveAndGo('${dInp}', ${tot})" style="flex:2.2; height:55px; background:#ff6f00; color:#fff; border-radius:18px; border:none; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+    <i class="fas fa-paper-plane"></i>
+</button>`;
     }
 const dList = $("dailyList");
 if (dList) {
@@ -1870,7 +1908,6 @@ function loadHistMonth() {
     filtered.forEach(day => {
         const dObj = new Date(day.date);
         let wIdx = Math.ceil(dObj.getDate() / 7);
-        if (wIdx > 4) wIdx = 4;
         const wKey = `สัปดาห์ที่ ${wIdx}`;
 
         if (!weeklyData[wKey]) {
