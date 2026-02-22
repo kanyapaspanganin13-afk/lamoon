@@ -171,12 +171,12 @@ function openReportModal(title, htmlContent) {
 </script>
 </head>
 <style>
-    /* 1. ตัวแปรหลัก */
+/* 1. ตัวแปรหลัก */
     :root { 
         --primary: #6366f1; --accent: #0ea5e9; --danger: #ef4444; --success: #22c55e; 
         --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --border: #e2e8f0;
     }
-    /* 2. ระบบธีม (ต้องอยู่บนสุดเพื่อเตรียมตัวแปร) */
+    /* 2. ระบบธีม */
     body.navy { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --accent: #38bdf8; }
     body.dark { --bg: #121212; --card: #1a1a1a; --text: #fbbf24; --accent: #fbbf24; }
 
@@ -186,77 +186,76 @@ function openReportModal(title, htmlContent) {
         margin: 0; background: var(--bg); color: var(--text); 
         padding-bottom: 90px; overflow-x: hidden; transition: all 0.3s ease; 
     }
-   /* 4. ระบบเลย์เอาต์ (ปรับให้โปร่งแสง) */
-.container { 
-    padding: 15px; 
-    max-width: 500px; 
-    margin: auto; 
-    position: relative; 
-    z-index: 1; 
-}
-/* 4. ระบบเลย์เอาต์  */
-.page { 
-    display: none; 
-    background: #f8fafc; 
-    opacity: 1; 
-    border-radius: 25px;
-    padding: 20px;
     
-    /* 🔴 ปรับระยะห่างด้านล่างให้มากขึ้นเล็กน้อยเพื่อให้พ้นแถบเมนู */
-    margin: 10px 10px 100px 10px; 
-    border: 1px solid var(--border);
-    /* 🟢 ลดความสูงลงอีกนิด เพื่อให้เหลือพื้นที่ด้านล่างครับ */
-    min-height: calc(100vh - 200px); 
-    box-sizing: border-box;
-    overflow-y: auto;
-}
-.page.active { 
-    display: block !important; 
-    animation: slideUp 0.4s ease-out;
-}
+    /* 4. ระบบเลย์เอาต์ */
+    .container { 
+        padding: 15px; 
+        max-width: 500px; 
+        margin: auto; 
+        position: relative; 
+        z-index: 1; 
+    }
+
+    .page { 
+        display: none; 
+        background: var(--bg); /* 🟢 แก้ไข: ใช้ตัวแปรตามธีมเพื่อให้มองเห็นตัวหนังสือในโหมดมืด */
+        opacity: 1; 
+        border-radius: 25px;
+        padding: 20px;
+        margin: 10px 10px 100px 10px; 
+        border: 1px solid var(--border);
+        min-height: calc(100vh - 200px); 
+        box-sizing: border-box;
+        overflow-y: auto;
+    }
+    .page.active { 
+        display: block !important; 
+        animation: slideUp 0.4s ease-out;
+    }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
     .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
-/* 5. เมนูบาร์ (ปรับปรุงให้รองรับ 4 ปุ่ม และไอคอนชิดข้อความ) */
-nav {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--card) !important; 
-    /* ใช้ Grid แบ่ง 4 ส่วนเท่ากันเพื่อให้แม่นยำกว่า Flex ครับ */
-    display: grid; 
-    grid-template-columns: repeat(4, 1fr); 
-    height: 70px; /* ลดความสูงลงนิดนึงเพื่อให้ดูแน่นขึ้น */
-    align-items: center;
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.15); 
-    z-index: 99999; 
-    border-top: 1px solid var(--border); 
-    padding-bottom: env(safe-area-inset-bottom);
-    transition: background 0.3s ease;
-}
-.nav-item { 
-    text-align: center; 
-    color: var(--text);
-    opacity: 0.6; 
-    cursor: pointer; 
-    transition: 0.2s; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center;
-    justify-content: center; /* จัดให้อยู่กึ่งกลางปุ่มพอดี */
-    gap: 0px; /* 🟢 กำหนดระยะห่างระหว่าง i และ span เป็น 0 เพื่อให้ชิดที่สุด */
-}
-.nav-item.active { 
-    color: var(--accent) !important; 
-    opacity: 1; 
-}
-.nav-item i { 
-    font-size: 20px; /* ปรับขนาดไอคอนให้พอดีกับ 4 ปุ่ม */
-    display: block; 
-    margin-bottom: -2px; /* 🟢 ใช้ค่าติดลบเพื่อดึงตัวหนังสือขึ้นมาให้ชิดไอคอนครับ */
-}
-.nav-item span { 
-    font-size: 11px; 
-    font-weight: 700; 
-    margin-top: 0; /* มั่นใจว่าไม่มี margin บนมาผลักตัวหนังสือลงไป */
-}
+
+    /* 5. เมนูบาร์ (รองรับ 4 ปุ่ม) */
+    nav {
+        position: fixed; bottom: 0; left: 0; right: 0;
+        background: var(--card) !important; 
+        display: grid; 
+        grid-template-columns: repeat(4, 1fr); 
+        height: 70px;
+        align-items: center;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.15); 
+        z-index: 99999; 
+        border-top: 1px solid var(--border); 
+        padding-bottom: env(safe-area-inset-bottom);
+        transition: background 0.3s ease;
+    }
+    .nav-item { 
+        text-align: center; 
+        color: var(--text);
+        opacity: 0.6; 
+        cursor: pointer; 
+        transition: 0.2s; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center;
+        justify-content: center;
+        gap: 0px; 
+    }
+    .nav-item.active { 
+        color: var(--accent) !important; 
+        opacity: 1; 
+    }
+    .nav-item i { 
+        font-size: 20px; 
+        display: block; 
+        margin-bottom: -2px; 
+    }
+    .nav-item span { 
+        font-size: 11px; 
+        font-weight: 700; 
+        margin-top: 0; 
+    }
+
     /* 6. ฟอร์มและอินพุต */
     .icon-card, input, select { background: var(--card); color: var(--text); }
     .icon-card { 
@@ -269,76 +268,44 @@ nav {
         width: 100%; height: 75px; border-radius: 20px; font-size: 20px; font-weight: 700; 
         text-align: center; border: none; outline: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
         appearance: none; -webkit-appearance: none;
-    }     
-      /* 7. ปุ่มและการจัดการ (ขนาดนิ่งสนิท) */
-    /* สีปกติของแต่ละปุ่ม */
+    }      
+
+    /* 7. ปุ่มและการจัดการ */
     #btnCash { background: linear-gradient(135deg, #10b981, #059669); color: white; }
     #btnTrans { background: linear-gradient(135deg, #6366f1, #4338ca); color: white; }
     #btnMix   { background: linear-gradient(135deg, #81d4fa, #01579b); color: white; }
-/* 🔵 ปุ่มจ่ายเงินหลัก */
-.btn-pay { 
-    height: 75px; 
-    font-size: 18px; 
-    width: 100%; 
-    border-radius: 18px;
-    border: 3px solid transparent;
-    /* ใช้ transition แค่สีและเงาพอครับ ไม่ต้องใส่ all เพื่อป้องกันการขยาย */
-    transition: background 0.2s, opacity 0.2s, border 0.2s;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    
-    /* 🔒 ล็อคตัวปุ่มไม่ให้ขยายเด็ดขาด */
-    transform: none !important; 
-    
-    /* ✅ แก้ไขการใส่สี Gradient ให้ถูกต้อง */
-    background: linear-gradient(135deg, #190da8, #0b1e59); 
-    color: #ffffff;
-}
 
-/* 🟢 สถานะเมื่อปุ่มถูกเลือก (Active) - ล็อคขนาดให้นิ่งสนิท */
-.btn-pay.active-cash, 
-.btn-pay.active-trans, 
-.btn-pay.active-mix {
-    border: 3px solid #ffffff !important; /* ใช้ขอบขาวเน้นว่าเลือก */
-    box-shadow: 0 0 15px rgba(255,255,255,0.3);   
-    /* 🔒 ล็อคขนาดปุ่มไม่ให้ขยายเด็ดขาด */
-    transform: scale(1) !important; 
-    opacity: 1 !important;
-}
-/* 🔒 ล็อคไอคอนข้างในปุ่มที่เลือก ไม่ให้ขยายตามไปด้วย */
-.btn-pay.active-cash i, 
-.btn-pay.active-trans i, 
-.btn-pay.active-mix i {
-    transform: scale(1) !important;
-    display: inline-block !important;
-}
-/* ⚪ สถานะปุ่มที่ไม่ได้เลือก */
-.btn-pay.is-inactive {
-    opacity: 0.4;
-    filter: grayscale(0.5);
-    transform: none !important; /* ไม่ให้หดหรือขยาย */
-}
-/* 🔒 ล็อคขนาดไอคอนข้างใน (ตัวช่วยหลัก) */
-.btn-pay i {
-    transform: none !important;      /* ล็อคไม่ให้ขยาย/ดีด */
-    display: inline-block !important; /* บังคับให้เป็น Block เพื่อให้ margin ทำงาน */
-    margin-bottom: 8px;              /* 👈 ปรับระยะห่างไอคอนกับตัวหนังสือตรงนี้ (เพิ่มจาก 4 เป็น 8) */
-    font-size: 24px;                 /* คุมขนาดไอคอนให้คงที่ */
-    transition: none !important;     /* ปิดความนุ่มนวลในการขยาย เพื่อให้มันนิ่งสนิททันที */
-} 
-   /* 8. โมดอลและรายงาน - ปรับปรุงใหม่ */
+    .btn-pay { 
+        height: 75px; font-size: 18px; width: 100%; border-radius: 18px;
+        border: 3px solid transparent;
+        transition: background 0.2s, opacity 0.2s, border 0.2s;
+        cursor: pointer;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        transform: none !important; 
+        background: linear-gradient(135deg, #190da8, #0b1e59); 
+        color: #ffffff;
+    }
+
+    .btn-pay.active-cash, .btn-pay.active-trans, .btn-pay.active-mix {
+        border: 3px solid #ffffff !important; 
+        box-shadow: 0 0 15px rgba(255,255,255,0.3);   
+        transform: scale(1) !important; opacity: 1 !important;
+    }
+    .btn-pay i {
+        transform: none !important; display: inline-block !important; 
+        margin-bottom: 8px; font-size: 24px; transition: none !important;
+    } 
+
+    /* 8. โมดอลและรายงาน - 🟢 แก้ไขจุดที่กดปิดไม่ได้ตรงนี้ครับ */
     .modal { 
         position: fixed; 
         inset: 0; 
-        background: rgba(0, 0, 0, 0.7); /* ลดความดำลงนิดจะได้เห็นหน้าหลัง */
+        background: rgba(0, 0, 0, 0.7); 
         display: none; 
-        z-index: 1000000; 
+        z-index: 1000000; /* สูงกว่า nav */
         align-items: center; 
         justify-content: center;
-        padding-bottom: 80px; /* เพิ่มช่องว่างด้านล่างให้พ้นแถบเมนูบาร์ */
+        padding-bottom: 80px; 
     }
     .modal-content { 
         background: var(--card); 
@@ -347,11 +314,26 @@ nav {
         max-width: 400px; 
         border-radius: 25px; 
         padding: 25px; 
-        max-height: 75vh; /* ปรับลดจาก 85 เป็น 75 เพื่อไม่ให้ยาวเกินไป */
+        max-height: 75vh; 
         overflow-y: auto; 
-        box-shadow: 0 20px 50px rgba(0,0,0,0.3); /* เพิ่มเงาให้ดูมีมิติ */
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3); 
         position: relative;
+        z-index: 1000001; /* 🟢 เพิ่ม z-index ให้เนื้อหาอยู่บนสุด */
     }
+    
+    /* 🔴 เพิ่มส่วนนี้เพื่อให้ปุ่มปิดอยู่บนสุดและกดติดชัวร์ๆ */
+    .modal-content .close, .close-btn {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        z-index: 1000002 !important;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        padding: 10px; /* เพิ่มพื้นที่ให้กดง่ายขึ้น */
+        color: var(--text);
+    }
+
     .status-bar { padding: 12px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 14px; margin-bottom: 10px; }
     .acc-main-card { background: var(--card); padding: 20px; border-radius: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); margin-bottom: 15px; }
     #accHistory { font-size: 12px; max-height: 150px; overflow-y: auto; }
@@ -359,8 +341,8 @@ nav {
         from { transform: translateY(100%); opacity: 0; }
         to { transform: translateY(0); opacity: 1; }
     }
-        </style>
-    </head>
+</style>
+</head>
 <body>
             <div class="container">
             <div id="p1" class="page active" style="padding: 15px; background: #f8fafc;">
@@ -633,7 +615,7 @@ nav {
         </div>
 
         <div style="text-align:center; line-height: 1.4;">
-            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.8</span></div>
+            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.9</span></div>
             <div style="font-size:9px; color:#cbd5e1; font-weight:400;">Update: <span id="display-date">22/02/2026</span></div>
         </div>
     </div>
@@ -672,7 +654,7 @@ nav {
     <div onclick="go(2)" class="nav-item"><i class="fas fa-history"></i><span>รายงาน</span></div>
     <div onclick="go(3)" class="nav-item"><i class="fas fa-wallet"></i><span>บัญชี</span></div>
     <div onclick="go(4)" class="nav-item"><i class="fas fa-book-open"></i><span>ทรงผม</span></div>   
-</nav>
+    </nav>
  <script>
  /* ==========================================================
    SECTION 1: INITIALIZATION & GLOBAL VARIABLES
@@ -680,7 +662,7 @@ nav {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.8"; 
+const APP_VERSION = "1.0.9"; 
 const LAST_UPDATED = "22/02/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
