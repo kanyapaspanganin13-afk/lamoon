@@ -607,7 +607,7 @@ function openReportModal(title, htmlContent) {
         </div>
 
         <div style="text-align:center; line-height: 1.4;">
-            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.1.0</span></div>
+            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.7</span></div>
             <div style="font-size:9px; color:#cbd5e1; font-weight:400;">Update: <span id="display-date">22/02/2026</span></div>
         </div>
     </div>
@@ -654,7 +654,7 @@ function openReportModal(title, htmlContent) {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.1.0"; 
+const APP_VERSION = "1.0.7"; 
 const LAST_UPDATED = "22/02/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
@@ -681,6 +681,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if ($("display-version")) $("display-version").innerText = APP_VERSION;
     if ($("display-date")) $("display-date").innerText = LAST_UPDATED;
 });
+// 🟢 ตรวจสอบว่ามีบรรทัดนี้อยู่บนสุดของไฟล์ JavaScript นะครับช่าง
+const $ = (id) => document.getElementById(id);
+
 function go(p) {
     // 1. จัดการการซ่อน/แสดงหน้า Page
     document.querySelectorAll('.page').forEach(pg => {
@@ -692,10 +695,8 @@ function go(p) {
         targetPage.classList.add('active');
         targetPage.style.display = 'block';
     }
-    // 2. จัดการสถานะปุ่มเมนู (Navbar) ให้ตรงกับเลขหน้าที่กด
-    // เราใช้การเช็คจากเลข p โดยตรงจะแม่นยำกว่าครับ
+    // 2. จัดการสถานะปุ่มเมนู (Navbar)
     document.querySelectorAll('.nav-item').forEach((btn) => {
-        // ดึงค่าเลขหน้าจากฟังก์ชันที่แนบไว้ใน onclick (เช่น go(1) ดึงเลข 1)
         const btnFunction = btn.getAttribute('onclick');
         if (btnFunction && btnFunction.includes('go(' + p + ')')) {
             btn.classList.add('active');
@@ -703,12 +704,14 @@ function go(p) {
             btn.classList.remove('active');
         }
     });
-    // --- ✨ ส่วนโหลดชื่อร้าน (ป้องกันชื่อหาย) ---
+    // --- ✨ ส่วนโหลดชื่อร้าน ---
     const savedShopName = localStorage.getItem("shopName") || "BARBER SHOP";
     const shopTitleEl = document.querySelector('h2') || document.getElementById("shopNameDisplay"); 
     if (shopTitleEl) shopTitleEl.innerText = savedShopName;
     // 3. เงื่อนไขพิเศษเมื่อเข้าแต่ละหน้า
-    const dateInpValue = $("dateInp")?.value || new Date().toISOString().split('T')[0];
+    // ใช้ตัวแปร $ ที่เราประกาศไว้ด้านบนครับ
+    const dateInp = $("dateInp");
+    const dateInpValue = dateInp ? dateInp.value : new Date().toISOString().split('T')[0];
 
     if (p === 2) {
         if (typeof renderDay === 'function') renderDay(dateInpValue);
@@ -718,19 +721,19 @@ function go(p) {
         }
     }
     if (p === 3) { 
-        if ($("accDate") && $("dateInp")) {
-            $("accDate").value = $("dateInp").value;
+        if ($("accDate") && dateInp) {
+            $("accDate").value = dateInp.value;
         }
         if (typeof loadAccountStatus === 'function') {
             loadAccountStatus(); 
         }
     }
-    // 🟢 เพิ่มเงื่อนไขสำหรับหน้า 4 (แคตตาล็อกทรงผม)
     if (p === 4) {
         console.log("เข้าสู่หน้าแคตตาล็อกทรงผม");
-        // ถ้าช่างมีฟังก์ชันโหลดรูปเริ่มต้น สามารถสั่งรันที่นี่ได้ครับ
-        // if (typeof loadGallery === 'function') loadGallery();
     }
+    // ดันหน้าจอกลับไปด้านบนสุดเวลาเปลี่ยนหน้า
+    window.scrollTo(0, 0);
+} // 👈 🟢 เติมปีกกาปิดตรงนี้ครับช่าง!
 function updateDateDisplay(v) {
     if (!v) return;
     // 1. แยกวันที่ (v จะเป็นรูปแบบ 2026-02-13)
