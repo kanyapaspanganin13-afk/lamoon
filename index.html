@@ -1110,32 +1110,34 @@ async function saveAndGo(date, total) {
     const btn = document.getElementById("btnSubmitSend");
     const icon = document.getElementById("btnIcon");
 
-    // 🎯 1. ดักจับข้อมูลซ้ำ: ถ้ามีวันที่นี้ใน archives แล้ว ให้เตือนและล็อกปุ่มทันที
+    // 🎯 1. ดักจับข้อมูลซ้ำ: ถ้าส่งแล้วให้เตือนและล็อกปุ่มเป็นสีเทา ไอคอนจรวด
     const alreadySent = archives.some(a => a.date === date);
     if (alreadySent) {
-        alert(`⚠️ ข้อมูลของวันที่ ${date} บันทึกข้อมูลเรียบร้อยแล้ว`);
+        alert(`⚠️ ข้อมูลของวันที่ ${date} ส่งไปแล้ว`);
         if (btn) {
             btn.disabled = true; 
-            btn.style.background = "#94a3b8"; // เปลี่ยนเป็นสีเทา (สำเร็จแล้ว)
-            if (icon) icon.className = "fas fa-check-double";
+            btn.style.background = "#94a3b8"; // 🔘 สีเทา
+            if (icon) icon.className = "fas fa-paper-plane"; // ไอคอนจรวดเหมือนเดิม
             btn.style.cursor = "default";
         }
-        return; // หยุดการทำงานทันที
+        return;
     }
-    // 🎯 2. แจ้งเตือนยืนยันก่อนส่ง (กันมือลั่น)
-    if (!confirm(`ยืนยันการส่งข้อมูลวันที่ ${date} ใช่ไหมครับ?`)) return;
-    // 🎯 3. เริ่มกระบวนการส่ง: ล็อกปุ่มเป็นสีเขียว
+
+    // 🎯 2. ยืนยันก่อนส่ง
+    if (!confirm(`ยืนยันการส่งข้อมูลวันที่ ${date} ใช่ไหม?`)) return;
+
+    // 🎯 3. เริ่มส่ง: ล็อกปุ่มเป็นสีเขียว
     if (btn) {
         if (btn.disabled) return; 
         btn.disabled = true;             
         btn.style.background = "#22c55e"; // 🟢 สีเขียว (กำลังส่ง)
         if (icon) icon.className = "fas fa-spinner fa-spin"; 
     }
-    // --- ส่วน Logic การคำนวณเดิมของช่าง ---
+
+    // ... [Logic คำนวณคงเดิมของช่าง] ...
     const allToday = db.filter(r => r.date === date);
     const todayData = allToday.filter(r => r.type === 'SERVICE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
-
     let cash = 0, tips = 0;
     todayData.forEach(r => {
         const p = Number(r.price) || 0;
@@ -1144,34 +1146,23 @@ async function saveAndGo(date, total) {
         if (r.pay === "Cash" || r.pay === "เงินสด") { cash += (p + t); }
         else if (r.pay === "Mix") { cash += Number(r.payCash) || 0; }
     });
-
     const commission = total * (Number(conf.perc) / 100);
     const baseEarn = Math.max(commission, Number(conf.guar) || 0); 
     const bEarn = isHoliday ? 0 : baseEarn + tips;
     const settle = isHoliday ? 0 : cash - bEarn;
-
-    const data = { 
-        date, total, cash, 
-        barber: Math.floor(bEarn), 
-        settle: settle, 
-        type: isHoliday ? "HOLIDAY" : "WORK",
-        details: allToday 
-    };
-    
+    const data = { date, total, cash, barber: Math.floor(bEarn), settle: settle, type: isHoliday ? "HOLIDAY" : "WORK", details: allToday };
     const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
-
     if (!isHoliday) { account.balance = -settle; }
-
     db = db.filter(r => r.date !== date);
 
     try {
         if (typeof saveDB === "function") { await saveDB(); } else { await save(); }
         
-        // 🎯 4. ส่งสำเร็จ: เปลี่ยนเป็นสีเทาล็อกค้างไว้
+        // 🎯 4. ส่งสำเร็จ: เปลี่ยนเป็นสีเทา แต่ไอคอนจรวดเหมือนเดิม
         if (btn) {
             btn.style.background = "#94a3b8"; // 🔘 สีเทา (สำเร็จแล้ว)
-            if (icon) icon.className = "fas fa-check-double"; 
+            if (icon) icon.className = "fas fa-paper-plane"; // ✈️ จรวดเหมือนเดิม
             btn.disabled = true;             
             btn.style.cursor = "default";
         }
@@ -1183,7 +1174,6 @@ async function saveAndGo(date, total) {
         }, 500);
 
     } catch (e) {
-        // กรณี Error ให้กลับเป็นสีส้มเพื่อให้ส่งใหม่ได้
         if (btn) {
             btn.disabled = false;
             btn.style.background = "#ff6f00"; // 🟠 กลับเป็นสีส้ม
