@@ -322,14 +322,28 @@ nav {
     font-size: 24px;                 /* คุมขนาดไอคอนให้คงที่ */
     transition: none !important;     /* ปิดความนุ่มนวลในการขยาย เพื่อให้มันนิ่งสนิททันที */
 } 
-     /* 8. โมดอลและรายงาน */
+   /* 8. โมดอลและรายงาน - ปรับปรุงใหม่ */
     .modal { 
-        position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); 
-        display: none; z-index: 1000000; align-items: center; justify-content: center; 
+        position: fixed; 
+        inset: 0; 
+        background: rgba(0, 0, 0, 0.7); /* ลดความดำลงนิดจะได้เห็นหน้าหลัง */
+        display: none; 
+        z-index: 1000000; 
+        align-items: center; 
+        justify-content: center;
+        padding-bottom: 80px; /* เพิ่มช่องว่างด้านล่างให้พ้นแถบเมนูบาร์ */
     }
     .modal-content { 
-        background: var(--card); color: var(--text); width: 90%; max-width: 400px; 
-        border-radius: 25px; padding: 25px; max-height: 85vh; overflow-y: auto; 
+        background: var(--card); 
+        color: var(--text); 
+        width: 90%; 
+        max-width: 400px; 
+        border-radius: 25px; 
+        padding: 25px; 
+        max-height: 75vh; /* ปรับลดจาก 85 เป็น 75 เพื่อไม่ให้ยาวเกินไป */
+        overflow-y: auto; 
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3); /* เพิ่มเงาให้ดูมีมิติ */
+        position: relative;
     }
     .status-bar { padding: 12px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 14px; margin-bottom: 10px; }
     .acc-main-card { background: var(--card); padding: 20px; border-radius: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); margin-bottom: 15px; }
@@ -610,7 +624,7 @@ nav {
     <button onclick="saveSettings()" style="background:#1e3a8a; color:#fff; height:65px; border-radius:22px; border:none; font-weight:800; font-size:20px; box-shadow: 0 10px 25px rgba(30,58,138,0.3);">บันทึกข้อมูล</button>
     <button onclick="$('modalSet').style.display='none'" style="background:#f1f5f9; color:#64748b; height:65px; border-radius:22px; border:none; font-weight:800; font-size:18px;">ปิดหน้านี้</button>
 </div>
-   <div style="text-align:center; padding-top: 10px; padding-bottom: 10px; line-height: 1.5;"><div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 1px;">V.<span id="display-version">1.0.1</span></div>
+   <div style="text-align:center; padding-top: 10px; padding-bottom: 10px; line-height: 1.5;"><div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 1px;">V.<span id="display-version">1.0.2</span></div>
     <div style="font-size:9px; color:#cbd5e1; font-weight:400;"> Update: <span id="display-date">22/02/2026</span>
             </div>
         </div>
@@ -656,7 +670,7 @@ nav {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.1"; 
+const APP_VERSION = "1.0.2"; 
 const LAST_UPDATED = "22/02/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
