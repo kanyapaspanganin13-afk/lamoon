@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 02</title>
+    <title>Barber Note Pro 0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -427,15 +427,12 @@ body {
         </div>
     </div>
 
-    <div id="settleBarOuter" style="margin-bottom:12px; background: rgba(255,255,255,0.1); border-radius: 10px; height: 10px; overflow: hidden;">
-        <div id="settleBar" style="background: #10b981; width: 0%; height: 100%; transition: 0.3s; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);"></div>
-    </div>
+   <div id="settleBarContainer" style="margin-bottom:18px;"><div id="settleBar"></div> </div>
+                <div id="dServiceStats"></div>
+                <hr style="border:0; border-top:1px solid #e2e8f0; margin-top:15px;">
+                <div id="dailyList"></div>
+            </div>
 
-    <div id="dServiceStats" style="margin-bottom: 10px;"></div>
-    <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin-bottom:15px;">
-
-    <div id="dailyList" style="flex: 1; overflow-y: auto; padding-bottom: 140px;">
-        </div>
         <button onclick="go('p0')" style="width: 100%; height: 45px; background: rgba(255,255,255,0.05); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; font-weight: 700; font-size: 14px;">
             กลับหน้าเมนูหลัก
         </button>
