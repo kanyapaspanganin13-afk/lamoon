@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 05</title>
+    <title>Barber Note Pro 0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -289,61 +289,63 @@ body {
 </style>
 </head>
 <body>
-<div id="p0" class="page active">
-  <div style="padding: 20px; display: flex; align-items: center; gap: 15px;">
-    <div onclick="document.getElementById('logoInput').click();" style="width: 60px; height: 60px; background: #e2e8f0; border-radius: 50%; overflow: hidden; cursor: pointer; border: 2px solid #1e3a8a; position: relative;">
-        <img id="mainLogo" src="logo.png" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2209/2209678.png'">
-        <div style="position: absolute; bottom: 0; background: rgba(0,0,0,0.5); width: 100%; color: white; font-size: 8px; text-align: center;">แก้ไข</div>
-    </div>
-    
-    <input type="file" id="logoInput" accept="image/*" style="display: none;" onchange="uploadLogo(this)">
-
-    <div>
-        <h2 style="margin: 0; font-size: 20px; color: #1e3a8a; font-weight: 900;">BARBER NOTE PRO</h2>
-        <p style="margin: 0; font-size: 12px; color: #64748b;">ระบบจัดการร้านตัดผมมืออาชีพ</p>
-    </div>
-</div>
-   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px;">
-    
-    <div onclick="go('p1')" style="background: #1e3a8a; padding: 25px 15px; border-radius: 25px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-        <i class="fas fa-edit" style="font-size: 28px; color: #60a5fa; margin-bottom: 12px;"></i>
-        <div style="font-weight: 800; color: #ffffff; font-size: 15px;">บันทึกงาน</div>
+<div id="p0" class="page active" style="background: #0f172a; min-height: 100vh;">
+    <div style="padding: 20px; display: flex; align-items: center; gap: 15px;">
+        <div onclick="document.getElementById('logoInput').click();" style="width: 60px; height: 60px; background: #1e293b; border-radius: 50%; overflow: hidden; cursor: pointer; border: 2px solid #3b82f6; position: relative;">
+            <img id="mainLogo" src="logo.png" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2209/2209678.png'">
+            <div style="position: absolute; bottom: 0; background: rgba(0,0,0,0.6); width: 100%; color: white; font-size: 8px; text-align: center; padding-bottom: 2px;">แก้ไข</div>
+        </div> 
+        <input type="file" id="logoInput" accept="image/*" style="display: none;" onchange="uploadLogo(this)">
+        <div>
+            <h2 style="margin: 0; font-size: 20px; color: #f8fafc; font-weight: 900;">BARBER NOTE PRO</h2>
+            <p style="margin: 0; font-size: 12px; color: #94a3b8;">ระบบจัดการร้านตัดผมมืออาชีพ</p>
+        </div>
     </div>
 
-    <div onclick="go('p2')" style="background: #172554; padding: 25px 15px; border-radius: 25px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-        <i class="fas fa-file-invoice" style="font-size: 28px; color: #fbbf24; margin-bottom: 12px;"></i>
-        <div style="font-weight: 800; color: #ffffff; font-size: 15px;">รายงานรายวัน</div>
-    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px;">
+        <div onclick="go('p1')" style="background: #1e3a8a; padding: 25px 15px; border-radius: 25px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <i class="fas fa-edit" style="font-size: 28px; color: #60a5fa; margin-bottom: 12px;"></i>
+            <div style="font-weight: 800; color: #ffffff; font-size: 15px;">บันทึกงาน</div>
+        </div>
 
-    <div onclick="go('p3')" style="background: #064e3b; padding: 25px 15px; border-radius: 25px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-        <i class="fas fa-wallet" style="font-size: 28px; color: #34d399; margin-bottom: 12px;"></i>
-        <div style="font-weight: 800; color: #ffffff; font-size: 15px;">สถานะบัญชี</div>
-    </div>
+        <div onclick="go('p2')" style="background: #172554; padding: 25px 15px; border-radius: 25px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <i class="fas fa-file-invoice" style="font-size: 28px; color: #fbbf24; margin-bottom: 12px;"></i>
+            <div style="font-weight: 800; color: #ffffff; font-size: 15px;">รายงานรายวัน</div>
+        </div>
 
-    <div onclick="go('p5')" style="background: #4c1d95; padding: 25px 15px; border-radius: 25px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-        <i class="fas fa-chart-pie" style="font-size: 28px; color: #c084fc; margin-bottom: 12px;"></i>
-        <div style="font-weight: 800; color: #ffffff; font-size: 15px;">สรุป & สถิติ</div>
-    </div>
+        <div onclick="go('p3')" style="background: #064e3b; padding: 25px 15px; border-radius: 25px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <i class="fas fa-wallet" style="font-size: 28px; color: #34d399; margin-bottom: 12px;"></i>
+            <div style="font-weight: 800; color: #ffffff; font-size: 15px;">สถานะบัญชี</div>
+        </div>
 
-    <div onclick="go('p4')" style="background: #334155; padding: 25px 15px; border-radius: 25px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-        <i class="fas fa-cut" style="font-size: 28px; color: #94a3b8; margin-bottom: 12px;"></i>
-        <div style="font-weight: 800; color: #ffffff; font-size: 15px;">เทรนด์ทรงผม</div>
-    </div>
+        <div onclick="go('p5')" style="background: #4c1d95; padding: 25px 15px; border-radius: 25px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <i class="fas fa-chart-pie" style="font-size: 28px; color: #c084fc; margin-bottom: 12px;"></i>
+            <div style="font-weight: 800; color: #ffffff; font-size: 15px;">สรุป & สถิติ</div>
+        </div>
 
-    <div onclick="document.getElementById('modalSet').style.display='flex'" style="background: #1e293b; padding: 25px 15px; border-radius: 25px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-        <i class="fas fa-user-cog" style="font-size: 28px; color: #cbd5e1; margin-bottom: 12px;"></i>
-        <div style="font-weight: 800; color: #ffffff; font-size: 15px;">ตั้งค่า & ระบบ</div>
+        <div onclick="go('p4')" style="background: #334155; padding: 25px 15px; border-radius: 25px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <i class="fas fa-cut" style="font-size: 28px; color: #94a3b8; margin-bottom: 12px;"></i>
+            <div style="font-weight: 800; color: #ffffff; font-size: 15px;">เทรนด์ทรงผม</div>
+        </div>
+
+        <div onclick="document.getElementById('modalSet').style.display='flex'" style="background: #1e293b; padding: 25px 15px; border-radius: 25px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <i class="fas fa-user-cog" style="font-size: 28px; color: #cbd5e1; margin-bottom: 12px;"></i>
+            <div style="font-weight: 800; color: #ffffff; font-size: 15px;">ตั้งค่า & ระบบ</div>
         </div>
     </div>
 </div>
-
-<div id="p1" class="page" style="display: none; padding: 20px; background: #f8fafc; min-height: 100vh; flex-direction: column;">
-    
-    <div style="text-align: center; margin-bottom: 25px; padding-top: 10px;">
-        <h2 id="shopNameDisp" style="margin: 0; color:#1e3a8a; font-weight:900; font-size: 22px; letter-spacing: 1px; text-transform: uppercase;">BARBER SHOP</h2>
-        <div style="height: 3px; width: 40px; background: #1e3a8a; margin: 8px auto; border-radius: 10px;"></div>
+<div id="p0" class="page active" style="background: #0f172a; min-height: 100vh;">
+    <div style="padding: 20px; display: flex; align-items: center; gap: 15px;">
+        <div onclick="document.getElementById('logoInput').click();" style="width: 60px; height: 60px; background: #1e293b; border-radius: 50%; overflow: hidden; cursor: pointer; border: 2px solid #3b82f6; position: relative;">
+            <img id="mainLogo" src="logo.png" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2209/2209678.png'">
+            <div style="position: absolute; bottom: 0; background: rgba(0,0,0,0.6); width: 100%; color: white; font-size: 8px; text-align: center; padding-bottom: 2px;">แก้ไข</div>
+        </div> 
+        <input type="file" id="logoInput" accept="image/*" style="display: none;" onchange="uploadLogo(this)">
+        <div>
+            <h2 style="margin: 0; font-size: 20px; color: #f8fafc; font-weight: 900;">BARBER NOTE PRO</h2>
+            <p style="margin: 0; font-size: 12px; color: #94a3b8;">ระบบจัดการร้านตัดผมมืออาชีพ</p>
+        </div>
     </div>
-
     <div class="grid-3" style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap:12px; margin-bottom: 20px;">
         <div style="background:#fff; border-radius:20px; height:75px; position:relative; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
             <span id="dateDisplay" style="font-weight:800; color:#475569; font-size:16px;">📅 วันที่</span>
@@ -387,8 +389,7 @@ body {
             <i class="fas fa-wallet"></i><br>จ่ายผสม
         </button>
     </div>
-
-    <div style="margin-top: auto; padding-bottom: 20px;">
+<div style="margin-top: auto; padding-bottom: 20px;">
         <button class="btn-main" onclick="handleSave(event)" style="width:100%; height:90px; border-radius:28px; background: linear-gradient(135deg, #1e3a8a, #0f172a); color:#fff; border:none; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.3); display:flex; align-items:center; justify-content:center; gap:15px; margin-bottom: 15px;">
             <i class="fas fa-save" style="font-size: 32px;"></i>
             <span style="font-size: 28px; font-weight: 900; letter-spacing:1px;">บันทึกข้อมูล</span>
@@ -399,7 +400,6 @@ body {
     </div>
 </div>
  <div id="p2" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 15px; background: #0f172a; min-height: 100vh; display: flex; flex-direction: column; box-sizing: border-box; color: white;">
-    
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
         <div style="background: #1e3a8a; padding:18px 15px; border-radius:20px; text-align:center; box-shadow:0 10px 15px -3px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
             <small style="font-weight:800; color:#cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px;">ยอดรวมวันนี้</small>
