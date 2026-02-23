@@ -2684,11 +2684,21 @@ window.addEventListener('load', () => {
    SECTION 10: KNOWLEDGE BASE & HAIR STYLE GUIDE
    (ส่วนคลังความรู้ เทรนด์ทรงผมปี 2026 และการเชื่อมต่อลิงก์ภายนอก)
    ========================================================== */
-
+// ตัวแปรสำหรับจำสถานะการเปิด (ประกาศไว้นอกฟังก์ชัน)
+let lastOpenedType = null;
 function showHairExpert(type) {
-    const display = $("hair-info-display"); // ใช้ตัวแปร $ ที่ช่างประกาศไว้ใน Section 1
+    const display = $("hair-info-display");
     if (!display) return;
-    
+    // --- ระบบกดซ้ำเพื่อปิด (Toggle) ---
+    if (lastOpenedType === type) {
+        display.innerHTML = "";
+        display.style.display = "none"; // ซ่อนพื้นที่แสดงผล
+        lastOpenedType = null; // ล้างค่าสถานะ
+        return;
+    }
+    // เตรียมการแสดงผล
+    display.style.display = "block";
+    lastOpenedType = type;
     let content = '';
 
     // หัวข้อที่ 1: วิเคราะห์เส้นผม (Source: All Things Beauty)
