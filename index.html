@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 0</title>
+    <title>Barber Note Pro 03</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -732,55 +732,68 @@ document.addEventListener("DOMContentLoaded", () => {
     if ($("display-date")) $("display-date").innerText = LAST_UPDATED;
 });
 function go(p) {
-    // 1. จัดการการซ่อน/แสดงหน้า
-    document.querySelectorAll('.page').forEach(pg => {
-        pg.classList.remove('active');
-        pg.style.display = 'none'; 
-    });
-
+    // 1. ตรวจสอบชื่อหน้า (Target ID)
     let targetId = (typeof p === 'number') ? 'p' + p : p;
     const targetPage = document.getElementById(targetId);
 
-    if (targetPage) {
-        targetPage.classList.add('active');
-        targetPage.style.display = 'block';
+    // ถ้าหาหน้าที่จะไปไม่เจอ ให้หยุดทำงานก่อนที่แอปจะค้าง
+    if (!targetPage) {
+        console.log("ไม่พบหน้า: " + targetId);
+        return; 
     }
 
-    // 2. ถ้ากลับมาหน้า Dashboard (p0)
-    if (targetId === 'p0') {
-        updateDashboardStats();
-        const shopTitleEl = document.querySelector('#p0 h2'); 
-        if (shopTitleEl) shopTitleEl.innerText = "BARBER NOTE PRO";
-    }
-
-    // 3. จัดการ Nav Bar (ถ้ายังมีใช้อยู่)
-    document.querySelectorAll('.nav-item').forEach((btn, i) => {
-        btn.classList.toggle('active', (i + 1) === p);
+    // 2. ซ่อนหน้าที่มี class="page" ทั้งหมด
+    document.querySelectorAll('.page').forEach(pg => {
+        pg.style.display = 'none';
+        pg.classList.remove('active');
     });
 
-    // 4. เงื่อนไขพิเศษตามหน้าย่อย
-    const dateVal = document.getElementById("dateInp")?.value || new Date().toISOString().split('T')[0];
+    // 3. แสดงหน้าเป้าหมาย
+    targetPage.style.display = 'block';
+    targetPage.classList.add('active');
 
-    // หน้าบันทึกงาน (p1)
-    if (targetId === 'p1') {
-        const savedShopName = localStorage.getItem("shopName") || "BARBER SHOP";
-        const shopTitleP1 = document.querySelector('#p1 h3'); 
-        if (shopTitleP1) shopTitleP1.innerText = "📝 " + savedShopName;
-    }
-    // หน้าตั้งค่าระบบ (p6) - ดึงค่าที่เคยบันทึกไว้มาโชว์ในช่องกรอก
-    if (targetId === 'p6') {
-        if (document.getElementById('setShop')) {
-            document.getElementById('setShop').value = localStorage.getItem("shopName") || "";
-            document.getElementById('setPerc').value = localStorage.getItem("shopPerc") || "";
-            document.getElementById('setGuar').value = localStorage.getItem("shopGuar") || "";
-            document.getElementById('setTheme').value = localStorage.getItem("appTheme") || "light";
-            // ปิดช่องขาวไว้ก่อน เพื่อให้ช่างเลือกกดปุ่ม "ตั้งค่า" ค่อยโชว์เหมือน P4
-            document.getElementById('config-display-area').style.display = 'none';
+    // --- ส่วนของเงื่อนไขพิเศษ (ใส่ไว้ใน try-catch เพื่อป้องกันหน้าค้าง) ---
+    try {
+        // หน้า Dashboard (p0)
+        if (targetId === 'p0') {
+            if (typeof updateDashboardStats === 'function') updateDashboardStats();
+            const shopTitleEl = document.querySelector('#p0 h2'); 
+            if (shopTitleEl) shopTitleEl.innerText = "BARBER NOTE PRO";
         }
-    }
 
-    if (p === 2 || p === 'p2') { if (typeof renderDay === 'function') renderDay(dateVal); }
-    if (p === 3 || p === 'p3') { if (typeof loadAccountStatus === 'function') loadAccountStatus(); }
+        // หน้าบันทึกงาน (p1)
+        if (targetId === 'p1') {
+            const savedShopName = localStorage.getItem("shopName") || "BARBER SHOP";
+            const shopTitleP1 = document.querySelector('#p1 h3'); 
+            if (shopTitleP1) shopTitleP1.innerText = "📝 " + savedShopName;
+        }
+
+        // หน้าตั้งค่า (p6)
+        if (targetId === 'p6') {
+            const setShop = document.getElementById('setShop');
+            if (setShop) {
+                setShop.value = localStorage.getItem("shopName") || "";
+                document.getElementById('setPerc').value = localStorage.getItem("shopPerc") || "";
+                document.getElementById('setGuar').value = localStorage.getItem("shopGuar") || "";
+                document.getElementById('setTheme').value = localStorage.getItem("appTheme") || "light";
+                
+                const configArea = document.getElementById('config-display-area');
+                if (configArea) configArea.style.display = 'none';
+            }
+        }
+
+        // รันฟังก์ชันรายงาน (เฉพาะถ้ามีฟังก์ชันนี้อยู่จริง)
+        const dateVal = document.getElementById("dateInp")?.value || new Date().toISOString().split('T')[0];
+        if ((p === 2 || p === 'p2') && typeof renderDay === 'function') { 
+            renderDay(dateVal); 
+        }
+        if ((p === 3 || p === 'p3') && typeof loadAccountStatus === 'function') { 
+            loadAccountStatus(); 
+        }
+
+    } catch (err) {
+        console.log("เกิดข้อผิดพลาดบางจุด แต่ยังเปลี่ยนหน้าได้อยู่:", err);
+    }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
