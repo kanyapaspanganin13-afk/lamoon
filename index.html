@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 12</title>
+    <title>Barber Note Pro 1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -171,328 +171,296 @@ function openReportModal(title, htmlContent) {
 </script>
 </head>
 <style>
-/* 1. ตัวแปรหลัก */
-    :root { 
-        --primary: #6366f1; --accent: #0ea5e9; --danger: #ef4444; --success: #22c55e; 
-        --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --border: #e2e8f0;
-    }
-    /* 2. ระบบธีม */
-    body.navy { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --accent: #38bdf8; }
-    body.dark { --bg: #121212; --card: #1a1a1a; --text: #fbbf24; --accent: #fbbf24; }
+/* 1. ตัวแปรหลัก (คงเดิม) */
+:root { 
+    --primary: #6366f1; --accent: #0ea5e9; --danger: #ef4444; --success: #22c55e; 
+    --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --border: #e2e8f0;
+}
 
-    /* 3. รีเซ็ตพื้นฐาน */
-    * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { 
-        margin: 0; background: var(--bg); color: var(--text); 
-        padding-bottom: 90px; overflow-x: hidden; transition: all 0.3s ease; 
-    }
-    
-    /* 4. ระบบเลย์เอาต์ */
-    .container { 
-        padding: 15px; 
-        max-width: 500px; 
-        margin: auto; 
-        position: relative; 
-        z-index: 1; 
-    }
+/* 2. ระบบธีม (คงเดิม) */
+body.navy { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --accent: #38bdf8; }
+body.dark { --bg: #121212; --card: #1a1a1a; --text: #fbbf24; --accent: #fbbf24; }
 
-    .page { 
-        display: none; 
-        background: var(--bg); /* 🟢 แก้ไข: ใช้ตัวแปรตามธีมเพื่อให้มองเห็นตัวหนังสือในโหมดมืด */
-        opacity: 1; 
-        border-radius: 25px;
-        padding: 20px;
-        margin: 10px 10px 100px 10px; 
-        border: 1px solid var(--border);
-        min-height: calc(100vh - 200px); 
-        box-sizing: border-box;
-        overflow-y: auto;
-    }
-    .page.active { 
-        display: block !important; 
-        animation: slideUp 0.4s ease-out;
-    }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
+/* 3. รีเซ็ตพื้นฐาน */
+* { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
 
-    /* 5. เมนูบาร์ (รองรับ 4 ปุ่ม) */
-    nav {
-        position: fixed; bottom: 0; left: 0; right: 0;
-        background: var(--card) !important; 
-        display: grid; 
-        grid-template-columns: repeat(4, 1fr); 
-        height: 70px;
-        align-items: center;
-        box-shadow: 0 -5px 20px rgba(0,0,0,0.15); 
-        z-index: 99999; 
-        border-top: 1px solid var(--border); 
-        padding-bottom: env(safe-area-inset-bottom);
-        transition: background 0.3s ease;
-    }
-    .nav-item { 
-        text-align: center; 
-        color: var(--text);
-        opacity: 0.6; 
-        cursor: pointer; 
-        transition: 0.2s; 
-        display: flex; 
-        flex-direction: column; 
-        align-items: center;
-        justify-content: center;
-        gap: 0px; 
-    }
-    .nav-item.active { 
-        color: var(--accent) !important; 
-        opacity: 1; 
-    }
-    .nav-item i { 
-        font-size: 20px; 
-        display: block; 
-        margin-bottom: -2px; 
-    }
-    .nav-item span { 
-        font-size: 11px; 
-        font-weight: 700; 
-        margin-top: 0; 
-    }
+body { 
+    margin: 0; 
+    background: var(--bg); 
+    color: var(--text); 
+    /* 🔴 แก้ไข: ลด padding ด้านล่างออกเพราะไม่มีเมนูบาร์แล้ว */
+    padding-bottom: 20px; 
+    overflow-x: hidden; 
+    transition: all 0.3s ease; 
+}
 
-    /* 6. ฟอร์มและอินพุต */
-    .icon-card, input, select { background: var(--card); color: var(--text); }
-    .icon-card { 
-        border-radius: 15px; padding: 10px 2px; display: flex; flex-direction: column; 
-        align-items: center; justify-content: center; gap: 4px; cursor: pointer; 
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: 75px; font-size: 14px; transition: 0.2s;
-    }
-    .icon-card:active { transform: scale(0.95); }
-    input, select { 
-        width: 100%; height: 75px; border-radius: 20px; font-size: 20px; font-weight: 700; 
-        text-align: center; border: none; outline: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
-        appearance: none; -webkit-appearance: none;
-    }      
+/* 4. ระบบเลย์เอาต์ */
+.container { 
+    padding: 10px; 
+    max-width: 500px; 
+    margin: auto; 
+    position: relative; 
+}
 
-    /* 7. ปุ่มและการจัดการ */
-    #btnCash { background: linear-gradient(135deg, #10b981, #059669); color: white; }
-    #btnTrans { background: linear-gradient(135deg, #6366f1, #4338ca); color: white; }
-    #btnMix   { background: linear-gradient(135deg, #81d4fa, #01579b); color: white; }
+.page { 
+    display: none; 
+    background: var(--bg); 
+    border-radius: 25px;
+    padding: 20px;
+    /* 🔴 แก้ไข: ปรับ margin ด้านล่างให้สั้นลง */
+    margin: 10px 5px 20px 5px; 
+    border: 1px solid var(--border);
+    /* 🔴 แก้ไข: คืนพื้นที่ความสูงหน้าจอให้เต็มที่ */
+    min-height: calc(100vh - 40px); 
+    box-sizing: border-box;
+    overflow-y: auto;
+}
 
-    .btn-pay { 
-        height: 75px; font-size: 18px; width: 100%; border-radius: 18px;
-        border: 3px solid transparent;
-        transition: background 0.2s, opacity 0.2s, border 0.2s;
-        cursor: pointer;
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        transform: none !important; 
-        background: linear-gradient(135deg, #190da8, #0b1e59); 
-        color: #ffffff;
-    }
+.page.active { 
+    display: block !important; 
+    animation: fadeIn 0.3s ease-in-out;
+}
 
-    .btn-pay.active-cash, .btn-pay.active-trans, .btn-pay.active-mix {
-        border: 3px solid #ffffff !important; 
-        box-shadow: 0 0 15px rgba(255,255,255,0.3);   
-        transform: scale(1) !important; opacity: 1 !important;
-    }
-    .btn-pay i {
-        transform: none !important; display: inline-block !important; 
-        margin-bottom: 8px; font-size: 24px; transition: none !important;
-    } 
+/* 🟢 ส่วนที่เพิ่ม: สไตล์ปุ่มย้อนกลับ (Back Button) */
+.back-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    color: var(--primary);
+    padding: 10px;
+    border-radius: 15px;
+    background: rgba(99, 102, 241, 0.05); /* พื้นหลังจางๆ ให้ดูแพง */
+    transition: 0.2s;
+}
+.back-nav:active { transform: translateX(-5px); }
+.back-nav b { font-size: 18px; }
 
-    /* 8. โมดอลและรายงาน - 🟢 แก้ไขจุดที่กดปิดไม่ได้ตรงนี้ครับ */
-    .modal { 
-        position: fixed; 
-        inset: 0; 
-        background: rgba(0, 0, 0, 0.7); 
-        display: none; 
-        z-index: 1000000; /* สูงกว่า nav */
-        align-items: center; 
-        justify-content: center;
-        padding-bottom: 80px; 
-    }
-    .modal-content { 
-        background: var(--card); 
-        color: var(--text); 
-        width: 90%; 
-        max-width: 400px; 
-        border-radius: 25px; 
-        padding: 25px; 
-        max-height: 75vh; 
-        overflow-y: auto; 
-        box-shadow: 0 20px 50px rgba(0,0,0,0.3); 
-        position: relative;
-        z-index: 1000001; /* 🟢 เพิ่ม z-index ให้เนื้อหาอยู่บนสุด */
-    }
-    
-    /* 🔴 เพิ่มส่วนนี้เพื่อให้ปุ่มปิดอยู่บนสุดและกดติดชัวร์ๆ */
-    .modal-content .close, .close-btn {
-        position: absolute;
-        top: 15px;
-        right: 20px;
-        z-index: 1000002 !important;
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
-        padding: 10px; /* เพิ่มพื้นที่ให้กดง่ายขึ้น */
-        color: var(--text);
-    }
+/* 5. ระบบเมนู Dashboard (หน้าแรก p0) */
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 15px;
+}
 
-    .status-bar { padding: 12px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 14px; margin-bottom: 10px; }
-    .acc-main-card { background: var(--card); padding: 20px; border-radius: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); margin-bottom: 15px; }
-    #accHistory { font-size: 12px; max-height: 150px; overflow-y: auto; }
-    @keyframes slideUp {
-        from { transform: translateY(100%); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-    }
+.menu-item {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 25px 10px;
+    text-align: center;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.menu-item:active { transform: scale(0.95); background: var(--border); }
+.menu-item i { font-size: 32px; }
+.menu-item span { font-size: 14px; font-weight: 700; color: var(--text); }
+
+/* ตกแต่งสีไอคอนแยกตามหมวดหมู่ (ดึงสีจากตัวแปรหลัก) */
+.icon-save { color: #10b981 !important; }
+.icon-report { color: #f59e0b !important; }
+.icon-acc { color: #3b82f6 !important; }
+.icon-stats { color: #ec4899 !important; }
+.icon-know { color: #6366f1 !important; }
+.icon-set { color: #64748b !important; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}   
 </style>
 </head>
 <body>
-            <div class="container">
-            <div id="p1" class="page active" style="padding: 15px; background: #f8fafc;">
-                <h2 id="shopNameDisp" style="text-align:center; color:#1e293b; font-weight:900; margin: 10px 0 20px 0; letter-spacing: 1px; text-transform: uppercase;">BARBER SHOP</h2>
-                
-                <div class="grid-3" style="gap: 12px; margin-bottom: 20px;">
-                    <div class="icon-card" style="background:#fff; border:none; box-shadow:0 8px 15px rgba(0,0,0,0.05); border-radius:20px; height:90px; display:flex; flex-direction:column; align-items:center; justify-content:center;" onclick="handleInsurance()">
-                        <div style="background:linear-gradient(135deg, #fbbf24, #f59e0b); width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; color:#fff; font-size:18px;">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <span style="color:#1e293b; font-weight:800; font-size:14px;">ประกันรายได้</span>
-                    </div>
-                    
-                    <div class="icon-card" style="background:#fff; border:none; box-shadow:0 8px 15px rgba(0,0,0,0.05); border-radius:20px; height:90px; display:flex; flex-direction:column; align-items:center; justify-content:center;" onclick="handleHoliday()">
-                        <div style="background:linear-gradient(135deg, #f87171, #ef4444); width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; color:#fff; font-size:18px;">
-                            <i class="fas fa-umbrella-beach"></i>
-                        </div>
-                        <span style="color:#1e293b; font-weight:800; font-size:14px;">บันทึกวันหยุด</span>
-                    </div>
-            
-                    <div class="icon-card" style="background:#fff; border:none; box-shadow:0 8px 15px rgba(0,0,0,0.05); border-radius:20px; height:90px; display:flex; flex-direction:column; align-items:center; justify-content:center;" onclick="openSettings()">
-                        <div style="background:linear-gradient(135deg, #94a3b8, #475569); width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; color:#fff; font-size:18px;">
-                            <i class="fas fa-cog"></i>
-                        </div>
-                        <span style="color:#1e293b; font-weight:800; font-size:14px;">ตั้งค่าระบบ</span>
-                    </div>
-                </div>
-            
-              <div class="grid-3" style="gap:10px; margin-bottom:15px;">
-    <div style="background:#fff; border-radius:18px; border:none; height:75px; position:relative; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-        
-        <span id="dateDisplay" style="font-weight:800; color:#475569; font-size:18px;">📅 เลือกวันที่</span>
-        
-        <input type="date" id="dateInp" 
-               onchange="if(window.updateDateDisplay) updateDateDisplay(this.value);" 
-               style="position:absolute; opacity:0; width:100%; height:100%; cursor:pointer; z-index:2;">
-    </div>
-
-    <input type="time" id="tStart" style="height:75px; border-radius:22px; border:none; text-align:center; font-weight:700; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-    <input type="time" id="tEnd" style="height:75px; border-radius:22px; border:none; text-align:center; font-weight:700; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-</div>
-            <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                <select id="hairStyle" style="height:70px; border-radius:14px; border:none; font-weight:700; background:#fff; color:#1e293b; box-shadow:0 4px 10px rgba(0,0,0,0.03); padding:0 10px;">
-                    <option value="">✂️ ทรงผม</option>
-                    <option>แฟชั่น</option><option>สกินเฟด</option><option>เปิดข้าง</option><option>รองทรง</option>
-                    <option>ตำรวจ/ทหาร</option><option>ทรงนักเรียน</option><option>แก้ผม</option><option>โกนผม</option>
-                </select>
-                <select id="extra1" style="height:70px; border-radius:14px; border:none; font-weight:700; background:#fff; color:#64748b; box-shadow:0 4px 10px rgba(0,0,0,0.03); padding:0 8px;">
-                    <option value="">บริการ1</option>
-                    <option value="เด็ก"> เด็ก</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>ย้อมแฟชั่น</option>
-                </select>
-                <select id="extra2" style="height:70px; border-radius:14px; border:none; font-weight:700; background:#fff; color:#64748b; box-shadow:0 4px 10px rgba(0,0,0,0.03); padding:0 8px;">
-                    <option value="">บริการ2</option>
-                    <option value="เด็ก"> เด็ก</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>ย้อมแฟชั่น</option>
-                </select>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; margin: 10px 0;">
-                <div style="position: relative; background: #ffffff; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.05);">
-                    <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 24px; color: #6366f1; font-weight: 900;">฿</span>
-                    <input type="number" id="priceInp" placeholder="0" inputmode="numeric" 
-                        style="width: 100%; height: 85px !important; background: transparent !important; font-size: 45px !important; font-weight: 900 !important; color: #1e293b !important; padding-left: 40px !important; border: none !important;">
-                </div>
-            
-                <input type="number" id="tipInp" placeholder="ทิป" inputmode="numeric" 
-                    style="width: 100%; height: 85px !important; background: #e1f5fe !important; border-radius: 20px !important; font-size: 32px !important; font-weight: 900 !important; color: #ad2c18 !important; border: none !important;">
-            </div>
-            
-           <div class="grid-3" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; margin-bottom:15px;">
-    <button id="btnCash" onclick="setPaymentType('Cash')" style="height:70px; border-radius:18px; border:none; background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-weight:700; font-size:18px; box-shadow:0 4px 10px rgba(16,185,129,0.2);">
-        <i class="fas fa-money-bill-wave"></i><br>เงินสด
-    </button>
-    <button id="btnTrans" onclick="setPaymentType('Trans')" style="height:70px; border-radius:18px; border:none; background:linear-gradient(135deg, #6366f1, #4338ca); color:#fff; font-weight:700; font-size:18px; box-shadow:0 4px 10px rgba(99,102,241,0.2);">
-        <i class="fas fa-qrcode"></i><br>สแกนจ่าย
-    </button>
-    <button id="btnMix" onclick="setPaymentType('Mix')" style="height:70px; border-radius:18px; border:none; background:linear-gradient(135deg, #81d4fa, #01579b); color:#fff; font-weight:700; font-size:18px; box-shadow:0 4px 10px rgba(245,158,11,0.2);">
-        <i class="fas fa-wallet"></i><br>จ่ายผสม
-    </button>
-</div>
-
-<div id="mixPanel" style="display:none; background:#f8fafc; padding:15px; border-radius:20px; border:2px dashed #cbd5e1; margin-bottom:20px;">
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-        <div>
-            <label style="font-size:18px; color:#64748b;">ระบุเงินสด:</label>
-            <input type="number" id="mixCash" style="width:100%; height:45px; border-radius:12px; border:1px solid #ddd; text-align:center; font-size:30px;" placeholder="0">
+<div id="p0" class="page active">
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px; padding: 10px;">
+        <div style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; border: 2px solid var(--primary);">
+            <img src="https://via.placeholder.com/60" id="user-img" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
         <div>
-            <label style="font-size:18px; color:#64748b;">ระบุเงินโอน:</label>
-            <input type="number" id="mixTrans" style="width:100%; height:45px; border-radius:12px; border:1px solid #ddd; text-align:center; font-size:30px;" placeholder="0">
+            <h2 style="margin: 0; font-size: 20px;">สวัสดีช่าง <span id="user-name">บอย</span></h2>
+            <small style="opacity: 0.7;">วันนี้พร้อมลุยงานแล้วหรือยังครับ?</small>
+        </div>
+    </div>
+    
+    <div class="menu-grid">
+        <div class="menu-item" onclick="go('p1')">
+            <i class="fas fa-edit icon-save"></i>
+            <span>บันทึกงาน</span>
+        </div>
+
+        <div class="menu-item" onclick="go('p2')">
+            <i class="fas fa-file-invoice icon-report"></i>
+            <span>รายงานรายวัน</span>
+        </div>
+
+        <div class="menu-item" onclick="go('p3')">
+            <i class="fas fa-wallet icon-acc"></i>
+            <span>สถานะบัญชี</span>
+        </div>
+
+        <div class="menu-item" onclick="go('p5')">
+            <i class="fas fa-chart-pie icon-stats"></i>
+            <span>สรุป & สถิติ</span>
+        </div>
+
+        <div class="menu-item" onclick="go('p4')">
+            <i class="fas fa-cut icon-know"></i>
+            <span>เทรนด์ทรงผม</span>
+        </div>
+
+        <div class="menu-item" onclick="document.getElementById('modalSet').style.display='flex'">
+            <i class="fas fa-user-cog icon-set"></i>
+            <span>ตั้งค่า & ระบบ</span>
         </div>
     </div>
 </div>
-<button class="btn-main" onclick="handleSave(event)" 
-    style="width:100%; height:90px; border-radius:28px; 
-    background: linear-gradient(135deg, #190da8, #0b1e59); /* 🔵 สีที่ช่างเลือก */
-    color:#fff; border:none; 
-    box-shadow: 0 15px 35px rgba(11, 30, 89, 0.4); 
-    display:flex; align-items:center; justify-content:center; gap:15px;">
+   <div id="p1" class="page" style="padding: 15px; background: #f8fafc; padding-bottom: 50px;">
     
-    <i class="fas fa-save" style="font-size: 38px;"></i>
-    <span style="font-size: 32px; font-weight: 900; letter-spacing:1px;">บันทึกข้อมูล</span>
-</button>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <div onclick="go('p0')" style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #1e293b; background: #fff; padding: 8px 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); flex-shrink: 0;">
+            <i class="fas fa-chevron-left" style="font-size: 16px;"></i>
+            <span style="font-weight: 800; font-size: 14px;">เมนูหลัก</span>
+        </div>
+        <h2 id="shopNameDisp" style="margin: 0; color:#1e293b; font-weight:900; font-size: 18px; letter-spacing: 1px; text-transform: uppercase;">BARBER SHOP</h2>
+        <div style="width: 80px;"></div> </div>
+
+    <div class="grid-3" style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap:10px; margin-bottom:15px;">
+        <div style="background:#fff; border-radius:18px; height:75px; position:relative; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+            <span id="dateDisplay" style="font-weight:800; color:#475569; font-size:16px;">📅 วันที่</span>
+            <input type="date" id="dateInp" onchange="if(window.updateDateDisplay) updateDateDisplay(this.value);" style="position:absolute; opacity:0; width:100%; height:100%; cursor:pointer; z-index:2;">
+        </div>
+        <input type="time" id="tStart" style="height:75px; border-radius:18px; border:none; text-align:center; font-weight:700; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+        <input type="time" id="tEnd" style="height:75px; border-radius:18px; border:none; text-align:center; font-weight:700; background:#fff; color:#1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <select id="hairStyle" style="height:70px; border-radius:18px; border:none; font-weight:700; background:#fff; color:#1e293b; box-shadow:0 4px 10px rgba(0,0,0,0.03); padding:0 10px;">
+            <option value="">✂️ ทรงผม</option>
+            <option>แฟชั่น</option><option>สกินเฟด</option><option>เปิดข้าง</option><option>รองทรง</option>
+            <option>ตำรวจ/ทหาร</option><option>ทรงนักเรียน</option><option>แก้ผม</option><option>โกนผม</option>
+        </select>
+        <select id="extra1" style="height:70px; border-radius:18px; border:none; font-weight:700; background:#fff; color:#64748b; box-shadow:0 4px 10px rgba(0,0,0,0.03); padding:0 8px;">
+            <option value="">บริการ 1</option>
+             <option value="เด็ก"> เด็ก</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>ย้อมแฟชั่น</option>
+                </select>
+        <select id="extra2" style="height:70px; border-radius:18px; border:none; font-weight:700; background:#fff; color:#64748b; box-shadow:0 4px 10px rgba(0,0,0,0.03); padding:0 8px;">
+            <option value="">บริการ 2</option>
+            <option value="เด็ก"> เด็ก</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>ย้อมแฟชั่น</option>
+                </select>
+    </div>
+    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div style="position: relative; background: #ffffff; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); border: 2px solid #eef2ff;">
+            <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 24px; color: #6366f1; font-weight: 900;">฿</span>
+            <input type="number" id="priceInp" placeholder="0" inputmode="numeric" style="width: 100%; height: 85px; background: transparent; font-size: 45px; font-weight: 900; color: #1e293b; padding-left: 45px; border: none; outline: none;">
+        </div>
+        <input type="number" id="tipInp" placeholder="ทิป" inputmode="numeric" style="width: 100%; height: 85px; background: #fffbeb; border-radius: 20px; font-size: 32px; font-weight: 900; color: #ad2c18; border: 2px solid #fef3c7; outline: none; text-align: center;">
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; margin-bottom:15px;">
+        <button id="btnCash" onclick="setPaymentType('Cash')" style="height:70px; border-radius:18px; border:none; background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-weight:700;">
+            <i class="fas fa-money-bill-wave"></i><br><span style="font-size: 14px;">เงินสด</span>
+        </button>
+        <button id="btnTrans" onclick="setPaymentType('Trans')" style="height:70px; border-radius:18px; border:none; background:linear-gradient(135deg, #6366f1, #4338ca); color:#fff; font-weight:700;">
+            <i class="fas fa-qrcode"></i><br><span style="font-size: 14px;">สแกนจ่าย</span>
+        </button>
+        <button id="btnMix" onclick="setPaymentType('Mix')" style="height:70px; border-radius:18px; border:none; background:linear-gradient(135deg, #0ea5e9, #0284c7); color:#fff; font-weight:700;">
+            <i class="fas fa-wallet"></i><br><span style="font-size: 14px;">จ่ายผสม</span>
+        </button>
+    </div>
+
+    <div id="mixPanel" style="display:none; background:#fff; padding:15px; border-radius:20px; border:2px dashed #6366f1; margin-bottom:20px; animation: slideDown 0.3s ease-out;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <div>
+                <label style="font-size:14px; color:#64748b; font-weight: 700;">เงินสด:</label>
+                <input type="number" id="mixCash" style="width:100%; height:45px; border-radius:12px; border:1px solid #e2e8f0; text-align:center; font-size:24px; font-weight: 700;" placeholder="0">
+            </div>
+            <div>
+                <label style="font-size:14px; color:#64748b; font-weight: 700;">เงินโอน:</label>
+                <input type="number" id="mixTrans" style="width:100%; height:45px; border-radius:12px; border:1px solid #e2e8f0; text-align:center; font-size:24px; font-weight: 700;" placeholder="0">
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-main" onclick="handleSave(event)" style="width:100%; height:85px; border-radius:25px; background: linear-gradient(135deg, #1e3a8a, #0f172a); color:#fff; border:none; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.3); display:flex; align-items:center; justify-content:center; gap:15px;">
+        <i class="fas fa-save" style="font-size: 30px;"></i>
+        <span style="font-size: 26px; font-weight: 900; letter-spacing:1px;">บันทึกข้อมูล</span>
+    </button>
 </div>
-            <div id="p2" class="page" style="max-width:480px; margin:0 auto; padding: 15px; padding-bottom: 100px;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
-                    <div style="background: #3b50ce; padding:18px 15px; border-radius:20px; text-align:center; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);">
-                        <small style="font-weight:800; color:#cbd5e1; text-transform: uppercase; letter-spacing: 0.5px;">ยอดรวมวันนี้</small>
-                        <div id="dTotal" style="font-size:36px; font-weight:900; color:#cbd5e1; margin: 5px 0;">0</div>
-                        <div id="dCounts" style="font-size:16px; font-weight:700; color:#cbd5e1; background:rgba(255,255,255,0.15); display:inline-block; padding:2px 10px; border-radius:10px;">ลูกค้า 0 คน</div>
-                    </div>
-            
-                   <div style="background:#3b50ce; padding:15px; border-radius:20px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; justify-content:center; gap:8px;">
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700;">
-                    <span style="color:#cbd5e1; display:flex; align-items:center; gap:8px;">
-                        <i class="fas fa-mobile-alt" style="width:18px; color:#60a5fa;"></i> โอน:
-                    </span> 
-                    <b id="dTrans" style="color:#ffffff;">0</b>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700;">
-                    <span style="color:#cbd5e1; display:flex; align-items:center; gap:8px;">
-                        <i class="fas fa-money-bill-wave" style="width:18px; color:#4ade80;"></i> สด:
-                    </span> 
-                    <b id="dCash" style="color:#ffffff;">0</b>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700;">
-                    <span style="color:#cbd5e1; display:flex; align-items:center; gap:8px;">
-                        <i class="fas fa-cut" style="width:18px; color:#fbbf24;"></i> ช่าง:
-                    </span> 
-                    <b id="dBarber" style="color:#ffffff;">0</b>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:800; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px; margin-top: 2px;">
-                    <span style="color:#cbd5e1; display:flex; align-items:center; gap:8px;">
-                        <i class="fas fa-store" style="width:18px; color:#f472b6;"></i> ร้าน:
-                    </span> 
-                    <b id="dShop" style="color:#ffffff;">0</b>
-                </div>
-            </div>
-            </div>
-                <div id="settleBarContainer" style="margin-bottom:18px;"><div id="settleBar"></div> </div>
-                <div id="dServiceStats"></div>
-                <hr style="border:0; border-top:1px solid #e2e8f0; margin-top:15px;">
-                <div id="dailyList"></div>
-            </div>
-            
-               <div id="p3" class="page" style="max-width:480px; margin:0 auto; padding: 12px; padding-bottom: 100px; background: #f8fafc;">
+     <div id="p2" class="page" style="max-width:480px; margin:0 auto; padding: 15px; padding-bottom: 100px; background: #f8fafc;">
     
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <div onclick="go('p0')" style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #1e293b; background: #fff; padding: 8px 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <i class="fas fa-chevron-left" style="font-size: 18px;"></i>
+            <span style="font-weight: 800; font-size: 16px;">เมนูหลัก</span>
+        </div>
+        <div style="font-size: 14px; font-weight: 700; color: #64748b;">รายงานรายวัน</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+        <div style="background: linear-gradient(135deg, #3b50ce, #1e3a8a); padding:18px 15px; border-radius:25px; text-align:center; box-shadow:0 10px 20px rgba(59, 80, 206, 0.2); border: 1px solid rgba(255,255,255,0.1);">
+            <small style="font-weight:800; color:#cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px;">ยอดรวมวันนี้</small>
+            <div id="dTotal" style="font-size:36px; font-weight:900; color:#ffffff; margin: 5px 0;">0</div>
+            <div id="dCounts" style="font-size:14px; font-weight:700; color:#ffffff; background:rgba(255,255,255,0.2); display:inline-block; padding:3px 12px; border-radius:12px;">ลูกค้า 0 คน</div>
+        </div>
+
+        <div style="background:#ffffff; padding:15px; border-radius:25px; box-shadow:0 8px 15px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display:flex; flex-direction:column; justify-content:center; gap:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:14px; font-weight:700;">
+                <span style="color:#64748b; display:flex; align-items:center; gap:6px;">
+                    <i class="fas fa-mobile-alt" style="color:#6366f1;"></i> โอน:
+                </span> 
+                <b id="dTrans" style="color:#1e293b;">0</b>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:14px; font-weight:700;">
+                <span style="color:#64748b; display:flex; align-items:center; gap:6px;">
+                    <i class="fas fa-money-bill-wave" style="color:#10b981;"></i> สด:
+                </span> 
+                <b id="dCash" style="color:#1e293b;">0</b>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:14px; font-weight:700;">
+                <span style="color:#64748b; display:flex; align-items:center; gap:6px;">
+                    <i class="fas fa-cut" style="color:#f59e0b;"></i> ช่าง:
+                </span> 
+                <b id="dBarber" style="color:#1e293b;">0</b>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:14px; font-weight:800; border-top: 1px dashed #e2e8f0; padding-top: 8px;">
+                <span style="color:#1e293b; display:flex; align-items:center; gap:6px;">
+                    <i class="fas fa-store" style="color:#f472b6;"></i> ร้าน:
+                </span> 
+                <b id="dShop" style="color:#1e293b;">0</b>
+            </div>
+        </div>
+    </div>
+
+    <div id="settleBarContainer" style="margin-bottom:18px; background: #e2e8f0; border-radius: 10px; height: 8px; overflow: hidden;">
+        <div id="settleBar" style="background: #10b981; width: 0%; height: 100%; transition: 0.3s;"></div> 
+    </div>
+
+    <div id="dServiceStats" style="margin-bottom: 15px;"></div>
+
+    <hr style="border:0; border-top:1px solid #e2e8f0; margin: 20px 0;">
+
+    <div style="font-weight: 800; color: #1e293b; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-list-ul"></i> รายการวันที่
+    </div>
+    <div id="dailyList"></div>
+</div>
+    <div id="p3" class="page" style="max-width:480px; margin:0 auto; padding: 12px; padding-bottom: 100px; background: #f8fafc;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <div onclick="go('p0')" style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #1e293b; background: #fff; padding: 8px 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <i class="fas fa-chevron-left" style="font-size: 18px;"></i>
+            <span style="font-weight: 800; font-size: 16px;">เมนูหลัก</span>
+        </div>
+        <div style="font-size: 14px; font-weight: 700; color: #64748b;">ระบบบัญชีร้าน</div>
+    </div>
+
     <div class="card" style="background:#fff; border-radius:25px; padding:20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border:1px solid #fff; margin-bottom: 15px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <b style="font-size:22px; color:#92400e;"><i class="fas fa-wallet"></i> สถานะบัญชี</b>
@@ -500,18 +468,18 @@ function openReportModal(title, htmlContent) {
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-            <div style="background:#fff; border-radius:18px; padding:12px; text-align:center; border: 1px solid #f1f5f9; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+            <div style="background:#f8fafc; border-radius:18px; padding:12px; text-align:center; border: 1px solid #f1f5f9; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
                 <small style="font-size:12px; color:#64748b; font-weight:700;">ค้างเดิม</small>
                 <b style="font-size:18px; color:#1e293b; display:block;" id="accOldVal">฿0</b>
             </div>
-            <div style="background:#fff; border-radius:18px; padding:12px; text-align:center; border: 1px solid #f1f5f9; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+            <div style="background:#f8fafc; border-radius:18px; padding:12px; text-align:center; border: 1px solid #f1f5f9; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
                 <small id="accDateLabel" style="font-size:12px; color:#64748b; font-weight:700;">00/00/0000</small>
                 <b style="font-size:18px; color:#1e293b; display:block;" id="accTodayVal">฿0</b>
             </div>
         </div>
 
-        <div style="background:#fff; border-radius:22px; padding:20px; text-align:center; margin-bottom:15px; border: 1px solid #f1f5f9;">
-            <div id="statusBadge" style="display:inline-block; padding:4px 12px; border-radius:10px; font-size:12px; font-weight:700; margin-bottom:8px;">
+        <div style="background:#f8fafc; border-radius:22px; padding:20px; text-align:center; margin-bottom:15px; border: 1px solid #f1f5f9;">
+            <div id="statusBadge" style="display:inline-block; padding:4px 12px; border-radius:10px; font-size:12px; font-weight:700; margin-bottom:8px; background: #e2e8f0; color: #475569;">
                 กำลังคำนวณ...
             </div>
             <div style="font-size:32px; font-weight:900; color:#1e293b;" id="accTotalVal">฿0</div>
@@ -528,135 +496,181 @@ function openReportModal(title, htmlContent) {
             </div>
         </div>
 
-       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-    <button onclick="clearAccount()" style="background:#22c55e; color:#fff; border:none; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-        <i class="fas fa-check-double"></i> เคลียร์เงิน
-    </button>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <button onclick="clearAccount()" style="background:#22c55e; color:#fff; border:none; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.2);">
+                <i class="fas fa-check-double"></i> เคลียร์เงิน
+            </button>
+            <button onclick="openHistoryModal()" style="background:#f59e0b; color:#fff; border:none; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer; box-shadow: 0 4px 6px rgba(245,158,11,0.2);">
+                <i class="fas fa-history"></i> ประวัติเคลียร์เงิน
+            </button>
+        </div>
+    </div> 
+<div id="p5" class="page">
+    <div style="display: flex; align-items: center; margin-bottom: 25px;">
+        <div onclick="go('p0')" style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #1e293b; background: #fff; padding: 10px 18px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+            <i class="fas fa-chevron-left" style="font-size: 18px;"></i>
+            <span style="font-weight: 800; font-size: 16px;">เมนูหลัก</span>
+        </div>
+    </div>
 
-    <button onclick="openHistoryModal()" style="background:#f59e0b; color:#fff; border:none; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-        <i class="fas fa-history"></i> ประวัติเคลียร์เงิน
-    </button>
-</div>
-   <div onclick="document.getElementById('histMonth').showPicker()" 
-     style="background:linear-gradient(135deg, #1e40af, #4338ca); border-radius:25px; padding:15px 10px; text-align:center; color:#fff; position:relative; box-shadow:0 8px 20px rgba(67, 56, 202, 0.3); cursor:pointer; margin-top: 15px; margin-bottom: 12px; transition: 0.3s;">
-    
-    <i class="fas fa-calendar-check" style="font-size:26px; margin-bottom:8px; display:block; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></i>
-    <b style="font-size:18px; letter-spacing: 0.5px;">สรุปรายเดือน</b>
-    
-    <input type="month" id="histMonth" onchange="loadHistMonth()" 
-           style="position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer;">
-</div>
-    <div onclick="openComparisonSelector()" style="background: linear-gradient(135deg, #38bdf8, #1d4ed8); border-radius: 25px; padding: 15px; text-align: center; color: #fff; cursor: pointer; box-shadow: 0 8px 15px rgba(56,189,248,0.2); display: flex; align-items: center; justify-content: center; gap: 10px;">       
-    <i class="fas fa-chart-line" style="font-size: 24px;"></i>
-    <b style="font-size: 16px;">เปรียบเทียบช่วงวันที่</b>
-            </div>
-         </div> 
-      </div>                   
-   <div id="p4" class="page">
-        <div style="text-align: center; margin-bottom: 20px;">
-            <h3 style="margin: 0; font-size: 22px; color: var(--primary); font-weight: 900;">💈 คลังความรู้ & ทรงผม</h3>
-            <div style="font-size: 11px; color: var(--text); opacity: 0.6;">Professional Barber Guide</div>
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h3 style="margin: 0; font-size: 24px; color: var(--primary); font-weight: 900;">📈 สรุปผล & สถิติ</h3>
+        <p style="font-size: 13px; color: #64748b; margin-top: 5px;">ติดตามผลงานและรายได้ของคุณ</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+        
+        <div onclick="document.getElementById('histMonth').showPicker()" 
+             style="background:linear-gradient(135deg, #1e40af, #4338ca); border-radius:25px; padding:25px 15px; text-align:center; color:#fff; position:relative; box-shadow:0 10px 25px rgba(30, 64, 175, 0.25); cursor:pointer;">
+            <i class="fas fa-calendar-check" style="font-size:32px; margin-bottom:12px; display:block;"></i>
+            <b style="font-size:20px; letter-spacing: 0.5px;">สรุปรายเดือน</b>
+            <input type="month" id="histMonth" onchange="loadHistMonth()" 
+                   style="position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer;">
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
-            <div class="icon-card" onclick="showHairExpert(1)" style="height: 120px; background: linear-gradient(135deg, #1e293b, #334155); color: white; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                <i class="fas fa-microscope" style="font-size: 28px; margin-bottom: 10px; color: #fbbf24;"></i>
-                <span style="font-weight: 800; font-size: 13px;">เส้นผมแต่ละแบบ</span>
-                <small style="font-size: 9px; opacity: 0.8; font-weight: 400;">Texture & Analysis</small>
-            </div>
-            <div class="icon-card" onclick="showHairExpert(2)" style="height: 120px; background: linear-gradient(135deg, #1e3a8a, #1e40af); color: white; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                <i class="fas fa-user-check" style="font-size: 28px; margin-bottom: 10px; color: #60a5fa;"></i>
-                <span style="font-weight: 800; font-size: 13px;">โครงหน้ากับทรงผม</span>
-                <small style="font-size: 9px; opacity: 0.8; font-weight: 400;">Face Shape Guide</small>
-            </div>
-            <div class="icon-card" onclick="showHairExpert(3)" style="height: 120px; background: linear-gradient(135deg, #4338ca, #6366f1); color: white; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                <i class="fas fa-cut" style="font-size: 28px; margin-bottom: 10px; color: #a5b4fc;"></i>
-                <span style="font-weight: 800; font-size: 13px;">ทรงผมมาตรฐาน/แฟชั่น</span>
-                <small style="font-size: 9px; opacity: 0.8; font-weight: 400;">Hairstyle Gallery</small>
-            </div>
-            <div class="icon-card" onclick="showHairExpert(4)" style="height: 120px; background: linear-gradient(135deg, #059669, #10b981); color: white; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                <i class="fas fa-pump-soap" style="font-size: 28px; margin-bottom: 10px; color: #6ee7b7;"></i>
-                <span style="font-weight: 800; font-size: 13px;">การเซต/จัดทรง</span>
-                <small style="font-size: 9px; opacity: 0.8; font-weight: 400;">Styling & Finish</small>
-            </div>
+        <div onclick="openComparisonSelector()" 
+             style="background: linear-gradient(135deg, #0ea5e9, #2563eb); border-radius: 25px; padding: 25px 15px; text-align: center; color: #fff; cursor: pointer; box-shadow: 0 10px 25px rgba(14, 165, 233, 0.25); display: flex; flex-direction: column; align-items: center; gap: 12px;">       
+            <i class="fas fa-chart-line" style="font-size: 32px;"></i>
+            <b style="font-size: 20px;">เปรียบเทียบช่วงวันที่</b>
         </div>
+    </div>
+    <div id="stats-display-area" style="margin-top: 25px;"></div>
+</div>          
+  <div id="p4" class="page">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; gap: 10px;">
+        <div onclick="go('p0')" style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #1e293b; background: #fff; padding: 8px 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); flex-shrink: 0;">
+            <i class="fas fa-chevron-left" style="font-size: 18px;"></i>
+            <span style="font-weight: 800; font-size: 16px;">เมนูหลัก</span>
+        </div>
+        
+        <div style="text-align: right;">
+            <h3 style="margin: 0; font-size: 18px; color: var(--primary); font-weight: 900;">💈 คลังความรู้</h3>
+            <div style="font-size: 10px; color: var(--text); opacity: 0.6;">Barber Guide</div>
+        </div>
+    </div>
 
-        <div id="hair-info-display" class="acc-main-card" style="min-height: 200px; padding: 15px; background: #fff; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-            <div style="text-align: center; color: #94a3b8; padding-top: 40px;">
-                <i class="fas fa-arrow-up" style="font-size: 24px; margin-bottom: 10px;"></i>
-                <p>กรุณาเลือกหมวดหมู่ที่ต้องการดูข้อมูล</p>
-            </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px;">
+        <div class="icon-card" onclick="showHairExpert(1)" style="height: 110px; background: linear-gradient(135deg, #1e293b, #334155); color: white; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 20px;">
+            <i class="fas fa-microscope" style="font-size: 24px; margin-bottom: 8px; color: #fbbf24;"></i>
+            <span style="font-weight: 800; font-size: 13px;">เส้นผมแต่ละแบบ</span>
+            <small style="font-size: 9px; opacity: 0.8;">Texture Analysis</small>
+        </div>
+        
+        <div class="icon-card" onclick="showHairExpert(2)" style="height: 110px; background: linear-gradient(135deg, #1e3a8a, #1e40af); color: white; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 20px;">
+            <i class="fas fa-user-check" style="font-size: 24px; margin-bottom: 8px; color: #60a5fa;"></i>
+            <span style="font-weight: 800; font-size: 13px;">โครงหน้ากับทรงผม</span>
+            <small style="font-size: 9px; opacity: 0.8;">Face Shape Guide</small>
+        </div>
+        
+        <div class="icon-card" onclick="showHairExpert(3)" style="height: 110px; background: linear-gradient(135deg, #4338ca, #6366f1); color: white; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 20px;">
+            <i class="fas fa-cut" style="font-size: 24px; margin-bottom: 8px; color: #a5b4fc;"></i>
+            <span style="font-weight: 800; font-size: 13px;">ทรงผมมาตรฐาน</span>
+            <small style="font-size: 9px; opacity: 0.8;">Hairstyle Gallery</small>
+        </div>
+        
+        <div class="icon-card" onclick="showHairExpert(4)" style="height: 110px; background: linear-gradient(135deg, #059669, #10b981); color: white; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 20px;">
+            <i class="fas fa-pump-soap" style="font-size: 24px; margin-bottom: 8px; color: #6ee7b7;"></i>
+            <span style="font-weight: 800; font-size: 13px;">การเซต/จัดทรง</span>
+            <small style="font-size: 9px; opacity: 0.8;">Styling & Finish</small>
+        </div>
+    </div>
+
+    <div id="hair-info-display" class="acc-main-card" style="min-height: 200px; padding: 20px; background: #fff; border-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid var(--border);">
+        <div style="text-align: center; color: #94a3b8; padding-top: 40px;">
+            <i class="fas fa-lightbulb" style="font-size: 30px; margin-bottom: 15px; color: #e2e8f0;"></i>
+            <p style="font-size: 14px;">เลือกหมวดหมู่ด้านบน<br>เพื่อดูเทคนิคการตัดและจัดทรง</p>
         </div>
     </div>
 </div>
-    <div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); z-index:9999; display:flex; align-items:center; justify-content:center; padding:15px;">
-  <div style="background:#ffffff; width:95%; max-width:420px; border-radius:35px; display:flex; flex-direction:column; overflow:hidden; animation: slideUp 0.3s ease-out; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
-    
-    <div style="padding: 20px 20px 5px; text-align: center;">
-        <h3 style="margin: 0; font-size: 22px; color: #1e3a8a; font-weight: 900;">⚙️ ตั้งค่าระบบ</h3>
-    </div>
-
-    <div style="padding: 5px 20px 25px;"> <input type="text" id="setShop" placeholder="ชื่อร้าน" 
-               style="width: 100%; height: 52px; border-radius: 16px; border: 1px solid #e2e8f0; background: #f1f5f9; text-align: center; font-size: 18px; font-weight: 700; color: #1e3a8a; margin-bottom: 10px; outline: none;">
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
-            <input type="number" id="setPerc" placeholder="% ช่าง" style="width:100%; height:52px; border-radius:16px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:18px; font-weight:700; outline:none;">
-            <input type="number" id="setGuar" placeholder="ประกัน" style="width:100%; height:52px; border-radius:16px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:18px; font-weight:700; outline:none;">
-        </div>
-
-        <div style="margin-bottom:10px;">
-            <select id="setTheme" style="width:100%; height:52px; border-radius:16px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:16px; font-weight:700; color:#475569; outline:none;">
-                <option value="light">🌤 ธีมสว่าง</option>
-                <option value="navy">🌌 ธีมน้ำเงิน</option>
-                <option value="dark">🌑 ธีมดำ-ทอง</option>
-            </select>
-        </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-            <div style="position: relative; display: flex; align-items: center;">
-                <select id="setSound" style="width:100%; height:52px; border-radius:16px; border:1px solid #cbd5e1; background:#f1f5f9; text-align:center; font-size:15px; font-weight:700; outline:none; appearance:none; -webkit-appearance:none; padding-left: 35px;">
-                    <option value="on">เปิดเสียง</option>
-                    <option value="off">ปิดเสียง</option>
-                </select>
-                <i class="fas fa-volume-up" style="position: absolute; left: 12px; color: #475569; pointer-events: none; font-size: 14px;"></i>
-            </div>
-
-            <div style="position: relative; display: flex; align-items: center;">
-                <select id="setVoice" style="width:100%; height:52px; border-radius:16px; border:1px solid #cbd5e1; background:#f1f5f9; text-align:center; font-size:15px; font-weight:700; outline:none; appearance:none; -webkit-appearance:none; padding-left: 35px;">
-                    <option value="female">เสียงหญิง</option>
-                    <option value="male">เสียงชาย</option>
-                </select>
-                <i class="fas fa-user-friends" style="position: absolute; left: 12px; color: #475569; pointer-events: none; font-size: 14px;"></i>
+<div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); z-index:9999; display:flex; align-items:center; justify-content:center; padding:15px;">
+    <div style="background:#ffffff; width:95%; max-width:420px; border-radius:35px; display:flex; flex-direction:column; overflow:hidden; animation: slideUp 0.3s ease-out; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+        
+        <div style="padding: 20px 20px 10px; text-align: center;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                <div onclick="document.getElementById('modalSet').style.display='none'; document.getElementById('config-area').style.display='none';" style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #1e293b; background: #f1f5f9; padding: 8px 15px; border-radius: 15px;">
+                    <i class="fas fa-times" style="font-size: 18px;"></i>
+                    <span style="font-weight: 800; font-size: 16px;">ปิด</span>
+                </div>
+                <h3 style="margin: 0; font-size: 20px; color: #1e3a8a; font-weight: 900;">⚙️ จัดการระบบ</h3>
+                <div style="width: 45px;"></div> 
             </div>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:20px;">
-            <button onclick="exportBackup()" style="height:48px; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; font-size:12px; font-weight:800; color:#1e293b; display:flex; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
-                <i class="fas fa-file-download"></i> <span>สำรองข้อมูล</span>
-            </button>
-            
-            <input type="file" id="fileInput" style="display:none;" onchange="importBackup(this)">
+        <div style="padding: 0 20px 25px;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:20px;">
+                <div class="icon-card" onclick="handleInsurance()" style="background:#fff; border:1px solid #e2e8f0; border-radius:20px; height:90px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;">
+                    <div style="background:linear-gradient(135deg, #fbbf24, #f59e0b); width:35px; height:35px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; color:#fff; font-size:16px;"><i class="fas fa-shield-alt"></i></div>
+                    <span style="color:#1e293b; font-weight:800; font-size:12px;">ประกัน</span>
+                </div>
+                
+                <div class="icon-card" onclick="handleHoliday()" style="background:#fff; border:1px solid #e2e8f0; border-radius:20px; height:90px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;">
+                    <div style="background:linear-gradient(135deg, #f87171, #ef4444); width:35px; height:35px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; color:#fff; font-size:16px;"><i class="fas fa-umbrella-beach"></i></div>
+                    <span style="color:#1e293b; font-weight:800; font-size:12px;">วันหยุด</span>
+                </div>
 
-            <button onclick="$('fileInput').click()" style="height:48px; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; font-size:12px; font-weight:800; color:#1e293b; display:flex; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
-                <i class="fas fa-file-upload"></i> <span>คืนค่า</span>
-            </button>
-            
-            <button onclick="clearData()" style="height:48px; background:#fff1f2; border:1px solid #fecaca; border-radius:12px; font-size:12px; font-weight:800; color:#e11d48; display:flex; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
-                <i class="fas fa-trash-alt"></i> <span>ล้างข้อมูล</span>
-            </button>
-        </div>
+                <div class="icon-card" onclick="document.getElementById('config-area').style.display='block'" style="background:#fff; border:1px solid #e2e8f0; border-radius:20px; height:90px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;">
+                    <div style="background:linear-gradient(135deg, #64748b, #334155); width:35px; height:35px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; color:#fff; font-size:16px;"><i class="fas fa-cog"></i></div>
+                    <span style="color:#1e293b; font-weight:800; font-size:12px;">ตั้งค่าระบบ</span>
+                </div>
+            </div>
 
-        <div style="display:grid; grid-template-columns: 2fr 1.2fr; gap:12px; margin-bottom: 10px;">
-            <button onclick="saveSettings()" style="background:#1e3a8a; color:#fff; height:60px; border-radius:20px; border:none; font-weight:800; font-size:18px; box-shadow: 0 8px 20px rgba(30,58,138,0.2);">บันทึกข้อมูล</button>
-            <button onclick="$('modalSet').style.display='none'" style="background:#f1f5f9; color:#64748b; height:60px; border-radius:20px; border:none; font-weight:800; font-size:16px;">ปิด</button>
-        </div>
+            <div id="config-area" style="display:none; animation: fadeIn 0.3s ease-out;">
+                <input type="text" id="setShop" placeholder="ชื่อร้าน" style="width: 100%; height: 52px; border-radius: 16px; border: 1px solid #e2e8f0; background: #f1f5f9; text-align: center; font-size: 18px; font-weight: 700; color: #1e3a8a; margin-bottom: 10px; outline: none;">
 
-        <div style="text-align:center; line-height: 1.4;">
-            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.7</span></div>
-            <div style="font-size:9px; color:#cbd5e1; font-weight:400;">Update: <span id="display-date">22/02/2026</span></div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                    <input type="number" id="setPerc" placeholder="% ช่าง" style="width:100%; height:52px; border-radius:16px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:18px; font-weight:700;">
+                    <input type="number" id="setGuar" placeholder="ประกัน" style="width:100%; height:52px; border-radius:16px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:18px; font-weight:700;">
+                </div>
+
+                <div style="margin-bottom:10px;">
+                    <select id="setTheme" style="width:100%; height:52px; border-radius:16px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:16px; font-weight:700; color:#475569;">
+                        <option value="light">🌤 ธีมสว่าง</option>
+                        <option value="navy">🌌 ธีมน้ำเงิน</option>
+                        <option value="dark">🌑 ธีมดำ-ทอง</option>
+                    </select>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <select id="setSound" style="width:100%; height:52px; border-radius:16px; border:1px solid #cbd5e1; background:#f1f5f9; text-align:center; font-size:15px; font-weight:700; appearance:none; padding-left: 35px;">
+                            <option value="on">เปิดเสียง</option>
+                            <option value="off">ปิดเสียง</option>
+                        </select>
+                        <i class="fas fa-volume-up" style="position: absolute; left: 12px; color: #475569; pointer-events: none;"></i>
+                    </div>
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <select id="setVoice" style="width:100%; height:52px; border-radius:16px; border:1px solid #cbd5e1; background:#f1f5f9; text-align:center; font-size:15px; font-weight:700; appearance:none; padding-left: 35px;">
+                            <option value="female">เสียงหญิง</option>
+                            <option value="male">เสียงชาย</option>
+                        </select>
+                        <i class="fas fa-user-friends" style="position: absolute; left: 12px; color: #475569; pointer-events: none;"></i>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:20px;">
+                    <button onclick="exportBackup()" style="height:48px; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; font-size:11px; font-weight:800; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                        <i class="fas fa-file-download"></i> <span>สำรองข้อมูล</span>
+                    </button>
+                    <button onclick="document.getElementById('fileInput').click()" style="height:48px; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; font-size:11px; font-weight:800; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                        <i class="fas fa-file-upload"></i> <span>คืนค่า</span>
+                    </button>
+                    <button onclick="clearData()" style="height:48px; background:#fff1f2; border:1px solid #fecaca; border-radius:12px; font-size:11px; font-weight:800; color:#e11d48; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                        <i class="fas fa-trash-alt"></i> <span>ล้างข้อมูล</span>
+                    </button>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 2fr 1.2fr; gap:12px;">
+                    <button onclick="saveSettings()" style="background:#1e3a8a; color:#fff; height:55px; border-radius:20px; border:none; font-weight:800;">บันทึกข้อมูล</button>
+                    <button onclick="document.getElementById('config-area').style.display='none'" style="background:#f1f5f9; color:#64748b; height:55px; border-radius:20px; border:none; font-weight:800;">ซ่อน</button>
+                </div>
+            </div>
+
+            <div style="text-align:center; line-height: 1.4; margin-top: 15px;">
+                <div style="font-size:10px; color:#94a3b8; font-weight:600;">V.<span id="display-version">1.0.7</span></div>
+                <div style="font-size:9px; color:#cbd5e1;">Update: 22/02/2026</div>
+            </div>
         </div>
     </div>
-</div>
 </div>
     <div id="reportModal" class="modal">
     <div class="modal-content">
@@ -686,12 +700,7 @@ function openReportModal(title, htmlContent) {
         </div>
     </div>
 </div>
-    <nav>
-    <div onclick="go(1)" class="nav-item active"><i class="fas fa-edit"></i><span>บันทึก</span></div>
-    <div onclick="go(2)" class="nav-item"><i class="fas fa-history"></i><span>รายงาน</span></div>
-    <div onclick="go(3)" class="nav-item"><i class="fas fa-wallet"></i><span>บัญชี</span></div>
-    <div onclick="go(4)" class="nav-item"><i class="fas fa-book-open"></i><span>ทรงผม</span></div>
-</nav>
+    <nav></nav>
  <script>
  /* ==========================================================
    SECTION 1: INITIALIZATION & GLOBAL VARIABLES
@@ -727,51 +736,58 @@ document.addEventListener("DOMContentLoaded", () => {
     if ($("display-date")) $("display-date").innerText = LAST_UPDATED;
 });
 function go(p) {
-    // 1. ซ่อน/แสดงหน้า (โค้ดเดิมของช่างดีอยู่แล้วครับ)
+    // 1. จัดการการซ่อน/แสดงหน้า
     document.querySelectorAll('.page').forEach(pg => {
         pg.classList.remove('active');
         pg.style.display = 'none'; 
     });
     
-    const targetPage = document.getElementById('p' + p);
+    let targetId = (typeof p === 'number') ? 'p' + p : p;
+    const targetPage = document.getElementById(targetId);
+
     if (targetPage) {
         targetPage.classList.add('active');
         targetPage.style.display = 'block';
     }
-    // 2. จัดการเมนู Active
+
+    // 2. ถ้ากลับมาหน้า Dashboard (p0) ให้ดึงข้อมูลมาแสดงผลใหม่เสมอ
+    if (targetId === 'p0') {
+        updateDashboardStats();
+    }
+
+    // 3. จัดการเมนู Nav Bar และชื่อร้าน (เหมือนเดิม)
     document.querySelectorAll('.nav-item').forEach((btn, i) => {
         btn.classList.toggle('active', (i + 1) === p);
     });
-    // --- ✨ ส่วนที่เพิ่ม: โหลดชื่อร้านทุกครั้งที่สลับหน้า (ป้องกันชื่อหาย) ---
     const savedShopName = localStorage.getItem("shopName") || "BARBER SHOP";
     const shopTitleEl = document.querySelector('h2'); 
     if (shopTitleEl) shopTitleEl.innerText = savedShopName;
 
-    // 3. เงื่อนไขพิเศษ
-    const dateInpValue = $("dateInp")?.value || new Date().toISOString().split('T')[0];
+    // 4. เงื่อนไขพิเศษตามหน้าย่อย (p2, p3 ตามที่ช่างเคยมี)
+    const dateVal = document.getElementById("dateInp")?.value || new Date().toISOString().split('T')[0];
+    if (p === 2 || p === 'p-daily-report') { if (typeof renderDay === 'function') renderDay(dateVal); }
+    if (p === 3 || p === 'p-account') { if (typeof loadAccountStatus === 'function') loadAccountStatus(); }
 
-    if (p === 2) {
-        if (typeof renderDay === 'function') renderDay(dateInpValue);
-        if ($("displayDateThai")) {
-            const [y, m, d] = dateInpValue.split('-');
-            $("displayDateThai").innerText = `${d}/${m}/${parseInt(y) + 543}`;
-        }
-    }
-
-    if (p === 3) { 
-        // หน้าบัญชี: ให้เช็คก่อนว่าข้อมูลเปลี่ยนไหม ค่อยโหลด (ลดการกระตุก)
-        if ($("accDate") && $("dateInp")) {
-            $("accDate").value = $("dateInp").value;
-        }
-        if (typeof loadAccountStatus === 'function') {
-            // เรียกใช้ฟังก์ชันเดิม แต่ไม่ต้องรีเฟรชหน้าจอ
-            loadAccountStatus(); 
-        }
-    }
-    if (p === 4) {
-        console.log("เข้าสู่หน้าแคตตาล็อกทรงผม");
-    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ✨ ฟังก์ชันใหม่: ดึงข้อมูลเดิมจาก localStorage มาโชว์ที่หน้า Dashboard
+function updateDashboardStats() {
+    const today = document.getElementById("dateInp")?.value || new Date().toISOString().split('T')[0];
+    const rawData = localStorage.getItem("barberData") || "{}";
+    const data = JSON.parse(rawData);
+    const dayData = data[today] || [];
+
+    let cash = 0, trans = 0;
+    dayData.forEach(item => {
+        if (item.payType === 'cash') cash += parseFloat(item.price || 0);
+        if (item.payType === 'trans') trans += parseFloat(item.price || 0);
+    });
+
+    // นำตัวเลขไปแปะในหน้า Dashboard (ต้องมี ID ใน HTML)
+    if (document.getElementById("dash-cash")) document.getElementById("dash-cash").innerText = cash.toLocaleString();
+    if (document.getElementById("dash-trans")) document.getElementById("dash-trans").innerText = trans.toLocaleString();
+    if (document.getElementById("dash-total")) document.getElementById("dash-total").innerText = (cash + trans).toLocaleString();
 }
 function updateDateDisplay(v) {
     if (!v) return;
