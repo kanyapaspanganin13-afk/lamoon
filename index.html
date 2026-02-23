@@ -2705,22 +2705,52 @@ function showHairExpert(type) {
                 </a>
             </div>`;
     } 
-   // หัวข้อที่ 2: โครงหน้ากับทรงผม (อัปเดตลิงก์เป็น Hairsmith Clinic)
-    else if (type === 2) { 
+   // หัวข้อที่ 2: โครงหน้ากับทรงผม 
+   else if (type === 2) { 
         content = `
-            <div style="animation: fadeIn 0.4s ease;">
-                <h4 style="color:#1e3a8a; margin-bottom:10px; display:flex; align-items:center; gap:8px;">
-                    <i class="fas fa-user-check" style="color:#60a5fa;"></i> วิเคราะห์โครงหน้า 4 แบบ
+            <div style="animation: fadeIn 0.4s ease; line-height: 1.5; color: #1e293b;">
+                <h4 style="color:#1e3a8a; border-bottom:3px solid #3b82f6; padding-bottom:8px; margin-bottom:15px; text-align:center;">
+                    <i class="fas fa-user-tag"></i> วิเคราะห์รูปหน้าและทรงผม
                 </h4>
-                <p style="font-size:14px; color:#475569; line-height:1.5;">เจาะลึกเทคนิคการเลือกทรงผมสำหรับหน้ากลม, หน้าเหลี่ยม, หน้าตอบ และหน้ารูปไข่ จากเชี่ยวชาญโดยตรง</p>
                 
-                <a href="https://www.hairsmithclinic.com/haircare/how-to-choose-men-hairstyle-for-face-shape/" target="_blank" 
-                   style="display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; height:55px; background:linear-gradient(135deg, #0284c7, #0369a1); color:#fff; border-radius:15px; text-decoration:none; font-weight:700; margin-top:12px; box-shadow:0 4px 12px rgba(2,132,199,0.3);">
-                   <i class="fas fa-magic"></i> ดูวิธีเลือกทรงผมตามรูปหน้า
-                </a>
-                
-                <div style="margin-top:10px; font-size:12px; color:#94a3b8; text-align:center;">
-                    *ข้อมูลอ้างอิงจาก Hairsmith Clinic
+                <div style="background:#fff; border-radius:15px; padding:12px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #fee2e2;">
+                    <b style="color:#e11d48; font-size:16px;">🔴 หน้ากลม (Round)</b><br>
+                    <small style="color:#64748b;">ลักษณะ: แก้มเยอะ ความกว้างและยาวหน้าใกล้เคียงกัน</small>
+                    <div style="margin-top:8px; font-size:14px;">
+                        <span style="color:#059669;">✅ <b>ทรงที่ควรตัด:</b></span> Undercut, High Fade, Pompadour หรือ Quiff (เน้นปัดเสยหรือตั้งขึ้นเพื่อให้หน้าดูยาวมีมิติ) <br>
+                        <span style="color:#dc2626;">❌ <b>สิ่งที่ควรเลี่ยง:</b></span> ทรงหน้าม้าปิดหน้าผาก หรือทรงที่ไว้ยาวด้านข้างพองๆ เพราะจะทำให้หน้าดูบานกว่าเดิม
+                    </div>
+                </div>
+
+                <div style="background:#fff; border-radius:15px; padding:12px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #e0f2fe;">
+                    <b style="color:#0284c7; font-size:16px;">🟦 หน้าเหลี่ยม (Square)</b><br>
+                    <small style="color:#64748b;">ลักษณะ: กรามชัด หน้าผากกว้างดูแข็งแรง</small>
+                    <div style="margin-top:8px; font-size:14px;">
+                        <span style="color:#059669;">✅ <b>ทรงที่ควรตัด:</b></span> Buzz Cut, Crew Cut หรือ Side Part (การแสกข้างจะช่วยลดความเหลี่ยมของหน้า) <br>
+                        <span style="color:#dc2626;">❌ <b>สิ่งที่ควรเลี่ยง:</b></span> ทรงที่ตัดสั้นเกรียนแบบไร้มิติ หรือแสกกลาง เพราะจะเน้นกรามให้ดูชัดและแข็งเกินไป
+                    </div>
+                </div>
+
+                <div style="background:#fff; border-radius:15px; padding:12px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #fef3c7;">
+                    <b style="color:#d97706; font-size:16px;">📐 หน้ายาว (Oblong/Long)</b><br>
+                    <small style="color:#64748b;">ลักษณะ: หน้าแคบแต่ช่วงคางหรือหน้าผากยาว</small>
+                    <div style="margin-top:8px; font-size:14px;">
+                        <span style="color:#059669;">✅ <b>ทรงที่ควรตัด:</b></span> French Crop, Side Swept หรือทรงที่มีหน้าม้า (ช่วยปิดหน้าผากลดความยาวหน้า) <br>
+                        <span style="color:#dc2626;">❌ <b>สิ่งที่ควรเลี่ยง:</b></span> ทรงที่ไถข้างสูงมากและเซตด้านบนตั้งสูง (High Top) เพราะจะทำให้หน้าดูยาวผิดปกติ
+                    </div>
+                </div>
+
+                <div style="background:#fff; border-radius:15px; padding:12px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #dcfce7;">
+                    <b style="color:#16a34a; font-size:16px;">💎 หน้ารูปไข่ (Oval)</b><br>
+                    <small style="color:#64748b;">ลักษณะ: สมดุลที่สุด สัดส่วนรับกันทุกส่วน</small>
+                    <div style="margin-top:8px; font-size:14px;">
+                        <span style="color:#059669;">✅ <b>ทรงที่ควรตัด:</b></span> ตัดได้ทุกทรง! แนะนำ Ivy League หรือ Two Block (เน้นโชว์ใบหน้าที่สมดุล) <br>
+                        <span style="color:#dc2626;">❌ <b>สิ่งที่ควรเลี่ยง:</b></span> ระวังแค่การตัดหน้าม้าที่หนาเกินไปจนปิดบังใบหน้าที่ได้รูปอยู่แล้ว
+                    </div>
+                </div>
+
+                <div style="background:#f1f5f9; padding:10px; border-radius:12px; border:1px dashed #64748b; font-size:13px; text-align:center;">
+                    <b>💡 Barber Tip:</b> หากลูกค้ามี "โหนกแก้มสูง" ให้ช่างเลี่ยงการไถสั้นเกรียนเหนือใบหู เพื่อไม่ให้เน้นโหนกแก้มชัดเกินไปครับ
                 </div>
             </div>`;
     }
