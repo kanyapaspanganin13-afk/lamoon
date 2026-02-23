@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 09</title>
+    <title>Barber Note Pro 0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -391,13 +391,10 @@ body {
             <i class="fas fa-save" style="font-size: 32px;"></i>
             <span style="font-size: 28px; font-weight: 900; letter-spacing:1px;">บันทึกข้อมูล</span>
         </button>
-        <div style="margin-top: 20px; padding: 15px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border-top: 1px solid rgba(255,255,255,0.05);"> 
-    <button onclick="go('p0')" style="height: 50px; background: #334155; color: #cbd5e1; border-radius: 18px; border: none; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-        <i class="fas fa-chevron-left"></i> ย้อนกลับ
-    </button>
-    <button onclick="go('p2')" style="height: 50px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #ffffff; border-radius: 18px; border: none; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(29,78,216,0.3);">
-        ถัดไป <i class="fas fa-chevron-right"></i>
-    </button>
+    <div style="margin-top: auto; padding-bottom: 20px; padding-top: 20px;">
+        <button onclick="go('p0')" style="width: 100%; height: 55px; background: #fff; color: #64748b; border-radius: 20px; border: 1px solid #e2e8f0; font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+            <i class="fas fa-home"></i> กลับหน้าเมนูหลัก
+        </button>
     </div>
 </div>
 <div id="p2" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 15px; background: #0f172a; min-height: 100vh; flex-direction: column; box-sizing: border-box; color: white;">
@@ -434,13 +431,10 @@ body {
     <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:15px 0;">
     <div id="dailyList"></div>
 
-     <div style="margin-top: 20px; padding: 15px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border-top: 1px solid rgba(255,255,255,0.05);"> 
-    <button onclick="go('p1')" style="height: 50px; background: #334155; color: #cbd5e1; border-radius: 18px; border: none; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-        <i class="fas fa-chevron-left"></i> ย้อนกลับ
-    </button>
-    <button onclick="go('p3')" style="height: 50px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #ffffff; border-radius: 18px; border: none; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(29,78,216,0.3);">
-        ถัดไป <i class="fas fa-chevron-right"></i>
-    </button>
+    <div style="margin-top: auto; padding-bottom: 20px; padding-top: 20px;">
+        <button onclick="go('p0')" style="width: 100%; height: 55px; background: #fff; color: #64748b; border-radius: 20px; border: 1px solid #e2e8f0; font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+            <i class="fas fa-home"></i> กลับหน้าเมนูหลัก
+        </button>
     </div>
 <div id="reportModal" class="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(10px); z-index:10000; align-items:center; justify-content:center; padding:15px;">
     <div class="modal-content" style="background:#ffffff; width:95%; max-width:400px; border-radius:30px; padding: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); animation: slideUp 0.3s ease-out;"> 
@@ -512,13 +506,10 @@ body {
             </button>
         </div>
     </div> 
-   <div style="margin-top: 20px; padding: 15px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border-top: 1px solid rgba(255,255,255,0.05);"> 
-    <button onclick="go('p2')" style="height: 50px; background: #334155; color: #cbd5e1; border-radius: 18px; border: none; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-        <i class="fas fa-chevron-left"></i> ย้อนกลับ
-    </button>
-    <button onclick="go('p4')" style="height: 50px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #ffffff; border-radius: 18px; border: none; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(29,78,216,0.3);">
-        ถัดไป <i class="fas fa-chevron-right"></i>
-    </button>
+  <div style="margin-top: auto; padding-bottom: 20px; padding-top: 20px;">
+        <button onclick="go('p0')" style="width: 100%; height: 55px; background: #fff; color: #64748b; border-radius: 20px; border: 1px solid #e2e8f0; font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+            <i class="fas fa-home"></i> กลับหน้าเมนูหลัก
+        </button>
 </div>
 </div> <div id="historyModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; padding:20px;">
     <div class="modal-content" style="background:#fff; width:100%; max-width:400px; padding:20px; border-radius:25px;">
