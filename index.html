@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 12</title>
+    <title>Barber Note Pro 2</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -701,67 +701,65 @@ body {
 </div>
 <div id="p6" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 15px; background: #0f172a; min-height: 100vh; flex-direction: column; box-sizing: border-box; color: white;">
     
-    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px; padding: 10px 5px 0;">
-        <button onclick="go('p0')" style="background: rgba(255,255,255,0.1); border: none; color: white; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-            <i class="fas fa-chevron-left"></i>
-        </button>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; padding: 10px 5px 0;">
         <div style="text-align: left;">
-            <h3 style="margin: 0; font-size: 22px; color: #f8fafc; font-weight: 900;">⚙️ จัดการระบบ</h3>
-            <div style="font-size: 11px; color: #94a3b8; letter-spacing: 1px; font-weight: 600;">SYSTEM CONFIGURATION</div>
+            <h3 style="margin: 0; font-size: 24px; color: #f8fafc; font-weight: 900;">⚙️ จัดการระบบ</h3>
+            <div style="font-size: 12px; color: #94a3b8; letter-spacing: 1px; font-weight: 600;">SYSTEM CONFIGURATION</div>
         </div>
+        <i class="fas fa-sliders-h" style="color: #60a5fa; font-size: 22px;"></i>
     </div>
 
     <div style="background: #ffffff; border-radius: 35px; padding: 30px 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); flex-grow: 1; display: flex; flex-direction: column;">
         
-        <label style="color: #64748b; font-size: 12px; font-weight: 800; margin-bottom: 8px; margin-left: 5px;">ชื่อร้านค้า</label>
+        <label style="color: #64748b; font-size: 13px; font-weight: 800; margin-bottom: 8px; margin-left: 5px;">ชื่อร้านค้า</label>
         <input type="text" id="setShop" placeholder="ระบุชื่อร้าน" 
                style="width: 100%; height: 55px; border-radius: 18px; border: 1px solid #e2e8f0; background: #f8fafc; text-align: center; font-size: 18px; font-weight: 700; color: #1e3a8a; margin-bottom: 20px; outline: none; box-sizing: border-box;">
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:20px;">
             <div>
-                <label style="color: #64748b; font-size: 12px; font-weight: 800; display: block; text-align: center; margin-bottom: 8px;">% ส่วนแบ่งช่าง</label>
+                <label style="color: #64748b; font-size: 13px; font-weight: 800; display: block; text-align: center; margin-bottom: 8px;">% ส่วนแบ่งช่าง</label>
                 <input type="number" id="setPerc" placeholder="0" style="width:100%; height:55px; border-radius:18px; border:1px solid #e2e8f0; background:#f8fafc; text-align:center; font-size:18px; font-weight:700; color: #1e3a8a; outline:none; box-sizing: border-box;">
             </div>
             <div>
-                <label style="color: #64748b; font-size: 12px; font-weight: 800; display: block; text-align: center; margin-bottom: 8px;">เงินประกันรายวัน</label>
+                <label style="color: #64748b; font-size: 13px; font-weight: 800; display: block; text-align: center; margin-bottom: 8px;">เงินประกันรายวัน</label>
                 <input type="number" id="setGuar" placeholder="0" style="width:100%; height:55px; border-radius:18px; border:1px solid #e2e8f0; background:#f8fafc; text-align:center; font-size:18px; font-weight:700; color: #1e3a8a; outline:none; box-sizing: border-box;">
             </div>
         </div>
 
-        <label style="color: #64748b; font-size: 12px; font-weight: 800; margin-bottom: 8px; margin-left: 5px;">รูปแบบการแสดงผล</label>
-        <select id="setTheme" style="width:100%; height:55px; border-radius:18px; border:1px solid #e2e8f0; background:#f8fafc; text-align:center; font-size:16px; font-weight:700; color:#475569; outline:none; box-sizing: border-box; margin-bottom: 20px;">
+        <label style="color: #64748b; font-size: 13px; font-weight: 800; margin-bottom: 8px; margin-left: 5px;">รูปแบบการแสดงผล</label>
+        <select id="setTheme" style="width:100%; height:55px; border-radius:18px; border: 1px solid #e2e8f0; background:#f8fafc; text-align:center; font-size:16px; font-weight:700; color:#475569; outline:none; box-sizing: border-box; margin-bottom: 20px;">
             <option value="light">🌤 ธีมสว่าง (Light)</option>
             <option value="navy">🌌 ธีมน้ำเงิน (Navy)</option>
             <option value="dark">🌑 ธีมดำ-ทอง (Dark)</option>
         </select>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:25px;">
-            <div style="position: relative;">
-                <select id="setSound" style="width:100%; height:55px; border-radius:18px; border:1px solid #cbd5e1; background:#f8fafc; text-align:center; font-size:14px; font-weight:700; outline:none; appearance:none; padding-left: 30px; box-sizing: border-box;">
-                    <option value="on">เปิดเสียงระบบ</option>
-                    <option value="off">ปิดเสียงระบบ</option>
+            <div style="position: relative; display: flex; align-items: center;">
+                <select id="setSound" style="width:100%; height:55px; border-radius:18px; border:1px solid #cbd5e1; background:#f8fafc; text-align:left; padding-left: 45px; font-size:16px; font-weight:700; color:#475569; outline:none; appearance:none; box-sizing: border-box;">
+                    <option value="on">เปิดเสียง</option>
+                    <option value="off">ปิดเสียง</option>
                 </select>
-                <i class="fas fa-volume-up" style="position: absolute; left: 15px; top: 20px; color: #64748b; pointer-events: none;"></i>
+                <i class="fas fa-volume-up" style="position: absolute; left: 18px; color: #64748b; pointer-events: none; font-size: 18px;"></i>
             </div>
-            <div style="position: relative;">
-                <select id="setVoice" style="width:100%; height:55px; border-radius:18px; border:1px solid #cbd5e1; background:#f8fafc; text-align:center; font-size:14px; font-weight:700; outline:none; appearance:none; padding-left: 30px; box-sizing: border-box;">
-                    <option value="female">เสียงผู้หญิง</option>
-                    <option value="male">เสียงผู้ชาย</option>
+            <div style="position: relative; display: flex; align-items: center;">
+                <select id="setVoice" style="width:100%; height:55px; border-radius:18px; border:1px solid #cbd5e1; background:#f8fafc; text-align:left; padding-left: 45px; font-size:16px; font-weight:700; color:#475569; outline:none; appearance:none; box-sizing: border-box;">
+                    <option value="female">หญิง</option>
+                    <option value="male">ชาย</option>
                 </select>
-                <i class="fas fa-user-friends" style="position: absolute; left: 15px; top: 20px; color: #64748b; pointer-events: none;"></i>
+                <i class="fas fa-user-friends" style="position: absolute; left: 18px; color: #64748b; pointer-events: none; font-size: 18px;"></i>
             </div>
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:30px;">
-            <button onclick="exportBackup()" style="height:65px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:20px; font-size:11px; font-weight:800; color:#1e293b; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
-                <i class="fas fa-file-download" style="font-size:18px; color:#3b82f6;"></i><span>สำรองข้อมูล</span>
+            <button onclick="exportBackup()" style="height:65px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:20px; font-size:12px; font-weight:800; color:#1e293b; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
+                <i class="fas fa-file-download" style="font-size:20px; color:#3b82f6;"></i><span>สำรอง</span>
             </button>
             <input type="file" id="fileInput" style="display:none;" onchange="importBackup(this)">
-            <button onclick="document.getElementById('fileInput').click()" style="height:65px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:20px; font-size:11px; font-weight:800; color:#1e293b; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
-                <i class="fas fa-file-upload" style="font-size:18px; color:#10b981;"></i><span>คืนค่า</span>
+            <button onclick="document.getElementById('fileInput').click()" style="height:65px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:20px; font-size:12px; font-weight:800; color:#1e293b; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
+                <i class="fas fa-file-upload" style="font-size:20px; color:#10b981;"></i><span>คืนค่า</span>
             </button>
-            <button onclick="clearData()" style="height:65px; background:#fff1f2; border:1px solid #fecaca; border-radius:20px; font-size:11px; font-weight:800; color:#e11d48; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
-                <i class="fas fa-trash-alt" style="font-size:18px;"></i><span>ล้างข้อมูล</span>
+            <button onclick="clearData()" style="height:65px; background:#fff1f2; border:1px solid #fecaca; border-radius:20px; font-size:12px; font-weight:800; color:#e11d48; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
+                <i class="fas fa-trash-alt" style="font-size:20px;"></i><span>ล้างข้อมูล</span>
             </button>
         </div>
 
@@ -770,9 +768,14 @@ body {
         </button>
     </div>
 
-    <div style="text-align:center; padding: 20px 0;">
-        <div style="font-size:11px; color:#64748b; font-weight:700;">VERSION <span id="display-version">1.0.7</span></div>
-        <div style="font-size:10px; color:#475569; margin-top: 4px;">LAST UPDATE: 22/02/2026</div>
+    <div style="display: flex; justify-content: center; gap: 30px; padding: 25px 0;">
+        <button onclick="go('p1')" style="width: 55px; height: 55px; border-radius: 50%; border: none; background: #343d52; color: #ffffff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
+            <i class="fas fa-edit"></i>
+        </button>
+        
+        <button onclick="go('p0')" style="width: 55px; height: 55px; border-radius: 50%; border: none; background: #343d52; color: #ffffff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
+            <i class="fas fa-home"></i>
+        </button>
     </div>
 </div>
  <script>
