@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 22</title>
+    <title>Barber Note Pro 2</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -709,7 +709,7 @@ body {
         <i class="fas fa-sliders-h" style="color: #60a5fa; font-size: 22px;"></i>
     </div>
 
-    <div style="background: #ffffff; border-radius: 35px; padding: 30px 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); flex-grow: 1; display: flex; flex-direction: column;">
+    <div style="background: #ffffff; border-radius: 35px; padding: 30px 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); flex-grow: 1; display: flex; flex-direction: column; margin-bottom: 20px;">
         
         <label style="color: #64748b; font-size: 15px; font-weight: 800; margin-bottom: 8px; margin-left: 5px;">ชื่อร้านค้า</label>
         <input type="text" id="setShop" placeholder="ระบุชื่อร้าน" 
@@ -727,7 +727,7 @@ body {
         </div>
 
         <label style="color: #64748b; font-size: 15px; font-weight: 800; margin-bottom: 8px; margin-left: 5px;">รูปแบบการแสดงผล</label>
-        <select id="setTheme" style="width:100%; height:55px; border-radius:18px; border: 1px solid #e2e8f0; background:#f8fafc; text-align:center; font-size:16px; font-weight:700; color:#475569; outline:none; box-sizing: border-box; margin-bottom: 20px;">
+        <select id="setTheme" style="width:100%; height:55px; border-radius:18px; border: 1px solid #e2e8f0; background:#f8fafc; text-align:center; font-size:18px; font-weight:700; color:#475569; outline:none; box-sizing: border-box; margin-bottom: 20px;">
             <option value="light">🌤 ธีมสว่าง (Light)</option>
             <option value="navy">🌌 ธีมน้ำเงิน (Navy)</option>
             <option value="dark">🌑 ธีมดำ-ทอง (Dark)</option>
@@ -735,14 +735,14 @@ body {
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:25px;">
             <div style="position: relative; display: flex; align-items: center;">
-                <select id="setSound" style="width:100%; height:55px; border-radius:18px; border:1px solid #cbd5e1; background:#f8fafc; text-align:left; padding-left: 45px; font-size:16px; font-weight:700; color:#475569; outline:none; appearance:none; box-sizing: border-box;">
+                <select id="setSound" style="width:100%; height:55px; border-radius:18px; border:1px solid #cbd5e1; background:#f8fafc; text-align:left; padding-left: 50px; font-size:18px; font-weight:700; color:#475569; outline:none; appearance:none; box-sizing: border-box;">
                     <option value="on">เปิดเสียง</option>
                     <option value="off">ปิดเสียง</option>
                 </select>
                 <i class="fas fa-volume-up" style="position: absolute; left: 18px; color: #64748b; pointer-events: none; font-size: 18px;"></i>
             </div>
             <div style="position: relative; display: flex; align-items: center;">
-                <select id="setVoice" style="width:100%; height:55px; border-radius:18px; border:1px solid #cbd5e1; background:#f8fafc; text-align:left; padding-left: 45px; font-size:16px; font-weight:700; color:#475569; outline:none; appearance:none; box-sizing: border-box;">
+                <select id="setVoice" style="width:100%; height:55px; border-radius:18px; border:1px solid #cbd5e1; background:#f8fafc; text-align:left; padding-left: 50px; font-size:18px; font-weight:700; color:#475569; outline:none; appearance:none; box-sizing: border-box;">
                     <option value="female">หญิง</option>
                     <option value="male">ชาย</option>
                 </select>
@@ -751,29 +751,30 @@ body {
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:30px;">
-            <button onclick="exportBackup()" style="height:65px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:20px; font-size:12px; font-weight:800; color:#1e293b; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
+            <button onclick="exportBackup()" style="height:65px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:20px; font-size:13px; font-weight:800; color:#1e293b; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
                 <i class="fas fa-file-download" style="font-size:20px; color:#3b82f6;"></i><span>สำรอง</span>
             </button>
             <input type="file" id="fileInput" style="display:none;" onchange="importBackup(this)">
-            <button onclick="document.getElementById('fileInput').click()" style="height:65px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:20px; font-size:12px; font-weight:800; color:#1e293b; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
+            <button onclick="document.getElementById('fileInput').click()" style="height:65px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:20px; font-size:13px; font-weight:800; color:#1e293b; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
                 <i class="fas fa-file-upload" style="font-size:20px; color:#10b981;"></i><span>คืนค่า</span>
             </button>
-            <button onclick="clearData()" style="height:65px; background:#fff1f2; border:1px solid #fecaca; border-radius:20px; font-size:12px; font-weight:800; color:#e11d48; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
+            <button onclick="clearData()" style="height:65px; background:#fff1f2; border:1px solid #fecaca; border-radius:20px; font-size:13px; font-weight:800; color:#e11d48; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
                 <i class="fas fa-trash-alt" style="font-size:20px;"></i><span>ล้างข้อมูล</span>
             </button>
         </div>
 
-        <button onclick="saveSettings()" style="width: 100%; background: linear-gradient(135deg, #1e3a8a, #2563eb); color:#fff; height:70px; border-radius:25px; border:none; font-weight:800; font-size:20px; box-shadow: 0 10px 25px rgba(30,58,138,0.3); cursor:pointer; margin-top: auto;">
+        <button onclick="saveSettings()" style="width: 100%; background: linear-gradient(135deg, #059669, #10b981); color:#fff; height:75px; border-radius:25px; border:none; font-weight:900; font-size:22px; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3); cursor:pointer; margin-top: auto; transition: 0.3s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">
             <i class="fas fa-save" style="margin-right: 10px;"></i>บันทึกการตั้งค่า
         </button>
     </div>
 
-      <button onclick="go('p1')" style="width: 55px; height: 55px; border-radius: 50%; border: none; background: #343d52; color: #ffffff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px);">
+    <div style="display: flex; justify-content: center; gap: 60px; padding: 10px 0 30px;">
+        <button onclick="go('p1')" style="width: 60px; height: 60px; border-radius: 50%; border: none; background: #343d52; color: #ffffff; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px);">
             <i class="fas fa-edit"></i>
         </button>
         
-         <button onclick="go('p0')" style="width: 55px; height: 55px; border-radius: 50%; border: none; background: #343d52; color: #64748b; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s;">
-        <i class="fas fa-home"></i>
+        <button onclick="go('p0')" style="width: 60px; height: 60px; border-radius: 50%; border: none; background: #343d52; color: #f8fafc; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); transition: 0.3s;">
+            <i class="fas fa-home"></i>
         </button>
     </div>
 </div>
@@ -2532,21 +2533,23 @@ function openSettings() {
     }
 }
 function saveSettings() {
-    // 1. ดึงค่าจากฟอร์ม
+    // 1. ดึงค่าจาก Element IDs ที่เราตั้งไว้ในหน้า p6
     const settings = {
-        shop:  document.getElementById("setShop")?.value || "",
+        shop:  document.getElementById("setShop")?.value.trim() || "",
         perc:  parseFloat(document.getElementById("setPerc")?.value) || 0,
         guar:  parseFloat(document.getElementById("setGuar")?.value) || 0,
         theme: document.getElementById("setTheme")?.value || "light",
-        voice: document.getElementById("setVoice")?.value || "female", // ปรับเป็นค่าเพศเสียง
+        voice: document.getElementById("setVoice")?.value || "female",
         sound: document.getElementById("setSound")?.value || "on"
     };
 
-    // 2. อัปเดตตัวแปรกลาง (conf)
-    Object.assign(conf, settings);
+    // 2. อัปเดตตัวแปร Global Configuration (conf)
+    if (typeof conf !== 'undefined') {
+        Object.assign(conf, settings);
+    }
 
-    // 3. บันทึกลง LocalStorage
-    localStorage.setItem('barber_conf', JSON.stringify(conf));
+    // 3. จัดเก็บลง LocalStorage ทั้งแบบก้อนเดียวและแยก Key เพื่อความปลอดภัยของข้อมูล
+    localStorage.setItem('barber_conf', JSON.stringify(settings));
     localStorage.setItem('shopName',  settings.shop);
     localStorage.setItem('shopPerc',  settings.perc);
     localStorage.setItem('shopGuar',  settings.guar);
@@ -2554,29 +2557,32 @@ function saveSettings() {
     localStorage.setItem('shopVoice', settings.voice);
     localStorage.setItem('shopSound', settings.sound);
 
-    // 4. อัปเดตการแสดงผลทันที
+    // 4. อัปเดต UI ทันที (ชื่อร้าน)
     const nameDisp = document.getElementById("shopNameDisp") || document.getElementById("shopNameDisplay");
-    if (nameDisp) nameDisp.innerText = settings.shop.toUpperCase();
+    if (nameDisp) {
+        nameDisp.innerText = settings.shop.toUpperCase();
+    }
 
-    // 5. เรียกฟังก์ชัน UI อื่นๆ
+    // 5. รันฟังก์ชันระบบที่เกี่ยวข้อง
     if (typeof applyTheme === "function") applyTheme(settings.theme);
     if (typeof calculateMoney === "function") calculateMoney(); 
     if (typeof renderDay === "function") renderDay(); 
 
-    // 🟢 6. การแจ้งเตือนด้วยเสียง (แทนที่ Alert)
+    // 🟢 6. ระบบแจ้งเตือนด้วยเสียง (Voice Feedback)
     if (settings.sound === "on") {
-        const msg = "บันทึกการตั้งค่าเรียบร้อยแล้ว";
+        // เคลียร์คิวเสียงเก่าที่อาจค้างอยู่ก่อนหน้า
+        window.speechSynthesis.cancel();
+        
+        const msg = `บันทึกข้อมูลร้าน ${settings.shop} เรียบร้อยแล้วค่ะ`;
         const utterance = new SpeechSynthesisUtterance(msg);
         utterance.lang = 'th-TH';
-        // เลือกเสียง ชาย/หญิง ตามที่ตั้งค่าไว้
-        utterance.pitch = settings.voice === "male" ? 0.8 : 1.2; 
+        
+        // ปรับ Pitch ตามเพศที่เลือก: ชาย (0.8 - ทุ้ม) / หญิง (1.2 - แหลม)
+        utterance.pitch = settings.voice === "male" ? 0.8 : 1.2;
+        utterance.rate = 1.0; // ความเร็วปกติ
+        
         window.speechSynthesis.speak(utterance);
     }
-
-    // 7. เปลี่ยนหน้ากลับไปหน้าหลัก (แทนการปิด Modal)
-    setTimeout(() => {
-        go('p0');
-    }, 500); // หน่วงเวลาเล็กน้อยเพื่อให้เสียงพูดจบ
 }
 function handleSave(event) {
     // 1. ดึงค่าพื้นฐานและตรวจสอบความถูกต้อง
