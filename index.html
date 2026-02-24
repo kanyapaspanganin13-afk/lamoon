@@ -330,84 +330,84 @@ body {
 </div>
 <div id="p1" class="page" style="display: flex; padding: 12px; background: #f8fafc; min-height: 100vh; flex-direction: column; box-sizing: border-box;">
     
-    <div style="text-align: center; margin-bottom: 12px;">
-        <h2 id="shopNameDisp" style="margin: 0; color:#1e3a8a; font-weight:900; font-size: 24px; letter-spacing: 1px;">BARBER SHOP</h2>
-        <div style="height: 3px; width: 35px; background: #1e3a8a; margin: 4px auto; border-radius: 10px;"></div>
+    <div style="text-align: center; margin-bottom: 15px;">
+        <h2 id="shopNameDisp" style="margin: 0; color:#1e3a8a; font-weight:900; font-size: 26px; letter-spacing: 1px;">BARBER SHOP</h2>
+        <div style="height: 4px; width: 45px; background: #1e3a8a; margin: 5px auto; border-radius: 10px;"></div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px; margin-bottom: 8px;">
-        <div style="background:#fff; border-radius:15px; height:60px; position:relative; display:flex; align-items:center; justify-content:center; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-            <span id="dateDisplay" style="font-weight:900; color:#475569; font-size:16px;"><i class="fas fa-calendar-alt" style="margin-right:5px; color:#1e3a8a;"></i> วันที่</span>
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 6px; margin-bottom: 6px;">
+        <div style="background:#fff; border-radius:15px; height:70px; position:relative; display:flex; align-items:center; justify-content:center; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+            <span id="dateDisplay" style="font-weight:900; color:#1e3a8a; font-size:18px;"><i class="fas fa-calendar-alt"></i> วันที่</span>
             <input type="date" id="dateInp" onchange="if(window.updateDateDisplay) updateDateDisplay(this.value);" style="position:absolute; opacity:0; width:100%; height:100%; cursor:pointer; z-index:2;">
         </div>
-        <select id="custType" style="height:60px; border-radius:15px; border:none; font-weight:900; background:#fff; color:#1e293b; box-shadow:0 2px 8px rgba(0,0,0,0.05); padding:0 10px; font-size:16px; text-align:center;">
-            <option value="ทั่วไป">👤 ประจำ</option>
-            <option value="ใหม่">✨ ใหม่</option>
+        <select id="custType" style="height:70px; border-radius:15px; border:none; font-weight:900; background:#fff; color:#1e293b; box-shadow:0 2px 10px rgba(0,0,0,0.05); padding:0 10px; font-size:18px; text-align:center;">
+            <option value="ทั่วไป">👤 ลูกค้าประจำ</option>
+            <option value="ใหม่">✨ ลูกค้าใหม่</option>
         </select>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-        <div style="position: relative; display: flex; align-items: center; background: #fff; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 0 10px;">
-            <span style="font-weight: 900; color: #64748b; font-size: 14px; white-space: nowrap;">เริ่ม</span>
-            <input type="time" id="tStart" style="width: 100%; height:55px; border:none; text-align:center; font-weight:900; background:transparent; color:#1e293b; font-size:18px; outline: none;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px;">
+        <div style="display: flex; align-items: center; background: #fff; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 0 15px;">
+            <span style="font-weight: 900; color: #64748b; font-size: 16px;">เวลาเริ่ม</span>
+            <input type="time" id="tStart" style="width: 100%; height:65px; border:none; text-align:center; font-weight:900; background:transparent; color:#1e293b; font-size:22px; outline: none;">
         </div>
-        <div style="position: relative; display: flex; align-items: center; background: #fff; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 0 10px;">
-            <span style="font-weight: 900; color: #64748b; font-size: 14px; white-space: nowrap;">เสร็จ</span>
-            <input type="time" id="tEnd" style="width: 100%; height:55px; border:none; text-align:center; font-weight:900; background:transparent; color:#1e293b; font-size:18px; outline: none;">
+        <div style="display: flex; align-items: center; background: #fff; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 0 15px;">
+            <span style="font-weight: 900; color: #64748b; font-size: 16px;">เวลาเสร็จ</span>
+            <input type="time" id="tEnd" style="width: 100%; height:65px; border:none; text-align:center; font-weight:900; background:transparent; color:#1e293b; font-size:22px; outline: none;">
         </div>
     </div>
 
-    <div style="margin-bottom: 8px;">
-        <select id="hairStyle" style="width:100%; height:60px; border-radius:15px; border:none; font-weight:900; background:#fff; color:#1e293b; box-shadow:0 2px 8px rgba(0,0,0,0.05); padding:0 15px; font-size: 18px;">
+    <div style="margin-bottom: 6px;">
+        <select id="hairStyle" style="width:100%; height:75px; border-radius:15px; border:none; font-weight:900; background:#fff; color:#1e293b; box-shadow:0 2px 10px rgba(0,0,0,0.05); padding:0 20px; font-size: 22px;">
             <option value="">✂️ เลือกทรงผม</option>
             <option>แฟชั่น</option><option>สกินเฟด</option><option>เปิดข้าง</option><option>รองทรง</option>
             <option>ตำรวจ/ทหาร</option><option>ทรงนักเรียน</option><option>แก้ผม</option><option>โกนผม</option>
         </select>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-        <select id="extra1" style="height:55px; border-radius:15px; border:none; font-weight:900; background:#fff; color:#475569; box-shadow:0 2px 8px rgba(0,0,0,0.05); padding:0 8px; font-size: 15px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px;">
+        <select id="extra1" style="height:65px; border-radius:15px; border:none; font-weight:900; background:#fff; color:#475569; box-shadow:0 2px 10px rgba(0,0,0,0.05); padding:0 10px; font-size: 17px;">
             <option value="">➕ บริการ 1</option>
-           <option value="เด็ก"> เด็ก</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>ย้อมแฟชั่น</option>
-        </select>
-        <select id="extra2" style="height:55px; border-radius:15px; border:none; font-weight:900; background:#fff; color:#475569; box-shadow:0 2px 8px rgba(0,0,0,0.05); padding:0 8px; font-size: 15px;">
-            <option value="">➕ บริการ 2</option>
             <option value="เด็ก"> เด็ก</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>ย้อมแฟชั่น</option>
+        </select>
+        <select id="extra2" style="height:65px; border-radius:15px; border:none; font-weight:900; background:#fff; color:#475569; box-shadow:0 2px 10px rgba(0,0,0,0.05); padding:0 10px; font-size: 17px;">
+            <option value="">➕ บริการ 2</option>
+           <option value="เด็ก"> เด็ก</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>ย้อมแฟชั่น</option>
         </select>
     </div>
 
     <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px; margin-bottom: 15px;">
-        <div style="position: relative; background: #ffffff; border-radius: 18px; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.1); border: 2px solid #eef2ff;">
-            <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 22px; color: #6366f1; font-weight: 900;">฿</span>
-            <input type="number" id="priceInp" placeholder="0" inputmode="numeric" style="width: 100%; height: 75px; background: transparent; font-size: 42px; font-weight: 900; color: #1e293b; padding-left: 40px; border: none; outline: none;">
+        <div style="position: relative; background: #ffffff; border-radius: 20px; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15);">
+            <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 24px; color: #6366f1; font-weight: 900;">฿</span>
+            <input type="number" id="priceInp" placeholder="0" inputmode="numeric" style="width: 100%; height: 85px; background: transparent; font-size: 50px; font-weight: 900; color: #1e293b; padding-left: 45px; border: none; outline: none;">
         </div>
-        <input type="number" id="tipInp" placeholder="ทิป" inputmode="numeric" style="width: 100%; height: 79px; background: #fffbeb; border-radius: 18px; font-size: 32px; font-weight: 900; color: #ad2c18; border: none; outline: none; text-align: center;">
+        <input type="number" id="tipInp" placeholder="ทิป" inputmode="numeric" style="width: 100%; height: 85px; background: #fffbeb; border-radius: 20px; font-size: 36px; font-weight: 900; color: #ad2c18; border: none; outline: none; text-align: center;">
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px;">
-        <button id="btnCash" onclick="setPaymentType('Cash')" style="height:65px; border-radius:15px; border:none; background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-weight:900; font-size: 16px;">
-            <i class="fas fa-money-bill-wave"></i><br>สด
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 15px;">
+        <button id="btnCash" onclick="setPaymentType('Cash')" style="height:75px; border-radius:15px; border:none; background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-weight:900; font-size: 18px;">
+            เงินสด
         </button>
-        <button id="btnTrans" onclick="setPaymentType('Trans')" style="height:65px; border-radius:15px; border:none; background:linear-gradient(135deg, #6366f1, #4338ca); color:#fff; font-weight:900; font-size: 16px;">
-            <i class="fas fa-qrcode"></i><br>โอน
+        <button id="btnTrans" onclick="setPaymentType('Trans')" style="height:75px; border-radius:15px; border:none; background:linear-gradient(135deg, #6366f1, #4338ca); color:#fff; font-weight:900; font-size: 18px;">
+            โอน
         </button>
-        <button id="btnMix" onclick="setPaymentType('Mix')" style="height:65px; border-radius:15px; border:none; background:linear-gradient(135deg, #0ea5e9, #0284c7); color:#fff; font-weight:900; font-size: 16px;">
-            <i class="fas fa-wallet"></i><br>ผสม
+        <button id="btnMix" onclick="setPaymentType('Mix')" style="height:75px; border-radius:15px; border:none; background:linear-gradient(135deg, #0ea5e9, #0284c7); color:#fff; font-weight:900; font-size: 18px;">
+            ผสม
         </button>
     </div>
 
     <div style="margin-top: auto;">
-        <button class="btn-main" onclick="handleSave(event)" style="width:100%; height:75px; border-radius:20px; background: linear-gradient(135deg, #1e3a8a, #0f172a); color:#fff; border:none; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.15);">
-            <i class="fas fa-save" style="font-size: 22px;"></i>
-            <span style="font-size: 24px; font-weight: 900;">บันทึก</span>
+        <button class="btn-main" onclick="handleSave(event)" style="width:100%; height:85px; border-radius:25px; background: linear-gradient(135deg, #1e3a8a, #0f172a); color:#fff; border:none; display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">
+            <span style="font-size: 28px; font-weight: 900;">บันทึก</span>
         </button>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-bottom: 8px;"> 
-            <button onclick="go('p0')" style="height: 50px; background: #e2e8f0; color: #475569; border-radius: 12px; border: none; font-size: 20px; font-weight: 900; cursor: pointer;">
-                <i class="fas fa-chevron-left"></i>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 20px 10px 20px;"> 
+            <button onclick="go('p0')" style="background: none; border: none; color: #64748b; font-size: 35px; font-weight: 900; cursor: pointer; outline: none;">
+                <i class="fas fa-angle-double-left"></i>
             </button>
-            <button onclick="go('p2')" style="height: 50px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #ffffff; border-radius: 12px; border: none; font-size: 20px; font-weight: 900; cursor: pointer;">
-                <i class="fas fa-chevron-right"></i>
+            
+            <button onclick="go('p2')" style="background: none; border: none; color: #3b82f6; font-size: 35px; font-weight: 900; cursor: pointer; outline: none;">
+                <i class="fas fa-angle-double-right"></i>
             </button>
         </div>
     </div> 
