@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 0</title>
+    <title>Barber Note Pro 03</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -348,11 +348,11 @@ body {
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px;">
         <div style="display: flex; align-items: center; background: #fff; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 0 15px;">
-            <span style="font-weight: 900; color: #64748b; font-size: 16px;">เวลาเริ่ม</span>
+            <span style="font-weight: 900; color: #64748b; font-size: 18px;">เริ่ม</span>
             <input type="time" id="tStart" style="width: 100%; height:65px; border:none; text-align:center; font-weight:900; background:transparent; color:#1e293b; font-size:22px; outline: none;">
         </div>
         <div style="display: flex; align-items: center; background: #fff; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 0 15px;">
-            <span style="font-weight: 900; color: #64748b; font-size: 16px;">เวลาเสร็จ</span>
+            <span style="font-weight: 900; color: #64748b; font-size: 18px;">เสร็จ</span>
             <input type="time" id="tEnd" style="width: 100%; height:65px; border:none; text-align:center; font-weight:900; background:transparent; color:#1e293b; font-size:22px; outline: none;">
         </div>
     </div>
@@ -366,11 +366,11 @@ body {
     </div>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px;">
-        <select id="extra1" style="height:65px; border-radius:15px; border:none; font-weight:900; background:#fff; color:#475569; box-shadow:0 2px 10px rgba(0,0,0,0.05); padding:0 10px; font-size: 17px;">
+        <select id="extra1" style="height:65px; border-radius:15px; border:none; font-weight:900; background:#fff; color:#475569; box-shadow:0 2px 10px rgba(0,0,0,0.05); padding:0 10px; font-size: 20px;">
             <option value="">➕ บริการ 1</option>
             <option value="เด็ก"> เด็ก</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>ย้อมแฟชั่น</option>
         </select>
-        <select id="extra2" style="height:65px; border-radius:15px; border:none; font-weight:900; background:#fff; color:#475569; box-shadow:0 2px 10px rgba(0,0,0,0.05); padding:0 10px; font-size: 17px;">
+        <select id="extra2" style="height:65px; border-radius:15px; border:none; font-weight:900; background:#fff; color:#475569; box-shadow:0 2px 10px rgba(0,0,0,0.05); padding:0 10px; font-size: 20px;">
             <option value="">➕ บริการ 2</option>
            <option value="เด็ก"> เด็ก</option><option>โกนหนวด</option><option>กันหน้า</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>ย้อมแฟชั่น</option>
         </select>
@@ -384,34 +384,36 @@ body {
         <input type="number" id="tipInp" placeholder="ทิป" inputmode="numeric" style="width: 100%; height: 85px; background: #fffbeb; border-radius: 20px; font-size: 36px; font-weight: 900; color: #ad2c18; border: none; outline: none; text-align: center;">
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 15px;">
-        <button id="btnCash" onclick="setPaymentType('Cash')" style="height:75px; border-radius:15px; border:none; background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-weight:900; font-size: 18px;">
-            เงินสด
+   <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 15px;">
+        <button id="btnCash" onclick="setPaymentType('Cash')" style="height:75px; border-radius:15px; border:none; background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-weight:900; font-size: 16px; line-height: 1.2;">
+            <i class="fas fa-money-bill-wave" style="font-size: 20px;"></i><br>เงินสด
         </button>
-        <button id="btnTrans" onclick="setPaymentType('Trans')" style="height:75px; border-radius:15px; border:none; background:linear-gradient(135deg, #6366f1, #4338ca); color:#fff; font-weight:900; font-size: 18px;">
-            โอน
+        <button id="btnTrans" onclick="setPaymentType('Trans')" style="height:75px; border-radius:15px; border:none; background:linear-gradient(135deg, #6366f1, #4338ca); color:#fff; font-weight:900; font-size: 16px; line-height: 1.2;">
+            <i class="fas fa-qrcode" style="font-size: 20px;"></i><br>โอน
         </button>
-        <button id="btnMix" onclick="setPaymentType('Mix')" style="height:75px; border-radius:15px; border:none; background:linear-gradient(135deg, #0ea5e9, #0284c7); color:#fff; font-weight:900; font-size: 18px;">
-            ผสม
+        <button id="btnMix" onclick="setPaymentType('Mix')" style="height:75px; border-radius:15px; border:none; background:linear-gradient(135deg, #0ea5e9, #0284c7); color:#fff; font-weight:900; font-size: 16px; line-height: 1.2;">
+            <i class="fas fa-wallet" style="font-size: 20px;"></i><br>ผสม
         </button>
     </div>
 
     <div style="margin-top: auto;">
-        <button class="btn-main" onclick="handleSave(event)" style="width:100%; height:85px; border-radius:25px; background: linear-gradient(135deg, #1e3a8a, #0f172a); color:#fff; border:none; display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">
+        <button class="btn-main" onclick="handleSave(event)" style="width:100%; height:85px; border-radius:25px; background: linear-gradient(135deg, #1e3a8a, #0f172a); color:#fff; border:none; display:flex; align-items:center; justify-content:center; gap:15px; margin-bottom: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">
+            <i class="fas fa-save" style="font-size: 30px;"></i>
             <span style="font-size: 28px; font-weight: 900;">บันทึก</span>
         </button>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 20px 10px 20px;"> 
-            <button onclick="go('p0')" style="background: none; border: none; color: #64748b; font-size: 35px; font-weight: 900; cursor: pointer; outline: none;">
-                <i class="fas fa-angle-double-left"></i>
-            </button>
-            
-            <button onclick="go('p2')" style="background: none; border: none; color: #3b82f6; font-size: 35px; font-weight: 900; cursor: pointer; outline: none;">
-                <i class="fas fa-angle-double-right"></i>
-            </button>
+    
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;"> 
+    <button onclick="go('p0')" style="width: 55px; height: 55px; border-radius: 50%; border: none; background: #f1f5f9; color: #64748b; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s;">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    
+    <button onclick="go('p2')" style="width: 55px; height: 55px; border-radius: 50%; border: none; background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #ffffff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(29,78,216,0.3);">
+        <i class="fas fa-chevron-right"></i>
+    </button>
+            </div>
         </div>
-    </div> 
-</div>
+    </div>
+        
 <div id="p2" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 15px; background: #0f172a; min-height: 100vh; flex-direction: column; box-sizing: border-box; color: white;"> 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
         <div style="background: #1e3a8a; padding:18px 15px; border-radius:20px; text-align:center; box-shadow:0 10px 15px -3px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
