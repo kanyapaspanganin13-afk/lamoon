@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 04</title>
+    <title>Barber Note Pro 4</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -171,113 +171,142 @@ function openReportModal(title, htmlContent) {
 </script>
 </head>
 <style>
-/* 1. ตัวแปรหลัก (คงเดิม) */
+/* 1. ตัวแปรหลักและระบบธีม (รองรับหลายโหมด) */
 :root { 
     --primary: #6366f1; --accent: #0ea5e9; --danger: #ef4444; --success: #22c55e; 
     --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --border: #e2e8f0;
 }
 
-/* 2. ระบบธีม (คงเดิม) */
-body.navy { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --accent: #38bdf8; }
-body.dark { --bg: #121212; --card: #1a1a1a; --text: #fbbf24; --accent: #fbbf24; }
+/* ระบบธีม Navy/Dark - ปรับสีพื้นหลังและข้อความให้เข้ากับไอคอนสีสว่าง */
+body.navy { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --accent: #38bdf8; --border: #334155; }
+body.dark { --bg: #121212; --card: #1a1a1a; --text: #fbbf24; --accent: #fbbf24; --border: #2e2e2e; }
 
-/* 3. รีเซ็ตพื้นฐาน */
-* { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
+/* 2. รีเซ็ตพื้นฐาน */
+* { 
+    box-sizing: border-box; 
+    font-family: 'Kanit', sans-serif; 
+    -webkit-tap-highlight-color: transparent; 
+    touch-action: manipulation; /* ป้องกันการซูมเวลาจิ้มรัวๆ */
+}
 
 body { 
     margin: 0; 
     background: var(--bg); 
     color: var(--text); 
-    /* 🔴 แก้ไข: ลด padding ด้านล่างออกเพราะไม่มีเมนูบาร์แล้ว */
     padding-bottom: 20px; 
     overflow-x: hidden; 
-    transition: all 0.3s ease; 
+    transition: background 0.3s ease; 
 }
 
-/* 4. ระบบเลย์เอาต์ */
+/* 3. ระบบเลย์เอาต์หน้า (Page System) */
 .container { 
     padding: 10px; 
     max-width: 500px; 
     margin: auto; 
-    position: relative; 
 }
+
 .page { 
     display: none; 
     background: var(--bg); 
     border-radius: 25px;
     padding: 20px;
-    /* 🔴 แก้ไข: ปรับ margin ด้านล่างให้สั้นลง */
-    margin: 10px 5px 20px 5px; 
+    margin: 10px 5px; 
     border: 1px solid var(--border);
-    /* 🔴 แก้ไข: คืนพื้นที่ความสูงหน้าจอให้เต็มที่ */
     min-height: calc(100vh - 40px); 
     box-sizing: border-box;
     overflow-y: auto;
 }
-.page.active { 
-    display: block !important; 
-    animation: fadeIn 0.3s ease-in-out;
-}
-/* 🟢 ส่วนที่เพิ่ม: สไตล์ปุ่มย้อนกลับ (Back Button) */
-.back-nav {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    cursor: pointer;
-    color: var(--primary);
-    padding: 10px;
-    border-radius: 15px;
-    background: rgba(99, 102, 241, 0.05); /* พื้นหลังจางๆ ให้ดูแพง */
-    transition: 0.2s;
-}
-.back-nav:active { transform: translateX(-5px); }
-.back-nav b { font-size: 18px; }
 
-/* 5. ระบบเมนู Dashboard (หน้าแรก p0) */
+.page.active { 
+    display: flex !important; /* ใช้ Flex เพื่อจัดตำแหน่งภายในหน้าได้ง่ายขึ้น */
+    flex-direction: column;
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* 4. 🔵 ปุ่มจ่ายเงินหลัก (ล็อคขนาดนิ่งสนิท) */
+.btn-pay { 
+    height: 80px; /* เพิ่มความสูงนิดหน่อยให้กดถนัด */
+    width: 100%; 
+    border-radius: 20px;
+    border: 3px solid transparent;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s, border 0.2s, background 0.2s;
+    
+    /* 🔒 ล็อคขนาด */
+    transform: none !important;
+    flex-shrink: 0; /* ป้องกันปุ่มโดนบีบ */
+}
+
+/* สีพื้นฐานของปุ่มชำระเงิน */
+#btnCash { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+#btnTrans { background: linear-gradient(135deg, #6366f1, #4338ca); color: white; }
+#btnMix   { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; }
+
+/* 🔒 ล็อคไอคอนข้างในปุ่ม */
+.btn-pay i {
+    font-size: 26px;
+    margin-bottom: 5px;
+    transform: none !important;
+    display: inline-block;
+}
+
+/* 🟢 สถานะเมื่อเลือก (Active) */
+.btn-pay.active-cash, 
+.btn-pay.active-trans, 
+.btn-pay.active-mix {
+    border: 3px solid #ffffff !important;
+    box-shadow: 0 0 20px rgba(255,255,255,0.2);
+    opacity: 1 !important;
+    transform: scale(1) !important;
+}
+
+/* ⚪ สถานะปุ่มที่ไม่ถูกเลือก */
+.btn-pay.is-inactive {
+    opacity: 0.35;
+    filter: grayscale(0.4);
+    transform: none !important;
+}
+
+/* 5. ระบบ Dashboard (p0) */
 .menu-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     margin-top: 15px;
 }
+
 .menu-item {
     background: var(--card);
-    border-radius: 20px;
+    border-radius: 22px;
     padding: 25px 10px;
     text-align: center;
     border: 1px solid var(--border);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    cursor: pointer;
-    transition: 0.2s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    transition: 0.2s;
 }
-.menu-item:active { transform: scale(0.95); background: var(--border); }
-.menu-item i { font-size: 32px; }
-.menu-item span { font-size: 14px; font-weight: 700; color: var(--text); }
 
-/* ตกแต่งสีไอคอนให้เด่นบนพื้นหลัง Navy */
-.icon-save   { color: #34d399 !important; } /* สีเขียวมิ้นท์สว่าง (บันทึกงาน) */
-.icon-report { color: #fbbf24 !important; } /* สีเหลืองทอง (รายงาน) */
-.icon-acc    { color: #60a5fa !important; } /* สีฟ้าสว่าง (บัญชี) */
-.icon-stats  { color: #f472b6 !important; } /* สีชมพูสว่าง (สถิติ) */
-.icon-know   { color: #a78bfa !important; } /* สีม่วงลาเวนเดอร์ (ความรู้/เทรนด์) */
-.icon-set    { color: #cbd5e1 !important; } /* สีเทาขาว (ตั้งค่า) */
+/* การตอบสนองเวลาจิ้ม (Feedback) */
+.menu-item:active { transform: scale(0.96); background: var(--border); }
 
-/* เพิ่มเอฟเฟกต์ให้ไอคอนดูมีพลัง (Shadow) */
-.menu-card i {
-    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.1));
-    transition: transform 0.2s ease;
-}
-/* เวลาช่างจิ้ม ให้ไอคอนขยับนิดนึงดูมีชีวิตชีวา */
-.menu-card:active i {
-    transform: scale(1.1);
-}
+/* สีไอคอน Dashboard ตามที่คุณต้องการ */
+.icon-save   { color: #34d399 !important; filter: drop-shadow(0 0 5px rgba(52,211,153,0.3)); } 
+.icon-report { color: #fbbf24 !important; filter: drop-shadow(0 0 5px rgba(251,191,36,0.3)); }
+.icon-acc    { color: #60a5fa !important; filter: drop-shadow(0 0 5px rgba(96,165,250,0.3)); }
+.icon-stats  { color: #f472b6 !important; filter: drop-shadow(0 0 5px rgba(244,114,182,0.3)); }
+.icon-know   { color: #a78bfa !important; filter: drop-shadow(0 0 5px rgba(167,139,250,0.3)); }
+.icon-set    { color: #cbd5e1 !important; }
+
+/* 6. แอนิเมชั่น */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
 }   
 </style>
