@@ -1434,13 +1434,19 @@ function renderDay(selectedDate){
             allRec = archivedDay.details;
         }
     }
-    const isHoliday = allRec.some(r => r.type && r.type.toUpperCase() === 'HOLIDAY');
+
     const stats = {};
     const extraSvcs = ["โกนหนวด", "กันหน้า", "สระผม"];
     let tot = 0, trans = 0, cash = 0, tips = 0;
     let listHtml = "";
     let realCustomerCount = 0;
-    // --- ส่วนการประมวลผลข้อมูล ---
+    
+    // ✅ 1. เพิ่มตัวแปรนับแยกประเภทลูกค้า
+    let regCust = 0; // ลูกค้าประจำ
+    let newCust = 0; // ลูกค้าใหม่
+
+    const isHoliday = allRec.some(r => r.type && r.type.toUpperCase() === 'HOLIDAY');
+
     allRec
     .slice()
     .sort((a,b) => a.time.localeCompare(b.time))
@@ -1449,102 +1455,82 @@ function renderDay(selectedDate){
         const t = parseFloat(r.tip) || 0;
         const rType = r.type ? String(r.type).toUpperCase().trim() : '';
         const currentSvcs = Array.isArray(r.svcs) ? r.svcs : [];
- // ✅ 1. คำนวณยอดรวมพื้นฐาน (แก้ไขใหม่ให้รองรับการดึงค่าจาก DB)
+
+        // คำนวณยอดเงิน (คงเดิมตาม Logic ของคุณ)
         tot += p;
         tips += t;
         if (r.pay === 'Mix') {
-            // ดึงยอดที่บันทึกมาใช้โดยตรง
             const pCash = parseFloat(r.payCash) || 0;
             const pTrans = parseFloat(r.payTrans) || 0; 
             trans += pTrans;
-            // cash ในที่นี้คือเงินสดที่ร้านต้องได้รับ (หักทิปที่ช่างเอาไปแล้ว)
-            // ถ้า r.payCash รวมทิปมาด้วย ให้ใช้ pCash - t
             cash += (pCash - t); 
         } else if (r.pay === 'Trans' || r.pay === 'โอน') {
-            // ถ้าจ่ายโอนทั้งหมด: ยอดราคา + ทิป จะเข้าส่วน trans
             trans += (p + t);
         } else {
-            // ถ้าจ่ายเงินสดทั้งหมด (Cash): ยอดราคาเข้า cash ของร้าน (ทิปอยู่ที่ช่างแล้วไม่ต้องบวก)
             cash += p;
         }
-      // 🚨 2. เงื่อนไขการนับลูกค้า (แบบแก้ไข)
-    if (rType === 'HOLIDAY' || rType === 'GUARANTEE' || p === 0) {
-        // ข้ามการนับ (วันหยุด/การันตี/ยอดเป็น 0)
-    } else {
-    // 🟢 แก้ไข: นับลูกค้า 1 คนเสมอถ้ามีการใช้บริการ (ไม่ว่าจะตัดผมหรือบริการเสริม)
-    if (currentSvcs.length > 0) {
-        realCustomerCount++; 
-    }
-    // ส่วนการเก็บสถิติแยกประเภท (คงไว้เหมือนเดิมเพื่อดูว่าใครตัดผมบ้าง)
-    const cleanExtras = extraSvcs.map(s => s.trim().toLowerCase());
-    const hasRealHaircut = currentSvcs.some(s => {
-        if (!s) return false;
-        const cleanS = s.trim().toLowerCase();
-        return !cleanExtras.includes(cleanS);
-    });
-    if (hasRealHaircut) {
-        stats["ตัดผม"] = (stats["ตัดผม"] || 0) + 1;
-    }
-    // นับจำนวนครั้งของแต่ละบริการ
-    currentSvcs.forEach(s => {
-        if (s) stats[s] = (stats[s] || 0) + 1;
-    });
-}
-        // ✅ 3. ส่วนสร้าง HTML (ปรับให้โชว์ไอคอน Mix)
+
+        // ✅ 2. แก้ไข Logic การนับลูกค้าใหม่/ประจำ
+        if (rType !== 'HOLIDAY' && rType !== 'GUARANTEE' && p > 0) {
+            if (currentSvcs.length > 0) {
+                realCustomerCount++;
+                
+                // เช็คจากค่าที่บันทึกไว้ใน r.custType (ถ้าเป็น "ใหม่" ให้นับใหม่ นอกนั้นนับประจำ)
+                if (r.custType === "ใหม่") {
+                    newCust++;
+                } else {
+                    regCust++;
+                }
+            }
+
+            // สถิติบริการ (คงเดิม)
+            const cleanExtras = extraSvcs.map(s => s.trim().toLowerCase());
+            const hasRealHaircut = currentSvcs.some(s => {
+                if (!s) return false;
+                const cleanS = s.trim().toLowerCase();
+                return !cleanExtras.includes(cleanS);
+            });
+            if (hasRealHaircut) stats["ตัดผม"] = (stats["ตัดผม"] || 0) + 1;
+            currentSvcs.forEach(s => { if (s) stats[s] = (stats[s] || 0) + 1; });
+        }
+
+        // ส่วนสร้าง HTML รายการ (คงเดิม)
         const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
-        
         let payIcon = r.pay === 'Trans' ? '📱' : '💵';
-        let mixText = "";
-        if (r.pay === 'Mix') {
-            payIcon = '🌓'; // ไอคอนสำหรับจ่ายผสม
-            mixText = `<br><small style="color:#64748b; font-size:10px; font-weight:normal;">(สด:${r.payCash}/โอน:${r.payTrans})</small>`;
-        } 
+        let mixText = r.pay === 'Mix' ? `<br><small style="color:#64748b; font-size:10px;">(สด:${r.payCash}/โอน:${r.payTrans})</small>` : "";
+        
         listHtml += `
         <div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div style="display:flex; align-items:center; gap:12px;">
-                    <div style="width:28px; height:28px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#64748b; flex-shrink:0;">
-                        ${i+1}
-                    </div>
+                    <div style="width:28px; height:28px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#64748b;">${i+1}</div>
                     <div style="display:flex; flex-direction:column;">
-                        <div style="font-weight:800; font-size:14px; color:#1e293b; margin-bottom:2px;">
+                        <div style="font-weight:800; font-size:14px; color:#1e293b;">
                             <span style="color:#64748b; font-weight:500;">[${timeShow}]</span> ${currentSvcs.join(' + ')}
+                            ${r.custType === "ใหม่" ? ' <span style="color:#0ea5e9; font-size:10px;">✨ใหม่</span>' : ''}
                         </div>
-                        <div style="display:flex; gap:8px; align-items:center;">
-                            ${t ? `<small style="color:#be185d; font-weight:700; font-size:11px;">🔹 ทิป: ฿${t}</small>` : '<small style="color:#94a3b8; font-size:11px;">(ไม่มีทิป)</small>'}
+                        <div style="display:flex; gap:8px;">
+                            ${t ? `<small style="color:#be185d; font-weight:700;">🔹 ทิป: ฿${t}</small>` : '<small style="color:#94a3b8;">(ไม่มีทิป)</small>'}
                         </div>
                     </div>
                 </div>
                 <div style="text-align:right;">
-                    <b style="font-size:16px; display:block; color:#1e293b; line-height:1.2;">
-                        <span style="font-size:14px;">${payIcon}</span> ฿${p}${t ? ` <span style="color:#be185d;">(+${t})</span>` : ''}
-                        ${mixText}
-                    </b>
-                    <span style="font-size:11px; font-weight:700; color:#ef4444; cursor:pointer;" onclick="delRec(${r.id})">ลบ</span>
+                    <b style="font-size:16px; color:#1e293b;">${payIcon} ฿${p}${t ? ` <span style="color:#be185d;">(+${t})</span>` : ''}${mixText}</b>
+                    <span style="font-size:11px; font-weight:700; color:#ef4444; cursor:pointer; display:block;" onclick="delRec(${r.id})">ลบ</span>
                 </div>
             </div>
         </div>`;
     });
 
-    const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc / 100), conf.guar) + tips;
-    const sEarn = isHoliday ? 0 : tot - (bEarn - tips);
-    const settle = isHoliday ? 0 : cash - bEarn;
-
-    if ($("dTotal")) $("dTotal").innerText = tot.toLocaleString();
-    if ($("dTrans")) $("dTrans").innerText = trans.toLocaleString();
-    if ($("dCash")) $("dCash").innerText = cash.toLocaleString();
-    if ($("dBarber")) $("dBarber").innerText = Math.floor(bEarn).toLocaleString();
-    if ($("dShop")) $("dShop").innerText = Math.floor(sEarn).toLocaleString();
-
+    // ✅ 3. ปรับการแสดงผลจำนวนลูกค้าที่ "dCounts"
     if ($("dCounts")) {
         if (isHoliday) {
             $("dCounts").innerText = "🏖️ วันหยุด";
         } else if (realCustomerCount === 0 && allRec.length > 0) {
             $("dCounts").innerText = "🛡️ ประกันรายได้";
-        } else if (allRec.length === 0 && allRec.length > 0) {
-            $("dCounts").innerText = "ไม่มีข้อมูล";
         } else {
-            $("dCounts").innerText = `ลูกค้า: ${realCustomerCount} คน`;
+            // โชว์แยก ประจำ/ใหม่
+            $("dCounts").innerHTML = `ประจำ: <span style="color:#1e3a8a;">${regCust}</span> | ใหม่: <span style="color:#0ea5e9;">${newCust}</span> | รวม: ${realCustomerCount}`;
         }
     }
 
@@ -2597,13 +2583,17 @@ function handleSave(event) {
     } else {
         payMethod === 'Cash' ? cashAmt = price + tip : transAmt = price + tip;
     }
-    // 4. สร้างอ็อบเจกต์บันทึกข้อมูล (Record Object)
+   // 4. สร้างอ็อบเจกต์บันทึกข้อมูล (Record Object)
     const rec = {
         id: Date.now(), 
         date: dateVal, 
         time: startTime, 
         endTime: endTime || (typeof addMinutes === 'function' ? addMinutes(startTime, 30) : startTime),
         svcs: [$("hairStyle")?.value, $("extra1")?.value, $("extra2")?.value].filter(Boolean),
+        
+        // ✅ เพิ่มบรรทัดนี้เพื่อให้ renderDay ดึงไปนับ "ใหม่/ประจำ" ได้
+        custType: $("custType")?.value || "ทั่วไป", 
+        
         price: price, 
         tip: tip, 
         pay: payMethod, 
