@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 09</title>
+    <title>Barber Note Pro 0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -201,7 +201,6 @@ body {
     margin: auto; 
     position: relative; 
 }
-
 .page { 
     display: none; 
     background: var(--bg); 
@@ -215,12 +214,10 @@ body {
     box-sizing: border-box;
     overflow-y: auto;
 }
-
 .page.active { 
     display: block !important; 
     animation: fadeIn 0.3s ease-in-out;
 }
-
 /* 🟢 ส่วนที่เพิ่ม: สไตล์ปุ่มย้อนกลับ (Back Button) */
 .back-nav {
     display: flex;
@@ -244,7 +241,6 @@ body {
     gap: 12px;
     margin-top: 15px;
 }
-
 .menu-item {
     background: var(--card);
     border-radius: 20px;
@@ -259,7 +255,6 @@ body {
     align-items: center;
     gap: 10px;
 }
-
 .menu-item:active { transform: scale(0.95); background: var(--border); }
 .menu-item i { font-size: 32px; }
 .menu-item span { font-size: 14px; font-weight: 700; color: var(--text); }
@@ -277,7 +272,6 @@ body {
     filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.1));
     transition: transform 0.2s ease;
 }
-
 /* เวลาช่างจิ้ม ให้ไอคอนขยับนิดนึงดูมีชีวิตชีวา */
 .menu-card:active i {
     transform: scale(1.1);
@@ -317,12 +311,12 @@ body {
             <div style="font-weight: 800; color: #ffffff; font-size: 15px;">สถานะบัญชี</div>
         </div>
 
-        <div onclick="go('p5')" style="background: #4c1d95; padding: 25px 15px; border-radius: 25px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+        <div onclick="go('p4')" style="background: #4c1d95; padding: 25px 15px; border-radius: 25px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
             <i class="fas fa-chart-pie" style="font-size: 28px; color: #c084fc; margin-bottom: 12px;"></i>
             <div style="font-weight: 800; color: #ffffff; font-size: 15px;">สรุป & สถิติ</div>
         </div>
 
-        <div onclick="go('p4')" style="background: #334155; padding: 25px 15px; border-radius: 25px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+        <div onclick="go('p5')" style="background: #334155; padding: 25px 15px; border-radius: 25px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
             <i class="fas fa-cut" style="font-size: 28px; color: #94a3b8; margin-bottom: 12px;"></i>
             <div style="font-weight: 800; color: #ffffff; font-size: 15px;">เทรนด์ทรงผม</div>
         </div>
@@ -339,7 +333,6 @@ body {
         <h2 id="shopNameDisp" style="margin: 0; color:#1e3a8a; font-weight:900; font-size: 22px; letter-spacing: 1px; text-transform: uppercase;">BARBER SHOP</h2>
         <div style="height: 3px; width: 40px; background: #1e3a8a; margin: 8px auto; border-radius: 10px;"></div>
     </div>
-
     <div class="grid-3" style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap:12px; margin-bottom: 20px;">
         <div style="background:#fff; border-radius:20px; height:75px; position:relative; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
             <span id="dateDisplay" style="font-weight:800; color:#475569; font-size:16px;">📅 วันที่</span>
@@ -400,8 +393,7 @@ body {
             </button>
         </div>
     </div> 
-<div id="p2" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 15px; background: #0f172a; min-height: 100vh; flex-direction: column; box-sizing: border-box; color: white;">
-    
+<div id="p2" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 15px; background: #0f172a; min-height: 100vh; flex-direction: column; box-sizing: border-box; color: white;"> 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
         <div style="background: #1e3a8a; padding:18px 15px; border-radius:20px; text-align:center; box-shadow:0 10px 15px -3px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
             <small style="font-weight:800; color:#cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px;">ยอดรวมวันนี้</small>
@@ -525,7 +517,7 @@ body {
         <div id="accHistory" style="max-height:400px; overflow-y:auto;"></div>
     </div>
 </div>
-<div id="p5" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 15px; background: #0f172a; min-height: 100vh; flex-direction: column; box-sizing: border-box;">
+<div id="p4" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 15px; background: #0f172a; min-height: 100vh; flex-direction: column; box-sizing: border-box;">
     
     <div style="text-align: center; margin-bottom: 25px; padding-top: 10px;">
         <h3 style="margin: 0; font-size: 24px; color: #f8fafc; font-weight: 900;">📈 สรุปรายงาน & สถิติ</h3>
@@ -555,7 +547,7 @@ body {
         </button>
     </div>
 </div>
-<div id="p4" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 15px; background: #0f172a; min-height: 100vh; flex-direction: column; box-sizing: border-box;">
+<div id="p5" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 15px; background: #0f172a; min-height: 100vh; flex-direction: column; box-sizing: border-box;">
     
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; gap: 10px; padding-top: 10px;">
         <div style="text-align: left;">
@@ -1801,24 +1793,21 @@ function closeHistoryModal() {
     if (modal) modal.style.display = "none"; 
 }
 function closeReportModal() {
-    // ใช้ getElementById เพื่อความแน่นอนครับ ถ้าช่างไม่ได้ประกาศฟังก์ชัน $ ไว้
-    const modal = document.getElementById("reportModal"); 
-    
-    if (modal) {
-        modal.style.display = "none";
-        document.body.style.overflow = "auto"; // คืนค่าการเลื่อนหน้าจอ
-    }
-    // หน่วงเวลาเล็กน้อยเพื่อความนุ่มนวล
-    setTimeout(() => {
-        // ตรวจสอบว่ามีฟังก์ชัน go หรือไม่
-        if (typeof go === 'function') {
-            console.log("ปิดหน้ารายงานเรียบร้อย");
-            // ถ้าช่างต้องการให้ปิดแล้วอยู่ที่หน้าเดิม ไม่ต้องสั่ง go(2) ก็ได้ครับ
-            // แต่ถ้าตั้งใจให้ไปหน้าดูรายงานย้อนหลัง (p2) ก็คงค่านี้ไว้ครับ
-            // go(2); 
-        }
-    }, 100); 
-} // ปิดฟังก์ชันแค่ตรงนี้พอครับช่าง (ปีกกาอันที่เกินออกไปแล้ว)
+    const modal = $("reportModal"); 
+    
+    if (modal) {
+        modal.style.display = "none";
+        document.body.style.overflow = "auto";
+    }
+
+    // หน่วงเวลาเล็กน้อยเพื่อให้ UI คืนค่าได้สมบูรณ์
+    setTimeout(() => {
+        if (typeof go === 'function') {
+            console.log("กำลังกลับไปหน้าบันทึก...");
+            go(2); 
+        }
+    }, 100); 
+}
 function closeAndGoHome() {
     const m = $("modalSet");
     if (m) m.style.display = 'none';
