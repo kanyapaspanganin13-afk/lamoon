@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 2</title>
+    <title>Barber Note Pro 42</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -762,22 +762,11 @@ body {
                 <i class="fas fa-trash-alt" style="font-size:20px;"></i><span>ล้างข้อมูล</span>
             </button>
         </div>
-
-        <button onclick="saveSettings()" style="width: 100%; background: linear-gradient(135deg, #059669, #10b981); color:#fff; height:75px; border-radius:25px; border:none; font-weight:900; font-size:22px; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3); cursor:pointer; margin-top: auto; transition: 0.3s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">
-            <i class="fas fa-save" style="margin-right: 10px;"></i>บันทึกการตั้งค่า
+            <button id="saveBtn" onclick="saveSettings()" style="width: 100%; background: linear-gradient(135deg, #1e3a8a, #2563eb); color:#fff; height:75px; border-radius:25px; border:none; font-weight:900; font-size:22px; box-shadow: 0 10px 25px rgba(30,58,138,0.3); cursor:pointer; margin-top: auto; display:flex; align-items:center; justify-content:center; gap:12px; transition: 0.3s;" onmousedown="this.style.background='linear-gradient(135deg, #059669, #10b981)'; this.style.transform='scale(0.95)';" onmouseup="this.style.background='linear-gradient(135deg, #1e3a8a, #2563eb)'; this.style.transform='scale(1)';" onmouseleave="this.style.background='linear-gradient(135deg, #1e3a8a, #2563eb)'; this.style.transform='scale(1)';">
+                <i class="fas fa-save" style="font-size: 24px;"></i><span>บันทึกการตั้งค่า</span>
         </button>
     </div>
-
-    <div style="display: flex; justify-content: center; gap: 60px; padding: 10px 0 30px;">
-        <button onclick="go('p1')" style="width: 60px; height: 60px; border-radius: 50%; border: none; background: #343d52; color: #ffffff; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px);">
-            <i class="fas fa-edit"></i>
-        </button>
-        
-        <button onclick="go('p0')" style="width: 60px; height: 60px; border-radius: 50%; border: none; background: #343d52; color: #f8fafc; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); transition: 0.3s;">
-            <i class="fas fa-home"></i>
-        </button>
-    </div>
-</div>
+</div>    
  <script>
  /* ==========================================================
    SECTION 1: INITIALIZATION & GLOBAL VARIABLES
@@ -2583,6 +2572,11 @@ function saveSettings() {
         
         window.speechSynthesis.speak(utterance);
     }
+    // 7. นำทางกลับหน้าหลัก (p0) ทันที
+    // เราไม่ใช้ Delay นานเกินไปเพื่อให้แอปรู้สึกตอบสนองไว (Responsive)
+    setTimeout(() => {
+        if (typeof go === "function") go('p0');
+    }, 300); 
 }
 function handleSave(event) {
     // 1. ดึงค่าพื้นฐานและตรวจสอบความถูกต้อง
