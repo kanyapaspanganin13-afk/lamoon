@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 4</title>
+    <title>Barber Note Pro 54</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -2081,16 +2081,24 @@ function renderHistoryList() {
 function loadHistMonth() {
     const $ = (id) => document.getElementById(id);
     const m = $("histMonth").value;
+    const displayArea = $("stats-display-area"); 
+    
     if (!m) return alert("กรุณาเลือกเดือนก่อนครับ");
-
     if (typeof archives === 'undefined') return alert("ไม่พบฐานข้อมูลหลัก (archives)");
 
+    // ล้างข้อมูลเก่าในพื้นที่แสดงผลก่อนโหลดใหม่
+    displayArea.innerHTML = `<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> กำลังคำนวณ...</div>`;
+
     const filtered = archives.filter(a => a.date && a.date.startsWith(m));
+
     if (!filtered.length) {
-        return openReportModal("📊 สรุปรายเดือน", `<div style='text-align:center;padding:50px;color:#94a3b8;'>ไม่พบข้อมูลของเดือน ${m}</div>`);
+        displayArea.innerHTML = `<div style='text-align:center;padding:50px;color:#94a3b8; background:rgba(255,255,255,0.05); border-radius:20px;'>
+            <i class="fas fa-folder-open" style="font-size:30px;margin-bottom:10px;display:block;"></i>
+            ไม่พบข้อมูลของเดือน ${m}
+        </div>`;
+        return;
     }
 
-    // 🟢 เพิ่มตัวนับ monthGuarDays (จำนวนวันประกันรายได้)
     let monthTotal = 0, monthBarber = 0, monthCount = 0, monthGuarDays = 0; 
     let hairStats = {}, serviceStats = {};
     let offDays = 0, workDays = 0;
@@ -2107,7 +2115,7 @@ function loadHistMonth() {
         if (!weeklyData[wKey]) {
             weeklyData[wKey] = { 
                 customers: 0, workDays: 0, offDays: 0, 
-                zeroDays: 0, guarDays: 0, dailyCounts: [], // เพิ่ม guarDays ในระดับสัปดาห์ด้วย
+                zeroDays: 0, guarDays: 0, dailyCounts: [],
                 popularHair: {}, 
                 popularService: {}, 
                 income: 0 
@@ -2123,7 +2131,6 @@ function loadHistMonth() {
         workDays++;
         weeklyData[wKey].workDays++;
         
-        // 🛡️ ตรวจสอบว่าในรายละเอียดวันนั้น มีรายการ "GUARANTEE_CLAIM" หรือไม่
         const hasInsurance = day.details && day.details.some(d => d.type === "GUARANTEE_CLAIM");
         if (hasInsurance) {
             monthGuarDays++;
@@ -2140,7 +2147,6 @@ function loadHistMonth() {
         let dayCustomerCount = 0;
         if (day.details && Array.isArray(day.details)) {
             day.details.forEach(d => {
-                // 👤 นับเฉพาะ SERVICE จริงๆ (ไม่นับ GUARANTEE_CLAIM เป็นลูกค้า)
                 if (d.type === "SERVICE") {
                     monthCount++;
                     dayCustomerCount++;
@@ -2172,6 +2178,10 @@ function loadHistMonth() {
     });
 
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
+    
+    // เลื่อนหน้าจอลงมาดูรายงานอัตโนมัติ
+    displayArea.scrollIntoView({ behavior: 'smooth' });
+}
     
     // 🎯 ส่งค่า monthGuarDays เข้าไปในฟังก์ชันสรุปรายงานด้วย
     generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays);
@@ -2319,11 +2329,14 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
             </div>
         </div>`;
     }).join("");
-
-    openReportModal(
-        `สรุปรายงานเดือน ${m}`,
-        `<div style="background:#0f172a; padding:24px; color:#f1f5f9; border-radius:20px; font-family: sans-serif; margin-bottom:50px;">
+    const displayArea = document.getElementById("stats-display-area");
+    if (displayArea) {
+        displayArea.innerHTML = `
+        <div style="background:#0f172a; padding:24px; color:#f1f5f9; border-radius:20px; font-family: sans-serif; margin-bottom:50px; border:1px solid rgba(255,255,255,0.1);">
             <div style="text-align:center; padding:10px 0 20px 0;">
+                <div style="font-size:18px; color:#facc15; font-weight:800; margin-bottom:10px;">
+                    📅 สรุปรายงานเดือน ${m}
+                </div>
                 <div style="font-size:16px; color:#94a3b8; font-weight:700; margin-bottom:5px;">✂️ รายได้รวมประจำเดือน</div>
                 <div style="font-size:48px; font-weight:900; color:#ffffff;">฿${monthTotal.toLocaleString()}</div>
             </div>
@@ -2364,10 +2377,15 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                 </div>
                 ${renderStats(serviceStats, "#38bdf8")}
             </div>
-        </div>`
-    );
-}  
-function renderStats(obj, accentColor) {
+        </div>`;
+
+        // เลื่อนหน้าจอลงมาดูรายงานทันที
+        setTimeout(() => {
+            displayArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 150);
+    }
+}
+  function renderStats(obj, accentColor) {
     const entries = Object.entries(obj).sort((a, b) => b[1] - a[1]);
     if (!entries.length) return "<div style='color:rgba(255,255,255,0.2); padding:10px; font-size:13px;'>ไม่มีข้อมูลสถิติ</div>";
     
