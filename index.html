@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 11</title>
+    <title>Barber Note Pro 1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -681,7 +681,7 @@ body {
         </button>
     </div>
 </div>
-<div id="p6" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 15px; background: #0f172a; min-height: 100vh; flex-direction: column; box-sizing: border-box;">
+<div id="p6" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 15px; background: #0f172a; min-height: 100vh; flex-direction: column; box-sizing: border-box; color: white;">
     
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; padding: 10px 5px 0;">
         <div style="text-align: left;">
@@ -702,73 +702,15 @@ body {
             <span style="color:#f8fafc; font-weight:800; font-size:12px;">วันหยุด</span>
         </div>
 
-        <div class="icon-card" onclick="document.getElementById('config-display-area').style.display='block'" style="background:#1e293b; border:1px solid rgba(255,255,255,0.1); border-radius:20px; height:95px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;">
+        <div class="icon-card" onclick="document.getElementById('modalSet').style.display='flex'" style="background:#1e293b; border:1px solid rgba(255,255,255,0.1); border-radius:20px; height:95px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;">
             <div style="background:linear-gradient(135deg, #64748b, #334155); width:35px; height:35px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; color:#fff;"><i class="fas fa-cog"></i></div>
             <span style="color:#f8fafc; font-weight:800; font-size:12px;">ตั้งค่า</span>
         </div>
     </div>
 
-    <div id="config-display-area" style="display:none; background: #ffffff; border-radius: 30px; padding: 25px 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); animation: fadeIn 0.4s ease-out;">
-        
-        <input type="text" id="setShop" placeholder="ชื่อร้าน" style="width: 100%; height: 52px; border-radius: 16px; border: 1px solid #e2e8f0; background: #f8fafc; text-align: center; font-size: 18px; font-weight: 700; color: #1e3a8a; margin-bottom: 12px; outline: none; box-sizing: border-box;">
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
-            <div style="text-align:center;">
-                <label style="font-size:11px; color:#64748b; font-weight:800; display:block; margin-bottom:4px;">% ช่าง</label>
-                <input type="number" id="setPerc" placeholder="0" style="width:100%; height:50px; border-radius:15px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:18px; font-weight:700; box-sizing: border-box;">
-            </div>
-            <div style="text-align:center;">
-                <label style="font-size:11px; color:#64748b; font-weight:800; display:block; margin-bottom:4px;">ประกัน</label>
-                <input type="number" id="setGuar" placeholder="0" style="width:100%; height:50px; border-radius:15px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:18px; font-weight:700; box-sizing: border-box;">
-            </div>
-        </div>
-
-        <div style="margin-bottom:12px;">
-            <select id="setTheme" style="width:100%; height:52px; border-radius:16px; border:1px solid #e2e8f0; background:#f8fafc; text-align:center; font-size:16px; font-weight:700; color:#475569;">
-                <option value="light">🌤 ธีมสว่าง</option>
-                <option value="navy">🌌 ธีมน้ำเงิน</option>
-                <option value="dark">🌑 ธีมดำ-ทอง</option>
-            </select>
-        </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:20px;">
-            <div style="position: relative; display: flex; align-items: center;">
-                <select id="setSound" style="width:100%; height:50px; border-radius:15px; border:1px solid #cbd5e1; background:#f8fafc; text-align:center; font-size:14px; font-weight:700; appearance:none; padding-left: 20px; box-sizing: border-box;">
-                    <option value="on">เปิดเสียง</option>
-                    <option value="off">ปิดเสียง</option>
-                </select>
-                <i class="fas fa-volume-up" style="position: absolute; left: 12px; color: #64748b; pointer-events: none;"></i>
-            </div>
-            <div style="position: relative; display: flex; align-items: center;">
-                <select id="setVoice" style="width:100%; height:50px; border-radius:15px; border:1px solid #cbd5e1; background:#f8fafc; text-align:center; font-size:14px; font-weight:700; appearance:none; padding-left: 20px; box-sizing: border-box;">
-                    <option value="female">เสียงหญิง</option>
-                    <option value="male">เสียงชาย</option>
-                </select>
-                <i class="fas fa-user-friends" style="position: absolute; left: 12px; color: #64748b; pointer-events: none;"></i>
-            </div>
-        </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:20px;">
-            <button onclick="exportBackup()" style="height:55px; background:#fff; border:1px solid #cbd5e1; border-radius:15px; font-size:10px; font-weight:800; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                <i class="fas fa-file-download" style="font-size:14px; margin-bottom:4px;"></i>สำรอง
-            </button>
-            <button onclick="document.getElementById('fileInput').click()" style="height:55px; background:#fff; border:1px solid #cbd5e1; border-radius:15px; font-size:10px; font-weight:800; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                <i class="fas fa-file-upload" style="font-size:14px; margin-bottom:4px;"></i>คืนค่า
-            </button>
-            <button onclick="clearData()" style="height:55px; background:#fff1f2; border:1px solid #fecaca; border-radius:15px; font-size:10px; font-weight:800; color:#e11d48; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                <i class="fas fa-trash-alt" style="font-size:14px; margin-bottom:4px;"></i>ล้างค่า
-            </button>
-        </div>
-
-        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:10px;">
-            <button onclick="saveSettings()" style="background:#1e3a8a; color:#fff; height:55px; border-radius:20px; border:none; font-weight:800; cursor:pointer; font-size:16px; box-shadow: 0 4px 12px rgba(30,58,138,0.3);">บันทึกข้อมูล</button>
-            <button onclick="document.getElementById('config-display-area').style.display='none'" style="background:#f1f5f9; color:#64748b; height:55px; border-radius:20px; border:none; font-weight:800; cursor:pointer;">ซ่อน</button>
-        </div>
-    </div>
-
     <div style="margin-top: auto; padding: 25px 0;">
-         <button onclick="go('p0')" style="width: 55px; height: 55px; border-radius: 50%; border: none; background: #343d52; color: #64748b; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s;">
-        <i class="fas fa-home"></i>
+         <button onclick="go('p0')" style="width: 55px; height: 55px; border-radius: 50%; border: none; background: #343d52; color: #ffffff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+            <i class="fas fa-home"></i>
         </button>
         
         <div style="text-align:center; line-height: 1.4; margin-top: 20px;">
@@ -777,6 +719,68 @@ body {
         </div>
     </div>
 </div>
+
+<div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); z-index:9999; align-items:center; justify-content:center; padding:15px;">
+    
+    <div style="background:#ffffff; width:95%; max-width:420px; border-radius:35px; display:flex; flex-direction:column; overflow:hidden; animation: slideUp 0.3s ease-out; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
+        
+        <div style="padding: 25px 20px 5px; text-align: center;">
+            <h3 style="margin: 0; font-size: 22px; color: #1e3a8a; font-weight: 900;">⚙️ ตั้งค่าระบบ</h3>
+        </div>
+
+        <div style="padding: 10px 20px 30px;">
+            <input type="text" id="setShop" placeholder="ชื่อร้าน" 
+                   style="width: 100%; height: 52px; border-radius: 16px; border: 1px solid #e2e8f0; background: #f1f5f9; text-align: center; font-size: 18px; font-weight: 700; color: #1e3a8a; margin-bottom: 12px; outline: none; box-sizing: border-box;">
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
+                <input type="number" id="setPerc" placeholder="% ช่าง" style="width:100%; height:52px; border-radius:16px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:18px; font-weight:700; outline:none; box-sizing: border-box;">
+                <input type="number" id="setGuar" placeholder="ประกัน" style="width:100%; height:52px; border-radius:16px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:18px; font-weight:700; outline:none; box-sizing: border-box;">
+            </div>
+
+            <div style="margin-bottom:12px;">
+                <select id="setTheme" style="width:100%; height:52px; border-radius:16px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:16px; font-weight:700; color:#475569; outline:none; box-sizing: border-box;">
+                    <option value="light">🌤 ธีมสว่าง</option>
+                    <option value="navy">🌌 ธีมน้ำเงิน</option>
+                    <option value="dark">🌑 ธีมดำ-ทอง</option>
+                </select>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                <div style="position: relative; display: flex; align-items: center;">
+                    <select id="setSound" style="width:100%; height:52px; border-radius:16px; border:1px solid #cbd5e1; background:#f1f5f9; text-align:center; font-size:15px; font-weight:700; outline:none; appearance:none; padding-left: 35px; box-sizing: border-box;">
+                        <option value="on">เปิดเสียง</option>
+                        <option value="off">ปิดเสียง</option>
+                    </select>
+                    <i class="fas fa-volume-up" style="position: absolute; left: 12px; color: #475569; pointer-events: none;"></i>
+                </div>
+                <div style="position: relative; display: flex; align-items: center;">
+                    <select id="setVoice" style="width:100%; height:52px; border-radius:16px; border:1px solid #cbd5e1; background:#f1f5f9; text-align:center; font-size:15px; font-weight:700; outline:none; appearance:none; padding-left: 35px; box-sizing: border-box;">
+                        <option value="female">เสียงหญิง</option>
+                        <option value="male">เสียงชาย</option>
+                    </select>
+                    <i class="fas fa-user-friends" style="position: absolute; left: 12px; color: #475569; pointer-events: none;"></i>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:20px;">
+                <button onclick="exportBackup()" style="height:55px; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; font-size:11px; font-weight:800; color:#1e293b; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;">
+                    <i class="fas fa-file-download" style="font-size:15px; margin-bottom:3px;"></i><span>สำรอง</span>
+                </button>
+                <input type="file" id="fileInput" style="display:none;" onchange="importBackup(this)">
+                <button onclick="document.getElementById('fileInput').click()" style="height:55px; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; font-size:11px; font-weight:800; color:#1e293b; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;">
+                    <i class="fas fa-file-upload" style="font-size:15px; margin-bottom:3px;"></i><span>คืนค่า</span>
+                </button>
+                <button onclick="clearData()" style="height:55px; background:#fff1f2; border:1px solid #fecaca; border-radius:12px; font-size:11px; font-weight:800; color:#e11d48; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;">
+                    <i class="fas fa-trash-alt" style="font-size:15px; margin-bottom:3px;"></i><span>ล้างข้อมูล</span>
+                </button>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 2fr 1.2fr; gap:12px;">
+                <button onclick="saveSettings()" style="background:#1e3a8a; color:#fff; height:60px; border-radius:20px; border:none; font-weight:800; font-size:18px; box-shadow: 0 8px 20px rgba(30,58,138,0.2); cursor:pointer;">บันทึกข้อมูล</button>
+                <button onclick="document.getElementById('modalSet').style.display='none'" style="background:#f1f5f9; color:#64748b; height:60px; border-radius:20px; border:none; font-weight:800; font-size:16px; cursor:pointer;">ปิด</button>
+            </div>
+        </div>
+    </div>
  <script>
  /* ==========================================================
    SECTION 1: INITIALIZATION & GLOBAL VARIABLES
