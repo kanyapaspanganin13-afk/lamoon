@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 4</title>
+    <title>Barber Note Pro 5</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -454,41 +454,50 @@ body {
             </div>
         </div>
     </div>
-        
-<div id="p2" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 15px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); min-height: 100vh; flex-direction: column; box-sizing: border-box; color: white; border: 1px solid rgba(255,255,255,0.1);"> 
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
-        <div style="background: var(--primary-color, #1e3a8a); filter: brightness(1.2); padding:18px 15px; border-radius:25px; text-align:center; box-shadow:0 8px 32px 0 rgba(0,0,0,0.37); border: 1px solid rgba(255,255,255,0.18);">
-            <small style="font-weight:800; color:#cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px;">ยอดรวมวันนี้</small>
-            <div id="dTotal" style="font-size:36px; font-weight:900; color:#ffffff; margin: 5px 0;">0</div>
-            <div id="dCounts" style="font-size:14px; font-weight:700; color:#cbd5e1; background:rgba(255,255,255,0.2); display:inline-block; padding:4px 12px; border-radius:12px;">ลูกค้า 0 คน</div>
-        </div>
-
-        <div style="background: var(--primary-color, #1e3a8a); filter: brightness(1.1); padding:15px; border-radius:25px; box-shadow:0 8px 32px 0 rgba(0,0,0,0.37); border: 1px solid rgba(255,255,255,0.18); display:flex; flex-direction:column; justify-content:center; gap:8px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:14px; font-weight:700;">
-                <span style="color:#cbd5e1;"><i class="fas fa-mobile-alt" style="width:18px; color:#60a5fa;"></i> โอน:</span> 
-                <b id="dTrans" style="color:#ffffff;">0</b>
+            <div id="p2" class="page" style="max-width:480px; margin:0 auto; padding: 15px; padding-bottom: 100px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+                    <div style="background: #3b50ce; padding:18px 15px; border-radius:20px; text-align:center; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);">
+                        <small style="font-weight:800; color:#cbd5e1; text-transform: uppercase; letter-spacing: 0.5px;">ยอดรวมวันนี้</small>
+                        <div id="dTotal" style="font-size:36px; font-weight:900; color:#cbd5e1; margin: 5px 0;">0</div>
+                        <div id="dCounts" style="font-size:16px; font-weight:700; color:#cbd5e1; background:rgba(255,255,255,0.15); display:inline-block; padding:2px 10px; border-radius:10px;">ลูกค้า 0 คน</div>
+                    </div>
+            
+                   <div style="background:#3b50ce; padding:15px; border-radius:20px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; justify-content:center; gap:8px;">
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700;">
+                    <span style="color:#cbd5e1; display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-mobile-alt" style="width:18px; color:#60a5fa;"></i> โอน:
+                    </span> 
+                    <b id="dTrans" style="color:#ffffff;">0</b>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700;">
+                    <span style="color:#cbd5e1; display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-money-bill-wave" style="width:18px; color:#4ade80;"></i> สด:
+                    </span> 
+                    <b id="dCash" style="color:#ffffff;">0</b>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700;">
+                    <span style="color:#cbd5e1; display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-cut" style="width:18px; color:#fbbf24;"></i> ช่าง:
+                    </span> 
+                    <b id="dBarber" style="color:#ffffff;">0</b>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:800; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px; margin-top: 2px;">
+                    <span style="color:#cbd5e1; display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-store" style="width:18px; color:#f472b6;"></i> ร้าน:
+                    </span> 
+                    <b id="dShop" style="color:#ffffff;">0</b>
+                </div>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:14px; font-weight:700;">
-                <span style="color:#cbd5e1;"><i class="fas fa-money-bill-wave" style="width:18px; color:#4ade80;"></i> สด:</span> 
-                <b id="dCash" style="color:#ffffff;">0</b>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:14px; font-weight:700;">
-                <span style="color:#cbd5e1;"><i class="fas fa-cut" style="width:18px; color:#fbbf24;"></i> ช่าง:</span> 
-                <b id="dBarber" style="color:#ffffff;">0</b>
+                <div id="settleBarContainer" style="margin-bottom:18px;"><div id="settleBar"></div> </div>
+                <div id="dServiceStats"></div>
+                <hr style="border:0; border-top:1px solid #e2e8f0; margin-top:15px;">
+                <div id="dailyList"></div>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:14px; font-weight:800; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px;">
-                <span style="color:#cbd5e1;"><i class="fas fa-store" style="width:18px; color:#f472b6;"></i> ร้าน:</span> 
-                <b id="dShop" style="color:#ffffff;">0</b>
-            </div>
-        </div>
-    </div>
-
-    <div id="settleBarContainer" style="margin-bottom:18px;"></div>
-    <div id="dServiceStats"></div>
-    <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:15px 0;">
-    
-    <div id="dailyList" style="background: rgba(255,255,255,0.03); border-radius: 20px; padding: 5px;"></div>
 
     <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding: 20px 0;"> 
         <button onclick="go('p1')" style="width: 55px; height: 55px; border-radius: 50%; border: none; background: rgba(255,255,255,0.1); color: #ffffff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
