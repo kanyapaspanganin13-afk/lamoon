@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 2</title>
+    <title>Barber Note Pro 22</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -711,22 +711,22 @@ body {
 
     <div style="background: #ffffff; border-radius: 35px; padding: 30px 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); flex-grow: 1; display: flex; flex-direction: column;">
         
-        <label style="color: #64748b; font-size: 13px; font-weight: 800; margin-bottom: 8px; margin-left: 5px;">ชื่อร้านค้า</label>
+        <label style="color: #64748b; font-size: 15px; font-weight: 800; margin-bottom: 8px; margin-left: 5px;">ชื่อร้านค้า</label>
         <input type="text" id="setShop" placeholder="ระบุชื่อร้าน" 
-               style="width: 100%; height: 55px; border-radius: 18px; border: 1px solid #e2e8f0; background: #f8fafc; text-align: center; font-size: 18px; font-weight: 700; color: #1e3a8a; margin-bottom: 20px; outline: none; box-sizing: border-box;">
+               style="width: 100%; height: 55px; border-radius: 18px; border: 1px solid #e2e8f0; background: #f8fafc; text-align: center; font-size: 20px; font-weight: 700; color: #1e3a8a; margin-bottom: 20px; outline: none; box-sizing: border-box;">
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:20px;">
             <div>
-                <label style="color: #64748b; font-size: 13px; font-weight: 800; display: block; text-align: center; margin-bottom: 8px;">% ส่วนแบ่งช่าง</label>
-                <input type="number" id="setPerc" placeholder="0" style="width:100%; height:55px; border-radius:18px; border:1px solid #e2e8f0; background:#f8fafc; text-align:center; font-size:18px; font-weight:700; color: #1e3a8a; outline:none; box-sizing: border-box;">
+                <label style="color: #64748b; font-size: 15px; font-weight: 800; display: block; text-align: center; margin-bottom: 8px;">% ส่วนแบ่งช่าง</label>
+                <input type="number" id="setPerc" placeholder="0" style="width:100%; height:55px; border-radius:18px; border:1px solid #e2e8f0; background:#f8fafc; text-align:center; font-size:20px; font-weight:700; color: #1e3a8a; outline:none; box-sizing: border-box;">
             </div>
             <div>
-                <label style="color: #64748b; font-size: 13px; font-weight: 800; display: block; text-align: center; margin-bottom: 8px;">เงินประกันรายวัน</label>
-                <input type="number" id="setGuar" placeholder="0" style="width:100%; height:55px; border-radius:18px; border:1px solid #e2e8f0; background:#f8fafc; text-align:center; font-size:18px; font-weight:700; color: #1e3a8a; outline:none; box-sizing: border-box;">
+                <label style="color: #64748b; font-size: 15px; font-weight: 800; display: block; text-align: center; margin-bottom: 8px;">เงินประกันรายวัน</label>
+                <input type="number" id="setGuar" placeholder="0" style="width:100%; height:55px; border-radius:18px; border:1px solid #e2e8f0; background:#f8fafc; text-align:center; font-size:20px; font-weight:700; color: #1e3a8a; outline:none; box-sizing: border-box;">
             </div>
         </div>
 
-        <label style="color: #64748b; font-size: 13px; font-weight: 800; margin-bottom: 8px; margin-left: 5px;">รูปแบบการแสดงผล</label>
+        <label style="color: #64748b; font-size: 15px; font-weight: 800; margin-bottom: 8px; margin-left: 5px;">รูปแบบการแสดงผล</label>
         <select id="setTheme" style="width:100%; height:55px; border-radius:18px; border: 1px solid #e2e8f0; background:#f8fafc; text-align:center; font-size:16px; font-weight:700; color:#475569; outline:none; box-sizing: border-box; margin-bottom: 20px;">
             <option value="light">🌤 ธีมสว่าง (Light)</option>
             <option value="navy">🌌 ธีมน้ำเงิน (Navy)</option>
@@ -768,13 +768,12 @@ body {
         </button>
     </div>
 
-    <div style="display: flex; justify-content: center; gap: 30px; padding: 25px 0;">
-        <button onclick="go('p1')" style="width: 55px; height: 55px; border-radius: 50%; border: none; background: #343d52; color: #ffffff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
+      <button onclick="go('p1')" style="width: 55px; height: 55px; border-radius: 50%; border: none; background: #343d52; color: #ffffff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px);">
             <i class="fas fa-edit"></i>
         </button>
         
-        <button onclick="go('p0')" style="width: 55px; height: 55px; border-radius: 50%; border: none; background: #343d52; color: #ffffff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
-            <i class="fas fa-home"></i>
+         <button onclick="go('p0')" style="width: 55px; height: 55px; border-radius: 50%; border: none; background: #343d52; color: #64748b; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s;">
+        <i class="fas fa-home"></i>
         </button>
     </div>
 </div>
@@ -2533,51 +2532,51 @@ function openSettings() {
     }
 }
 function saveSettings() {
-    // 1. ดึงค่าจากฟอร์ม (เพิ่ม sound เข้าไปครับ)
+    // 1. ดึงค่าจากฟอร์ม
     const settings = {
-        shop:  $("setShop")?.value || "",
-        perc:  parseFloat($("setPerc")?.value) || 0,
-        guar:  parseFloat($("setGuar")?.value) || 0,
-        theme: $("setTheme")?.value || "light",
-        voice: $("setVoice")?.value || "default.mp3",
-        sound: $("setSound")?.value || "on"  // 🟢 เพิ่มบรรทัดนี้ครับ
+        shop:  document.getElementById("setShop")?.value || "",
+        perc:  parseFloat(document.getElementById("setPerc")?.value) || 0,
+        guar:  parseFloat(document.getElementById("setGuar")?.value) || 0,
+        theme: document.getElementById("setTheme")?.value || "light",
+        voice: document.getElementById("setVoice")?.value || "female", // ปรับเป็นค่าเพศเสียง
+        sound: document.getElementById("setSound")?.value || "on"
     };
 
-    // 2. อัปเดตตัวแปรกลาง (conf) ทันที 
+    // 2. อัปเดตตัวแปรกลาง (conf)
     Object.assign(conf, settings);
 
-    // 3. บันทึกลง LocalStorage (ก้อนเดียว JSON)
+    // 3. บันทึกลง LocalStorage
     localStorage.setItem('barber_conf', JSON.stringify(conf));
-
-    // 🟢 บันทึกแยก Key (เพิ่ม shopSound เข้าไปด้วยครับ)
     localStorage.setItem('shopName',  settings.shop);
     localStorage.setItem('shopPerc',  settings.perc);
     localStorage.setItem('shopGuar',  settings.guar);
     localStorage.setItem('shopTheme', settings.theme);
     localStorage.setItem('shopVoice', settings.voice);
-    localStorage.setItem('shopSound', settings.sound); // 🟢 เพิ่มบรรทัดนี้ครับ
+    localStorage.setItem('shopSound', settings.sound);
 
     // 4. อัปเดตการแสดงผลทันที
-    if ($("shopNameDisp")) {
-        $("shopNameDisp").innerText = settings.shop.toUpperCase();
-    } 
+    const nameDisp = document.getElementById("shopNameDisp") || document.getElementById("shopNameDisplay");
+    if (nameDisp) nameDisp.innerText = settings.shop.toUpperCase();
 
-    if (document.getElementById("shopNameDisplay")) {
-        document.getElementById("shopNameDisplay").innerText = settings.shop;
+    // 5. เรียกฟังก์ชัน UI อื่นๆ
+    if (typeof applyTheme === "function") applyTheme(settings.theme);
+    if (typeof calculateMoney === "function") calculateMoney(); 
+    if (typeof renderDay === "function") renderDay(); 
+
+    // 🟢 6. การแจ้งเตือนด้วยเสียง (แทนที่ Alert)
+    if (settings.sound === "on") {
+        const msg = "บันทึกการตั้งค่าเรียบร้อยแล้ว";
+        const utterance = new SpeechSynthesisUtterance(msg);
+        utterance.lang = 'th-TH';
+        // เลือกเสียง ชาย/หญิง ตามที่ตั้งค่าไว้
+        utterance.pitch = settings.voice === "male" ? 0.8 : 1.2; 
+        window.speechSynthesis.speak(utterance);
     }
 
-    // 5. เรียกฟังก์ชันอัปเดต UI และคำนวณใหม่
-    if (typeof applyTheme === "function")        applyTheme(settings.theme);
-    if (typeof calculateMoney === "function")    calculateMoney(); 
-    if (typeof renderDay === "function")         renderDay(); 
-
-    // 🟢 ถ้าช่างมีฟังก์ชันเปิด/ปิดเสียง ให้เรียกที่นี่ได้เลยครับ
-    // if (typeof updateSoundStatus === "function") updateSoundStatus(settings.sound);
-
-    // 6. ปิด Modal และแจ้งเตือน
-    if ($("modalSet")) $("modalSet").style.display = 'none';
-    
-    alert("✅ บันทึกการตั้งค่าเรียบร้อยแล้ว");
+    // 7. เปลี่ยนหน้ากลับไปหน้าหลัก (แทนการปิด Modal)
+    setTimeout(() => {
+        go('p0');
+    }, 500); // หน่วงเวลาเล็กน้อยเพื่อให้เสียงพูดจบ
 }
 function handleSave(event) {
     // 1. ดึงค่าพื้นฐานและตรวจสอบความถูกต้อง
