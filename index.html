@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 1</title>
+    <title>Barber Note Pro 21</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -507,21 +507,27 @@ body {
     </div>
 <div id="p2" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 15px; min-height: 100vh; display: flex; flex-direction: column; box-sizing: border-box;">
     
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 5px 0;">
-        <div onclick="go('p1')" style="cursor: pointer; width: 45px; height: 45px; background: rgba(255,255,255,0.05); border-radius: 15px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);">
-            <i class="fas fa-chevron-left" style="color: white; font-size: 18px;"></i>
-        </div>
+   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; padding: 10px 5px; border-bottom: 2px solid rgba(15, 23, 42, 0.05);">
+    
+    <div onclick="go('p1')" style="cursor: pointer; width: 46px; height: 46px; background: #f1f5f9; border-radius: 16px; display: flex; align-items: center; justify-content: center; border: 1.5px solid #cbd5e1; transition: 0.2s;">
+        <i class="fas fa-arrow-left" style="color: #0f172a; font-size: 18px;"></i>
+    </div>
 
-        <div style="text-align: center;">
-            <h3 style="margin: 0; color: white; font-size: 18px; font-weight: 800; letter-spacing: 0.5px;">📊 สรุปรายงาน</h3>
-            <small style="color: #94a3b8; font-size: 11px;">ข้อมูลรายได้และสถิติวันนี้</small>
+    <div style="text-align: center;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 2px;">
+            <i class="fas fa-chart-pie" style="color: #2563eb; font-size: 20px;"></i>
+            <span style="color: #0f172a; font-size: 20px; font-weight: 900; letter-spacing: 0.5px;">รายงานประจำวัน</span>
         </div>
-
-        <div onclick="go('p3')" style="cursor: pointer; width: 45px; height: 45px; background: var(--primary-color, #3b82f6); border-radius: 15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-            <i class="fas fa-chevron-right" style="color: white; font-size: 18px;"></i>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+            <i class="far fa-clock" style="color: #64748b; font-size: 11px;"></i>
+            <small style="color: #475569; font-size: 12px; font-weight: 700;">ข้อมูลรายได้และสถิติ</small>
         </div>
     </div>
 
+    <div onclick="go('p3')" style="cursor: pointer; width: 46px; height: 46px; background: #2563eb; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(37,99,235,0.4); border: 1.5px solid #1d4ed8;">
+        <i class="fas fa-arrow-right" style="color: white; font-size: 18px;"></i>
+    </div>
+</div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
         <div style="background: linear-gradient(135deg, #190da8, #0b1e59); padding:18px 15px; border-radius:20px; text-align:center; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);">
             <small style="font-weight:800; color:#cbd5e1; text-transform: uppercase; letter-spacing: 0.5px;">ยอดรวมวันนี้</small>
@@ -1694,18 +1700,23 @@ if (dList) {
         const yBE = parseInt(dateParts[0]) + 543; // แปลงเป็น พ.ศ.
         displayDateBE = `${d}/${m}/${yBE}`;
     }
-   dList.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 8px 12px; border-radius: 12px; border-bottom: 2px solid #f1f5f9; margin-bottom: 10px;">           
-            
-            <div style="display: flex; align-items: center; gap: 10px; margin-right: 15px;">
-                <b style="font-size: 16px; color: #1e293b;">📋 รายงาน</b>              
-                
-                <div style="position: relative; background: #f1f5f9; padding: 5px 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; cursor: pointer; width: 130px; height: 34px;"> 
-                    <span style="font-size: 14px; font-weight: 700; color: #6366f1; width: 100%; text-align: center;">${displayDateBE}</span>                
-                    <input type="date" id="reportDateSelector" value="${dInp}" 
-                           onchange="renderDay(this.value)" 
-                           style="position: absolute; opacity: 0; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer;">
-                </div>
+ const htmlHeader = `
+<div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 10px 15px; border-radius: 16px; border-bottom: 2px solid #f1f5f9; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">            
+    
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-calendar-alt" style="color: #1e293b; font-size: 18px;"></i>
+        <b style="font-size: 16px; color: #1e293b; letter-spacing: 0.5px;">วันที่</b>
+    </div>
+
+    <div style="position: relative; background: #f8fafc; padding: 6px 14px; border-radius: 10px; border: 1.5px solid #e2e8f0; display: flex; align-items: center; cursor: pointer; min-width: 130px; height: 38px;"> 
+        <span style="font-size: 15px; font-weight: 800; color: #4f46e5; width: 100%; text-align: center;">
+            ${displayDateBE}
+        </span>            
+        
+        <input type="date" id="reportDateSelector" value="${dInp}" 
+               onchange="renderDay(this.value)" 
+               style="position: absolute; opacity: 0; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer;">
+    </div>
 
                 <button onclick="deleteArchiveDate('${dInp}')" 
                         title="ลบข้อมูลของวันนี้"
