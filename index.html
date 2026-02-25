@@ -9,52 +9,52 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 1</title>
+    <title>Barber Note Pro 11</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 const getEl = id => document.getElementById(id);
-
-// 1. ฟังก์ชันหลักสำหรับกดปุ่มเลือกช่วงวันที่
-async function compareStats() {
-    const { value: v } = await Swal.fire({
-        title: '📊 เปรียบเทียบข้อมูล',
-        confirmButtonText: 'วิเคราะห์ข้อมูล',
-        confirmButtonColor: '#38bdf8',
-        html: `
-            <div style="text-align: left; font-family: 'Kanit', sans-serif; font-size: 14px; color: #1e293b;">
-                <p style="margin: 0 0 5px 0; color: #64748b;">📅 ช่วงที่ 1 </p>
-                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
-                    <input id="s1" type="date" class="swal2-input" style="flex:1; margin:0; height:45px; font-size:14px; border-radius:12px; border: 1px solid #cbd5e1;">
-                    <input id="e1" type="date" class="swal2-input" style="flex:1; margin:0; height:45px; font-size:14px; border-radius:12px; border: 1px solid #cbd5e1;">
-                </div>
-                <p style="margin: 0 0 5px 0; color: #64748b;">📅 ช่วงที่ 2 </p>
-                <div style="display: flex; gap: 8px;">
-                    <input id="s2" type="date" class="swal2-input" style="flex:1; margin:0; height:45px; font-size:14px; border-radius:12px; border: 1px solid #cbd5e1;">
-                    <input id="e2" type="date" class="swal2-input" style="flex:1; margin:0; height:45px; font-size:14px; border-radius:12px; border: 1px solid #cbd5e1;">
-                </div>
+// 1. ฟังก์ชันหลักสำหรับเลือกวันที่ (ใช้ openReportModal )
+function compareStats() {
+    const htmlSelectDate = `
+        <div style="text-align: left; font-family: 'Kanit', sans-serif; padding: 5px;">
+            <p style="margin: 0 0 8px 0; color: #64748b; font-size: 14px;">📅 ช่วงที่ 1 </p>
+            <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+                <input id="s1" type="date" style="flex:1; height:45px; border-radius:12px; border:1px solid #cbd5e1; padding:0 10px; font-family:'Kanit';">
+                <input id="e1" type="date" style="flex:1; height:45px; border-radius:12px; border:1px solid #cbd5e1; padding:0 10px; font-family:'Kanit';">
             </div>
-        `,
-        preConfirm: () => {
-            const s1 = document.getElementById('s1').value;
-            const e1 = document.getElementById('e1').value;
-            const s2 = document.getElementById('s2').value;
-            const e2 = document.getElementById('e2').value;
-            if (!s1 || !e1 || !s2 || !e2) {
-                Swal.showValidationMessage('กรุณาเลือกวันที่ให้ครบทุกช่องครับพี่');
-                return false;
-            }
-            return { s1, e1, s2, e2 };
-        }
-    });
-
-    if (v) {
-        renderComparisonReport(v);
-    }
+            <p style="margin: 0 0 8px 0; color: #64748b; font-size: 14px;">📅 ช่วงที่ 2 </p>
+            <div style="display: flex; gap: 8px; margin-bottom: 25px;">
+                <input id="s2" type="date" style="flex:1; height:45px; border-radius:12px; border:1px solid #cbd5e1; padding:0 10px; font-family:'Kanit';">
+                <input id="e2" type="date" style="flex:1; height:45px; border-radius:12px; border:1px solid #cbd5e1; padding:0 10px; font-family:'Kanit';">
+            </div>
+            <button onclick="processComparison()" style="width:100%; height:50px; background:#38bdf8; color:white; border:none; border-radius:15px; font-size:16px; font-weight:bold; cursor:pointer; font-family:'Kanit';">
+                🚀 วิเคราะห์ข้อมูล
+            </button>
+        </div>
+    `;
+    // เรียกใช้ Modal สีขาว
+    openReportModal("📊 เปรียบเทียบข้อมูล", htmlSelectDate);
 }
+// 2. ฟังก์ชันช่วยดึงค่าจาก Modal ไปคำนวณ
+function processComparison() {
+    const v = {
+        s1: getEl('s1').value, e1: getEl('e1').value,
+        s2: getEl('s2').value, e2: getEl('e2').value
+    };
 
-// 2. ฟังก์ชันสำหรับประมวลผลและแสดงผลในช่องรายงาน
+    if (!v.s1 || !v.e1 || !v.s2 || !v.e2) {
+        alert("กรุณาเลือกวันที่ให้ครบทุกช่องครับพี่");
+        return;
+    }
+    // ปิด Modal สีขาวก่อน
+    const modal = getEl('reportModal');
+    if (modal) modal.style.display = 'none';
+    // ส่งค่าไปแสดงรายงานสีเข้ม
+    renderComparisonReport(v);
+}
+// 3. ฟังก์ชันสำหรับประมวลผลและแสดงผล (หน้ากากมืด)
 function renderComparisonReport(v) {
     const formatThaiDate = (dateStr) => {
         if (!dateStr) return "-";
@@ -64,7 +64,6 @@ function renderComparisonReport(v) {
         const [y, m, d] = dateStr.split('-');
         return `${dayName} ${d}/${m}/${(parseInt(y) + 543).toString().slice(-2)}`;
     };
-
     const fetchStats = (start, end) => {
         let list = [];
         let currentDate = new Date(start);
@@ -91,8 +90,7 @@ function renderComparisonReport(v) {
                 }
             }
             currentDate.setDate(currentDate.getDate() + 1);
-        }
-        
+        } 
         const sumC = list.reduce((a, b) => a + Number(b.count || 0), 0);
         const sumE = list.reduce((a, b) => a + Number(b.barber || 0), 0);
         
@@ -111,8 +109,8 @@ function renderComparisonReport(v) {
 
     const finalReportHtml = `
         <div id="report-container" 
-            onclick="this.parentElement.innerHTML=''" 
-            style="background: #0f172a; color: #f1f5f9; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); margin-top: 20px; display: flex; flex-direction: column; height: 500px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); cursor: pointer;">
+            onclick="this.remove()" 
+            style="background: #0f172a; color: #f1f5f9; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); margin-top: 20px; display: flex; flex-direction: column; height: 500px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); cursor: pointer; font-family: 'Kanit', sans-serif;">
             
             <div style="padding: 15px; background: rgba(30, 41, 59, 0.9); text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
                 <div style="font-size: 15px; font-weight: 800; color: #38bdf8;">📊 วิเคราะห์เปรียบเทียบข้อมูล</div>
@@ -149,6 +147,7 @@ function renderComparisonReport(v) {
         displayArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
+// 4. ฟังก์ชันแสดง Modal (ของเดิมที่พี่ให้มา)
 function openReportModal(title, htmlContent) {
     const modal = getEl('reportModal');
     const modalTitle = getEl('reportTitle');
@@ -157,24 +156,21 @@ function openReportModal(title, htmlContent) {
     if (!modal || !modalTitle || !modalContent) {
         console.error("❌ หา ID Modal ไม่เจอ!");
         return;
-    }
-    // ใส่ข้อมูล
+    } 
     modalTitle.innerText = title;
     modalContent.innerHTML = htmlContent;
-    // จัดสไตล์ modalInner (ตัวกล่องสีขาว)
+    
     const inner = modalContent.parentElement;
-    inner.style.width = "95%";            // ให้เกือบเต็มจอในมือถือ
-    inner.style.maxWidth = "650px";       // ไม่ให้กว้างไปในคอม
-    inner.style.maxHeight = "85vh";       // ไม่ให้สูงเลยหน้าจอ
-    inner.style.overflowY = "auto";       // ให้เลื่อนบรรทัดดูได้
-    inner.style.background = "#ffffff";   // พื้นหลังขาวสะอาด
-    inner.style.borderRadius = "24px";    // ขอบมนสวยงาม
+    inner.style.width = "95%";
+    inner.style.maxWidth = "650px";
+    inner.style.maxHeight = "85vh";
+    inner.style.overflowY = "auto";
+    inner.style.background = "#ffffff";
+    inner.style.borderRadius = "24px";
     inner.style.padding = "20px";
     inner.style.margin = "auto";
-    
-    // สำคัญ: ทำให้การไถหน้าจอบน iPhone ลื่นไหล
     inner.style.webkitOverflowScrolling = "touch";
-    // สั่งแสดงผล Modal
+    
     modal.style.display = "flex";
     modal.style.alignItems = "center";
     modal.style.justifyContent = "center";
