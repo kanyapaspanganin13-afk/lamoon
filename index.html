@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro </title>
+    <title>Barber Note Pro 8</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -2383,10 +2383,22 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     }).join("");
 
 const finalReportHtml = `
-        <div style="background:#0f172a; padding:24px; color:#f1f5f9; border-radius:20px; font-family: sans-serif;">
-            <div style="text-align:center; padding:10px 0 20px 0;">
-                <div style="font-size:16px; color:#94a3b8; font-weight:700; margin-bottom:5px;">✂️ รายได้รวมประจำเดือน</div>
-                <div style="font-size:48px; font-weight:900; color:#ffffff;">฿${monthTotal.toLocaleString()}</div>
+        <div id="report-container" style="
+            background: #0f172a; 
+            color: #f1f5f9; 
+            border-radius: 24px; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 500px; /* 🎯 จำกัดความสูงตรงนี้ครับ */
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            font-family: sans-serif;
+        ">
+            <div style="padding: 20px; background: rgba(30, 41, 59, 0.8); text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 16px; color: #94a3b8; font-weight:700;">✂️ รายได้ประจำเดือน ${m}</div>
+                <div style="font-size: 40px; font-weight: 900; color: #ffffff;">฿${monthTotal.toLocaleString()}</div>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
                 <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); padding:15px; border-radius:20px; text-align:center;">
@@ -2428,7 +2440,7 @@ const finalReportHtml = `
         </div>
     `;
     // แสดงผลในพื้นที่ใหม่ที่พี่กำหนด
-   const displayArea = document.getElementById("stats-display-area");
+  const displayArea = document.getElementById("stats-display-area");
     if (displayArea) {
         displayArea.innerHTML = finalReportHtml;
         // แถม: เลื่อนจอไปที่จุดแสดงผลให้อัตโนมัติด้วยครับ
