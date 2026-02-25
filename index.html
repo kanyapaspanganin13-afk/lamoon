@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 21</title>
+    <title>Barber Note Pro 20</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -857,9 +857,8 @@ function go(p) {
     let targetId = (typeof p === 'number') ? 'p' + p : p;
     const targetPage = document.getElementById(targetId);
 
-    // ถ้าหาหน้าที่จะไปไม่เจอ ให้หยุดทำงานก่อนที่แอปจะค้าง
     if (!targetPage) {
-        console.log("ไม่พบหน้า: " + targetId);
+        console.log("❌ ไม่พบหน้า: " + targetId);
         return; 
     }
 
@@ -870,10 +869,10 @@ function go(p) {
     });
 
     // 3. แสดงหน้าเป้าหมาย
-    targetPage.style.display = 'block';
+    targetPage.style.display = 'flex'; // ปรับเป็น flex เพื่อให้จัดวางกึ่งกลางหน้าจอได้สวยงาม
     targetPage.classList.add('active');
 
-    // --- ส่วนของเงื่อนไขพิเศษ (ใส่ไว้ใน try-catch เพื่อป้องกันหน้าค้าง) ---
+    // --- ส่วนของเงื่อนไขพิเศษ ---
     try {
         // หน้า Dashboard (p0)
         if (targetId === 'p0') {
@@ -887,6 +886,17 @@ function go(p) {
             const savedShopName = localStorage.getItem("shopName") || "BARBER SHOP";
             const shopTitleP1 = document.querySelector('#p1 h3'); 
             if (shopTitleP1) shopTitleP1.innerText = "📝 " + savedShopName;
+        }
+
+        // หน้าสรุปรายวัน (p2) - ดึงวันที่ปัจจุบันมารอไว้เลย
+        if (targetId === 'p2') {
+            const dateVal = document.getElementById("dateInp")?.value || new Date().toISOString().split('T')[0];
+            if (typeof renderDay === 'function') renderDay(dateVal);
+        }
+
+        // หน้าบัญชีร้าน (p3)
+        if (targetId === 'p3') {
+            if (typeof loadAccountStatus === 'function') loadAccountStatus();
         }
 
         // หน้าตั้งค่า (p6)
@@ -903,17 +913,8 @@ function go(p) {
             }
         }
 
-        // รันฟังก์ชันรายงาน (เฉพาะถ้ามีฟังก์ชันนี้อยู่จริง)
-        const dateVal = document.getElementById("dateInp")?.value || new Date().toISOString().split('T')[0];
-        if ((p === 2 || p === 'p2') && typeof renderDay === 'function') { 
-            renderDay(dateVal); 
-        }
-        if ((p === 3 || p === 'p3') && typeof loadAccountStatus === 'function') { 
-            loadAccountStatus(); 
-        }
-
     } catch (err) {
-        console.log("เกิดข้อผิดพลาดบางจุด แต่ยังเปลี่ยนหน้าได้อยู่:", err);
+        console.log("⚠️ ข้อผิดพลาดในการรันฟังก์ชันเฉพาะหน้า:", err);
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1700,40 +1701,38 @@ if (dList) {
         const yBE = parseInt(dateParts[0]) + 543; // แปลงเป็น พ.ศ.
         displayDateBE = `${d}/${m}/${yBE}`;
     }
- const htmlHeader = `
-<div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 10px 15px; border-radius: 16px; border-bottom: 2px solid #f1f5f9; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">            
-    
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <i class="fas fa-calendar-alt" style="color: #1e293b; font-size: 18px;"></i>
-        <b style="font-size: 16px; color: #1e293b; letter-spacing: 0.5px;">วันที่</b>
-    </div>
-
-    <div style="position: relative; background: #f8fafc; padding: 6px 14px; border-radius: 10px; border: 1.5px solid #e2e8f0; display: flex; align-items: center; cursor: pointer; min-width: 130px; height: 38px;"> 
-        <span style="font-size: 15px; font-weight: 800; color: #4f46e5; width: 100%; text-align: center;">
-            ${displayDateBE}
-        </span>            
+dList.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 10px 12px; border-radius: 15px; border-bottom: 2px solid #f1f5f9; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">            
         
-        <input type="date" id="reportDateSelector" value="${dInp}" 
-               onchange="renderDay(this.value)" 
-               style="position: absolute; opacity: 0; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <b style="font-size: 16px; color: #0f172a;">📅 วันที่</b>              
+            
+            <div style="position: relative; background: #f1f5f9; padding: 5px 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; display: flex; align-items: center; cursor: pointer; width: 140px; height: 36px;"> 
+                <span style="font-size: 14px; font-weight: 800; color: #4f46e5; width: 100%; text-align: center;">${displayDateBE}</span>                
+                <input type="date" id="reportDateSelector" value="${dInp}" 
+                       onchange="renderDay(this.value)" 
+                       style="position: absolute; opacity: 0; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer;">
+            </div>
+
+            <button onclick="deleteArchiveDate('${dInp}')" 
+                    title="ลบข้อมูลของวันนี้"
+                    style="background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; width: 36px; height: 36px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-trash-alt" style="font-size: 16px;"></i>
+            </button>
+        </div>
+
+        <div style="display: flex; align-items: center;">
+            <i class="fab fa-line" style="color: #22c55e; font-size: 38px; cursor: pointer; filter: drop-shadow(0 2px 4px rgba(34,197,94,0.3));" onclick="shareLine()"></i>
+        </div>
     </div>
 
-                <button onclick="deleteArchiveDate('${dInp}')" 
-                        title="ลบข้อมูลของวันนี้"
-                        style="background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; width: 34px; height: 34px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
-                    <i class="fas fa-trash-alt" style="font-size: 18px;"></i>
-                </button>
-            </div>
-
-            <div style="display: flex; align-items: center;">
-                <i class="fab fa-line" style="color: #22c55e; font-size: 34px; cursor: pointer;" onclick="shareLine()"></i>
-            </div>
-        </div>
-
-        <div style="padding: 0 5px;">
-            ${isHoliday ? `<center style='padding:30px; color:#64748b;'>🏖️ วันหยุด (${displayDateBE})</center>` : (listHtml || "<center style='padding:30px; color:#94a3b8;'>ไม่มีข้อมูล</center>")}
-        </div>
-    `;
+    <div style="padding: 0 5px;">
+        ${isHoliday ? 
+            `<div style='padding:40px 20px; text-align:center; color:#64748b; background:rgba(255,255,255,0.5); border-radius:15px;'>🏖️ วันหยุด (${displayDateBE})</div>` : 
+            (listHtml || "<div style='padding:40px 20px; text-align:center; color:#94a3b8; background:rgba(255,255,255,0.5); border-radius:15px;'>📅 ไม่มีข้อมูล</div>")
+        }
+    </div>
+`;
 }
 }             
 /* ==========================================================
