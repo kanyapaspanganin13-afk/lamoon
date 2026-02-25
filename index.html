@@ -14,8 +14,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-// เปลี่ยนจาก $ เป็น getEl เพื่อความปลอดภัย
 const getEl = id => document.getElementById(id);
+
+// 1. ฟังก์ชันหลักสำหรับกดปุ่มเลือกช่วงวันที่
 async function compareStats() {
     const { value: v } = await Swal.fire({
         title: '📊 เปรียบเทียบข้อมูล',
@@ -35,17 +36,28 @@ async function compareStats() {
                 </div>
             </div>
         `,
-        preConfirm: () => ({ 
-            s1: document.getElementById('s1').value, e1: document.getElementById('e1').value, 
-            s2: document.getElementById('s2').value, e2: document.getElementById('e2').value 
-        })
+        preConfirm: () => {
+            const s1 = document.getElementById('s1').value;
+            const e1 = document.getElementById('e1').value;
+            const s2 = document.getElementById('s2').value;
+            const e2 = document.getElementById('e2').value;
+            if (!s1 || !e1 || !s2 || !e2) {
+                Swal.showValidationMessage('กรุณาเลือกวันที่ให้ครบทุกช่องครับพี่');
+                return false;
+            }
+            return { s1, e1, s2, e2 };
+        }
     });
 
-    if (v && v.s1 && v.e1 && v.s2 && v.e2) {
+    if (v) {
         renderComparisonReport(v);
     }
+}
+
+// 2. ฟังก์ชันสำหรับประมวลผลและแสดงผลในช่องรายงาน
 function renderComparisonReport(v) {
     const formatThaiDate = (dateStr) => {
+        if (!dateStr) return "-";
         const days = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
         const dt = new Date(dateStr);
         const dayName = days[dt.getDay()];
@@ -80,8 +92,10 @@ function renderComparisonReport(v) {
             }
             currentDate.setDate(currentDate.getDate() + 1);
         }
+        
         const sumC = list.reduce((a, b) => a + Number(b.count || 0), 0);
         const sumE = list.reduce((a, b) => a + Number(b.barber || 0), 0);
+        
         const rowList = list.length > 0 ? list.map(d => `
             <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:12px;">
                 <span style="flex:1.5; color:#94a3b8;">${d.date}</span>
@@ -106,7 +120,6 @@ function renderComparisonReport(v) {
             </div>
 
             <div onclick="event.stopPropagation()" style="flex: 1; overflow-y: auto; padding: 15px; cursor: default;">
-                
                 <div style="background:rgba(56,189,248,0.05); border:1px solid rgba(56,189,248,0.2); border-radius:18px; padding:12px; margin-bottom:15px;">
                     <div style="color:#38bdf8; font-size:11px; font-weight:700; margin-bottom:8px;">📅 ${d1.range}</div>
                     <div style="display:flex; justify-content:space-between; margin-bottom:10px; background:rgba(255,255,255,0.03); padding:8px; border-radius:10px;">
