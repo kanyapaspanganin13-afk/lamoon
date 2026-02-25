@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 4</title>
+    <title>Barber Note Pro 24</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -512,89 +512,78 @@ body {
         </div>
     </div>
 </div>
-<div id="p2" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 15px; min-height: 100vh; display: flex; flex-direction: column; box-sizing: border-box;">
+<div id="p2" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 12px; background: #f8fafc; min-height: 100vh; flex-direction: column; box-sizing: border-box;">
     
-   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; padding: 10px 5px; border-bottom: 2px solid rgba(15, 23, 42, 0.05);">
-    
-    <div onclick="go('p1')" style="cursor: pointer; width: 46px; height: 46px; background: #f1f5f9; border-radius: 16px; display: flex; align-items: center; justify-content: center; border: 1.5px solid #cbd5e1; transition: 0.2s;">
-        <i class="fas fa-arrow-left" style="color: #0f172a; font-size: 18px;"></i>
-    </div>
-
-    <div style="text-align: center;">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 2px;">
-            <i class="fas fa-chart-pie" style="color: #2563eb; font-size: 22px;"></i>
-            <span style="color: #0f172a; font-size: 22px; font-weight: 900; letter-spacing: 0.5px;">รายงานประจำวัน</span>
-        </div>
-        <div style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-            <i class="far fa-clock" style="color: #64748b; font-size: 11px;"></i>
-            <small style="color: #475569; font-size: 15px; font-weight: 700;">Daily report</small>
-        </div>
-    </div>
-
-    <div onclick="go('p3')" style="cursor: pointer; width: 46px; height: 46px; background: #2563eb; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(37,99,235,0.4); border: 1.5px solid #1d4ed8;">
-        <i class="fas fa-arrow-right" style="color: white; font-size: 18px;"></i>
-    </div>
-</div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
-        <div style="background: linear-gradient(135deg, #190da8, #0b1e59); padding:18px 15px; border-radius:20px; text-align:center; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);">
-            <small style="font-weight:800; color:#cbd5e1; text-transform: uppercase; letter-spacing: 0.5px;">ยอดรวมวันนี้</small>
-            <div id="dTotal" style="font-size:36px; font-weight:900; color:#ffffff; margin: 5px 0;">0</div>
-            <div id="dCounts" style="font-size:16px; font-weight:700; color:#cbd5e1; background:rgba(255,255,255,0.15); display:inline-block; padding:2px 10px; border-radius:10px;">ลูกค้า 0 คน</div>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 5px 0; border-bottom: 1px solid rgba(15, 23, 42, 0.05);">
+        <div onclick="go('p1')" style="cursor: pointer; width: 42px; height: 42px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1.5px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+            <i class="fas fa-arrow-left" style="color: #64748b; font-size: 16px;"></i>
         </div>
 
-        <div style="background: linear-gradient(135deg, #190da8, #0b1e59); padding:15px; border-radius:20px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; justify-content:center; gap:8px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700;">
-                <span style="color:#cbd5e1; display:flex; align-items:center; gap:8px;">
-                    <i class="fas fa-mobile-alt" style="width:18px; color:#60a5fa;"></i> โอน:
-                </span> 
-                <b id="dTrans" style="color:#ffffff;">0</b>
-            </div> 
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700;">
-                <span style="color:#cbd5e1; display:flex; align-items:center; gap:8px;">
-                    <i class="fas fa-money-bill-wave" style="width:18px; color:#4ade80;"></i> สด:
-                </span> 
-                <b id="dCash" style="color:#ffffff;">0</b>
-            </div> 
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700;">
-                <span style="color:#cbd5e1; display:flex; align-items:center; gap:8px;">
-                    <i class="fas fa-cut" style="width:18px; color:#fbbf24;"></i> ช่าง:
-                </span> 
-                <b id="dBarber" style="color:#ffffff;">0</b>
+        <div style="text-align: center;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="fas fa-chart-pie" style="color: #2563eb; font-size: 22px;"></i>
+                <h3 style="margin: 0; color: #0f172a; font-size: 22px; font-weight: 900; letter-spacing: 0.5px;">รายงานประจำวัน</h3>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:800; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px; margin-top: 2px;">
-                <span style="color:#cbd5e1; display:flex; align-items:center; gap:8px;">
-                    <i class="fas fa-store" style="width:18px; color:#f472b6;"></i> ร้าน:
-                </span> 
-                <b id="dShop" style="color:#ffffff;">0</b>
+            <small style="color: #64748b; font-size: 15px; font-weight: 700; letter-spacing: 1px;">DAILY REPORT</small>
+        </div>
+
+        <div onclick="go('p3')" style="cursor: pointer; width: 42px; height: 42px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);">
+            <i class="fas fa-arrow-right" style="color: white; font-size: 16px;"></i>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div style="background: linear-gradient(135deg, #1e40af, #3b82f6); padding:18px 10px; border-radius:22px; text-align:center; box-shadow: 0 4px 12px rgba(37,99,235,0.15);">
+            <small style="font-weight:800; color:rgba(255,255,255,0.8); text-transform: uppercase; font-size: 11px;">ยอดรวมวันนี้</small>
+            <div id="dTotal" style="font-size:32px; font-weight:900; color:#ffffff; margin: 4px 0;">0</div>
+            <div id="dCounts" style="font-size:12px; font-weight:700; color:#ffffff; background:rgba(255,255,255,0.2); display:inline-block; padding:2px 10px; border-radius:8px;">ลูกค้า 0 คน</div>
+        </div>
+
+        <div style="background: #ffffff; padding:15px; border-radius:22px; border: 1.5px solid #e2e8f0; display:flex; flex-direction:column; justify-content:center; gap:6px;">
+            <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:700;">
+                <span style="color:#64748b;"><i class="fas fa-mobile-alt" style="color:#3b82f6; width:15px;"></i> โอน:</span> 
+                <b id="dTrans" style="color:#0f172a;">0</b>
+            </div> 
+            <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:700;">
+                <span style="color:#64748b;"><i class="fas fa-money-bill-wave" style="color:#22c55e; width:15px;"></i> สด:</span> 
+                <b id="dCash" style="color:#0f172a;">0</b>
+            </div> 
+            <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:700; border-top: 1px dashed #e2e8f0; pt: 5px; margin-top: 2px;">
+                <span style="color:#64748b;"><i class="fas fa-cut" style="color:#f59e0b; width:15px;"></i> ช่าง:</span> 
+                <b id="dBarber" style="color:#0f172a;">0</b>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:800;">
+                <span style="color:#64748b;"><i class="fas fa-store" style="color:#ec4899; width:15px;"></i> ร้าน:</span> 
+                <b id="dShop" style="color:#2563eb;">0</b>
             </div>
         </div>
     </div>
 
-    <div id="settleBarContainer" style="margin-bottom:18px;"><div id="settleBar"></div> </div>
+    <div id="settleBarContainer" style="margin-bottom:15px;"><div id="settleBar"></div> </div>
     <div id="dServiceStats"></div>
-    <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin-top:15px;">
-    <div id="dailyList"></div>
-    </div> 
- </div> 
-</div> <div id="reportModal" class="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(10px); z-index:10000; align-items:center; justify-content:center; padding:15px;">
-    <div class="modal-content" style="background:#ffffff; width:95%; max-width:400px; border-radius:30px; padding: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); animation: slideUp 0.3s ease-out;"> 
+    <div id="dailyList" style="flex: 1; overflow-y: auto;"></div>
+    
+</div> <div id="reportModal" class="modal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); backdrop-filter:blur(8px); z-index:10000; align-items:center; justify-content:center; padding:15px;">
+    <div class="modal-content" style="background:#ffffff; width:100%; max-width:400px; border-radius:25px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);"> 
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3 id="reportTitle" style="margin:0; color:#1e3a8a; font-weight: 800;">📊 รายงาน</h3>
-            <button onclick="closeReportModal()" style="background:#fee2e2; color:#dc2626; border:none; width:35px; height:35px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+            <h3 id="reportTitle" style="margin:0; color:#0f172a; font-weight: 800; font-size: 18px;">📊 รายงาน</h3>
+            <button onclick="closeReportModal()" style="background:#f1f5f9; color:#64748b; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer;">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <div id="reportContent" style="max-height:450px; overflow-y:auto; border-radius:15px; background:#f8fafc; padding:10px;">
-        </div>
+        <div id="reportContent" style="max-height:400px; overflow-y:auto; border-radius:15px; background:#f8fafc; padding:12px; border: 1px solid #e2e8f0;"></div>
     </div>
 </div>
-<div id="linePreview" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; padding:20px;">
-    <div style="background:#fff; width:100%; max-width:450px; padding:20px; border-radius:15px;">
-        <h3 style="margin:0 0 15px 0; color:#1e293b; font-size:18px;">📝 ตรวจสอบรายงานก่อนส่ง</h3>
-        <textarea id="msgEdit" style="width:100%; height:300px; padding:12px; border:1px solid #cbd5e1; border-radius:10px; resize:none; outline:none;"></textarea>
-        <div style="display:flex; gap:10px; margin-top:15px;">
-            <button onclick="document.getElementById('linePreview').style.display='none'" style="flex:1; padding:12px; background:#f1f5f9; border-radius:10px; border:none;">ยกเลิก</button>
-            <button onclick="sendToLineFinal()" style="flex:1; padding:12px; background:#22c55e; color:#fff; border-radius:10px; border:none; font-weight:bold;">ส่งเข้า LINE ✅</button>
+
+<div id="linePreview" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.8); z-index:10001; justify-content:center; align-items:center; padding:20px; backdrop-filter:blur(5px);">
+    <div style="background:#fff; width:100%; max-width:420px; padding:20px; border-radius:25px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+        <h3 style="margin:0 0 15px 0; color:#0f172a; font-size:18px; font-weight: 800;">📝 ตรวจสอบรายงานส่ง LINE</h3>
+        <textarea id="msgEdit" style="width:100%; height:250px; padding:15px; border:1.5px solid #e2e8f0; border-radius:15px; resize:none; outline:none; font-family: sans-serif; font-size: 14px; background: #f8fafc; color: #1e293b; box-sizing: border-box;"></textarea>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button onclick="document.getElementById('linePreview').style.display='none'" style="flex:1; height: 50px; background:#f1f5f9; border-radius:15px; border:none; color:#64748b; font-weight:700; cursor:pointer;">ยกเลิก</button>
+            <button onclick="sendToLineFinal()" style="flex:1; height: 50px; background:#22c55e; color:#fff; border-radius:15px; border:none; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                <i class="fab fa-line" style="font-size: 20px;"></i> ส่งเข้า LINE
+            </button>
         </div>
     </div>
 </div>
