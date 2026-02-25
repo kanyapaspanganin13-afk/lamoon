@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 2</title>
+    <title>Barber Note Pro 52</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -598,63 +598,62 @@ body {
         </div>
     </div>
 </div>
-<div id="p3" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 15px; padding-bottom: 30px; background: #0f172a; min-height: 100vh; display: flex; flex-direction: column; box-sizing: border-box;">
+<div id="p3" class="page" style="display:none; max-width:480px; margin:0 auto; padding: 12px; background: #0f172a; min-height: 100vh; flex-direction: column; box-sizing: border-box;">
     
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 5px 0;">
-        <div onclick="go('p2')" style="cursor: pointer; width: 45px; height: 45px; background: rgba(255,255,255,0.05); border-radius: 15px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);">
-            <i class="fas fa-chevron-left" style="color: white; font-size: 18px;"></i>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 5px 0;">
+        <div onclick="go('p2')" style="cursor: pointer; width: 42px; height: 42px; background: rgba(255,255,255,0.05); border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);">
+            <i class="fas fa-chevron-left" style="color: white; font-size: 16px;"></i>
         </div>
 
         <div style="text-align: center;">
-            <h3 style="margin: 0; color: white; font-size: 18px; font-weight: 800; letter-spacing: 0.5px;">💰 ระบบบัญชีร้าน</h3>
-            <small style="color: #94a3b8; font-size: 11px;">จัดการยอดค้างชำระและประวัติ</small>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="fas fa-file-invoice-dollar" style="color: #fbbf24; font-size: 20px;"></i>
+                <h3 style="margin: 0; color: white; font-size: 18px; font-weight: 800; letter-spacing: 0.5px;">สถานะบัญชี</h3>
+            </div>
+            <small style="color: #94a3b8; font-size: 11px;">Account status</small>
         </div>
 
-        <div onclick="go('p0')" style="cursor: pointer; width: 45px; height: 45px; background: rgba(255,255,255,0.05); border-radius: 15px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);">
-            <i class="fas fa-home" style="color: #64748b; font-size: 18px;"></i>
+        <div onclick="go('p0')" style="cursor: pointer; width: 42px; height: 42px; background: rgba(255,255,255,0.05); border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);">
+            <i class="fas fa-home" style="color: #64748b; font-size: 16px;"></i>
         </div>
     </div>
 
-    <div class="card" style="background:#fff; border-radius:25px; padding:20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border:none; margin-bottom: 15px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <b style="font-size:22px; color:#92400e;"><i class="fas fa-wallet"></i> สถานะบัญชี</b>
-            <div id="accLight" style="background:#22c55e; width:10px; height:10px; border-radius:50%; box-shadow:0 0 8px #22c55e;"></div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-            <div style="background:#f8fafc; border-radius:18px; padding:12px; text-align:center; border: 1px solid #f1f5f9;">
+    <div class="card" style="background:#fff; border-radius:20px; padding:15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border:none; margin-bottom: 12px;">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+            <div style="background:#f8fafc; border-radius:15px; padding:15px 10px; text-align:center; border: 1px solid #f1f5f9;">
                 <small style="font-size:12px; color:#64748b; font-weight:700;">ค้างเดิม</small>
-                <b style="font-size:18px; color:#1e293b; display:block;" id="accOldVal">฿0</b>
+                <b style="font-size:20px; color:#1e293b; display:block;" id="accOldVal">฿0</b>
             </div>
-            <div style="background:#f8fafc; border-radius:18px; padding:12px; text-align:center; border: 1px solid #f1f5f9;">
+            <div style="background:#f8fafc; border-radius:15px; padding:15px 10px; text-align:center; border: 1px solid #f1f5f9;">
                 <small id="accDateLabel" style="font-size:12px; color:#64748b; font-weight:700;">00/00/0000</small>
-                <b style="font-size:18px; color:#1e293b; display:block;" id="accTodayVal">฿0</b>
+                <b style="font-size:20px; color:#1e293b; display:block;" id="accTodayVal">฿0</b>
             </div>
         </div>
 
-        <div style="background:#f8fafc; border-radius:22px; padding:20px; text-align:center; margin-bottom:15px; border: 1px solid #f1f5f9;">
-            <div id="statusBadge" style="display:inline-block; padding:4px 12px; border-radius:10px; font-size:12px; font-weight:700; margin-bottom:8px; background: #e2e8f0; color: #475569;">
+        <div style="background:#f8fafc; border-radius:18px; padding:25px 15px; text-align:center; margin-bottom:12px; border: 1px solid #f1f5f9;">
+            <div id="statusBadge" style="display:inline-block; padding:4px 12px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:8px; background: #e2e8f0; color: #475569; text-transform: uppercase;">
                 กำลังคำนวณ...
             </div>
-            <div style="font-size:32px; font-weight:900; color:#1e293b;" id="accTotalVal">฿0</div>
+            <div style="font-size:40px; font-weight:900; color:#1e293b; letter-spacing: -1px;" id="accTotalVal">฿0</div>
         </div>
 
-        <div style="margin-bottom:15px;">
-            <div style="display:flex; align-items:center; background:#f1f5f9; border-radius:15px; padding:0 15px; margin-bottom:8px; height:50px;">
-                <i class="fas fa-calendar-alt" style="color:#6366f1;"></i>
-                <input type="date" id="accDate" style="flex:1; border:none; background:none; font-size:16px; font-weight:600; padding-left:10px; outline:none;">
+        <div style="margin-bottom:12px;">
+            <div style="display:flex; align-items:center; background:#f1f5f9; border-radius:12px; padding:0 15px; margin-bottom:8px; height:52px; border: 1px solid #e2e8f0;">
+                <i class="fas fa-calendar-alt" style="color:#6366f1; width: 20px;"></i>
+                <input type="date" id="accDate" style="flex:1; border:none; background:none; font-size:16px; font-weight:700; padding-left:10px; outline:none; color:#1e293b;">
             </div>
-            <div style="display:flex; align-items:center; background:#f1f5f9; border-radius:15px; padding:0 15px; height:50px;">
-                <i class="fas fa-pen-nib" style="color:#94a3b8;"></i>
-                <input type="text" id="accNote" placeholder="หมายเหตุ..." style="flex:1; border:none; background:none; font-size:15px; padding-left:10px; outline:none;">
+            <div style="display:flex; align-items:center; background:#f1f5f9; border-radius:12px; padding:0 15px; height:52px; border: 1px solid #e2e8f0;">
+                <i class="fas fa-pen-nib" style="color:#94a3b8; width: 20px;"></i>
+                <input type="text" id="accNote" placeholder="หมายเหตุ..." style="flex:1; border:none; background:none; font-size:15px; font-weight:600; padding-left:10px; outline:none; color:#1e293b;">
             </div>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <button onclick="clearAccount()" style="background:#22c55e; color:#fff; border:none; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+            <button onclick="clearAccount()" style="background: linear-gradient(135deg, #22c55e, #16a34a); color:#fff; border:none; border-radius:15px; height: 55px; font-size:15px; font-weight:800; cursor:pointer; box-shadow: 0 4px 12px rgba(34,197,94,0.2);">
                 <i class="fas fa-check-double"></i> เคลียร์เงิน
             </button>
-            <button onclick="openHistoryModal()" style="background:#f59e0b; color:#fff; border:none; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer;">
+            <button onclick="openHistoryModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); color:#fff; border:none; border-radius:15px; height: 55px; font-size:15px; font-weight:800; cursor:pointer; box-shadow: 0 4px 12px rgba(245,158,11,0.2);">
                 <i class="fas fa-history"></i> ประวัติ
             </button>
         </div>
