@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 52</title>
+    <title>Barber Note Pro 5</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -622,11 +622,11 @@ body {
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
             <div style="background:#f8fafc; border-radius:15px; padding:15px 10px; text-align:center; border: 1px solid #f1f5f9;">
-                <small style="font-size:12px; color:#64748b; font-weight:700;">ค้างเดิม</small>
+                <small style="font-size:14px; color:#64748b; font-weight:700;">ค้างเดิม</small>
                 <b style="font-size:22px; color:#1e293b; display:block;" id="accOldVal">฿0</b>
             </div>
             <div style="background:#f8fafc; border-radius:15px; padding:15px 10px; text-align:center; border: 1px solid #f1f5f9;">
-                <small id="accDateLabel" style="font-size:12px; color:#64748b; font-weight:700;">00/00/0000</small>
+                <small id="accDateLabel" style="font-size:14px; color:#64748b; font-weight:700;">00/00/0000</small>
                 <b style="font-size:22px; color:#1e293b; display:block;" id="accTodayVal">฿0</b>
             </div>
         </div>
@@ -655,13 +655,15 @@ body {
             </div>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <button onclick="clearAccount()" style="background: linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; border-radius:15px; height: 55px; font-size:16px; font-weight:800; cursor:pointer; box-shadow: 0 4px 12px rgba(16,185,129,0.2);">
-                <i class="fas fa-check-double"></i> เคลียร์เงิน
-            </button>
-            <button onclick="openHistoryModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); color:#fff; border:none; border-radius:15px; height: 55px; font-size:16px; font-weight:800; cursor:pointer; box-shadow: 0 4px 12px rgba(245,158,11,0.2);">
-                <i class="fas fa-history"></i> ประวัติ
-            </button>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top: 5px;">
+    <button onclick="clearAccount()" style="background: linear-gradient(135deg, #05e850,#22c55e); color:#fff; border:none; border-radius:18px; height: 70px; font-size: 19px; font-weight: 900; cursor:pointer; box-shadow: 0 6px 15px rgba(16,185,129,0.3); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
+        <i class="fas fa-check-double" style="font-size: 22px;"></i>
+        <span>เคลียร์เงิน</span>
+    </button>
+    <button onclick="openHistoryModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); color:#fff; border:none; border-radius:18px; height: 70px; font-size: 19px; font-weight: 900; cursor:pointer; box-shadow: 0 6px 15px rgba(245,158,11,0.25); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
+        <i class="fas fa-history" style="font-size: 22px;"></i>
+        <span>ประวัติ</span>
+    </button>
         </div>
     </div>
 </div>
