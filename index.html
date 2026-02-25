@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 11</title>
+    <title>Barber Note Pro 1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -70,54 +70,73 @@ window.processComparison = function() {
     renderComparisonReport({ s1, e1, s2, e2 });
 };
 
-// --- 3. ฟังก์ชันแสดงผลรายงาน (หน้ากากมืด) ---
+// --- 3. ฟังก์ชันแสดงผลรายงาน (เวอร์ชันแก้ไขการหาข้อมูลไม่เจอ) ---
 function renderComparisonReport(v) {
     const formatThaiDate = (dateStr) => {
         if (!dateStr) return "-";
         const days = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
-        const dt = new Date(dateStr);
-        const dayName = days[dt.getDay()];
         const [y, m, d] = dateStr.split('-');
+        const dt = new Date(y, m - 1, d); // สร้าง Date แบบระบุปีเดือนวันโดยตรง (แม่นยำกว่า)
+        const dayName = days[dt.getDay()];
         return `${dayName} ${d}/${m}/${(parseInt(y) + 543).toString().slice(-2)}`;
     };
 
     const fetchStats = (start, end) => {
         let list = [];
-        let currentDate = new Date(start);
-        const stopDate = new Date(end);
+        // ปรับการสร้างวันที่แบบ Manual เพื่อป้องกันเรื่อง Timezone
+        let [sY, sM, sD] = start.split('-').map(Number);
+        let [eY, eM, eD] = end.split('-').map(Number);
+        
+        let curr = new Date(sY, sM - 1, sD);
+        let stop = new Date(eY, eM - 1, eD);
 
-        while (currentDate <= stopDate) {
-            const dateStr = currentDate.toISOString().split('T')[0];
-            if (typeof archives !== 'undefined') {
-                const dayData = archives.find(a => a.date === dateStr);
-                if (dayData) {
-                    let realCustomerCount = 0;
-                    if (dayData.details && Array.isArray(dayData.details)) {
-                        realCustomerCount = dayData.details.filter(d => {
-                            const itemName = Array.isArray(d.svcs) ? d.svcs.join("") : String(d.svcs || "");
-                            const isInsurance = d.type === "GUARANTEE_CLAIM" || itemName.includes("ประกัน");
-                            return !isInsurance; 
-                        }).length;
-                    }
-                    list.push({
-                        date: formatThaiDate(dateStr),
-                        count: realCustomerCount,
-                        barber: dayData.barber || 0
-                    });
+        // ตรวจสอบตัวแปร archives
+        if (typeof archives === 'undefined') {
+            return { sumC: 0, sumE: 0, rowList: `<div style="padding:15px; text-align:center; color:#ef4444;">ไม่พบตัวแปร archives</div>`, range: "ERROR" };
+        }
+
+        while (curr <= stop) {
+            // สร้าง Date String รูปแบบ YYYY-MM-DD แบบตรงไปตรงมา
+            const y = curr.getFullYear();
+            const m = String(curr.getMonth() + 1).padStart(2, '0');
+            const d = String(curr.getDate()).padStart(2, '0');
+            const dateStr = `${y}-${m}-${d}`;
+
+            // ค้นหาข้อมูล
+            const dayData = archives.find(a => a.date === dateStr);
+            
+            if (dayData) {
+                let realCustomerCount = 0;
+                // ตรวจสอบ details และนับจำนวนลูกค้า
+                const details = dayData.details || dayData.items || []; // เผื่อกรณีชื่อตัวแปรต่างกัน
+                if (Array.isArray(details)) {
+                    realCustomerCount = details.filter(item => {
+                        const itemName = Array.isArray(item.svcs) ? item.svcs.join("") : String(item.svcs || "");
+                        const isInsurance = item.type === "GUARANTEE_CLAIM" || itemName.includes("ประกัน");
+                        return !isInsurance; 
+                    }).length;
                 }
+
+                list.push({
+                    date: formatThaiDate(dateStr),
+                    count: realCustomerCount,
+                    // ดึงยอดเงิน (เผื่อเรียกทั้ง barber หรือ total)
+                    barber: Number(dayData.barber || dayData.total || 0)
+                });
             }
-            currentDate.setDate(currentDate.getDate() + 1);
+            
+            curr.setDate(curr.getDate() + 1);
         }
         
         const sumC = list.reduce((a, b) => a + Number(b.count || 0), 0);
         const sumE = list.reduce((a, b) => a + Number(b.barber || 0), 0);
         
         const rowList = list.length > 0 ? list.map(d => `
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:12px;">
+            <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px;">
                 <span style="flex:1.5; color:#94a3b8;">${d.date}</span>
-                <span style="flex:1; text-align:center; color:#38bdf8;">👤 ${d.count}</span>
-                <span style="flex:1.2; text-align:right; color:#bef264;">฿${Number(d.barber).toLocaleString()}</span>
-            </div>`).join("") : `<div style="padding:15px; text-align:center; color:#475569;">❌ ไม่พบข้อมูล</div>`;
+                <span style="flex:1; text-align:center; color:#38bdf8; font-weight:700;">👤 ${d.count}</span>
+                <span style="flex:1.2; text-align:right; color:#bef264; font-weight:700;">฿${Number(d.barber).toLocaleString()}</span>
+            </div>`).join("") : `<div style="padding:25px; text-align:center; color:#64748b;">📅 ไม่มีข้อมูลที่บันทึกไว้ในช่วงนี้</div>`;
         
         return { sumC, sumE, rowList, range: `${formatThaiDate(start)} - ${formatThaiDate(end)}` };
     };
@@ -125,16 +144,13 @@ function renderComparisonReport(v) {
     const d1 = fetchStats(v.s1, v.e1);
     const d2 = fetchStats(v.s2, v.e2);
 
+    // --- ส่วนแสดงผล HTML (คงเดิมตามโครงสร้างของพี่) ---
     const finalReportHtml = `
-        <div id="report-container" 
-            onclick="this.remove()" 
-            style="background: #0f172a; color: #f1f5f9; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); margin-top: 20px; display: flex; flex-direction: column; height: 500px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); cursor: pointer; font-family: 'Kanit', sans-serif;">
-            
+        <div id="report-container" onclick="this.remove()" style="background: #0f172a; color: #f1f5f9; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); margin-top: 20px; display: flex; flex-direction: column; height: 500px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); cursor: pointer; font-family: 'Kanit', sans-serif;">
             <div style="padding: 15px; background: rgba(30, 41, 59, 0.9); text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
                 <div style="font-size: 15px; font-weight: 800; color: #38bdf8;">📊 วิเคราะห์เปรียบเทียบข้อมูล</div>
                 <div style="font-size: 10px; color: #64748b; margin-top:3px;">(แตะที่นี่เพื่อปิดรายงาน)</div>
             </div>
-
             <div onclick="event.stopPropagation()" style="flex: 1; overflow-y: auto; padding: 15px; cursor: default;">
                 <div style="background:rgba(56,189,248,0.05); border:1px solid rgba(56,189,248,0.2); border-radius:18px; padding:12px; margin-bottom:15px;">
                     <div style="color:#38bdf8; font-size:11px; font-weight:700; margin-bottom:8px;">📅 ${d1.range}</div>
@@ -144,9 +160,7 @@ function renderComparisonReport(v) {
                     </div>
                     <div style="max-height:120px; overflow-y:auto;">${d1.rowList}</div>
                 </div>
-
                 <center style="color:#475569; font-weight:900; font-size:12px; margin-bottom:15px;">V S</center>
-
                 <div style="background:rgba(190,242,100,0.05); border:1px solid rgba(190,242,100,0.2); border-radius:18px; padding:12px;">
                     <div style="color:#bef264; font-size:11px; font-weight:700; margin-bottom:8px;">📅 ${d2.range}</div>
                     <div style="display:flex; justify-content:space-between; margin-bottom:10px; background:rgba(255,255,255,0.03); padding:8px; border-radius:10px;">
@@ -165,7 +179,6 @@ function renderComparisonReport(v) {
         displayArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
-
 // --- 4. ฟังก์ชันแสดง Modal ขาว (คงเดิม) ---
 function openReportModal(title, htmlContent) {
     const modal = getEl('reportModal');
