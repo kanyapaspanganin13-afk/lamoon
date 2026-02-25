@@ -9,18 +9,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 8</title>
+    <title>Barber Note Pro 1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 // เปลี่ยนจาก $ เป็น getEl เพื่อความปลอดภัย
 const getEl = id => document.getElementById(id);
-async function openComparisonSelector() {
-    if (typeof Swal === 'undefined') {
-        alert("กรุณารอระบบโหลดสักครู่ หรือเช็คการเชื่อมต่ออินเทอร์เน็ต");
-        return;
-    }
+async function compareStats() {
     const { value: v } = await Swal.fire({
         title: '📊 เปรียบเทียบข้อมูล',
         confirmButtonText: 'วิเคราะห์ข้อมูล',
@@ -40,13 +36,14 @@ async function openComparisonSelector() {
             </div>
         `,
         preConfirm: () => ({ 
-            s1: getEl('s1').value, e1: getEl('e1').value, 
-            s2: getEl('s2').value, e2: getEl('e2').value 
+            s1: document.getElementById('s1').value, e1: document.getElementById('e1').value, 
+            s2: document.getElementById('s2').value, e2: document.getElementById('e2').value 
         })
     });
 
-    if (v && v.s1 && v.e1 && v.s2 && v.e2) renderComparisonReport(v);
-}
+    if (v && v.s1 && v.e1 && v.s2 && v.e2) {
+        renderComparisonReport(v);
+    }
 function renderComparisonReport(v) {
     const formatThaiDate = (dateStr) => {
         const days = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
@@ -65,21 +62,15 @@ function renderComparisonReport(v) {
             const dateStr = currentDate.toISOString().split('T')[0];
             if (typeof archives !== 'undefined') {
                 const dayData = archives.find(a => a.date === dateStr);
-               if (dayData) {
+                if (dayData) {
                     let realCustomerCount = 0;
-                    
                     if (dayData.details && Array.isArray(dayData.details)) {
                         realCustomerCount = dayData.details.filter(d => {
-                            // 1. ดึงชื่อรายการออกมา (เช่น "🛡️ ประกันรายวัน")
                             const itemName = Array.isArray(d.svcs) ? d.svcs.join("") : String(d.svcs || "");
-                            // 2. เช็คว่ามีประเภทเป็น GUARANTEE_CLAIM หรือมีคำว่า "ประกัน" ไหม
-                            // ถ้าเป็นประกัน ให้คืนค่า false เพื่อ "ไม่นับ" เป็นลูกค้า
                             const isInsurance = d.type === "GUARANTEE_CLAIM" || itemName.includes("ประกัน");
-                            
                             return !isInsurance; 
                         }).length;
                     }
-
                     list.push({
                         date: formatThaiDate(dateStr),
                         count: realCustomerCount,
@@ -91,13 +82,12 @@ function renderComparisonReport(v) {
         }
         const sumC = list.reduce((a, b) => a + Number(b.count || 0), 0);
         const sumE = list.reduce((a, b) => a + Number(b.barber || 0), 0);
-        
         const rowList = list.length > 0 ? list.map(d => `
-            <div style="display:flex; justify-content:space-between; padding:10px 8px; border-bottom:1px solid rgba(0,0,0,0.05); font-size:13px; color:#334155;">
-                <span style="flex:1.5; font-weight:500;">${d.date}</span>
-                <span style="flex:1; text-align:center; color:#1d4ed8; font-weight:700;">👤 ${d.count}</span>
-                <span style="flex:1.2; text-align:right; color:#059669; font-weight:700;">฿${Number(d.barber).toLocaleString()}</span>
-            </div>`).join("") : `<div style="padding:15px; text-align:center; color:#94a3b8;">❌ ไม่พบข้อมูล</div>`;
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:12px;">
+                <span style="flex:1.5; color:#94a3b8;">${d.date}</span>
+                <span style="flex:1; text-align:center; color:#38bdf8;">👤 ${d.count}</span>
+                <span style="flex:1.2; text-align:right; color:#bef264;">฿${Number(d.barber).toLocaleString()}</span>
+            </div>`).join("") : `<div style="padding:15px; text-align:center; color:#475569;">❌ ไม่พบข้อมูล</div>`;
         
         return { sumC, sumE, rowList, range: `${formatThaiDate(start)} - ${formatThaiDate(end)}` };
     };
@@ -105,38 +95,46 @@ function renderComparisonReport(v) {
     const d1 = fetchStats(v.s1, v.e1);
     const d2 = fetchStats(v.s2, v.e2);
 
-    // ... ส่วนที่เหลือ (reportHtml และ openReportModal) ใช้ของเดิมได้เลยครับ ...
-    const reportHtml = `
-        <div style="font-family:'Kanit', sans-serif; text-align:left; background:#ffffff; margin:-20px; padding:20px; color:#1e293b;">
-            <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:24px; padding:18px; margin-bottom:15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-                <div style="color:#0369a1; font-weight:700; font-size:13px; margin-bottom:10px; display:flex; align-items:center; gap:5px;">📅 ${d1.range}</div>
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:12px; border-radius:16px; border:1px solid #e0f2fe; margin-bottom:10px;">
-                    <span style="flex:1.5; font-weight:800; color:#1e293b; font-size:14px;">สรุปรวม</span>
-                    <span style="flex:1; text-align:center; color:#1d4ed8; font-weight:800; font-size:18px;">👤 ${d1.sumC}</span>
-                    <span style="flex:1.2; text-align:right; color:#059669; font-weight:800; font-size:18px;">฿${d1.sumE.toLocaleString()}</span>
-                </div>
-                <div style="max-height:160px; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0 5px;">
-                    ${d1.rowList}
-                </div>
+    const finalReportHtml = `
+        <div id="report-container" 
+            onclick="this.parentElement.innerHTML=''" 
+            style="background: #0f172a; color: #f1f5f9; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); margin-top: 20px; display: flex; flex-direction: column; height: 500px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); cursor: pointer;">
+            
+            <div style="padding: 15px; background: rgba(30, 41, 59, 0.9); text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 15px; font-weight: 800; color: #38bdf8;">📊 วิเคราะห์เปรียบเทียบข้อมูล</div>
+                <div style="font-size: 10px; color: #64748b; margin-top:3px;">(แตะที่นี่เพื่อปิดรายงาน)</div>
             </div>
 
-            <div style="text-align:center; color:#cbd5e1; font-weight:900; margin:10px 0; font-size:12px;">VS</div>
-
-            <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius: 24px; padding: 18px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-                <div style="color:#15803d; font-weight:700; font-size:13px; margin-bottom:10px; display:flex; align-items:center; gap:5px;">📅 ${d2.range}</div>
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:12px; border-radius:16px; border:1px solid #dcfce7; margin-bottom:10px;">
-                    <span style="flex:1.5; font-weight:800; color:#1e293b; font-size:14px;">สรุปรวม</span>
-                    <span style="flex:1; text-align:center; color:#1d4ed8; font-weight:800; font-size:18px;">👤 ${d2.sumC}</span>
-                    <span style="flex:1.2; text-align:right; color:#059669; font-weight:800; font-size:18px;">฿${d2.sumE.toLocaleString()}</span>
+            <div onclick="event.stopPropagation()" style="flex: 1; overflow-y: auto; padding: 15px; cursor: default;">
+                
+                <div style="background:rgba(56,189,248,0.05); border:1px solid rgba(56,189,248,0.2); border-radius:18px; padding:12px; margin-bottom:15px;">
+                    <div style="color:#38bdf8; font-size:11px; font-weight:700; margin-bottom:8px;">📅 ${d1.range}</div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px; background:rgba(255,255,255,0.03); padding:8px; border-radius:10px;">
+                        <span style="font-size:13px; font-weight:800;">👤 ${d1.sumC} คน</span>
+                        <span style="font-size:13px; font-weight:800; color:#bef264;">฿${d1.sumE.toLocaleString()}</span>
+                    </div>
+                    <div style="max-height:120px; overflow-y:auto;">${d1.rowList}</div>
                 </div>
-                <div style="max-height:160px; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0 5px;">
-                    ${d2.rowList}
+
+                <center style="color:#475569; font-weight:900; font-size:12px; margin-bottom:15px;">V S</center>
+
+                <div style="background:rgba(190,242,100,0.05); border:1px solid rgba(190,242,100,0.2); border-radius:18px; padding:12px;">
+                    <div style="color:#bef264; font-size:11px; font-weight:700; margin-bottom:8px;">📅 ${d2.range}</div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px; background:rgba(255,255,255,0.03); padding:8px; border-radius:10px;">
+                        <span style="font-size:13px; font-weight:800;">👤 ${d2.sumC} คน</span>
+                        <span style="font-size:13px; font-weight:800; color:#bef264;">฿${d2.sumE.toLocaleString()}</span>
+                    </div>
+                    <div style="max-height:120px; overflow-y:auto;">${d2.rowList}</div>
                 </div>
             </div>
-            <div style="text-align:center; font-size:11px; color:#94a3b8; margin-top:15px;">เปรียบเทียบข้อมูลเฉพาะรายได้ของช่าง</div>
-        </div>`;
+        </div>
+    `;
 
-    openReportModal("วิเคราะห์เปรียบเทียบข้อมูล", reportHtml);
+    const displayArea = document.getElementById("stats-display-area");
+    if (displayArea) {
+        displayArea.innerHTML = finalReportHtml;
+        displayArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 function openReportModal(title, htmlContent) {
     const modal = getEl('reportModal');
