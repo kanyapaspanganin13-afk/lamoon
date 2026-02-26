@@ -2491,44 +2491,44 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; padding: 0 15px;">
                     <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:10px; border-radius:15px; text-align:center;">
-                        <div style="font-size:10px; color:#94a3b8;">ยอดช่าง</div>
+                        <div style="font-size:14px; color:#94a3b8;">ยอดช่าง</div>
                         <div style="font-size:18px; font-weight:800; color:#bef264;">฿${Math.floor(monthBarber).toLocaleString()}</div>
                     </div>
                     <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:10px; border-radius:15px; text-align:center;">
-                        <div style="font-size:10px; color:#94a3b8;">ยอดร้าน</div>
+                        <div style="font-size:12px; color:#94a3b8;">ยอดร้าน</div>
                         <div style="font-size:18px; font-weight:800; color:#38bdf8;">฿${Math.floor(monthTotal - monthBarber).toLocaleString()}</div>
                     </div>
                 </div>
 
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px; padding: 0 15px;">
                     <div style="background:rgba(56,189,248,0.1); padding:8px; border-radius:12px; text-align:center;">
-                        <div style="font-size:9px; color:#38bdf8;">รวม</div><div style="font-size:13px; font-weight:700;">${monthCount}</div>
+                        <div style="font-size:12px; color:#38bdf8;">รวม</div><div style="font-size:13px; font-weight:700;">${monthCount}</div>
                     </div>
                     <div style="background:rgba(74,222,128,0.1); padding:8px; border-radius:12px; text-align:center;">
-                        <div style="font-size:9px; color:#4ade80;">ใหม่</div><div style="font-size:13px; font-weight:700;">${monthNewCust}</div>
+                        <div style="font-size:12px; color:#4ade80;">]^ลูกค้าใหม่</div><div style="font-size:13px; font-weight:700;">${monthNewCust}</div>
                     </div>
                     <div style="background:rgba(129,140,248,0.1); padding:8px; border-radius:12px; text-align:center;">
-                        <div style="font-size:9px; color:#818cf8;">ประจำ</div><div style="font-size:13px; font-weight:700;">${monthRegularCust}</div>
+                        <div style="font-size:9px; color:#818cf8;">ลูกค้าประจำ</div><div style="font-size:13px; font-weight:700;">${monthRegularCust}</div>
                     </div>
                 </div>
 
                 <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:20px; padding: 0 15px;">
                     <div style="background:rgba(255,255,255,0.05); padding:6px; border-radius:10px; text-align:center;">
-                        <div style="font-size:8px; color:#94a3b8;">เปิด</div><div style="font-size:11px; font-weight:700;">${workDays}</div>
+                        <div style="font-size:12px; color:#94a3b8;">เปิด</div><div style="font-size:11px; font-weight:700;">${workDays}</div>
                     </div>
                     <div style="background:rgba(244,63,94,0.1); padding:6px; border-radius:10px; text-align:center;">
-                        <div style="font-size:8px; color:#fb7185;">หยุด</div><div style="font-size:11px; font-weight:700; color:#fb7185;">${offDays}</div>
+                        <div style="font-size:12px; color:#fb7185;">หยุด</div><div style="font-size:11px; font-weight:700; color:#fb7185;">${offDays}</div>
                     </div>
                     <div style="background:rgba(147,51,234,0.1); padding:6px; border-radius:10px; text-align:center;">
-                        <div style="font-size:8px; color:#a855f7;">เฉลี่ย</div><div style="font-size:11px; font-weight:700;">${avgCustomerPerDay.toFixed(1)}</div>
+                        <div style="font-size:12px; color:#a855f7;">เฉลี่ย</div><div style="font-size:11px; font-weight:700;">${avgCustomerPerDay.toFixed(1)}</div>
                     </div>
                     <div style="background:rgba(250,204,21,0.1); padding:6px; border-radius:10px; text-align:center;">
-                        <div style="font-size:8px; color:#facc15;">ประกัน</div><div style="font-size:11px; font-weight:700;">${monthGuarDays || 0}</div>
+                        <div style="font-size:12px; color:#facc15;">ประกัน</div><div style="font-size:11px; font-weight:700;">${monthGuarDays || 0}</div>
                     </div>
                 </div>
 
                 <div style="margin-bottom:25px; padding: 0 15px;">
-                    <div style="font-size:14px; font-weight:800; color:#facc15; margin-bottom:12px;">📅 วิเคราะห์รายสัปดาห์</div>
+                    <div style="font-size:16px; font-weight:800; color:#facc15; margin-bottom:12px;">📅 วิเคราะห์รายสัปดาห์</div>
                     ${weeklyHtml}
                 </div>
 
@@ -2540,6 +2540,10 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                 <div style="margin-bottom:25px;">
                     <div style="font-size:15px; font-weight:800; color:#bef264; margin-bottom:15px; padding: 0 15px;">ทรงผมยอดนิยม</div>
                     ${renderStats(hairStats, "#bef264")}
+                </div>
+            <div style="margin-bottom:25px;">
+                    <div style="font-size:15px; font-weight:800; color:#38bdf8; margin-bottom:15px; padding: 0 15px;">บริการยอดนิยม</div>
+                    ${renderStats(serviceStats, "#38bdf8")}
                 </div>
             </div>
         </div>
