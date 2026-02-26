@@ -2354,7 +2354,6 @@ function loadHistMonth() {
     // เรียกใช้ฟังก์ชันสร้าง Report
     generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays);
 }
-
 function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays) {
     const weekEntries = Object.entries(weeklyData);
     
@@ -2394,7 +2393,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     const busiestDay = dayAverages.sort((a, b) => b.avg - a.avg)[0];
     const quietestDay = dayAverages.sort((a, b) => a.avg - b.avg)[0];
 
-    // ฟังก์ชันวาดกราฟสถิติ
+    // ฟังก์ชันวาดกราฟสถิติ (Bar Chart)
     const renderStats = (statsObj, color) => {
         const entries = Object.entries(statsObj).sort((a,b) => b[1]-a[1]);
         if (entries.length === 0) return `<div style="color:#64748b; font-size:12px; padding: 0 15px;">ไม่มีข้อมูลสถิติ</div>`;
