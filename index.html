@@ -530,7 +530,7 @@ body {
                 <i class="fas fa-chart-pie" style="color: #2563eb; font-size: 22px;"></i>
                 <h3 style="margin: 0; color: #0f172a; font-size: 22px; font-weight: 900; letter-spacing: 0.5px;">รายงานประจำวัน</h3>
             </div>
-            <small style="color: #64748b; font-size: 15px; font-weight: 700; letter-spacing: 1px;">DAILY REPORT</small>
+            <small style="color: #64748b; font-size: 15px; font-weight: 700; letter-spacing: 1px;">Daily repot</small>
         </div>
 
         <div onclick="go('p3')" style="cursor: pointer; width: 42px; height: 42px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);">
@@ -785,7 +785,7 @@ body {
                 <i class="fas fa-sliders-h" style="color: #2563eb; font-size: 22px;"></i>
                 <h3 style="margin: 0; color: #0f172a; font-size: 22px; font-weight: 900; letter-spacing: 0.5px;">จัดการระบบ</h3>
             </div>
-            <small style="color: #64748b; font-size: 15px; font-weight: 700; letter-spacing: 1px;">SYSTEM CONFIGURATION</small>
+            <small style="color: #64748b; font-size: 15px; font-weight: 700; letter-spacing: 1px;">System configuration</small>
         </div>
 
         <div style="width: 42px;"></div>
@@ -2481,8 +2481,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
 
     // --- 4. ประกอบโครงสร้าง HTML ---
     const finalReportHtml = `
-        <div id="report-container" onclick="this.parentElement.innerHTML=''" style="background: #0f172a; color: #f1f5f9; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; height: 550px; overflow: hidden; font-family: sans-serif; cursor: pointer;">
-            
+       <div id="report-container" onclick="this.parentElement.innerHTML='<div style=\'text-align:center; padding:20px;\'><p style=\'font-size:16px; font-weight:700;\'>กรุณาเลือกเดือนหรือช่วงเวลา<br><span style=\'font-weight:500; font-size:14px;\'>เพื่อดูรายงานสถิติ</span></p></div>'" ...     
             <div style="padding: 16px; background: rgba(30, 41, 59, 0.9); text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
                 <div style="font-size: 14px; color: #94a3b8; font-weight:700;">✂️รายได้เดือน ${m}</div>
                 <div style="font-size: 28px; font-weight: 900; color: #ffffff;">฿${monthTotal.toLocaleString()}</div>
