@@ -2478,9 +2478,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         </div>`;
     }).join("");
 
-    // --- 4. ประกอบโครงสร้าง HTML (จุดที่พี่ต้องเปลี่ยน) ---
-  const defaultText = "<div style='text-align:center; padding:20px;'><p style='font-size:16px; font-weight:700; color:#94a3b8;'>กรุณาเลือกเดือนหรือช่วงเวลา<br><span style='font-weight:500; font-size:14px;'>เพื่อดูรายงานสถิติ</span></p></div>";
-    
+    const defaultText = `<div style="text-align:center; padding:20px;"><p style="font-size:16px; font-weight:700; color:#94a3b8;">กรุณาเลือกเดือนหรือช่วงเวลา<br><span style="font-weight:500; font-size:14px;">เพื่อดูรายงานสถิติ</span></p></div>`;
     const finalReportHtml = `
         <div id="report-container" onclick="this.parentElement.innerHTML='${defaultText}'" style="background: #0f172a; color: #f1f5f9; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; height: 550px; overflow: hidden; font-family: sans-serif; cursor: pointer;">
             
