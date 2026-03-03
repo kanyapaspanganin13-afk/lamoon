@@ -585,44 +585,51 @@ span[onclick*="delRec"] {
     </div>
 <div class="card" style="background:var(--card); border-radius:25px; padding:18px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border:1px solid var(--border);">
     
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">
-        <div>
-            <b style="font-size:18px; color:var(--text); display:block;"><i class="fas fa-chart-line" style="color:#10b981;"></i> กำไรสุทธิ</b>
-            <div onclick="document.getElementById('profitMonth').showPicker()" style="display:inline-flex; align-items:center; background:var(--bg); padding:4px 10px; border-radius:10px; margin-top:5px; cursor:pointer; border:1px solid var(--border);">
-                <i class="fas fa-calendar-alt" style="font-size:10px; color:#6366f1; margin-right:5px;"></i>
-                <input type="month" id="profitMonth" onchange="changeProfitMonth()" style="border:none; background:none; font-size:11px; font-weight:700; color:var(--text); outline:none; cursor:pointer; width:90px;">
+<div class="card" style="background:var(--card); border-radius:25px; padding:18px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border:1px solid var(--border);">
+    
+    <b style="font-size:18px; color:var(--text); display:block; margin-bottom:12px;">
+        <i class="fas fa-chart-line" style="color:#10b981;"></i> กำไรสุทธิ
+    </b>
+
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <div onclick="document.getElementById('profitMonth').showPicker()" 
+             style="flex: 1; background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:45px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center; cursor:pointer;">
+            <small style="font-size:8px; color:var(--text); opacity:0.5; position:absolute; top:4px;">เลือกเดือน</small>
+            <div style="display:flex; align-items:center; margin-top:10px;">
+                <i class="fas fa-calendar-alt" style="font-size:12px; color:#6366f1; margin-right:5px;"></i>
+                <input type="month" id="profitMonth" onchange="changeProfitMonth()" style="border:none; background:none; font-size:14px; font-weight:800; color:var(--text); outline:none; cursor:pointer; width:100px;">
             </div>
         </div>
-        
-        <div style="text-align:right;">
-            <small style="font-size:10px; color:#64748b; font-weight:700;">รายได้ร้านสะสม</small>
-            <b id="shopTotalMonth" style="font-size:18px; color:#3b82f6; display:block;">฿0</b>
+
+        <div style="flex: 1; background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:45px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <small style="font-size:12px; color:#64748b; font-weight:700; position:absolute; top:4px;">รายได้ร้าน</small>
+            <b id="shopTotalMonth" style="font-size:16px; color:#3b82f6; margin-top:10px;">฿0</b>
         </div>
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 10px;">
         <div style="display: flex; gap: 10px;">
             <div style="flex: 1; background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:45px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-                <small style="font-size:8px; color:var(--text); opacity:0.5; position:absolute; top:4px;">ค่าเช่า</small>
+                <small style="font-size:12px; color:var(--text); opacity:0.5; position:absolute; top:4px;">ค่าเช่า</small>
                 <input type="number" id="costRent" oninput="calcNetProfit()" placeholder="0" style="width:100%; border:none; background:none; text-align:center; font-weight:800; color:#ef4444; outline:none; font-size:16px; padding-top:10px;">
             </div>
             <div style="flex: 1; background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:45px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-                <small style="font-size:8px; color:var(--text); opacity:0.5; position:absolute; top:4px;">เน็ต</small>
+                <small style="font-size:12px; color:var(--text); opacity:0.5; position:absolute; top:4px;">เน็ต</small>
                 <input type="number" id="costNet" oninput="calcNetProfit()" placeholder="0" style="width:100%; border:none; background:none; text-align:center; font-weight:800; color:#ef4444; outline:none; font-size:16px; padding-top:10px;">
             </div>
         </div>
         <div style="display: flex; gap: 10px;">
             <div style="flex: 1; background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:45px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-                <small style="font-size:8px; color:var(--text); opacity:0.5; position:absolute; top:4px;">ค่าน้ำ</small>
+                <small style="font-size:12px; color:var(--text); opacity:0.5; position:absolute; top:4px;">ค่าน้ำ</small>
                 <input type="number" id="costWater" oninput="calcNetProfit()" placeholder="0" style="width:100%; border:none; background:none; text-align:center; font-weight:800; color:#ef4444; outline:none; font-size:16px; padding-top:10px;">
             </div>
             <div style="flex: 1; background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:45px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-                <small style="font-size:8px; color:var(--text); opacity:0.5; position:absolute; top:4px;">ค่าไฟ</small>
+                <small style="font-size:12px; color:var(--text); opacity:0.5; position:absolute; top:4px;">ค่าไฟ</small>
                 <input type="number" id="costElec" oninput="calcNetProfit()" placeholder="0" style="width:100%; border:none; background:none; text-align:center; font-weight:800; color:#ef4444; outline:none; font-size:16px; padding-top:10px;">
             </div>
         </div>
         <div style="background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:45px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-            <small style="font-size:8px; color:var(--text); opacity:0.5; position:absolute; top:4px;">สินค้าสิ้นเปลือง</small>
+            <small style="font-size:12px; color:var(--text); opacity:0.5; position:absolute; top:4px;">สินค้าสิ้นเปลือง</small>
             <input type="number" id="costSupply" oninput="calcNetProfit()" placeholder="0" style="width:100%; border:none; background:none; text-align:center; font-weight:800; color:#ef4444; outline:none; font-size:16px; padding-top:10px;">
         </div>
     </div>
