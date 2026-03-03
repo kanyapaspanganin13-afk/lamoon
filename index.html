@@ -583,12 +583,6 @@ span[onclick*="delRec"] {
             <button onclick="openHistoryModal()" style="background:#f59e0b; color:#fff; border:none; border-radius:15px; padding:12px 0; font-size:14px; font-weight:800; cursor:pointer; height:45px;">ประวัติเคลียร์</button>
         </div>
     </div>
- <div class="card" style="background:var(--card); border-radius:25px; padding:18px; padding-bottom:10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border:1px solid var(--border);">
-    
-    <b style="font-size:18px; color:var(--text); display:block; margin-bottom:12px;">
-        <i class="fas fa-chart-line" style="color:#10b981;"></i> กำไรสุทธิ
-    </b>
-
 <div class="card" style="background:var(--card); border-radius:25px; padding:18px; padding-bottom:10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border:1px solid var(--border); width: 100%; box-sizing: border-box;">
     
     <b style="font-size:18px; color:var(--text); display:block; margin-bottom:12px;">
@@ -610,34 +604,34 @@ span[onclick*="delRec"] {
     </div>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-        <div style="background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 8px; overflow:hidden;">
-            <span style="font-size:11px; font-weight:700; color:var(--text); white-space:nowrap; margin-right:4px;">ค่าเช่า:</span>
+        <div style="background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 8px;">
+            <span style="font-size:11px; font-weight:700; color:var(--text); white-space:nowrap;">ค่าเช่า:</span>
             <input type="number" id="costRent" oninput="calcNetProfit()" placeholder="0" style="width:100%; border:none; background:none; text-align:right; font-weight:800; color:#ef4444; outline:none; font-size:14px;">
         </div>
-        <div style="background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 8px; overflow:hidden;">
-            <span style="font-size:11px; font-weight:700; color:var(--text); white-space:nowrap; margin-right:4px;">เน็ต:</span>
+        <div style="background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 8px;">
+            <span style="font-size:11px; font-weight:700; color:var(--text); white-space:nowrap;">เน็ต:</span>
             <input type="number" id="costNet" oninput="calcNetProfit()" placeholder="0" style="width:100%; border:none; background:none; text-align:right; font-weight:800; color:#ef4444; outline:none; font-size:14px;">
         </div>
-        <div style="background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 8px; overflow:hidden;">
-            <span style="font-size:11px; font-weight:700; color:var(--text); white-space:nowrap; margin-right:4px;">ค่าน้ำ:</span>
+        <div style="background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 8px;">
+            <span style="font-size:11px; font-weight:700; color:var(--text); white-space:nowrap;">ค่าน้ำ:</span>
             <input type="number" id="costWater" oninput="calcNetProfit()" placeholder="0" style="width:100%; border:none; background:none; text-align:right; font-weight:800; color:#ef4444; outline:none; font-size:14px;">
         </div>
-        <div style="background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 8px; overflow:hidden;">
-            <span style="font-size:11px; font-weight:700; color:var(--text); white-space:nowrap; margin-right:4px;">ค่าไฟ:</span>
+        <div style="background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 8px;">
+            <span style="font-size:11px; font-weight:700; color:var(--text); white-space:nowrap;">ค่าไฟ:</span>
             <input type="number" id="costElec" oninput="calcNetProfit()" placeholder="0" style="width:100%; border:none; background:none; text-align:right; font-weight:800; color:#ef4444; outline:none; font-size:14px;">
         </div>
     </div>
 
-    <div style="background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 10px; margin-bottom: 12px; overflow:hidden;">
-        <span style="font-size:11px; font-weight:700; color:var(--text); white-space:nowrap; margin-right:4px;">สินค้าสิ้นเปลือง:</span>
+    <div style="background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 10px; margin-bottom: 12px;">
+        <span style="font-size:11px; font-weight:700; color:var(--text); white-space:nowrap;">สินค้าสิ้นเปลือง:</span>
         <input type="number" id="costSupply" oninput="calcNetProfit()" placeholder="0" style="width:100%; border:none; background:none; text-align:right; font-weight:800; color:#ef4444; outline:none; font-size:14px;">
     </div>
     
     <div id="profitBox" style="background:linear-gradient(135deg, #059669, #064e3b); padding:8px 15px; border-radius:12px; text-align:center; box-shadow: 0 3px 8px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;">
-        <small id="profitLabel" style="color:rgba(255,255,255,0.9); font-size:12px; font-weight:700; white-space:nowrap;">กำไรสุทธิ:</small>
-        <div id="profitNetVal" style="font-size:18px; font-weight:900; color:#ffffff; white-space:nowrap;">฿0</div>
+        <small id="profitLabel" style="color:rgba(255,255,255,0.9); font-size:12px; font-weight:700;">กำไรสุทธิ:</small>
+        <div id="profitNetVal" style="font-size:18px; font-weight:900; color:#ffffff;">฿0</div>
             </div>
-        </div> 
+        </div>
     </div>
 </div>
 <div id="p4" class="page" style="max-width:480px; margin:0 auto; padding: 12px; padding-bottom: 100px;">
@@ -1295,49 +1289,55 @@ function updateMixValues() {
     }
 }
 function updateShopIncomeOnly() {
-        const selectedMonth = document.getElementById('profitMonth').value;
-        if (!selectedMonth) return;
+    // 1. ดึงยอดรายได้ร้านจากตัวแปร shopEarn ของพี่
+    // ตรวจสอบว่ามีตัวแปร shopEarn ไหม ถ้าไม่มีให้เป็น 0
+    let income = (typeof shopEarn !== 'undefined') ? shopEarn : 0;
 
-        // ตัวอย่างการดึงยอด (พี่ต้องปรับตามตัวแปรที่เก็บข้อมูลในแอปพี่นะครับ)
-        let shopIncome = 0; 
-        
-        // ตรงนี้คือตัวเลขรายได้ร้านที่หักส่วนแบ่งช่างออกแล้ว
-        // สมมติให้ดึงมาจากฐานข้อมูลหรือตัวแปรหลักของพี่
-        // shopIncome = getYodShopOnly(selectedMonth); 
-
-        document.getElementById('shopTotalMonth').innerText = "฿" + shopIncome.toLocaleString();
-        calcNetProfit();
+    // 2. นำยอดไปแสดงที่ ID shopTotalMonth (ใส่คอมมาให้สวยงาม)
+    const shopDisplay = document.getElementById('shopTotalMonth');
+    if (shopDisplay) {
+        shopDisplay.innerText = "฿" + income.toLocaleString();
     }
 
-    function calcNetProfit() {
-        const incomeTxt = document.getElementById('shopTotalMonth').innerText;
-        const shopIncome = parseFloat(incomeTxt.replace('฿', '').replace(/,/g, '')) || 0;
+    // 3. สั่งคำนวณกำไรสุทธิ (หักลบค่าใช้จ่าย) ทันที
+    calcNetProfit();
+}
 
-        const costs = [
-            parseFloat(document.getElementById('costRent').value) || 0,
-            parseFloat(document.getElementById('costNet').value) || 0,
-            parseFloat(document.getElementById('costWater').value) || 0,
-            parseFloat(document.getElementById('costElec').value) || 0,
-            parseFloat(document.getElementById('costSupply').value) || 0
-        ];
+function calcNetProfit() {
+    // ดึงรายได้ร้านจากหน้าจอ (ที่เพิ่งใส่ค่า shopEarn ลงไป)
+    const incomeTxt = document.getElementById('shopTotalMonth').innerText;
+    const shopIncome = parseFloat(incomeTxt.replace('฿', '').replace(/,/g, '')) || 0;
+
+    // ดึงค่าใช้จ่าย 5 ช่อง
+    const costs = {
+        rent: parseFloat(document.getElementById('costRent').value) || 0,
+        net: parseFloat(document.getElementById('costNet').value) || 0,
+        water: parseFloat(document.getElementById('costWater').value) || 0,
+        elec: parseFloat(document.getElementById('costElec').value) || 0,
+        supply: parseFloat(document.getElementById('costSupply').value) || 0
+    };
+
+    const totalCost = costs.rent + costs.net + costs.water + costs.elec + costs.supply;
+    const netResult = shopIncome - totalCost;
+
+    // แสดงผลที่แถบด้านล่าง (สีเขียว=กำไร / สีแดง=ขาดทุน)
+    const valDisplay = document.getElementById('profitNetVal');
+    const boxDisplay = document.getElementById('profitBox');
+    const labelDisplay = document.getElementById('profitLabel');
+
+    if (valDisplay && boxDisplay) {
+        // อัปเดตตัวเลข (ใส่ -฿ ข้างหน้าถ้าขาดทุน)
+        valDisplay.innerText = (netResult >= 0 ? "฿" : "-฿") + Math.abs(netResult).toLocaleString();
         
-        const totalCost = costs.reduce((a, b) => a + b, 0);
-        const netResult = shopIncome - totalCost;
-
-        const valDisplay = document.getElementById('profitNetVal');
-        const boxDisplay = document.getElementById('profitBox');
-        const labelDisplay = document.getElementById('profitLabel');
-
-        if (netResult >= 0) {
-            boxDisplay.style.background = "linear-gradient(135deg, #059669, #064e3b)";
-            labelDisplay.innerText = "กำไรสุทธิ:";
-            valDisplay.innerText = "฿" + netResult.toLocaleString();
-        } else {
-            boxDisplay.style.background = "linear-gradient(135deg, #ef4444, #991b1b)";
-            labelDisplay.innerText = "ขาดทุนสุทธิ:";
-            valDisplay.innerText = "-฿" + Math.abs(netResult).toLocaleString();
-        }
+        // สลับสีพื้นหลัง
+        boxDisplay.style.background = netResult >= 0 
+            ? "linear-gradient(135deg, #059669, #064e3b)" 
+            : "linear-gradient(135deg, #ef4444, #991b1b)";
+            
+        // เปลี่ยนข้อความหัวข้อ
+        labelDisplay.innerText = netResult >= 0 ? "กำไรสุทธิ:" : "ขาดทุนสุทธิ:";
     }
+}
     /* ==========================================================
    SECTION 4: CALCULATION & CLOSING DAILY REPORT
    (ระบบคำนวณส่วนแบ่งและการปิดยอดรายวัน)
