@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 02</title>
+    <title>Barber Note Pro 12</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -345,6 +345,63 @@ nav {
         box-shadow: 0 20px 50px rgba(0,0,0,0.3); /* เพิ่มเงาให้ดูมีมิติ */
         position: relative;
     }
+    /* 9. ส่วนเสริมสำหรับรายงานและสถิติ (ที่เพิ่งปรับปรุง) */
+
+/* กรอบนับจำนวนลูกค้า dCounts */
+#dCounts {
+    text-align: center;
+    padding: 8px;
+    border-radius: 12px;
+    background: var(--bg); /* ปรับสีตามธีม */
+    color: var(--text);
+    min-height: 60px; /* ล็อคความสูงขั้นต่ำไม่ให้โย่ง */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* ปรับแต่ง Tag บริการใน dServiceStats */
+#dServiceStats span {
+    display: inline-block;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    white-space: nowrap; /* ป้องกันข้อความตัดบรรทัดในตัวเอง */
+}
+
+/* ปรับปรุงหน้าประวัติ (History Row) ให้รองรับโหมดมืด */
+.history-row {
+    background: var(--card) !important;
+    border-bottom: 1px solid var(--border) !important;
+    transition: background 0.2s;
+}
+
+.history-row:last-child {
+    border-bottom: none;
+}
+
+/* สีตัวหนังสือในรายงานให้เปลี่ยนตามธีม */
+.history-row [style*="color:#1e293b"] { color: var(--text) !important; }
+.history-row [style*="color:#64748b"] { color: var(--text); opacity: 0.7; }
+
+/* จัดการ Scrollbar ให้ดูเล็กและสะอาดตา */
+#accHistory::-webkit-scrollbar, 
+.modal-content::-webkit-scrollbar,
+.page::-webkit-scrollbar {
+    width: 4px;
+}
+#accHistory::-webkit-scrollbar-thumb,
+.modal-content::-webkit-scrollbar-thumb,
+.page::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+}
+/* ปรับปุ่มลบในประวัติให้เด่นแต่พอดี */
+span[onclick*="delRec"] {
+    padding: 4px 8px;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 6px;
+    margin-top: 5px;
+    display: inline-block;
+}
     .status-bar { padding: 12px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 14px; margin-bottom: 10px; }
     .acc-main-card { background: var(--card); padding: 20px; border-radius: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); margin-bottom: 15px; }
     #accHistory { font-size: 12px; max-height: 150px; overflow-y: auto; }
@@ -1432,28 +1489,40 @@ function renderDay(selectedDate){
     if ($("dBarber")) $("dBarber").innerText = Math.floor(bEarn).toLocaleString();
     if ($("dShop")) $("dShop").innerText = Math.floor(sEarn).toLocaleString();
 
-    // --- 🟢 ส่วนสรุปยอดลูกค้า (แก้ไขใหม่) ---
-    if ($("dCounts")) {
-        if (isHoliday) {
-            $("dCounts").innerText = "🏖️ วันหยุด";
-        } else if (allRec.length === 0) {
-            $("dCounts").innerText = "ไม่มีข้อมูล";
-        } else {
-            // แสดงผลหลักเป็น "ลูกค้า: X คน"
-            // และจะโชว์รายละเอียด (ใหม่/ประจำ) เฉพาะเมื่อมีการเลือกบันทึกไว้เท่านั้น
-            let detail = "";
-            if (countNew > 0 || countRegular > 0) {
-                detail = ` (ใหม่ ${countNew} / ประจำ ${countRegular})`;
-            }
-            $("dCounts").innerText = `ลูกค้า: ${realCustomerCount} คน${detail}`;
+       // --- 🟢 ส่วนสรุปยอดลูกค้า (แก้ไขใหม่: แยกบรรทัดและปรับสี) ---
+if ($("dCounts")) {
+    if (isHoliday) {
+        $("dCounts").innerHTML = "<span style='color:#64748b;'>🏖️ วันหยุด</span>";
+    } else if (allRec.length === 0) {
+        $("dCounts").innerHTML = "<span style='color:#94a3b8;'>ไม่มีข้อมูล</span>";
+    } else {
+        // จัดรูปแบบการแสดงผลใหม่ แยกบรรทัด ใหม่/ประจำ
+        let detail = "";
+        if (countNew > 0 || countRegular > 0) {
+            detail = `
+                <div style="font-size: 13px; font-weight: 700; margin-top: 4px; border-top: 1px dashed #e2e8f0; pt: 4px;">
+                    <span style="color:#10b981;">✨ ใหม่: ${countNew}</span> | 
+                    <span style="color:#6366f1;">👤 ประจำ: ${countRegular}</span>
+                </div>`;
         }
+        // ปรับความสูงช่องและการแสดงตัวเลขหลัก
+        $("dCounts").innerHTML = `
+            <div style="line-height: 1.2;">
+                <b style="font-size: 16px; color:#1e293b;">ลูกค้า: ${realCustomerCount} คน</b>
+                ${detail}
+            </div>`;
     }
-
-    let sH = `<div style="display:flex; flex-wrap:wrap; gap:5px; justify-content:center; margin-bottom:10px;">`;
-    const priority = ["ตัดผม", "เด็ก"];
-    priority.forEach(k => { if (stats[k]) sH += `<span style="background:#4338ca;color:#fff;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;">${k}: ${stats[k]}</span>`; });
-    for (let s in stats) { if (!priority.includes(s)) sH += `<span style="background:#64748b;color:#fff;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;">${s}: ${stats[s]}</span>`; }
-    if ($("dServiceStats")) $("dServiceStats").innerHTML = sH + `</div>`;
+}
+   // --- 🟢 ปรับขนาดช่อง Service Stats (ให้เล็กลงและประหยัดพื้นที่) ---
+let sH = `<div style="display:flex; flex-wrap:wrap; gap:4px; justify-content:center; margin-bottom:8px;">`;
+const priority = ["ตัดผม", "เด็ก"];
+priority.forEach(k => { 
+    if (stats[k]) sH += `<span style="background:#4338ca;color:#fff;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:800;">${k}: ${stats[k]}</span>`; 
+});
+for (let s in stats) { 
+    if (!priority.includes(s)) sH += `<span style="background:#f1f5f9;color:#475569;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;border:1px solid #e2e8f0;">${s}: ${stats[s]}</span>`; 
+}
+if ($("dServiceStats")) $("dServiceStats").innerHTML = sH + `</div>`;
 
     let txt = "", statusColor = "", icon = "";
     if (isHoliday) {
@@ -1500,7 +1569,7 @@ function renderDay(selectedDate){
             <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 8px 12px; border-radius: 12px; border-bottom: 2px solid #f1f5f9; margin-bottom: 10px;">           
                 
                 <div style="display: flex; align-items: center; gap: 10px; margin-right: 15px;">
-                    <b style="font-size: 16px; color: #1e293b;">📋รายงานวันที่</b>              
+                    <b style="font-size: 14px; color: #1e293b;">📋รายงานวันที่</b>              
                     
                     <div style="position: relative; background: #f1f5f9; padding: 5px 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; cursor: pointer; width: 130px; height: 34px;"> 
                         <span style="font-size: 14px; font-weight: 700; color: #6366f1; width: 100%; text-align: center;">${displayDateBE}</span>                 
