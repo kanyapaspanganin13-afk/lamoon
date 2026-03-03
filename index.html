@@ -583,58 +583,56 @@ span[onclick*="delRec"] {
             <button onclick="openHistoryModal()" style="background:#f59e0b; color:#fff; border:none; border-radius:15px; padding:12px 0; font-size:14px; font-weight:800; cursor:pointer; height:45px;">ประวัติเคลียร์</button>
         </div>
     </div>
-    
-<div class="card" style="background:var(--card); border-radius:25px; padding:18px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border:1px solid var(--border);">
+ <div class="card" style="background:var(--card); border-radius:25px; padding:18px; padding-bottom:10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border:1px solid var(--border);">
     
     <b style="font-size:18px; color:var(--text); display:block; margin-bottom:12px;">
         <i class="fas fa-chart-line" style="color:#10b981;"></i> กำไรสุทธิ
     </b>
 
-    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-        <div onclick="document.getElementById('profitMonth').showPicker()" 
-             style="flex: 1; background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:45px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center; cursor:pointer;">
-            <small style="font-size:10px; color:var(--text); opacity:0.5; position:absolute; top:4px;">เดือนที่คำนวณ</small>
+    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <div onclick="document.getElementById('histMonth').showPicker()" 
+             style="flex: 1; background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:45px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center; cursor:pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <small style="font-size:10px; color:var(--text); opacity:0.5; position:absolute; top:4px;">เลือกเดือนสถิติ</small>
             <div style="display:flex; align-items:center; margin-top:10px;">
                 <i class="fas fa-calendar-alt" style="font-size:12px; color:#6366f1; margin-right:5px;"></i>
-                <input type="month" id="profitMonth" onchange="changeProfitMonth()" style="border:none; background:none; font-size:14px; font-weight:800; color:var(--text); outline:none; cursor:pointer; width:110px;">
+                <input type="month" id="histMonth" onchange="loadHistMonth()" style="border:none; background:none; font-size:13px; font-weight:800; color:var(--text); outline:none; cursor:pointer; width:100px;">
             </div>
         </div>
-
         <div style="flex: 1; background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:45px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center;">
             <small style="font-size:10px; color:#64748b; font-weight:700; position:absolute; top:4px;">รายได้ร้าน</small>
             <b id="shopTotalMonth" style="font-size:16px; color:#3b82f6; margin-top:10px;">฿0</b>
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
         <div style="background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 10px;">
-            <span style="font-size:12px; font-weight:700; color:var(--text); white-space:nowrap;">ค่าเช่า:</span>
+            <span style="font-size:12px; font-weight:700; color:var(--text);">ค่าเช่า:</span>
             <input type="number" id="costRent" oninput="calcNetProfit()" placeholder="0" style="width:100%; border:none; background:none; text-align:right; font-weight:800; color:#ef4444; outline:none; font-size:14px;">
         </div>
         <div style="background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 10px;">
-            <span style="font-size:12px; font-weight:700; color:var(--text); white-space:nowrap;">เน็ต:</span>
+            <span style="font-size:12px; font-weight:700; color:var(--text);">เน็ต:</span>
             <input type="number" id="costNet" oninput="calcNetProfit()" placeholder="0" style="width:100%; border:none; background:none; text-align:right; font-weight:800; color:#ef4444; outline:none; font-size:14px;">
         </div>
         <div style="background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 10px;">
-            <span style="font-size:12px; font-weight:700; color:var(--text); white-space:nowrap;">ค่าน้ำ:</span>
+            <span style="font-size:12px; font-weight:700; color:var(--text);">ค่าน้ำ:</span>
             <input type="number" id="costWater" oninput="calcNetProfit()" placeholder="0" style="width:100%; border:none; background:none; text-align:right; font-weight:800; color:#ef4444; outline:none; font-size:14px;">
         </div>
         <div style="background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 10px;">
-            <span style="font-size:12px; font-weight:700; color:var(--text); white-space:nowrap;">ค่าไฟ:</span>
+            <span style="font-size:12px; font-weight:700; color:var(--text);">ค่าไฟ:</span>
             <input type="number" id="costElec" oninput="calcNetProfit()" placeholder="0" style="width:100%; border:none; background:none; text-align:right; font-weight:800; color:#ef4444; outline:none; font-size:14px;">
         </div>
-        <div style="grid-column: span 2; background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 10px;">
-            <span style="font-size:12px; font-weight:700; color:var(--text); white-space:nowrap;">สินค้าสิ้นเปลือง:</span>
-            <input type="number" id="costSupply" oninput="calcNetProfit()" placeholder="0" style="width:100%; border:none; background:none; text-align:right; font-weight:800; color:#ef4444; outline:none; font-size:14px;">
-        </div>
+    </div>
+
+    <div style="background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 10px; margin-bottom: 12px;">
+        <span style="font-size:12px; font-weight:700; color:var(--text);">สินค้าสิ้นเปลือง:</span>
+        <input type="number" id="costSupply" oninput="calcNetProfit()" placeholder="0" style="width:100%; border:none; background:none; text-align:right; font-weight:800; color:#ef4444; outline:none; font-size:14px;">
     </div>
     
-   <div style="margin-top:12px;">
-    <div id="profitBox" style="background:linear-gradient(135deg, #059669, #064e3b); padding:8px 15px; border-radius:12px; text-align:center; box-shadow: 0 3px 8px rgba(0,0,0,0.1); transition: 0.3s; display: flex; justify-content: space-between; align-items: center;"> 
+    <div id="profitBox" style="background:linear-gradient(135deg, #059669, #064e3b); padding:8px 15px; border-radius:12px; text-align:center; box-shadow: 0 3px 8px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
         <small id="profitLabel" style="color:rgba(255,255,255,0.9); font-size:12px; font-weight:700;">กำไรสุทธิ:</small>
         <div id="profitNetVal" style="font-size:20px; font-weight:900; color:#ffffff;">฿0</div>
-           </div>  
-        </div>
+            </div>
+        </div>  
     </div>
 </div>
 <div id="p4" class="page" style="max-width:480px; margin:0 auto; padding: 12px; padding-bottom: 100px;">
@@ -2167,19 +2165,21 @@ function loadHistMonth() {
 
     const filtered = archives.filter(a => a.date && a.date.startsWith(m));
     if (!filtered.length) {
+        // 🟢 ถ้าไม่พบข้อมูลเดือนนั้น ให้เซ็ตรายได้ร้านเป็น 0
+        if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
         return openReportModal("📊 สรุปรายเดือน", `<div style='text-align:center;padding:50px;color:#94a3b8;'>ไม่พบข้อมูลของเดือน ${m}</div>`);
     }
 
-    // 🟢 เพิ่มตัวนับ monthGuarDays (จำนวนวันประกันรายได้)
     let monthTotal = 0, monthBarber = 0, monthCount = 0, monthGuarDays = 0; 
     let hairStats = {}, serviceStats = {};
     let offDays = 0, workDays = 0;
     let weeklyData = {};
 
-    const haircutList = ["แฟชั่น","สกินเฟด","เปิดข้าง","รองทรง","ตำรวจ/ทหาร","ทรงนักเรียน","แก้ผม","โกนผม","เด็ก"];
+    const haircutList = ["แฟชั่น","สกินเฟด","รองทรง","ตำรวจ/ทหาร","นักเรียน","ซอยผม/เล็มผม","แก้ผม","โกนผม","เด็ก"];
     const dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
 
     filtered.forEach(day => {
+        // ... (โค้ดส่วนคำนวณเดิมของพี่) ...
         const dObj = new Date(day.date);
         let wIdx = Math.ceil(dObj.getDate() / 7);
         const wKey = `สัปดาห์ที่ ${wIdx}`;
@@ -2187,9 +2187,8 @@ function loadHistMonth() {
         if (!weeklyData[wKey]) {
             weeklyData[wKey] = { 
                 customers: 0, workDays: 0, offDays: 0, 
-                zeroDays: 0, guarDays: 0, dailyCounts: [], // เพิ่ม guarDays ในระดับสัปดาห์ด้วย
-                popularHair: {}, 
-                popularService: {}, 
+                zeroDays: 0, guarDays: 0, dailyCounts: [], 
+                popularHair: {}, popularService: {}, 
                 income: 0 
             };
         }
@@ -2203,7 +2202,6 @@ function loadHistMonth() {
         workDays++;
         weeklyData[wKey].workDays++;
         
-        // 🛡️ ตรวจสอบว่าในรายละเอียดวันนั้น มีรายการ "GUARANTEE_CLAIM" หรือไม่
         const hasInsurance = day.details && day.details.some(d => d.type === "GUARANTEE_CLAIM");
         if (hasInsurance) {
             monthGuarDays++;
@@ -2213,19 +2211,18 @@ function loadHistMonth() {
         const dailyIncome = Number(day.total) || 0;
         const dailyBarber = Number(day.barber) || 0; 
         
-        monthTotal += dailyIncome;
+        monthTotal += dailyIncome; // ยอดรวมรายได้ร้านสะสมของเดือน
         monthBarber += dailyBarber;
         weeklyData[wKey].income += dailyIncome;
 
+        // ... (ส่วนนับจำนวนลูกค้าและทรงผมเดิม) ...
         let dayCustomerCount = 0;
         if (day.details && Array.isArray(day.details)) {
             day.details.forEach(d => {
-                // 👤 นับเฉพาะ SERVICE จริงๆ (ไม่นับ GUARANTEE_CLAIM เป็นลูกค้า)
                 if (d.type === "SERVICE") {
                     monthCount++;
                     dayCustomerCount++;
                     weeklyData[wKey].customers++;
-
                     const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
                     svcs.forEach(s => {
                         if (!s) return;
@@ -2251,9 +2248,18 @@ function loadHistMonth() {
         });
     });
 
+    // 🟢 1. อัปเดตยอดรายได้ร้านในหน้าบัญชี (shopTotalMonth)
+    if ($("shopTotalMonth")) {
+        $("shopTotalMonth").innerText = "฿" + monthTotal.toLocaleString();
+    }
+
+    // 🟢 2. สั่งคำนวณกำไรสุทธิใหม่ (ถ้ามีฟังก์ชัน calcNetProfit อยู่แล้ว)
+    if (window.calcNetProfit) {
+        calcNetProfit();
+    }
+
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
     
-    // 🎯 ส่งค่า monthGuarDays เข้าไปในฟังก์ชันสรุปรายงานด้วย
     generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays);
 }
 function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays) {
@@ -2262,9 +2268,9 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     const dayStats = {};
     let dailyTimeline = []; 
 
-    const haircutList = ["แฟชั่น","สกินเฟด","เปิดข้าง","รองทรง","ตำรวจ/ทหาร","ทรงนักเรียน","แก้ผม","โกนผม","เด็ก"];
-    const allHaircuts = ["แฟชั่น","สกินเฟด","เปิดข้าง","รองทรง","ตำรวจ/ทหาร","ทรงนักเรียน","แก้ผม","โกนผม","เด็ก"];
-    const allServices = ["โกนหนวด", "สระผม", "ย้อมผม", "กันหน้า", "ดัดผม", "ย้อมแฟชั่น"]; 
+    const haircutList = ["แฟชั่น","สกินเฟด","รองทรง","ตำรวจ/ทหาร","นักเรียน","ซอยผม/เล็มผม","แก้ผม","โกนผม","เด็ก"];
+    const allHaircuts = ["แฟชั่น","สกินเฟด","รองทรง","ตำรวจ/ทหาร","นักเรียน","ซอยผม/เล็มผม","แก้ผม","โกนผม","เด็ก"];
+    const allServices = ["โกนหนวด", "สระผม", "ย้อมผม", "กันหน้า","กันจอน", "ดัดผม", "ย้อมแฟชั่น"]; 
 
     const topHair = Object.entries(hairStats).sort((a, b) => b[1] - a[1])[0];
     const topService = Object.entries(serviceStats).sort((a, b) => b[1] - a[1])[0];
