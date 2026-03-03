@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 21</title>
+    <title>Barber Note Pro 2</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -597,11 +597,12 @@ span[onclick*="delRec"] {
                    style="border:none; background:none; font-size:12px; font-weight:800; color:var(--text); outline:none; cursor:pointer; width:90%; text-align:center; margin-top:10px;">
         </div>
 
-        <div style="flex: 1; background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:45px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-            <small style="font-size:9px; color:#3b82f6; font-weight:700; position:absolute; top:4px; white-space:nowrap;">รายได้ร้านสุทธิ</small>
-            <b id="shopTotalMonth" style="font-size:15px; color:#3b82f6; margin-top:10px; white-space:nowrap;">฿0</b>
-        </div>
+       <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); padding:15px; border-radius:20px; text-align:center;">
+    <div style="font-size:11px; color:#94a3b8;">รายได้ร้าน</div>
+    <div id="sourceShopEarn" style="font-size:20px; font-weight:800; color:#f8fafc;">
+        ฿${Math.floor(monthTotal - monthBarber).toLocaleString()}
     </div>
+</div>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
         <div style="background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 8px;">
@@ -633,7 +634,6 @@ span[onclick*="delRec"] {
             </div>
         </div>
     </div>
-</div>
 <div id="p4" class="page" style="max-width:480px; margin:0 auto; padding: 12px; padding-bottom: 100px;">
     
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: 100px; margin-bottom: 15px; width: 100%;">
@@ -1289,25 +1289,24 @@ function updateMixValues() {
     }
 }
 function updateShopIncomeOnly() {
-    // วิธีนี้จะไปดึงตัวเลขจาก "ช่องรายได้ร้าน" ที่โชว์อยู่บนหน้าจอพี่มาใช้เลยครับ
-    // เปลี่ยน 'totalShopEarnDisplay' เป็น ID ของช่องที่พี่โชว์รายได้ร้านปัจจุบัน
-    const sourceElement = document.getElementById('totalShopEarnDisplay'); 
-    
+    // 1. ไปดึงตัวเลขจากจุดที่พี่เพิ่งใส่ ID ไว้ (sourceShopEarn)
+    const source = document.getElementById('sourceShopEarn');
     let income = 0;
-    if (sourceElement) {
-        // ดึงข้อความ ตัด ฿ ออก แล้วเปลี่ยนเป็นตัวเลข
-        income = parseFloat(sourceElement.innerText.replace('฿', '').replace(/,/g, '')) || 0;
-    } else {
-        // ถ้าหา ID ไม่เจอ ให้ถอยกลับไปใช้ตัวแปร shopEarn (ถ้ามี)
-        income = (typeof shopEarn !== 'undefined') ? shopEarn : 0;
+
+    if (source) {
+        // ดึงข้อความ ตัด ฿ และลูกน้ำออก แล้วเปลี่ยนเป็นตัวเลข
+        income = parseFloat(source.innerText.replace('฿', '').replace(/,/g, '')) || 0;
     }
 
-    const shopDisplay = document.getElementById('shopTotalMonth');
-    if (shopDisplay) {
-        shopDisplay.innerText = "฿" + income.toLocaleString();
-        // เรียกคำนวณหักลบต่อ
-        calcNetProfit();
+    // 2. ส่งยอดไปแสดงที่ช่อง "รายได้ร้านสุทธิ" ในส่วนของกำไรสุทธิ
+    const target = document.getElementById('shopTotalMonth');
+    if (target) {
+        target.innerText = "฿" + income.toLocaleString();
     }
+
+    // 3. คำนวณกำไร/ขาดทุนสุทธิต่อทันที
+    calcNetProfit();
+}
 }
     const shopDisplay = document.getElementById('shopTotalMonth');
     if (shopDisplay) {
