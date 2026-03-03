@@ -1308,6 +1308,13 @@ function updateShopIncomeOnly() {
         // เรียกคำนวณหักลบต่อ
         calcNetProfit();
     }
+}
+    const shopDisplay = document.getElementById('shopTotalMonth');
+    if (shopDisplay) {
+        shopDisplay.innerText = "฿" + income.toLocaleString();
+        // เรียกคำนวณหักลบต่อ
+        calcNetProfit();
+    }
 function calcNetProfit() {
     // ดึงรายได้ร้านจากหน้าจอ (ที่เพิ่งใส่ค่า shopEarn ลงไป)
     const incomeTxt = document.getElementById('shopTotalMonth').innerText;
