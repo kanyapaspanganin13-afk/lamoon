@@ -501,29 +501,29 @@ span[onclick*="delRec"] {
         <div id="p2" class="page" style="max-width:480px; margin:0 auto; padding: 15px; padding-bottom: 100px;">
     <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; margin-bottom: 15px;">
         
-        <div style="background: linear-gradient(135deg, #190da8, #0b1e59); padding:18px 10px; border-radius:20px; text-align:center; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: center;">
-            <small style="font-weight:800; color:#cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; font-size: 12px;">ยอดรวมวันนี้</small>
+        <div style="background: linear-gradient(135deg,#fff,#190da8); padding:18px 10px; border-radius:20px; text-align:center; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: center;">
+            <small style="font-weight:800; color:#cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; font-size: 15px;">ยอดรวมวันนี้</small>
             <div id="dTotal" style="font-size:42px; font-weight:900; color:#ffffff; margin: 2px 0; letter-spacing: -1px;">0</div>
             <div id="dCounts" style="font-size:14px; font-weight:700; color:#ffffff; background:rgba(255,255,255,0.15); display:inline-block; padding:4px 10px; border-radius:12px; margin: 0 auto; width: fit-content;">ลูกค้า 0 คน</div>
         </div>
 
-        <div style="background: linear-gradient(135deg, #190da8, #0b1e59); padding:12px 10px; border-radius:20px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; justify-content:center; gap:6px;">
+        <div style="background: linear-gradient(135deg,#fff,#190da8); padding:12px 10px; border-radius:20px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; justify-content:center; gap:6px;">
             
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:700;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:700;">
                 <span style="color:#cbd5e1; display:flex; align-items:center; gap:5px;">
                     <i class="fas fa-mobile-alt" style="width:14px; color:#60a5fa;"></i> โอน
                 </span> 
                 <b id="dTrans" style="color:#ffffff;">0</b>
             </div>
             
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:700;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:700;">
                 <span style="color:#cbd5e1; display:flex; align-items:center; gap:5px;">
                     <i class="fas fa-money-bill-wave" style="width:14px; color:#4ade80;"></i> สด
                 </span> 
                 <b id="dCash" style="color:#ffffff;">0</b>
             </div>
             
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:700;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:700;">
                 <span style="color:#cbd5e1; display:flex; align-items:center; gap:5px;">
                     <i class="fas fa-cut" style="width:14px; color:#fbbf24;"></i> ช่าง
                 </span> 
@@ -1509,7 +1509,7 @@ if ($("dCounts")) {
         // ปรับความสูงช่องและการแสดงตัวเลขหลัก
         $("dCounts").innerHTML = `
             <div style="line-height: 1.2;">
-                <b style="font-size: 16px; color:#1e293b;">ลูกค้า: ${realCustomerCount} คน</b>
+                <b style="font-size: 16px; color:#fff;">ลูกค้า: ${realCustomerCount} คน</b>
                 ${detail}
             </div>`;
     }
