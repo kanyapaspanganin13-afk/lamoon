@@ -583,23 +583,23 @@ span[onclick*="delRec"] {
             <button onclick="openHistoryModal()" style="background:#f59e0b; color:#fff; border:none; border-radius:15px; padding:12px 0; font-size:14px; font-weight:800; cursor:pointer; height:45px;">ประวัติเคลียร์</button>
         </div>
     </div>
-<div class="card" style="background:var(--card); border-radius:25px; padding:18px; padding-bottom:10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border:1px solid var(--border); width: 100%; box-sizing: border-box;">
+<div class="card" style="background:var(--card); border-radius:25px; padding:18px; padding-bottom:10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border:1px solid var(--border); width: 100%; box-sizing: border-box; margin-top:15px;">
     
     <b style="font-size:18px; color:var(--text); display:block; margin-bottom:12px;">
         <i class="fas fa-chart-line" style="color:#10b981;"></i> กำไรสุทธิ
     </b>
 
-    <div style="display: flex; gap: 10px; margin-bottom: 12px; align-items: center;">
+    <div style="display: flex; gap: 10px; margin-bottom: 12px;">
         <div onclick="document.getElementById('profitMonth').showPicker()" 
-             style="flex: 1; background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:50px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center; cursor:pointer;">
+             style="flex: 1.2; background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:50px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center; cursor:pointer;">
             <small style="font-size:9px; color:var(--text); opacity:0.5; position:absolute; top:4px; white-space:nowrap;">เลือกเดือนสถิติ</small>
             <input type="month" id="profitMonth" onchange="updateShopIncomeOnly()" 
                    style="border:none; background:none; font-size:12px; font-weight:800; color:var(--text); outline:none; cursor:pointer; width:90%; text-align:center; margin-top:10px;">
         </div>
 
-        <div style="flex: 1; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); height:50px; border-radius:15px; text-align:center; display:flex; flex-direction:column; justify-content:center;">
-            <small style="font-size:10px; color:#94a3b8; font-weight:700;">รายได้ร้าน</small>
-            <div id="sourceShopEarn" style="font-size:16px; font-weight:800; color:#3b82f6;">           
+        <div style="flex: 1; background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:50px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <small style="font-size:9px; color:#3b82f6; font-weight:700; position:absolute; top:4px; white-space:nowrap;">รายได้ร้านสุทธิ</small>
+            <b id="shopTotalMonth" style="font-size:16px; color:#3b82f6; margin-top:10px; white-space:nowrap;">฿0</b>
         </div>
     </div>
 
@@ -1291,29 +1291,33 @@ function updateMixValues() {
 }
 // ฟังก์ชันดึงยอดรายได้ร้านจากจุดที่พี่ใส่ ID ไว้ (sourceShopEarn)
 function updateShopIncomeOnly() {
+    // 1. ไปหาจุดที่พี่โชว์ "รายได้ร้าน" (จุดที่มีเลข 14,640 ในรูปของพี่)
+    // พี่ต้องแน่ใจว่าจุดนั้นใส่ id="sourceShopEarn" ไว้แล้วนะครับ
     const source = document.getElementById('sourceShopEarn');
     let income = 0;
 
     if (source) {
-        // ดึงข้อความ ตัด ฿ และลูกน้ำออก แล้วเปลี่ยนเป็นตัวเลข
-        income = parseFloat(source.innerText.replace('฿', '').replace(/,/g, '')) || 0;
+        // ดึงตัวเลขออกมา ตัดเครื่องหมาย ฿ และลูกน้ำออก
+        let rawText = source.innerText.replace('฿', '').replace(/,/g, '');
+        income = parseFloat(rawText) || 0;
     }
 
-    // ส่งยอดไปแสดงที่ช่อง "รายได้ร้านสุทธิ" ในส่วนกำไรสุทธิ
+    // 2. นำยอดที่ได้ไปใส่ในช่อง "รายได้ร้านสุทธิ" ของกรอบกำไรสุทธิ
     const target = document.getElementById('shopTotalMonth');
     if (target) {
         target.innerText = "฿" + income.toLocaleString();
     }
 
-    // คำนวณหักลบค่าใช้จ่ายทันที
+    // 3. สั่งคำนวณหักลบค่าใช้จ่ายทันที
     calcNetProfit();
 }
 
-// ฟังก์ชันคำนวณกำไร/ขาดทุน
 function calcNetProfit() {
+    // ดึงยอดรายได้ร้านจากหน้าจอ
     const incomeTxt = document.getElementById('shopTotalMonth').innerText;
     const shopIncome = parseFloat(incomeTxt.replace('฿', '').replace(/,/g, '')) || 0;
 
+    // ดึงค่าใช้จ่าย 5 ช่อง
     const costs = [
         parseFloat(document.getElementById('costRent').value) || 0,
         parseFloat(document.getElementById('costNet').value) || 0,
