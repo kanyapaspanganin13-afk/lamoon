@@ -1294,7 +1294,51 @@ function updateMixValues() {
         $("mixTrans").value = trans > 0 ? trans.toFixed(2).replace(/\.00$/, '') : 0;
     }
 }
-/* ==========================================================
+function updateShopIncomeOnly() {
+        const selectedMonth = document.getElementById('profitMonth').value;
+        if (!selectedMonth) return;
+
+        // ตัวอย่างการดึงยอด (พี่ต้องปรับตามตัวแปรที่เก็บข้อมูลในแอปพี่นะครับ)
+        let shopIncome = 0; 
+        
+        // ตรงนี้คือตัวเลขรายได้ร้านที่หักส่วนแบ่งช่างออกแล้ว
+        // สมมติให้ดึงมาจากฐานข้อมูลหรือตัวแปรหลักของพี่
+        // shopIncome = getYodShopOnly(selectedMonth); 
+
+        document.getElementById('shopTotalMonth').innerText = "฿" + shopIncome.toLocaleString();
+        calcNetProfit();
+    }
+
+    function calcNetProfit() {
+        const incomeTxt = document.getElementById('shopTotalMonth').innerText;
+        const shopIncome = parseFloat(incomeTxt.replace('฿', '').replace(/,/g, '')) || 0;
+
+        const costs = [
+            parseFloat(document.getElementById('costRent').value) || 0,
+            parseFloat(document.getElementById('costNet').value) || 0,
+            parseFloat(document.getElementById('costWater').value) || 0,
+            parseFloat(document.getElementById('costElec').value) || 0,
+            parseFloat(document.getElementById('costSupply').value) || 0
+        ];
+        
+        const totalCost = costs.reduce((a, b) => a + b, 0);
+        const netResult = shopIncome - totalCost;
+
+        const valDisplay = document.getElementById('profitNetVal');
+        const boxDisplay = document.getElementById('profitBox');
+        const labelDisplay = document.getElementById('profitLabel');
+
+        if (netResult >= 0) {
+            boxDisplay.style.background = "linear-gradient(135deg, #059669, #064e3b)";
+            labelDisplay.innerText = "กำไรสุทธิ:";
+            valDisplay.innerText = "฿" + netResult.toLocaleString();
+        } else {
+            boxDisplay.style.background = "linear-gradient(135deg, #ef4444, #991b1b)";
+            labelDisplay.innerText = "ขาดทุนสุทธิ:";
+            valDisplay.innerText = "-฿" + Math.abs(netResult).toLocaleString();
+        }
+    }
+    /* ==========================================================
    SECTION 4: CALCULATION & CLOSING DAILY REPORT
    (ระบบคำนวณส่วนแบ่งและการปิดยอดรายวัน)
    ========================================================== */
