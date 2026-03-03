@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 1</title>
+    <title>Barber Note Pro 21</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1289,20 +1289,25 @@ function updateMixValues() {
     }
 }
 function updateShopIncomeOnly() {
-    // 1. ดึงยอดรายได้ร้านจากตัวแปร shopEarn ของพี่
-    // ตรวจสอบว่ามีตัวแปร shopEarn ไหม ถ้าไม่มีให้เป็น 0
-    let income = (typeof shopEarn !== 'undefined') ? shopEarn : 0;
+    // วิธีนี้จะไปดึงตัวเลขจาก "ช่องรายได้ร้าน" ที่โชว์อยู่บนหน้าจอพี่มาใช้เลยครับ
+    // เปลี่ยน 'totalShopEarnDisplay' เป็น ID ของช่องที่พี่โชว์รายได้ร้านปัจจุบัน
+    const sourceElement = document.getElementById('totalShopEarnDisplay'); 
+    
+    let income = 0;
+    if (sourceElement) {
+        // ดึงข้อความ ตัด ฿ ออก แล้วเปลี่ยนเป็นตัวเลข
+        income = parseFloat(sourceElement.innerText.replace('฿', '').replace(/,/g, '')) || 0;
+    } else {
+        // ถ้าหา ID ไม่เจอ ให้ถอยกลับไปใช้ตัวแปร shopEarn (ถ้ามี)
+        income = (typeof shopEarn !== 'undefined') ? shopEarn : 0;
+    }
 
-    // 2. นำยอดไปแสดงที่ ID shopTotalMonth (ใส่คอมมาให้สวยงาม)
     const shopDisplay = document.getElementById('shopTotalMonth');
     if (shopDisplay) {
         shopDisplay.innerText = "฿" + income.toLocaleString();
+        // เรียกคำนวณหักลบต่อ
+        calcNetProfit();
     }
-
-    // 3. สั่งคำนวณกำไรสุทธิ (หักลบค่าใช้จ่าย) ทันที
-    calcNetProfit();
-}
-
 function calcNetProfit() {
     // ดึงรายได้ร้านจากหน้าจอ (ที่เพิ่งใส่ค่า shopEarn ลงไป)
     const incomeTxt = document.getElementById('shopTotalMonth').innerText;
