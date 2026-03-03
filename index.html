@@ -586,23 +586,21 @@ span[onclick*="delRec"] {
 <div class="card" style="background:var(--card); border-radius:25px; padding:18px; padding-bottom:10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border:1px solid var(--border); width: 100%; box-sizing: border-box; margin-top:15px;">
     
     <b style="font-size:18px; color:var(--text); display:block; margin-bottom:12px;">
-        <i class="fas fa-chart-line" style="color:#10b981;"></i> กำไรสุทธิ
-    </b>
+        <i class="fas fa-chart-line" style="color:#10b981;"></i> กำไรสุทธิ</b>
 
-    <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-        <div onclick="document.getElementById('profitMonth').showPicker()" 
-             style="flex: 1.2; background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:50px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center; cursor:pointer;">
-            <small style="font-size:9px; color:var(--text); opacity:0.5; position:absolute; top:4px; white-space:nowrap;">เลือกเดือนสถิติ</small>
-            <input type="month" id="profitMonth" onchange="updateShopIncomeOnly()" 
-                   style="border:none; background:none; font-size:12px; font-weight:800; color:var(--text); outline:none; cursor:pointer; width:90%; text-align:center; margin-top:10px;">
-        </div>
-
-        <div style="flex: 1; background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:50px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-            <small style="font-size:9px; color:#3b82f6; font-weight:700; position:absolute; top:4px; white-space:nowrap;">รายได้ร้านสุทธิ</small>
-            <b id="shopTotalMonth" style="font-size:16px; color:#3b82f6; margin-top:10px; white-space:nowrap;">฿0</b>
-        </div>
+   <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+    <div onclick="document.getElementById('profitMonth').showPicker()" 
+         style="flex: 1.2; background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:50px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center; cursor:pointer;">
+        <small style="font-size:9px; color:var(--text); opacity:0.5; position:absolute; top:4px; white-space:nowrap;">เลือกเดือนสถิติ</small>
+        <input type="month" id="profitMonth" onchange="calculateProfitByMonth()" 
+               style="border:none; background:none; font-size:12px; font-weight:800; color:var(--text); outline:none; cursor:pointer; width:90%; text-align:center; margin-top:10px;">
     </div>
 
+    <div style="flex: 1; background:var(--bg); border-radius:15px; border: 1px solid var(--border); height:50px; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+        <small style="font-size:9px; color:#3b82f6; font-weight:700; position:absolute; top:4px; white-space:nowrap;">รายได้ร้านสุทธิ</small>
+        <b id="shopTotalMonth" style="font-size:16px; color:#3b82f6; margin-top:10px; white-space:nowrap;">฿0</b>
+    </div>
+</div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
         <div style="background:var(--bg); border-radius:12px; border: 1px solid var(--border); height:40px; display:flex; align-items:center; padding: 0 8px;">
             <span style="font-size:11px; font-weight:700; color:var(--text); white-space:nowrap;">ค่าเช่า:</span>
@@ -630,21 +628,18 @@ span[onclick*="delRec"] {
     <div id="profitBox" style="background:linear-gradient(135deg, #059669, #064e3b); padding:8px 15px; border-radius:12px; text-align:center; box-shadow: 0 3px 8px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
         <small id="profitLabel" style="color:rgba(255,255,255,0.9); font-size:12px; font-weight:700;">กำไรสุทธิ:</small>
         <div id="profitNetVal" style="font-size:18px; font-weight:900; color:#ffffff;">฿0</div>
+            </div>
+        </div>
     </div>
-</div>
-    </div>
-</div>
 
 <div id="p4" class="page" style="max-width:480px; margin:0 auto; padding: 12px; padding-bottom: 100px;"> 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: 100px; margin-bottom: 15px; width: 100%;">
-        
         <div onclick="document.getElementById('histMonth').showPicker()" 
              style="background: linear-gradient(135deg, #1e40af, #4338ca); border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; cursor: pointer; position: relative; box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2); border: 1px solid rgba(255,255,255,0.1);">
             <i class="fas fa-calendar-check" style="font-size: 22px; margin-bottom: 6px;"></i>
             <b style="font-size: 14px;">รายเดือน</b>
             <input type="month" id="histMonth" onchange="loadHistMonth()" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
         </div>
-
         <div onclick="openComparisonSelector()" 
              style="background: linear-gradient(135deg, #38bdf8, #1d4ed8); border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; cursor: pointer; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2); border: 1px solid rgba(255,255,255,0.1);">
             <i class="fas fa-chart-line" style="font-size: 22px; margin-bottom: 6px;"></i>
@@ -656,9 +651,9 @@ span[onclick*="delRec"] {
         <div style="text-align: center; color: var(--text); opacity: 0.4; margin-top: 80px;">
             <i class="fas fa-chart-bar" style="font-size: 50px; margin-bottom: 15px; display: block;"></i>
             <p style="font-size: 16px; font-weight: 700;">เลือกโหมดด้านบน<br>เพื่อดูการวิเคราะห์สถิติ</p>
+            </div>
         </div>
     </div>
-</div>
 </div>    
     <div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); z-index:9999; display:flex; align-items:center; justify-content:center; padding:15px;">
   <div style="background:#ffffff; width:95%; max-width:420px; border-radius:35px; display:flex; flex-direction:column; overflow:hidden; animation: slideUp 0.3s ease-out; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
@@ -1289,30 +1284,12 @@ function updateMixValues() {
         $("mixTrans").value = trans > 0 ? trans.toFixed(2).replace(/\.00$/, '') : 0;
     }
 }
-// ฟังก์ชันดึงยอดรายได้ร้านจากจุดที่พี่ใส่ ID ไว้ (sourceShopEarn)
-function updateShopIncomeOnly() {
-    const source = document.getElementById('dShop'); // ดึงจากจุดที่ renderDay พิมพ์ออกมา
-    const target = document.getElementById('shopTotalMonth'); // ช่องรับในกำไรสุทธิ
-    
-    if (source && target) {
-        // ดึงข้อความ ตัดลูกน้ำออก และแปลงเป็นตัวเลข
-        let val = source.innerText.replace(/,/g, ''); 
-        let income = parseFloat(val) || 0;
-
-        // ส่งไปแสดงผลที่ช่องกำไรสุทธิ
-        target.innerText = "฿" + income.toLocaleString();
-        
-        // สั่งคำนวณหักลบค่าใช้จ่ายต่อทันที
-        calcNetProfit();
-    }
-}
-
 function calcNetProfit() {
-    // ดึงยอดรายได้ร้านจากหน้าจอ
+    // ดึงยอดรายได้ร้านที่โชว์อยู่ตอนนี้
     const incomeTxt = document.getElementById('shopTotalMonth').innerText;
     const shopIncome = parseFloat(incomeTxt.replace('฿', '').replace(/,/g, '')) || 0;
 
-    // ดึงค่าใช้จ่าย 5 ช่อง
+    // ดึงค่าใช้จ่าย 5 ช่องที่พี่กรอก
     const costs = [
         parseFloat(document.getElementById('costRent').value) || 0,
         parseFloat(document.getElementById('costNet').value) || 0,
@@ -2205,109 +2182,51 @@ function renderHistoryList() {
 }
 function loadHistMonth() {
     const $ = (id) => document.getElementById(id);
-    const m = $("histMonth").value;
-    if (!m) return alert("กรุณาเลือกเดือนก่อนครับ");
+    
+    // 1. ดึงค่าจาก ID profitMonth (ในการ์ดกำไรสุทธิ) หรือ histMonth (ของเดิม)
+    // แนะนำให้ใช้ ID เดียวกันเพื่อให้โค้ดไม่สับสนครับ
+    const m = $("profitMonth") ? $("profitMonth").value : ($("histMonth") ? $("histMonth").value : "");
+    
+    if (!m) return; // ไม่ต้อง alert เพื่อความลื่นไหล
 
-    if (typeof archives === 'undefined') return alert("ไม่พบฐานข้อมูลหลัก (archives)");
+    if (typeof archives === 'undefined') return;
 
     const filtered = archives.filter(a => a.date && a.date.startsWith(m));
+    
+    // ถ้าไม่พบข้อมูลเดือนนั้น ให้เซ็ตเป็น 0 แล้วหยุดทำงาน
     if (!filtered.length) {
-        // 🟢 ถ้าไม่พบข้อมูลเดือนนั้น ให้เซ็ตรายได้ร้านเป็น 0
         if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
-        return openReportModal("📊 สรุปรายเดือน", `<div style='text-align:center;padding:50px;color:#94a3b8;'>ไม่พบข้อมูลของเดือน ${m}</div>`);
+        if (window.calcNetProfit) window.calcNetProfit(); 
+        return;
     }
 
-    let monthTotal = 0, monthBarber = 0, monthCount = 0, monthGuarDays = 0; 
-    let hairStats = {}, serviceStats = {};
-    let offDays = 0, workDays = 0;
-    let weeklyData = {};
-
-    const haircutList = ["แฟชั่น","สกินเฟด","รองทรง","ตำรวจ/ทหาร","นักเรียน","ซอยผม/เล็มผม","แก้ผม","โกนผม","เด็ก"];
-    const dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+    let monthTotal = 0, monthBarber = 0; 
 
     filtered.forEach(day => {
-        // ... (โค้ดส่วนคำนวณเดิมของพี่) ...
-        const dObj = new Date(day.date);
-        let wIdx = Math.ceil(dObj.getDate() / 7);
-        const wKey = `สัปดาห์ที่ ${wIdx}`;
-
-        if (!weeklyData[wKey]) {
-            weeklyData[wKey] = { 
-                customers: 0, workDays: 0, offDays: 0, 
-                zeroDays: 0, guarDays: 0, dailyCounts: [], 
-                popularHair: {}, popularService: {}, 
-                income: 0 
-            };
-        }
-
-        if (day.off === true || day.type === "HOLIDAY") {
-            offDays++;
-            weeklyData[wKey].offDays++;
-            return;
-        }
-
-        workDays++;
-        weeklyData[wKey].workDays++;
-        
-        const hasInsurance = day.details && day.details.some(d => d.type === "GUARANTEE_CLAIM");
-        if (hasInsurance) {
-            monthGuarDays++;
-            weeklyData[wKey].guarDays++;
-        }
+        // ข้ามวันที่หยุด
+        if (day.off === true || day.type === "HOLIDAY") return;
 
         const dailyIncome = Number(day.total) || 0;
         const dailyBarber = Number(day.barber) || 0; 
         
-        monthTotal += dailyIncome; // ยอดรวมรายได้ร้านสะสมของเดือน
+        monthTotal += dailyIncome; 
         monthBarber += dailyBarber;
-        weeklyData[wKey].income += dailyIncome;
-
-        // ... (ส่วนนับจำนวนลูกค้าและทรงผมเดิม) ...
-        let dayCustomerCount = 0;
-        if (day.details && Array.isArray(day.details)) {
-            day.details.forEach(d => {
-                if (d.type === "SERVICE") {
-                    monthCount++;
-                    dayCustomerCount++;
-                    weeklyData[wKey].customers++;
-                    const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
-                    svcs.forEach(s => {
-                        if (!s) return;
-                        const cleanS = s.trim();
-                        if (haircutList.includes(cleanS)) {
-                            hairStats[cleanS] = (hairStats[cleanS] || 0) + 1;
-                            weeklyData[wKey].popularHair[cleanS] = (weeklyData[wKey].popularHair[cleanS] || 0) + 1;
-                        } else {
-                            serviceStats[cleanS] = (serviceStats[cleanS] || 0) + 1;
-                            weeklyData[wKey].popularService[cleanS] = (weeklyData[wKey].popularService[cleanS] || 0) + 1;
-                        }
-                    });
-                }
-            });
-        }
-        if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
-        
-        weeklyData[wKey].dailyCounts.push({ 
-            dayName: dayNames[dObj.getDay()], 
-            count: dayCustomerCount, 
-            income: dailyIncome,
-            barberEarn: dailyBarber 
-        });
     });
 
-    // 🟢 1. อัปเดตยอดรายได้ร้านในหน้าบัญชี (shopTotalMonth)
+    // 🟢 คำนวณรายได้ "เฉพาะส่วนของร้าน" (ยอดรวม - ส่วนแบ่งช่าง)
+    const realShopEarn = monthTotal - monthBarber;
+
+    // 🟢 1. อัปเดตยอดรายได้ร้านในช่องสีฟ้า (shopTotalMonth)
     if ($("shopTotalMonth")) {
-        $("shopTotalMonth").innerText = "฿" + monthTotal.toLocaleString();
+        $("shopTotalMonth").innerText = "฿" + Math.floor(realShopEarn).toLocaleString();
     }
 
-    // 🟢 2. สั่งคำนวณกำไรสุทธิใหม่ (ถ้ามีฟังก์ชัน calcNetProfit อยู่แล้ว)
+    // 🟢 2. สั่งคำนวณกำไรสุทธิ (หักลบค่าเช่า/น้ำ/ไฟ) ทันที
     if (window.calcNetProfit) {
-        calcNetProfit();
+        window.calcNetProfit();
     }
-
-    const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
     
-    generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays);
+    // หมายเหตุ: ผมเอา generateMonthlyReport ออก เพื่อไม่ให้มีหน้ารายงานเด้งขึ้นมาครับ
 }
 function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays) {
     // --- 1. เตรียมข้อมูลสำหรับวิเคราะห์ (Logic) ---
