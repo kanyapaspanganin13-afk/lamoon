@@ -1514,15 +1514,25 @@ if ($("dCounts")) {
             </div>`;
     }
 }
-   // --- 🟢 ปรับขนาดช่อง Service Stats (ให้เล็กลงและประหยัดพื้นที่) ---
+// --- 🟢 ปรับการแสดงผล Service Stats ให้เรียงตามประเภท (ทรงผมขึ้นก่อนเสมอ) ---
 let sH = `<div style="display:flex; flex-wrap:wrap; gap:4px; justify-content:center; margin-bottom:8px;">`;
-const priority = ["ตัดผม", "เด็ก"];
-priority.forEach(k => { 
-    if (stats[k]) sH += `<span style="background:#4338ca;color:#fff;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:800;">${k}: ${stats[k]}</span>`; 
+// 1. เตรียมรายชื่อบริการเสริมเพื่อใช้เช็ค
+const cleanExtras = extraSvcs.map(s => s.trim().toLowerCase());
+// 2. ดึงรายการทั้งหมดจาก stats และแยกเป็น 2 กลุ่ม
+const allStatsKeys = Object.keys(stats);
+// กลุ่มที่ 1: ทรงผม (อะไรก็ได้ที่ไม่ใช่ โกนหนวด/กันหน้า/สระผม)
+const haircutGroup = allStatsKeys.filter(k => !cleanExtras.includes(k.trim().toLowerCase()));
+// กลุ่มที่ 2: บริการเสริม (โกนหนวด/กันหน้า/สระผม)
+const extraGroup = allStatsKeys.filter(k => cleanExtras.includes(k.trim().toLowerCase()));
+// 3. แสดงผลกลุ่มทรงผมก่อน (ใช้สีน้ำเงินเข้ม) 
+// ไม่ว่าจะเป็น รองทรง, แฟชั่น, สกินเฮด จะเรียงต่อกันตรงนี้ครับ
+haircutGroup.forEach(k => {
+    sH += `<span style="background:#4338ca;color:#fff;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:800;">${k}: ${stats[k]}</span>`;
 });
-for (let s in stats) { 
-    if (!priority.includes(s)) sH += `<span style="background:#f1f5f9;color:#475569;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;border:1px solid #e2e8f0;">${s}: ${stats[s]}</span>`; 
-}
+// 4. แสดงผลกลุ่มบริการเสริมต่อท้าย (ใช้สีฟ้าอ่อน)
+extraGroup.forEach(k => {
+    sH += `<span style="background:#e0f2fe;color:#0369a1;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;border:1px solid #bae6fd;">${k}: ${stats[k]}</span>`;
+});
 if ($("dServiceStats")) $("dServiceStats").innerHTML = sH + `</div>`;
 
     let txt = "", statusColor = "", icon = "";
