@@ -1291,24 +1291,23 @@ function updateMixValues() {
 }
 // ฟังก์ชันดึงยอดรายได้ร้านจากจุดที่พี่ใส่ ID ไว้ (sourceShopEarn)
 function updateShopIncomeOnly() {
-    // 1. ไปหาจุดที่พี่โชว์ "รายได้ร้าน" (จุดที่มีเลข 14,640 ในรูปของพี่)
-    // พี่ต้องแน่ใจว่าจุดนั้นใส่ id="sourceShopEarn" ไว้แล้วนะครับ
-    const source = document.getElementById('sourceShopEarn');
+    // 1. ดึงตัวเลขจาก id="dShop" (ที่ renderDay เพิ่งใส่ค่า sEarn ลงไป)
+    const source = document.getElementById('dShop');
     let income = 0;
 
     if (source) {
-        // ดึงตัวเลขออกมา ตัดเครื่องหมาย ฿ และลูกน้ำออก
-        let rawText = source.innerText.replace('฿', '').replace(/,/g, '');
+        // ดึงข้อความ ตัดลูกน้ำออก แล้วแปลงเป็นตัวเลข
+        let rawText = source.innerText.replace(/,/g, '');
         income = parseFloat(rawText) || 0;
     }
 
-    // 2. นำยอดที่ได้ไปใส่ในช่อง "รายได้ร้านสุทธิ" ของกรอบกำไรสุทธิ
+    // 2. นำยอดไปแสดงที่ช่อง "รายได้ร้านสุทธิ" ใน Card กำไรสุทธิ
     const target = document.getElementById('shopTotalMonth');
     if (target) {
         target.innerText = "฿" + income.toLocaleString();
     }
 
-    // 3. สั่งคำนวณหักลบค่าใช้จ่ายทันที
+    // 3. สั่งคำนวณหักลบค่าใช้จ่าย (ค่าเช่า, น้ำ, ไฟ) ทันที
     calcNetProfit();
 }
 
