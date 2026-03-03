@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 2</title>
+    <title>Barber Note Pro 02</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1290,8 +1290,8 @@ function updateMixValues() {
         $("mixTrans").value = trans > 0 ? trans.toFixed(2).replace(/\.00$/, '') : 0;
     }
 }
+// ฟังก์ชันดึงยอดรายได้ร้านจากจุดที่พี่ใส่ ID ไว้ (sourceShopEarn)
 function updateShopIncomeOnly() {
-    // 1. ไปดึงตัวเลขจากจุดที่พี่เพิ่งใส่ ID ไว้ (sourceShopEarn)
     const source = document.getElementById('sourceShopEarn');
     let income = 0;
 
@@ -1300,54 +1300,41 @@ function updateShopIncomeOnly() {
         income = parseFloat(source.innerText.replace('฿', '').replace(/,/g, '')) || 0;
     }
 
-    // 2. ส่งยอดไปแสดงที่ช่อง "รายได้ร้านสุทธิ" ในส่วนของกำไรสุทธิ
+    // ส่งยอดไปแสดงที่ช่อง "รายได้ร้านสุทธิ" ในส่วนกำไรสุทธิ
     const target = document.getElementById('shopTotalMonth');
     if (target) {
         target.innerText = "฿" + income.toLocaleString();
     }
 
-    // 3. คำนวณกำไร/ขาดทุนสุทธิต่อทันที
+    // คำนวณหักลบค่าใช้จ่ายทันที
     calcNetProfit();
 }
-}
-    const shopDisplay = document.getElementById('shopTotalMonth');
-    if (shopDisplay) {
-        shopDisplay.innerText = "฿" + income.toLocaleString();
-        // เรียกคำนวณหักลบต่อ
-        calcNetProfit();
-    }
+
+// ฟังก์ชันคำนวณกำไร/ขาดทุน
 function calcNetProfit() {
-    // ดึงรายได้ร้านจากหน้าจอ (ที่เพิ่งใส่ค่า shopEarn ลงไป)
     const incomeTxt = document.getElementById('shopTotalMonth').innerText;
     const shopIncome = parseFloat(incomeTxt.replace('฿', '').replace(/,/g, '')) || 0;
 
-    // ดึงค่าใช้จ่าย 5 ช่อง
-    const costs = {
-        rent: parseFloat(document.getElementById('costRent').value) || 0,
-        net: parseFloat(document.getElementById('costNet').value) || 0,
-        water: parseFloat(document.getElementById('costWater').value) || 0,
-        elec: parseFloat(document.getElementById('costElec').value) || 0,
-        supply: parseFloat(document.getElementById('costSupply').value) || 0
-    };
-
-    const totalCost = costs.rent + costs.net + costs.water + costs.elec + costs.supply;
+    const costs = [
+        parseFloat(document.getElementById('costRent').value) || 0,
+        parseFloat(document.getElementById('costNet').value) || 0,
+        parseFloat(document.getElementById('costWater').value) || 0,
+        parseFloat(document.getElementById('costElec').value) || 0,
+        parseFloat(document.getElementById('costSupply').value) || 0
+    ];
+    
+    const totalCost = costs.reduce((a, b) => a + b, 0);
     const netResult = shopIncome - totalCost;
 
-    // แสดงผลที่แถบด้านล่าง (สีเขียว=กำไร / สีแดง=ขาดทุน)
     const valDisplay = document.getElementById('profitNetVal');
     const boxDisplay = document.getElementById('profitBox');
     const labelDisplay = document.getElementById('profitLabel');
 
     if (valDisplay && boxDisplay) {
-        // อัปเดตตัวเลข (ใส่ -฿ ข้างหน้าถ้าขาดทุน)
         valDisplay.innerText = (netResult >= 0 ? "฿" : "-฿") + Math.abs(netResult).toLocaleString();
-        
-        // สลับสีพื้นหลัง
         boxDisplay.style.background = netResult >= 0 
             ? "linear-gradient(135deg, #059669, #064e3b)" 
             : "linear-gradient(135deg, #ef4444, #991b1b)";
-            
-        // เปลี่ยนข้อความหัวข้อ
         labelDisplay.innerText = netResult >= 0 ? "กำไรสุทธิ:" : "ขาดทุนสุทธิ:";
     }
 }
