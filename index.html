@@ -2371,41 +2371,38 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                     <div style="font-size:20px; font-weight:800; color:#f8fafc;">฿${Math.floor(monthTotal - monthBarber).toLocaleString()}</div>
                 </div>
             </div>
-          <div style="margin-bottom: 25px;">
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px;">
-        <div style="background: rgba(56,189,248,0.15); padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #38bdf8; text-align: center; border: 1px solid rgba(56,189,248,0.2);">
-            👤 ลูกค้า ${monthCount}
-        </div>
-        <div style="background: rgba(34,197,94,0.15); padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #4ade80; text-align: center; border: 1px solid rgba(34,197,94,0.2);">
-            💇 ใหม่ ${countNew || 0}
-        </div>
-        <div style="background: rgba(168,85,247,0.15); padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #c084fc; text-align: center; border: 1px solid rgba(168,85,247,0.2);">
-            💇‍♂️ ประจำ ${countRegular || 0}
-        </div>
-    </div>
-
-    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;">
-        <div style="background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #f8fafc;">
-            📅 เปิด ${workDays} วัน
-        </div>
-        <div style="background: rgba(244,63,94,0.15); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #fb7185;">
-            ⛱️ หยุด ${offDays} วัน
-        </div>
-        <div style="background: rgba(250,204,21,0.15); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #facc15;">
-            🛡️ ประกัน ${monthGuarDays || 0} วัน
-        </div>
-        <div style="background: rgba(147,51,234,0.15); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #a855f7;">
-            📊 เฉลี่ย ${avgCustomerPerDay.toFixed(2)}
-        </div>
-            
-   // --- รวมทุกอย่างเข้าด้วยกันใน reportContent เดียวครับพี่ ---
+   // --- เริ่มก้อนเนื้อหาเพียงอันเดียว (รวมสถิติด้านบนและปุ่มด้านล่าง) ---
     let reportContent = `
         <div style="text-align:center; font-family:'Kanit',sans-serif; padding:5px;">
             <h3 style="color:#fff; margin-bottom:20px;">📊 สรุปรายงานเดือน ${m}</h3>
             
-            <div style="margin-bottom:20px;">
-                <div style="margin-bottom:8px;">${popHair}</div>
-                <div>${popService}</div>
+            <div style="margin-bottom: 25px;">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px;">
+                    <div style="background: rgba(56,189,248,0.15); padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #38bdf8; text-align: center; border: 1px solid rgba(56,189,248,0.2);">
+                        👤 ลูกค้า ${monthCount}
+                    </div>
+                    <div style="background: rgba(34,197,94,0.15); padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #4ade80; text-align: center; border: 1px solid rgba(34,197,94,0.2);">
+                        💇 ใหม่ ${countNew || 0}
+                    </div>
+                    <div style="background: rgba(168,85,247,0.15); padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #c084fc; text-align: center; border: 1px solid rgba(168,85,247,0.2);">
+                        💇‍♂️ ประจำ ${countRegular || 0}
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;">
+                    <div style="background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #f8fafc;">
+                        📅 เปิด ${workDays} วัน
+                    </div>
+                    <div style="background: rgba(244,63,94,0.15); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #fb7185;">
+                        ⛱️ หยุด ${offDays} วัน
+                    </div>
+                    <div style="background: rgba(250,204,21,0.15); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #facc15;">
+                        🛡️ ประกัน ${monthGuarDays || 0} วัน
+                    </div>
+                    <div style="background: rgba(147,51,234,0.15); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #a855f7;">
+                        📊 เฉลี่ย ${avgCustomerPerDay.toFixed(2)}
+                    </div>
+                </div>
             </div>
 
             <div style="margin-bottom:25px; text-align:left;">
@@ -2447,12 +2444,13 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
             <button onclick="closeReportModal()" style="background:none; border:none; color:#94a3b8; font-size:14px; cursor:pointer; padding:10px;">ปิดหน้าต่าง</button>
         </div>`;
 
-    // --- สั่งแสดงผลครั้งเดียวจบ ---
+    // --- สั่งแสดงผลจบกระบวนการ ---
     const modalDisplay = document.getElementById("reportContent");
     if(modalDisplay) {
         modalDisplay.innerHTML = reportContent;
         document.getElementById("reportModal").style.display = "flex";
     }
+} // ปิดฟังก์ชัน generateMonthlyReport
 function exportToExcel(m, monthTotal, monthBarber, weeklyData, hairStats, serviceStats) {
     try {
         const rows = [];
