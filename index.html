@@ -2201,75 +2201,60 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     const topHair = Object.entries(hairStats).sort((a, b) => b[1] - a[1])[0];
     const topService = Object.entries(serviceStats).sort((a, b) => b[1] - a[1])[0];
 
-    // --- [เพิ่มส่วนวิเคราะห์แนวโน้ม] เปรียบเทียบกับสัปดาห์ก่อนหน้า ---
-    const weekKeys = Object.keys(weeklyData);
+   // --- [เพิ่ม Logic วิเคราะห์แนวโน้มลูกค้าใหม่/ประจำ แบบระบุสัปดาห์] ---
+    const newGrowthWeeks = []; 
+    const newDropWeeks = [];   
+    const regGrowthWeeks = []; 
+    const regDropWeeks = [];   
+
+    let nUp = 0, nDown = 0;
+    let rUp = 0, rDown = 0;
+
     weekKeys.forEach((wk, idx) => {
         const curr = weeklyData[wk];
-        if (idx === 0) {
-            curr.newTrend = "เริ่มต้น";
-            curr.regTrend = "เริ่มต้น";
-        } else {
+        if (idx > 0) {
             const prev = weeklyData[weekKeys[idx - 1]];
-            // เทียบลูกค้าใหม่
-            if (curr.countNew > prev.countNew) curr.newTrend = "เพิ่มขึ้น 📈";
-            else if (curr.countNew < prev.countNew) curr.newTrend = "ลดลง 📉";
-            else curr.newTrend = "คงที่ ➖";
-            // เทียบลูกค้าประจำ
-            if (curr.countRegular > prev.countRegular) curr.regTrend = "เพิ่มขึ้น 📈";
-            else if (curr.countRegular < prev.countRegular) curr.regTrend = "ลดลง 📉";
-            else curr.regTrend = "คงที่ ➖";
+            
+            // ตรวจสอบลูกค้าใหม่
+            if (curr.countNew > prev.countNew) { newGrowthWeeks.push(wk); nUp++; }
+            else if (curr.countNew < prev.countNew) { newDropWeeks.push(wk); nDown++; }
+            
+            // ตรวจสอบลูกค้าประจำ
+            if (curr.countRegular > prev.countRegular) { regGrowthWeeks.push(wk); rUp++; }
+            else if (curr.countRegular < prev.countRegular) { regDropWeeks.push(wk); rDown++; }
         }
     });
 
-    weekEntries.forEach(([wk, data]) => {
-        if (data.dailyCounts) {
-            data.dailyCounts.forEach(d => {
-                dailyTimeline.push(d); 
-                const dayName = d.dayName.split(' ')[0]; 
-                if (!dayStats[dayName]) dayStats[dayName] = { total: 0, count: 0 };
-                if (d.count > 0) {
-                    dayStats[dayName].total += d.count;
-                    dayStats[dayName].count += 1;
-                }
-            });
-        }
-    });
-
-    const topIncomeWeek = weekEntries.length > 0 ? weekEntries.reduce((prev, curr) => (curr[1].income > prev[1].income ? curr : prev)) : null;
-    const topCountWeek = weekEntries.length > 0 ? weekEntries.reduce((prev, curr) => (curr[1].customers > prev[1].customers ? curr : prev)) : null;
-
-    const dayAverages = Object.entries(dayStats)
-        .filter(([name, data]) => data.count > 0)
-        .map(([name, data]) => ({ name, avg: data.total / data.count }));
-
-    const busiestDay = dayAverages.sort((a, b) => b.avg - a.avg)[0];
-    const quietestDay = dayAverages.sort((a, b) => a.avg - b.avg)[0];
-
-    const renderStats = (statsObj, color) => {
-        const entries = Object.entries(statsObj).sort((a,b) => b[1]-a[1]);
-        if (entries.length === 0) return `<div style="color:#64748b; font-size:12px;">ไม่มีข้อมูลสถิติ</div>`;
-        const maxVal = entries[0][1];
-        return entries.map(([name, count]) => {
-            const width = (count / maxVal) * 100;
-            return `
-            <div style="margin-bottom:10px;">
-                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
-                    <span style="color:#f8fafc;">${name}</span>
-                    <span style="color:${color}; font-weight:700;">${count}</span>
-                </div>
-                <div style="width:100%; height:6px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;">
-                    <div style="width:${width}%; height:100%; background:${color}; border-radius:10px;"></div>
-                </div>
-            </div>`;
-        }).join("");
+    // ฟังก์ชันวิเคราะห์เทรนด์ใหญ่รายเดือน (3 เงื่อนไข)
+    const getMonthTrend = (up, down) => {
+        if (up > down) return "อยู่ในทิศทางเติบโตดีมาก 🔝";
+        if (down > up) return "อยู่ในช่วงชะลอตัวลง ↘️";
+        return "ภาพรวมค่อนข้างทรงตัว ➖";
     };
 
+    const monthNewTrend = getMonthTrend(nUp, nDown);
+    const monthRegTrend = getMonthTrend(rUp, rDown);
+
+    // --- ส่วนสรุปภาพรวม (Insights) ปรับปรุงใหม่ ---
     const insights = [
-        `เดือนนี้เปิดให้บริการทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
-        `ประเภทลูกค้า: <b>ใหม่ ${countNew || 0} คน</b> | <b>ประจำ ${countRegular || 0} คน</b>`,
-        `ใช้ประกันรายได้ทั้งหมด <b>${monthGuarDays || 0} วัน</b>`,
-        (topIncomeWeek && (topIncomeWeek[1].income || 0) > 0) ? `สัปดาห์ที่ทำรายได้สูงสุดคือ <b>${topIncomeWeek[0]}</b>` : `สัปดาห์ที่ทำรายได้สูงสุดคือ <b>-</b>`,
-        (topCountWeek && (topCountWeek[1].customers || 0) > 0) ? `สัปดาห์ที่มีลูกค้ามากที่สุดคือ <b>${topCountWeek[0]}</b>` : `สัปดาห์ที่มีลูกค้ามากที่สุดคือ <b>-</b>`,
+        `ระยะเวลาทำงาน: เปิดให้บริการ <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
+        
+        // วิเคราะห์ลูกค้าใหม่: ระบุสัปดาห์ + แนวโน้มเดือน
+        `วิเคราะห์ลูกค้าใหม่: ${
+            newGrowthWeeks.length > 0 || newDropWeeks.length > 0 
+            ? `สัปดาห์ที่เพิ่ม: <b>${newGrowthWeeks.join(", ") || "-"}</b> | สัปดาห์ที่ลด: <b>${newDropWeeks.join(", ") || "-"}</b>`
+            : "ปริมาณคงที่ตลอดเดือน"
+        } <br/>&nbsp;&nbsp;↳ <span style="color:#4ade80;"><b>สรุปเดือนนี้: ${monthNewTrend}</b></span>`,
+
+        // วิเคราะห์ลูกค้าประจำ: ระบุสัปดาห์ + แนวโน้มเดือน
+        `วิเคราะห์ลูกค้าประจำ: ${
+            regGrowthWeeks.length > 0 || regDropWeeks.length > 0 
+            ? `สัปดาห์ที่เพิ่ม: <b>${regGrowthWeeks.join(", ") || "-"}</b> | สัปดาห์ที่ลด: <b>${regDropWeeks.join(", ") || "-"}</b>`
+            : "แวะเวียนมาสม่ำเสมอในทุกสัปดาห์"
+        } <br/>&nbsp;&nbsp;↳ <span style="color:#c084fc;"><b>สรุปเดือนนี้: ${monthRegTrend}</b></span>`,
+        
+        `สถิติประกันรายได้: ใช้ประกันรายได้ทั้งหมด <b>${monthGuarDays || 0} วัน</b>`,
+        (topIncomeWeek && (topIncomeWeek[1].income || 0) > 0) ? `สัปดาห์รายได้สูงสุด: <b>${topIncomeWeek[0]}</b>` : `สัปดาห์รายได้สูงสุด: <b>-</b>`,
         (busiestDay && busiestDay.avg > 0) ? (() => {
             if (!quietestDay || busiestDay.avg === quietestDay.avg) return `ลูกค้าเข้าเยอะใน <b>วัน${busiestDay.name}</b>`;
             return `ลูกค้าเข้าเยอะใน <b>วัน${busiestDay.name}</b> และน้อยใน <b>วัน${quietestDay.name}</b>`;
@@ -2330,18 +2315,18 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     </div>
 
     <div style="background: rgba(34,197,94,0.05); padding: 6px 4px; border-radius: 12px; text-align: center; border: 1px solid rgba(34,197,94,0.1);">
-        <div style="font-size: 8px; color: #4ade80; margin-bottom: 2px;">✨ ใหม่</div>
+        <div style="font-size: 8px; color: #4ade80; margin-bottom: 2px;">💇 ใหม่</div>
         <div style="font-size: 11px; font-weight: 700; color: #4ade80;">${data.countNew || 0}</div>
     </div>
 
     <div style="background: rgba(168,85,247,0.05); padding: 6px 4px; border-radius: 12px; text-align: center; border: 1px solid rgba(168,85,247,0.1);">
-        <div style="font-size: 8px; color: #c084fc; margin-bottom: 2px;">🔄 ประจำ</div>
+        <div style="font-size: 8px; color: #c084fc; margin-bottom: 2px;">💇‍♂️ ประจำ</div>
         <div style="font-size: 11px; font-weight: 700; color: #c084fc;">${data.countRegular || 0}</div>
     </div>
 </div>
 <div style="font-size: 11px; color: #64748b; line-height: 1.7; padding: 0 4px 10px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
-    <div>✨ แนวโน้มลูกค้าใหม่: <span style="color: #f1f5f9; font-weight: 600;">${data.newTrend}</span></div>
-    <div>🔄 แนวโน้มลูกค้าประจำ: <span style="color: #f1f5f9; font-weight: 600;">${data.regTrend}</span></div>
+    <div>💇 แนวโน้มลูกค้าใหม่: <span style="color: #f1f5f9; font-weight: 600;">${data.newTrend}</span></div>
+    <div>💇‍♂️ แนวโน้มลูกค้าประจำ: <span style="color: #f1f5f9; font-weight: 600;">${data.regTrend}</span></div>
     <div style="margin-top: 2px;">📈 ลูกค้าเยอะที่สุด: <span style="color: #f1f5f9; font-weight: 600;">${bestDay}</span></div>
     <div>📉 ลูกค้าน้อยที่สุด: <span style="color: #f1f5f9; font-weight: 600;">${worstDay}</span></div>
 </div>          
@@ -2374,10 +2359,10 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
             👤 ลูกค้า ${monthCount}
         </div>
         <div style="background: rgba(34,197,94,0.15); padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #4ade80; text-align: center; border: 1px solid rgba(34,197,94,0.2);">
-            ✨ ใหม่ ${countNew || 0}
+            💇 ใหม่ ${countNew || 0}
         </div>
         <div style="background: rgba(168,85,247,0.15); padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #c084fc; text-align: center; border: 1px solid rgba(168,85,247,0.2);">
-            🔄 ประจำ ${countRegular || 0}
+            💇‍♂️ ประจำ ${countRegular || 0}
         </div>
     </div>
 
@@ -2395,7 +2380,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
             📊 เฉลี่ย ${avgCustomerPerDay.toFixed(2)}
         </div>
             <div style="margin-bottom:25px;">
-                <div style="font-size:14px; font-weight:800; color:#facc15; margin-bottom:12px;">📅 วิเคราะห์รายสัปดาห์</div>
+                <div style="font-size:14px; font-weight:800; color:#facc15; margin-bottom:12px;">🌀 วิเคราะห์รายสัปดาห์</div>
                 ${weeklyHtml}
             </div>
             <div style="background:rgba(250,204,21,0.08); border:1px solid rgba(250,204,21,0.25); padding:18px; border-radius:20px; margin-bottom:30px;">
