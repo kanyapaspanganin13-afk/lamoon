@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 1</title>
+    <title>Barber Note Pro </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -668,8 +668,8 @@ span[onclick*="delRec"] {
         </div>
 
         <div style="text-align:center; line-height: 1.4;">
-            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.8</span></div>
-            <div style="font-size:9px; color:#cbd5e1; font-weight:400;">Update: <span id="display-date">22/02/2026</span></div>
+            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.2</span></div>
+            <div style="font-size:9px; color:#cbd5e1; font-weight:400;">Update: <span id="display-date">04/03/2026</span></div>
         </div>
     </div>
 </div>
@@ -714,8 +714,8 @@ span[onclick*="delRec"] {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.8"; 
-const LAST_UPDATED = "22/02/2026"; 
+const APP_VERSION = "1.0.2"; 
+const LAST_UPDATED = "04/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
     const currentStoredVersion = localStorage.getItem("app_v");
@@ -2330,7 +2330,7 @@ let reportContent = `
         `;
 
         // สั่งแสดงผล (ใช้ ID Modal ของพี่)
-        const modalDisplay = document.getElementById("reportModalContent");
+        const modalDisplay = document.getElementById("reportContent");
         if(modalDisplay) {
             modalDisplay.innerHTML = reportContent;
         }
