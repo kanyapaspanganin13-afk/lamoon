@@ -1854,15 +1854,8 @@ function closeReportModal() {
         modal.style.display = "none";
         document.body.style.overflow = "auto";
     }
-
-    // หน่วงเวลาเล็กน้อยเพื่อให้ UI คืนค่าได้สมบูรณ์
-    setTimeout(() => {
-        if (typeof go === 'function') {
-            console.log("กำลังกลับไปหน้าบันทึก...");
-            go(2); 
-        }
-    }, 100); 
-} // ปิดฟังก์ชันแค่ตรงนี้พอครับช่าง (ปีกกาอันที่เกินออกไปแล้ว)
+    console.log("ปิดรายงานเรียบร้อย ค้างไว้หน้าเดิม...");
+}
 function closeAndGoHome() {
     const m = $("modalSet");
     if (m) m.style.display = 'none';
