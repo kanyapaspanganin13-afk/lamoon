@@ -9,10 +9,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro </title>
+    <title>Barber Note Pro 1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 // เปลี่ยนจาก $ เป็น getEl เพื่อความปลอดภัย
 const getEl = id => document.getElementById(id);
@@ -2419,6 +2420,88 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         </div>`
     );
 } 
+function exportToExcel(m, monthTotal, monthBarber, weeklyData, hairStats, serviceStats) {
+    try {
+        const rows = [];
+        let totalCustomers = 0, totalNew = 0, totalRegular = 0; // เพิ่มตัวแปรนับลูกค้าประจำ
+        let totalBarber = 0, totalShop = 0;
+        let totalOffDays = 0, totalWorkDays = 0;
+
+        const allServiceNames = Object.keys(serviceStats || {});
+
+        Object.entries(weeklyData).forEach(([wk, data]) => {
+            if (data.dailyCounts) {
+                data.dailyCounts.forEach(day => {
+                    const isOff = day.isOff;
+                    if (isOff) {
+                        totalOffDays++;
+                    } else {
+                        totalWorkDays++;
+                    }
+
+                    const barberEarn = Math.floor(day.barberEarn || 0);
+                    const shopEarn = (day.income || 0) - barberEarn;
+                    const dayNameText = isOff ? `${day.dayName.split(' ')[0]} (หยุด)` : day.dayName.split(' ')[0];
+
+                    const row = {
+                        "ว-ด-ป": day.dayName.split(' ')[1] || day.dayName,
+                        "วัน": dayNameText,
+                        "ลูกค้า": isOff ? 0 : (day.count || 0),
+                        "ลูกค้าใหม่": isOff ? 0 : (day.countNew || 0),
+                        "ลูกค้าประจำ": isOff ? 0 : (day.countRegular || 0), // เพิ่มคอลัมน์นี้ครับพี่!
+                        "รายได้ช่าง": isOff ? 0 : barberEarn,
+                        "รายได้ร้าน": isOff ? 0 : shopEarn
+                    };
+
+                    allServiceNames.forEach(serviceName => {
+                        const count = !isOff && day.services ? (day.services[serviceName] || 0) : 0;
+                        row[serviceName] = count > 0 ? count : "";
+                    });
+
+                    rows.push(row);
+
+                    if (!isOff) {
+                        totalCustomers += (day.count || 0);
+                        totalNew += (day.countNew || 0);
+                        totalRegular += (day.countRegular || 0); // รวมยอดลูกค้าประจำ
+                        totalBarber += barberEarn;
+                        totalShop += shopEarn;
+                    }
+                });
+            }
+        });
+
+        // --- ส่วนสรุปท้ายตารางแบบครบถ้วน (รวมลูกค้าประจำด้วย) ---
+        rows.push({}); 
+        
+        const summaryRow = {
+            "ว-ด-ป": "เทียบยอด",
+            "วัน": `ทำงาน ${totalWorkDays} / หยุด ${totalOffDays}`, 
+            "ลูกค้า": totalCustomers,
+            "ลูกค้าใหม่": totalNew,
+            "ลูกค้าประจำ": totalRegular, // สรุปยอดลูกค้าประจำท้ายตาราง
+            "รายได้ช่าง": totalBarber,
+            "รายได้ร้าน": totalShop
+        };
+        
+        allServiceNames.forEach(serviceName => {
+            summaryRow[serviceName] = serviceStats[serviceName] || 0;
+        });
+
+        rows.push(summaryRow);
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(rows);
+        const fileName = `${conf.shop || "Barber_Shop"}_เดือน_${m}.xlsx`;
+        
+        XLSX.utils.book_append_sheet(wb, ws, "รายงานละเอียด");
+        XLSX.writeFile(wb, fileName);
+        
+        alert(`ส่งออกไฟล์เรียบร้อย! ข้อมูลลูกค้าประจำมาครบแล้วครับพี่`);
+    } catch (err) {
+        alert("ข้อผิดพลาด: " + err.message);
+    }
+}
 function renderStats(obj, accentColor) {
     const entries = Object.entries(obj).sort((a, b) => b[1] - a[1]);
     if (!entries.length) return "<div style='color:rgba(255,255,255,0.2); padding:10px; font-size:13px;'>ไม่มีข้อมูลสถิติ</div>";
