@@ -9,11 +9,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 11</title>
+    <title>Barber Note Pro </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 // เปลี่ยนจาก $ เป็น getEl เพื่อความปลอดภัย
 const getEl = id => document.getElementById(id);
@@ -668,7 +667,7 @@ span[onclick*="delRec"] {
         </div>
 
         <div style="text-align:center; line-height: 1.4;">
-            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.6</span></div>
+            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.1.0</span></div>
             <div style="font-size:9px; color:#cbd5e1; font-weight:400;">Update: <span id="display-date">04/03/2026</span></div>
         </div>
     </div>
@@ -714,7 +713,7 @@ span[onclick*="delRec"] {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.6"; 
+const APP_VERSION = "1.1.0"; 
 const LAST_UPDATED = "04/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
@@ -2256,8 +2255,21 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     // --- ส่วนสรุปภาพรวม (Insights) ปรับปรุงใหม่ ---
     const insights = [
         `ระยะเวลาทำงาน: เปิดให้บริการ <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
-        `วิเคราะห์ลูกค้าใหม่: ${newGrowthWeeks.length > 0 || newDropWeeks.length > 0 ? `สัปดาห์ที่เพิ่ม: <b>${newGrowthWeeks.join(", ") || "-"}</b> | สัปดาห์ที่ลด: <b>${newDropWeeks.join(", ") || "-"}</b>` : "ปริมาณคงที่ตลอดเดือน"} <br/>&nbsp;&nbsp;↳ <span style="color:#4ade80;"><b>สรุปเดือนนี้: ${monthNewTrend}</b></span>`,
-        `วิเคราะห์ลูกค้าประจำ: ${regGrowthWeeks.length > 0 || regDropWeeks.length > 0 ? `สัปดาห์ที่เพิ่ม: <b>${regGrowthWeeks.join(", ") || "-"}</b> | สัปดาห์ที่ลด: <b>${regDropWeeks.join(", ") || "-"}</b>` : "แวะเวียนมาสม่ำเสมอในทุกสัปดาห์"} <br/>&nbsp;&nbsp;↳ <span style="color:#c084fc;"><b>สรุปเดือนนี้: ${monthRegTrend}</b></span>`,
+        
+        // วิเคราะห์ลูกค้าใหม่: ระบุสัปดาห์ + แนวโน้มเดือน
+        `วิเคราะห์ลูกค้าใหม่: ${
+            newGrowthWeeks.length > 0 || newDropWeeks.length > 0 
+            ? `สัปดาห์ที่เพิ่ม: <b>${newGrowthWeeks.join(", ") || "-"}</b> | สัปดาห์ที่ลด: <b>${newDropWeeks.join(", ") || "-"}</b>`
+            : "ปริมาณคงที่ตลอดเดือน"
+        } <br/>&nbsp;&nbsp;↳ <span style="color:#4ade80;"><b>สรุปเดือนนี้: ${monthNewTrend}</b></span>`,
+
+        // วิเคราะห์ลูกค้าประจำ: ระบุสัปดาห์ + แนวโน้มเดือน
+        `วิเคราะห์ลูกค้าประจำ: ${
+            regGrowthWeeks.length > 0 || regDropWeeks.length > 0 
+            ? `สัปดาห์ที่เพิ่ม: <b>${regGrowthWeeks.join(", ") || "-"}</b> | สัปดาห์ที่ลด: <b>${regDropWeeks.join(", ") || "-"}</b>`
+            : "แวะเวียนมาสม่ำเสมอในทุกสัปดาห์"
+        } <br/>&nbsp;&nbsp;↳ <span style="color:#c084fc;"><b>สรุปเดือนนี้: ${monthRegTrend}</b></span>`,
+        
         `สถิติประกันรายได้: ใช้ประกันรายได้ทั้งหมด <b>${monthGuarDays || 0} วัน</b>`,
         (topIncomeWeek && (topIncomeWeek[1].income || 0) > 0) ? `สัปดาห์รายได้สูงสุด: <b>${topIncomeWeek[0]}</b>` : `สัปดาห์รายได้สูงสุด: <b>-</b>`,
         (busiestDay && busiestDay.avg > 0) ? (() => {
@@ -2275,6 +2287,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         }
         const wBarber = sumBarber;
         const wShop = weeklyTotalIncome - wBarber;
+        const avg = data.workDays > 0 ? (data.customers / data.workDays).toFixed(1) : 0;
         
         const sortedDays = data.dailyCounts ? [...data.dailyCounts].sort((a,b) => b.count - a.count) : [];
         const maxCount = sortedDays.length > 0 ? sortedDays[0].count : 0;
@@ -2311,36 +2324,40 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                     <div style="font-size:13px; font-weight:800; color:#38bdf8;">฿${Math.floor(wShop).toLocaleString()}</div>
                 </div>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px;">
-                <div style="background: rgba(255,255,255,0.02); padding: 6px 4px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
-                    <div style="font-size: 8px; color: #64748b; margin-bottom: 2px;">👤 รวม</div>
-                    <div style="font-size: 12px; font-weight: 700; color: #38bdf8;">${data.customers}</div>
-                </div>
-                <div style="background: rgba(34,197,94,0.05); padding: 6px 4px; border-radius: 12px; text-align: center; border: 1px solid rgba(34,197,94,0.1);">
-                    <div style="font-size: 8px; color: #4ade80; margin-bottom: 2px;">💇 ใหม่</div>
-                    <div style="font-size: 12px; font-weight: 700; color: #4ade80;">${data.countNew || 0}</div>
-                </div>
-                <div style="background: rgba(168,85,247,0.05); padding: 6px 4px; border-radius: 12px; text-align: center; border: 1px solid rgba(168,85,247,0.1);">
-                    <div style="font-size: 8px; color: #c084fc; margin-bottom: 2px;">💇‍♂️ ประจำ</div>
-                    <div style="font-size: 12px; font-weight: 700; color: #c084fc;">${data.countRegular || 0}</div>
-                </div>
-            </div>
-            <div style="font-size: 11px; color: #64748b; line-height: 1.7; padding: 0 4px 10px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
-                <div>💇 แนวโน้มลูกค้าใหม่: <span style="color: #f1f5f9; font-weight: 600;">${data.newTrend}</span></div>
-                <div>💇‍♂️ แนวโน้มลูกค้าประจำ: <span style="color: #f1f5f9; font-weight: 600;">${data.regTrend}</span></div>
-                <div style="margin-top: 2px;">📈 ลูกค้าเยอะที่สุด: <span style="color: #f1f5f9; font-weight: 600;">${bestDay}</span></div>
-                <div>📉 ลูกค้าน้อยที่สุด: <span style="color: #f1f5f9; font-weight: 600;">${worstDay}</span></div>
-            </div>          
+        
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px;">
+    <div style="background: rgba(255,255,255,0.02); padding: 6px 4px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+        <div style="font-size: 8px; color: #64748b; margin-bottom: 2px;">👤 รวม</div>
+        <div style="font-size: 12px; font-weight: 700; color: #38bdf8;">${data.customers}</div>
+    </div>
+
+    <div style="background: rgba(34,197,94,0.05); padding: 6px 4px; border-radius: 12px; text-align: center; border: 1px solid rgba(34,197,94,0.1);">
+        <div style="font-size: 8px; color: #4ade80; margin-bottom: 2px;">💇 ใหม่</div>
+        <div style="font-size: 12px; font-weight: 700; color: #4ade80;">${data.countNew || 0}</div>
+    </div>
+
+    <div style="background: rgba(168,85,247,0.05); padding: 6px 4px; border-radius: 12px; text-align: center; border: 1px solid rgba(168,85,247,0.1);">
+        <div style="font-size: 8px; color: #c084fc; margin-bottom: 2px;">💇‍♂️ ประจำ</div>
+        <div style="font-size: 12px; font-weight: 700; color: #c084fc;">${data.countRegular || 0}</div>
+    </div>
+</div>
+<div style="font-size: 11px; color: #64748b; line-height: 1.7; padding: 0 4px 10px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
+    <div>💇 แนวโน้มลูกค้าใหม่: <span style="color: #f1f5f9; font-weight: 600;">${data.newTrend}</span></div>
+    <div>💇‍♂️ แนวโน้มลูกค้าประจำ: <span style="color: #f1f5f9; font-weight: 600;">${data.regTrend}</span></div>
+    <div style="margin-top: 2px;">📈 ลูกค้าเยอะที่สุด: <span style="color: #f1f5f9; font-weight: 600;">${bestDay}</span></div>
+    <div>📉 ลูกค้าน้อยที่สุด: <span style="color: #f1f5f9; font-weight: 600;">${worstDay}</span></div>
+</div>          
             <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top: 8px;">
                 ${popHair} ${popService}
             </div>
         </div>`;
     }).join("");
 
-    let reportContent = `
-        <div style="background:#0f172a; padding:24px; color:#f1f5f9; border-radius:20px; font-family: sans-serif;">
+    openReportModal(
+        `สรุปรายงานเดือน ${m}`,
+        `<div style="background:#0f172a; padding:24px; color:#f1f5f9; border-radius:20px; font-family: sans-serif; margin-bottom:50px;">
             <div style="text-align:center; padding:10px 0 20px 0;">
-                <div style="font-size:16px; color:#94a3b8; font-weight:700; margin-bottom:5px;">✂️ รายได้รวมประจำเดือน ${m}</div>
+                <div style="font-size:16px; color:#94a3b8; font-weight:700; margin-bottom:5px;">✂️ รายได้รวมประจำเดือน</div>
                 <div style="font-size:48px; font-weight:900; color:#ffffff;">฿${monthTotal.toLocaleString()}</div>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
@@ -2353,165 +2370,55 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                     <div style="font-size:20px; font-weight:800; color:#f8fafc;">฿${Math.floor(monthTotal - monthBarber).toLocaleString()}</div>
                 </div>
             </div>
+          <div style="margin-bottom: 25px;">
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px;">
+        <div style="background: rgba(56,189,248,0.15); padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #38bdf8; text-align: center; border: 1px solid rgba(56,189,248,0.2);">
+            👤 ลูกค้า ${monthCount}
+        </div>
+        <div style="background: rgba(34,197,94,0.15); padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #4ade80; text-align: center; border: 1px solid rgba(34,197,94,0.2);">
+            💇 ใหม่ ${countNew || 0}
+        </div>
+        <div style="background: rgba(168,85,247,0.15); padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #c084fc; text-align: center; border: 1px solid rgba(168,85,247,0.2);">
+            💇‍♂️ ประจำ ${countRegular || 0}
+        </div>
+    </div>
 
-            <div style="text-align:center; font-family:'Kanit',sans-serif; padding:5px;">
-                <h3 style="color:#fff; margin-bottom:20px;">📊 สรุปรายงานเดือน ${m}</h3>
-                
-                <div style="margin-bottom: 25px;">
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px;">
-                        <div style="background: rgba(56,189,248,0.15); padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #38bdf8; text-align: center; border: 1px solid rgba(56,189,248,0.2);">
-                            👤 ลูกค้า ${monthCount}
-                        </div>
-                        <div style="background: rgba(34,197,94,0.15); padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #4ade80; text-align: center; border: 1px solid rgba(34,197,94,0.2);">
-                            💇 ใหม่ ${countNew || 0}
-                        </div>
-                        <div style="background: rgba(168,85,247,0.15); padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #c084fc; text-align: center; border: 1px solid rgba(168,85,247,0.2);">
-                            💇‍♂️ ประจำ ${countRegular || 0}
-                        </div>
-                    </div>
-
-                    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;">
-                        <div style="background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #f8fafc;">
-                            📅 เปิด ${workDays} วัน
-                        </div>
-                        <div style="background: rgba(244,63,94,0.15); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #fb7185;">
-                            ⛱️ หยุด ${offDays} วัน
-                        </div>
-                        <div style="background: rgba(250,204,21,0.15); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #facc15;">
-                            🛡️ ประกัน ${monthGuarDays || 0} วัน
-                        </div>
-                        <div style="background: rgba(147,51,234,0.15); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #a855f7;">
-                            📊 เฉลี่ย ${avgCustomerPerDay.toFixed(2)}
-                        </div>
-                    </div>
-                </div> 
-
-                <div style="margin-bottom:25px; text-align:left;">
-                    <div style="font-size:14px; font-weight:800; color:#facc15; margin-bottom:12px;">🌀 วิเคราะห์รายสัปดาห์</div>
-                    ${weeklyHtml}
-                </div>
-
-                <div style="background:rgba(250,204,21,0.08); border:1px solid rgba(250,204,21,0.25); padding:18px; border-radius:20px; margin-bottom:30px; text-align:left;">
-                    <div style="font-size:14px; font-weight:800; color:#facc15; margin-bottom:10px;">⌛ วิเคราะห์ภาพรวม</div>
-                    ${insights.map(i => `<div style="font-size:13px; color:#f8fafc; margin-bottom:6px;">• ${i}</div>`).join("")}
-                </div>
-
-                <div style="margin-bottom:25px; text-align:left;">
-                    <div style="font-size:15px; font-weight:800; color:#bef264; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
-                        <div style="width:4px; height:16px; background:#bef264; border-radius:2px;"></div> ทรงผมยอดนิยม
-                    </div>
-                    ${renderStats(hairStats, "#bef264")}
-                </div>
-
-                <div style="padding-bottom:20px; text-align:left;">
-                    <div style="font-size:15px; font-weight:800; color:#38bdf8; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
-                        <div style="width:4px; height:16px; background:#38bdf8; border-radius:2px;"></div> บริการยอดนิยม
-                    </div>
-                    ${renderStats(serviceStats, "#38bdf8")}
-                </div>
-
-                <hr style="border:0; border-top:1px dashed rgba(255,255,255,0.1); margin:20px 0;">
-
-                <button onclick="exportToExcel('${m}', ${monthTotal}, ${monthBarber}, weeklyData, hairStats, serviceStats)" 
-                        style="width:100%; height:55px; background:#16a34a; color:#fff; border-radius:18px; border:none; font-weight:800; font-size:16px; margin-bottom:12px; cursor:pointer; box-shadow: 0 4px 15px rgba(22,163,74,0.3); display:flex; align-items:center; justify-content:center; gap:10px;">
-                    <span style="font-size:22px;">📁</span> ดาวน์โหลดรายงาน Excel
-                </button>
-
-                <button onclick="shareLine()" 
-                        style="width:100%; height:55px; background:#06c755; color:#fff; border-radius:18px; border:none; font-weight:800; font-size:16px; margin-bottom:15px; cursor:pointer; box-shadow: 0 4px 15px rgba(6,199,85,0.2); display:flex; align-items:center; justify-content:center; gap:10px;">
-                    <span style="font-size:22px;">💬</span> ส่งข้อมูลเข้า LINE
-                </button>
-
-                <button onclick="closeReportModal()" style="background:none; border:none; color:#94a3b8; font-size:14px; cursor:pointer; padding:10px;">ปิดหน้าต่าง</button>
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;">
+        <div style="background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #f8fafc;">
+            📅 เปิด ${workDays} วัน
+        </div>
+        <div style="background: rgba(244,63,94,0.15); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #fb7185;">
+            ⛱️ หยุด ${offDays} วัน
+        </div>
+        <div style="background: rgba(250,204,21,0.15); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #facc15;">
+            🛡️ ประกัน ${monthGuarDays || 0} วัน
+        </div>
+        <div style="background: rgba(147,51,234,0.15); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #a855f7;">
+            📊 เฉลี่ย ${avgCustomerPerDay.toFixed(2)}
+        </div>
+            <div style="margin-bottom:25px;">
+                <div style="font-size:14px; font-weight:800; color:#facc15; margin-bottom:12px;">🌀 วิเคราะห์รายสัปดาห์</div>
+                ${weeklyHtml}
             </div>
-        </div>`;
-
-    // --- สั่งแสดงผลใส่ใน Modal ---
-    const modalDisplay = document.getElementById("reportContent");
-    if(modalDisplay) {
-        modalDisplay.innerHTML = reportContent;
-        document.getElementById("reportModal").style.display = "flex";
-    }
-}
-function exportToExcel(m, monthTotal, monthBarber, weeklyData, hairStats, serviceStats) {
-    try {
-        const rows = [];
-        let totalCustomers = 0, totalNew = 0, totalRegular = 0;
-        let totalBarber = 0, totalShop = 0;
-        let totalOffDays = 0, totalWorkDays = 0;
-
-        const allServiceNames = Object.keys(serviceStats || {});
-
-        Object.entries(weeklyData).forEach(([wk, data]) => {
-            if (data.dailyCounts) {
-                data.dailyCounts.forEach(day => {
-                    const isOff = day.isOff;
-                    if (isOff) { totalOffDays++; } else { totalWorkDays++; }
-
-                    const barberEarn = Math.floor(day.barberEarn || 0);
-                    const shopEarn = (day.income || 0) - barberEarn;
-                    const dayNameText = isOff ? `${day.dayName.split(' ')[0]} (หยุด)` : day.dayName.split(' ')[0];
-
-                    const row = {
-                        "ว-ด-ป": day.dayName.split(' ')[1] || day.dayName,
-                        "วัน": dayNameText,
-                        "ลูกค้า": isOff ? 0 : (day.count || 0),
-                        "ลูกค้าใหม่": isOff ? 0 : (day.countNew || 0),
-                        "ลูกค้าประจำ": isOff ? 0 : (day.countRegular || 0),
-                        "รายได้ช่าง": isOff ? 0 : barberEarn,
-                        "รายได้ร้าน": isOff ? 0 : shopEarn
-                    };
-
-                    allServiceNames.forEach(serviceName => {
-                        const count = !isOff && day.services ? (day.services[serviceName] || 0) : 0;
-                        row[serviceName] = count > 0 ? count : "";
-                    });
-
-                    rows.push(row);
-
-                    if (!isOff) {
-                        totalCustomers += (day.count || 0);
-                        totalNew += (day.countNew || 0);
-                        totalRegular += (day.countRegular || 0);
-                        totalBarber += barberEarn;
-                        totalShop += shopEarn;
-                    }
-                });
-            }
-        });
-
-        rows.push({}); 
-        const summaryRow = {
-            "ว-ด-ป": "รวมยอด",
-            "วัน": `ทำงาน ${totalWorkDays} / หยุด ${totalOffDays}`, 
-            "ลูกค้า": totalCustomers,
-            "ลูกค้าใหม่": totalNew,
-            "ลูกค้าประจำ": totalRegular,
-            "รายได้ช่าง": totalBarber,
-            "รายได้ร้าน": totalShop
-        };
-        allServiceNames.forEach(serviceName => { summaryRow[serviceName] = serviceStats[serviceName] || 0; });
-        rows.push(summaryRow);
-
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(rows);
-        // แก้ไข: ใช้ชื่อร้านที่ประกาศไว้ หรือค่า Default เพื่อป้องกัน Error
-        const shopName = (typeof conf !== 'undefined' && conf.shop) ? conf.shop : "Barber_Shop";
-        const fileName = `${shopName}_เดือน_${m}.xlsx`;
-        
-        XLSX.utils.book_append_sheet(wb, ws, "รายงานละเอียด");
-        XLSX.writeFile(wb, fileName);
-        alert(`ส่งออกไฟล์เรียบร้อยครับพี่!`);
-    } catch (err) {
-        console.error(err);
-        alert("ขอผิดพลาดในการส่งออก Excel: " + err.message);
-    }
-}
-function shareLine(m, total, count) {
-    const text = `📊 รายงานเดือน: ${m}\n✂️ รายได้รวม: ฿${total.toLocaleString()}\n👤 ลูกค้ารวม: ${count} ท่าน\nส่งจากระบบ Barber Report`;
-    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
-    window.open(lineUrl, '_blank');
-}     
+            <div style="background:rgba(250,204,21,0.08); border:1px solid rgba(250,204,21,0.25); padding:18px; border-radius:20px; margin-bottom:30px;">
+                <div style="font-size:14px; font-weight:800; color:#facc15; margin-bottom:10px;">⌛ วิเคราะห์ภาพรวม</div>
+                ${insights.map(i => `<div style="font-size:13px; color:#f8fafc; margin-bottom:6px;">• ${i}</div>`).join("")}
+            </div>
+            <div style="margin-bottom:25px;">
+                <div style="font-size:15px; font-weight:800; color:#bef264; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+                    <div style="width:4px; height:16px; background:#bef264; border-radius:2px;"></div> ทรงผมยอดนิยม
+                </div>
+                ${renderStats(hairStats, "#bef264")}
+            </div>
+            <div style="padding-bottom:20px;">
+                <div style="font-size:15px; font-weight:800; color:#38bdf8; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+                    <div style="width:4px; height:16px; background:#38bdf8; border-radius:2px;"></div> บริการยอดนิยม
+                </div>
+                ${renderStats(serviceStats, "#38bdf8")}
+            </div>
+        </div>`
+    );
+} 
 function renderStats(obj, accentColor) {
     const entries = Object.entries(obj).sort((a, b) => b[1] - a[1]);
     if (!entries.length) return "<div style='color:rgba(255,255,255,0.2); padding:10px; font-size:13px;'>ไม่มีข้อมูลสถิติ</div>";
