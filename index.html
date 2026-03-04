@@ -2189,51 +2189,76 @@ function loadHistMonth() {
     generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular);
 }
 function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular) {
-    // --- 1. เตรียมข้อมูลสำหรับวิเคราะห์ (Logic) ---
+    // --- 1. เตรียมข้อมูลพื้นฐาน (Logic ที่ขาดไป) ---
     const weekEntries = Object.entries(weeklyData);
+    const weekKeys = Object.keys(weeklyData); 
     const dayStats = {};
-    let dailyTimeline = []; 
 
-    const haircutList = ["แฟชั่น","สกินเฟด","รองทรง","ตำรวจ/ทหาร","นักเรียน","ซอยผม/เล็มผม","แก้ผม","โกนผม","เด็ก"];
-    const allHaircuts = ["แฟชั่น","สกินเฟด","รองทรง","ตำรวจ/ทหาร","นักเรียน","ซอยผม/เล็มผม","แก้ผม","โกนผม","เด็ก"];
-    const allServices = ["โกนหนวด", "สระผม", "ย้อมผม", "กันหน้า","กันจอน", "ดัดผม", "ย้อมแฟชั่น"]; 
+    // วิเคราะห์หาวันที่ลูกค้าเยอะที่สุด/น้อยที่สุด
+    weekEntries.forEach(([wk, data]) => {
+        if (data.dailyCounts) {
+            data.dailyCounts.forEach(d => {
+                const dayName = d.dayName.split(' ')[0];
+                if (!dayStats[dayName]) dayStats[dayName] = { total: 0, count: 0 };
+                if (d.count > 0) {
+                    dayStats[dayName].total += d.count;
+                    dayStats[dayName].count += 1;
+                }
+            });
+        }
+    });
+
+    const dayAverages = Object.entries(dayStats).filter(([name, data]) => data.count > 0).map(([name, data]) => ({ name, avg: data.total / data.count }));
+    const busiestDay = dayAverages.sort((a, b) => b.avg - a.avg)[0];
+    const quietestDay = dayAverages.sort((a, b) => a.avg - b.avg)[0];
+    const topIncomeWeek = weekEntries.length > 0 ? weekEntries.reduce((p, c) => ((c[1].income || 0) > (p[1].income || 0) ? c : p)) : null;
 
     const topHair = Object.entries(hairStats).sort((a, b) => b[1] - a[1])[0];
     const topService = Object.entries(serviceStats).sort((a, b) => b[1] - a[1])[0];
 
-   // --- [เพิ่ม Logic วิเคราะห์แนวโน้มลูกค้าใหม่/ประจำ แบบระบุสัปดาห์] ---
-    const newGrowthWeeks = []; 
-    const newDropWeeks = [];   
-    const regGrowthWeeks = []; 
-    const regDropWeeks = [];   
-
-    let nUp = 0, nDown = 0;
-    let rUp = 0, rDown = 0;
+    // --- 2. วิเคราะห์แนวโน้มลูกค้าใหม่/ประจำ ---
+    const newGrowthWeeks = []; const newDropWeeks = [];
+    const regGrowthWeeks = []; const regDropWeeks = [];
+    let nUp = 0, nDown = 0, rUp = 0, rDown = 0;
 
     weekKeys.forEach((wk, idx) => {
         const curr = weeklyData[wk];
         if (idx > 0) {
             const prev = weeklyData[weekKeys[idx - 1]];
-            
-            // ตรวจสอบลูกค้าใหม่
             if (curr.countNew > prev.countNew) { newGrowthWeeks.push(wk); nUp++; }
             else if (curr.countNew < prev.countNew) { newDropWeeks.push(wk); nDown++; }
-            
-            // ตรวจสอบลูกค้าประจำ
             if (curr.countRegular > prev.countRegular) { regGrowthWeeks.push(wk); rUp++; }
             else if (curr.countRegular < prev.countRegular) { regDropWeeks.push(wk); rDown++; }
         }
     });
 
-    // ฟังก์ชันวิเคราะห์เทรนด์ใหญ่รายเดือน (3 เงื่อนไข)
     const getMonthTrend = (up, down) => {
         if (up > down) return "อยู่ในทิศทางเติบโตดีมาก 🔝";
         if (down > up) return "อยู่ในช่วงชะลอตัวลง ↘️";
         return "ภาพรวมค่อนข้างทรงตัว ➖";
     };
-
     const monthNewTrend = getMonthTrend(nUp, nDown);
     const monthRegTrend = getMonthTrend(rUp, rDown);
+
+    // --- 3. ฟังก์ชัน Render กราฟสถิติ ---
+    const renderStats = (statsObj, color) => {
+        const entries = Object.entries(statsObj).sort((a, b) => b[1] - a[1]);
+        if (entries.length === 0) return `<div style="font-size:12px; color:#64748b;">ไม่มีข้อมูล</div>`;
+        const maxVal = entries[0][1];
+        return entries.map(([name, count]) => {
+            const width = maxVal > 0 ? (count / maxVal) * 100 : 0;
+            return `
+            <div style="margin-bottom:8px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:3px;">
+                    <span style="color:#cbd5e1;">${name}</span>
+                    <span style="font-weight:700; color:${color};">${count}</span>
+                </div>
+                <div style="width:100%; height:6px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;">
+                    <div style="width:${width}%; height:100%; background:${color}; border-radius:10px;"></div>
+                </div>
+            </div>`;
+        }).join("");
+    };
 
     // --- ส่วนสรุปภาพรวม (Insights) ปรับปรุงใหม่ ---
     const insights = [
