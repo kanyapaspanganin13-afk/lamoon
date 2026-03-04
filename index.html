@@ -2255,7 +2255,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
 
     // --- ส่วนสรุปภาพรวม (Insights) ---
     const insights = [
-        `ระยะเวลาทำงาน: เปิดให้บริการ <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
+        `เดือนนี้: เปิดให้บริการ <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
         `วิเคราะห์ลูกค้าใหม่: ${newGrowthWeeks.length > 0 || newDropWeeks.length > 0 ? `สัปดาห์ที่เพิ่ม: <b>${newGrowthWeeks.join(", ") || "-"}</b> | สัปดาห์ที่ลด: <b>${newDropWeeks.join(", ") || "-"}</b>` : "ปริมาณคงที่ตลอดเดือน"} <br/>&nbsp;&nbsp;↳ <span style="color:#4ade80;"><b>สรุปเดือนนี้: ${monthNewTrend}</b></span>`,
         `วิเคราะห์ลูกค้าประจำ: ${regGrowthWeeks.length > 0 || regDropWeeks.length > 0 ? `สัปดาห์ที่เพิ่ม: <b>${regGrowthWeeks.join(", ") || "-"}</b> | สัปดาห์ที่ลด: <b>${regDropWeeks.join(", ") || "-"}</b>` : "แวะเวียนมาสม่ำเสมอในทุกสัปดาห์"} <br/>&nbsp;&nbsp;↳ <span style="color:#c084fc;"><b>สรุปเดือนนี้: ${monthRegTrend}</b></span>`,
         `สถิติประกันรายได้: ใช้ประกันรายได้ทั้งหมด <b>${monthGuarDays || 0} วัน</b>`,
@@ -2337,7 +2337,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         </div>`;
     }).join("");
 
-    // --- ส่วนแสดงผลใส่ใน Modal ---
     let reportContent = `
         <div style="background:#0f172a; padding:24px; color:#f1f5f9; border-radius:20px; font-family: sans-serif;">
             <div style="text-align:center; padding:10px 0 20px 0;">
@@ -2356,6 +2355,8 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
             </div>
 
             <div style="text-align:center; font-family:'Kanit',sans-serif; padding:5px;">
+                <h3 style="color:#fff; margin-bottom:20px;">📊 สรุปรายงานเดือน ${m}</h3>
+                
                 <div style="margin-bottom: 25px;">
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px;">
                         <div style="background: rgba(56,189,248,0.15); padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #38bdf8; text-align: center; border: 1px solid rgba(56,189,248,0.2);">
@@ -2368,6 +2369,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                             💇‍♂️ ประจำ ${countRegular || 0}
                         </div>
                     </div>
+
                     <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;">
                         <div style="background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #f8fafc;">
                             📅 เปิด ${workDays} วัน
@@ -2382,8 +2384,8 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                             📊 เฉลี่ย ${avgCustomerPerDay.toFixed(2)}
                         </div>
                     </div>
-                </div>
-
+                </div> 
+                
                 <div style="margin-bottom:25px; text-align:left;">
                     <div style="font-size:14px; font-weight:800; color:#facc15; margin-bottom:12px;">🌀 วิเคราะห์รายสัปดาห์</div>
                     ${weeklyHtml}
@@ -2410,7 +2412,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
 
                 <hr style="border:0; border-top:1px dashed rgba(255,255,255,0.1); margin:20px 0;">
 
-                <button onclick="exportToExcel('${m}', ${monthTotal}, ${monthBarber}, {}, hairStats, serviceStats)" 
+                <button onclick="exportToExcel('${m}', ${monthTotal}, ${monthBarber}, weeklyData, hairStats, serviceStats)" 
                         style="width:100%; height:55px; background:#16a34a; color:#fff; border-radius:18px; border:none; font-weight:800; font-size:16px; margin-bottom:12px; cursor:pointer; box-shadow: 0 4px 15px rgba(22,163,74,0.3); display:flex; align-items:center; justify-content:center; gap:10px;">
                     <span style="font-size:22px;">📁</span> ดาวน์โหลดรายงาน Excel
                 </button>
@@ -2424,7 +2426,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
             </div>
         </div>`;
 
-    // --- สั่งแสดงผล ---
+    // --- สั่งแสดงผลใส่ใน Modal ---
     const modalDisplay = document.getElementById("reportContent");
     if(modalDisplay) {
         modalDisplay.innerHTML = reportContent;
