@@ -441,8 +441,8 @@ span[onclick*="delRec"] {
             </div>
             <select id="custType" style="height:55px; border-radius:15px; border:none; background:#fff; color:#1e293b; font-weight:800; font-size:18px; text-align:center; padding: 0 5px; outline:none; box-shadow: 0 4px 8px rgba(0,0,0,0.03); appearance:none;">
                 <option value="none">❌ ปิด</option>
-                <option value="new">✨ ใหม่</option>
-                <option value="regular">👤 ประจำ</option>
+                <option value="new">💇 ใหม่</option>
+                <option value="regular">💇‍♂️ ประจำ</option>
             </select>
         </div>
 
@@ -1444,8 +1444,8 @@ function renderDay(selectedDate){
         
         // 🟢 เพิ่มสัญลักษณ์แสดงประเภทในรายการ (History)
         let custTag = "";
-        if(cType === 'new') custTag = " <span style='color:#f59e0b; font-size:12px;'>✨</span>";
-        if(cType === 'regular') custTag = " <span style='color:#6366f1; font-size:12px;'>👤</span>";
+        if(cType === 'new') custTag = " <span style='color:#f59e0b; font-size:12px;'>💇</span>";
+        if(cType === 'regular') custTag = " <span style='color:#6366f1; font-size:12px;'>💇‍♂️</span>";
 
         let payIcon = r.pay === 'Trans' ? '📱' : '💵';
         let mixText = "";
@@ -2304,10 +2304,10 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
             </div>
             <div style="display:flex; gap:6px; margin-bottom:8px;">
                 <div style="flex:1; background:rgba(34,197,94,0.05); border:1px solid rgba(34,197,94,0.1); padding:4px 8px; border-radius:10px; text-align:center;">
-                    <span style="font-size:9px; color:#4ade80;">✨ ใหม่: ${data.countNew || 0}</span>
+                    <span style="font-size:9px; color:#4ade80;">💇 ใหม่: ${data.countNew || 0}</span>
                 </div>
                 <div style="flex:1; background:rgba(168,85,247,0.05); border:1px solid rgba(168,85,247,0.1); padding:4px 8px; border-radius:10px; text-align:center;">
-                    <span style="font-size:9px; color:#c084fc;">🔄 ประจำ: ${data.countRegular || 0}</span>
+                    <span style="font-size:9px; color:#c084fc;">💇‍♂️ ประจำ: ${data.countRegular || 0}</span>
                 </div>
             </div>
             <div style="display:flex; gap:6px; margin-bottom:10px;">
