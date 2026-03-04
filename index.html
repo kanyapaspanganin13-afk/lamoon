@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro </title>
+    <title>Barber Note Pro 1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -2304,36 +2304,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         const popService = Object.entries(data.popularService || {}).sort((a,b) => b[1] - a[1]).slice(0, 2).map(([name, count]) => `
             <span style="background:rgba(56,189,248,0.1); color:#38bdf8; padding:2px 8px; border-radius:8px; font-size:10px; border:1px solid rgba(56,189,248,0.2); margin-right:4px;">🧴 ${name} ${count}</span>
         `).join("");
-let reportContent = `
-            <div style="text-align:center; font-family:'Kanit',sans-serif;">
-                <h3 style="color:#fff; margin-bottom:15px;">📊 สรุปรายงานเดือน ${m}</h3>
-                
-                <div style="margin-bottom:15px;">
-                    <div style="margin-bottom:8px;">${popHair}</div>
-                    <div>${popService}</div>
-                </div>
 
-                <hr style="border:0; border-top:1px dashed rgba(255,255,255,0.1); margin:20px 0;">
-
-                <button onclick="exportToExcel('${m}', ${monthTotal}, ${monthBarber}, weeklyData, hairStats, serviceStats)" 
-                        style="width:100%; height:55px; background:#16a34a; color:#fff; border-radius:18px; border:none; font-weight:800; font-size:16px; margin-bottom:12px; cursor:pointer; box-shadow: 0 4px 15px rgba(22,163,74,0.3); display:flex; align-items:center; justify-content:center; gap:10px;">
-                    <span style="font-size:22px;">📁</span> ดาวน์โหลดรายงาน Excel
-                </button>
-
-                <button onclick="shareLine()" 
-                        style="width:100%; height:55px; background:#06c755; color:#fff; border-radius:18px; border:none; font-weight:800; font-size:16px; margin-bottom:15px; cursor:pointer; box-shadow: 0 4px 15px rgba(6,199,85,0.2); display:flex; align-items:center; justify-content:center; gap:10px;">
-                    <span style="font-size:22px;">💬</span> ส่งข้อมูลเข้า LINE
-                </button>
-
-                <button onclick="closeReportModal()" style="background:none; border:none; color:#94a3b8; font-size:14px; cursor:pointer; padding:10px;">ปิดหน้าต่าง</button>
-            </div>
-        `;
-
-        // สั่งแสดงผล (ใช้ ID Modal ของพี่)
-        const modalDisplay = document.getElementById("reportContent");
-        if(modalDisplay) {
-            modalDisplay.innerHTML = reportContent;
-        }
         return `
         <div style="background:#020617; border:1px solid rgba(255,255,255,0.08); padding:16px; border-radius:22px; margin-bottom:12px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -2434,21 +2405,52 @@ let reportContent = `
                 <div style="font-size:14px; font-weight:800; color:#facc15; margin-bottom:10px;">⌛ วิเคราะห์ภาพรวม</div>
                 ${insights.map(i => `<div style="font-size:13px; color:#f8fafc; margin-bottom:6px;">• ${i}</div>`).join("")}
             </div>
-            <div style="margin-bottom:25px;">
+           // --- 1. สร้างเนื้อหารายงาน (เริ่มจากหัวข้อและสถิติเดิมของพี่) ---
+    let reportContent = `
+        <div style="text-align:center; font-family:'Kanit',sans-serif;">
+            <h3 style="color:#fff; margin-bottom:15px;">📊 สรุปรายงานเดือน ${m}</h3>
+            
+            <div style="margin-bottom:15px;">
+                <div style="margin-bottom:8px;">${popHair}</div>
+                <div>${popService}</div>
+            </div>
+
+            <div style="margin-bottom:25px; text-align:left;">
                 <div style="font-size:15px; font-weight:800; color:#bef264; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
                     <div style="width:4px; height:16px; background:#bef264; border-radius:2px;"></div> ทรงผมยอดนิยม
                 </div>
                 ${renderStats(hairStats, "#bef264")}
             </div>
-            <div style="padding-bottom:20px;">
+
+            <div style="padding-bottom:20px; text-align:left;">
                 <div style="font-size:15px; font-weight:800; color:#38bdf8; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
                     <div style="width:4px; height:16px; background:#38bdf8; border-radius:2px;"></div> บริการยอดนิยม
                 </div>
                 ${renderStats(serviceStats, "#38bdf8")}
             </div>
-        </div>`
-    );
-} 
+
+            <hr style="border:0; border-top:1px dashed rgba(255,255,255,0.1); margin:20px 0;">
+
+            <button onclick="exportToExcel('${m}', ${monthTotal}, ${monthBarber}, weeklyData, hairStats, serviceStats)" 
+                    style="width:100%; height:55px; background:#16a34a; color:#fff; border-radius:18px; border:none; font-weight:800; font-size:16px; margin-bottom:12px; cursor:pointer; box-shadow: 0 4px 15px rgba(22,163,74,0.3); display:flex; align-items:center; justify-content:center; gap:10px;">
+                <span style="font-size:22px;">📁</span> ดาวน์โหลดรายงาน Excel
+            </button>
+
+            <button onclick="shareLine()" 
+                    style="width:100%; height:55px; background:#06c755; color:#fff; border-radius:18px; border:none; font-weight:800; font-size:16px; margin-bottom:15px; cursor:pointer; box-shadow: 0 4px 15px rgba(6,199,85,0.2); display:flex; align-items:center; justify-content:center; gap:10px;">
+                <span style="font-size:22px;">💬</span> ส่งข้อมูลเข้า LINE
+            </button>
+
+            <button onclick="closeReportModal()" style="background:none; border:none; color:#94a3b8; font-size:14px; cursor:pointer; padding:10px;">ปิดหน้าต่าง</button>
+        </div>`;
+
+    // --- 2. สั่งแสดงผลใส่ใน Modal ---
+    const modalDisplay = document.getElementById("reportContent");
+    if(modalDisplay) {
+        modalDisplay.innerHTML = reportContent;
+        // อย่าลืมสั่งเปิด Modal ให้พี่เห็นด้วยครับ
+        document.getElementById("reportModal").style.display = "flex";
+    }
 function exportToExcel(m, monthTotal, monthBarber, weeklyData, hairStats, serviceStats) {
     try {
         const rows = [];
