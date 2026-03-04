@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 12</title>
+    <title>Barber Note Pro 1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -2201,6 +2201,26 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     const topHair = Object.entries(hairStats).sort((a, b) => b[1] - a[1])[0];
     const topService = Object.entries(serviceStats).sort((a, b) => b[1] - a[1])[0];
 
+    // --- [เพิ่มส่วนวิเคราะห์แนวโน้ม] เปรียบเทียบกับสัปดาห์ก่อนหน้า ---
+    const weekKeys = Object.keys(weeklyData);
+    weekKeys.forEach((wk, idx) => {
+        const curr = weeklyData[wk];
+        if (idx === 0) {
+            curr.newTrend = "เริ่มต้น";
+            curr.regTrend = "เริ่มต้น";
+        } else {
+            const prev = weeklyData[weekKeys[idx - 1]];
+            // เทียบลูกค้าใหม่
+            if (curr.countNew > prev.countNew) curr.newTrend = "เพิ่มขึ้น 📈";
+            else if (curr.countNew < prev.countNew) curr.newTrend = "ลดลง 📉";
+            else curr.newTrend = "คงที่ ➖";
+            // เทียบลูกค้าประจำ
+            if (curr.countRegular > prev.countRegular) curr.regTrend = "เพิ่มขึ้น 📈";
+            else if (curr.countRegular < prev.countRegular) curr.regTrend = "ลดลง 📉";
+            else curr.regTrend = "คงที่ ➖";
+        }
+    });
+
     weekEntries.forEach(([wk, data]) => {
         if (data.dailyCounts) {
             data.dailyCounts.forEach(d => {
@@ -2246,7 +2266,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
 
     const insights = [
         `เดือนนี้เปิดให้บริการทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
-        `ประเภทลูกค้า: <b>ใหม่ ${countNew || 0} คน</b> | <b>ประจำ ${countRegular || 0} คน</b>`, // 🟢 เพิ่มสถิติประเภทลูกค้า
+        `ประเภทลูกค้า: <b>ใหม่ ${countNew || 0} คน</b> | <b>ประจำ ${countRegular || 0} คน</b>`,
         `ใช้ประกันรายได้ทั้งหมด <b>${monthGuarDays || 0} วัน</b>`,
         (topIncomeWeek && (topIncomeWeek[1].income || 0) > 0) ? `สัปดาห์ที่ทำรายได้สูงสุดคือ <b>${topIncomeWeek[0]}</b>` : `สัปดาห์ที่ทำรายได้สูงสุดคือ <b>-</b>`,
         (topCountWeek && (topCountWeek[1].customers || 0) > 0) ? `สัปดาห์ที่มีลูกค้ามากที่สุดคือ <b>${topCountWeek[0]}</b>` : `สัปดาห์ที่มีลูกค้ามากที่สุดคือ <b>-</b>`,
@@ -2302,14 +2322,18 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                     <div style="font-size:13px; font-weight:800; color:#38bdf8;">฿${Math.floor(wShop).toLocaleString()}</div>
                 </div>
             </div>
+            
             <div style="display:flex; gap:6px; margin-bottom:8px;">
-                <div style="flex:1; background:rgba(34,197,94,0.05); border:1px solid rgba(34,197,94,0.1); padding:4px 8px; border-radius:10px; text-align:center;">
-                    <span style="font-size:9px; color:#4ade80;">💇 ใหม่: ${data.countNew || 0}</span>
+                <div style="flex:1; background:rgba(34,197,94,0.05); border:1px solid rgba(34,197,94,0.1); padding:6px 8px; border-radius:10px;">
+                    <div style="font-size:8px; color:#4ade80; margin-bottom:2px;">✨ ใหม่ (แนวโน้ม)</div>
+                    <div style="font-size:11px; font-weight:700; color:#f8fafc;">${data.countNew || 0} <span style="font-size:9px; font-weight:normal;">(${data.newTrend})</span></div>
                 </div>
-                <div style="flex:1; background:rgba(168,85,247,0.05); border:1px solid rgba(168,85,247,0.1); padding:4px 8px; border-radius:10px; text-align:center;">
-                    <span style="font-size:9px; color:#c084fc;">💇‍♂️ ประจำ: ${data.countRegular || 0}</span>
+                <div style="flex:1; background:rgba(168,85,247,0.05); border:1px solid rgba(168,85,247,0.1); padding:6px 8px; border-radius:10px;">
+                    <div style="font-size:8px; color:#c084fc; margin-bottom:2px;">🔄 ประจำ (แนวโน้ม)</div>
+                    <div style="font-size:11px; font-weight:700; color:#f8fafc;">${data.countRegular || 0} <span style="font-size:9px; font-weight:normal;">(${data.regTrend})</span></div>
                 </div>
             </div>
+
             <div style="display:flex; gap:6px; margin-bottom:10px;">
                 <div style="flex:1; background:rgba(255,255,255,0.02); padding:4px 10px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-size:10px; color:#64748b;">👤 รวม</span>
@@ -2382,7 +2406,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
             </div>
         </div>`
     );
-}  
+} 
 function renderStats(obj, accentColor) {
     const entries = Object.entries(obj).sort((a, b) => b[1] - a[1]);
     if (!entries.length) return "<div style='color:rgba(255,255,255,0.2); padding:10px; font-size:13px;'>ไม่มีข้อมูลสถิติ</div>";
