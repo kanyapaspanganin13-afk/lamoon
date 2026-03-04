@@ -2253,9 +2253,9 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         }).join("");
     };
 
-    // --- ส่วนสรุปภาพรวม (Insights) ---
+    // --- ส่วนสรุปภาพรวม (Insights) ปรับปรุงใหม่ ---
     const insights = [
-        `เดือนนี้: เปิดให้บริการ <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
+        `ระยะเวลาทำงาน: เปิดให้บริการ <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
         `วิเคราะห์ลูกค้าใหม่: ${newGrowthWeeks.length > 0 || newDropWeeks.length > 0 ? `สัปดาห์ที่เพิ่ม: <b>${newGrowthWeeks.join(", ") || "-"}</b> | สัปดาห์ที่ลด: <b>${newDropWeeks.join(", ") || "-"}</b>` : "ปริมาณคงที่ตลอดเดือน"} <br/>&nbsp;&nbsp;↳ <span style="color:#4ade80;"><b>สรุปเดือนนี้: ${monthNewTrend}</b></span>`,
         `วิเคราะห์ลูกค้าประจำ: ${regGrowthWeeks.length > 0 || regDropWeeks.length > 0 ? `สัปดาห์ที่เพิ่ม: <b>${regGrowthWeeks.join(", ") || "-"}</b> | สัปดาห์ที่ลด: <b>${regDropWeeks.join(", ") || "-"}</b>` : "แวะเวียนมาสม่ำเสมอในทุกสัปดาห์"} <br/>&nbsp;&nbsp;↳ <span style="color:#c084fc;"><b>สรุปเดือนนี้: ${monthRegTrend}</b></span>`,
         `สถิติประกันรายได้: ใช้ประกันรายได้ทั้งหมด <b>${monthGuarDays || 0} วัน</b>`,
@@ -2385,7 +2385,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                         </div>
                     </div>
                 </div> 
-                
+
                 <div style="margin-bottom:25px; text-align:left;">
                     <div style="font-size:14px; font-weight:800; color:#facc15; margin-bottom:12px;">🌀 วิเคราะห์รายสัปดาห์</div>
                     ${weeklyHtml}
@@ -2436,7 +2436,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
 function exportToExcel(m, monthTotal, monthBarber, weeklyData, hairStats, serviceStats) {
     try {
         const rows = [];
-        let totalCustomers = 0, totalNew = 0, totalRegular = 0; // เพิ่มตัวแปรนับลูกค้าประจำ
+        let totalCustomers = 0, totalNew = 0, totalRegular = 0;
         let totalBarber = 0, totalShop = 0;
         let totalOffDays = 0, totalWorkDays = 0;
 
@@ -2446,11 +2446,7 @@ function exportToExcel(m, monthTotal, monthBarber, weeklyData, hairStats, servic
             if (data.dailyCounts) {
                 data.dailyCounts.forEach(day => {
                     const isOff = day.isOff;
-                    if (isOff) {
-                        totalOffDays++;
-                    } else {
-                        totalWorkDays++;
-                    }
+                    if (isOff) { totalOffDays++; } else { totalWorkDays++; }
 
                     const barberEarn = Math.floor(day.barberEarn || 0);
                     const shopEarn = (day.income || 0) - barberEarn;
@@ -2461,7 +2457,7 @@ function exportToExcel(m, monthTotal, monthBarber, weeklyData, hairStats, servic
                         "วัน": dayNameText,
                         "ลูกค้า": isOff ? 0 : (day.count || 0),
                         "ลูกค้าใหม่": isOff ? 0 : (day.countNew || 0),
-                        "ลูกค้าประจำ": isOff ? 0 : (day.countRegular || 0), // เพิ่มคอลัมน์นี้ครับพี่!
+                        "ลูกค้าประจำ": isOff ? 0 : (day.countRegular || 0),
                         "รายได้ช่าง": isOff ? 0 : barberEarn,
                         "รายได้ร้าน": isOff ? 0 : shopEarn
                     };
@@ -2476,7 +2472,7 @@ function exportToExcel(m, monthTotal, monthBarber, weeklyData, hairStats, servic
                     if (!isOff) {
                         totalCustomers += (day.count || 0);
                         totalNew += (day.countNew || 0);
-                        totalRegular += (day.countRegular || 0); // รวมยอดลูกค้าประจำ
+                        totalRegular += (day.countRegular || 0);
                         totalBarber += barberEarn;
                         totalShop += shopEarn;
                     }
@@ -2484,37 +2480,38 @@ function exportToExcel(m, monthTotal, monthBarber, weeklyData, hairStats, servic
             }
         });
 
-        // --- ส่วนสรุปท้ายตารางแบบครบถ้วน (รวมลูกค้าประจำด้วย) ---
         rows.push({}); 
-        
         const summaryRow = {
-            "ว-ด-ป": "เทียบยอด",
+            "ว-ด-ป": "รวมยอด",
             "วัน": `ทำงาน ${totalWorkDays} / หยุด ${totalOffDays}`, 
             "ลูกค้า": totalCustomers,
             "ลูกค้าใหม่": totalNew,
-            "ลูกค้าประจำ": totalRegular, // สรุปยอดลูกค้าประจำท้ายตาราง
+            "ลูกค้าประจำ": totalRegular,
             "รายได้ช่าง": totalBarber,
             "รายได้ร้าน": totalShop
         };
-        
-        allServiceNames.forEach(serviceName => {
-            summaryRow[serviceName] = serviceStats[serviceName] || 0;
-        });
-
+        allServiceNames.forEach(serviceName => { summaryRow[serviceName] = serviceStats[serviceName] || 0; });
         rows.push(summaryRow);
 
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.json_to_sheet(rows);
-        const fileName = `${conf.shop || "Barber_Shop"}_เดือน_${m}.xlsx`;
+        // แก้ไข: ใช้ชื่อร้านที่ประกาศไว้ หรือค่า Default เพื่อป้องกัน Error
+        const shopName = (typeof conf !== 'undefined' && conf.shop) ? conf.shop : "Barber_Shop";
+        const fileName = `${shopName}_เดือน_${m}.xlsx`;
         
         XLSX.utils.book_append_sheet(wb, ws, "รายงานละเอียด");
         XLSX.writeFile(wb, fileName);
-        
-        alert(`ส่งออกไฟล์เรียบร้อย! ข้อมูลลูกค้าประจำมาครบแล้วครับพี่`);
+        alert(`ส่งออกไฟล์เรียบร้อยครับพี่!`);
     } catch (err) {
-        alert("ข้อผิดพลาด: " + err.message);
+        console.error(err);
+        alert("ขอผิดพลาดในการส่งออก Excel: " + err.message);
     }
 }
+function shareLine(m, total, count) {
+    const text = `📊 รายงานเดือน: ${m}\n✂️ รายได้รวม: ฿${total.toLocaleString()}\n👤 ลูกค้ารวม: ${count} ท่าน\nส่งจากระบบ Barber Report`;
+    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
+    window.open(lineUrl, '_blank');
+}     
 function renderStats(obj, accentColor) {
     const entries = Object.entries(obj).sort((a, b) => b[1] - a[1]);
     if (!entries.length) return "<div style='color:rgba(255,255,255,0.2); padding:10px; font-size:13px;'>ไม่มีข้อมูลสถิติ</div>";
