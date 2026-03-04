@@ -668,7 +668,7 @@ span[onclick*="delRec"] {
         </div>
 
         <div style="text-align:center; line-height: 1.4;">
-            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.4</span></div>
+            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.5</span></div>
             <div style="font-size:9px; color:#cbd5e1; font-weight:400;">Update: <span id="display-date">04/03/2026</span></div>
         </div>
     </div>
@@ -714,7 +714,7 @@ span[onclick*="delRec"] {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.4"; 
+const APP_VERSION = "1.0.5"; 
 const LAST_UPDATED = "04/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
@@ -2371,7 +2371,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                     <div style="font-size:20px; font-weight:800; color:#f8fafc;">฿${Math.floor(monthTotal - monthBarber).toLocaleString()}</div>
                 </div>
             </div>
-   // --- เริ่มก้อนเนื้อหาเพียงอันเดียว (รวมสถิติด้านบนและปุ่มด้านล่าง) ---
+ // --- เริ่มก้อนเนื้อหาเพียงอันเดียว (ปิดแท็กและปีกกาให้ครบถ้วนแล้วครับพี่) ---
     let reportContent = `
         <div style="text-align:center; font-family:'Kanit',sans-serif; padding:5px;">
             <h3 style="color:#fff; margin-bottom:20px;">📊 สรุปรายงานเดือน ${m}</h3>
@@ -2402,8 +2402,8 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                     <div style="background: rgba(147,51,234,0.15); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #a855f7;">
                         📊 เฉลี่ย ${avgCustomerPerDay.toFixed(2)}
                     </div>
-           </div>
-            <div style="margin-bottom:25px; text-align:left;">
+                </div>
+            </div> <div style="margin-bottom:25px; text-align:left;">
                 <div style="font-size:14px; font-weight:800; color:#facc15; margin-bottom:12px;">🌀 วิเคราะห์รายสัปดาห์</div>
                 ${weeklyHtml}
             </div>
@@ -2442,13 +2442,13 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
             <button onclick="closeReportModal()" style="background:none; border:none; color:#94a3b8; font-size:14px; cursor:pointer; padding:10px;">ปิดหน้าต่าง</button>
         </div>`;
 
-    // --- สั่งแสดงผลจบกระบวนการ ---
+    // --- สั่งแสดงผลใส่ใน Modal ---
     const modalDisplay = document.getElementById("reportContent");
     if(modalDisplay) {
         modalDisplay.innerHTML = reportContent;
         document.getElementById("reportModal").style.display = "flex";
     }
-} // ปิดฟังก์ชัน generateMonthlyReport
+} // ปิดฟังก์ชัน generateMonthlyReport อย่างถูกต้องครับพี่
 function exportToExcel(m, monthTotal, monthBarber, weeklyData, hairStats, serviceStats) {
     try {
         const rows = [];
