@@ -2224,7 +2224,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         const r = curr.countRegular || 0;
         
         // วิเคราะห์สดรายสัปดาห์
-        curr.newAnalysis = (n > r) ? "มาเยอะกว่าปกติ" : (n < r) ? "มาประปราย" : "เท่ากับขาประจำ";
+        curr.newAnalysis = (n > r) ? "กลุ่มหลักอาทิตย์นี้" : (n < r) ? "น้อยกว่าลูกค้าประจำ" : "เท่ากับลูกค้าประจำ";
         curr.regAnalysis = (r > n) ? "กลุ่มหลักอาทิตย์นี้" : (r < n) ? "น้อยกว่าลูกค้าใหม่" : "เท่ากับลูกค้าใหม่";
 
         if (!maxNewWeek || n > (weeklyData[maxNewWeek]?.countNew || 0)) maxNewWeek = wk;
@@ -2257,13 +2257,15 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         }).join("");
     };
 
-// --- 5. สรุปภาพรวม (Insights) - ย้ายประกันรายได้ไปต่อจากเปิดร้าน ---
-   const insights = [
-        `ระยะเวลาให้บริการ: เปิดร้านทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
+// --- 5. สรุปภาพรวม (Insights) - แก้ไขการนับยอดรวมลูกค้าทุกคน ---
+    const insights = [
+        `เดือนนี้: เปิดร้านทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
         `สถิติประกันรายได้: ใช้ประกันรายได้ทั้งหมด <b>${monthGuarDays || 0} วัน</b>`,
         
-        `สัปดาห์ที่มีลูกค้ามากที่สุด: <b>${topCountWeek ? topCountWeek[0] : "-"}</b> (${topCountWeek ? (topCountWeek[1].countNew + topCountWeek[1].countRegular) : "-"} คน)`,
-        (topIncomeWeek && (topIncomeWeek[1].income || 0) > 0) ? `สัปดาห์ที่มีรายได้สูงสุด: <b>${topIncomeWeek[0]}</b> (฿${topIncomeWeek[1].income.toLocaleString()})` : `สัปดาห์รายได้สูงสุด: <b>-</b>`,
+        // แก้ไข: ใช้ customers (ซึ่งนับทุกคนรวมถึงคนไม่ระบุประเภท) แทนการบวกแยกกลุ่ม
+        `สัปดาห์ที่มีลูกค้ามากที่สุด: <b>${topCountWeek ? topCountWeek[0] : "-"}</b> (${topCountWeek ? (topCountWeek[1].customers) : "-"} คน)`,
+        
+        (topIncomeWeek && (topIncomeWeek[1].income || 0) > 0) ? `สัปดาห์ที่มีรายได้สูงสุด: <b>${topIncomeWeek[0]}</b> (฿${topIncomeWeek[1].income.toLocaleString()})` : `สัปดาห์ที่มีรายได้สูงสุด: <b>-</b>`,
         
         `โครงสร้างลูกค้าเดือนนี้: <b>${totalRegular > totalNew ? "ลูกค้าประจำเป็นฐานหลัก" : totalNew > totalRegular ? "ลูกค้าใหม่เพิ่มมากขึ้น" : "สัดส่วนลูกค้าพอๆ กัน"} (ประจำ ${totalRegular > 0 ? totalRegular : "-"} / ใหม่ ${totalNew > 0 ? totalNew : "-"})</b>`,
         `สถิติลูกค้าเยอะสุดแยกกลุ่ม: ใหม่ (<b>${maxNewWeek !== "-" ? maxNewWeek : "-"}</b>) | ประจำ (<b>${maxRegWeek !== "-" ? maxRegWeek : "-"}</b>)`,
