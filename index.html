@@ -2123,19 +2123,17 @@ function loadHistMonth() {
         monthBarber += dailyBarber;
         weeklyData[wKey].income += dailyIncome;
 
+// --- 🟢 แก้ไข Logic ให้รวมลูกค้าทุกคน (แม้ไม่ได้ระบุประเภท) ---
         let dayCustomerCount = 0; 
 
         if (day.details && Array.isArray(day.details)) {
             day.details.forEach(d => {
-                // เช็คว่าเป็นงานบริการ (SERVICE) เหมือนใน renderDay
                 if (d.type === "SERVICE") {
-                    monthCount++;
-                    dayCustomerCount++;
-                    weeklyData[wKey].customers++;
-
-                    // --- 🎯 แก้ไขให้เหมือน renderDay: ใช้ custType ---
+                    monthCount++;       // นับรวมลูกค้าทุกคนในเดือน
+                    dayCustomerCount++; // นับรวมลูกค้าทุกคนในวัน
+                    weeklyData[wKey].customers++; // นับรวมลูกค้าทุกคนในสัปดาห์
+                    // แยกนับเฉพาะกลุ่มที่ระบุประเภท (เพื่อใช้ในสถิติโครงสร้างลูกค้า)
                     const type = String(d.custType || "").toLowerCase().trim();
-                    
                     if (type === "new") {
                         countNew++;
                         weeklyData[wKey].countNew++;
@@ -2143,7 +2141,7 @@ function loadHistMonth() {
                         countRegular++;
                         weeklyData[wKey].countRegular++;
                     }
-
+                    // ลูกค้าที่ไม่ระบุประเภท จะถูกนับรวมใน monthCount ไปแล้ว แต่ไม่เข้านับใน countNew/Regular
                     const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
                     svcs.forEach(s => {
                         if (!s) return;
