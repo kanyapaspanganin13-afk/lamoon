@@ -2125,24 +2125,27 @@ function loadHistMonth() {
         monthBarber += dailyBarber;
         weeklyData[wKey].income += dailyIncome;
 
-        let dayCustomerCount = 0;
-        if (day.details && Array.isArray(day.details)) {
-            day.details.forEach(d => {
-                if (d.type === "SERVICE") {
-                    monthCount++;
-                    dayCustomerCount++;
-                    weeklyData[wKey].customers++;
+       // --- 🟢 แก้ไข Logic การเช็คประเภทลูกค้าในวันที่มีการบันทึก ---
+    if (day.details && Array.isArray(day.details)) {
+    day.details.forEach(d => {
+        if (d.type === "SERVICE") {
+            monthCount++;
+            dayCustomerCount++;
+            weeklyData[wKey].customers++;
+            // 🟢 แก้ไขตรงนี้: ทำให้การเช็ค cType แม่นยำขึ้น (รองรับทั้งตัวเล็กตัวใหญ่)
+            const type = String(d.cType || "").toLowerCase().trim();
+            
+            if (type === "new") {
+                countNew++;
+                weeklyData[wKey].countNew++;
+            } else if (type === "regular") {
+                countRegular++;
+                weeklyData[wKey].countRegular++;
+            } else {
+               
+            }
 
-                    // 🟢 ตรวจสอบประเภทลูกค้าจากฟิลด์ cType หรือชื่อที่พี่ใช้เก็บ (new / regular)
-                    if (d.cType === "new") {
-                        countNew++;
-                        weeklyData[wKey].countNew++;
-                    } else if (d.cType === "regular") {
-                        countRegular++;
-                        weeklyData[wKey].countRegular++;
-                    }
-
-                    const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
+                const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
                     svcs.forEach(s => {
                         if (!s) return;
                         const cleanS = s.trim();
