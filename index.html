@@ -666,7 +666,7 @@ span[onclick*="delRec"] {
         </div>
 
         <div style="text-align:center; line-height: 1.4;">
-            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.1.5</span></div>
+            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.1.6</span></div>
             <div style="font-size:9px; color:#cbd5e1; font-weight:400;">Update: <span id="display-date">05/03/2026</span></div>
         </div>
     </div>
@@ -712,7 +712,7 @@ span[onclick*="delRec"] {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.1.5"; 
+const APP_VERSION = "1.1.6"; 
 const LAST_UPDATED = "05/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
@@ -1612,8 +1612,6 @@ if ($("dServiceStats")) $("dServiceStats").innerHTML = sH + `</div>`;
 function loadAccountStatus() {
     const getEl = (id) => document.getElementById(id);
     
-    // 🎯 แก้จุดนี้: ดึงวันที่จาก Input "accDate" ตรงๆ เพราะมันคือรูปแบบเดียวกับที่บันทึก
-    // ถ้าไม่มีให้ดึงวันที่ปัจจุบันในรูปแบบ ISO (YYYY-MM-DD) ซึ่งมักจะตรงกับที่ระบบใช้เก็บ
     let todayKey = getEl("accDate")?.value;
     
     if (!todayKey) {
@@ -1621,7 +1619,7 @@ function loadAccountStatus() {
         const y = now.getFullYear();
         const m = String(now.getMonth() + 1).padStart(2, '0');
         const d = String(now.getDate()).padStart(2, '0');
-        todayKey = `${y}-${m}-${d}`; // รูปแบบ 2026-02-14
+        todayKey = `${y}-${m}-${d}`;
     }
 
     if (typeof archives === "undefined") return;
@@ -1630,38 +1628,51 @@ function loadAccountStatus() {
     const todayData = archives.find(a => a.date === todayKey);
     let todaySettle = todayData ? -todayData.settle : 0;
 
-    // 🎯 2. ดึงยอด "ค้างเดิม" (เอาเฉพาะวันที่ยังค้างอยู่และไม่ใช่วันนี้)
+    // 🎯 2. ดึงยอด "ค้างเดิม"
     let oldSettle = archives.reduce((sum, day) => {
-        // ต้องไม่ใช่วันนี้ 
-        // และต้องเป็นยอดที่ "ยังไม่ถูกเคลียร์" (ถ้าช่างมีระบบเคลียร์แล้วยอดจะกลายเป็น 0)
+        // เงื่อนไข: ไม่ใช่วันนี้ และ ยอดยังไม่เป็น 0 (ยังค้างอยู่)
         if (day.date !== todayKey && day.settle !== 0) {
             return sum + (Number(-day.settle) || 0);
         }
         return sum;
     }, 0);
 
-    // 🎯 3. หักลบกันเป็น "ยอดต้องเคลียร์"
+    // 🎯 3. คำนวณ "ยอดต้องเคลียร์รวม"
     let totalBalance = oldSettle + todaySettle;
     if (typeof account !== "undefined") {
         account.balance = totalBalance;
     }
 
-    // 📊 แสดงผลตัวเลข
+    // --- 📊 แสดงผลตัวเลขและข้อความ ---
+
+    // แสดงยอดวันนี้
     if (getEl("accTodayVal")) getEl("accTodayVal").innerText = `฿${todaySettle.toLocaleString()}`;
-    if (getEl("accOldVal"))   getEl("accOldVal").innerText = `฿${oldSettle.toLocaleString()}`;
+
+    // 🟢 แก้ไขจุดนี้: แสดงยอดค้างเดิมพร้อมข้อความว่าใครค้าง
+    const oldValEl = getEl("accOldVal");
+    if (oldValEl) {
+        if (oldSettle < 0) {
+            oldValEl.innerHTML = `<small style="color:#991b1b">ช่างค้าง:</small> ฿${Math.abs(oldSettle).toLocaleString()}`;
+        } else if (oldSettle > 0) {
+            oldValEl.innerHTML = `<small style="color:#166534">ร้านค้าง:</small> ฿${oldSettle.toLocaleString()}`;
+        } else {
+            oldValEl.innerText = `฿0`;
+        }
+    }
     
+    // ยอดรวมทั้งหมด
     if (getEl("accTotalVal")) {
         getEl("accTotalVal").innerText = `฿${Math.abs(totalBalance).toLocaleString()}`;
     }
 
-    // ส่วนของวันที่แสดงบนหัว (โชว์ให้สวยงาม)
+    // ส่วนหัววันที่
     if (getEl("accDateLabel")) {
         getEl("accDateLabel").innerText = new Date(todayKey).toLocaleDateString('th-TH', { 
             day: 'numeric', month: 'short', year: 'numeric' 
         });
     }
 
-    // อัปเดตสถานะป้าย
+    // อัปเดตสถานะป้าย Badge (ยอดรวมสรุป)
     const badge = getEl("statusBadge");
     if (badge) {
         if (totalBalance < 0) {
