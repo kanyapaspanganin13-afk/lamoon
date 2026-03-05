@@ -2206,42 +2206,33 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
 
     const topHair = Object.entries(hairStats).sort((a, b) => b[1] - a[1])[0];
     const topService = Object.entries(serviceStats).sort((a, b) => b[1] - a[1])[0];
-
-    // --- 2. วิเคราะห์แนวโน้มลูกค้าใหม่/ประจำ ---
-    const newGrowthWeeks = []; const newDropWeeks = [];
-    const regGrowthWeeks = []; const regDropWeeks = [];
-    let nUp = 0, nDown = 0, rUp = 0, rDown = 0;
+// --- 2. วิเคราะห์ลูกค้า (รายสัปดาห์ & รายเดือน) ---
     let maxNewWeek = "-"; let maxRegWeek = "-";
-    let biggestNewChange = { week: "-", diff: 0 };
-    let biggestRegChange = { week: "-", diff: 0 };
+    let nUp = 0, nDown = 0, rUp = 0, rDown = 0;
 
     weekKeys.forEach((wk, idx) => {
         const curr = weeklyData[wk];
-        if (!maxNewWeek || curr.countNew > (weeklyData[maxNewWeek]?.countNew || 0)) maxNewWeek = wk;
-        if (!maxRegWeek || curr.countRegular > (weeklyData[maxRegWeek]?.countRegular || 0)) maxRegWeek = wk;
+        
+        // 1. วิเคราะห์สดรายสัปดาห์ (ส่งกลับไปที่ data เพื่อโชว์ใน HTML รายสัปดาห์)
+        const n = curr.countNew || 0;
+        const r = curr.countRegular || 0;
+        curr.newAnalysis = (n > r) ? "มาเยอะกว่าปกติ" : (n < r) ? "มาประปราย" : "เท่ากับลูกค้าประจำ";
+        curr.regAnalysis = (r > n) ? "กลุ่มหลักอาทิตย์นี้" : (r < n) ? "น้อยกว่าลูกค้าใหม่" : "เท่ากับลูกค้าใหม่";
+
+        // 2. เก็บสถิติรายเดือน (คงเดิมไว้)
+        if (!maxNewWeek || n > (weeklyData[maxNewWeek]?.countNew || 0)) maxNewWeek = wk;
+        if (!maxRegWeek || r > (weeklyData[maxRegWeek]?.countRegular || 0)) maxRegWeek = wk;
 
         if (idx > 0) {
             const prev = weeklyData[weekKeys[idx - 1]];
-            if (curr.countNew > prev.countNew) { newGrowthWeeks.push(wk); nUp++; }
-            else if (curr.countNew < prev.countNew) { newDropWeeks.push(wk); nDown++; }
-            if (curr.countRegular > prev.countRegular) { regGrowthWeeks.push(wk); rUp++; }
-            else if (curr.countRegular < prev.countRegular) { regDropWeeks.push(wk); rDown++; }
-
-            const nDiff = Math.abs(curr.countNew - prev.countNew);
-            const rDiff = Math.abs(curr.countRegular - prev.countRegular);
-            if (nDiff > biggestNewChange.diff) biggestNewChange = { week: wk, diff: nDiff };
-            if (rDiff > biggestRegChange.diff) biggestRegChange = { week: wk, diff: rDiff };
+            if (n > prev.countNew) nUp++; else if (n < prev.countNew) nDown++;
+            if (r > prev.countRegular) rUp++; else if (r < prev.countRegular) rDown++;
         }
     });
 
-    const getMonthTrend = (up, down) => {
-        if (up > down) return "อยู่ในช่วงเติบโตดีมาก 🔝";
-        if (down > up) return "อยู่ในระยะชะลอตัวลง ↘️";
-        return "ภาพรวมค่อนข้างทรงตัว ➖";
-    };
-    const monthNewTrend = getMonthTrend(nUp, nDown);
-    const monthRegTrend = getMonthTrend(rUp, rDown);
-
+    const monthNewTrend = nUp > nDown ? "เติบโตดี" : nDown > nUp ? "ชะลอตัว" : "ทรงตัว";
+    const monthRegTrend = rUp > rDown ? "เติบโตดี" : rDown > rUp ? "ชะลอตัว" : "ทรงตัว";
+   
     // --- 3. [กู้คืน] ฟังก์ชัน Render กราฟสถิติ ---
     const renderStats = (statsObj, color) => {
         const entries = Object.entries(statsObj).sort((a, b) => b[1] - a[1]);
@@ -2262,11 +2253,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         }).join("");
     };
 
-    // --- 4. วิเคราะห์ Insight เชิงลึก ---
-    let monthNewInsight = weekKeys.length >= 3 ? (weeklyData[weekKeys[weekKeys.length-1]].countNew > weeklyData[weekKeys[0]].countNew ? "ช่วงปลายเดือนลูกค้าใหม่เข้ามามากขึ้น" : "จำนวนลูกค้าใหม่ค่อนข้างสม่ำเสมอ") : "กำลังรวบรวมข้อมูล...";
-    let monthRegInsight = weekKeys.length >= 3 ? (weeklyData[weekKeys[weekKeys.length-1]].countRegular > weeklyData[weekKeys[0]].countRegular ? "ลูกค้าประจำเข้ามามากที่สุดช่วงปลายเดือน" : "กลุ่มลูกค้าประจำสม่ำเสมอตลอดเดือน") : "กำลังรวบรวมข้อมูล...";
-
-    // --- 5. สรุปภาพรวม (Insights) ---
+       // --- 5. สรุปภาพรวม (Insights) ---
     const insights = [
         `ระยะเวลาให้บริการ: เปิดร้านทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
         `แนวโน้มลูกค้าใหม่: ${newGrowthWeeks.length > 0 || newDropWeeks.length > 0 ? `สัปดาห์ที่เพิ่ม: <b>${newGrowthWeeks.join(", ") || "-"}</b> | สัปดาห์ที่น้อย: <b>${newDropWeeks.join(", ") || "-"}</b>` : "จำนวนค่อนข้างคงที่"} <br/>&nbsp;&nbsp;↳ <span style="color:#4ade80;"><b>ภาพรวมเดือนนี้: ${monthNewTrend}</b></span> <br/>&nbsp;&nbsp;↳ <i>${monthNewInsight} (สัปดาห์ที่ลูกค้าใหม่เยอะสุด: ${maxNewWeek})</i>`,
@@ -2345,11 +2332,11 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     </div>
 </div>
 <div style="font-size: 11px; color: #64748b; line-height: 1.7; padding: 0 4px 10px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
-    <div>💇 แนวโน้มลูกค้าใหม่: <span style="color: #f1f5f9; font-weight: 600;">${data.newTrend}</span></div>
-    <div>💇‍♂️ แนวโน้มลูกค้าประจำ: <span style="color: #f1f5f9; font-weight: 600;">${data.regTrend}</span></div>
+    <div>💇 ลูกค้าใหม่: <span style="color: #f1f5f9; font-weight: 600;">${data.newAnalysis} (${data.countNew || 0})</span></div>
+    <div>💇‍♂️ ลูกค้าประจำ: <span style="color: #f1f5f9; font-weight: 600;">${data.regAnalysis} (${data.countRegular || 0})</span></div>
     <div style="margin-top: 2px;">📈 ลูกค้าเยอะที่สุด: <span style="color: #f1f5f9; font-weight: 600;">${bestDay}</span></div>
     <div>📉 ลูกค้าน้อยที่สุด: <span style="color: #f1f5f9; font-weight: 600;">${worstDay}</span></div>
-</div>          
+</div>      
             <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top: 8px;">
                 ${popHair} ${popService}
             </div>
