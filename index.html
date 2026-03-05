@@ -2084,7 +2084,7 @@ function loadHistMonth() {
     let offDays = 0, workDays = 0;
     let weeklyData = {};
 
-    const haircutList = ["แฟชั่น","สกินเฟด","รองทรง","ตำรวจ/ทหาร","นักเรียน","ซอยผม/เล็มผม","แก้ผม","โกนผม","เด็ก"];
+    const haircutList = ["แฟชั่น","สกินเฟด","รองทรง","ตำรวจ/ทหาร","นักเรียน","ทรงนักเรียน","เปิดข้าง","ซอยผม/เล็มผม","แก้ผม","โกนผม","เด็ก"];
     const dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
 
     filtered.forEach(day => {
@@ -2224,8 +2224,8 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     });
 
     const getMonthTrend = (up, down) => {
-        if (up > down) return "อยู่ในทิศทางเติบโตดีมาก 🔝";
-        if (down > up) return "อยู่ในช่วงชะลอตัวลง ↘️";
+        if (up > down) return "อยู่ในช่วงเติบโตดีมาก 🔝";
+        if (down > up) return "อยู่ในระยะชะลอตัวลง ↘️";
         return "ภาพรวมค่อนข้างทรงตัว ➖";
     };
     const monthNewTrend = getMonthTrend(nUp, nDown);
@@ -2253,7 +2253,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
 
     // --- ส่วนสรุปภาพรวม (Insights) ปรับปรุงใหม่ ---
     const insights = [
-        `ระยะเวลาทำงาน: เปิดให้บริการ <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
+        `ระยะเวลา: เปิดให้บริการ <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
         
         // วิเคราะห์ลูกค้าใหม่: ระบุสัปดาห์ + แนวโน้มเดือน
         `วิเคราะห์ลูกค้าใหม่: ${
