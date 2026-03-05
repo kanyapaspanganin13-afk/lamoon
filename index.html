@@ -2302,12 +2302,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         `ทรงผมยอดนิยม: <b>${topHair ? topHair[0] : '-'}</b> | บริการยอดนิยม: <b>${topService ? topService[0] : '-'}</b>`
     ];
 
-    // ✅ สั่งแสดงผล (เรียกฟังก์ชัน Modal ของพี่)
-    if (typeof showReportModal === 'function') {
-        showReportModal(insights);
-    }
-}
-    const weeklyHtml = weekEntries.map(([wk, data]) => {
+      const weeklyHtml = weekEntries.map(([wk, data]) => {
         const weeklyTotalIncome = data.income || 0;
         let sumBarber = 0;
         if (data.dailyCounts) {
