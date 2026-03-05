@@ -666,7 +666,7 @@ span[onclick*="delRec"] {
         </div>
 
         <div style="text-align:center; line-height: 1.4;">
-            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.1.3</span></div>
+            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.1.4</span></div>
             <div style="font-size:9px; color:#cbd5e1; font-weight:400;">Update: <span id="display-date">05/03/2026</span></div>
         </div>
     </div>
@@ -712,7 +712,7 @@ span[onclick*="delRec"] {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.1.3"; 
+const APP_VERSION = "1.1.4"; 
 const LAST_UPDATED = "05/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
@@ -2070,15 +2070,13 @@ function loadHistMonth() {
 
     const filtered = archives.filter(a => a.date && a.date.startsWith(m));
     if (!filtered.length) {
-        // 🟢 ถ้าไม่พบข้อมูลเดือนนั้น ให้เซ็ตรายได้ร้านเป็น 0 (สำหรับหน้าบัญชี)
         if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
         if (window.calcNetProfit) window.calcNetProfit();
         return openReportModal("📊 สรุปรายเดือน", `<div style='text-align:center;padding:50px;color:#94a3b8;'>ไม่พบข้อมูลของเดือน ${m}</div>`);
     }
 
-    // --- 🟢 เพิ่มตัวแปรสำหรับนับแยกประเภท ---
-    let countNew = 0;      // สำหรับลูกค้าใหม่
-    let countRegular = 0;  // สำหรับลูกค้าประจำ
+    let countNew = 0;
+    let countRegular = 0;
     let monthTotal = 0, monthBarber = 0, monthCount = 0, monthGuarDays = 0; 
     let hairStats = {}, serviceStats = {};
     let offDays = 0, workDays = 0;
@@ -2096,7 +2094,7 @@ function loadHistMonth() {
             weeklyData[wKey] = { 
                 customers: 0, workDays: 0, offDays: 0, 
                 zeroDays: 0, guarDays: 0, dailyCounts: [],
-                countNew: 0, countRegular: 0, // เพิ่มตัวนับรายสัปดาห์ด้วย
+                countNew: 0, countRegular: 0,
                 popularHair: {}, 
                 popularService: {}, 
                 income: 0 
@@ -2125,27 +2123,27 @@ function loadHistMonth() {
         monthBarber += dailyBarber;
         weeklyData[wKey].income += dailyIncome;
 
-       // --- 🟢 แก้ไข Logic การเช็คประเภทลูกค้าในวันที่มีการบันทึก ---
-    if (day.details && Array.isArray(day.details)) {
-    day.details.forEach(d => {
-        if (d.type === "SERVICE") {
-            monthCount++;
-            dayCustomerCount++;
-            weeklyData[wKey].customers++;
-            // 🟢 แก้ไขตรงนี้: ทำให้การเช็ค cType แม่นยำขึ้น (รองรับทั้งตัวเล็กตัวใหญ่)
-            const type = String(d.cType || "").toLowerCase().trim();
-            
-            if (type === "new") {
-                countNew++;
-                weeklyData[wKey].countNew++;
-            } else if (type === "regular") {
-                countRegular++;
-                weeklyData[wKey].countRegular++;
-            } else {
-               
-            }
+        // --- 🟢 จุดที่แก้ไข: ประกาศตัวแปรนับลูกค้าประจำวัน ---
+        let dayCustomerCount = 0; 
 
-                const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
+        if (day.details && Array.isArray(day.details)) {
+            day.details.forEach(d => {
+                if (d.type === "SERVICE") {
+                    monthCount++;
+                    dayCustomerCount++; // นับยอดรายวัน
+                    weeklyData[wKey].customers++;
+
+                    // ตรวจสอบประเภทลูกค้า (รองรับตัวเล็กตัวใหญ่)
+                    const type = String(d.cType || "").toLowerCase().trim();
+                    if (type === "new") {
+                        countNew++;
+                        weeklyData[wKey].countNew++;
+                    } else if (type === "regular") {
+                        countRegular++;
+                        weeklyData[wKey].countRegular++;
+                    }
+
+                    const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
                     svcs.forEach(s => {
                         if (!s) return;
                         const cleanS = s.trim();
@@ -2160,6 +2158,7 @@ function loadHistMonth() {
                 }
             });
         }
+
         if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
         
         weeklyData[wKey].dailyCounts.push({ 
@@ -2170,7 +2169,6 @@ function loadHistMonth() {
         });
     });
 
-    // 🟢 อัปเดตรายได้ร้านในหน้าบัญชี (ยอดรวม - ส่วนแบ่งช่าง)
     const realShopEarn = monthTotal - monthBarber;
     if ($("shopTotalMonth")) {
         $("shopTotalMonth").innerText = "฿" + Math.floor(realShopEarn).toLocaleString();
@@ -2179,7 +2177,7 @@ function loadHistMonth() {
 
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
     
-    // 🎯 ส่งค่า monthGuarDays, countNew, และ countRegular เข้าไปโชว์ในรายงาน
+    // เรียกรายงาน
     generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular);
 }
 function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular) {
