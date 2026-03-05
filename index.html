@@ -2428,6 +2428,7 @@ function renderStats(obj, accentColor) {
         </div>`).join("");
 }
 function shareLine() {
+    const $ = (id) => document.getElementById(id); // กันเหนียวเผื่อลืมประกาศตัวแปร $
     const dInp = $("dateInp").value;
     const today = db.filter(r => r.date === dInp);
     
@@ -2435,18 +2436,21 @@ function shareLine() {
         alert("ไม่พบข้อมูลของวันที่เลือก");
         return;
     }
-    // --- 🟢 แก้ไขวันที่ให้เป็นแบบย่อ (เช่น 13 ก.พ. 69) ---
+
     const [y, m, d] = dInp.split('-');
     const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
     const fDate = `${parseInt(d)} ${months[parseInt(m)-1]} ${(parseInt(y) + 543).toString().slice(-2)}`;
     
-    // --- 🟢 ดึงชื่อร้านจาก Config ---
     const shopName = conf.shop || "Barber Shop";
 
     let tot = 0, cash = 0, trans = 0, tips = 0;
     let stats = {}, realCustomerCount = 0;
+    
+    // --- 🟢 เพิ่มตัวนับแยกประเภทลูกค้า ---
+    let newCount = 0;
+    let regCount = 0;
 
-    // 1. ประมวลผลรายการลูกค้า (คงเดิม)
+    // 1. ประมวลผลรายการลูกค้า
     const clientList = today
         .sort((a, b) => a.time.localeCompare(b.time))
         .map((r, i) => {
@@ -2466,6 +2470,12 @@ function shareLine() {
             const isService = !['GUARANTEE', 'HOLIDAY'].includes(rType) && p > 0;
             if (isService) {
                 realCustomerCount++;
+                
+                // --- 🎯 เช็คประเภทลูกค้า (ใช้ custType ให้ตรงกับที่เก็บในฐานข้อมูล) ---
+                const cType = String(r.custType || "").toLowerCase().trim();
+                if (cType === 'new') newCount++;
+                else if (cType === 'regular') regCount++;
+
                 if (r.hair && r.hair.includes("เด็ก")) stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
                 (r.svcs || []).forEach(s => { if (s) stats[s] = (stats[s] || 0) + 1; });
             }
@@ -2498,11 +2508,18 @@ function shareLine() {
         ? `⚠️ ช่างคืนร้าน: ${Math.floor(Math.abs(settle)).toLocaleString()} บาท` 
         : `🟦 ร้านคืนช่าง: ${Math.floor(Math.abs(settle)).toLocaleString()} บาท`;
 
-    // 4. ประกอบข้อความ (Template)
-    let msg = `💈 รายงานร้าน: ${shopName}\n`; // 🟢 ใช้ชื่อร้านจากตัวแปรแล้ว
-    msg += `📅 วันที่: ${fDate}\n`;            // 🟢 เป็นแบบย่อแล้ว
+   // --- 4. ประกอบข้อความ (Template) - ปรับตามเงื่อนไขพี่ ---
+    let msg = `💈 รายงานร้าน: ${shopName}\n`;
+    msg += `📅 วันที่: ${fDate}\n`;
     msg += `-------------------------\n`;
-    msg += `📝 ลูกค้า (${realCustomerCount} คน):\n${clientList}\n`;
+    if (newCount > 0 || regCount > 0) {
+        msg += `📝 ลูกค้าทั้งหมด: ${realCustomerCount} คน\n`;
+        msg += `✨ ใหม่: ${newCount > 0 ? newCount : '-'} | 🤵 ประจำ: ${regCount > 0 ? regCount : '-'}\n`;
+    } else {
+        msg += `📝 ลูกค้า: ${realCustomerCount} คน\n`;
+    }
+    msg += `-------------------------\n`;
+    msg += `${clientList}\n`;
     msg += `-------------------------\n`;
     msg += `📊 สรุปงาน:\n${statText || '(ไม่มีรายการ)'}\n`;
     msg += `-------------------------\n`;
@@ -2513,17 +2530,16 @@ function shareLine() {
     msg += `-------------------------\n`;
     msg += `${settleMsg}`;
 
-    // 5. แสดง Preview (สำคัญมาก)
-    const msgEdit = $("msgEdit"); // ใช้ฟังก์ชัน $ ที่คุณประกาศไว้
+    // 5. แสดง Preview
+    const msgEdit = $("msgEdit");
     const previewArea = $("linePreview");
     
     if (msgEdit && previewArea) {
         msgEdit.value = msg;
-        previewArea.style.display = "flex"; // แสดงหน้าต่าง Preview
-        console.log("✅ Preview Generated");
+        previewArea.style.display = "flex";
+        console.log("✅ Line Report Generated with Customer Types");
     } else {
-        console.error("❌ ไม่พบ Element สำหรับแสดง Preview");
-        alert("ระบบพรีวิวมีปัญหา โปรดตรวจสอบ ID ของหน้าต่างพรีวิวครับ");
+        alert("ระบบพรีวิวมีปัญหา โปรดตรวจสอบ ID ของหน้าต่างพรีวิว");
     }
 }
 function sendToLineFinal() {
@@ -2531,7 +2547,7 @@ function sendToLineFinal() {
     const previewArea = document.getElementById("linePreview");
     // 1. ตรวจสอบว่ามีข้อมูลข้อความหรือไม่
     if (!msgEdit || !msgEdit.value.trim()) {
-        alert("กรุณาตรวจสอบข้อความก่อนส่งครับ");
+        alert("กรุณาตรวจสอบข้อความก่อนส่ง");
         return;
     }
     const finalMsg = msgEdit.value;
