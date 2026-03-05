@@ -2273,24 +2273,15 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         `แนวโน้มลูกค้าประจำ: ${regGrowthWeeks.length > 0 || regDropWeeks.length > 0 ? `สัปดาห์ที่เพิ่ม: <b>${regGrowthWeeks.join(", ") || "-"}</b> | สัปดาห์ที่น้อย: <b>${regDropWeeks.join(", ") || "-"}</b>` : "ลูกค้าเข้ามาอย่างสม่ำเสมอ"} <br/>&nbsp;&nbsp;↳ <span style="color:#c084fc;"><b>ภาพรวมเดือนนี้: ${monthRegTrend}</b></span> <br/>&nbsp;&nbsp;↳ <i>${monthRegInsight} (สัปดาห์ที่ลูกค้าประจำเยอะสุด: ${maxRegWeek})</i>`,
         `โครงสร้างลูกค้าเดือนนี้: <b>${countRegular > countNew ? "ลูกค้าประจำเป็นฐานหลัก" : "ลูกค้าใหม่เพิ่มมากขึ้น"} (ประจำ ${countRegular} / ใหม่ ${countNew})</b>`,
         `จุดที่น่าสังเกต: <br/>&nbsp;&nbsp;↳ จำนวนลูกค้าใหม่เปลี่ยนแปลงจากสัปดาห์ก่อนมากที่สุดใน: <b>${biggestNewChange.week}</b> (±${biggestNewChange.diff} คน) <br/>&nbsp;&nbsp;↳ จำนวนลูกค้าประจำเปลี่ยนแปลงจากสัปดาห์ก่อนมากที่สุดใน: <b>${biggestRegChange.week}</b> (±${biggestRegChange.diff} คน)`,
-        `สถิติประกันรายได้: ใช้ไป <b>${monthGuarDays || 0} วัน</b>`,
-        (topIncomeWeek) ? `สัปดาห์รายได้สูงสุด: <b>${topIncomeWeek[0]}</b>` : `สัปดาห์รายได้สูงสุด: -`,
-        (topCountWeek) ? `สัปดาห์ลูกค้าเยอะสุด: <b>${topCountWeek[0]}</b> (รวม ${topCountWeek[1].countNew + topCountWeek[1].countRegular} คน)` : `สัปดาห์ลูกค้าเยอะสุด: -`,
-        (busiestDay) ? `วันที่คนเข้าเยอะที่สุด: <b>วัน${busiestDay.name}</b>` : `สถิติรายวัน: -`,
-        
-        // ✅ นำกราฟสถิติมาแสดงผลด้านล่าง
-        `<hr style="border:0; border-top:1px dashed rgba(255,255,255,0.1); margin:10px 0;">`,
-        `<div style="font-size:13px; font-weight:bold; margin-bottom:10px; color:#94a3b8;">📊 อันดับทรงผม & บริการ</div>`,
-        renderStats(hairStats, '#38bdf8'),
-        `<div style="margin-top:10px;"></div>`,
-        renderStats(serviceStats, '#fbbf24')
+        `สถิติประกันรายได้: ใช้ประกันรายได้ทั้งหมด <b>${monthGuarDays || 0} วัน</b>`,
+        (topIncomeWeek && (topIncomeWeek[1].income || 0) > 0) ? `สัปดาห์รายได้สูงสุด: <b>${topIncomeWeek[0]}</b>` : `สัปดาห์รายได้สูงสุด: <b>-</b>`,
+        (busiestDay && busiestDay.avg > 0) ? (() => {
+        if (!quietestDay || busiestDay.avg === quietestDay.avg) return `ลูกค้าเข้าเยอะใน <b>วัน${busiestDay.name}</b>`;
+        return `ลูกค้าเข้าเยอะใน <b>วัน${busiestDay.name}</b> และน้อยใน <b>วัน${quietestDay.name}</b>`;
+        })() : `สถิติรายวัน: -`,
+        `ทรงผมยอดนิยม: <b>${topHair ? topHair[0] : '-'}</b> | บริการยอดนิยม: <b>${topService ? topService[0] : '-'}</b>`
     ];
 
-    if (typeof showReportModal === 'function') {
-        showReportModal(insights);
-    }
-}
-     
     const weeklyHtml = weekEntries.map(([wk, data]) => {
         const weeklyTotalIncome = data.income || 0;
         let sumBarber = 0;
