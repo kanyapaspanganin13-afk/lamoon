@@ -1443,7 +1443,7 @@ function renderDay(selectedDate){
         // 🟢 เพิ่มสัญลักษณ์แสดงประเภทในรายการ (History)
         let custTag = "";
         if(cType === 'new') custTag = " <span style='color:#f59e0b; font-size:12px;'>💇</span>";
-        if(cType === 'regular') custTag = " <span style='color:#6366f1; font-size:12px;'>💇‍♂️</span>";
+        if(cType === 'regular') custTag = " <span style='color:#fbbf24; font-size:12px;'>💇‍♂️</span>";
 
         let payIcon = r.pay === 'Trans' ? '📱' : '💵';
         let mixText = "";
@@ -1501,7 +1501,7 @@ if ($("dCounts")) {
             detail = `
                 <div style="font-size: 13px; font-weight: 700; margin-top: 4px; border-top: 1px dashed #e2e8f0; pt: 4px;">
                     <span style="color:#10b981;"> ใหม่: ${countNew}</span> | 
-                    <span style="color:#6366f1;"> ประจำ: ${countRegular}</span>
+                    <span style="color:#fbbf24;"> ประจำ: ${countRegular}</span>
                 </div>`;
         }
         // ปรับความสูงช่องและการแสดงตัวเลขหลัก
