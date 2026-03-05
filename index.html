@@ -2180,12 +2180,19 @@ function loadHistMonth() {
     generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular);
 }
 function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular) {
-    // --- 1. เตรียมข้อมูลพื้นฐาน ---
+    // --- 1. เตรียมข้อมูลพื้นฐาน & นับยอดลูกค้าใหม่/ประจำใหม่ป้องกันค่าเป็น 0 ---
     const weekEntries = Object.entries(weeklyData);
     const weekKeys = Object.keys(weeklyData); 
     const dayStats = {};
+    
+    let totalNew = 0;
+    let totalRegular = 0;
 
     weekEntries.forEach(([wk, data]) => {
+        // นับยอดรวมลูกค้าใหม่/ประจำทั้งเดือน
+        totalNew += (data.countNew || 0);
+        totalRegular += (data.countRegular || 0);
+
         if (data.dailyCounts) {
             data.dailyCounts.forEach(d => {
                 const dayName = d.dayName.split(' ')[0];
@@ -2206,20 +2213,20 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
 
     const topHair = Object.entries(hairStats).sort((a, b) => b[1] - a[1])[0];
     const topService = Object.entries(serviceStats).sort((a, b) => b[1] - a[1])[0];
-// --- 2. วิเคราะห์ลูกค้า (รายสัปดาห์ & รายเดือน) ---
+
+    // --- 2. วิเคราะห์ลูกค้า (รายสัปดาห์ & รายเดือน) ---
     let maxNewWeek = "-"; let maxRegWeek = "-";
     let nUp = 0, nDown = 0, rUp = 0, rDown = 0;
 
     weekKeys.forEach((wk, idx) => {
         const curr = weeklyData[wk];
-        
-        // 1. วิเคราะห์สดรายสัปดาห์ (ส่งกลับไปที่ data เพื่อโชว์ใน HTML รายสัปดาห์)
         const n = curr.countNew || 0;
         const r = curr.countRegular || 0;
-        curr.newAnalysis = (n > r) ? "มาเยอะกว่าปกติ" : (n < r) ? "มาประปราย" : "เท่ากับลูกค้าประจำ";
+        
+        // วิเคราะห์สดรายสัปดาห์
+        curr.newAnalysis = (n > r) ? "มาเยอะกว่าปกติ" : (n < r) ? "มาประปราย" : "เท่ากับขาประจำ";
         curr.regAnalysis = (r > n) ? "กลุ่มหลักอาทิตย์นี้" : (r < n) ? "น้อยกว่าลูกค้าใหม่" : "เท่ากับลูกค้าใหม่";
 
-        // 2. เก็บสถิติรายเดือน (คงเดิมไว้)
         if (!maxNewWeek || n > (weeklyData[maxNewWeek]?.countNew || 0)) maxNewWeek = wk;
         if (!maxRegWeek || r > (weeklyData[maxRegWeek]?.countRegular || 0)) maxRegWeek = wk;
 
@@ -2229,9 +2236,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
             if (r > prev.countRegular) rUp++; else if (r < prev.countRegular) rDown++;
         }
     });
-
-    const monthNewTrend = nUp > nDown ? "เติบโตดี" : nDown > nUp ? "ชะลอตัว" : "ทรงตัว";
-    const monthRegTrend = rUp > rDown ? "เติบโตดี" : rDown > rUp ? "ชะลอตัว" : "ทรงตัว";
    
     // --- 3. [กู้คืน] ฟังก์ชัน Render กราฟสถิติ ---
     const renderStats = (statsObj, color) => {
@@ -2254,17 +2258,21 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     };
 
 // --- 5. สรุปภาพรวม (Insights) - ย้ายประกันรายได้ไปต่อจากเปิดร้าน ---
-    const insights = [
+   const insights = [
         `ระยะเวลาให้บริการ: เปิดร้านทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
         `สถิติประกันรายได้: ใช้ประกันรายได้ทั้งหมด <b>${monthGuarDays || 0} วัน</b>`,
-        `สัปดาห์ที่มีลูกค้ามากที่สุด: <b>${topCountWeek ? topCountWeek[0] : "-"}</b> (${topCountWeek ? (topCountWeek[1].countNew + topCountWeek[1].countRegular) : 0} คน)`,
-        (topIncomeWeek && (topIncomeWeek[1].income || 0) > 0) ? `สัปดาห์ที่มีรายได้สูงสุด: <b>${topIncomeWeek[0]}</b> (฿${topIncomeWeek[1].income.toLocaleString()})` : `สัปดาห์ที่มีรายได้สูงสุด: <b>-</b>`,
-        `โครงสร้างลูกค้าเดือนนี้: <b>${countRegular > countNew ? "ลูกค้าประจำเป็นฐานหลัก" : "ลูกค้าใหม่เพิ่มมากขึ้น"} (ประจำ ${countRegular} / ใหม่ ${countNew})</b>`,
-        `สถิติลูกค้าเยอะสุดแยกกลุ่ม: ใหม่ (<b>${maxNewWeek}</b>) | ประจำ (<b>${maxRegWeek}</b>)`,
+        
+        `สัปดาห์ที่มีลูกค้ามากที่สุด: <b>${topCountWeek ? topCountWeek[0] : "-"}</b> (${topCountWeek ? (topCountWeek[1].countNew + topCountWeek[1].countRegular) : "-"} คน)`,
+        (topIncomeWeek && (topIncomeWeek[1].income || 0) > 0) ? `สัปดาห์ที่มีรายได้สูงสุด: <b>${topIncomeWeek[0]}</b> (฿${topIncomeWeek[1].income.toLocaleString()})` : `สัปดาห์รายได้สูงสุด: <b>-</b>`,
+        
+        `โครงสร้างลูกค้าเดือนนี้: <b>${totalRegular > totalNew ? "ลูกค้าประจำเป็นฐานหลัก" : totalNew > totalRegular ? "ลูกค้าใหม่เพิ่มมากขึ้น" : "สัดส่วนลูกค้าพอๆ กัน"} (ประจำ ${totalRegular > 0 ? totalRegular : "-"} / ใหม่ ${totalNew > 0 ? totalNew : "-"})</b>`,
+        `สถิติลูกค้าเยอะสุดแยกกลุ่ม: ใหม่ (<b>${maxNewWeek !== "-" ? maxNewWeek : "-"}</b>) | ประจำ (<b>${maxRegWeek !== "-" ? maxRegWeek : "-"}</b>)`,
+        
         (busiestDay && busiestDay.avg > 0) ? (() => {
             if (!quietestDay || busiestDay.avg === quietestDay.avg) return `ลูกค้าเข้าเยอะใน <b>วัน${busiestDay.name}</b>`;
             return `ลูกค้าเข้าเยอะใน <b>วัน${busiestDay.name}</b> และน้อยใน <b>วัน${quietestDay.name}</b>`;
         })() : `สถิติรายวัน: -`,
+        
         `ทรงผมยอดนิยม: <b>${topHair ? topHair[0] : '-'}</b> | บริการยอดนิยม: <b>${topService ? topService[0] : '-'}</b>`
     ];
     const weeklyHtml = weekEntries.map(([wk, data]) => {
