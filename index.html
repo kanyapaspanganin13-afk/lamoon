@@ -2287,20 +2287,43 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     }
 
     // --- ส่วนสรุปภาพรวม (Insights) ---
-    const insights = [
-        `ระยะเวลา: เปิดให้บริการ <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
-        `วิเคราะห์ลูกค้าใหม่: ${newGrowthWeeks.length > 0 || newDropWeeks.length > 0 ? `สัปดาห์ที่เพิ่ม: <b>${newGrowthWeeks.join(", ") || "-"}</b> | สัปดาห์ที่ลด: <b>${newDropWeeks.join(", ") || "-"}</b>` : "ปริมาณคงที่ตลอดเดือน"} <br/>&nbsp;&nbsp;↳ <span style="color:#4ade80;"><b>สรุปเดือนนี้: ${monthNewTrend}</b></span> <br/>&nbsp;&nbsp;↳ <i>${monthNewInsight} (สัปดาห์ที่คนใหม่เยอะสุด: ${maxNewWeek || "-"})</i>`,
-        `วิเคราะห์ลูกค้าประจำ: ${regGrowthWeeks.length > 0 || regDropWeeks.length > 0 ? `สัปดาห์ที่เพิ่ม: <b>${regGrowthWeeks.join(", ") || "-"}</b> | สัปดาห์ที่ลด: <b>${regDropWeeks.join(", ") || "-"}</b>` : "แวะเวียนมาสม่ำเสมอในทุกสัปดาห์"} <br/>&nbsp;&nbsp;↳ <span style="color:#c084fc;"><b>สรุปเดือนนี้: ${monthRegTrend}</b></span> <br/>&nbsp;&nbsp;↳ <i>${monthRegInsight} (สัปดาห์ที่ขาประจำเยอะสุด: ${maxRegWeek || "-"})</i>`,
-        `โครงสร้างลูกค้าเดือนนี้: <b>${countRegular > countNew ? `เน้นลูกค้าประจำ (ประจำ ${countRegular} / ใหม่ ${countNew})` : countNew > countRegular ? `เน้นลูกค้าใหม่ (ใหม่ ${countNew} / ประจำ ${countRegular})` : `สัดส่วนลูกค้าสมดุลเท่ากัน (${countNew} คน)`}</b>`,
-        `จุดที่น่าสังเกต: ลูกค้าใหม่มีความผันผวนสูงสุดใน <b>${biggestNewChange.week || "-"}</b> (ส่วนต่าง ${biggestNewChange.diff} คน)`,
-        `สถิติประกันรายได้: ใช้ประกันรายได้ทั้งหมด <b>${monthGuarDays || 0} วัน</b>`,
-        (topIncomeWeek && (topIncomeWeek[1].income || 0) > 0) ? `สัปดาห์รายได้สูงสุด: <b>${topIncomeWeek[0]}</b>` : `สัปดาห์รายได้สูงสุด: <b>-</b>`,
-        (busiestDay && busiestDay.avg > 0) ? (() => {
-            if (!quietestDay || busiestDay.avg === quietestDay.avg) return `ลูกค้าเข้าเยอะใน <b>วัน${busiestDay.name}</b>`;
-            return `ลูกค้าเข้าเยอะใน <b>วัน${busiestDay.name}</b> และน้อยใน <b>วัน${quietestDay.name}</b>`;
-        })() : `สถิติรายวัน: -`,
-        `ทรงผมยอดนิยม: <b>${topHair ? topHair[0] : '-'}</b> | บริการยอดนิยม: <b>${topService ? topService[0] : '-'}</b>`
-    ];
+     const insights = [
+    `ระยะเวลาให้บริการ: เปิดร้านทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
+
+    `แนวโน้มลูกค้าใหม่: ${newGrowthWeeks.join(", ") || "จำนวนค่อนข้างคงที่"} 
+    <br/>&nbsp;&nbsp;↳ <span style="color:#4ade80;"><b>ภาพรวมเดือนนี้: ${monthNewTrend}</b></span> 
+    <br/>&nbsp;&nbsp;↳ <i>${monthNewInsight} (สัปดาห์ที่มีลูกค้าใหม่มากที่สุด: ${maxNewWeek || "-"})</i>`,
+
+    `แนวโน้มลูกค้าประจำ: ${regGrowthWeeks.join(", ") || "ลูกค้าเข้ามาอย่างสม่ำเสมอ"} 
+    <br/>&nbsp;&nbsp;↳ <span style="color:#c084fc;"><b>ภาพรวมเดือนนี้: ${monthRegTrend}</b></span> 
+    <br/>&nbsp;&nbsp;↳ <i>${monthRegInsight} (สัปดาห์ที่มีลูกค้าประจำมากที่สุด: ${maxRegWeek || "-"})</i>`,
+
+    `โครงสร้างลูกค้าเดือนนี้: <b>${
+        countRegular > countNew
+        ? "ลูกค้าประจำเป็นฐานหลักของร้าน"
+        : "มีลูกค้าใหม่เข้ามาใช้บริการค่อนข้างมาก"
+    } (ประจำ ${countRegular} / ใหม่ ${countNew})</b>`,
+
+    `จุดที่น่าสังเกตของเดือนนี้: 
+    <br/>&nbsp;&nbsp;↳ ลูกค้าใหม่เปลี่ยนแปลงชัดที่สุดใน <b>${biggestNewChange.week || "-"}</b> (ต่างกัน ${biggestNewChange.diff} คน)
+    <br/>&nbsp;&nbsp;↳ ลูกค้าประจำเปลี่ยนแปลงชัดที่สุดใน <b>${biggestRegChange.week || "-"}</b> (ต่างกัน ${biggestRegChange.diff} คน)`,
+
+    `สถิติประกันรายได้: ใช้ทั้งหมด <b>${monthGuarDays || 0} วัน</b>`,
+
+    (topIncomeWeek && (topIncomeWeek[1].income || 0) > 0)
+        ? `สัปดาห์ที่มีรายได้สูงสุด: <b>${topIncomeWeek[0]}</b>`
+        : `สัปดาห์ที่มีรายได้สูงสุด: <b>-</b>`,
+
+    (topCountWeek)
+        ? `สัปดาห์ที่มีลูกค้าเข้ามามากที่สุด: <b>${topCountWeek[0]}</b> (รวม ${topCountWeek[1].countNew + topCountWeek[1].countRegular} คน)`
+        : `สัปดาห์ที่มีลูกค้าเข้ามามากที่สุด: <b>-</b>`,
+
+    (busiestDay && busiestDay.avg > 0)
+        ? `วันที่ลูกค้าเข้ามาใช้บริการมากที่สุดคือ <b>วัน${busiestDay.name}</b>`
+        : `สถิติรายวัน: -`,
+
+    `ทรงผมยอดนิยม: <b>${topHair ? topHair[0] : '-'}</b> | บริการยอดนิยม: <b>${topService ? topService[0] : '-'}</b>`
+];
 
       const weeklyHtml = weekEntries.map(([wk, data]) => {
         const weeklyTotalIncome = data.income || 0;
