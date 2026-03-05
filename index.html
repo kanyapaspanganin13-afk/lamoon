@@ -2257,7 +2257,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         }).join("");
     };
 
-// --- 5. สรุปภาพรวม (Insights) ปรับปรุงใหม่ตามเงื่อนไขพี่ ---
+// --- 5. สรุปภาพรวม (Insights) ปรับปรุงใหม่แยกสีลูกค้า (โทน C: ฟ้า-ทอง) ---
 const insights = [
     `เดือนนี้: เปิดร้านทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
     `สถิติประกันรายได้: ใช้ประกันรายได้ทั้งหมด <b>${monthGuarDays || 0} วัน</b>`,
@@ -2271,10 +2271,22 @@ const insights = [
         : `สัปดาห์ที่มีรายได้สูงสุด: <b>-</b>`
 ];
 
-// 🎯 เงื่อนไข: ถ้ามีการเลือกประเภทลูกค้า (ใหม่ หรือ ประจำ) อย่างน้อย 1 คน ถึงจะแสดง 2 บรรทัดนี้
+// 🎯 เงื่อนไข: ถ้ามีการเลือกประเภทลูกค้า ถึงจะแสดง 2 บรรทัดนี้ (พร้อมแยกสี ฟ้า-ทอง)
 if (totalNew > 0 || totalRegular > 0) {
-    insights.push(`โครงสร้างลูกค้าเดือนนี้: <b>${totalRegular > totalNew ? "ลูกค้าประจำเป็นฐานหลัก" : totalNew > totalRegular ? "ลูกค้าใหม่เพิ่มมากขึ้น" : "สัดส่วนลูกค้าพอๆ กัน"} (ประจำ ${totalRegular > 0 ? totalRegular : "-"} / ใหม่ ${totalNew > 0 ? totalNew : "-"})</b>`);
-    insights.push(`สถิติลูกค้าเยอะสุดแยกกลุ่ม: ใหม่ (<b>${maxNewWeek !== "-" ? maxNewWeek : "-"}</b>) | ประจำ (<b>${maxRegWeek !== "-" ? maxRegWeek : "-"}</b>)`);
+    // 🔵 สีฟ้าสำหรับลูกค้าใหม่ | 🟡 สีเหลืองทองสำหรับลูกค้าประจำ
+    const newColor = "#3b82f6";
+    const regColor = "#f59e0b";
+
+    const newText = `<span style="color: ${newColor}; font-weight: bold;">ใหม่ ${totalNew > 0 ? totalNew : "-"}</span>`;
+    const regText = `<span style="color: ${regColor}; font-weight: bold;">ประจำ ${totalRegular > 0 ? totalRegular : "-"}</span>`;
+    
+    insights.push(`โครงสร้างลูกค้าเดือนนี้: <b>${totalRegular > totalNew ? "ลูกค้าประจำเป็นฐานหลัก" : totalNew > totalRegular ? "ลูกค้าใหม่เพิ่มมากขึ้น" : "สัดส่วนลูกค้าพอๆ กัน"} (${regText} / ${newText})</b>`);
+    
+    // แยกสีตรงชื่อสัปดาห์ที่ลูกค้าแต่ละกลุ่มเยอะที่สุด
+    const maxNewText = `<span style="color: ${newColor};">ใหม่ (<b>${maxNewWeek !== "-" ? maxNewWeek : "-"}</b>)</span>`;
+    const maxRegText = `<span style="color: ${regColor};">ประจำ (<b>${maxRegWeek !== "-" ? maxRegWeek : "-"}</b>)</span>`;
+    
+    insights.push(`สถิติลูกค้าเยอะสุดแยกกลุ่ม: ${maxNewText} | ${maxRegText}`);
 }
 
 // สถิติรายวัน (เข้าเยอะ/น้อย)
@@ -2286,6 +2298,7 @@ if (busiestDay && busiestDay.avg > 0) {
 } else {
     insights.push(`สถิติรายวัน: -`);
 }
+
 // ทรงผมและบริการยอดนิยม
 insights.push(`ทรงผมยอดนิยม: <b>${topHair ? topHair[0] : '-'}</b> | บริการยอดนิยม: <b>${topService ? topService[0] : '-'}</b>`);
    
