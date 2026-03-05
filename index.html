@@ -666,7 +666,7 @@ span[onclick*="delRec"] {
         </div>
 
         <div style="text-align:center; line-height: 1.4;">
-            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.1.6</span></div>
+            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.9</span></div>
             <div style="font-size:9px; color:#cbd5e1; font-weight:400;">Update: <span id="display-date">05/03/2026</span></div>
         </div>
     </div>
@@ -712,7 +712,7 @@ span[onclick*="delRec"] {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.1.6"; 
+const APP_VERSION = "1.0.9"; 
 const LAST_UPDATED = "05/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
@@ -2225,8 +2225,9 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     const topHair = Object.entries(hairStats).sort((a, b) => b[1] - a[1])[0];
     const topService = Object.entries(serviceStats).sort((a, b) => b[1] - a[1])[0];
 
-    // --- 2. วิเคราะห์ลูกค้า (รายสัปดาห์ & รายเดือน) ---
-    let maxNewWeek = "-"; let maxRegWeek = "-";
+   // --- 2. วิเคราะห์ลูกค้า (รายสัปดาห์ & รายเดือน) - แก้ไขตามเงื่อนไขพี่ ---
+    let maxNewWeek = "-"; 
+    let maxRegWeek = "-";
     let nUp = 0, nDown = 0, rUp = 0, rDown = 0;
 
     weekKeys.forEach((wk, idx) => {
@@ -2238,13 +2239,26 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         curr.newAnalysis = (n > r) ? "กลุ่มหลักอาทิตย์นี้" : (n < r) ? "น้อยกว่าลูกค้าประจำ" : "เท่ากับลูกค้าประจำ";
         curr.regAnalysis = (r > n) ? "กลุ่มหลักอาทิตย์นี้" : (r < n) ? "น้อยกว่าลูกค้าใหม่" : "เท่ากับลูกค้าใหม่";
 
-        if (!maxNewWeek || n > (weeklyData[maxNewWeek]?.countNew || 0)) maxNewWeek = wk;
-        if (!maxRegWeek || r > (weeklyData[maxRegWeek]?.countRegular || 0)) maxRegWeek = wk;
+        // 🎯 แก้ไข Logic การเลือกสัปดาห์ที่เยอะที่สุด:
+        // ต้องชนะอีกฝั่งในสัปดาห์เดียวกันก่อน ถึงจะมีสิทธิ์บันทึกชื่อสัปดาห์
+        
+        // ถ้าลูกค้าใหม่ "มากกว่า" ลูกค้าประจำ และมากกว่ายอดสูงสุดที่เคยเก็บไว้
+        if (n > r && (maxNewWeek === "-" || n > (weeklyData[maxNewWeek]?.countNew || 0))) {
+            maxNewWeek = wk;
+        }
 
+        // ถ้าลูกค้าประจำ "มากกว่า" ลูกค้าใหม่ และมากกว่ายอดสูงสุดที่เคยเก็บไว้
+        if (r > n && (maxRegWeek === "-" || r > (weeklyData[maxRegWeek]?.countRegular || 0))) {
+            maxRegWeek = wk;
+        }
+
+        // ส่วนการเปรียบเทียบสัปดาห์ก่อนหน้า (คงเดิม)
         if (idx > 0) {
             const prev = weeklyData[weekKeys[idx - 1]];
-            if (n > prev.countNew) nUp++; else if (n < prev.countNew) nDown++;
-            if (r > prev.countRegular) rUp++; else if (r < prev.countRegular) rDown++;
+            const pN = prev.countNew || 0;
+            const pR = prev.countRegular || 0;
+            if (n > pN) nUp++; else if (n < pN) nDown++;
+            if (r > pR) rUp++; else if (r < pR) rDown++;
         }
     });
    
