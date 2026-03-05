@@ -2257,26 +2257,38 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         }).join("");
     };
 
-// --- 5. สรุปภาพรวม (Insights) - แก้ไขการนับยอดรวมลูกค้าทุกคน ---
-    const insights = [
-        `เดือนนี้: เปิดร้านทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
-        `สถิติประกันรายได้: ใช้ประกันรายได้ทั้งหมด <b>${monthGuarDays || 0} วัน</b>`,
-        
-        // แก้ไข: ใช้ customers (ซึ่งนับทุกคนรวมถึงคนไม่ระบุประเภท) แทนการบวกแยกกลุ่ม
-        `สัปดาห์ที่มีลูกค้ามากที่สุด: <b>${topCountWeek ? topCountWeek[0] : "-"}</b> (${topCountWeek ? (topCountWeek[1].customers) : "-"} คน)`,
-        
-        (topIncomeWeek && (topIncomeWeek[1].income || 0) > 0) ? `สัปดาห์ที่มีรายได้สูงสุด: <b>${topIncomeWeek[0]}</b> (฿${topIncomeWeek[1].income.toLocaleString()})` : `สัปดาห์ที่มีรายได้สูงสุด: <b>-</b>`,
-        
-        `โครงสร้างลูกค้าเดือนนี้: <b>${totalRegular > totalNew ? "ลูกค้าประจำเป็นฐานหลัก" : totalNew > totalRegular ? "ลูกค้าใหม่เพิ่มมากขึ้น" : "สัดส่วนลูกค้าพอๆ กัน"} (ประจำ ${totalRegular > 0 ? totalRegular : "-"} / ใหม่ ${totalNew > 0 ? totalNew : "-"})</b>`,
-        `สถิติลูกค้าเยอะสุดแยกกลุ่ม: ใหม่ (<b>${maxNewWeek !== "-" ? maxNewWeek : "-"}</b>) | ประจำ (<b>${maxRegWeek !== "-" ? maxRegWeek : "-"}</b>)`,
-        
-        (busiestDay && busiestDay.avg > 0) ? (() => {
-            if (!quietestDay || busiestDay.avg === quietestDay.avg) return `ลูกค้าเข้าเยอะใน <b>วัน${busiestDay.name}</b>`;
-            return `ลูกค้าเข้าเยอะใน <b>วัน${busiestDay.name}</b> และน้อยใน <b>วัน${quietestDay.name}</b>`;
-        })() : `สถิติรายวัน: -`,
-        
-        `ทรงผมยอดนิยม: <b>${topHair ? topHair[0] : '-'}</b> | บริการยอดนิยม: <b>${topService ? topService[0] : '-'}</b>`
-    ];
+// --- 5. สรุปภาพรวม (Insights) ปรับปรุงใหม่ตามเงื่อนไขพี่ ---
+const insights = [
+    `เดือนนี้: เปิดร้านทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
+    `สถิติประกันรายได้: ใช้ประกันรายได้ทั้งหมด <b>${monthGuarDays || 0} วัน</b>`,
+    
+    // แสดงสัปดาห์ที่ลูกค้ามากที่สุด (นับรวมทุกคน)
+    `สัปดาห์ที่มีลูกค้ามากที่สุด: <b>${topCountWeek ? topCountWeek[0] : "-"}</b> (${topCountWeek ? (topCountWeek[1].customers || "-") : "-"} คน)`,
+    
+    // แสดงสัปดาห์รายได้สูงสุด
+    (topIncomeWeek && (topIncomeWeek[1].income || 0) > 0) 
+        ? `สัปดาห์ที่มีรายได้สูงสุด: <b>${topIncomeWeek[0]}</b> (฿${topIncomeWeek[1].income.toLocaleString()})` 
+        : `สัปดาห์ที่มีรายได้สูงสุด: <b>-</b>`
+];
+
+// 🎯 เงื่อนไข: ถ้ามีการเลือกประเภทลูกค้า (ใหม่ หรือ ประจำ) อย่างน้อย 1 คน ถึงจะแสดง 2 บรรทัดนี้
+if (totalNew > 0 || totalRegular > 0) {
+    insights.push(`โครงสร้างลูกค้าเดือนนี้: <b>${totalRegular > totalNew ? "ลูกค้าประจำเป็นฐานหลัก" : totalNew > totalRegular ? "ลูกค้าใหม่เพิ่มมากขึ้น" : "สัดส่วนลูกค้าพอๆ กัน"} (ประจำ ${totalRegular > 0 ? totalRegular : "-"} / ใหม่ ${totalNew > 0 ? totalNew : "-"})</b>`);
+    insights.push(`สถิติลูกค้าเยอะสุดแยกกลุ่ม: ใหม่ (<b>${maxNewWeek !== "-" ? maxNewWeek : "-"}</b>) | ประจำ (<b>${maxRegWeek !== "-" ? maxRegWeek : "-"}</b>)`);
+}
+
+// สถิติรายวัน (เข้าเยอะ/น้อย)
+if (busiestDay && busiestDay.avg > 0) {
+    const dayText = (!quietestDay || busiestDay.avg === quietestDay.avg) 
+        ? `ลูกค้าเข้าเยอะใน <b>วัน${busiestDay.name}</b>` 
+        : `ลูกค้าเข้าเยอะใน <b>วัน${busiestDay.name}</b> และน้อยใน <b>วัน${quietestDay.name}</b>`;
+    insights.push(dayText);
+} else {
+    insights.push(`สถิติรายวัน: -`);
+}
+// ทรงผมและบริการยอดนิยม
+insights.push(`ทรงผมยอดนิยม: <b>${topHair ? topHair[0] : '-'}</b> | บริการยอดนิยม: <b>${topService ? topService[0] : '-'}</b>`);
+   
     const weeklyHtml = weekEntries.map(([wk, data]) => {
         const weeklyTotalIncome = data.income || 0;
         let sumBarber = 0;
