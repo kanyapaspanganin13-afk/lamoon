@@ -205,21 +205,27 @@ function openReportModal(title, htmlContent) {
 /* 4. ระบบเลย์เอาต์  */
 .page { 
     display: none; 
-    background: #f8fafc; 
+    /* 🎯 เปลี่ยนจากสีทึบ #f8fafc เป็นขาวโปร่งแสง 85% */
+    background: rgba(255, 255, 255, 0.85) !important; 
+    
+    /* 🎯 เพิ่มเอฟเฟกต์กระจกฝ้า (เบลอพื้นหลัง) */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    
     opacity: 1; 
     border-radius: 25px;
     padding: 20px;
-    
-    /* 🔴 ปรับระยะห่างด้านล่างให้มากขึ้นเล็กน้อยเพื่อให้พ้นแถบเมนู */
     margin: 10px 10px 100px 10px; 
     
-    border: 1px solid var(--border);
+    /* 🎯 เปลี่ยนเส้นขอบให้ดูบางและกลืนกับความใส */
+    border: 1px solid rgba(255, 255, 255, 0.3);
     
-    /* 🟢 ลดความสูงลงอีกนิด เพื่อให้เหลือพื้นที่ด้านล่างครับ */
     min-height: calc(100vh - 200px); 
-    
     box-sizing: border-box;
     overflow-y: auto;
+    
+    /* เพิ่มเงาจางๆ ให้ดูมีมิติ */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .page.active { 
@@ -674,7 +680,7 @@ span[onclick*="delRec"] {
         </div>
 
         <div style="text-align:center; line-height: 1.4;">
-            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.2</span></div>
+            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.3</span></div>
             <div style="font-size:9px; color:#cbd5e1; font-weight:400;">Update: <span id="display-date">06/03/2026</span></div>
         </div>
     </div>
@@ -720,7 +726,7 @@ span[onclick*="delRec"] {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.2"; 
+const APP_VERSION = "1.0.3"; 
 const LAST_UPDATED = "06/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
@@ -2799,52 +2805,43 @@ function handleSave(event) {
     }
 }
 function applyTheme(t) {
-    // 1. จัดการ Class และลบ Style พิเศษเดิมออกก่อน
     document.body.className = t;
-    const oldStyle = document.getElementById("navyStyle");
-    if (oldStyle) oldStyle.remove();
-
     const s = document.documentElement.style;
-    // 2. กำหนดค่าพื้นฐาน (Default: Light Theme)
-    // การตั้งค่าไว้ตรงนี้จะช่วยลดการเขียนซ้ำใน else
     let bodyBg = '#f3f4f6';
-    s.setProperty('--card', '#ffffff');
-    s.setProperty('--text', '#1a237e');
-    s.setProperty('--modal-bg', '#f3f4f6');
-    // 3. ตรวจสอบเงื่อนไขธีมต่างๆ
+
     if (t === 'dark') {
-        // --- 🌑 ธีมมืด-ทอง ---
         bodyBg = '#171717';
-        s.setProperty('--card', '#262626');
+        // 🌑 ธีมมืด: ให้กรอบดำโปร่งแสงเล็กน้อย
+        s.setProperty('--card', 'rgba(38, 38, 38, 0.8)'); 
         s.setProperty('--text', '#fbbf24');
-        s.setProperty('--modal-bg', '#171717');
     } 
-else if (t === 'navy') {
-        // --- 🌌 ธีมน้ำเงิน ---
+    else if (t === 'navy') {
         bodyBg = '#1a237e';
-        s.setProperty('--card', '#ffffff');
+        // 🌌 ธีมน้ำเงิน: ให้กรอบขาวโปร่งแสง (มองเห็นพื้นหลังน้ำเงิน)
+        s.setProperty('--card', 'rgba(255, 255, 255, 0.85)'); 
         s.setProperty('--text', '#1a237e');
-        s.setProperty('--modal-bg', '#1a237e');
         
-        const st = document.createElement("style");
+        // เพิ่มเอฟเฟกต์กระจกฝ้า (Blur) ให้กับ Card
+        const st = document.getElementById("navyStyle") || document.createElement("style");
         st.id = "navyStyle";
         st.innerHTML = `
-            body.navy { background: #1a237e !important; color: #ffffff !important; }
-            .navy .card b, .navy .card span { color: #1e293b !important; }
-            .navy #dTotal, .navy #accNet { color: #1a237e !important; }
-            .navy .nav-item { color: #ffffff !important; opacity: 0.7; }
-            .navy .nav-item.active { color: #facc15 !important; opacity: 1; font-weight: bold; }
-            
-            /* 🎯 จุดที่เพิ่ม: บังคับสีตัวหนังสือในช่องกรอกข้อมูลให้เห็นชัด */
-            .navy input, .navy select, .navy textarea { 
-                color: #1e293b !important; 
-                background: #ffffff !important;
+            body.navy { background: #1a237e !important; }
+            /* 🎯 ทำให้กรอบ Card โปร่งแสงและเบลอพื้นหลัง */
+            .navy .card, .navy #mainContainer { 
+                background: rgba(255, 255, 255, 0.85) !important;
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.3);
             }
-            .navy #modalSet h3 { color: #ffffff !important; }
+            .navy input, .navy select { background: rgba(255, 255, 255, 0.9) !important; }
         `;
-        document.head.appendChild(st);
+        if (!document.getElementById("navyStyle")) document.head.appendChild(st);
     }
-    // 4. อัปเดตพื้นหลังของ Body
+    else {
+        // ☀️ ธีมปกติ: ขาวสะอาด
+        s.setProperty('--card', '#ffffff');
+        s.setProperty('--text', '#1a237e');
+    }
     document.body.style.background = bodyBg;
 }
 /* ==========================================================
