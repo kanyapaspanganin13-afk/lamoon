@@ -674,7 +674,7 @@ span[onclick*="delRec"] {
         </div>
 
         <div style="text-align:center; line-height: 1.4;">
-            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.9</span></div>
+            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.2</span></div>
             <div style="font-size:9px; color:#cbd5e1; font-weight:400;">Update: <span id="display-date">06/03/2026</span></div>
         </div>
     </div>
@@ -720,7 +720,7 @@ span[onclick*="delRec"] {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.9"; 
+const APP_VERSION = "1.0.2"; 
 const LAST_UPDATED = "06/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
@@ -736,11 +736,21 @@ const LAST_UPDATED = "06/03/2026";
         window.location.reload(true);
     }
 })();
-// 3. ตัวแปรหลักของระบบ
+// 3. ตัวแปรหลักของระบบ (ปรับปรุงให้รองรับค่าที่บันทึกแยก Key ด้วย)
 let db = JSON.parse(localStorage.getItem("barber_db")) || [];
 let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
 let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
-let conf = JSON.parse(localStorage.getItem("barber_conf")) || { shop: "Barber Shop", perc: 50, guar: 0 };
+
+// 🎯 แก้ไขบรรทัดนี้ครับพี่: ให้ดึงค่าจาก localStorage ทุกตัวมาใส่ใน conf ทันที
+let conf = JSON.parse(localStorage.getItem("barber_conf")) || { 
+    shop: localStorage.getItem("shopName") || "Barber Shop", 
+    perc: parseFloat(localStorage.getItem("shopPerc")) || 50, 
+    guar: parseFloat(localStorage.getItem("shopGuar")) || 0,
+    theme: localStorage.getItem("shopTheme") || "light",
+    voice: localStorage.getItem("shopVoice") || "default.mp3",
+    sound: localStorage.getItem("shopSound") || "on"
+};
+
 let payMethod = "";
 // 4. สั่งแสดงผลเลขเวอร์ชันและวันที่บนหน้าจอ
 document.addEventListener("DOMContentLoaded", () => {
