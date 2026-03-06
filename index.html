@@ -185,7 +185,7 @@ function openReportModal(title, htmlContent) {
         --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --border: #e2e8f0;
     }
     /* 2. ระบบธีม (ต้องอยู่บนสุดเพื่อเตรียมตัวแปร) */
-    body.navy { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --accent: #38bdf8; }
+    body.navy { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --accent: #073bf5; }
     body.dark { --bg: #121212; --card: #1a1a1a; --text: #fbbf24; --accent: #fbbf24; }
 
     /* 3. รีเซ็ตพื้นฐาน */
@@ -202,14 +202,6 @@ function openReportModal(title, htmlContent) {
     position: relative; 
     z-index: 1; 
 }
-   /* 4. ระบบเลย์เอาต์ (ปรับให้โปร่งแสง) */
-.container { 
-    padding: 15px; 
-    max-width: 500px; 
-    margin: auto; 
-    position: relative; 
-    z-index: 1; 
-}
 /* 4. ระบบเลย์เอาต์  */
 .page { 
     display: none; 
@@ -217,7 +209,6 @@ function openReportModal(title, htmlContent) {
     opacity: 1; 
     border-radius: 25px;
     padding: 20px;
-    
     /* 🔴 ปรับระยะห่างด้านล่างให้มากขึ้นเล็กน้อยเพื่อให้พ้นแถบเมนู */
     margin: 10px 10px 100px 10px; 
     
@@ -236,7 +227,8 @@ function openReportModal(title, htmlContent) {
 }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
     .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
-/* 5. เมนูบาร์ (ปรับให้รองรับระบบธีม) */
+
+    /* 5. เมนูบาร์ (ปรับให้รองรับระบบธีม) */
 nav {
     position: fixed; bottom: 0; left: 0; right: 0;
     /* เปลี่ยนจาก #ffffff !important เป็น var(--card) เพื่อให้เปลี่ยนตามธีมที่เลือก */
@@ -362,7 +354,6 @@ nav {
         position: relative;
     }
     /* 9. ส่วนเสริมสำหรับรายงานและสถิติ (ที่เพิ่งปรับปรุง) */
-
 /* กรอบนับจำนวนลูกค้า dCounts */
 #dCounts {
     text-align: center;
