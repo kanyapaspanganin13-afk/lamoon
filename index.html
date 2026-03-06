@@ -457,8 +457,8 @@ span[onclick*="delRec"] {
 
     <select id="custType" style="width: 100%; height:55px; border-radius:15px; border:none; background:#fff; color:#1e293b; font-weight:800; font-size:18px; text-align:center; text-align-last:center; padding: 0 5px; outline:none; box-shadow: 0 4px 8px rgba(0,0,0,0.03); appearance:none; cursor:pointer;">
         <option value="none">ประเภทลูกค้า</option>
-        <option value="new">💇 ลูกค้าใหม่</option>
-        <option value="regular">💇‍♂️ ลูกค้าประจำ</option>
+        <option value="new">🌟 ลูกค้าใหม่</option>
+        <option value="regular">📌 ลูกค้าประจำ</option>
     </select>
 </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
@@ -2403,18 +2403,18 @@ insights.push(`ทรงผมยอดนิยม: <b>${topHair ? topHair[0] :
     </div>
 
     <div style="background: rgba(34,197,94,0.05); padding: 6px 4px; border-radius: 12px; text-align: center; border: 1px solid rgba(34,197,94,0.1);">
-        <div style="font-size: 8px; color: #4ade80; margin-bottom: 2px;">💇 ใหม่</div>
+        <div style="font-size: 8px; color: #4ade80; margin-bottom: 2px;">🌟 ใหม่</div>
         <div style="font-size: 12px; font-weight: 700; color: #4ade80;">${data.countNew || 0}</div>
     </div>
 
     <div style="background: rgba(168,85,247,0.05); padding: 6px 4px; border-radius: 12px; text-align: center; border: 1px solid rgba(168,85,247,0.1);">
-        <div style="font-size: 8px; color: #c084fc; margin-bottom: 2px;">💇‍♂️ ประจำ</div>
+        <div style="font-size: 8px; color: #c084fc; margin-bottom: 2px;">📌 ประจำ</div>
         <div style="font-size: 12px; font-weight: 700; color: #c084fc;">${data.countRegular || 0}</div>
     </div>
 </div>
 <div style="font-size: 11px; color: #64748b; line-height: 1.7; padding: 0 4px 10px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
-    <div>💇 ลูกค้าใหม่: <span style="color: #f1f5f9; font-weight: 600;">${data.newAnalysis} (${data.countNew || 0})</span></div>
-    <div>💇‍♂️ ลูกค้าประจำ: <span style="color: #f1f5f9; font-weight: 600;">${data.regAnalysis} (${data.countRegular || 0})</span></div>
+    <div>🌟 ลูกค้าใหม่: <span style="color: #f1f5f9; font-weight: 600;">${data.newAnalysis} (${data.countNew || 0})</span></div>
+    <div>📌 ลูกค้าประจำ: <span style="color: #f1f5f9; font-weight: 600;">${data.regAnalysis} (${data.countRegular || 0})</span></div>
     <div style="margin-top: 2px;">📈 ลูกค้าเยอะที่สุด: <span style="color: #f1f5f9; font-weight: 600;">${bestDay}</span></div>
     <div>📉 ลูกค้าน้อยที่สุด: <span style="color: #f1f5f9; font-weight: 600;">${worstDay}</span></div>
 </div>      
@@ -2447,10 +2447,10 @@ insights.push(`ทรงผมยอดนิยม: <b>${topHair ? topHair[0] :
             👤 ลูกค้า ${monthCount}
         </div>
         <div style="background: rgba(34,197,94,0.15); padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #4ade80; text-align: center; border: 1px solid rgba(34,197,94,0.2);">
-            💇 ใหม่ ${countNew || 0}
+            🌟 ใหม่ ${countNew || 0}
         </div>
         <div style="background: rgba(168,85,247,0.15); padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #c084fc; text-align: center; border: 1px solid rgba(168,85,247,0.2);">
-            💇‍♂️ ประจำ ${countRegular || 0}
+            📌 ประจำ ${countRegular || 0}
         </div>
     </div>
 
@@ -2820,13 +2820,48 @@ function applyTheme(t) {
     s.setProperty('--text', '#1a237e');
     s.setProperty('--modal-bg', '#f3f4f6');
     // 3. ตรวจสอบเงื่อนไขธีมต่างๆ
-    if (t === 'dark') {
+if (t === 'dark') {
         // --- 🌑 ธีมมืด-ทอง ---
         bodyBg = '#171717';
         s.setProperty('--card', '#262626');
         s.setProperty('--text', '#fbbf24');
         s.setProperty('--modal-bg', '#171717');
-    } 
+        s.setProperty('--accent', '#fbbf24'); // ปุ่มเมนู Active เป็นสีทองสว่าง
+
+        // สร้างสไตล์พิเศษเฉพาะธีม Dark-Gold เพื่อให้ปุ่มแตกต่าง
+        const st = document.getElementById("darkStyle") || document.createElement("style");
+        st.id = "darkStyle";
+        st.innerHTML = `
+            body.dark { background: #171717 !important; color: #fbbf24 !important; }
+            
+            /* 🎯 ปรับแต่งปุ่มในธีมมืดให้ดูหรูหรา (พื้นดำขอบทอง) */
+            .dark button, .dark .btn-main, .dark .icon-card {
+                background: linear-gradient(135deg, #262626, #171717) !important;
+                border: 1px solid #fbbf24 !important;
+                color: #fbbf24 !important;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
+            }
+
+            /* เมื่อเอาเมาส์วางหรือกดปุ่ม ให้เรืองแสงสีทอง */
+            .dark button:active, .dark .btn-main:active {
+                background: #fbbf24 !important;
+                color: #171717 !important;
+                box-shadow: 0 0 20px rgba(251, 191, 36, 0.4) !important;
+            }
+
+            /* ปรับสีช่อง Input ให้เข้ากับธีม */
+            .dark input, .dark select {
+                background: #262626 !important;
+                border: 1px solid #404040 !important;
+                color: #fbbf24 !important;
+            }
+
+            /* สีไอคอนเมนูที่ไม่ได้เลือกให้จางลงเป็นสีทองหม่น */
+            .dark .nav-item { color: #fbbf24 !important; opacity: 0.5; }
+            .dark .nav-item.active { opacity: 1; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
+        `;
+        if (!document.getElementById("darkStyle")) document.head.appendChild(st);
+    }
 else if (t === 'navy') {
         // --- 🌌 ธีมน้ำเงิน ---
         bodyBg = '#1a237e';
