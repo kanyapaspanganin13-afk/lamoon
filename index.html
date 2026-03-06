@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro </title>
+    <title>Barber Note Pro 1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -2876,43 +2876,43 @@ window.addEventListener('touchmove', (e) => {
 // 3. การทำงานทันทีที่โหลดหน้าเว็บเสร็จ (เพิ่มการจำชื่อร้านแบบสมบูรณ์)
 window.addEventListener('load', () => {
     console.log("🚀 Barber App System Started...");
-
-    // --- 🟢 ส่วนที่แก้ไข: โหลดชื่อร้านจากทั้งสองแหล่งให้แม่นยำ ---
+    // 1. ดึงชื่อร้านมาแสดง (ของเดิมที่พี่มี)
     const savedName = localStorage.getItem("shopName") || "BARBER SHOP";
-    
-    // อัปเดตทุกจุดที่แสดงชื่อร้าน
     const shopElements = [
         document.querySelector('h2'), 
         document.getElementById("shopNameDisplay"),
         document.getElementById("shopNameDisp")
     ];
-    
-    shopElements.forEach(el => {
-        if (el) el.innerText = savedName;
-    });
-
-    // --- ส่วนจัดการหน้าจอ (Modal) ---
-    if (document.getElementById("modalSet")) document.getElementById("modalSet").style.display = "none";
-    if (document.getElementById("reportModal")) document.getElementById("reportModal").style.display = "none";
-
-    // --- ส่วนตั้งค่าวันที่เริ่มต้น ---
+    shopElements.forEach(el => { if (el) el.innerText = savedName; });
+    // --- 🟢 ส่วนที่พี่ต้องเพิ่ม: ดึงค่ากลับใส่ในช่องตั้งค่า (Input) ---
+    // เพื่อให้เวลาเปิดหน้าตั้งค่าขึ้นมา ค่าเดิมที่เคยกรอกไว้จะยังอยู่
+    if (document.getElementById("setShop"))  document.getElementById("setShop").value  = savedName;
+    if (document.getElementById("setPerc"))  document.getElementById("setPerc").value  = localStorage.getItem("shopPerc") || 0;
+    if (document.getElementById("setGuar"))  document.getElementById("setGuar").value  = localStorage.getItem("shopGuar") || 0;
+    if (document.getElementById("setTheme")) document.getElementById("setTheme").value = localStorage.getItem("shopTheme") || "light";
+    if (document.getElementById("setVoice")) document.getElementById("setVoice").value = localStorage.getItem("shopVoice") || "default.mp3";
+    if (document.getElementById("setSound")) document.getElementById("setSound").value = localStorage.getItem("shopSound") || "on";
+    // อัปเดตตัวแปรกลาง conf (ถ้ามี) เพื่อให้ระบบคำนวณเงินจำค่าล่าสุด
+    if (typeof conf !== 'undefined') {
+        conf.shop = savedName;
+        conf.perc = parseFloat(localStorage.getItem("shopPerc")) || 0;
+        conf.guar = parseFloat(localStorage.getItem("shopGuar")) || 0;
+        conf.theme = localStorage.getItem("shopTheme") || "light";
+        conf.sound = localStorage.getItem("shopSound") || "on";
+    }
     const today = new Date().toISOString().split('T')[0]; 
     ["dateInp", "accDate", "histDate"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = today;
     });
 
-    // ✨ บังคับไปหน้าหลัก (p1) และคืนค่าความใสหน้าจอ
     if (typeof go === 'function') go(1); 
-    
     document.body.style.opacity = "1"; 
-    document.body.style.overflow = "auto";
+    
+    if (typeof applyTheme === 'function') applyTheme(localStorage.getItem("shopTheme") || "light");
+    if (typeof calculateMoney === 'function') calculateMoney();
 
-    // โหลดข้อมูลรายงานและบัญชี
-    if (typeof updateDateDisplay === 'function') updateDateDisplay(today);
-    if (typeof loadAccountStatus === 'function') loadAccountStatus();
-
-    console.log("⚡ ระบบพร้อมทำงาน: ชื่อร้านคือ " + savedName);
+    console.log("⚡ ระบบจำค่าการตั้งค่าทั้งหมดเรียบร้อยแล้ว");
 });
  </script>
             </body>
