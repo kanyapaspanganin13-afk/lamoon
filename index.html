@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro </title>
+    <title>Barber Note Pro 1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -145,26 +145,34 @@ function openReportModal(title, htmlContent) {
         console.error("❌ หา ID Modal ไม่เจอ!");
         return;
     }
-    // ใส่ข้อมูล
+    // 1. ใส่หัวข้อและเนื้อหา
     modalTitle.innerText = title;
     modalContent.innerHTML = htmlContent;
-    // จัดสไตล์ modalInner (ตัวกล่องสีขาว)
+    // 2. จัดสไตล์ modalInner (ตัวกล่องสีขาวครอบข้อมูล)
     const inner = modalContent.parentElement;
-    inner.style.width = "95%";            // ให้เกือบเต็มจอในมือถือ
-    inner.style.maxWidth = "650px";       // ไม่ให้กว้างไปในคอม
-    inner.style.maxHeight = "85vh";       // ไม่ให้สูงเลยหน้าจอ
-    inner.style.overflowY = "auto";       // ให้เลื่อนบรรทัดดูได้
-    inner.style.background = "#ffffff";   // พื้นหลังขาวสะอาด
-    inner.style.borderRadius = "24px";    // ขอบมนสวยงาม
-    inner.style.padding = "20px";
-    inner.style.margin = "auto";
+    // 🎯 แก้ไข: ขยายความกว้างให้เต็มจอที่สุด (98%) และเอา maxWidth ออกหรือขยายเพิ่ม
+    inner.style.width = "98%";            // ขยายให้เกือบชิดขอบจอซ้าย-ขวา
+    inner.style.maxWidth = "100%";        // ปลดล็อกขีดจำกัดความกว้างเดิม (650px)
+    // 🎯 แก้ไข: ขยายความยาวให้เกือบเต็มหน้าจอแนวตั้ง
+    inner.style.height = "auto";
+    inner.style.maxHeight = "95vh";       // ขยายจาก 85 เป็น 95 เพื่อให้เห็นข้อมูลยาวขึ้น
+    // 🎯 แก้ไข: ลด Padding ของตัวกล่องขาวลง เพื่อให้เนื้อหาข้างในกางได้กว้างขึ้น
+    inner.style.padding = "15px 8px";     // บน-ล่าง 15px | ซ้าย-ขวา 8px (ประหยัดพื้นที่ข้าง)
     
-    // สำคัญ: ทำให้การไถหน้าจอบน iPhone ลื่นไหล
+    inner.style.margin = "auto";
+    inner.style.background = "#ffffff";
+    inner.style.borderRadius = "20px";    // ปรับขอบมนให้พอดี
+    inner.style.display = "flex";
+    inner.style.flexDirection = "column";
+    inner.style.overflowY = "auto";
+    inner.style.boxSizing = "border-box"; // ป้องกันความกว้างเกินจอ
+    // ทำให้การไถหน้าจอบน iPhone ลื่นไหล
     inner.style.webkitOverflowScrolling = "touch";
-    // สั่งแสดงผล Modal
+    // 3. สั่งแสดงผล Modal
     modal.style.display = "flex";
     modal.style.alignItems = "center";
     modal.style.justifyContent = "center";
+    modal.style.padding = "5px";          // ลด Margin นอกสุดของตัว Modal
 }
 </script>
 </head>
