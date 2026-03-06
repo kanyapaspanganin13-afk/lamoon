@@ -2827,7 +2827,7 @@ function applyTheme(t) {
         s.setProperty('--text', '#fbbf24');
         s.setProperty('--modal-bg', '#171717');
     } 
-   else if (t === 'navy') {
+    else if (t === 'navy') {
         // --- 🌌 ธีมน้ำเงิน ---
         bodyBg = '#1a237e';
         s.setProperty('--card', '#ffffff');
@@ -2840,13 +2840,15 @@ function applyTheme(t) {
             body.navy { background: #1a237e !important; color: #ffffff !important; }
             .navy .card b, .navy .card span { color: #1e293b !important; }
             
-            /* 🎯 1. ตัวเลขยอดรวมวันนี้ ให้เป็นสีขาวเหมือนธีมดำ-ทอง */
-            .navy #dTotal, .navy #accNet { color: #ffffff !important; }
+            /* 🎯 ยอดรวมวันนี้และยอดเงินคงเหลือ ให้เป็นสีเงิน */
+            .navy #dTotal, .navy #accNet { 
+                color: #f5f8fc !important; 
+                text-shadow: 0 0 8px rgba(226, 232, 240, 0.3);
+            }
             
             .navy .nav-item { color: #ffffff !important; opacity: 0.7; }
             .navy .nav-item.active { color: #facc15 !important; opacity: 1; font-weight: bold; }
 
-            /* 🎯 2. ตัวหนังสือในปุ่มต่างๆ และช่อง Input ให้เป็นสีเข้ม (มองเห็นชัดบนพื้นขาว) */
             .navy button, .navy input, .navy select, .navy .btn-main { 
                 color: #1e293b !important; 
             }
