@@ -1460,7 +1460,7 @@ function renderDay(selectedDate){
         
         // 🟢 เพิ่มสัญลักษณ์แสดงประเภทในรายการ (History)
         let custTag = ""; 
-        let payIcon = r.pay === 'Trans' ? '📱' : '💵';
+        let payIcon = r.pay === 'Trans' ? '📱' : '💶';
         let mixText = "";
         if (r.pay === 'Mix') {
             payIcon = '🌓';
@@ -2019,7 +2019,7 @@ function renderHistoryList() {
             if (r.pay === 'Mix') {
                 payText = `🌓 ผสม (สด:${(r.payCash||0)}/โอน:${(r.payTrans||0)})`;
             } else {
-                payText = r.pay === 'Trans' ? '📱 โอน' : '💵 เงินสด';
+                payText = r.pay === 'Trans' ? '📱 โอน' : '💶 เงินสด';
             }
             return `
             <div style="padding:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
@@ -2046,7 +2046,7 @@ function renderHistoryList() {
 
             <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:24px;">
                 <div style="background:#14532d; padding:14px 8px; border-radius:18px; text-align:center; color:#ffffff;">
-                    <div style="font-size:13px; opacity:0.8; font-weight:600; margin-bottom:4px;">💵 เงินสด</div>
+                    <div style="font-size:13px; opacity:0.8; font-weight:600; margin-bottom:4px;">💶 เงินสด</div>
                     <div style="font-size:16px; font-weight:800;">฿${cashTotal.toLocaleString()}</div>
                 </div>
                 <div style="background:#1e3a8a; padding:14px 8px; border-radius:18px; text-align:center; color:#ffffff;">
@@ -2547,7 +2547,7 @@ function shareLine() {
 
             const tShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
             const icon = rType === 'GUARANTEE' ? '🛡️' : (rType === 'HOLIDAY' ? '🏖️' : '');
-            const payIcon = r.pay === 'Trans' ? '📱' : '💵';
+            const payIcon = r.pay === 'Trans' ? '📱' : '💶';
 
             return `${i + 1}. [${tShow}] ${icon} ${(r.svcs || []).join('+')} = ${p}${t ? ` (+ทิป ${t})` : ''} ${payIcon}`;
         }).join('\n');
@@ -2589,7 +2589,7 @@ function shareLine() {
     msg += `📊 สรุปงาน:\n${statText || '(ไม่มีรายการ)'}\n`;
     msg += `-------------------------\n`;
     msg += `💰 ยอด: ${tot.toLocaleString()} | 🧧 ทิป: ${tips}\n`;
-    msg += `📱 โอน: ${trans.toLocaleString()} | 💵 เงินสด: ${cash.toLocaleString()}\n`;
+    msg += `📱 โอน: ${trans.toLocaleString()} | 💶 เงินสด: ${cash.toLocaleString()}\n`;
     msg += `🤵 ช่าง: ${Math.floor(bEarn).toLocaleString()}\n`;
     msg += `🏠 ร้าน: ${Math.floor(shopEarn).toLocaleString()}\n`;
     msg += `-------------------------\n`;
