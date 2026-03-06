@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 1</title>
+    <title>Barber Note Pro 01</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -2807,43 +2807,45 @@ function handleSave(event) {
     }
 }
 function applyTheme(t) {
+    // 1. จัดการ Class และลบ Style พิเศษเดิมออกก่อน
     document.body.className = t;
-    const s = document.documentElement.style;
-    let bodyBg = '#f3f4f6';
+    const oldStyle = document.getElementById("navyStyle");
+    if (oldStyle) oldStyle.remove();
 
+    const s = document.documentElement.style;
+    // 2. กำหนดค่าพื้นฐาน (Default: Light Theme)
+    // การตั้งค่าไว้ตรงนี้จะช่วยลดการเขียนซ้ำใน else
+    let bodyBg = '#f3f4f6';
+    s.setProperty('--card', '#ffffff');
+    s.setProperty('--text', '#1a237e');
+    s.setProperty('--modal-bg', '#f3f4f6');
+    // 3. ตรวจสอบเงื่อนไขธีมต่างๆ
     if (t === 'dark') {
+        // --- 🌑 ธีมมืด-ทอง ---
         bodyBg = '#171717';
-        // 🌑 ธีมมืด: ให้กรอบดำโปร่งแสงเล็กน้อย
-        s.setProperty('--card', 'rgba(38, 38, 38, 0.8)'); 
+        s.setProperty('--card', '#262626');
         s.setProperty('--text', '#fbbf24');
+        s.setProperty('--modal-bg', '#171717');
     } 
     else if (t === 'navy') {
+        // --- 🌌 ธีมน้ำเงิน ---
         bodyBg = '#1a237e';
-        // 🌌 ธีมน้ำเงิน: ให้กรอบขาวโปร่งแสง (มองเห็นพื้นหลังน้ำเงิน)
-        s.setProperty('--card', 'rgba(255, 255, 255, 0.85)'); 
-        s.setProperty('--text', '#1a237e');
-        
-        // เพิ่มเอฟเฟกต์กระจกฝ้า (Blur) ให้กับ Card
-        const st = document.getElementById("navyStyle") || document.createElement("style");
-        st.id = "navyStyle";
-        st.innerHTML = `
-            body.navy { background: #1a237e !important; }
-            /* 🎯 ทำให้กรอบ Card โปร่งแสงและเบลอพื้นหลัง */
-            .navy .card, .navy #mainContainer { 
-                background: rgba(255, 255, 255, 0.85) !important;
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.3);
-            }
-            .navy input, .navy select { background: rgba(255, 255, 255, 0.9) !important; }
-        `;
-        if (!document.getElementById("navyStyle")) document.head.appendChild(st);
-    }
-    else {
-        // ☀️ ธีมปกติ: ขาวสะอาด
         s.setProperty('--card', '#ffffff');
         s.setProperty('--text', '#1a237e');
+        s.setProperty('--modal-bg', '#1a237e');
+        // สร้าง Style พิเศษเฉพาะธีม Navy
+        const st = document.createElement("style");
+        st.id = "navyStyle";
+        st.innerHTML = `
+            body.navy { background: #1a237e !important; color: #ffffff !important; }
+            .navy .card b, .navy .card span { color: #1e293b !important; }
+            .navy #dTotal, .navy #accNet { color: #1a237e !important; }
+            .navy .nav-item { color: #ffffff !important; opacity: 0.7; }
+            .navy .nav-item.active { color: #facc15 !important; opacity: 1; font-weight: bold; }
+        `;
+        document.head.appendChild(st);
     }
+    // 4. อัปเดตพื้นหลังของ Body
     document.body.style.background = bodyBg;
 }
 /* ==========================================================
