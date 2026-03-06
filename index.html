@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 1</title>
+    <title>Barber Note Pro </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -675,7 +675,7 @@ span[onclick*="delRec"] {
 
         <div style="text-align:center; line-height: 1.4;">
             <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.9</span></div>
-            <div style="font-size:9px; color:#cbd5e1; font-weight:400;">Update: <span id="display-date">05/03/2026</span></div>
+            <div style="font-size:9px; color:#cbd5e1; font-weight:400;">Update: <span id="display-date">06/03/2026</span></div>
         </div>
     </div>
 </div>
@@ -721,7 +721,7 @@ span[onclick*="delRec"] {
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
 const APP_VERSION = "1.0.9"; 
-const LAST_UPDATED = "05/03/2026"; 
+const LAST_UPDATED = "06/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
     const currentStoredVersion = localStorage.getItem("app_v");
@@ -1546,7 +1546,7 @@ if ($("dServiceStats")) $("dServiceStats").innerHTML = sH + `</div>`;
     } else if (tot === 0) {
         txt = "ร้านจ่ายประกัน"; statusColor = "#0369a1"; icon = "🛡️";
     } else if (settle > 0) {
-        txt = `ช่างคืนร้าน ฿${Math.floor(settle).toLocaleString()}`; statusColor = "#b91c1c"; icon = "👨‍🎨";
+        txt = `ช่างคืนร้าน ฿${Math.floor(settle).toLocaleString()}`; statusColor = "#b91c1c"; icon = "🥷";
     } else if (settle < 0) {
         txt = `ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; statusColor = "#4338ca"; icon = "🏠";
     } else {
@@ -1681,7 +1681,7 @@ function loadAccountStatus() {
     const badge = getEl("statusBadge");
     if (badge) {
         if (totalBalance < 0) {
-            badge.innerText = "👨‍🎨 ช่างคืนร้าน";
+            badge.innerText = "🥷 ช่างคืนร้าน";
             badge.style.backgroundColor = "#fee2e2"; badge.style.color = "#991b1b";
         } else if (totalBalance > 0) {
             badge.innerText = "🏠 ร้านคืนช่าง";
@@ -1701,7 +1701,7 @@ function updateStatusUI(net) {
 
     // ✅ ปรับตรรกะสี: ลบ=แดง (ช่างคืนร้าน) | บวก=น้ำเงิน (ร้านคืนช่าง)
     let color = net < 0 ? "#dc2626" : (net > 0 ? "#1e3a8a" : "#16a34a");
-    let txt = net < 0 ? "👨‍🎨 ช่างคืนร้าน" : (net > 0 ? "🏠 ร้านคืนช่าง" : "✅ ยอดลงตัว");
+    let txt = net < 0 ? "🥷 ช่างคืนร้าน" : (net > 0 ? "🏠 ร้านคืนช่าง" : "✅ ยอดลงตัว");
 
     if (badge) {
         badge.innerText = txt;
@@ -1988,7 +1988,7 @@ function renderHistoryList() {
     if (cashTotal > barberEarn) {
         const toShop = cashTotal - barberEarn;
         settleHTML = `<div style="background:rgba(251,146,60,0.1); padding:16px; border-radius:16px; margin-bottom:20px; text-align:center; border:1px solid rgba(251,146,60,0.3);">
-            <div style="font-size:16px; color:#fdba74; font-weight:600; margin-bottom:4px;">👨‍🎨 ช่างคืนร้าน</div>
+            <div style="font-size:16px; color:#fdba74; font-weight:600; margin-bottom:4px;">🥷 ช่างคืนร้าน</div>
             <div style="font-size:24px; color:#fb923c; font-weight:800;">฿${toShop.toLocaleString()}</div>
         </div>`;
     } else if (barberEarn > cashTotal) {
@@ -2560,7 +2560,7 @@ function shareLine() {
     
     let settle = cash - bEarn;
     let settleMsg = settle > 0 
-        ? `⚠️ ช่างคืนร้าน: ${Math.floor(Math.abs(settle)).toLocaleString()} บาท` 
+        ? `🟧 ช่างคืนร้าน: ${Math.floor(Math.abs(settle)).toLocaleString()} บาท` 
         : `🟦 ร้านคืนช่าง: ${Math.floor(Math.abs(settle)).toLocaleString()} บาท`;
 
    // --- 4. ประกอบข้อความ (Template) - ปรับตามเงื่อนไขพี่ ---
@@ -2569,7 +2569,7 @@ function shareLine() {
     msg += `-------------------------\n`;
     if (newCount > 0 || regCount > 0) {
         msg += `📝 ลูกค้าทั้งหมด: ${realCustomerCount} คน\n`;
-        msg += `✨ ใหม่: ${newCount > 0 ? newCount : '-'} | 🤵 ประจำ: ${regCount > 0 ? regCount : '-'}\n`;
+        msg += ` ใหม่: ${newCount > 0 ? newCount : '-'} | ประจำ: ${regCount > 0 ? regCount : '-'}\n`;
     } else {
         msg += `📝 ลูกค้า: ${realCustomerCount} คน\n`;
     }
