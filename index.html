@@ -2819,13 +2819,13 @@ function applyTheme(t) {
         s.setProperty('--text', '#fbbf24');
         s.setProperty('--modal-bg', '#171717');
     } 
-    else if (t === 'navy') {
+else if (t === 'navy') {
         // --- 🌌 ธีมน้ำเงิน ---
         bodyBg = '#1a237e';
         s.setProperty('--card', '#ffffff');
         s.setProperty('--text', '#1a237e');
         s.setProperty('--modal-bg', '#1a237e');
-        // สร้าง Style พิเศษเฉพาะธีม Navy
+        
         const st = document.createElement("style");
         st.id = "navyStyle";
         st.innerHTML = `
@@ -2834,6 +2834,13 @@ function applyTheme(t) {
             .navy #dTotal, .navy #accNet { color: #1a237e !important; }
             .navy .nav-item { color: #ffffff !important; opacity: 0.7; }
             .navy .nav-item.active { color: #facc15 !important; opacity: 1; font-weight: bold; }
+            
+            /* 🎯 จุดที่เพิ่ม: บังคับสีตัวหนังสือในช่องกรอกข้อมูลให้เห็นชัด */
+            .navy input, .navy select, .navy textarea { 
+                color: #1e293b !important; 
+                background: #ffffff !important;
+            }
+            .navy #modalSet h3 { color: #ffffff !important; }
         `;
         document.head.appendChild(st);
     }
