@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 01</title>
+    <title>Barber Note Pro </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -2827,21 +2827,29 @@ function applyTheme(t) {
         s.setProperty('--text', '#fbbf24');
         s.setProperty('--modal-bg', '#171717');
     } 
-    else if (t === 'navy') {
+   else if (t === 'navy') {
         // --- 🌌 ธีมน้ำเงิน ---
         bodyBg = '#1a237e';
         s.setProperty('--card', '#ffffff');
         s.setProperty('--text', '#1a237e');
         s.setProperty('--modal-bg', '#1a237e');
-        // สร้าง Style พิเศษเฉพาะธีม Navy
+        
         const st = document.createElement("style");
         st.id = "navyStyle";
         st.innerHTML = `
             body.navy { background: #1a237e !important; color: #ffffff !important; }
             .navy .card b, .navy .card span { color: #1e293b !important; }
-            .navy #dTotal, .navy #accNet { color: #1a237e !important; }
+            
+            /* 🎯 1. ตัวเลขยอดรวมวันนี้ ให้เป็นสีขาวเหมือนธีมดำ-ทอง */
+            .navy #dTotal, .navy #accNet { color: #ffffff !important; }
+            
             .navy .nav-item { color: #ffffff !important; opacity: 0.7; }
             .navy .nav-item.active { color: #facc15 !important; opacity: 1; font-weight: bold; }
+
+            /* 🎯 2. ตัวหนังสือในปุ่มต่างๆ และช่อง Input ให้เป็นสีเข้ม (มองเห็นชัดบนพื้นขาว) */
+            .navy button, .navy input, .navy select, .navy .btn-main { 
+                color: #1e293b !important; 
+            }
         `;
         document.head.appendChild(st);
     }
