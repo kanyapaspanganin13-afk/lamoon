@@ -100,37 +100,37 @@ function renderComparisonReport(v) {
     const d1 = fetchStats(v.s1, v.e1);
     const d2 = fetchStats(v.s2, v.e2);
 
-// 🎯 2. ปรับโครงสร้าง HTML แบ่งสัดส่วน 40:60 และให้กว้างเต็มจอ
+// 🎯 2. แบ่งพื้นที่แนวตั้ง: บน 40% และ ล่าง 60% เพื่อให้ชุดล่างเห็นข้อมูลครบ
     const reportHtml = `
-        <div style="font-family:'Kanit', sans-serif; text-align:left; background:#ffffff; padding:5px; color:#1e293b; width:100%; box-sizing:border-box; display:flex; flexDirection:column; gap:5px;">
+        <div style="font-family:'Kanit', sans-serif; display:flex; flex-direction:column; height:75vh; width:100%; box-sizing:border-box; background:#ffffff; gap:10px; padding:5px;">
             
-            <div style="flex: 4; background:#f0f9ff; border:1px solid #bae6fd; border-radius:16px; padding:10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display:flex; flex-direction:column; min-height: 200px;">
+            <div style="flex: 4; display:flex; flex-direction:column; background:#f0f9ff; border:1px solid #bae6fd; border-radius:16px; padding:10px; overflow:hidden;">
                 <div style="color:#0369a1; font-weight:700; font-size:12px; margin-bottom:5px;">📅 ${d1.range}</div>
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:6px 10px; border-radius:12px; border:1px solid #e0f2fe; margin-bottom:5px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:6px 10px; border-radius:12px; border:1px solid #e0f2fe; margin-bottom:5px; flex-shrink:0;">
                     <span style="font-weight:800; font-size:13px;">สรุปยอด</span>
                     <span style="color:#1d4ed8; font-weight:800; font-size:16px;">👤 ${d1.sumC}</span>
                     <span style="color:#059669; font-weight:800; font-size:16px;">฿${d1.sumE.toLocaleString()}</span>
                 </div>
-                <div style="flex:1; overflow-y:auto; padding:0 2px; -webkit-overflow-scrolling:touch;">
+                <div style="flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;">
                     ${d1.rowList}
                 </div>
             </div>
 
-            <div style="text-align:center; color:#cbd5e1; font-weight:900; margin:2px 0; font-size:10px;">VS</div>
+            <div style="text-align:center; color:#cbd5e1; font-weight:900; font-size:10px; flex-shrink:0;">VS</div>
 
-            <div style="flex: 6; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:16px; padding:10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display:flex; flex-direction:column; min-height: 300px;">
+            <div style="flex: 6; display:flex; flex-direction:column; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:16px; padding:10px; overflow:hidden;">
                 <div style="color:#15803d; font-weight:700; font-size:12px; margin-bottom:5px;">📅 ${d2.range}</div>
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:6px 10px; border-radius:12px; border:1px solid #dcfce7; margin-bottom:5px;">
-                    <span style="font-weight:800; font-size:13px;">สรุปยอด</span>
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:6px 10px; border-radius:12px; border:1px solid #dcfce7; margin-bottom:5px; flex-shrink:0;">
+                    <span style="font-weight:800; font-size:13px;">สรุยอด</span>
                     <span style="color:#1d4ed8; font-weight:800; font-size:16px;">👤 ${d2.sumC}</span>
                     <span style="color:#059669; font-weight:800; font-size:16px;">฿${d2.sumE.toLocaleString()}</span>
                 </div>
-                <div style="flex:1; overflow-y:auto; padding:0 2px; -webkit-overflow-scrolling:touch;">
+                <div style="flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;">
                     ${d2.rowList}
                 </div>
             </div>
-            
-            <div style="text-align:center; font-size:10px; color:#94a3b8; margin-top:5px;">วิเคราะห์เปรียบเทียบข้อมูลเฉพาะรายได้ช่าง</div>
+
+            <div style="text-align:center; font-size:10px; color:#94a3b8; flex-shrink:0;">วิเคราะห์เปรียบเทียบข้อมูลเฉพาะรายได้ช่าง</div>
         </div>`;
 
     // 🎯 เพิ่มการตั้งค่าให้ Swal กว้างเต็มที่
