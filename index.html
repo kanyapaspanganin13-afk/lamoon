@@ -205,29 +205,18 @@ function openReportModal(title, htmlContent) {
 /* 4. ระบบเลย์เอาต์  */
 .page { 
     display: none; 
-    /* 🎯 เปลี่ยนจากสีทึบ #f8fafc เป็นขาวโปร่งแสง 85% */
     background: rgba(255, 255, 255, 0.85) !important; 
-    
-    /* 🎯 เพิ่มเอฟเฟกต์กระจกฝ้า (เบลอพื้นหลัง) */
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    
-    opacity: 1; 
-    border-radius: 25px;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 30px; /* เพิ่มความมนให้ดูนุ่มนวลขึ้น */
     padding: 20px;
     margin: 10px 10px 100px 10px; 
-    
-    /* 🎯 เปลี่ยนเส้นขอบให้ดูบางและกลืนกับความใส */
     border: 1px solid rgba(255, 255, 255, 0.3);
-    
     min-height: calc(100vh - 200px); 
     box-sizing: border-box;
     overflow-y: auto;
-    
-    /* เพิ่มเงาจางๆ ให้ดูมีมิติ */
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
-
 .page.active { 
     display: block !important; 
     animation: slideUp 0.4s ease-out;
@@ -237,17 +226,15 @@ function openReportModal(title, htmlContent) {
 /* 5. เมนูบาร์ (ปรับให้รองรับระบบธีม) */
 nav {
     position: fixed; bottom: 0; left: 0; right: 0;
-    /* เปลี่ยนจาก #ffffff !important เป็น var(--card) เพื่อให้เปลี่ยนตามธีมที่เลือก */
-    background: var(--card) !important; 
+    background: rgba(255, 255, 255, 0.8) !important; 
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     display: flex; justify-content: space-around; 
     height: 75px; align-items: center;
-    /* ปรับเงาให้ดูเข้ากับทั้งธีมสว่างและมืด */
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.15); 
+    box-shadow: 0 -5px 25px rgba(0,0,0,0.05); 
     z-index: 99999; 
-    /* ใช้สีเส้นขอบจากตัวแปรระบบธีม */
-    border-top: 1px solid var(--border); 
+    border-top: 1px solid rgba(255, 255, 255, 0.2); 
     padding-bottom: env(safe-area-inset-bottom);
-    transition: background 0.3s ease; /* ทำให้ตอนเปลี่ยนธีมสีจะค่อยๆ เปลี่ยน ดูนุ่มนวลครับ */
 }
 .nav-item { 
     flex: 1; text-align: center; 
@@ -258,9 +245,9 @@ nav {
     display: flex; flex-direction: column; align-items: center;
 }
 .nav-item.active { 
-    /* สีไอคอนเมื่อถูกเลือก จะใช้สี Accent ของธีมนั้นๆ (เช่น สีฟ้า หรือ สีเหลือง) */
-    color: var(--accent) !important; 
+    color: var(--accent) !important; /* 🎯 จะวิ่งไปหาค่าสีน้ำเงินที่ตั้งไว้ใน JS */
     opacity: 1; 
+    transform: translateY(-2px); /* ให้ดูมีการตอบสนองว่าเลือกอยู่ */
 }
 .nav-item i { font-size: 22px; display: block; margin-bottom: 2px; }
 .nav-item span { font-size: 11px; font-weight: 700; }
@@ -2807,41 +2794,64 @@ function handleSave(event) {
 function applyTheme(t) {
     document.body.className = t;
     const s = document.documentElement.style;
+    
+    // ลบสไตล์เก่าของธีม Navy ออกก่อนทุกครั้งที่เปลี่ยนธีม เพื่อความสดใหม่
+    const oldStyle = document.getElementById("navyStyle");
+    if (oldStyle) oldStyle.remove();
+
     let bodyBg = '#f3f4f6';
 
     if (t === 'dark') {
         bodyBg = '#171717';
-        // 🌑 ธีมมืด: ให้กรอบดำโปร่งแสงเล็กน้อย
         s.setProperty('--card', 'rgba(38, 38, 38, 0.8)'); 
         s.setProperty('--text', '#fbbf24');
+        s.setProperty('--accent', '#fbbf24'); // ปุ่ม Active สีทอง
     } 
     else if (t === 'navy') {
         bodyBg = '#1a237e';
-        // 🌌 ธีมน้ำเงิน: ให้กรอบขาวโปร่งแสง (มองเห็นพื้นหลังน้ำเงิน)
         s.setProperty('--card', 'rgba(255, 255, 255, 0.85)'); 
-        s.setProperty('--text', '#1a237e');
-        
-        // เพิ่มเอฟเฟกต์กระจกฝ้า (Blur) ให้กับ Card
-        const st = document.getElementById("navyStyle") || document.createElement("style");
+        s.setProperty('--text', '#ffffff');
+        s.setProperty('--accent', '#60a5fa'); // 🎯 ปุ่ม Active สีน้ำเงินสว่าง (เด่นมาก)
+
+        // สร้างสไตล์พิเศษสำหรับ Glassmorphism และปรับสีช่อง Input
+        const st = document.createElement("style");
         st.id = "navyStyle";
         st.innerHTML = `
             body.navy { background: #1a237e !important; }
-            /* 🎯 ทำให้กรอบ Card โปร่งแสงและเบลอพื้นหลัง */
-            .navy .card, .navy #mainContainer { 
-                background: rgba(255, 255, 255, 0.85) !important;
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.3);
+            
+            /* 🎯 กรอบหน้าหลักให้ใสและนวล */
+            .navy .page, .navy .card, .navy #mainContainer { 
+                background: rgba(255, 255, 255, 0.15) !important; /* ใสขึ้นเพื่อให้เห็นพื้นหลัง */
+                backdrop-filter: blur(15px);
+                -webkit-backdrop-filter: blur(15px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                color: #ffffff !important;
             }
-            .navy input, .navy select { background: rgba(255, 255, 255, 0.9) !important; }
+
+            /* 🎯 ช่องกรอกข้อมูลให้เนียน ไม่ขาวโดด */
+            .navy input, .navy select, .navy textarea {
+                background: rgba(255, 255, 255, 0.2) !important;
+                border: 1px solid rgba(255, 255, 255, 0.3) !important;
+                color: #ffffff !important;
+                border-radius: 12px;
+            }
+
+            /* ปรับสีตัวหนังสือในหน้าประวัติหรือจุดที่เคยเป็นสีดำให้ขาวขึ้น */
+            .navy b, .navy span, .navy div { color: inherit; }
+            
+            /* 🎯 ซ่อน Scrollbar สำหรับธีมนี้ */
+            .navy .page::-webkit-scrollbar { display: none !important; }
         `;
-        if (!document.getElementById("navyStyle")) document.head.appendChild(st);
+        document.head.appendChild(st);
     }
     else {
-        // ☀️ ธีมปกติ: ขาวสะอาด
+        // ☀️ ธีมปกติ (Light)
+        bodyBg = '#f3f4f6';
         s.setProperty('--card', '#ffffff');
         s.setProperty('--text', '#1a237e');
+        s.setProperty('--accent', '#3b82f6'); // ปุ่ม Active สีฟ้าปกติ
     }
+    
     document.body.style.background = bodyBg;
 }
 /* ==========================================================
