@@ -208,6 +208,12 @@ body.navy {
     --border: rgba(255, 255, 255, .1);
     --input-bg: rgba(15, 23, 42, 0.6);
     --btn-text: #ffffff;
+
+    /* สีปุ่มรับเงิน (สว่างพิเศษสำหรับธีม Navy) */
+    --cash1: #74f2be;--cash2: #13a86a;
+    --trans1: #303b8a;--trans2: #010f70;
+    --mix1: #89e6f5;--mix2: #09bcd9;
+    
 }
 
 body.dark {
@@ -294,12 +300,25 @@ input, select, textarea {
     transition: 0.2s;
 }
 
-/* ช่องราคา: ล้างกรอบเหลี่ยมซ้อนข้างในออกให้เหลือแต่ตัวเลขลอยๆ */
+/* ช่องราคา: ล้างกรอบออกให้เหลือแต่ตัวเลขลอยๆ */
 #priceInp {
     background: transparent !important;
     border: none !important;
+    box-shadow: none !important; /* ล้างเงาซ้อนด้านใน */
     font-size: 52px !important;
     height: 100% !important;
+    outline: none !important;   /* ล้างเส้นขอบเวลาคลิก */
+}
+
+/* ช่องทิป: ล้างกรอบออกให้เหลือแต่ตัวเลขลอยๆ เช่นกัน */
+#tipInp {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important; /* ล้างเงาซ้อนด้านใน */
+    font-size: 35px !important;  /* ปรับขนาดตามความเหมาะสม */
+    height: 100% !important;
+    outline: none !important;   /* ล้างเส้นขอบเวลาคลิก */
+    appearance: none !important; /* ล้างปุ่มลูกศรสำหรับ input type number */
 }
 
 /* ========= 🎨 5. BUTTONS & ICON CARDS ========= */
