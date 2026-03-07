@@ -300,25 +300,37 @@ input, select, textarea {
     transition: 0.2s;
 }
 
-/* ช่องราคา: ล้างกรอบออกให้เหลือแต่ตัวเลขลอยๆ */
+/* ส่วนของช่องราคา: ล้างกรอบของตัว input เพื่อให้ตัวเลขลอยอยู่ใน div แม่ */
 #priceInp {
     background: transparent !important;
     border: none !important;
-    box-shadow: none !important; /* ล้างเงาซ้อนด้านใน */
+    box-shadow: none !important;
     font-size: 52px !important;
     height: 100% !important;
-    outline: none !important;   /* ล้างเส้นขอบเวลาคลิก */
+    outline: none !important;
+    padding: 0 10px !important;
 }
 
-/* ช่องทิป: ล้างกรอบออกให้เหลือแต่ตัวเลขลอยๆ เช่นกัน */
+/* ส่วนของช่องทิป: ให้มีกรอบเหมือนโครงสร้างช่องราคา แต่ไม่เน้นสี */
 #tipInp {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important; /* ล้างเงาซ้อนด้านใน */
-    font-size: 35px !important;  /* ปรับขนาดตามความเหมาะสม */
+    background: var(--input-bg) !important; /* ใช้สีพื้นหลังช่องทั่วไป */
+    border: 1px solid var(--border) !important; /* ใช้สีเส้นขอบมาตรฐาน ไม่ใส่สีเด่น */
+    border-radius: 20px !important;
+    font-size: 35px !important;
     height: 100% !important;
-    outline: none !important;   /* ล้างเส้นขอบเวลาคลิก */
-    appearance: none !important; /* ล้างปุ่มลูกศรสำหรับ input type number */
+    width: 100% !important;
+    color: var(--text) !important; /* ใช้สีตัวอักษรปกติ */
+    text-align: center !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05) !important; /* เพิ่มมิติเล็กน้อย */
+}
+
+/* ล้างลูกศรเลขสำหรับช่องทิป */
+#tipInp::-webkit-outer-spin-button,
+#tipInp::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 /* ========= 🎨 5. BUTTONS & ICON CARDS ========= */
