@@ -283,34 +283,38 @@ body {
     backdrop-filter: blur(var(--blur));
     -webkit-backdrop-filter: blur(var(--blur));
     border-radius: var(--radius) !important;
-    /* เปลี่ยนจากขอบสีเดียว เป็นขอบที่ดึงตามธีม */
     border: 1px solid var(--border) !important; 
     padding: 20px !important;
     margin: 15px 12px 100px !important; 
     min-height: calc(100vh - 180px);
-    /* เพิ่มเงาให้ลึกขึ้นในแต่ละธีม */
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2) !important; 
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important; 
     transition: 0.3s;
 }
 .page.active { display: block; animation: slideUp 0.4s ease-out; }
 
-/* 🎯 หน้าบัญชี/รายงาน (#p3) - แก้ไขให้มีสีปุ่มและสีการ์ดที่แตกต่าง */
+/* 🎯 หน้าบัญชี/รายงาน (#p3) - ล้างกรอบซ้อนออกให้หมด */
+/* แก้จุดนี้: ให้เหลือแค่ตัวหนังสือและปุ่มลอยๆ บนหน้ากระดาษ .page */
 #p3 > div, #p3 .card, .history-card {
-    /* แทนที่จะเป็น transparent อย่างเดียว เราใส่สีพื้นหลังที่ดึงจากตัวแปรรายงาน */
-    background: var(--input-bg) !important; 
-    border: 1px solid var(--border) !important;
-    border-radius: 20px !important;
-    padding: 15px !important;
-    margin-bottom: 12px !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important;
+    background: transparent !important; /* ล้างสีพื้นหลังออก */
+    border: none !important;            /* ล้างขอบออก */
+    box-shadow: none !important;        /* ล้างเงาออก */
+    padding: 10px 0 !important;         /* เว้นระยะห่างระหว่างรายการแทน */
+    margin-bottom: 0 !important;
 }
 
-/* บังคับปุ่มในหน้ารายงานให้ใช้สีที่แตกต่าง (เพิ่มจาก Variables ที่คุยกันก่อนหน้า) */
+/* ถ้าต้องการให้รายการแต่ละอันมีเส้นคั่นบางๆ (เหมือนสมุดบัญชี) แทนการใส่กรอบ */
+.history-card {
+    border-bottom: 1px solid var(--border) !important; 
+    border-radius: 0 !important;
+}
+
+/* ปุ่มในหน้ารายงานก็ยังใช้สีตามธีมได้ แต่ไม่มีกรอบมาบีบ */
 #p3 button {
     background: linear-gradient(135deg, var(--btn-rep1, var(--accent)), var(--btn-rep2, var(--primary))) !important;
     color: var(--btn-text) !important;
     border-radius: 15px !important;
     border: none !important;
+    padding: 8px 15px !important;
     font-weight: 700 !important;
 }
 /* ========= 🎯 4. INPUTS & SELECTS (จบปัญหาสีไม่เท่ากัน) ========= */
