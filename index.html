@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 23</title>
+    <title>Barber Note Pro 24</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -269,17 +269,20 @@ body {
 
 /* ========= 🎯 แก้ไขจุดที่ 1: INPUTS & SELECTS ========= */
 input, select {
-    width: 100%; height: 72px;
+    width: 100%; 
+    height: 60px; /* ปรับความสูงตามชอบ */
     border-radius: 18px; 
-    border: 1px solid var(--border);
-    /* ✅ เปลี่ยนมาใช้ตัวแปรทั้งหมด ไม่ใช้สี Fix */
-    background: var(--card); 
-    color: var(--text);
-    font-size: 20px; font-weight: 700;
+    border: 1px solid var(--border); /* ใช้ตัวแปรขอบ */
+    
+    /* 🎯 จุดตาย: ต้องใช้ตัวแปรเท่านั้น */
+    background: var(--bg) !important; 
+    color: var(--text) !important;
+    
+    font-size: 18px; 
+    font-weight: 700;
     text-align: center;
     outline: none;
-    margin-bottom: 10px;
-    transition: .3s;
+    appearance: none; /* ลบหัวลูกศรเดิมของระบบออก */
 }
 
 /* ========= 🎨 ปุ่มรับชำระเงิน (เปลี่ยนตามตัวแปรธีม) ========= */
@@ -546,74 +549,72 @@ nav {
 </div>
      </div> 
   </div>                   
-    <div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); z-index:9999; display:flex; align-items:center; justify-content:center; padding:15px;">
-  <div style="background:#ffffff; width:95%; max-width:420px; border-radius:35px; display:flex; flex-direction:column; overflow:hidden; animation: slideUp 0.3s ease-out; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
-    
-    <div style="padding: 20px 20px 5px; text-align: center;">
-        <h3 style="margin: 0; font-size: 22px; color: #1e3a8a; font-weight: 900;">⚙️ ตั้งค่าระบบ</h3>
-    </div>
-
-    <div style="padding: 5px 20px 25px;"> <input type="text" id="setShop" placeholder="ชื่อร้าน" 
-               style="width: 100%; height: 52px; border-radius: 16px; border: 1px solid #e2e8f0; background: #f1f5f9; text-align: center; font-size: 18px; font-weight: 700; color: #1e3a8a; margin-bottom: 10px; outline: none;">
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
-            <input type="number" id="setPerc" placeholder="% ช่าง" style="width:100%; height:52px; border-radius:16px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:18px; font-weight:700; outline:none;">
-            <input type="number" id="setGuar" placeholder="ประกัน" style="width:100%; height:52px; border-radius:16px; border:1px solid #e2e8f0; background:#f1f5f9; text-align:center; font-size:18px; font-weight:700; outline:none;">
+<div id="modalSet" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); z-index:9999; display:flex; align-items:center; justify-content:center; padding:15px;">
+    <div style="background:var(--card); width:95%; max-width:420px; border-radius:35px; border:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; animation: slideUp 0.3s ease-out; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+        
+        <div style="padding: 20px 20px 5px; text-align: center;">
+            <h3 style="margin: 0; font-size: 22px; color: var(--text); font-weight: 900;">⚙️ ตั้งค่าระบบ</h3>
         </div>
 
-    <div style="margin-bottom:10px;">
-    <select id="setTheme" onchange="applyTheme(this.value)" 
-            style="width:100%; height:52px; border-radius:16px; border:1px solid var(--border); background:var(--card); text-align:center; font-size:16px; font-weight:700; color:var(--text); outline:none; backdrop-filter:blur(8px);">
-        <option value="light">🌤 ธีมสว่าง</option>
-        <option value="navy">🌌 ธีมน้ำเงิน</option>
-        <option value="dark">🌑 ธีมดำ-ทอง</option>
-    </select>
-</div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-            <div style="position: relative; display: flex; align-items: center;">
-                <select id="setSound" style="width:100%; height:52px; border-radius:16px; border:1px solid #cbd5e1; background:#f1f5f9; text-align:center; font-size:15px; font-weight:700; outline:none; appearance:none; -webkit-appearance:none; padding-left: 35px;">
-                    <option value="on">เปิดเสียง</option>
-                    <option value="off">ปิดเสียง</option>
-                </select>
-                <i class="fas fa-volume-up" style="position: absolute; left: 12px; color: #475569; pointer-events: none; font-size: 14px;"></i>
+        <div style="padding: 5px 20px 25px;"> 
+            <input type="text" id="setShop" placeholder="ชื่อร้าน" 
+                   style="width: 100%; height: 52px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg); text-align: center; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 10px; outline: none;">
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                <input type="number" id="setPerc" placeholder="% ช่าง" style="width:100%; height:52px; border-radius:16px; border:1px solid var(--border); background:var(--bg); text-align:center; font-size:18px; font-weight:700; color:var(--text); outline:none;">
+                <input type="number" id="setGuar" placeholder="ประกัน" style="width:100%; height:52px; border-radius:16px; border:1px solid var(--border); background:var(--bg); text-align:center; font-size:18px; font-weight:700; color:var(--text); outline:none;">
             </div>
 
-            <div style="position: relative; display: flex; align-items: center;">
-                <select id="setVoice" style="width:100%; height:52px; border-radius:16px; border:1px solid #cbd5e1; background:#f1f5f9; text-align:center; font-size:15px; font-weight:700; outline:none; appearance:none; -webkit-appearance:none; padding-left: 35px;">
-                    <option value="female">เสียงหญิง</option>
-                    <option value="male">เสียงชาย</option>
+            <div style="margin-bottom:10px;">
+                <select id="setTheme" onchange="applyTheme(this.value)" 
+                        style="width:100%; height:52px; border-radius:16px; border:1px solid var(--border); background:var(--bg); text-align:center; font-size:16px; font-weight:700; color:var(--text); outline:none;">
+                    <option value="light">🌤 ธีมสว่าง</option>
+                    <option value="navy">🌌 ธีมน้ำเงิน</option>
+                    <option value="dark">🌑 ธีมดำ-ทอง</option>
                 </select>
-                <i class="fas fa-user-friends" style="position: absolute; left: 12px; color: #475569; pointer-events: none; font-size: 14px;"></i>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                <div style="position: relative; display: flex; align-items: center;">
+                    <select id="setSound" style="width:100%; height:52px; border-radius:16px; border:1px solid var(--border); background:var(--bg); text-align:center; font-size:15px; font-weight:700; color:var(--text); outline:none; appearance:none; padding-left: 35px;">
+                        <option value="on">เปิดเสียง</option>
+                        <option value="off">ปิดเสียง</option>
+                    </select>
+                    <i class="fas fa-volume-up" style="position: absolute; left: 12px; color: var(--text); opacity:0.6; pointer-events: none; font-size: 14px;"></i>
+                </div>
+
+                <div style="position: relative; display: flex; align-items: center;">
+                    <select id="setVoice" style="width:100%; height:52px; border-radius:16px; border:1px solid var(--border); background:var(--bg); text-align:center; font-size:15px; font-weight:700; color:var(--text); outline:none; appearance:none; padding-left: 35px;">
+                        <option value="female">เสียงหญิง</option>
+                        <option value="male">เสียงชาย</option>
+                    </select>
+                    <i class="fas fa-user-friends" style="position: absolute; left: 12px; color: var(--text); opacity:0.6; pointer-events: none; font-size: 14px;"></i>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:20px;">
+                <button onclick="exportBackup()" style="height:48px; background:var(--card); border:1px solid var(--border); border-radius:12px; font-size:11px; font-weight:800; color:var(--text); cursor:pointer;">
+                    <i class="fas fa-file-download"></i> <span>สำรองข้อมูล</span>
+                </button>
+                <button onclick="$('fileInput').click()" style="height:48px; background:var(--card); border:1px solid var(--border); border-radius:12px; font-size:11px; font-weight:800; color:var(--text); cursor:pointer;">
+                    <i class="fas fa-file-upload"></i> <span>คืนค่า</span>
+                </button>
+                <button onclick="clearData()" style="height:48px; background:rgba(239, 68, 68, 0.1); border:1px solid var(--danger); border-radius:12px; font-size:11px; font-weight:800; color:var(--danger); cursor:pointer;">
+                    <i class="fas fa-trash-alt"></i> <span>ล้างข้อมูล</span>
+                </button>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 2fr 1.2fr; gap:12px; margin-bottom: 10px;">
+                <button onclick="saveSettings()" style="background:var(--accent); color:var(--btn-text); height:60px; border-radius:20px; border:none; font-weight:800; font-size:18px; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">บันทึกข้อมูล</button>
+                <button onclick="$('modalSet').style.display='none'" style="background:var(--bg); color:var(--text); opacity:0.7; height:60px; border-radius:20px; border:none; font-weight:800; font-size:16px;">ปิด</button>
+            </div>
+
+            <div style="text-align:center; line-height: 1.4; opacity: 0.5;">
+                <div style="font-size:10px; color:var(--text); font-weight:600;">V.<span id="display-version">1.0.3</span></div>
+                <div style="font-size:9px; color:var(--text); font-weight:400;">Update: <span id="display-date">06/03/2026</span></div>
             </div>
         </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:20px;">
-            <button onclick="exportBackup()" style="height:48px; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; font-size:12px; font-weight:800; color:#1e293b; display:flex; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
-                <i class="fas fa-file-download"></i> <span>สำรองข้อมูล</span>
-            </button>
-            
-            <input type="file" id="fileInput" style="display:none;" onchange="importBackup(this)">
-
-            <button onclick="$('fileInput').click()" style="height:48px; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; font-size:12px; font-weight:800; color:#1e293b; display:flex; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
-                <i class="fas fa-file-upload"></i> <span>คืนค่า</span>
-            </button>
-            
-            <button onclick="clearData()" style="height:48px; background:#fff1f2; border:1px solid #fecaca; border-radius:12px; font-size:12px; font-weight:800; color:#e11d48; display:flex; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
-                <i class="fas fa-trash-alt"></i> <span>ล้างข้อมูล</span>
-            </button>
-        </div>
-
-        <div style="display:grid; grid-template-columns: 2fr 1.2fr; gap:12px; margin-bottom: 10px;">
-            <button onclick="saveSettings()" style="background:#1e3a8a; color:#fff; height:60px; border-radius:20px; border:none; font-weight:800; font-size:18px; box-shadow: 0 8px 20px rgba(30,58,138,0.2);">บันทึกข้อมูล</button>
-            <button onclick="$('modalSet').style.display='none'" style="background:#f1f5f9; color:#64748b; height:60px; border-radius:20px; border:none; font-weight:800; font-size:16px;">ปิด</button>
-        </div>
-
-        <div style="text-align:center; line-height: 1.4;">
-            <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing: 0.5px;">V.<span id="display-version">1.0.3</span></div>
-            <div style="font-size:9px; color:#cbd5e1; font-weight:400;">Update: <span id="display-date">06/03/2026</span></div>
-        </div>
     </div>
-</div>
 </div>
     <div id="reportModal" class="modal">
     <div class="modal-content">
