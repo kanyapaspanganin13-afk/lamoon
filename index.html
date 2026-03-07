@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro </title>
+    <title>Barber Note Pro 8 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -249,6 +249,18 @@ body.dark {
 }
 ::-webkit-scrollbar { display: none; }
 
+/* 🎯 ตบสไตล์ dList และ settleBar: บังคับให้ตามธีม (Override Inline Style) */
+[style*="justify-content: space-between"], #settleBar, .d-list-item {
+    background: var(--card) !important; /* เปลี่ยนจากขาวตายตัว เป็นสีตามธีม */
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+/* ล้างสีตัวหนังสือที่เขียนฝังไว้ในรายงานวันที่ */
+[style*="color: #1e293b"], [style*="color:#1e293b"] {
+    color: var(--text) !important;
+}
+
 body {
     margin: 0;
     background: var(--bg) !important;
@@ -258,22 +270,12 @@ body {
     overflow-x: hidden;
 }
 
-/* 🎯 ตบสไตล์ dList และแถบรายงานวันที่: บังคับให้ตามธีม (ล้างสีขาว/น้ำเงินเข้ม) */
-[style*="justify-content: space-between"], #settleBar, .d-list-item {
-    background: var(--card) !important;
-    color: var(--text) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 15px !important;
-}
-[style*="color: #1e293b"], [style*="color:#1e293b"] { 
-    color: var(--text) !important; 
-}
-
 /* ========= 📋 3. PAGE & CARD LAYOUT ========= */
 .page {
     display: none;
     background: var(--card) !important;
     backdrop-filter: blur(var(--blur));
+    -webkit-backdrop-filter: blur(var(--blur));
     border-radius: var(--radius) !important;
     border: 1px solid var(--border) !important; 
     padding: 20px !important;
@@ -281,93 +283,56 @@ body {
     min-height: calc(100vh - 180px);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important; 
 }
-.page.active { display: block; animation: slideUp 0.3s ease-out; }
+.page.active { display: block; animation: slideUp 0.4s ease-out; }
 
-/* ========= 🎯 4. INPUTS & SPECIAL BOXES (แก้ราคาใหญ่/ทิปมีกรอบ) ========= */
-
-/* 💰 ช่องราคา: บังคับตัวเลขใหญ่ยักษ์ และพื้นหลังตามธีม */
-#priceInp {
-    font-size: 50px !important;
-    font-weight: 900 !important;
-    text-align: right !important;
+/* ❌ แก้ปฏิทินซ้อนหน้า 3 และเพิ่มระยะห่างช่องว่าง (Gap) */
+#p3 input, #p3 select, #p3 textarea {
+    border: none !important;
+    border-bottom: 2px solid var(--border) !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 12px 0 !important;
+    margin-bottom: 20px !important; /* เพิ่มระยะห่างให้ดูง่ายขึ้น */
     color: var(--text) !important;
-    background: var(--input-bg) !important;
-    border: 2px solid var(--border) !important; /* คืนขอบให้ราคา */
+}
+
+/* ✅ แก้ไข: ปุ่มส่งข้อมูล (btnSubmitSend) */
+#btnSubmitSend {
+    background: linear-gradient(135deg, var(--save1), var(--save2)) !important;
+    color: var(--btn-text) !important;
     border-radius: 18px !important;
-    padding: 10px 15px !important;
+    border: none !important;
+}
+
+/* ========= 🎯 4. INPUTS & SELECTS (แก้เรื่องชิดกันและกรอบหาย) ========= */
+input, select, textarea {
     width: 100% !important;
-    outline: none !important;
-}
-
-/* 🪙 ช่องทิป: บังคับกรอบ 2px ชัดเจน และสีแดงเด่น */
-#tipInp {
-    font-size: 24px !important;
-    font-weight: 800 !important;
-    text-align: center !important;
-    background: var(--input-bg) !important;
-    border: 2px solid var(--border) !important; /* ขอบต้องชัดตามที่มึงสั่ง */
-    border-radius: 15px !important;
-    color: #ef4444 !important; /* สีแดงให้เด่น */
-    padding: 8px !important;
-    margin-top: 5px;
-}
-
-/* 📅 ช่องวันที่ เริ่ม-เสร็จ: เพิ่มระยะห่างให้กดง่ายขึ้น */
-.time-input-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px !important; 
-    margin: 10px 0 !important;
-}
-.time-input-container input {
-    background: var(--input-bg) !important;
+    background-color: var(--input-bg) !important;
     border: 1px solid var(--border) !important;
-    border-radius: 12px !important;
-    padding: 12px !important;
     color: var(--text) !important;
+    font-size: 18px !important;
     font-weight: 700 !important;
-    text-align: center !important;
+    border-radius: 15px;
+    margin-bottom: 12px !important; /* แก้ปัญหาช่องชิดกัน */
 }
 
-/* 🎯 หน้า 3 (รายงาน): แก้ไขปฏิทินซ้อนและตัวหนังสือมองไม่เห็น */
-#p3 input[type="date"], #p3 select, #p3 textarea {
+/* ทำให้ปฏิทินอ่านออกในโหมดมืด */
+input[type="date"] { color-scheme: dark; }
+
+/* แก้ไข: ช่องทิปหน้าแรก (tipInp) */
+#tipInp {
     border: 1px solid var(--border) !important;
     background: var(--input-bg) !important;
-    border-radius: 10px !important;
-    padding: 12px !important;
-    color: var(--text) !important;
-    margin-bottom: 15px !important;
 }
 
 /* ========= 🎨 5. BUTTONS & UI ELEMENTS ========= */
-
-/* 💾 ปุ่มบันทึกข้อมูล: คืนชีพความพรีเมียม (btn-pay) */
-.btn-pay, button[onclick*="saveData"] {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 100% !important;
-    height: 65px !important;
-    background: linear-gradient(135deg, var(--save1), var(--save2)) !important;
-    color: var(--btn-text) !important;
-    font-size: 22px !important;
-    font-weight: 900 !important;
-    border-radius: 20px !important;
-    border: none !important;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important;
-    margin-top: 20px !important;
-}
-
-/* 📊 ปุ่มในหน้า 3 และสีไอคอน */
+/* ปุ่มหน้ารายงาน/บัญชี (ใช้ชื่อตัวแปรให้ตรงเป๊ะ) */
 #p3 button {
     background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)) !important;
     color: var(--btn-text) !important;
-    border-radius: 12px !important;
+    border-radius: 15px !important;
     padding: 12px !important;
-    border: none !important;
-}
-#p3 .icon-card i, #p3 .icon-card svg {
-    color: var(--accent) !important;
+    font-weight: 800 !important;
 }
 
 /* ========= 📱 6. NAVIGATION & MODALS ========= */
@@ -382,7 +347,7 @@ nav {
 .nav-item { flex: 1; text-align: center; opacity: .5; color: var(--text); }
 .nav-item.active { color: var(--accent) !important; font-weight: 900; opacity: 1; }
 
-@keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 </style>
 </head>
 <body>
