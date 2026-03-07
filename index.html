@@ -1485,13 +1485,13 @@ if ($("dServiceStats")) $("dServiceStats").innerHTML = sH + `</div>`;
         actionBox.style.display = "flex";
         actionBox.style.gap = "10px";
         actionBox.innerHTML = `
-  <div style="display: flex; gap: 8px; width: 100%; align-items: center; margin-bottom: 15px;">
-    <div id="settleBar" style="flex: 8; height: 60px; background: var(--input-bg); display: flex; align-items: center; justify-content: center; border-radius: 18px; font-weight: 800; font-size: 15px; color: ${statusColor}; border: 2px solid var(--border); box-sizing: border-box;">
-        <span style="margin-right: 8px; font-size: 20px;">${icon}</span> ${txt}
+ <div style="display: flex; gap: 10px; width: 100%; align-items: center; margin-bottom: 20px; padding: 0 5px; box-sizing: border-box;">
+    <div id="settleBar" style="flex: 8; height: 60px; background: var(--input-bg); display: flex; align-items: center; justify-content: center; border-radius: 18px; font-weight: 800; font-size: 16px; color: ${statusColor}; border: 2px solid var(--border); box-sizing: border-box; white-space: nowrap;">
+        <span style="margin-right: 10px; font-size: 22px;">${icon}</span> ${txt}
     </div>
 
     <button id="btnSubmitSend" onclick="saveAndGo('${dInp}', ${tot})" 
-            style="flex: 2; height: 60px; background: linear-gradient(135deg, #ff6f00, #e65100); color: #fff; border-radius: 18px; border: none; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; box-sizing: border-box;">
+            style="flex: 2; height: 60px; background: linear-gradient(135deg, #ff6f00, #e65100); color: #fff; border-radius: 18px; border: none; font-size: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; box-sizing: border-box; min-width: 60px;">
         <i id="btnIcon" class="fas fa-paper-plane"></i>
     </button>
 </div>`;
