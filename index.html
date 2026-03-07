@@ -417,6 +417,24 @@ nav {
 }
 
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+/* บังคับสีไอคอนเฉพาะในหน้ารายงาน/บัญชี */
+#p3 .icon-card i, #p3 .icon-card svg {
+    color: var(--accent) !important; /* ใช้สี Accent ของแต่ละธีม */
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+/* บังคับสีปุ่มเฉพาะในหน้ารายงาน/บัญชี */
+#p3 button, .history-card button {
+    background: linear-gradient(135deg, var(--btn-rep1), var(--btn-rep2)) !important;
+    color: var(--btn-text) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    transition: 0.2s;
+}
+
+#p3 button:active {
+    transform: scale(0.96);
+}   
 </style>
 </head>
 <body>
