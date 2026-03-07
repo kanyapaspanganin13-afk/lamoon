@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 04</title>
+    <title>Barber Note Pro 05</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -249,16 +249,18 @@ body.dark {
 }
 ::-webkit-scrollbar { display: none; }
 
-/* 🎯 จุดตาย: ล้าง background: #fff และขอบขาวที่แอบติดมาใน HTML */
-[style*="background:#fff"], [style*="background: #fff"], 
-[style*="background:white"], [style*="background: white"],
-[style*="background-color:#fff"] {
-    background: transparent !important;
+/* 🎯 ตบสไตล์ dList และ settleBar: บังคับกรอบหนาและตามธีม */
+[style*="justify-content: space-between"], #settleBar, .d-list-item {
+    background: var(--card) !important;
+    color: var(--text) !important;
+    border: 2px solid var(--border) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important;
 }
 
-[style*="border:1px solid #fff"], [style*="border: 1px solid white"],
-[style*="border:1px solid #ccc"] {
-    border: 1px solid var(--border) !important;
+/* ล้างสีตัวหนังสือที่เขียนฝังไว้ในรายงานวันที่ */
+[style*="color: #1e293b"], [style*="color:#1e293b"] {
+    color: var(--text) !important;
 }
 
 body {
@@ -270,7 +272,7 @@ body {
     overflow-x: hidden;
 }
 
-/* ========= 📋 3. PAGE & CARD LAYOUT (กรอบหลักหน้าบันทึก/รายงาน) ========= */
+/* ========= 📋 3. PAGE & CARD LAYOUT ========= */
 .page {
     display: none;
     background: var(--card) !important;
@@ -281,140 +283,87 @@ body {
     padding: 20px !important;
     margin: 15px 12px 100px !important; 
     min-height: calc(100vh - 180px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important; 
-    transition: 0.3s;
 }
 .page.active { display: block; animation: slideUp 0.4s ease-out; }
 
-/* 🎯 หน้าบัญชี/รายงาน (#p3) - ล้างกรอบซ้อนออกให้หมด */
-#p3 > div, #p3 .card, .history-card {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 10px 0 !important;
-    margin-bottom: 0 !important;
-}
-
-/* ✅ แก้ไข: ช่องทิปกรอบหายในหน้าบันทึก */
-#tipInp {
-    border: 2px solid var(--border) !important; /* บังคับให้มีขอบตามธีม */
+/* ❌ แก้ไขช่องหน้า 3: ใส่กรอบล้อมรอบแทนเส้นใต้ และเพิ่มระยะห่าง */
+#p3 input, #p3 select, #p3 textarea {
+    border: 2px solid var(--border) !important;
+    background: var(--input-bg) !important;
     border-radius: 15px !important;
-    background-color: var(--input-bg) !important;
+    padding: 12px !important;
+    margin-bottom: 20px !important; 
+    color: var(--text) !important;
+    text-align: center;
 }
 
-.history-card {
-    border-bottom: 1px solid var(--border) !important; 
-    border-radius: 0 !important;
-}
-
-/* ✅ แก้ไข: ปุ่มหน้ารายงานมองไม่เห็นตัวหนังสือ (เรียกชื่อตัวแปรให้ตรงกับ Section 1) */
-#p3 button, .history-card button {
-    background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)) !important;
-    color: var(--btn-text) !important; /* ดึงสีขาว/ดำตามธีม */
-    border-radius: 15px !important;
-    border: none !important;
-    padding: 10px 15px !important;
-    font-weight: 700 !important;
-    margin: 5px 0;
-    width: 100%;
-}
-
-/* ========= 🎯 4. INPUTS & SELECTS (แก้ไข: วันที่ชิดกันเกิน & ปฏิทินซ้อน) ========= */
+/* ========= 🎯 4. INPUTS & SELECTS (บังคับกรอบทุกจุด) ========= */
 input, select, textarea, .input-field {
     width: 100% !important;
     background-color: var(--input-bg) !important;
-    border: 1px solid var(--border) !important;
+    border: 2px solid var(--border) !important;
     color: var(--text) !important;
     font-size: 18px !important;
     font-weight: 700 !important;
-    text-align: center !important;
-    outline: none !important;
-    appearance: none !important;
-    -webkit-appearance: none;
-    box-shadow: none !important;
+    border-radius: 18px !important;
+    margin-bottom: 12px !important;
+    padding: 10px !important;
 }
 
-/* ✅ แก้ไข: เพิ่มช่องว่างระหว่างกล่อง "เริ่ม" และ "เสร็จ" ในหน้าบันทึก */
+/* 🔥 แก้จุดตาย: ช่องทิปและช่องราคาหน้าแรก บังคับกรอบกลับมา */
+.price-input-inner, .tip-input-inner, #tipInp, #priceInp {
+    border: 2px solid var(--border) !important; 
+    background: var(--input-bg) !important;
+    border-radius: 18px !important;
+    padding: 10px !important;
+}
+
+/* แก้ระยะห่างช่องวันที่หน้าบันทึกที่ชิดกันเกินไป */
 .time-input-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px !important; /* เพิ่มช่องว่างระหว่างกล่อง */
-    margin-bottom: 10px;
+    display: flex;
+    gap: 15px !important;
+    margin-bottom: 15px !important;
 }
 
-input[type="date"] {
-    position: relative;
-    min-height: 45px;
-    color-scheme: dark; /* ช่วยให้ Icon ปฏิทินในโหมดมืดเป็นสีขาวอัตโนมัติ */
-}
+input[type="date"] { color-scheme: dark; }
 
-/* ล้างกรอบซ้อนในช่องปฏิทินที่วงแดงไว้ */
-input::-webkit-calendar-picker-indicator {
-    background: transparent !important;
-    bottom: 0; color: transparent !important; cursor: pointer;
-    height: auto; left: 0; position: absolute; right: 0; top: 0; width: auto; z-index: 5;
-}
-
-/* เส้นใต้ช่องกรอกในหน้าบัญชี/รายงาน ให้ดูแพง ไม่เป็นกรอบสี่เหลี่ยมซ้อน */
-#p3 .input-wrapper-main, #p2 .input-wrapper-main, #p3 input, #p2 input {
-    background: transparent !important;
-    border: none !important;
-    border-bottom: 1px solid var(--border) !important;
-    border-radius: 0 !important;
-    padding: 5px 0 !important;
-}
-
-/* จัดการช่องราคาหน้าหลัก */
-#priceInp { font-size: 50px !important; text-align: right !important; background: transparent !important; border: none !important; color: var(--text); }
-#tipInp { font-size: 28px !important; text-align: center !important; background: transparent !important; border: none !important; color: #ad2c18 !important; }
-
-/* ========= 🎨 5. BUTTONS & ICON CARDS (หน้าหลัก) ========= */
-#btnCash { background: linear-gradient(145deg, var(--cash1), var(--cash2)) !important; }
-#btnTrans { background: linear-gradient(145deg, var(--trans1), var(--trans2)) !important; }
-#btnMix { background: linear-gradient(145deg, var(--mix1), var(--mix2)) !important; }
-
-.btn-pay {
-    height: 75px; width: 100%; border-radius: 22px; border: none !important;
-    font-size: 24px; font-weight: 900;
-    color: var(--btn-text) !important; 
+/* ========= 🎨 5. BUTTONS & UI ELEMENTS ========= */
+#btnSubmitSend {
     background: linear-gradient(135deg, var(--save1), var(--save2)) !important;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
+    color: var(--btn-text) !important;
+    border-radius: 18px !important;
+    border: none !important;
+    height: 55px !important;
+    font-weight: 900 !important;
 }
 
-.icon-card {
-    border-radius: 20px; border: 1px solid var(--border);
-    background: var(--input-bg); color: var(--text);
-    height: 80px; transition: 0.2s;
+#p3 button {
+    background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)) !important;
+    color: var(--btn-text) !important;
+    border-radius: 15px !important;
+    padding: 12px !important;
+    font-weight: 800 !important;
+    border: none !important;
 }
 
-/* ========= 📱 6. UI NAVIGATION & MODALS (ส่วนท้ายสุด) ========= */
+#p3 .icon-card i, #p3 .icon-card svg {
+    color: var(--accent) !important;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+/* ========= 📱 6. NAVIGATION & MODALS ========= */
 nav {
     position: fixed; bottom: 12px; left: 12px; right: 12px;
     height: 72px; background: var(--card) !important;
     border: 1px solid var(--border) !important;
     backdrop-filter: blur(25px); border-radius: 22px;
     display: flex; align-items: center; justify-content: space-around;
-    z-index: 9999; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
 }
 .nav-item { flex: 1; text-align: center; opacity: .5; color: var(--text); }
-.nav-item.active { color: var(--accent) !important; font-weight: 900; opacity: 1; transform: translateY(-3px); }
-
-.modal {
-    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); 
-    display: none; align-items: center; justify-content: center;
-    z-index: 10000; backdrop-filter: blur(4px);
-}
-.modal-content {
-    background: var(--card) !important; border-radius: 28px !important; 
-    padding: 25px; width: 92%; max-width: 420px; 
-    border: 1px solid var(--border) !important; color: var(--text) !important;
-}
+.nav-item.active { color: var(--accent) !important; font-weight: 900; opacity: 1; }
 
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-/* บังคับสีไอคอนเฉพาะในหน้ารายงาน/บัญชี (หน้า 3) */
-#p3 .icon-card i, #p3 .icon-card svg {
-    color: var(--accent) !important;
 }</style>
 </head>
 <body>
