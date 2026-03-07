@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 22 </title>
+    <title>Barber Note Pro 2 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -187,6 +187,10 @@ function openReportModal(title, htmlContent) {
     --mix1:#818cf8; --mix2:#6366f1; --save1:#3b82f6; --save2:#1e40af;
     --btn-clear1:#88f246; --btn-clear2:#139e03;
     --btn-his1:#f2ca5a; --btn-his2:#ed781f; --btn-text:#ffffff;
+    
+    /* สีช่องยอดเงินรวมธีมสว่าง: เน้นฟ้าอ่อนคลีนๆ */
+    --summary-bg: #eff6ff;
+    --summary-border: #bfdbfe;
 }
 
 body.navy {
@@ -196,6 +200,10 @@ body.navy {
     --mix1:#38bdf8; --mix2:#0284c7; --save1:#2154fc; --save2:#0b0161;
     --btn-clear1:#ff4d4d; --btn-clear2:#b30000;
     --btn-his1:#334155; --btn-his2:#1e293b; --btn-text:#ffffff;
+
+    /* สีช่องยอดเงินรวมธีม Navy: เน้นน้ำเงินเข้มขอบฟ้าสว่าง */
+    --summary-bg: #1e293b;
+    --summary-border: #0891b2;
 }
 
 body.dark {
@@ -205,8 +213,11 @@ body.dark {
     --mix1:#fde047; --mix2:#a16207; --save1:#fbbf24; --save2:#d97706;
     --btn-clear1:#fbbf24; --btn-clear2:#d97706;
     --btn-his1:#4b5563; --btn-his2:#1f2937; --btn-text:#1a1a1a;
-}
 
+    /* สีช่องยอดเงินรวมธีม Dark Gold: ดำขอบทองสว่าง */
+    --summary-bg: #000000;
+    --summary-border: #fbbf24;
+}
 /* ========= 🛠️ 1. GLOBAL & RESET (ล้างขยะ) ========= */
 * { 
     box-sizing: border-box; 
@@ -259,27 +270,62 @@ body > center, body > a, body > br { display: none !important; }
     padding: 0 !important;
 }
 
-#priceInp, 
-#p3 input[readonly], 
-[id*="total"], 
-[id*="balance"] {
+/* ========= 💰 3. INPUT SYSTEM (แยกสไตล์หน้า 1 กับ หน้า 3) ========= */
+
+/* --- [หน้า 1] ช่องกรอกราคาปกติ --- */
+#priceInp {
     width: 100% !important; 
     height: 90px !important; 
     font-size: 48px !important; 
     font-weight: 900 !important;
     text-align: center !important; 
     background: var(--input-bg) !important;
-    border: 2px solid var(--border) !important; /* กรอบจริงมีแค่อันนี้อันเดียว */
+    border: 2px solid var(--border) !important;
     border-radius: 18px !important;
     color: var(--text) !important; 
     outline: none !important;
     margin-bottom: 15px !important;
 }
 
+/* --- [หน้า 3] ช่องแสดงยอดเงินรวม  --- */
+#p3 input[readonly], 
+[id*="total"], 
+[id*="balance"] {
+    width: 100% !important; 
+    height: 100px !important; /* ให้ใหญ่กว่านิดนึงดูเป็นยอดสรุป */
+    font-size: 52px !important; 
+    font-weight: 900 !important;
+    text-align: center !important; 
+    
+    /* 🎨 ดึงสีพิเศษที่เราตั้งไว้ในธีมมาใช้ตรงนี้ */
+    background: var(--summary-bg) !important;
+    border: 3px solid var(--summary-border) !important; 
+    color: var(--text) !important; 
+    
+    border-radius: 22px !important;
+    outline: none !important;
+    margin-bottom: 20px !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important; /* เพิ่มเงาให้ดูเด่น */
+}
+
+/* --- ช่องทิป (แบบไร้กรอบ เนียนตามธีม) --- */
 #tipInp {
-    width: 100%; font-size: 22px; font-weight: 800; text-align: center;
-    background: var(--input-bg); border: 2px solid var(--border);
-    border-radius: 16px; padding: 12px; color: #ef4444; outline: none;
+    width: 100% !important; 
+    font-size: 22px !important; 
+    font-weight: 800 !important; 
+    text-align: center !important;
+    
+    /* 🎨 ใช้สีพื้นหลังตามธีม แต่สั่งฆ่ากรอบทิ้ง */
+    background: var(--input-bg) !important; 
+    border: none !important; 
+    
+    border-radius: 16px !important; 
+    padding: 14px !important; /* เพิ่ม Padding นิดนึงให้ดูไม่จม */
+    color: #ef4444 !important; /* สีแดงยอดฮิตของมึง */
+    
+    outline: none !important;
+    box-shadow: none !important; /* ลบเงาออกด้วยให้คลีนสุดๆ */
+    margin-bottom: 10px !important;
 }
 
 /* ========= 📅 4. DATE & TIME (จัด Grid ให้เป๊ะ) ========= */
