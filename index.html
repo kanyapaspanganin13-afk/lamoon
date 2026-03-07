@@ -241,11 +241,35 @@ body.dark {
    --btn-clear1: #fbbf24; --btn-clear2: #d97706; /* ดำทองใช้โทนทองเหมือนเดิม */
 --btn-his1: #4b5563;   --btn-his2: #1f2937;   /* ประวัติ: เทาดำ */
 }
-/* ========= 🛠️ 2. THE CLEAN SWEEP (ล้างส่วนเกิน & จัดระเบียบช่องราคา) ========= */
+/* ========= 🛠️ 2. THE FINAL UI FIX (รวม Modal & บังคับซ่อนขยะ) ========= */
 * { box-sizing: border-box; font-family: 'Kanit', sans-serif; }
 ::-webkit-scrollbar { display: none; }
 
-/* 🚫 ลบพวกส่วนเกินใต้แอปที่โผล่มากลางจอ */
+/* 🚫 สั่งตาย! ซ่อน Modal (รายงาน/ประวัติ) ไม่ให้โผล่มาจ๊ะเอ๋ */
+.modal {
+    position: fixed !important; 
+    inset: 0 !important; 
+    background: rgba(0, 0, 0, 0.75) !important; 
+    display: none !important; /* บังคับซ่อนจนกว่า JS จะสั่งเปิด */
+    align-items: center !important; 
+    justify-content: center !important;
+    z-index: 10000 !important; 
+    backdrop-filter: blur(6px) !important;
+}
+
+/* สไตล์เนื้อหาใน Modal */
+.modal-content {
+    background: var(--card) !important; 
+    border-radius: 28px !important; 
+    padding: 25px !important;
+    width: 92% !important; 
+    max-width: 420px !important; 
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4) !important;
+}
+
+/* ลบติ่งขยะ "รายงาน/ประวัติ" ที่หลุดออกมานอก Modal */
 center, .history-link-container, [style*="margin-top: 20px; background: white"] {
     display: none !important;
 }
@@ -255,75 +279,55 @@ body {
     padding-bottom: 95px; overflow-x: hidden;
 }
 
-/* ========= 📋 PAGE CONTROL ========= */
+/* ========= 📋 PAGE CONTROL (กรอบหน้าหลัก) ========= */
 .page {
     display: none; background: var(--card) !important;
     border-radius: var(--radius) !important; border: 1px solid var(--border) !important; 
     padding: 20px !important; margin: 15px 12px 100px !important; 
+    min-height: calc(100vh - 180px);
 }
 .page.active { display: block; animation: slideUp 0.3s ease-out; }
 
-/* ========= 💰 กู้ชีพช่องราคา & ทิป (เขียนแบบเดียวกัน) ========= */
+/* ========= 💰 PRICE & TIP (กูแก้ตามที่มึงสั่ง: กรอบต้องเหมือนกัน) ========= */
 
-/* 🎯 ช่องราคา: บังคับกรอบที่ตัว Container เหมือนช่องทิป */
-.price-input-container, .price-input-inner {
-    background: var(--input-bg) !important;
-    border: 2px solid var(--border) !important; /* กรอบหนาเท่ากัน */
-    border-radius: 18px !important;
-    padding: 5px 15px !important;
-    display: flex !important;
-    align-items: center !important;
-    height: 90px !important;
-    margin-bottom: 12px !important;
-}
-
-/* ลบกรอบที่ตัวเลขด้านในทิ้ง (เพื่อไม่ให้ซ้อน) */
+/* ช่องราคา: บังคับกรอบหนา 2px สีตามธีม ตัวเลขใหญ่ยักษ์ */
 #priceInp {
     font-size: 55px !important; font-weight: 900 !important;
     text-align: right !important; color: var(--text) !important;
-    background: transparent !important; /* ให้โปร่งใสตามตัวแม่ */
-    border: none !important; /* ห้ามมีกรอบซ้อน */
-    width: 100% !important; outline: none !important;
-}
-
-/* 🎯 ช่องทิป: โครงสร้างแบบเดียวกัน */
-.tip-input-inner, .tip-input-container {
     background: var(--input-bg) !important;
-    border: 2px solid var(--border) !important;
-    border-radius: 18px !important;
-    padding: 8px !important;
-    margin-top: 5px;
+    border: 2px solid var(--border) !important; /* กรอบเหมือนทิป */
+    border-radius: 18px !important; padding: 10px 20px !important;
+    width: 100% !important; height: 95px !important; outline: none !important;
 }
 
+/* ช่องทิป: กรอบหนา 2px เท่าราคา สีแดงเด่น */
 #tipInp {
     font-size: 26px !important; font-weight: 800 !important;
     text-align: center !important; color: #ef4444 !important;
-    background: transparent !important;
-    border: none !important;
+    background: var(--input-bg) !important;
+    border: 2px solid var(--border) !important;
+    border-radius: 18px !important; padding: 12px !important;
     width: 100% !important; outline: none !important;
+    margin-top: 5px;
 }
 
-/* ========= 💾 ปุ่มบันทึกข้อมูล ============== */
+/* ========= 💾 SAVE BUTTON (ร่างทอง) ========= */
 .btn-pay, button[onclick*="saveData"] {
     display: flex !important; align-items: center !important; justify-content: center !important;
     width: 100% !important; height: 65px !important;
     background: linear-gradient(135deg, var(--save1), var(--save2)) !important;
     color: var(--btn-text) !important; font-size: 22px !important; font-weight: 900 !important;
     border-radius: 22px !important; border: none !important;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important; margin-top: 20px !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important; margin-top: 25px !important;
 }
 
-/* ========= 📊 หน้ารายงาน (ล้างแถบขาว) ========= */
-[style*="justify-content: space-between"], #settleBar {
-    background: var(--input-bg) !important;
+/* ========= 📊 REPORT UI (หน้า 3) ========= */
+[style*="justify-content: space-between"], #settleBar, .d-list-item {
+    background: var(--card) !important;
     border: 1px solid var(--border) !important;
-    border-radius: 15px !important; padding: 10px !important;
+    border-radius: 15px !important; padding: 12px !important;
 }
-
-/* เปลี่ยนสีตัวหนังสือ "รายงานวันที่" ให้เห็นชัด */
-[style*="color: #1e293b"], b[style*="font-size: 13px"] {
-    color: var(--text) !important;
-}
+[style*="color: #1e293b"] { color: var(--text) !important; }
 
 /* ========= 📱 NAVIGATION ========= */
 nav {
