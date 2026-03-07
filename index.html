@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 49</title>
+    <title>Barber Note Pro 59</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -199,9 +199,12 @@ function openReportModal(title, htmlContent) {
     --mix1: #a9ddf5; --mix2: #0284c7;
     --btn-text: #ffffff;
 
-    /* 🟢 เพิ่มใหม่: สีปุ่มบันทึก (ธีมสว่าง - เน้นสีฟ้าคราม) */
-    --save1: #0ea5e9; 
-    --save2: #2563eb;
+    /* สีปุ่มบันทึก (หน้าแรก) */
+    --save1: #0ea5e9; --save2: #2563eb;
+
+    /* 🔵 เพิ่มใหม่: สีปุ่มในหน้ารายงาน (ธีมสว่าง - ใช้โทนเทาฟ้า Slate ให้ดูต่างจากหน้าแรก) */
+    --btn-rep1: #94a3b8; 
+    --btn-rep2: #475569;
 }
 
 body.navy {
@@ -213,14 +216,16 @@ body.navy {
     --input-bg: rgba(15, 23, 42, 0.6);
     --btn-text: #ffffff;
 
-    /* สีปุ่มรับเงิน */
     --cash1: #74f2be; --cash2: #13a86a;
     --trans1: #303b8a; --trans2: #010f70;
     --mix1: #89e6f5; --mix2: #09bcd9;
 
-    /* 🟢 เพิ่มใหม่: สีปุ่มบันทึก (ธีม Navy - เปลี่ยนเป็นม่วง-น้ำเงินให้ต่างจากธีมสว่าง) */
-    --save1: #6366f1; 
-    --save2: #4338ca;
+    /* สีปุ่มบันทึก (หน้าแรก) */
+    --save1: #6366f1; --save2: #4338ca;
+
+    /* 🔵 เพิ่มใหม่: สีปุ่มในหน้ารายงาน (ธีม Navy - ใช้โทนน้ำเงินเข้มจัดๆ ให้ต่างจากสีปุ่มบันทึก) */
+    --btn-rep1: #1e293b; 
+    --btn-rep2: #020617;
 }
 
 body.dark {
@@ -236,11 +241,12 @@ body.dark {
     --trans1: #f59e0b; --trans2: #b45309;
     --mix1: #fde047; --mix2: #a16207;
 
-    /* 🟢 เพิ่มใหม่: สีปุ่มบันทึก (ธีม Dark Gold) */
-    --save1: #fbbf24; 
-    --save2: #d97706;
-}
+    --save1: #fbbf24; --save2: #d97706;
 
+    /* 🔵 เพิ่มใหม่: สีปุ่มในหน้ารายงาน (ธีม Dark Gold - ใช้สีทองเข้ม) */
+    --btn-rep1: #fbbf24; 
+    --btn-rep2: #b45309;
+}
 /* ========= 🛠️ 2. RESET & FORCE FIX (ล้างสไตล์ที่ฝังใน HTML) ========= */
 * {
     box-sizing: border-box;
@@ -277,23 +283,36 @@ body {
     backdrop-filter: blur(var(--blur));
     -webkit-backdrop-filter: blur(var(--blur));
     border-radius: var(--radius) !important;
+    /* เปลี่ยนจากขอบสีเดียว เป็นขอบที่ดึงตามธีม */
     border: 1px solid var(--border) !important; 
     padding: 20px !important;
     margin: 15px 12px 100px !important; 
     min-height: calc(100vh - 180px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important; 
+    /* เพิ่มเงาให้ลึกขึ้นในแต่ละธีม */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2) !important; 
     transition: 0.3s;
 }
 .page.active { display: block; animation: slideUp 0.4s ease-out; }
 
-/* 🎯 หน้าบัญชี - สั่งล้างกรอบขาวซ้อนชั้นในให้สะอาด */
+/* 🎯 หน้าบัญชี/รายงาน (#p3) - แก้ไขให้มีสีปุ่มและสีการ์ดที่แตกต่าง */
 #p3 > div, #p3 .card, .history-card {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
+    /* แทนที่จะเป็น transparent อย่างเดียว เราใส่สีพื้นหลังที่ดึงจากตัวแปรรายงาน */
+    background: var(--input-bg) !important; 
+    border: 1px solid var(--border) !important;
+    border-radius: 20px !important;
+    padding: 15px !important;
+    margin-bottom: 12px !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important;
 }
 
+/* บังคับปุ่มในหน้ารายงานให้ใช้สีที่แตกต่าง (เพิ่มจาก Variables ที่คุยกันก่อนหน้า) */
+#p3 button {
+    background: linear-gradient(135deg, var(--btn-rep1, var(--accent)), var(--btn-rep2, var(--primary))) !important;
+    color: var(--btn-text) !important;
+    border-radius: 15px !important;
+    border: none !important;
+    font-weight: 700 !important;
+}
 /* ========= 🎯 4. INPUTS & SELECTS (จบปัญหาสีไม่เท่ากัน) ========= */
 input, select, textarea {
     width: 100% !important; 
