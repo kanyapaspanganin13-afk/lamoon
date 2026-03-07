@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 59</title>
+    <title>Barber Note Pro 19</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -179,55 +179,54 @@ function openReportModal(title, htmlContent) {
 </script>
 </head>
 <style>
-/* ========= 💎 1. THEME VARIABLES & SYSTEM ========= */
+/* ========= 💎 1. THEME VARIABLES & SYSTEM (NEW COLOR SET) ========= */
 :root {
-    --primary: #6366f1;
-    --accent: #0ea5e9;
-    --success: #22c55e;
-    --danger: #ef4444;
-    --bg: #f8fafc;
-    --card: rgba(255, 255, 255, .95);
+    /* ⚪ LIGHT MODE: โทนขาว-ฟ้าใส (เน้นความสะอาดตา) */
+    --bg: #f0f2f5;           /* พื้นหลังเทาอ่อนขาว เพื่อให้ card สีขาวดูลอยเด่น */
+    --card: #ffffff;         /* การ์ดขาวบริสุทธิ์ */
     --text: #1e293b;
-    --border: rgba(226, 232, 240, 0.8);
-    --input-bg: #f1f5f9;
-    --blur: 20px;
+    --accent: #3b82f6;       /* สีฟ้าหลัก */
+    --primary: #2563eb;      /* สีน้ำเงินเข้มขึ้น */
+    --border: rgba(0, 0, 0, 0.08);
+    --input-bg: #f8fafc;     /* ช่องกรอกสีเทาจางๆ */
     --radius: 28px;
+    --blur: 20px;
 
-    /* สีปุ่มรับเงิน (สว่าง) */
-    --cash1: #58f58a; --cash2: #04c742;
-    --trans1: #8789f5; --trans2: #070973;
-    --mix1: #a9ddf5; --mix2: #0284c7;
+    /* สีปุ่มรับเงินธีมสว่าง (ใช้สีสดใสแต่ไม่ทึบ) */
+    --cash1: #34d399; --cash2: #10b981; /* เขียวสด */
+    --trans1: #60a5fa; --trans2: #3b82f6; /* ฟ้าสด */
+    --mix1: #818cf8; --mix2: #6366f1; /* ม่วงคราม */
+    --save1: #3b82f6; --save2: #1e40af; /* ปุ่มบันทึกสีน้ำเงินชัดเจน */
     --btn-text: #ffffff;
 
-    /* สีปุ่มบันทึก (หน้าแรก) */
-    --save1: #0ea5e9; --save2: #2563eb;
-
-    /* 🔵 เพิ่มใหม่: สีปุ่มในหน้ารายงาน (ธีมสว่าง - ใช้โทนเทาฟ้า Slate ให้ดูต่างจากหน้าแรก) */
+    /* 🟢 เพิ่มใหม่: สีปุ่มหน้ารายงาน/บัญชี (ใช้สีเทาสุภาพ เพื่อให้ต่างจากปุ่มบันทึก) */
     --btn-rep1: #94a3b8; 
     --btn-rep2: #475569;
 }
 
 body.navy {
-    --bg: #0f172a;
-    --card: rgba(30, 41, 59, .9);
+    /* 🌌 NAVY MODE: โทนน้ำเงินเข้มลึก (เน้นความพรีเมียมและ Contrast สูง) */
+    --bg: #020617;           /* พื้นหลังน้ำเงินเกือบดำ เพื่อให้แยกจาก card ชัดเจน */
+    --card: #0f172a;         /* การ์ดน้ำเงินเข้ม */
     --text: #f1f5f9;
-    --accent: #3b82f6;
-    --border: rgba(255, 255, 255, .1);
-    --input-bg: rgba(15, 23, 42, 0.6);
+    --accent: #22d3ee;       /* สีฟ้าสว่างแบบนีออน (Cyan) เพื่อให้เด้งออกมา */
+    --primary: #0891b2;      /* สีฟ้าคราม */
+    --border: rgba(255, 255, 255, 0.1);
+    --input-bg: #1e293b;     /* ช่องกรอกสีน้ำเงินสว่าง เพื่อให้เห็นขอบ */
     --btn-text: #ffffff;
 
-    --cash1: #74f2be; --cash2: #13a86a;
-    --trans1: #303b8a; --trans2: #010f70;
-    --mix1: #89e6f5; --mix2: #09bcd9;
+    /* สีปุ่มรับเงินธีม Navy (เน้นสีสะท้อนแสง) */
+    --cash1: #4ade80; --cash2: #16a34a; /* เขียวสะท้อนแสง */
+    --trans1: #c084fc; --trans2: #9333ea; /* ม่วงสะท้อนแสง */
+    --mix1: #38bdf8; --mix2: #0284c7; /* ฟ้าสะท้อนแสง */
+    --save1: #22d3ee; --save2: #0ea5e9; /* ปุ่มบันทึกสีฟ้านีออนสว่าง */
 
-    /* สีปุ่มบันทึก (หน้าแรก) */
-    --save1: #6366f1; --save2: #4338ca;
-
-    /* 🔵 เพิ่มใหม่: สีปุ่มในหน้ารายงาน (ธีม Navy - ใช้โทนน้ำเงินเข้มจัดๆ ให้ต่างจากสีปุ่มบันทึก) */
-    --btn-rep1: #1e293b; 
-    --btn-rep2: #020617;
+    /* 🟢 เพิ่มใหม่: สีปุ่มหน้ารายงาน/บัญชี (ใช้สีน้ำเงินเทาเข้มตัดกับพื้นหลัง) */
+    --btn-rep1: #475569; 
+    --btn-rep2: #1e293b;
 }
 
+/* body.dark (ดำทอง) ของคุณดีอยู่แล้ว ไม่ต้องแก้ครับ */
 body.dark {
     --bg: #121212;
     --card: rgba(28, 28, 28, .95);
@@ -236,16 +235,11 @@ body.dark {
     --border: rgba(251, 191, 36, .2);
     --input-bg: rgba(0, 0, 0, 0.4);
     --btn-text: #1a1a1a;
-    
     --cash1: #fbbf24; --cash2: #d97706;
     --trans1: #f59e0b; --trans2: #b45309;
     --mix1: #fde047; --mix2: #a16207;
-
     --save1: #fbbf24; --save2: #d97706;
-
-    /* 🔵 เพิ่มใหม่: สีปุ่มในหน้ารายงาน (ธีม Dark Gold - ใช้สีทองเข้ม) */
-    --btn-rep1: #fbbf24; 
-    --btn-rep2: #b45309;
+    --btn-rep1: #fbbf24; --btn-rep2: #d97706;
 }
 /* ========= 🛠️ 2. RESET & FORCE FIX (ล้างสไตล์ที่ฝังใน HTML) ========= */
 * {
