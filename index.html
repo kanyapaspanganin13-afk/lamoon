@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 2 </title>
+    <title>Barber Note Pro 22 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -179,173 +179,128 @@ function openReportModal(title, htmlContent) {
 </script>
 </head>
 <style>
-/* ========= GLOBAL & RESET ========= */
-*{
-    box-sizing:border-box;
-    font-family:'Kanit',sans-serif;
-    -webkit-tap-highlight-color: transparent; /* ลบสีฟ้าเวลาคลิกบนมือถือ */
+/* ========= 💎 1. THEME SYSTEM (ครบทุกโหมด) ========= */
+:root {
+    --bg:#f0f2f5; --card:#ffffff; --text:#1e293b; --accent:#3b82f6;
+    --border:rgba(0,0,0,0.08); --input-bg:#f8fafc; --radius:24px;
+    --cash1:#34d399; --cash2:#10b981; --trans1:#60a5fa; --trans2:#3b82f6;
+    --mix1:#818cf8; --mix2:#6366f1; --save1:#3b82f6; --save2:#1e40af;
+    --btn-clear1:#88f246; --btn-clear2:#139e03;
+    --btn-his1:#f2ca5a; --btn-his2:#ed781f; --btn-text:#ffffff;
 }
 
-body{
-    margin:0;
-    background:var(--bg);
-    color:var(--text);
-    padding-bottom:100px; /* เพิ่มระยะกันชนข้างล่างนิดนึง */
-    transition: background 0.3s ease;
+body.navy {
+    --bg:#020617; --card:#0f172a; --text:#f1f5f9; --accent:#22d3ee;
+    --border:rgba(255,255,255,0.1); --input-bg:#1e293b;
+    --cash1:#4ade80; --cash2:#16a34a; --trans1:#8549f5; --trans2:#4402ad;
+    --mix1:#38bdf8; --mix2:#0284c7; --save1:#2154fc; --save2:#0b0161;
+    --btn-clear1:#ff4d4d; --btn-clear2:#b30000;
+    --btn-his1:#334155; --btn-his2:#1e293b; --btn-text:#ffffff;
 }
 
-/* 🚫 กำจัดเศษขยะ HTML ที่อาจหลุดมา */
+body.dark {
+    --bg:#121212; --card:#1c1c1c; --text:#fbbf24; --accent:#fbbf24;
+    --border:rgba(251,191,36,0.2); --input-bg:#00000066;
+    --cash1:#fbbf24; --cash2:#d97706; --trans1:#f59e0b; --trans2:#b45309;
+    --mix1:#fde047; --mix2:#a16207; --save1:#fbbf24; --save2:#d97706;
+    --btn-clear1:#fbbf24; --btn-clear2:#d97706;
+    --btn-his1:#4b5563; --btn-his2:#1f2937; --btn-text:#1a1a1a;
+}
+
+/* ========= 🛠️ 2. GLOBAL & RESET ========= */
+* { box-sizing:border-box; font-family:'Kanit',sans-serif; -webkit-tap-highlight-color: transparent; }
+body { margin:0; background:var(--bg); color:var(--text); padding-bottom:100px; transition: background 0.3s; }
+
+/* 🚫 กำจัดเศษขยะและกรอบซ้อนชั้นนอก (ที่มึงเห็นเป็นกรอบขาวซ้อน) */
+.price-input-container, .price-input-inner, .input-wrapper, 
 center, .history-link-container, [style*="margin-top: 20px; background: white"] {
-    display: none !important;
+    border: none !important; background: transparent !important; box-shadow: none !important;
+    display: none !important; /* สำหรับพวกติ่งขยะ */
 }
+/* แต่ถ้าเป็น Wrapper ของ Input ให้แสดงผลแบบไม่มีกรอบ */
+.price-input-container, .input-wrapper { display: block !important; }
 
-/* ========= PAGE ========= */
-.page{
-    display:none;
-    background:var(--card);
-    border-radius:var(--radius);
-    border:1px solid var(--border);
-    padding:22px;
-    margin:14px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05); /* เพิ่มเงาจางๆ ให้ดูมีมิติ */
+/* ========= 📋 PAGE CONTROL ========= */
+.page {
+    display:none; background:var(--card); border-radius:var(--radius);
+    border:1px solid var(--border); padding:22px; margin:14px;
 }
-.page.active{ display:block; animation: slideUp 0.3s ease-out; }
+.page.active { display:block; animation: slideUp 0.3s ease-out; }
 
-/* ========= 💰 INPUT SYSTEM (ป้องกันกรอบซ้อน) ========= */
-
-/* ลบกรอบส่วนเกินที่ตัวครอบ (Wrapper) */
-.price-input-container, .input-wrapper, [style*="border: 1px solid #3b82f6"] {
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-}
-
+/* ========= 💰 INPUTS (ปรับให้หน้าเดียวคลีนๆ) ========= */
 #priceInp, #p3 input[readonly] {
-    width:100%; height:90px;
-    font-size:48px; font-weight:900;
-    text-align:center;
-    background:var(--input-bg);
-    border:2px solid var(--border); /* กรอบชั้นเดียวเน้นๆ */
-    border-radius:18px;
-    color:var(--text);
-    outline: none;
-    margin-bottom: 15px;
+    width:100%; height:90px; font-size:48px; font-weight:900;
+    text-align:center; background:var(--input-bg);
+    border:2px solid var(--border); border-radius:18px;
+    color:var(--text); outline: none; margin-bottom: 15px;
 }
 
 #tipInp {
-    width:100%; font-size:22px; font-weight:800;
-    text-align:center;
-    background:var(--input-bg);
-    border:2px solid var(--border);
-    border-radius:16px;
-    padding:12px;
-    color:#ef4444;
-    outline: none;
-    margin-bottom: 5px;
+    width:100%; font-size:22px; font-weight:800; text-align:center;
+    background:var(--input-bg); border:2px solid var(--border);
+    border-radius:16px; padding:12px; color:#ef4444; outline: none;
 }
 
-/* ========= 📅 DATE & TIME (BALANCE) ========= */
+/* ========= 📅 DATE & TIME (แก้ชิด/ห่างให้สมดุล) ========= */
 .time-input-container {
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap:12px; /* ระยะห่างตรงกลาง */
-    margin: 10px 0 15px;
+    display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:15px 0;
 }
 .time-input-container input {
-    width: 100% !important; /* บังคับเต็มช่อง Grid */
-    background:var(--input-bg);
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:12px;
-    text-align:center;
-    color:var(--text);
-    font-size: 14px;
-    font-weight: 600;
+    width: 100%; background:var(--input-bg); border:1px solid var(--border);
+    border-radius:12px; padding:12px; text-align:center; color:var(--text);
+    font-size: 14px; font-weight: 600;
 }
-/* ========= 🎨 THEME SELECTOR CUSTOM  ========= */
+
+/* ========= 🎨 THEME SELECTOR CUSTOM ========= */
 #setTheme {
-    appearance: none; 
-    -webkit-appearance: none;
+    appearance: none; -webkit-appearance: none;
     background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 15px center;
-    background-size: 15px;
-    padding-right: 40px !important; 
-    cursor: pointer;
-    transition: all 0.2s ease;
+    background-repeat: no-repeat; background-position: right 15px center;
+    background-size: 15px; padding-right: 40px !important;
 }
 
-/* แถม: เวลาเอาเมาส์ไปจี้หรือกด ให้กรอบมันชัดขึ้นนิดนึง */
-#setTheme:focus {
-    border-color: var(--accent) !important;
-}
-/* ========= 🔘 BUTTONS (THEME-READY) ========= */
-.btn-pay, .btn-clear, .btn-history {
-    cursor: pointer;
-    transition: transform 0.1s active, opacity 0.2s;
-}
-.btn-pay:active, .btn-clear:active, .btn-history:active { transform: scale(0.98); }
-
+/* ========= 🔘 BUTTONS (เปลี่ยนสีตามธีม) ========= */
 .btn-pay {
-    width:100%; height:65px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:22px; font-weight:900;
-    border:none; border-radius:20px;
-    background:linear-gradient(135deg, var(--save1), var(--save2));
-    color:var(--btn-text);
-    margin-top:10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    width:100%; height:65px; display:flex; align-items:center; justify-content:center;
+    font-size:22px; font-weight:900; border:none; border-radius:20px;
+    background:linear-gradient(135deg,var(--save1),var(--save2));
+    color:var(--btn-text); margin-top:10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 .btn-clear {
-    width:100%; padding:16px;
-    font-size:18px; font-weight:800;
-    border:none; border-radius:18px;
-    background:linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2));
-    color:var(--btn-text);
-    margin-top:12px;
+    width:100%; padding:15px; font-size:18px; font-weight:800; border:none; border-radius:18px;
+    background:linear-gradient(135deg,var(--btn-clear1),var(--btn-clear2));
+    color:var(--btn-text); margin-top:12px;
 }
 
 .btn-history {
-    width:100%; padding:16px;
-    font-size:18px; font-weight:800;
-    border:none; border-radius:18px;
-    background:linear-gradient(135deg, var(--btn-his1), var(--btn-his2));
-    color:var(--btn-text);
-    margin-top:10px;
+    width:100%; padding:15px; font-size:18px; font-weight:800; border:none; border-radius:18px;
+    background:linear-gradient(135deg,var(--btn-his1),var(--btn-his2));
+    color:var(--btn-text); margin-top:10px;
 }
 
 /* ========= 📱 NAVIGATION ========= */
 nav {
-    position:fixed; bottom:12px; left:12px; right:12px;
-    height:72px;
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:22px;
-    display:flex; align-items:center; justify-content:space-around;
-    z-index:9999;
-    backdrop-filter: blur(10px); /* เพิ่มความหรู */
+    position:fixed; bottom:12px; left:12px; right:12px; height:72px;
+    background:var(--card); border:1px solid var(--border); border-radius:22px;
+    display:flex; align-items:center; justify-content:space-around; z-index:9999;
+    backdrop-filter: blur(10px);
 }
-.nav-item { flex:1; text-align:center; color:var(--text); opacity:.5; text-decoration:none; transition: 0.2s; }
+.nav-item { flex:1; text-align:center; color:var(--text); opacity:.5; text-decoration:none; }
 .nav-item.active { opacity:1; color:var(--accent); font-weight:900; }
 
 /* ========= 📦 MODAL ========= */
 .modal {
-    position:fixed; inset:0;
-    background:rgba(0,0,0,0.7);
-    display:none; /* JS จะเปลี่ยนเป็น flex ตอนเปิด */
-    align-items:center; justify-content:center;
-    z-index:10000;
+    position:fixed; inset:0; background:rgba(0,0,0,0.7);
+    display:none; align-items:center; justify-content:center; z-index:10000;
     backdrop-filter: blur(5px);
 }
 .modal-content {
-    background:var(--card); border-radius:28px;
-    padding:25px; width:92%; max-width:420px;
-    border:1px solid var(--border);
-    animation: slideUp 0.3s ease-out;
+    background:var(--card); border-radius:28px; padding:25px;
+    width:92%; max-width:420px; border:1px solid var(--border);
 }
 
-@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 </style>
 </head>
 <body>
