@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 02</title>
+    <title>Barber Note Pro 03</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -249,7 +249,7 @@ body.dark {
 }
 ::-webkit-scrollbar { display: none; }
 
-/* 🎯 จุดตาย: ล้าง background: #fff และขอบขาวที่เขียนฝังไว้ในตัว HTML (Inline Style) */
+/* 🎯 ล้าง background: #fff และขอบขาวที่เขียนฝังไว้ในตัว HTML (Inline Style) */
 [style*="background:#fff"], [style*="background: #fff"], 
 [style*="background:white"], [style*="background: white"],
 [style*="background-color:#fff"] {
@@ -295,139 +295,74 @@ body {
     margin-bottom: 0 !important;
 }
 
-/* 🔥 จุดที่เพิ่ม: ล้างกรอบของช่อง วันที่ และ หมายเหตุ เฉพาะหน้า 3 */
+/* ❌ แก้จุดปฏิทินซ้อน (ที่มึงวงแดง): ลบกรอบหน้า 3 ออกให้เหลือแค่เส้นใต้ */
 #p3 input, #p3 select, #p3 textarea {
-    border: none !important;             /* ลบเส้นขอบที่ซ้อนอยู่ออก */
-    background: transparent !important;   /* ให้ใช้พื้นหลังเดียวกับหน้า .page */
-    box-shadow: none !important;         /* ลบเงาที่ทำให้ดูเหมือนมีขอบ */
-    padding: 5px !important;
-}
-
-/* ถ้าต้องการให้รายการแต่ละอันมีเส้นคั่นบางๆ เหมือนสมุดบัญชี */
-.history-card {
-    border-bottom: 1px solid var(--border) !important; 
+    border: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    background: transparent !important;
+    box-shadow: none !important;
     border-radius: 0 !important;
+    padding: 8px 0 !important;
 }
 
-/* ปุ่มในหน้ารายงาน */
-#p3 button {
-    background: linear-gradient(135deg, var(--btn-rep1, var(--accent)), var(--btn-rep2, var(--primary))) !important;
+/* ปุ่มในหน้ารายงาน (แก้ตัวแปรให้ตรงกับ Section 1 แล้ว) */
+#p3 button, .history-card button {
+    background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)) !important;
     color: var(--btn-text) !important;
     border-radius: 15px !important;
     border: none !important;
-    padding: 8px 15px !important;
+    padding: 10px 15px !important;
     font-weight: 700 !important;
     margin: 5px 0;
+    width: 100%;
 }
-/* ========= 🎯 4. INPUTS & SELECTS (FIXED: ปฏิทินซ้อน & ตัวหนังสือมืด) ========= */
 
-/* คุมพื้นฐานทุก Input ให้สีสว่างอ่านง่าย */
+/* ========= 🎯 4. INPUTS & SELECTS (FIXED) ========= */
 input, select, textarea, .input-field {
     width: 100% !important;
     background-color: var(--input-bg) !important;
     border: 1px solid var(--border) !important;
-    color: var(--text) !important; /* บังคับสีตัวอักษรตามธีม */
+    color: var(--text) !important;
     font-size: 18px !important;
     font-weight: 700 !important;
     text-align: center !important;
     outline: none !important;
-    appearance: none !important;
-    -webkit-appearance: none;
-    box-shadow: none !important;
 }
 
-/* แก้ไข: ช่องวันที่ในหน้ารายงานที่มองไม่เห็นตัวเลข */
 input[type="date"] {
     position: relative;
     min-height: 45px;
-    color-scheme: dark; /* ช่วยให้ Icon ปฏิทินในโหมดมืดเป็นสีขาวอัตโนมัติ */
+    color-scheme: dark;
 }
 
-/* ล้างกรอบซ้อนในช่องปฏิทินที่วงแดงไว้ */
+/* ล้างกรอบซ้อนในช่องปฏิทิน */
 input::-webkit-calendar-picker-indicator {
     background: transparent !important;
-    bottom: 0;
-    color: transparent !important;
-    cursor: pointer;
-    height: auto;
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: auto;
-    z-index: 5;
+    bottom: 0; color: transparent !important; cursor: pointer;
+    height: auto; left: 0; position: absolute; right: 0; top: 0; width: auto; z-index: 5;
 }
 
-/* แก้ไข: หน้าบัญชี (#p3) และหน้ารายงาน (#p2) ที่กรอบซ้อนกัน */
-#p3 .input-wrapper-main, 
-#p2 .input-wrapper-main,
-#p3 input, #p2 input {
-    background: transparent !important;
-    border: none !important;
-    border-bottom: 1px solid var(--border) !important; /* เปลี่ยนเป็นเส้นใต้บางๆ แทนกรอบ */
-    border-radius: 0 !important;
-    padding: 5px 0 !important;
-    height: auto !important;
-}
+#priceInp { font-size: 50px !important; text-align: right !important; background: transparent !important; border: none !important; }
+#tipInp { font-size: 28px !important; text-align: center !important; background: transparent !important; border: none !important; }
 
-/* จัดการช่องราคาและทิปให้เท่ากันเป๊ะ */
-.price-input-inner, .tip-input-inner {
-    background: transparent !important;
-    border: none !important;
-    height: 100% !important;
-    width: 100% !important;
-    font-weight: 900 !important;
-    outline: none !important;
-}
-
-#priceInp {
-    font-size: 50px !important;
-    text-align: right !important;
-    padding-right: 15px !important;
-}
-
-#tipInp {
-    font-size: 28px !important;
-    text-align: center !important;
-}
-
-/* บังคับสี Placeholder ให้อ่านออกในทุกธีม */
-::placeholder {
-    color: var(--text) !important;
-    opacity: 0.4 !important;
-}
-
-/* ล้างลูกศรเลข */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
 /* ========= 🎨 5. BUTTONS & ICON CARDS ========= */
-/* ปุ่มรับเงิน 3 ปุ่มหลัก */
 #btnCash { background: linear-gradient(145deg, var(--cash1), var(--cash2)) !important; }
 #btnTrans { background: linear-gradient(145deg, var(--trans1), var(--trans2)) !important; }
 #btnMix { background: linear-gradient(145deg, var(--mix1), var(--mix2)) !important; }
 
-/* 🎯 จุดที่แก้ไข: ปุ่มบันทึกใหญ่ (เปลี่ยนมาใช้สีเฉพาะธีม) */
 .btn-pay {
     height: 75px; width: 100%; border-radius: 22px; border: none !important;
     font-size: 24px; font-weight: 900;
     color: var(--btn-text) !important; 
-    /* 🟢 เรียกใช้ตัวแปรใหม่ที่แยกสีไว้แล้ว */
     background: linear-gradient(135deg, var(--save1), var(--save2)) !important;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
-    cursor: pointer;
 }
-.btn-pay:active { transform: scale(0.96); }}
+.btn-pay:active { transform: scale(0.96); }
 
 .icon-card {
-    border-radius: 20px; 
-    border: 1px solid var(--border);
-    background: var(--input-bg);
-    color: var(--text);
-    height: 80px;
-    transition: 0.2s;
+    border-radius: 20px; border: 1px solid var(--border);
+    background: var(--input-bg); color: var(--text);
+    height: 80px; transition: 0.2s;
 }
 
 /* ========= 📱 6. UI NAVIGATION & MODALS ========= */
@@ -435,11 +370,9 @@ nav {
     position: fixed; bottom: 12px; left: 12px; right: 12px;
     height: 72px; background: var(--card) !important;
     border: 1px solid var(--border) !important;
-    backdrop-filter: blur(25px);
-    border-radius: 22px;
+    backdrop-filter: blur(25px); border-radius: 22px;
     display: flex; align-items: center; justify-content: space-around;
-    z-index: 9999;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 9999; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 .nav-item { flex: 1; text-align: center; opacity: .5; color: var(--text); }
 .nav-item.active { color: var(--accent) !important; font-weight: 900; opacity: 1; transform: translateY(-3px); }
@@ -450,33 +383,14 @@ nav {
     z-index: 10000; backdrop-filter: blur(4px);
 }
 .modal-content {
-    background: var(--card) !important; 
-    border-radius: 28px !important; 
-    padding: 25px;
-    width: 92%; max-width: 420px; 
-    border: 1px solid var(--border) !important;
-    color: var(--text) !important;
+    background: var(--card) !important; border-radius: 28px !important; 
+    padding: 25px; width: 92%; max-width: 420px; 
+    border: 1px solid var(--border) !important; color: var(--text) !important;
 }
 
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-/* บังคับสีไอคอนเฉพาะในหน้ารายงาน/บัญชี */
-#p3 .icon-card i, #p3 .icon-card svg {
-    color: var(--accent) !important; /* ใช้สี Accent ของแต่ละธีม */
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-}
 
-/* บังคับสีปุ่มเฉพาะในหน้ารายงาน/บัญชี */
-#p3 button, .history-card button {
-    background: linear-gradient(135deg, var(--btn-rep1), var(--btn-rep2)) !important;
-    color: var(--btn-text) !important;
-    border: 1px solid var(--border) !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
-    transition: 0.2s;
-}
-
-#p3 button:active {
-    transform: scale(0.96);
-}   
+#p3 .icon-card i, #p3 .icon-card svg { color: var(--accent) !important; }
 </style>
 </head>
 <body>
