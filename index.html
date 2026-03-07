@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro </title>
+    <title>Barber Note Pro 4</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -179,243 +179,199 @@ function openReportModal(title, htmlContent) {
 </script>
 </head>
 <style>
-    /* 1. ตัวแปรหลัก */
-    :root { 
-        --primary: #6366f1; --accent: #0ea5e9; --danger: #ef4444; --success: #22c55e; 
-        --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --border: #e2e8f0;
-    }
-    /* 2. ระบบธีม (ต้องอยู่บนสุดเพื่อเตรียมตัวแปร) */
-    body.navy { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --accent: #073bf5; }
-    body.dark { --bg: #121212; --card: #1a1a1a; --text: #fbbf24; --accent: #fbbf24; }
-
-    /* 3. รีเซ็ตพื้นฐาน */
-    * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { 
-        margin: 0; background: var(--bg); color: var(--text); 
-        padding-bottom: 90px; overflow-x: hidden; transition: all 0.3s ease; 
-    }
-   /* 4. ระบบเลย์เอาต์ (ปรับให้โปร่งแสง) */
-.container { 
-    padding: 15px; 
-    max-width: 500px; 
-    margin: auto; 
-    position: relative; 
-    z-index: 1; 
+/* ========= THEME VARIABLES & SYSTEM ========= */
+:root {
+    --primary: #6366f1;
+    --accent: #0ea5e9;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --bg: #f8fafc;
+    --card: rgba(255, 255, 255, .88);
+    --text: #1e293b;
+    --border: #e2e8f0;
+    --blur: 18px;
+    --radius: 26px;
 }
-/* 4. ระบบเลย์เอาต์  */
-.page { 
-    display: none; 
-    background: #f8fafc; 
-    opacity: 1; 
-    border-radius: 25px;
-    padding: 20px;
-    /* 🔴 ปรับระยะห่างด้านล่างให้มากขึ้นเล็กน้อยเพื่อให้พ้นแถบเมนู */
-    margin: 10px 10px 100px 10px; 
-    
-    border: 1px solid var(--border);
-    
-    /* 🟢 ลดความสูงลงอีกนิด เพื่อให้เหลือพื้นที่ด้านล่างครับ */
-    min-height: calc(100vh - 200px); 
-    
+
+/* 🌌 NAVY THEME - ปรับปรุงตัวหนังสือหน้าวิเคราะห์ */
+body.navy {
+    --bg: #0f172a;
+    --card: rgba(30, 41, 59, .82);
+    --text: #f1f5f9;
+    --accent: #3b82f6;
+    --border: rgba(255, 255, 255, .08);
+}
+
+/* 🌑 DARK THEME - ปรับปรุงตัวหนังสือทอง */
+body.dark {
+    --bg: #121212;
+    --card: rgba(26, 26, 26, .86);
+    --text: #fbbf24;
+    --accent: #fbbf24;
+    --border: rgba(251, 191, 36, .18);
+}
+
+/* ========= RESET & BASE ========= */
+* {
     box-sizing: border-box;
+    font-family: 'Kanit', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+::-webkit-scrollbar { display: none; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    transition: .35s ease;
+    padding-bottom: 95px;
+    overflow-x: hidden;
+    scrollbar-width: none;
+}
+
+/* ========= PAGE LAYOUT (GLASSMORPHISM) ========= */
+.page {
+    display: none;
+    background: var(--card);
+    backdrop-filter: blur(var(--blur));
+    -webkit-backdrop-filter: blur(var(--blur));
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 20px;
+    margin: 12px 12px 110px;
+    min-height: calc(100vh - 210px);
     overflow-y: auto;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, .06);
+    transition: .35s;
 }
 
-.page.active { 
-    display: block !important; 
-    animation: slideUp 0.4s ease-out;
+.page.active {
+    display: block;
+    animation: slideUp .4s ease;
 }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
 
-    /* 5. เมนูบาร์ (ปรับให้รองรับระบบธีม) */
+/* ========= NAVBAR (FLOATING STYLE) ========= */
 nav {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    /* เปลี่ยนจาก #ffffff !important เป็น var(--card) เพื่อให้เปลี่ยนตามธีมที่เลือก */
-    background: var(--card) !important; 
-    display: flex; justify-content: space-around; 
-    height: 75px; align-items: center;
-    /* ปรับเงาให้ดูเข้ากับทั้งธีมสว่างและมืด */
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.15); 
-    z-index: 99999; 
-    /* ใช้สีเส้นขอบจากตัวแปรระบบธีม */
-    border-top: 1px solid var(--border); 
-    padding-bottom: env(safe-area-inset-bottom);
-    transition: background 0.3s ease; /* ทำให้ตอนเปลี่ยนธีมสีจะค่อยๆ เปลี่ยน ดูนุ่มนวลครับ */
-}
-.nav-item { 
-    flex: 1; text-align: center; 
-    /* ใช้สีตัวหนังสือจากธีม แต่ทำให้จางลงเล็กน้อยสำหรับปุ่มที่ไม่ได้เลือก */
-    color: var(--text);
-    opacity: 0.6; 
-    cursor: pointer; transition: 0.2s; 
-    display: flex; flex-direction: column; align-items: center;
-}
-.nav-item.active { 
-    /* สีไอคอนเมื่อถูกเลือก จะใช้สี Accent ของธีมนั้นๆ (เช่น สีฟ้า หรือ สีเหลือง) */
-    color: var(--accent) !important; 
-    opacity: 1; 
-}
-.nav-item i { font-size: 22px; display: block; margin-bottom: 2px; }
-.nav-item span { font-size: 11px; font-weight: 700; }
-    /* 6. ฟอร์มและอินพุต */
-    .icon-card, input, select { background: var(--card); color: var(--text); }
-    .icon-card { 
-        border-radius: 15px; padding: 10px 2px; display: flex; flex-direction: column; 
-        align-items: center; justify-content: center; gap: 4px; cursor: pointer; 
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: 75px; font-size: 14px; transition: 0.2s;
-    }
-    .icon-card:active { transform: scale(0.95); }
-    input, select { 
-        width: 100%; height: 75px; border-radius: 20px; font-size: 20px; font-weight: 700; 
-        text-align: center; border: none; outline: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
-        appearance: none; -webkit-appearance: none;
-    }     
-      /* 7. ปุ่มและการจัดการ (ขนาดนิ่งสนิท) */
-    /* สีปกติของแต่ละปุ่ม */
-    #btnCash { background: linear-gradient(135deg, #10b981, #059669); color: white; }
-    #btnTrans { background: linear-gradient(135deg, #6366f1, #4338ca); color: white; }
-    #btnMix   { background: linear-gradient(135deg, #81d4fa, #01579b); color: white; }
-/* 🔵 ปุ่มจ่ายเงินหลัก */
-.btn-pay { 
-    height: 75px; 
-    font-size: 18px; 
-    width: 100%; 
-    border-radius: 18px;
-    border: 3px solid transparent;
-    /* ใช้ transition แค่สีและเงาพอครับ ไม่ต้องใส่ all เพื่อป้องกันการขยาย */
-    transition: background 0.2s, opacity 0.2s, border 0.2s;
-    cursor: pointer;
+    position: fixed;
+    bottom: 10px; left: 10px; right: 10px;
+    height: 70px;
+    background: var(--card);
+    backdrop-filter: blur(25px);
+    border-radius: 22px;
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 35px rgba(0, 0, 0, .25);
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    
-    /* 🔒 ล็อคตัวปุ่มไม่ให้ขยายเด็ดขาด */
-    transform: none !important; 
-    
-    /* ✅ แก้ไขการใส่สี Gradient ให้ถูกต้อง */
-    background: linear-gradient(135deg, #190da8, #0b1e59); 
-    color: #ffffff;
+    justify-content: space-around;
+    z-index: 9999;
 }
 
-/* 🟢 สถานะเมื่อปุ่มถูกเลือก (Active) - ล็อคขนาดให้นิ่งสนิท */
-.btn-pay.active-cash, 
-.btn-pay.active-trans, 
-.btn-pay.active-mix {
-    border: 3px solid #ffffff !important; /* ใช้ขอบขาวเน้นว่าเลือก */
-    box-shadow: 0 0 15px rgba(255,255,255,0.3);   
-    /* 🔒 ล็อคขนาดปุ่มไม่ให้ขยายเด็ดขาด */
-    transform: scale(1) !important; 
-    opacity: 1 !important;
-}
-/* 🔒 ล็อคไอคอนข้างในปุ่มที่เลือก ไม่ให้ขยายตามไปด้วย */
-.btn-pay.active-cash i, 
-.btn-pay.active-trans i, 
-.btn-pay.active-mix i {
-    transform: scale(1) !important;
-    display: inline-block !important;
-}
-/* ⚪ สถานะปุ่มที่ไม่ได้เลือก */
-.btn-pay.is-inactive {
-    opacity: 0.4;
-    filter: grayscale(0.5);
-    transform: none !important; /* ไม่ให้หดหรือขยาย */
-}
-/* 🔒 ล็อคขนาดไอคอนข้างใน (ตัวช่วยหลัก) */
-.btn-pay i {
-    transform: none !important;      /* ล็อคไม่ให้ขยาย/ดีด */
-    display: inline-block !important; /* บังคับให้เป็น Block เพื่อให้ margin ทำงาน */
-    margin-bottom: 8px;              /* 👈 ปรับระยะห่างไอคอนกับตัวหนังสือตรงนี้ (เพิ่มจาก 4 เป็น 8) */
-    font-size: 24px;                 /* คุมขนาดไอคอนให้คงที่ */
-    transition: none !important;     /* ปิดความนุ่มนวลในการขยาย เพื่อให้มันนิ่งสนิททันที */
-} 
-   /* 8. โมดอลและรายงาน - ปรับปรุงใหม่ */
-    .modal { 
-        position: fixed; 
-        inset: 0; 
-        background: rgba(0, 0, 0, 0.7); /* ลดความดำลงนิดจะได้เห็นหน้าหลัง */
-        display: none; 
-        z-index: 1000000; 
-        align-items: center; 
-        justify-content: center;
-        padding-bottom: 80px; /* เพิ่มช่องว่างด้านล่างให้พ้นแถบเมนูบาร์ */
-    }
-    .modal-content { 
-        background: var(--card); 
-        color: var(--text); 
-        width: 90%; 
-        max-width: 400px; 
-        border-radius: 25px; 
-        padding: 25px; 
-        max-height: 75vh; /* ปรับลดจาก 85 เป็น 75 เพื่อไม่ให้ยาวเกินไป */
-        overflow-y: auto; 
-        box-shadow: 0 20px 50px rgba(0,0,0,0.3); /* เพิ่มเงาให้ดูมีมิติ */
-        position: relative;
-    }
-    /* 9. ส่วนเสริมสำหรับรายงานและสถิติ (ที่เพิ่งปรับปรุง) */
-/* กรอบนับจำนวนลูกค้า dCounts */
-#dCounts {
-    text-align: center;
-    padding: 8px;
-    border-radius: 12px;
-    background: var(--bg); /* ปรับสีตามธีม */
+.nav-item {
+    flex: 1; text-align: center;
+    opacity: .6; transition: .25s;
+    display: flex; flex-direction: column; align-items: center;
     color: var(--text);
-    min-height: 60px; /* ล็อคความสูงขั้นต่ำไม่ให้โย่ง */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
 }
 
-/* ปรับแต่ง Tag บริการใน dServiceStats */
-#dServiceStats span {
-    display: inline-block;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    white-space: nowrap; /* ป้องกันข้อความตัดบรรทัดในตัวเอง */
+.nav-item i { font-size: 22px; margin-bottom: 3px; }
+.nav-item span { font-size: 11px; font-weight: 600; }
+
+.nav-item.active {
+    opacity: 1;
+    color: var(--accent) !important;
+    transform: translateY(-3px);
 }
 
-/* ปรับปรุงหน้าประวัติ (History Row) ให้รองรับโหมดมืด */
+/* ========= INPUTS (READABLE STYLE) ========= */
+input, select {
+    width: 100%; height: 72px;
+    border-radius: 18px; border: none;
+    background: #f1f5f9; /* บังคับพื้นสว่างเพื่อให้อ่านง่าย */
+    color: #1e293b;      /* 🎯 ตัวหนังสือสีเข้มมองเห็นชัด */
+    font-size: 20px; font-weight: 700;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .05);
+    outline: none;
+}
+
+/* ========= BUTTONS & CARDS ========= */
+.icon-card {
+    background: var(--card);
+    border-radius: 18px; border: 1px solid var(--border);
+    height: 75px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 4px; cursor: pointer; transition: .2s;
+}
+
+.icon-card:active { transform: scale(.95); }
+
+#btnCash { background: linear-gradient(135deg, #10b981, #059669); }
+#btnTrans { background: linear-gradient(135deg, #6366f1, #4338ca); }
+#btnMix { background: linear-gradient(135deg, #81d4fa, #01579b); }
+
+.btn-pay {
+    height: 75px; width: 100%; border-radius: 18px; border: none;
+    font-size: 18px; font-weight: 700;
+    color: #f5f8fc !important; /* 🎯 ปุ่มบันทึกเป็นสีเงินสว่าง */
+    background: linear-gradient(135deg, #190da8, #0b1e59);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .25);
+    transition: .2s;
+}
+
+.btn-pay:active { transform: scale(.96); }
+
+/* 🌑 Dark Theme Button Specifics */
+body.dark .btn-pay {
+    background: #1a1a1a !important;
+    color: #fbbf24 !important;
+    border: 1px solid #fbbf24 !important;
+}
+
+/* ========= 🎯 SPECIAL FIXES (ANALYSIS & TOTALS) ========= */
+
+/* แก้ไขตัวหนังสือในหน้าวิเคราะห์เปรียบเทียบ (Navy & Dark) */
+body.navy #compareModal b, body.navy #compareModal span, body.navy #compareModal div, 
+body.navy #compareStats b { color: #f1f5f9 !important; }
+
+body.dark #compareModal b, body.dark #compareModal span, body.dark #compareModal div, 
+body.dark #compareStats b { color: #fbbf24 !important; }
+
+/* ยอดเงินรวมในหน้าหลักให้เป็นสีเงินสว่างในธีม Navy */
+body.navy #dTotal, body.navy #accNet { 
+    color: #f5f8fc !important; 
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2); 
+}
+
+/* ========= HISTORY & MODAL ========= */
 .history-row {
-    background: var(--card) !important;
-    border-bottom: 1px solid var(--border) !important;
-    transition: background 0.2s;
+    background: transparent;
+    border-bottom: 1px solid var(--border);
+    padding: 8px 0;
 }
 
-.history-row:last-child {
-    border-bottom: none;
+.modal {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, .65);
+    display: none; align-items: center; justify-content: center;
+    z-index: 10000;
 }
 
-/* สีตัวหนังสือในรายงานให้เปลี่ยนตามธีม */
-.history-row [style*="color:#1e293b"] { color: var(--text) !important; }
-.history-row [style*="color:#64748b"] { color: var(--text); opacity: 0.7; }
+.modal-content {
+    background: var(--card);
+    backdrop-filter: blur(20px);
+    border-radius: 24px; padding: 24px;
+    width: 90%; max-width: 420px;
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .4);
+}
 
-/* จัดการ Scrollbar ให้ดูเล็กและสะอาดตา */
-#accHistory::-webkit-scrollbar, 
-.modal-content::-webkit-scrollbar,
-.page::-webkit-scrollbar {
-    width: 4px;
+/* ========= ANIMATION ========= */
+@keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
-#accHistory::-webkit-scrollbar-thumb,
-.modal-content::-webkit-scrollbar-thumb,
-.page::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 10px;
-}
-/* ปรับปุ่มลบในประวัติให้เด่นแต่พอดี */
-span[onclick*="delRec"] {
-    padding: 4px 8px;
-    background: rgba(239, 68, 68, 0.1);
-    border-radius: 6px;
-    margin-top: 5px;
-    display: inline-block;
-}
-    .status-bar { padding: 12px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 14px; margin-bottom: 10px; }
-    .acc-main-card { background: var(--card); padding: 20px; border-radius: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); margin-bottom: 15px; }
-    #accHistory { font-size: 12px; max-height: 150px; overflow-y: auto; }
-    @keyframes slideUp {
-        from { transform: translateY(100%); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-    }
         </style>
     </head>
 <body>
