@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 2 </title>
+    <title>Barber Note Pro 24 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -477,40 +477,42 @@ nav {
         </button>
     </div>
  
-    <div id="p2" class="page" style="width: 98%; max-width: 480px; margin:0 auto; padding: 15px; background: var(--card); border: 1px solid var(--border); border-radius: 25px;">
-        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; margin-bottom: 15px;">
-   <div style="background: linear-gradient(135deg, var(--primary), var(--accent)); padding:18px 10px; border-radius:20px; text-align:center; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3); border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; transition: 0.3s;">
-            <small style="font-weight:800; color: var(--btn-text); opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; font-size: 15px;">ยอดรวมวันนี้</small>
-            <div id="dTotal" style="font-size:42px; font-weight:900; color: var(--btn-text); margin: 2px 0; letter-spacing: -1px;">0</div>
-            <div id="dCounts" style="font-size:14px; font-weight:700; color: var(--btn-text); background:rgba(255,255,255,0.2); display:inline-block; padding:4px 10px; border-radius:12px; margin: 0 auto; width: fit-content;">ลูกค้า 0 คน</div>
+<div id="p2" class="page" style="width: 98%; max-width: 480px; margin:0 auto; padding: 15px; background: var(--card); border: 1px solid var(--border); border-radius: 25px;">
+    
+    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; margin-bottom: 15px; align-items: stretch;">
+        
+        <div style="background: linear-gradient(135deg, var(--save1), var(--save2)); padding:18px 10px; border-radius:20px; text-align:center; box-shadow:0 10px 15px -3px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: center; transition: 0.3s;">
+            <small style="font-weight:800; color: var(--btn-text); opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px; font-size: 13px;">ยอดรวมวันนี้</small>
+            <div id="dTotal" style="font-size:40px; font-weight:900; color: var(--btn-text); margin: 2px 0; letter-spacing: -1px;">0</div>
+            <div id="dCounts" style="font-size:13px; font-weight:700; color: var(--btn-text); background:rgba(255,255,255,0.25); display:inline-block; padding:4px 12px; border-radius:12px; margin: 0 auto; width: fit-content;">ลูกค้า 0 คน</div>
         </div>
 
-        <div style="background: var(--card); padding:12px 15px; border-radius:20px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid var(--border); display:flex; flex-direction:column; justify-content:center; gap:8px; margin-top: 10px; transition: 0.3s;">
+        <div style="background: var(--summary-bg); padding:12px 15px; border-radius:20px; box-shadow:0 4px 10px rgba(0,0,0,0.05); border: 1px solid var(--summary-border); display:flex; flex-direction:column; justify-content:center; gap:8px; transition: 0.3s;">
             
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:700;">
-                <span style="color: var(--text); opacity: 0.7; display:flex; align-items:center; gap:5px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700;">
+                <span style="color: var(--text); opacity: 0.8; display:flex; align-items:center; gap:5px;">
                     <i class="fas fa-mobile-alt" style="width:14px; color: var(--trans1);"></i> โอน
                 </span> 
                 <b id="dTrans" style="color: var(--text);">0</b>
             </div>
             
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:700;">
-                <span style="color: var(--text); opacity: 0.7; display:flex; align-items:center; gap:5px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700;">
+                <span style="color: var(--text); opacity: 0.8; display:flex; align-items:center; gap:5px;">
                     <i class="fas fa-money-bill-wave" style="width:14px; color: var(--cash1);"></i> สด
                 </span> 
                 <b id="dCash" style="color: var(--text);">0</b>
             </div>
             
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:700;">
-                <span style="color: var(--text); opacity: 0.7; display:flex; align-items:center; gap:5px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700;">
+                <span style="color: var(--text); opacity: 0.8; display:flex; align-items:center; gap:5px;">
                     <i class="fas fa-cut" style="width:14px; color: var(--accent);"></i> ช่าง
                 </span> 
                 <b id="dBarber" style="color: var(--text);">0</b>
             </div>
             
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:800; border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 2px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:800; border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 2px;">
                 <span style="color: var(--text); display:flex; align-items:center; gap:5px;">
-                    <i class="fas fa-store" style="width:14px; color: var(--danger);"></i> ร้าน
+                    <i class="fas fa-store" style="width:14px; color: #ef4444;"></i> ร้าน
                 </span> 
                 <b id="dShop" style="color: var(--text);">0</b>
             </div>
@@ -569,16 +571,17 @@ nav {
         <i class="fas fa-history"></i> ประวัติเคลียร์เงิน
     </button>
 </div>
-        <div onclick="document.getElementById('histMonth').showPicker()" 
-             style="background: linear-gradient(135deg, var(--primary), var(--trans2)); border-radius:25px; padding:15px 10px; text-align:center; color:#fff; position:relative; box-shadow:0 8px 20px rgba(0,0,0,0.15); cursor:pointer; margin-top: 15px; margin-bottom: 12px; transition: 0.3s;">
-            <i class="fas fa-calendar-check" style="font-size:26px; margin-bottom:8px; display:block;"></i>
-            <b style="font-size:18px; letter-spacing: 0.5px;">สรุปรายเดือน</b>
-            <input type="month" id="histMonth" onchange="loadHistMonth()" style="position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer;">
-        </div>
+    <div onclick="document.getElementById('histMonth').showPicker()" 
+     style="background: linear-gradient(135deg, var(--save1), var(--trans2)); border-radius:25px; padding:18px 10px; text-align:center; color:#fff; position:relative; box-shadow:0 8px 20px rgba(0,0,0,0.15); cursor:pointer; margin-top: 15px; margin-bottom: 12px; transition: 0.3s; border: 1px solid rgba(255,255,255,0.1);">
+    <i class="fas fa-calendar-alt" style="font-size:26px; margin-bottom:8px; display:block; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></i>
+    <b style="font-size:18px; font-weight: 800; letter-spacing: 0.5px;">สรุปรายเดือน</b>
+    <input type="month" id="histMonth" onchange="loadHistMonth()" style="position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer;">
+</div>
 
-        <div onclick="openComparisonSelector()" style="background: linear-gradient(135deg, var(--accent), var(--trans1)); border-radius: 25px; padding: 15px; text-align: center; color: #fff; cursor: pointer; box-shadow: 0 8px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 10px;">        
-            <i class="fas fa-chart-line" style="font-size: 24px;"></i>
-            <b style="font-size: 16px;">เปรียบเทียบช่วงวันที่</b>
+<div onclick="openComparisonSelector()" 
+     style="background: linear-gradient(135deg, var(--accent), var(--trans1)); border-radius: 25px; padding: 18px; text-align: center; color: #fff; cursor: pointer; box-shadow: 0 8px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 10px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s;">        
+    <i class="fas fa-chart-bar" style="font-size: 24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></i>
+    <b style="font-size: 17px; font-weight: 800;">เปรียบเทียบช่วงวันที่</b>
         </div>
     </div> 
 </div>          
