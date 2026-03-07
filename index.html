@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 19</title>
+    <title>Barber Note Pro 29</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -200,10 +200,9 @@ function openReportModal(title, htmlContent) {
     --btn-text: #ffffff;
 
     /* 🟢 เพิ่มใหม่: สีปุ่มหน้ารายงาน/บัญชี (ใช้สีเทาสุภาพ เพื่อให้ต่างจากปุ่มบันทึก) */
-    --btn-rep1: #94a3b8; 
-    --btn-rep2: #475569;
+    --btn-clear1: #f87171; --btn-clear2: #ef4444; /* เคลียร์เงิน: โทนแดง */
+    --btn-his1: #94a3b8;   --btn-his2: #475569;   /* ประวัติ: โทนเทาสุภาพ */
 }
-
 body.navy {
     /* 🌌 NAVY MODE: โทนน้ำเงินเข้มลึก (เน้นความพรีเมียมและ Contrast สูง) */
     --bg: #020617;           /* พื้นหลังน้ำเงินเกือบดำ เพื่อให้แยกจาก card ชัดเจน */
@@ -222,8 +221,8 @@ body.navy {
     --save1: #22d3ee; --save2: #0ea5e9; /* ปุ่มบันทึกสีฟ้านีออนสว่าง */
 
     /* 🟢 เพิ่มใหม่: สีปุ่มหน้ารายงาน/บัญชี (ใช้สีน้ำเงินเทาเข้มตัดกับพื้นหลัง) */
-    --btn-rep1: #475569; 
-    --btn-rep2: #1e293b;
+--btn-clear1: #ff4d4d; --btn-clear2: #b30000; /* เคลียร์เงิน: แดงเข้ม */
+--btn-his1: #334155;   --btn-his2: #1e293b;   /* ประวัติ: เทาน้ำเงินเข้ม */
 }
 
 /* body.dark (ดำทอง) ของคุณดีอยู่แล้ว ไม่ต้องแก้ครับ */
@@ -239,7 +238,8 @@ body.dark {
     --trans1: #f59e0b; --trans2: #b45309;
     --mix1: #fde047; --mix2: #a16207;
     --save1: #fbbf24; --save2: #d97706;
-    --btn-rep1: #fbbf24; --btn-rep2: #d97706;
+   --btn-clear1: #fbbf24; --btn-clear2: #d97706; /* ดำทองใช้โทนทองเหมือนเดิม */
+--btn-his1: #4b5563;   --btn-his2: #1f2937;   /* ประวัติ: เทาดำ */
 }
 /* ========= 🛠️ 2. RESET & FORCE FIX (ล้างสไตล์ที่ฝังใน HTML) ========= */
 * {
@@ -287,22 +287,29 @@ body {
 .page.active { display: block; animation: slideUp 0.4s ease-out; }
 
 /* 🎯 หน้าบัญชี/รายงาน (#p3) - ล้างกรอบซ้อนออกให้หมด */
-/* แก้จุดนี้: ให้เหลือแค่ตัวหนังสือและปุ่มลอยๆ บนหน้ากระดาษ .page */
 #p3 > div, #p3 .card, .history-card {
-    background: transparent !important; /* ล้างสีพื้นหลังออก */
-    border: none !important;            /* ล้างขอบออก */
-    box-shadow: none !important;        /* ล้างเงาออก */
-    padding: 10px 0 !important;         /* เว้นระยะห่างระหว่างรายการแทน */
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 10px 0 !important;
     margin-bottom: 0 !important;
 }
 
-/* ถ้าต้องการให้รายการแต่ละอันมีเส้นคั่นบางๆ (เหมือนสมุดบัญชี) แทนการใส่กรอบ */
+/* 🔥 จุดที่เพิ่ม: ล้างกรอบของช่อง วันที่ และ หมายเหตุ เฉพาะหน้า 3 */
+#p3 input, #p3 select, #p3 textarea {
+    border: none !important;             /* ลบเส้นขอบที่ซ้อนอยู่ออก */
+    background: transparent !important;   /* ให้ใช้พื้นหลังเดียวกับหน้า .page */
+    box-shadow: none !important;         /* ลบเงาที่ทำให้ดูเหมือนมีขอบ */
+    padding: 5px !important;
+}
+
+/* ถ้าต้องการให้รายการแต่ละอันมีเส้นคั่นบางๆ เหมือนสมุดบัญชี */
 .history-card {
     border-bottom: 1px solid var(--border) !important; 
     border-radius: 0 !important;
 }
 
-/* ปุ่มในหน้ารายงานก็ยังใช้สีตามธีมได้ แต่ไม่มีกรอบมาบีบ */
+/* ปุ่มในหน้ารายงาน */
 #p3 button {
     background: linear-gradient(135deg, var(--btn-rep1, var(--accent)), var(--btn-rep2, var(--primary))) !important;
     color: var(--btn-text) !important;
@@ -310,14 +317,18 @@ body {
     border: none !important;
     padding: 8px 15px !important;
     font-weight: 700 !important;
+    margin: 5px 0;
 }
 /* ========= 🎯 4. INPUTS & SELECTS (จบปัญหาสีไม่เท่ากัน) ========= */
 input, select, textarea {
     width: 100% !important; 
     height: 54px !important; 
     border-radius: 16px !important; 
+    
+    /* 🎯 จุดสำคัญ: หน้าทั่วไปให้มีขอบ แต่หน้า 3 (#p3) ให้ border เป็น none เพื่อไม่ให้ซ้อน */
     border: 1px solid var(--border) !important; 
     background: var(--input-bg) !important; 
+    
     color: var(--text) !important;
     font-size: 18px !important; 
     font-weight: 700 !important;
@@ -326,6 +337,15 @@ input, select, textarea {
     box-shadow: none !important;
     appearance: none !important;
     transition: 0.2s;
+}
+
+/* 🟢 เพิ่มส่วนนี้: สั่งล้างขอบและพื้นหลังสำหรับช่องวันที่/หมายเหตุ ในหน้าบัญชีโดยเฉพาะ */
+#p3 input, #p3 select, #p3 textarea {
+    border: none !important;            /* ลบกรอบซ้อนออก */
+    background: transparent !important;  /* ให้กลืนไปกับพื้นหลังหน้าบัญชี */
+    box-shadow: none !important;
+    height: auto !important;            /* ให้ความสูงยืดตามเนื้อหา */
+    padding: 10px 0 !important;
 }
 
 /* ส่วนของช่องราคา: ล้างกรอบของตัว input เพื่อให้ตัวเลขลอยอยู่ใน div แม่ */
@@ -341,17 +361,17 @@ input, select, textarea {
 
 /* ส่วนของช่องทิป: ให้มีกรอบเหมือนโครงสร้างช่องราคา แต่ไม่เน้นสี */
 #tipInp {
-    background: var(--input-bg) !important; /* ใช้สีพื้นหลังช่องทั่วไป */
-    border: 1px solid var(--border) !important; /* ใช้สีเส้นขอบมาตรฐาน ไม่ใส่สีเด่น */
+    background: var(--input-bg) !important;
+    border: 1px solid var(--border) !important;
     border-radius: 20px !important;
     font-size: 35px !important;
     height: 100% !important;
     width: 100% !important;
-    color: var(--text) !important; /* ใช้สีตัวอักษรปกติ */
+    color: var(--text) !important;
     text-align: center !important;
     outline: none !important;
     box-sizing: border-box !important;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05) !important; /* เพิ่มมิติเล็กน้อย */
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05) !important;
 }
 
 /* ล้างลูกศรเลขสำหรับช่องทิป */
