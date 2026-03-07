@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 24 </title>
+    <title>Barber Note Pro 25 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -187,10 +187,7 @@ function openReportModal(title, htmlContent) {
     --mix1:#818cf8; --mix2:#6366f1; --save1:#3b82f6; --save2:#1e40af;
     --btn-clear1:#88f246; --btn-clear2:#139e03;
     --btn-his1:#f2ca5a; --btn-his2:#ed781f; --btn-text:#ffffff;
-    
-    /* สีช่องยอดเงินรวมธีมสว่าง: เน้นฟ้าอ่อนคลีนๆ */
-    --summary-bg: #eff6ff;
-    --summary-border: #bfdbfe;
+    --summary-bg: #eff6ff; --summary-border: #bfdbfe;
 }
 
 body.navy {
@@ -200,10 +197,7 @@ body.navy {
     --mix1:#38bdf8; --mix2:#0284c7; --save1:#2154fc; --save2:#0b0161;
     --btn-clear1:#ff4d4d; --btn-clear2:#b30000;
     --btn-his1:#334155; --btn-his2:#1e293b; --btn-text:#ffffff;
-
-    /* สีช่องยอดเงินรวมธีม Navy: เน้นน้ำเงินเข้มขอบฟ้าสว่าง */
-    --summary-bg: #1e293b;
-    --summary-border: #0891b2;
+    --summary-bg: #1e293b; --summary-border: #0891b2;
 }
 
 body.dark {
@@ -213,158 +207,101 @@ body.dark {
     --mix1:#fde047; --mix2:#a16207; --save1:#fbbf24; --save2:#d97706;
     --btn-clear1:#fbbf24; --btn-clear2:#d97706;
     --btn-his1:#4b5563; --btn-his2:#1f2937; --btn-text:#1a1a1a;
-
-    /* สีช่องยอดเงินรวมธีม Dark Gold: ดำขอบทองสว่าง */
-    --summary-bg: #000000;
-    --summary-border: #fbbf24;
-}
-/* ========= 🛠️ 1. GLOBAL & RESET (ล้างขยะ) ========= */
-* { 
-    box-sizing: border-box; 
-    font-family: 'Kanit', sans-serif; 
-    -webkit-tap-highlight-color: transparent; 
+    --summary-bg: #000000; --summary-border: #fbbf24;
 }
 
-body { 
-    margin: 0; 
-    background: var(--bg); 
-    color: var(--text); 
-    padding-bottom: 100px; 
-    transition: background 0.3s; 
-}
+/* ========= 🛠️ 2. GLOBAL & RESET ========= */
+* { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
+body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 100px; transition: background 0.3s; }
 
-/* 🚫 สั่งฆ่ากรอบซ้อนและติ่งรายงานที่หลุดมา (แก้ตามวงแดงเป๊ะๆ) */
-center, 
-.history-link-container, 
-#p3 br, 
-[style*="margin-top: 20px; background: white"],
-[style*="background: white"],
-[style*="background:white"] {
-    /* ถ้าไม่ใช่คลาส .page หรือ #priceInp ให้สั่งลบพื้นหลัง/กรอบที่ติดมากับโค้ดเก่า */
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
+/* 🚫 ฆ่าเศษขยะ */
+center, .history-link-container, #p3 br, [style*="margin-top: 20px; background: white"], [style*="background: white"] {
+    border: none !important; background: transparent !important; box-shadow: none !important;
 }
-
-/* ซ่อนเศษข้อความหรือปุ่มรายงานที่อยู่นอกระบบ */
 body > center, body > a, body > br { display: none !important; }
 
-/* ========= 📋 2. PAGE CONTROL ========= */
+/* ========= 📋 3. PAGE CONTROL ========= */
 .page {
-    display: none; 
-    background: var(--card); 
-    border-radius: var(--radius);
-    border: 1px solid var(--border); 
-    padding: 22px; 
-    margin: 14px;
+    display: none; background: var(--card); border-radius: var(--radius);
+    border: 1px solid var(--border); padding: 22px; margin: 14px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }
 .page.active { display: block; animation: slideUp 0.3s ease-out; }
 
-/* ========= 💰 3. INPUTS (เน้นกรอบชั้นเดียว คลีนๆ) ========= */
+/* ========= 💰 4. INPUT SYSTEM (หน้า 1 คลีน / หน้า 3 สรุปเด่น) ========= */
 
-/* ตัวฆ่ากรอบซ้อนของ Container */
-.price-input-container, .input-wrapper, .price-input-inner {
-    border: none !important;
-    background: transparent !important;
-    padding: 0 !important;
-}
-
-/* ========= 💰 3. INPUT SYSTEM (แยกสไตล์หน้า 1 กับ หน้า 3) ========= */
-
-/* --- [หน้า 1] ช่องกรอกราคาปกติ --- */
+/* ช่องกรอกราคาหน้า 1 */
 #priceInp {
-    width: 100% !important; 
-    height: 90px !important; 
-    font-size: 48px !important; 
-    font-weight: 900 !important;
-    text-align: center !important; 
-    background: var(--input-bg) !important;
-    border: 2px solid var(--border) !important;
-    border-radius: 18px !important;
-    color: var(--text) !important; 
-    outline: none !important;
-    margin-bottom: 15px !important;
+    width: 100% !important; height: 90px !important; font-size: 48px !important; font-weight: 900 !important;
+    text-align: center !important; background: var(--input-bg) !important;
+    border: 2px solid var(--border) !important; border-radius: 18px !important;
+    color: var(--text) !important; outline: none !important; margin-bottom: 15px !important;
 }
 
-/* --- [หน้า 3] ช่องแสดงยอดเงินรวม  --- */
-#p3 input[readonly], 
-[id*="total"], 
-[id*="balance"] {
-    width: 100% !important; 
-    height: 100px !important; /* ให้ใหญ่กว่านิดนึงดูเป็นยอดสรุป */
-    font-size: 52px !important; 
-    font-weight: 900 !important;
-    text-align: center !important; 
-    
-    /* 🎨 ดึงสีพิเศษที่เราตั้งไว้ในธีมมาใช้ตรงนี้ */
-    background: var(--summary-bg) !important;
-    border: 3px solid var(--summary-border) !important; 
-    color: var(--text) !important; 
-    
-    border-radius: 22px !important;
-    outline: none !important;
-    margin-bottom: 20px !important;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important; /* เพิ่มเงาให้ดูเด่น */
+/* ช่องแสดงยอดรวมหน้า 3 (ขอบทอง/น้ำเงิน/ฟ้า) */
+#p3 input[readonly], [id*="total"], [id*="balance"] {
+    width: 100% !important; height: 100px !important; font-size: 52px !important; font-weight: 900 !important;
+    text-align: center !important; background: var(--summary-bg) !important;
+    border: 3px solid var(--summary-border) !important; color: var(--text) !important;
+    border-radius: 22px !important; outline: none !important; margin-bottom: 20px !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
 }
 
-/* --- ช่องทิป (แบบไร้กรอบ เนียนตามธีม) --- */
+/* ช่องทิป ไร้กรอบ เนียนตามธีม */
 #tipInp {
-    width: 100% !important; 
-    font-size: 22px !important; 
-    font-weight: 800 !important; 
-    text-align: center !important;
-    
-    /* 🎨 ใช้สีพื้นหลังตามธีม แต่สั่งฆ่ากรอบทิ้ง */
-    background: var(--input-bg) !important; 
-    border: none !important; 
-    
-    border-radius: 16px !important; 
-    padding: 14px !important; /* เพิ่ม Padding นิดนึงให้ดูไม่จม */
-    color: #ef4444 !important; /* สีแดงยอดฮิตของมึง */
-    
-    outline: none !important;
-    box-shadow: none !important; /* ลบเงาออกด้วยให้คลีนสุดๆ */
-    margin-bottom: 10px !important;
+    width: 100% !important; font-size: 22px !important; font-weight: 800 !important; text-align: center !important;
+    background: var(--input-bg) !important; border: none !important; 
+    border-radius: 16px !important; padding: 14px !important; color: #ef4444 !important;
+    outline: none !important; box-shadow: none !important; margin-bottom: 10px !important;
 }
 
-/* ========= 📅 4. DATE & TIME (จัด Grid ให้เป๊ะ) ========= */
+/* ========= 📅 5. DATE, TIME & SERVICE GRID (แก้ล้น/แก้เบียด) ========= */
+
+/* ช่องวันที่และเวลา */
 .time-input-container {
-    display: grid !important; 
-    grid-template-columns: 1fr 1fr !important; 
-    gap: 12px !important; 
-    margin: 10px 0 15px !important;
+    display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 12px !important; margin: 10px 0 15px !important;
 }
 .time-input-container input {
-    width: 100%; background: var(--input-bg); border: 1px solid var(--border);
-    border-radius: 12px; padding: 12px; text-align: center; color: var(--text);
-    font-size: 14px; font-weight: 600;
+    width: 100% !important; background: var(--input-bg) !important; border: 1px solid var(--border) !important;
+    border-radius: 12px !important; padding: 12px !important; text-align: center !important; 
+    color: var(--text) !important; font-size: 14px !important; font-weight: 600 !important;
 }
 
-/* ========= 🔘 5. BUTTONS (THEME-READY) ========= */
-.btn-pay, .btn-clear, .btn-history { cursor: pointer; transition: 0.2s; }
+/* 💇‍♂️ แก้ช่อง ทรงผม/บริการ 1/บริการ 2 (บังคับ 3 ช่องไม่ให้ล้นจอ) */
+.service-selection, .service-grid, [style*="display: flex; gap: 10px"] {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin: 10px 0 !important;
+}
+.service-selection select, .service-grid select {
+    width: 100% !important; background: var(--input-bg) !important;
+    border: 1px solid var(--border) !important; border-radius: 12px !important;
+    padding: 10px 2px !important; color: var(--text) !important;
+    font-size: 13px !important; font-weight: 700 !important; outline: none !important;
+}
+
+/* ========= 🔘 6. BUTTONS & NAV ========= */
+.btn-pay, .btn-clear, .btn-history { cursor: pointer; transition: 0.2s; border: none !important; }
 .btn-pay:active, .btn-clear:active, .btn-history:active { transform: scale(0.97); }
 
 .btn-pay {
     width: 100%; height: 65px; display: flex; align-items: center; justify-content: center;
-    font-size: 22px; font-weight: 900; border: none; border-radius: 20px;
-    background: linear-gradient(135deg, var(--save1), var(--save2));
-    color: var(--btn-text); margin-top: 10px;
+    font-size: 22px; font-weight: 900; border-radius: 20px;
+    background: linear-gradient(135deg, var(--save1), var(--save2)); color: var(--btn-text); margin-top: 10px;
 }
 
 .btn-clear {
-    width: 100%; padding: 16px; font-size: 18px; font-weight: 800; border: none; border-radius: 18px;
-    background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2));
-    color: var(--btn-text); margin-top: 12px;
+    width: 100%; padding: 16px; font-size: 18px; font-weight: 800; border-radius: 18px;
+    background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)); color: var(--btn-text); margin-top: 12px;
 }
 
 .btn-history {
-    width: 100%; padding: 16px; font-size: 18px; font-weight: 800; border: none; border-radius: 18px;
-    background: linear-gradient(135deg, var(--btn-his1), var(--btn-his2));
-    color: var(--btn-text); margin-top: 10px;
+    width: 100%; padding: 16px; font-size: 18px; font-weight: 800; border-radius: 18px;
+    background: linear-gradient(135deg, var(--btn-his1), var(--btn-his2)); color: var(--btn-text); margin-top: 10px;
 }
 
-/* ========= 📱 6. NAVIGATION & MODAL ========= */
 nav {
     position: fixed; bottom: 12px; left: 12px; right: 12px; height: 72px;
     background: var(--card); border: 1px solid var(--border); border-radius: 22px;
@@ -377,7 +314,6 @@ nav {
 .modal {
     position: fixed; inset: 0; background: rgba(0,0,0,0.7);
     display: none; align-items: center; justify-content: center; z-index: 10000;
-    backdrop-filter: blur(5px);
 }
 .modal-content {
     background: var(--card); border-radius: 28px; padding: 25px;
@@ -410,54 +346,60 @@ nav {
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-            <div style="background: var(--bg); border: 1px solid var(--border); border-radius:15px; height:55px; position:relative; display:flex; align-items:center; justify-content:center;">
-                <span id="dateDisplay" style="font-weight:800; color: var(--text); font-size:18px;">📅 วันที่</span>
-                <input type="date" id="dateInp" onchange="if(window.updateDateDisplay) updateDateDisplay(this.value);" style="position:absolute; opacity:0; width:100%; height:100%; cursor:pointer; z-index:2;">
-            </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+    <div style="background: var(--input-bg); border: 1px solid var(--border); border-radius:18px; height:58px; position:relative; display:flex; align-items:center; justify-content:center; overflow: hidden;">
+        <span id="dateDisplay" style="font-weight:800; color: var(--text); font-size:16px;">📅 วันที่</span>
+        <input type="date" id="dateInp" onchange="if(window.updateDateDisplay) updateDateDisplay(this.value);" 
+               style="position:absolute; opacity:0; width:100%; height:100%; cursor:pointer; z-index:2;">
+    </div>
 
-            <select id="custType" style="width: 100%; height:55px; border-radius:15px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-weight:800; font-size:18px; text-align:center; text-align-last:center; padding: 0 5px; outline:none; appearance:none; cursor:pointer;">
-                <option value="none">ประเภทลูกค้า</option>
-                <option value="new">🌟 ลูกค้าใหม่</option>
-                <option value="regular">📌 ลูกค้าประจำ</option>
-            </select>
-        </div>
+    <div style="position: relative; height: 58px;">
+        <select id="custType" style="width: 100%; height:100%; border-radius:18px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-weight:800; font-size:16px; text-align:center; text-align-last:center; outline:none; appearance:none; cursor:pointer;">
+            <option value="none"> ประเภทลูกค้า</option>
+            <option value="new">🌟 ลูกค้าใหม่</option>
+            <option value="regular">📌 ลูกค้าประจำ</option>
+        </select>
+    </div>
+</div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-            <div style="position:relative;">
-                <div style="position:absolute; top:4px; left:12px; font-size:12px; font-weight:700; color: var(--text); opacity: 0.6; z-index:1;">เริ่ม</div>
-                <input type="time" id="tStart" style="width:100%; height:55px; border-radius:15px; border: 1px solid var(--border); text-align:center; font-weight:700; background: var(--bg); color: var(--text); padding-top:10px; font-size:20px; outline:none;">
-            </div>
-            <div style="position:relative;">
-                <div style="position:absolute; top:4px; left:12px; font-size:12px; font-weight:700; color: var(--text); opacity: 0.6; z-index:1;">เสร็จ</div>
-                <input type="time" id="tEnd" style="width:100%; height:55px; border-radius:15px; border: 1px solid var(--border); text-align:center; font-weight:700; background: var(--bg); color: var(--text); padding-top:10px; font-size:20px; outline:none;">
-            </div>
-        </div>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+    <div style="position:relative; height: 58px;">
+        <div style="position:absolute; top:4px; left:12px; font-size:11px; font-weight:800; color: var(--text); opacity: 0.6; z-index:1;">เริ่ม</div>
+        <input type="time" id="tStart" style="width:100%; height:100%; border-radius:18px; border: 1px solid var(--border); text-align:center; font-weight:700; background: var(--input-bg); color: var(--text); padding-top:12px; font-size:18px; outline:none;">
+    </div>
+    <div style="position:relative; height: 58px;">
+        <div style="position:absolute; top:4px; left:12px; font-size:11px; font-weight:800; color: var(--text); opacity: 0.6; z-index:1;">เสร็จ</div>
+        <input type="time" id="tEnd" style="width:100%; height:100%; border-radius:18px; border: 1px solid var(--border); text-align:center; font-weight:700; background: var(--input-bg); color: var(--text); padding-top:12px; font-size:18px; outline:none;">
+    </div>
+</div>
 
-        <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-            <select id="hairStyle" style="height:70px; border-radius:15px; border: 1px solid var(--border); font-weight:700; background: var(--bg); color: var(--text); padding:0 8px; font-size:18px; outline:none;">
-                <option value="">✂️ ทรงผม</option>
-                <option>แฟชั่น</option><option>สกินเฟด</option><option>รองทรง</option><option>ตำรวจ/ทหาร</option><option>นักเรียน</option><option>ซอยผม/เล็มผม</option><option>แก้ผม</option><option>โกนผม</option>    
-            </select>
-            <select id="extra1" style="height:70px; border-radius:15px; border: 1px solid var(--border); font-weight:700; background: var(--bg); color: var(--text); padding:0 5px; font-size:18px; outline:none;">
-                <option value="">บริการ1</option>
-                <option value="เด็ก">เด็ก</option><option>โกนหนวด</option><option>กันหน้า</option><option>กันจอน</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>ย้อมแฟชั่น</option>
-            </select>
-            <select id="extra2" style="height:70px; border-radius:15px; border: 1px solid var(--border); font-weight:700; background: var(--bg); color: var(--text); padding:0 5px; font-size:18px; outline:none;">
-                <option value="">บริการ2</option>
-                <option value="เด็ก">เด็ก</option><option>โกนหนวด</option><option>กันหน้า</option><option>กันจอน</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>ย้อมแฟชั่น</option>
-            </select>
-        </div>
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
+    <select id="hairStyle" style="height:65px; border-radius:16px; border: 1px solid var(--border); font-weight:800; background: var(--input-bg); color: var(--text); padding:0 5px; font-size:14px; outline:none; text-align:center;">
+        <option value="">✂️ ทรงผม</option>
+        <option>แฟชั่น</option><option>สกินเฟด</option><option>รองทรง</option><option>ตำรวจ/ทหาร</option>
+        <option>นักเรียน</option><option>ซอยผม/เล็มผม</option><option>แก้ผม</option><option>โกนผม</option>
+    </select>
+    <select id="extra1" style="height:65px; border-radius:16px; border: 1px solid var(--border); font-weight:800; background: var(--input-bg); color: var(--text); padding:0 5px; font-size:14px; outline:none; text-align:center;">
+        <option value="">🛠️ บริการ1</option>
+        <option value="เด็ก">เด็ก</option><option>โกนหนวด</option><option>กันหน้า</option><option>กันจอน</option>
+        <option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>ย้อมแฟชั่น</option>
+    </select>
+    <select id="extra2" style="height:65px; border-radius:16px; border: 1px solid var(--border); font-weight:800; background: var(--input-bg); color: var(--text); padding:0 5px; font-size:14px; outline:none; text-align:center;">
+        <option value="">🛠️ บริการ2</option>
+        <option value="เด็ก">เด็ก</option><option>โกนหนวด</option><option>กันหน้า</option><option>กันจอน</option>
+        <option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>ย้อมแฟชั่น</option>
+    </select>
+</div>
 
- <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 8px; margin-bottom: 12px; height: 90px; align-items: stretch;">
-    <div style="position: relative; background: var(--bg); border: 2px solid var(--accent); border-radius: 20px; display: flex; align-items: center; overflow: hidden;">
+<div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; margin-bottom: 15px; height: 90px;">
+    <div style="position: relative; background: var(--input-bg); border: 2px solid var(--accent); border-radius: 20px; display: flex; align-items: center; overflow: hidden;">
         <span style="padding-left: 15px; font-size: 25px; color: var(--accent); font-weight: 900;">฿</span>
         <input type="number" id="priceInp" placeholder="0" inputmode="numeric" 
-               style="width: 100%; height: 100%; border: none; background: transparent; font-size: 50px; font-weight: 900; color: var(--text); outline: none; padding-right: 10px; text-align: right;">
+               style="width: 100%; height: 100%; border: none; background: transparent; font-size: 45px; font-weight: 900; color: var(--text); outline: none; padding-right: 15px; text-align: right;">
     </div>
     
     <input type="number" id="tipInp" placeholder="ทิปโอน" inputmode="numeric" 
-           style="height: 100%; background: rgba(225, 245, 254, 0.1); border: 2px solid #ad2c18; border-radius: 20px; font-size: 30px; font-weight: 900; color: #ad2c18; text-align: center; outline: none; box-sizing: border-box;">
+           style="height: 100%; background: var(--input-bg); border: none; border-radius: 20px; font-size: 28px; font-weight: 900; color: #ef4444; text-align: center; outline: none; box-shadow: none;">
 </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:12px;">
             <button id="btnCash" onclick="setPaymentType('Cash')" style="height:80px; border-radius:18px; border:none; background:linear-gradient(135deg, var(--cash1), var(--cash2)); color: var(--btn-text); font-weight:700; font-size:16px;">
