@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 21</title>
+    <title>Barber Note Pro 22</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -2770,12 +2770,14 @@ function handleSave(event) {
         $("tEnd").focus();
     }
 }
-function applyTheme(t){
-    // 1. จัดการ Class
-    document.body.classList.remove("dark","navy");
-    if(t !== "light") document.body.classList.add(t);
+function applyTheme(t) {
+    // 1. จัดการ Class ที่ Body (เพื่อให้ CSS body.navy และ body.dark ทำงาน)
+    document.body.classList.remove("dark", "navy");
+    if (t !== "light") {
+        document.body.classList.add(t);
+    }
 
-    // 2. ปรับสีพื้นหลัง Body (เผื่อกรณีจอเหลือพื้นที่ด้านล่าง)
+    // 2. ปรับพื้นหลัง Body ให้ตรงตามที่กำหนดใน CSS (ป้องกันพื้นหลังขาวหลอกตา)
     const bgColors = {
         light: "#f8fafc",
         navy: "#0f172a",
@@ -2783,9 +2785,24 @@ function applyTheme(t){
     };
     document.body.style.background = bgColors[t] || bgColors.light;
 
-    // 3. บันทึกธีม
+    // 3. ปรับสีตัวอักษรของ Input/Select ให้เข้ากับธีม (สำหรับเคสที่โดน Inline Style ทับ)
+    const inputColor = (t === 'dark') ? '#fbbf24' : '#1e293b';
+    const inputs = document.querySelectorAll('input, select');
+    inputs.forEach(el => el.style.color = inputColor);
+
+    // 4. บันทึกธีมลงเครื่อง
     localStorage.setItem("selectedTheme", t);
 }
+
+// 🎯 ส่วนเริ่มต้นเมื่อโหลดหน้าเว็บ
+document.addEventListener("DOMContentLoaded", () => {
+    const savedTheme = localStorage.getItem("selectedTheme") || "light";
+    applyTheme(savedTheme);
+
+    // ปรับค่าใน Dropdown (ถ้ามี) ให้ตรงกับธีมที่บันทึกไว้
+    const themeSelector = document.getElementById("setTheme");
+    if (themeSelector) themeSelector.value = savedTheme;
+});
 /* ==========================================================
    SECTION 9: SYSTEM STARTUP & EVENT LISTENERS
    (สวิตช์เปิดเครื่อง: การเริ่มต้นและดักจับเหตุการณ์)
