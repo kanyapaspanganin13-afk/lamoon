@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 28</title>
+    <title>Barber Note Pro 29</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -180,86 +180,85 @@ function openReportModal(title, htmlContent) {
 </head>
 <style>
 /* =====================================================
-💎 ULTIMATE PREMIUM THEME SYSTEM - COMPLETE EDITION
+💎 THE ULTIMATE PREMIUM POS SYSTEM - FULL COMPLETE
 =====================================================
 */
 
-/* 1. THEME VARIABLES */
+/* ========= 🎨 1. THEME SYSTEM (FULL VARIABLES) ========= */
 :root {
     /* ⚪ LIGHT: Modern & Clean */
-    --primary: #6366f1;
-    --accent: #0ea5e9;
-    --success: #22c55e;
-    --danger: #ef4444;
-    --bg: #f8fafc;
-    --card: rgba(255, 255, 255, 0.92);
+    --bg: #f0f2f5;
+    --card: #ffffff;
     --text: #1e293b;
-    --border: rgba(226, 232, 240, 0.8);
-    --input-bg: #f1f5f9;
+    --accent: #6366f1;
+    --primary: #4f46e5;
+    --border: rgba(0, 0, 0, 0.06);
+    --input-bg: #f8fafc;
+    --btn-text: #ffffff;
     --blur: 20px;
     --radius: 28px;
+    /* ปุ่มรับเงิน Light */
     --cash1: #10b981; --cash2: #059669;
     --trans1: #6366f1; --trans2: #4338ca;
     --mix1: #0ea5e9; --mix2: #0284c7;
-    --btn-text: #ffffff;
 }
 
 body.navy {
-    /* 🌌 NAVY: Tech & Deep */
+    /* 🌌 NAVY: Tech & Deep Space */
     --bg: #020617;
-    --card: rgba(15, 23, 42, 0.88);
+    --card: #0f172a;
     --text: #f1f5f9;
     --accent: #38bdf8;
     --primary: #6366f1;
-    --border: rgba(255, 255, 255, 0.08);
-    --input-bg: rgba(15, 23, 42, 0.6);
-    --cash1: #34d399; --cash2: #059669;
+    --border: rgba(255, 255, 255, 0.1);
+    --input-bg: #1e293b; 
+    --btn-text: #ffffff;
+    --blur: 22px;
+    --radius: 28px;
+    /* ปุ่มรับเงิน Navy (สว่างเรืองแสง) */
+    --cash1: #34d399; --cash2: #10b981;
     --trans1: #60a5fa; --trans2: #2563eb;
     --mix1: #22d3ee; --mix2: #0891b2;
 }
 
 body.dark {
-    /* 🟡 DARK GOLD: Luxury */
+    /* 🟡 DARK GOLD: Pure Luxury */
     --bg: #000000;
-    --card: rgba(28, 28, 28, 0.96);
+    --card: #111111;
     --text: #facc15;
     --accent: #facc15;
     --primary: #eab308;
-    --border: rgba(251, 191, 36, 0.15);
-    --input-bg: rgba(20, 20, 20, 0.8);
+    --border: rgba(250, 204, 21, 0.15);
+    --input-bg: #1a1a1a; 
     --btn-text: #1a1a1a;
-    --cash1: #fde047; --cash2: #eab308;
+    --blur: 25px;
+    --radius: 28px;
+    /* ปุ่มรับเงิน Dark Gold (เฉดเหลืองทอง) */
+    --cash1: #fde047; --cash2: #facc15;
     --trans1: #fb923c; --trans2: #ea580c;
     --mix1: #facc15; --mix2: #ca8a04;
 }
 
-/* 2. RESET & FORCE CLEAN (ฆ่าล้างบางกรอบผี) */
+/* ========= 🛠️ 2. CORE RESET & BASE STYLES ========= */
 * {
     box-sizing: border-box;
     font-family: 'Kanit', sans-serif;
     -webkit-tap-highlight-color: transparent;
     outline: none !important;
 }
-::-webkit-scrollbar { display: none; }
 
-/* ล้าง Inline Style ที่แอบฝังมาใน HTML */
-[style*="background:#fff"], [style*="background:white"], [style*="background-color:#fff"] { 
-    background: transparent !important; 
-}
-[style*="border:1px solid #fff"], [style*="border:1px solid #ccc"], [style*="border: 1px"] { 
-    border: none !important; 
-}
+::-webkit-scrollbar { display: none; }
 
 body {
     margin: 0;
-    background: var(--bg) !important;
-    color: var(--text) !important;
+    background: var(--bg);
+    color: var(--text);
     transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     padding-bottom: 100px;
     overflow-x: hidden;
 }
 
-/* 3. LAYOUT & PAGE */
+/* ========= 📋 3. PAGE & CARD LAYOUT ========= */
 .page {
     display: none;
     background: var(--card) !important;
@@ -269,71 +268,89 @@ body {
     border: 1px solid var(--border) !important;
     padding: 24px !important;
     margin: 15px 12px 100px !important;
-    min-height: calc(100vh - 190px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2) !important;
+    min-height: calc(100vh - 180px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
 }
+
 .page.active { display: block; animation: slideUp 0.4s ease-out; }
 
-/* ล้างขอบในหน้า p3 */
+/* ล้างกรอบในหน้าประวัติ/บัญชี */
 #p3 > div, #p3 .card, .history-card {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    padding: 10px 0 !important;
+    padding: 5px 0 !important;
 }
 
-/* 4. INPUTS & PRICE (ลบกรอบซ้อน) */
+/* ========= 🎯 4. INPUTS & PRICE (แก้ปัญหาสีช่องจม) ========= */
 input, select, textarea, .icon-card {
     width: 100% !important;
-    height: 58px !important;
-    border-radius: 18px !important;
-    border: 1px solid var(--border) !important;
+    height: 56px !important;
     background: var(--input-bg) !important;
     color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 18px !important;
     font-size: 18px !important;
     font-weight: 700 !important;
     text-align: center !important;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.04) !important;
+    appearance: none !important;
     transition: 0.2s;
 }
 
+/* ตัวเลขราคาหน้า Wallet (ลอยเด่น) */
 #priceInp {
     background: transparent !important;
     border: none !important;
-    font-size: 60px !important;
-    height: 100% !important;
-    text-shadow: 0 4px 15px rgba(0,0,0,0.1);
     box-shadow: none !important;
-    margin-bottom: 10px;
+    font-size: 60px !important;
+    height: 80px !important;
+    text-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
-/* 5. BUTTONS (Premium Gradient) */
-.btn-pay {
-    height: 75px; width: 100%; border-radius: 22px; border: none !important;
-    font-size: 24px; font-weight: 900;
+/* ========= 🎨 5. PREMIUM GRADIENT BUTTONS ========= */
+.btn-pay, #btnCash, #btnTrans, #btnMix {
+    border: none !important;
+    border-radius: 22px;
     color: var(--btn-text) !important;
-    background: linear-gradient(135deg, var(--accent), var(--primary)) !important;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255,255,255,0.2) !important;
+    font-weight: 900;
+    transition: all 0.2s ease;
     cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.1);
 }
-.btn-pay:active { transform: scale(0.96); opacity: 0.9; }
 
-#btnCash { background: linear-gradient(145deg, var(--cash1), var(--cash2)) !important; }
-#btnTrans { background: linear-gradient(145deg, var(--trans1), var(--trans2)) !important; }
-#btnMix { background: linear-gradient(145deg, var(--mix1), var(--mix2)) !important; }
+.btn-pay:active, #btnCash:active, #btnTrans:active, #btnMix:active {
+    transform: scale(0.96);
+    filter: brightness(1.1);
+}
 
-/* 6. NAV & MODAL */
+#btnCash { background: linear-gradient(135deg, var(--cash1), var(--cash2)) !important; }
+#btnTrans { background: linear-gradient(135deg, var(--trans1), var(--trans2)) !important; }
+#btnMix { background: linear-gradient(135deg, var(--mix1), var(--mix2)) !important; }
+
+/* ปุ่มบันทึกใหญ่ล่างสุด */
+.btn-pay {
+    background: linear-gradient(135deg, var(--accent), var(--primary)) !important;
+    height: 75px;
+    font-size: 24px;
+    letter-spacing: 1px;
+}
+
+/* ========= 📱 6. NAVIGATION & MODALS ========= */
 nav {
-    position: fixed; bottom: 15px; left: 15px; right: 15px;
-    height: 75px; background: var(--card) !important;
+    position: fixed;
+    bottom: 12px; left: 12px; right: 12px;
+    height: 75px;
+    background: var(--card) !important;
     border: 1px solid var(--border) !important;
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
     border-radius: 25px;
     display: flex; align-items: center; justify-content: space-around;
     z-index: 9999;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
+
 .nav-item { flex: 1; text-align: center; opacity: 0.4; color: var(--text); transition: 0.3s; }
 .nav-item.active { color: var(--accent) !important; font-weight: 900; opacity: 1; transform: translateY(-4px); }
 
@@ -342,14 +359,16 @@ nav {
     display: none; align-items: center; justify-content: center;
     z-index: 10000; backdrop-filter: blur(6px);
 }
+
 .modal-content {
     background: var(--card) !important;
+    border: 1px solid var(--border) !important;
     border-radius: 32px !important;
     padding: 30px; width: 92%; max-width: 420px;
-    border: 1px solid var(--border) !important;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.5) !important;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.4);
 }
 
+/* ========= ✨ 7. ANIMATIONS ========= */
 @keyframes slideUp { 
     from { transform: translateY(30px); opacity: 0; filter: blur(10px); } 
     to { transform: translateY(0); opacity: 1; filter: blur(0); } 
