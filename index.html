@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 05</title>
+    <title>Barber Note Pro 06</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -249,20 +249,6 @@ body.dark {
 }
 ::-webkit-scrollbar { display: none; }
 
-/* 🎯 ตบสไตล์ dList และ settleBar: บังคับกรอบหนาและตามธีม */
-[style*="justify-content: space-between"], #settleBar, .d-list-item {
-    background: var(--card) !important;
-    color: var(--text) !important;
-    border: 2px solid var(--border) !important;
-    border-radius: 18px !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important;
-}
-
-/* ล้างสีตัวหนังสือที่เขียนฝังไว้ในรายงานวันที่ */
-[style*="color: #1e293b"], [style*="color:#1e293b"] {
-    color: var(--text) !important;
-}
-
 body {
     margin: 0;
     background: var(--bg) !important;
@@ -272,84 +258,107 @@ body {
     overflow-x: hidden;
 }
 
+/* 🎯 ตบทับสไตล์ dList และรายงานวันที่ ให้ตามธีม */
+[style*="justify-content: space-between"], #settleBar, .d-list-item {
+    background: var(--card) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 15px !important;
+}
+
 /* ========= 📋 3. PAGE & CARD LAYOUT ========= */
 .page {
     display: none;
     background: var(--card) !important;
     backdrop-filter: blur(var(--blur));
-    -webkit-backdrop-filter: blur(var(--blur));
     border-radius: var(--radius) !important;
     border: 1px solid var(--border) !important; 
     padding: 20px !important;
     margin: 15px 12px 100px !important; 
     min-height: calc(100vh - 180px);
 }
-.page.active { display: block; animation: slideUp 0.4s ease-out; }
+.page.active { display: block; animation: slideUp 0.3s ease-out; }
 
-/* ❌ แก้ไขช่องหน้า 3: ใส่กรอบล้อมรอบแทนเส้นใต้ และเพิ่มระยะห่าง */
-#p3 input, #p3 select, #p3 textarea {
-    border: 2px solid var(--border) !important;
-    background: var(--input-bg) !important;
-    border-radius: 15px !important;
-    padding: 12px !important;
-    margin-bottom: 20px !important; 
-    color: var(--text) !important;
-    text-align: center;
-}
+/* ========= 🎯 4. INPUTS & PRICE FIX (แก้ราคาเล็ก/กรอบซ้อน) ========= */
 
-/* ========= 🎯 4. INPUTS & SELECTS (บังคับกรอบทุกจุด) ========= */
-input, select, textarea, .input-field {
+/* 🎯 จุดตาย 1: ช่องราคา (Price) - บังคับตัวใหญ่ยักษ์และลบกรอบซ้อน */
+.price-input-inner, #priceInp {
+    font-size: 55px !important; /* บังคับตัวเลขใหญ่สะใจ */
+    font-weight: 900 !important;
+    text-align: right !important;
     width: 100% !important;
-    background-color: var(--input-bg) !important;
-    border: 2px solid var(--border) !important;
+    background: transparent !important; /* ลบพื้นหลังซ้อน */
+    border: none !important; /* ลบกรอบซ้อนด้านใน */
     color: var(--text) !important;
-    font-size: 18px !important;
-    font-weight: 700 !important;
-    border-radius: 18px !important;
-    margin-bottom: 12px !important;
-    padding: 10px !important;
+    outline: none !important;
+    padding-right: 10px !important;
 }
 
-/* 🔥 แก้จุดตาย: ช่องทิปและช่องราคาหน้าแรก บังคับกรอบกลับมา */
-.price-input-inner, .tip-input-inner, #tipInp, #priceInp {
-    border: 2px solid var(--border) !important; 
+/* 🎯 จุดตาย 2: ช่องทิป (Tip) - ใส่กรอบให้ชัดเจนตามที่มึงสั่ง */
+.tip-input-inner, #tipInp {
+    font-size: 28px !important;
+    font-weight: 800 !important;
+    text-align: center !important;
     background: var(--input-bg) !important;
-    border-radius: 18px !important;
-    padding: 10px !important;
+    border: 2px solid var(--border) !important; /* ใส่กรอบ 2px ชัดๆ */
+    border-radius: 15px !important;
+    color: #ef4444 !important; /* บังคับสีแดงให้เด่น */
+    padding: 8px !important;
 }
 
-/* แก้ระยะห่างช่องวันที่หน้าบันทึกที่ชิดกันเกินไป */
+/* 🎯 จุดตาย 3: ช่องวันที่/เริ่ม-เสร็จ (ชิดกันเกิน) */
 .time-input-container {
-    display: flex;
-    gap: 15px !important;
-    margin-bottom: 15px !important;
+    display: flex !important;
+    gap: 20px !important; /* เพิ่มระยะห่างให้กว้างขึ้น */
+    margin: 15px 0 !important;
+}
+.time-input-container input {
+    flex: 1;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    padding: 10px !important;
+    background: var(--input-bg) !important;
+    color: var(--text) !important;
 }
 
-input[type="date"] { color-scheme: dark; }
+/* 🎯 จุดตาย 4: หน้า 3 (รายงาน) - บังคับกรอบช่องวันที่ให้เห็นชัด */
+#p3 input[type="date"], #p3 select, #p3 textarea {
+    border: 1px solid var(--border) !important;
+    background: var(--input-bg) !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    margin-bottom: 15px !important;
+    color: var(--text) !important;
+}
 
 /* ========= 🎨 5. BUTTONS & UI ELEMENTS ========= */
-#btnSubmitSend {
+.btn-pay, button[onclick*="saveData"] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 70px !important;
     background: linear-gradient(135deg, var(--save1), var(--save2)) !important;
     color: var(--btn-text) !important;
-    border-radius: 18px !important;
-    border: none !important;
-    height: 55px !important;
+    font-size: 24px !important;
     font-weight: 900 !important;
+    border-radius: 22px !important;
+    border: none !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25) !important;
+    margin-top: 25px !important;
 }
 
 #p3 button {
     background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)) !important;
     color: var(--btn-text) !important;
     border-radius: 15px !important;
-    padding: 12px !important;
+    padding: 15px !important;
     font-weight: 800 !important;
     border: none !important;
 }
 
-#p3 .icon-card i, #p3 .icon-card svg {
-    color: var(--accent) !important;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-}
+/* บังคับสีไอคอนหน้า 3 */
+#p3 .icon-card i, #p3 .icon-card svg { color: var(--accent) !important; }
 
 /* ========= 📱 6. NAVIGATION & MODALS ========= */
 nav {
@@ -360,11 +369,11 @@ nav {
     display: flex; align-items: center; justify-content: space-around;
     z-index: 9999;
 }
-.nav-item { flex: 1; text-align: center; opacity: .5; color: var(--text); }
+.nav-item { flex: 1; text-align: center; opacity: .5; color: var(--text); text-decoration: none; }
 .nav-item.active { color: var(--accent) !important; font-weight: 900; opacity: 1; }
 
-@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-}</style>
+@keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+</style>
 </head>
 <body>
 <div class="container">
