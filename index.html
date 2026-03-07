@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 03</title>
+    <title>Barber Note Pro 04</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -249,7 +249,7 @@ body.dark {
 }
 ::-webkit-scrollbar { display: none; }
 
-/* 🎯 ล้าง background: #fff และขอบขาวที่เขียนฝังไว้ในตัว HTML (Inline Style) */
+/* 🎯 จุดตาย: ล้าง background: #fff และขอบขาวที่แอบติดมาใน HTML */
 [style*="background:#fff"], [style*="background: #fff"], 
 [style*="background:white"], [style*="background: white"],
 [style*="background-color:#fff"] {
@@ -270,7 +270,7 @@ body {
     overflow-x: hidden;
 }
 
-/* ========= 📋 3. PAGE & CARD LAYOUT (กรอบหลัก) ========= */
+/* ========= 📋 3. PAGE & CARD LAYOUT (กรอบหลักหน้าบันทึก/รายงาน) ========= */
 .page {
     display: none;
     background: var(--card) !important;
@@ -295,20 +295,22 @@ body {
     margin-bottom: 0 !important;
 }
 
-/* ❌ แก้จุดปฏิทินซ้อน (ที่มึงวงแดง): ลบกรอบหน้า 3 ออกให้เหลือแค่เส้นใต้ */
-#p3 input, #p3 select, #p3 textarea {
-    border: none !important;
-    border-bottom: 1px solid var(--border) !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    padding: 8px 0 !important;
+/* ✅ แก้ไข: ช่องทิปกรอบหายในหน้าบันทึก */
+#tipInp {
+    border: 2px solid var(--border) !important; /* บังคับให้มีขอบตามธีม */
+    border-radius: 15px !important;
+    background-color: var(--input-bg) !important;
 }
 
-/* ปุ่มในหน้ารายงาน (แก้ตัวแปรให้ตรงกับ Section 1 แล้ว) */
+.history-card {
+    border-bottom: 1px solid var(--border) !important; 
+    border-radius: 0 !important;
+}
+
+/* ✅ แก้ไข: ปุ่มหน้ารายงานมองไม่เห็นตัวหนังสือ (เรียกชื่อตัวแปรให้ตรงกับ Section 1) */
 #p3 button, .history-card button {
     background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)) !important;
-    color: var(--btn-text) !important;
+    color: var(--btn-text) !important; /* ดึงสีขาว/ดำตามธีม */
     border-radius: 15px !important;
     border: none !important;
     padding: 10px 15px !important;
@@ -317,7 +319,7 @@ body {
     width: 100%;
 }
 
-/* ========= 🎯 4. INPUTS & SELECTS (FIXED) ========= */
+/* ========= 🎯 4. INPUTS & SELECTS (แก้ไข: วันที่ชิดกันเกิน & ปฏิทินซ้อน) ========= */
 input, select, textarea, .input-field {
     width: 100% !important;
     background-color: var(--input-bg) !important;
@@ -327,25 +329,46 @@ input, select, textarea, .input-field {
     font-weight: 700 !important;
     text-align: center !important;
     outline: none !important;
+    appearance: none !important;
+    -webkit-appearance: none;
+    box-shadow: none !important;
+}
+
+/* ✅ แก้ไข: เพิ่มช่องว่างระหว่างกล่อง "เริ่ม" และ "เสร็จ" ในหน้าบันทึก */
+.time-input-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px !important; /* เพิ่มช่องว่างระหว่างกล่อง */
+    margin-bottom: 10px;
 }
 
 input[type="date"] {
     position: relative;
     min-height: 45px;
-    color-scheme: dark;
+    color-scheme: dark; /* ช่วยให้ Icon ปฏิทินในโหมดมืดเป็นสีขาวอัตโนมัติ */
 }
 
-/* ล้างกรอบซ้อนในช่องปฏิทิน */
+/* ล้างกรอบซ้อนในช่องปฏิทินที่วงแดงไว้ */
 input::-webkit-calendar-picker-indicator {
     background: transparent !important;
     bottom: 0; color: transparent !important; cursor: pointer;
     height: auto; left: 0; position: absolute; right: 0; top: 0; width: auto; z-index: 5;
 }
 
-#priceInp { font-size: 50px !important; text-align: right !important; background: transparent !important; border: none !important; }
-#tipInp { font-size: 28px !important; text-align: center !important; background: transparent !important; border: none !important; }
+/* เส้นใต้ช่องกรอกในหน้าบัญชี/รายงาน ให้ดูแพง ไม่เป็นกรอบสี่เหลี่ยมซ้อน */
+#p3 .input-wrapper-main, #p2 .input-wrapper-main, #p3 input, #p2 input {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+    padding: 5px 0 !important;
+}
 
-/* ========= 🎨 5. BUTTONS & ICON CARDS ========= */
+/* จัดการช่องราคาหน้าหลัก */
+#priceInp { font-size: 50px !important; text-align: right !important; background: transparent !important; border: none !important; color: var(--text); }
+#tipInp { font-size: 28px !important; text-align: center !important; background: transparent !important; border: none !important; color: #ad2c18 !important; }
+
+/* ========= 🎨 5. BUTTONS & ICON CARDS (หน้าหลัก) ========= */
 #btnCash { background: linear-gradient(145deg, var(--cash1), var(--cash2)) !important; }
 #btnTrans { background: linear-gradient(145deg, var(--trans1), var(--trans2)) !important; }
 #btnMix { background: linear-gradient(145deg, var(--mix1), var(--mix2)) !important; }
@@ -357,7 +380,6 @@ input::-webkit-calendar-picker-indicator {
     background: linear-gradient(135deg, var(--save1), var(--save2)) !important;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
 }
-.btn-pay:active { transform: scale(0.96); }
 
 .icon-card {
     border-radius: 20px; border: 1px solid var(--border);
@@ -365,7 +387,7 @@ input::-webkit-calendar-picker-indicator {
     height: 80px; transition: 0.2s;
 }
 
-/* ========= 📱 6. UI NAVIGATION & MODALS ========= */
+/* ========= 📱 6. UI NAVIGATION & MODALS (ส่วนท้ายสุด) ========= */
 nav {
     position: fixed; bottom: 12px; left: 12px; right: 12px;
     height: 72px; background: var(--card) !important;
@@ -390,8 +412,10 @@ nav {
 
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-#p3 .icon-card i, #p3 .icon-card svg { color: var(--accent) !important; }
-</style>
+/* บังคับสีไอคอนเฉพาะในหน้ารายงาน/บัญชี (หน้า 3) */
+#p3 .icon-card i, #p3 .icon-card svg {
+    color: var(--accent) !important;
+}</style>
 </head>
 <body>
 <div class="container">
