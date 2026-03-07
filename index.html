@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 8 </title>
+    <title>Barber Note Pro 38 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -240,114 +240,165 @@ body.dark {
     --save1: #fbbf24; --save2: #d97706;
    --btn-clear1: #fbbf24; --btn-clear2: #d97706; /* ดำทองใช้โทนทองเหมือนเดิม */
     --btn-his1: #4b5563;   --btn-his2: #1f2937;   /* ประวัติ: เทาดำ */
-
-    /* ========= 🛠️ 2. THE ULTIMATE MASTER FIX (แก้กรอบซ้อน & ปรับสมดุลทุกหน้า) ========= */
-* { box-sizing: border-box; font-family: 'Kanit', sans-serif; }
+}
+/* ========= 🛠️ 2. RESET & FORCE FIX (ล้างสไตล์ที่ฝังใน HTML) ========= */
+* {
+    box-sizing: border-box;
+    font-family: 'Kanit', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
 ::-webkit-scrollbar { display: none; }
 
-/* 🚫 ซ่อน Modal และขยะส่วนเกินกลางจอให้ตายสนิท */
-.modal {
-    display: none !important; position: fixed; inset: 0; 
-    background: rgba(0, 0, 0, 0.75); z-index: 10000;
-    align-items: center; justify-content: center; backdrop-filter: blur(6px);
+/* 🎯 จุดตาย: ล้าง background: #fff และขอบขาวที่เขียนฝังไว้ในตัว HTML (Inline Style) */
+[style*="background:#fff"], [style*="background: #fff"], 
+[style*="background:white"], [style*="background: white"],
+[style*="background-color:#fff"] {
+    background: transparent !important;
 }
-center, .history-link-container, [style*="margin-top: 20px; background: white"] {
-    display: none !important;
+
+[style*="border:1px solid #fff"], [style*="border: 1px solid white"],
+[style*="border:1px solid #ccc"] {
+    border: 1px solid var(--border) !important;
 }
 
 body {
-    margin: 0; background: var(--bg) !important; color: var(--text) !important;
-    padding-bottom: 95px; overflow-x: hidden;
+    margin: 0;
+    background: var(--bg) !important;
+    color: var(--text) !important;
+    transition: 0.3s;
+    padding-bottom: 95px;
+    overflow-x: hidden;
 }
 
-/* ========= 📋 PAGE & SPACING (ปรับสมดุลระยะห่าง) ========= */
+/* ========= 📋 3. PAGE & CARD LAYOUT (กรอบหลัก) ========= */
 .page {
-    display: none; background: var(--card) !important;
-    border-radius: var(--radius) !important; border: 1px solid var(--border) !important; 
-    padding: 22px !important; margin: 15px 14px 100px !important; 
+    display: none;
+    background: var(--card) !important;
+    backdrop-filter: blur(var(--blur));
+    -webkit-backdrop-filter: blur(var(--blur));
+    border-radius: var(--radius) !important;
+    border: 1px solid var(--border) !important; 
+    padding: 20px !important;
+    margin: 15px 12px 100px !important; 
     min-height: calc(100vh - 180px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important; 
+    transition: 0.3s;
 }
-.page.active { display: block; animation: slideUp 0.3s ease-out; }
+.page.active { display: block; animation: slideUp 0.4s ease-out; }
 
-/* จัดการระยะห่างของ Element ในหน้าบันทึกให้เท่ากัน */
-.page > div, .page > section {
-    margin-bottom: 15px !important;
-}
-
-/* ========= 💰 INPUTS: PRICE & BALANCE (ลบกรอบซ้อนทุกหน้า) ========= */
-
-/* 🚫 ลบกรอบซ้อนหน้าบันทึกและหน้าบัญชี (ไอ้เส้นฟ้าที่มึงวงแดงไว้) */
-.price-input-container, .price-input-inner, .input-wrapper-main, 
-[style*="border: 1px solid #3b82f6"], [style*="border:1px solid #3b82f6"] {
-    border: none !important; background: transparent !important; box-shadow: none !important;
+/* 🎯 หน้าบัญชี - สั่งล้างกรอบขาวซ้อนชั้นในให้สะอาด */
+#p3 > div, #p3 .card, .history-card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
 }
 
-/* ช่องราคา (หน้า 1) และ ช่องยอดคงเหลือ (หน้า 3) */
-#priceInp, #p3 input[readonly], [id*="total"], [id*="balance"] {
-    font-size: 50px !important; font-weight: 900 !important;
-    text-align: center !important; color: var(--text) !important;
-    background: var(--input-bg) !important;
-    border: 2px solid var(--border) !important; /* กรอบชั้นเดียวคมๆ */
-    border-radius: 20px !important; padding: 15px !important;
-    width: 100% !important; height: 90px !important; outline: none !important;
+/* ========= 🎯 4. INPUTS & SELECTS (จบปัญหาสีไม่เท่ากัน) ========= */
+input, select, textarea {
+    width: 100% !important; 
+    height: 54px !important; 
+    border-radius: 16px !important; 
+    border: 1px solid var(--border) !important; 
+    background: var(--input-bg) !important; 
+    color: var(--text) !important;
+    font-size: 18px !important; 
+    font-weight: 700 !important;
+    text-align: center !important;
+    outline: none !important;
+    box-shadow: none !important;
+    appearance: none !important;
+    transition: 0.2s;
 }
 
-/* ช่องทิป: ปรับให้สมดุลกับช่องราคา */
+/* ส่วนของช่องราคา: ล้างกรอบของตัว input เพื่อให้ตัวเลขลอยอยู่ใน div แม่ */
+#priceInp {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-size: 52px !important;
+    height: 100% !important;
+    outline: none !important;
+    padding: 0 10px !important;
+}
+
+/* ส่วนของช่องทิป: ให้มีกรอบเหมือนโครงสร้างช่องราคา แต่ไม่เน้นสี */
 #tipInp {
-    font-size: 24px !important; font-weight: 800 !important;
-    text-align: center !important; color: #ef4444 !important;
-    background: var(--input-bg) !important;
-    border: 2px solid var(--border) !important;
-    border-radius: 18px !important; padding: 12px !important;
-    width: 100% !important; margin-bottom: 5px !important;
+    background: var(--input-bg) !important; /* ใช้สีพื้นหลังช่องทั่วไป */
+    border: 1px solid var(--border) !important; /* ใช้สีเส้นขอบมาตรฐาน ไม่ใส่สีเด่น */
+    border-radius: 20px !important;
+    font-size: 35px !important;
+    height: 100% !important;
+    width: 100% !important;
+    color: var(--text) !important; /* ใช้สีตัวอักษรปกติ */
+    text-align: center !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05) !important; /* เพิ่มมิติเล็กน้อย */
 }
 
-/* 📅 ช่องวันที่: แก้ปัญหาชิด/ห่าง (ใช้ Grid ช่วย) */
-.time-input-container {
-    display: grid !important; grid-template-columns: 1fr 1fr; 
-    gap: 12px !important; margin: 10px 0 !important;
-}
-.time-input-container input {
-    background: var(--input-bg) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 14px !important; padding: 12px !important;
-    color: var(--text) !important; font-weight: 700 !important;
-    width: 100% !important; text-align: center !important;
+/* ล้างลูกศรเลขสำหรับช่องทิป */
+#tipInp::-webkit-outer-spin-button,
+#tipInp::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
-/* ========= 🔘 BUTTONS SYSTEM (ปุ่มเปลี่ยนสีตามธีม) ========= */
+/* ========= 🎨 5. BUTTONS & ICON CARDS ========= */
+/* ปุ่มรับเงิน 3 ปุ่มหลัก */
+#btnCash { background: linear-gradient(145deg, var(--cash1), var(--cash2)) !important; }
+#btnTrans { background: linear-gradient(145deg, var(--trans1), var(--trans2)) !important; }
+#btnMix { background: linear-gradient(145deg, var(--mix1), var(--mix2)) !important; }
 
-/* 🎯 ปุ่มเคลียร์เงิน & ปุ่มหน้าบัญชี (บังคับเปลี่ยนสีตามธีมมึง) */
-#p3 button, .btn-clear, button[onclick*="settle"], button[onclick*="clear"] {
-    background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)) !important;
-    color: var(--btn-text) !important;
-    border-radius: 18px !important; border: none !important;
-    padding: 16px !important; font-weight: 800 !important;
-    font-size: 18px !important; width: 100% !important;
-    margin-top: 12px !important; box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
+/* ปุ่มบันทึกใหญ่ (ข้างล่าง) */
+.btn-pay {
+    height: 75px; width: 100%; border-radius: 22px; border: none !important;
+    font-size: 24px; font-weight: 900;
+    color: var(--btn-text) !important; 
+    background: linear-gradient(135deg, var(--accent), var(--primary)) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
+    cursor: pointer;
+}
+.btn-pay:active { transform: scale(0.96); }
+
+.icon-card {
+    border-radius: 20px; 
+    border: 1px solid var(--border);
+    background: var(--input-bg);
+    color: var(--text);
+    height: 80px;
+    transition: 0.2s;
 }
 
-/* 💾 ปุ่มบันทึกข้อมูล (หน้า 1) */
-.btn-pay, button[onclick*="saveData"] {
-    height: 65px !important;
-    background: linear-gradient(135deg, var(--save1), var(--save2)) !important;
-    color: var(--btn-text) !important; font-size: 22px !important; font-weight: 900 !important;
-    border-radius: 22px !important; border: none !important;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important; margin-top: 10px !important;
-}
-
-/* ========= 📱 NAVIGATION & OTHERS ========= */
+/* ========= 📱 6. UI NAVIGATION & MODALS ========= */
 nav {
     position: fixed; bottom: 12px; left: 12px; right: 12px;
     height: 72px; background: var(--card) !important;
     border: 1px solid var(--border) !important;
-    backdrop-filter: blur(25px); border-radius: 22px;
-    display: flex; align-items: center; justify-content: space-around; z-index: 9999;
+    backdrop-filter: blur(25px);
+    border-radius: 22px;
+    display: flex; align-items: center; justify-content: space-around;
+    z-index: 9999;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
-.nav-item { flex: 1; text-align: center; opacity: .5; color: var(--text); text-decoration: none; }
-.nav-item.active { color: var(--accent) !important; font-weight: 900; opacity: 1; }
+.nav-item { flex: 1; text-align: center; opacity: .5; color: var(--text); }
+.nav-item.active { color: var(--accent) !important; font-weight: 900; opacity: 1; transform: translateY(-3px); }
 
-@keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal {
+    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); 
+    display: none; align-items: center; justify-content: center;
+    z-index: 10000; backdrop-filter: blur(4px);
+}
+.modal-content {
+    background: var(--card) !important; 
+    border-radius: 28px !important; 
+    padding: 25px;
+    width: 92%; max-width: 420px; 
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+}
+
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 </style>
 </head>
 <body>
