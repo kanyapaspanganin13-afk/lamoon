@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 19</title>
+    <title>Barber Note Pro 49</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -189,7 +189,7 @@ function openReportModal(title, htmlContent) {
     --card: rgba(255, 255, 255, .95);
     --text: #1e293b;
     --border: rgba(226, 232, 240, 0.8);
-    --input-bg: #f1f5f9; /* สีพื้นช่องกรอกธีมสว่าง */
+    --input-bg: #f1f5f9;
     --blur: 20px;
     --radius: 28px;
 
@@ -198,6 +198,10 @@ function openReportModal(title, htmlContent) {
     --trans1: #8789f5; --trans2: #070973;
     --mix1: #a9ddf5; --mix2: #0284c7;
     --btn-text: #ffffff;
+
+    /* 🟢 เพิ่มใหม่: สีปุ่มบันทึก (ธีมสว่าง - เน้นสีฟ้าคราม) */
+    --save1: #0ea5e9; 
+    --save2: #2563eb;
 }
 
 body.navy {
@@ -209,11 +213,14 @@ body.navy {
     --input-bg: rgba(15, 23, 42, 0.6);
     --btn-text: #ffffff;
 
-    /* สีปุ่มรับเงิน (สว่างพิเศษสำหรับธีม Navy) */
-    --cash1: #74f2be;--cash2: #13a86a;
-    --trans1: #303b8a;--trans2: #010f70;
-    --mix1: #89e6f5;--mix2: #09bcd9;
-    
+    /* สีปุ่มรับเงิน */
+    --cash1: #74f2be; --cash2: #13a86a;
+    --trans1: #303b8a; --trans2: #010f70;
+    --mix1: #89e6f5; --mix2: #09bcd9;
+
+    /* 🟢 เพิ่มใหม่: สีปุ่มบันทึก (ธีม Navy - เปลี่ยนเป็นม่วง-น้ำเงินให้ต่างจากธีมสว่าง) */
+    --save1: #6366f1; 
+    --save2: #4338ca;
 }
 
 body.dark {
@@ -228,6 +235,10 @@ body.dark {
     --cash1: #fbbf24; --cash2: #d97706;
     --trans1: #f59e0b; --trans2: #b45309;
     --mix1: #fde047; --mix2: #a16207;
+
+    /* 🟢 เพิ่มใหม่: สีปุ่มบันทึก (ธีม Dark Gold) */
+    --save1: #fbbf24; 
+    --save2: #d97706;
 }
 
 /* ========= 🛠️ 2. RESET & FORCE FIX (ล้างสไตล์ที่ฝังใน HTML) ========= */
@@ -339,16 +350,17 @@ input, select, textarea {
 #btnTrans { background: linear-gradient(145deg, var(--trans1), var(--trans2)) !important; }
 #btnMix { background: linear-gradient(145deg, var(--mix1), var(--mix2)) !important; }
 
-/* ปุ่มบันทึกใหญ่ (ข้างล่าง) */
+/* 🎯 จุดที่แก้ไข: ปุ่มบันทึกใหญ่ (เปลี่ยนมาใช้สีเฉพาะธีม) */
 .btn-pay {
     height: 75px; width: 100%; border-radius: 22px; border: none !important;
     font-size: 24px; font-weight: 900;
     color: var(--btn-text) !important; 
-    background: linear-gradient(135deg, var(--accent), var(--primary)) !important;
+    /* 🟢 เรียกใช้ตัวแปรใหม่ที่แยกสีไว้แล้ว */
+    background: linear-gradient(135deg, var(--save1), var(--save2)) !important;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
     cursor: pointer;
 }
-.btn-pay:active { transform: scale(0.96); }
+.btn-pay:active { transform: scale(0.96); }}
 
 .icon-card {
     border-radius: 20px; 
