@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 29</title>
+    <title>Barber Note Pro 9</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -180,109 +180,77 @@ function openReportModal(title, htmlContent) {
 </head>
 <style>
 /* =====================================================
-💎 THE ULTIMATE PREMIUM POS SYSTEM - FULL COMPLETE
-=====================================================
-*/
+💎 THE GOD VERSION - COMPLETE UI SYSTEM (NO MISSING)
+===================================================== */
 
-/* ========= 🎨 1. THEME SYSTEM (FULL VARIABLES) ========= */
 :root {
-    /* ⚪ LIGHT: Modern & Clean */
-    --bg: #f0f2f5;
+    /* ⚪ LIGHT: High Contrast */
+    --bg: #f1f5f9;
     --card: #ffffff;
-    --text: #1e293b;
+    --text: #0f172a;
     --accent: #6366f1;
     --primary: #4f46e5;
-    --border: rgba(0, 0, 0, 0.06);
-    --input-bg: #f8fafc;
+    --border: rgba(0, 0, 0, 0.08);
+    --input-bg: #f8fafc; /* สีช่องสว่างตัดกับ Card */
     --btn-text: #ffffff;
-    --blur: 20px;
-    --radius: 28px;
-    /* ปุ่มรับเงิน Light */
     --cash1: #10b981; --cash2: #059669;
     --trans1: #6366f1; --trans2: #4338ca;
     --mix1: #0ea5e9; --mix2: #0284c7;
+    --success: #10b981; --danger: #ef4444;
 }
 
 body.navy {
-    /* 🌌 NAVY: Tech & Deep Space */
+    /* 🌌 NAVY: Deep Space Luxury */
     --bg: #020617;
     --card: #0f172a;
     --text: #f1f5f9;
     --accent: #38bdf8;
     --primary: #6366f1;
     --border: rgba(255, 255, 255, 0.1);
-    --input-bg: #1e293b; 
+    --input-bg: #1e293b; /* ช่องต้องสว่างกว่า Card เล็กน้อยเพื่อให้ลอย */
     --btn-text: #ffffff;
-    --blur: 22px;
-    --radius: 28px;
-    /* ปุ่มรับเงิน Navy (สว่างเรืองแสง) */
     --cash1: #34d399; --cash2: #10b981;
     --trans1: #60a5fa; --trans2: #2563eb;
     --mix1: #22d3ee; --mix2: #0891b2;
 }
 
 body.dark {
-    /* 🟡 DARK GOLD: Pure Luxury */
+    /* 🟡 DARK GOLD: Pure Black & Gold */
     --bg: #000000;
     --card: #111111;
     --text: #facc15;
     --accent: #facc15;
     --primary: #eab308;
-    --border: rgba(250, 204, 21, 0.15);
-    --input-bg: #1a1a1a; 
+    --border: rgba(250, 204, 21, 0.2);
+    --input-bg: #1a1a1a; /* ช่องเทาเข้มตัดกับพื้นดำสนิท */
     --btn-text: #1a1a1a;
-    --blur: 25px;
-    --radius: 28px;
-    /* ปุ่มรับเงิน Dark Gold (เฉดเหลืองทอง) */
     --cash1: #fde047; --cash2: #facc15;
     --trans1: #fb923c; --trans2: #ea580c;
     --mix1: #facc15; --mix2: #ca8a04;
 }
 
-/* ========= 🛠️ 2. CORE RESET & BASE STYLES ========= */
-* {
-    box-sizing: border-box;
-    font-family: 'Kanit', sans-serif;
-    -webkit-tap-highlight-color: transparent;
-    outline: none !important;
-}
-
+/* ========= 🛠️ CORE SYSTEM ========= */
+* { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; outline: none !important; }
 ::-webkit-scrollbar { display: none; }
+body { margin: 0; background: var(--bg); color: var(--text); transition: 0.3s ease; padding-bottom: 100px; overflow-x: hidden; }
 
-body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    padding-bottom: 100px;
-    overflow-x: hidden;
-}
-
-/* ========= 📋 3. PAGE & CARD LAYOUT ========= */
+/* ========= 📋 PAGE & LAYOUT ========= */
 .page {
     display: none;
     background: var(--card) !important;
-    backdrop-filter: blur(var(--blur));
-    -webkit-backdrop-filter: blur(var(--blur));
-    border-radius: var(--radius) !important;
+    border-radius: 28px !important;
     border: 1px solid var(--border) !important;
     padding: 24px !important;
     margin: 15px 12px 100px !important;
     min-height: calc(100vh - 180px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
 }
+.page.active { display: block; animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
 
-.page.active { display: block; animation: slideUp 0.4s ease-out; }
+.row { display: flex; gap: 12px; margin-bottom: 15px; width: 100%; }
+.col { flex: 1; }
 
-/* ล้างกรอบในหน้าประวัติ/บัญชี */
-#p3 > div, #p3 .card, .history-card {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 5px 0 !important;
-}
-
-/* ========= 🎯 4. INPUTS & PRICE (แก้ปัญหาสีช่องจม) ========= */
+/* ========= 🎯 INPUTS (Height ล็อกไว้ที่ 56px ตามสั่ง) ========= */
 input, select, textarea, .icon-card {
     width: 100% !important;
     height: 56px !important;
@@ -293,85 +261,59 @@ input, select, textarea, .icon-card {
     font-size: 18px !important;
     font-weight: 700 !important;
     text-align: center !important;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.04) !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05) !important;
     appearance: none !important;
     transition: 0.2s;
 }
 
-/* ตัวเลขราคาหน้า Wallet (ลอยเด่น) */
 #priceInp {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    font-size: 60px !important;
-    height: 80px !important;
-    text-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    background: transparent !important; border: none !important; box-shadow: none !important;
+    font-size: 60px !important; height: 80px !important; font-weight: 900 !important;
 }
 
-/* ========= 🎨 5. PREMIUM GRADIENT BUTTONS ========= */
+/* ========= 🎨 BUTTONS & STATES ========= */
 .btn-pay, #btnCash, #btnTrans, #btnMix {
-    border: none !important;
-    border-radius: 22px;
-    color: var(--btn-text) !important;
-    font-weight: 900;
-    transition: all 0.2s ease;
-    cursor: pointer;
+    border: none !important; border-radius: 22px; color: var(--btn-text) !important;
+    font-weight: 900; transition: 0.2s; cursor: pointer;
     box-shadow: 0 8px 20px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.1);
-}
-
-.btn-pay:active, #btnCash:active, #btnTrans:active, #btnMix:active {
-    transform: scale(0.96);
-    filter: brightness(1.1);
 }
 
 #btnCash { background: linear-gradient(135deg, var(--cash1), var(--cash2)) !important; }
 #btnTrans { background: linear-gradient(135deg, var(--trans1), var(--trans2)) !important; }
 #btnMix { background: linear-gradient(135deg, var(--mix1), var(--mix2)) !important; }
 
-/* ปุ่มบันทึกใหญ่ล่างสุด */
 .btn-pay {
     background: linear-gradient(135deg, var(--accent), var(--primary)) !important;
-    height: 75px;
-    font-size: 24px;
-    letter-spacing: 1px;
+    height: 75px !important; font-size: 24px !important; width: 100%;
 }
 
-/* ========= 📱 6. NAVIGATION & MODALS ========= */
+button:active, .btn-pay:active { transform: scale(0.95); filter: brightness(1.1); }
+
+/* ========= 📱 UI COMPONENTS ========= */
 nav {
-    position: fixed;
-    bottom: 12px; left: 12px; right: 12px;
-    height: 75px;
-    background: var(--card) !important;
-    border: 1px solid var(--border) !important;
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    border-radius: 25px;
+    position: fixed; bottom: 12px; left: 12px; right: 12px; height: 75px;
+    background: var(--card) !important; border: 1px solid var(--border) !important;
+    backdrop-filter: blur(25px); border-radius: 25px;
     display: flex; align-items: center; justify-content: space-around;
-    z-index: 9999;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 9999; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
-
 .nav-item { flex: 1; text-align: center; opacity: 0.4; color: var(--text); transition: 0.3s; }
 .nav-item.active { color: var(--accent) !important; font-weight: 900; opacity: 1; transform: translateY(-4px); }
 
-.modal {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-    display: none; align-items: center; justify-content: center;
-    z-index: 10000; backdrop-filter: blur(6px);
-}
-
 .modal-content {
-    background: var(--card) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 32px !important;
-    padding: 30px; width: 92%; max-width: 420px;
+    background: var(--card) !important; border: 1px solid var(--border) !important;
+    border-radius: 32px !important; padding: 30px; width: 92%; max-width: 420px;
     box-shadow: 0 25px 50px rgba(0,0,0,0.4);
 }
 
-/* ========= ✨ 7. ANIMATIONS ========= */
+/* Utility Classes */
+.text-success { color: var(--success) !important; }
+.text-danger { color: var(--danger) !important; }
+.hidden { display: none !important; }
+
 @keyframes slideUp { 
-    from { transform: translateY(30px); opacity: 0; filter: blur(10px); } 
-    to { transform: translateY(0); opacity: 1; filter: blur(0); } 
+    from { transform: translateY(30px); opacity: 0; } 
+    to { transform: translateY(0); opacity: 1; } 
 }
 </style>
 </head>
