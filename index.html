@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 09</title>
+    <title>Barber Note Pro 02</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -319,75 +319,90 @@ body {
     font-weight: 700 !important;
     margin: 5px 0;
 }
-/* ========= 🎯 4. INPUTS & SELECTS (จบปัญหาสีไม่เท่ากันทุกธีม) ========= */
-input, select, textarea {
-    width: 100% !important; 
-    height: 54px !important; 
-    border-radius: 16px !important; 
-    
-    /* 1. บังคับใช้สีทึบจากตัวแปร เพื่อไม่ให้สี "ซ้อน" กันแล้วเพี้ยน */
-    background-color: var(--input-bg) !important; 
-    border: 1px solid var(--border) !important; 
-    color: var(--text) !important;
-    
-    font-size: 18px !important; 
+/* ========= 🎯 4. INPUTS & SELECTS (FIXED: ปฏิทินซ้อน & ตัวหนังสือมืด) ========= */
+
+/* คุมพื้นฐานทุก Input ให้สีสว่างอ่านง่าย */
+input, select, textarea, .input-field {
+    width: 100% !important;
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important; /* บังคับสีตัวอักษรตามธีม */
+    font-size: 18px !important;
     font-weight: 700 !important;
     text-align: center !important;
-    
-    /* 2. ล้างสไตล์ดั้งเดิมของ Browser ที่ทำให้ธีมสว่าง/น้ำเงิน ดูสีโดด */
     outline: none !important;
-    box-shadow: none !important;
     appearance: none !important;
-    -webkit-appearance: none; /* สำหรับ Safari/iOS */
-    transition: 0.2s;
-    opacity: 1 !important; /* บังคับความทึบแสง 100% */
+    -webkit-appearance: none;
+    box-shadow: none !important;
 }
 
-/* 🟢 สำหรับหน้าบัญชี (#p3): ปรับให้ช่องวันที่/หมายเหตุ เนียนไปกับหน้ากระดาษ */
-#p3 input, #p3 select, #p3 textarea {
-    border: none !important;            /* ลบกรอบซ้อนออก */
-    background: transparent !important;  /* ให้กลืนไปกับพื้นหลัง Card ในหน้า 3 */
-    height: auto !important;
-    padding: 10px 0 !important;
+/* แก้ไข: ช่องวันที่ในหน้ารายงานที่มองไม่เห็นตัวเลข */
+input[type="date"] {
+    position: relative;
+    min-height: 45px;
+    color-scheme: dark; /* ช่วยให้ Icon ปฏิทินในโหมดมืดเป็นสีขาวอัตโนมัติ */
 }
 
-/* 🎯 แก้จุดตาย: ล้างสไตล์ที่ HTML เขียนฝัง background: var(--bg) ไว้ใน <div> */
-.page div[style*="background: var(--bg)"], 
-.page div[style*="background:var(--bg)"] {
-    background: var(--input-bg) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 15px !important;
+/* ล้างกรอบซ้อนในช่องปฏิทินที่วงแดงไว้ */
+input::-webkit-calendar-picker-indicator {
+    background: transparent !important;
+    bottom: 0;
+    color: transparent !important;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+    z-index: 5;
 }
 
-/* --- ส่วนของช่องราคาและทิป (ปรับให้รองรับทุกธีม) --- */
-
-/* ราคาหลัก: เน้นตัวเลขลอยตัว */
-#priceInp {
+/* แก้ไข: หน้าบัญชี (#p3) และหน้ารายงาน (#p2) ที่กรอบซ้อนกัน */
+#p3 .input-wrapper-main, 
+#p2 .input-wrapper-main,
+#p3 input, #p2 input {
     background: transparent !important;
     border: none !important;
-    font-size: 50px !important; /* ปรับให้พอดีกับหน้าจอ */
-    height: 100% !important;
-    padding: 0 10px !important;
+    border-bottom: 1px solid var(--border) !important; /* เปลี่ยนเป็นเส้นใต้บางๆ แทนกรอบ */
+    border-radius: 0 !important;
+    padding: 5px 0 !important;
+    height: auto !important;
 }
 
-/* ช่องทิป: บังคับให้สีเหมือนกันทุกธีม ไม่ใช้สีแดงค้างไว้ */
+/* จัดการช่องราคาและทิปให้เท่ากันเป๊ะ */
+.price-input-inner, .tip-input-inner {
+    background: transparent !important;
+    border: none !important;
+    height: 100% !important;
+    width: 100% !important;
+    font-weight: 900 !important;
+    outline: none !important;
+}
+
+#priceInp {
+    font-size: 50px !important;
+    text-align: right !important;
+    padding-right: 15px !important;
+}
+
 #tipInp {
-    background: var(--input-bg) !important;
-    /* ใช้สี Accent ของแต่ละธีมเป็นขอบแทนสีแดงตายตัว */
-    border: 2px solid var(--accent) !important; 
-    border-radius: 20px !important;
-    font-size: 30px !important;
+    font-size: 28px !important;
+    text-align: center !important;
+}
+
+/* บังคับสี Placeholder ให้อ่านออกในทุกธีม */
+::placeholder {
     color: var(--text) !important;
-    box-sizing: border-box !important;
+    opacity: 0.4 !important;
 }
 
 /* ล้างลูกศรเลข */
-#tipInp::-webkit-outer-spin-button,
-#tipInp::-webkit-inner-spin-button {
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
-
 /* ========= 🎨 5. BUTTONS & ICON CARDS ========= */
 /* ปุ่มรับเงิน 3 ปุ่มหลัก */
 #btnCash { background: linear-gradient(145deg, var(--cash1), var(--cash2)) !important; }
