@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 02</title>
+    <title>Barber Note Pro 01</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -2771,56 +2771,44 @@ function handleSave(event) {
     }
 }
 function applyTheme(t) {
-    // 1. จัดการ Class และลบ Style พิเศษเดิมออกก่อน
+    // 1. เปลี่ยน Class ที่ Body ทันที (CSS ของเราจะทำงานตาม Class นี้)
     document.body.className = t;
-    const oldStyle = document.getElementById("navyStyle");
-    if (oldStyle) oldStyle.remove();
 
+    // 2. เตรียมตัวแปรสไตล์ (root style)
     const s = document.documentElement.style;
-    // 2. กำหนดค่าพื้นฐาน (Default: Light Theme)
-    // การตั้งค่าไว้ตรงนี้จะช่วยลดการเขียนซ้ำใน else
-    let bodyBg = '#f3f4f6';
-    s.setProperty('--card', '#ffffff');
-    s.setProperty('--text', '#1a237e');
-    s.setProperty('--modal-bg', '#f3f4f6');
-    // 3. ตรวจสอบเงื่อนไขธีมต่างๆ
-        if (t === 'dark') {
-        // --- 🌑 ธีมมืด-ทอง ---
-        bodyBg = '#171717';
-        s.setProperty('--card', '#262626');
-        s.setProperty('--text', '#fbbf24');
-        s.setProperty('--modal-bg', '#171717');
-    }
-       else if (t === 'navy') {
-        // --- 🌌 ธีมน้ำเงิน ---
-        bodyBg = '#1a237e';
-        s.setProperty('--card', '#ffffff');
-        s.setProperty('--text', '#1a237e');
-        s.setProperty('--modal-bg', '#1a237e');
-        
-        const st = document.createElement("style");
-        st.id = "navyStyle";
-        st.innerHTML = `
-            body.navy { background: #1a237e !important; color: #ffffff !important; }
-            .navy .card b, .navy .card span { color: #1e293b !important; }
-            
-            /* 🎯 ยอดรวมวันนี้และยอดเงินคงเหลือ ให้เป็นสีเงิน */
-            .navy #dTotal, .navy #accNet { 
-                color: #f5f8fc !important; 
-                text-shadow: 0 0 8px rgba(226, 232, 240, 0.3);
-            }
-            
-            .navy .nav-item { color: #ffffff !important; opacity: 0.7; }
-            .navy .nav-item.active { color: #3a4afc !important; opacity: 1; font-weight: bold; }
+    let bodyBg = '#f8fafc'; // Default Light
 
-            .navy button, .navy input, .navy select, .navy .btn-main { 
-                color: #f5f8fc !important; 
-            }
-        `;
-        document.head.appendChild(st);
-    }
-    // 4. อัปเดตพื้นหลังของ Body
+    // 3. จัดการค่าพื้นฐานและสีเฉพาะธีม
+    if (t === 'dark') {
+        // --- 🌑 ธีมมืด-ทอง ---
+        bodyBg = '#121212';
+        s.setProperty('--bg', '#121212');
+        s.setProperty('--card', 'rgba(26, 26, 26, .86)');
+        s.setProperty('--text', '#fbbf24');
+        s.setProperty('--border', 'rgba(251, 191, 36, .18)');
+    } 
+    else if (t === 'navy') {
+        // --- 🌌 ธีมน้ำเงิน ---
+        bodyBg = '#0f172a';
+        s.setProperty('--bg', '#0f172a');
+        s.setProperty('--card', 'rgba(30, 41, 59, .82)');
+        s.setProperty('--text', '#f1f5f9');
+        s.setProperty('--border', 'rgba(255, 255, 255, .08)');
+    } 
+    else {
+        // --- ☀️ ธีมสว่าง (Default) ---
+        bodyBg = '#f8fafc';
+        s.setProperty('--bg', '#f8fafc');
+        s.setProperty('--card', 'rgba(255, 255, 255, .88)');
+        s.setProperty('--text', '#1e293b');
+        s.setProperty('--border', 'rgba(226, 232, 240, 0.5)');
+    }
+
+    // 4. บังคับพื้นหลัง Body ให้เปลี่ยนตามธีม
     document.body.style.background = bodyBg;
+    
+    // 5. บันทึกค่าธีมลงเครื่อง (LocalStorage) เผื่อผู้ใช้เปิดมาใหม่จะได้เป็นธีมเดิม
+    localStorage.setItem('selectedTheme', t);
 }
 /* ==========================================================
    SECTION 9: SYSTEM STARTUP & EVENT LISTENERS
