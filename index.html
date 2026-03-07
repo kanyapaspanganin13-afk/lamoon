@@ -1485,17 +1485,15 @@ if ($("dServiceStats")) $("dServiceStats").innerHTML = sH + `</div>`;
         actionBox.style.display = "flex";
         actionBox.style.gap = "10px";
         actionBox.innerHTML = `
- <div style="display: flex; gap: 10px; width: 100%; align-items: center; margin-bottom: 20px; padding: 0 5px; box-sizing: border-box;">
-    <div id="settleBar" style="flex: 8; height: 60px; background: var(--input-bg); display: flex; align-items: center; justify-content: center; border-radius: 18px; font-weight: 800; font-size: 16px; color: ${statusColor}; border: 2px solid var(--border); box-sizing: border-box; white-space: nowrap;">
-        <span style="margin-right: 10px; font-size: 22px;">${icon}</span> ${txt}
-    </div>
-
-    <button id="btnSubmitSend" onclick="saveAndGo('${dInp}', ${tot})" 
-            style="flex: 2; height: 60px; background: linear-gradient(135deg, #ff6f00, #e65100); color: #fff; border-radius: 18px; border: none; font-size: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; box-sizing: border-box; min-width: 60px;">
-        <i id="btnIcon" class="fas fa-paper-plane"></i>
-    </button>
-</div>`;
+            <div id="settleBar" style="flex:8; height:55px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; border-radius:18px; font-weight:800; font-size:14px; color:${statusColor}; border:1px solid #e2e8f0;">
+                <span style="margin-right:8px; font-size:18px;">${icon}</span> ${txt}
+            </div>
+          <button id="btnSubmitSend" onclick="saveAndGo('${dInp}', ${tot})" 
+        style="flex:2.2; height:55px; background:#ff6f00; color:#fff; border-radius:18px; border:none; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition: background 0.3s;">
+    <i id="btnIcon" class="fas fa-paper-plane"></i>
+</button>`;
     }
+
     const dList = $("dailyList");
     if (dList) {
         const dateParts = dInp.split('-'); 
@@ -1539,6 +1537,7 @@ if ($("dServiceStats")) $("dServiceStats").innerHTML = sH + `</div>`;
         `;
     } 
 }
+
 /* ==========================================================
    SECTION 5: ACCOUNTING & FINANCIAL STATUS
    (ระบบสมุดบัญชี สถานะการเงิน และไฟเตือน)
