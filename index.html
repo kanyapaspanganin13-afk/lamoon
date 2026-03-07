@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 18 </title>
+    <title>Barber Note Pro 28 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -241,87 +241,88 @@ body.dark {
    --btn-clear1: #fbbf24; --btn-clear2: #d97706; /* ดำทองใช้โทนทองเหมือนเดิม */
 --btn-his1: #4b5563;   --btn-his2: #1f2937;   /* ประวัติ: เทาดำ */
 }
-/* ========= 🛠️ 2. THE ULTIMATE RECOVERY (กู้ชีพแอปขั้นสุด) ========= */
+/* ========= 🛠️ 2. THE CLEAN SWEEP (ล้างส่วนเกิน & จัดระเบียบช่องราคา) ========= */
 * { box-sizing: border-box; font-family: 'Kanit', sans-serif; }
 ::-webkit-scrollbar { display: none; }
+
+/* 🚫 ลบพวกส่วนเกินใต้แอปที่โผล่มากลางจอ */
+center, .history-link-container, [style*="margin-top: 20px; background: white"] {
+    display: none !important;
+}
 
 body {
     margin: 0; background: var(--bg) !important; color: var(--text) !important;
     padding-bottom: 95px; overflow-x: hidden;
 }
 
-/* 📋 จัดการกรอบหน้า Page */
+/* ========= 📋 PAGE CONTROL ========= */
 .page {
     display: none; background: var(--card) !important;
     border-radius: var(--radius) !important; border: 1px solid var(--border) !important; 
     padding: 20px !important; margin: 15px 12px 100px !important; 
-    min-height: calc(100vh - 180px); box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 .page.active { display: block; animation: slideUp 0.3s ease-out; }
 
-/* ========= 💰 กู้ชีพช่องราคา & ทิป (หน้า 1) ========= */
+/* ========= 💰 กู้ชีพช่องราคา & ทิป (เขียนแบบเดียวกัน) ========= */
 
-/* ช่องราคา: บังคับกลับมาใหญ่และสวยเหมือนเดิม */
-#priceInp {
-    font-size: 48px !important; font-weight: 900 !important;
-    text-align: right !important; color: var(--text) !important;
+/* 🎯 ช่องราคา: บังคับกรอบที่ตัว Container เหมือนช่องทิป */
+.price-input-container, .price-input-inner {
     background: var(--input-bg) !important;
-    border: 2px solid var(--border) !important;
-    border-radius: 18px !important; padding: 10px 20px !important;
-    width: 100% !important; height: 85px !important; outline: none !important;
+    border: 2px solid var(--border) !important; /* กรอบหนาเท่ากัน */
+    border-radius: 18px !important;
+    padding: 5px 15px !important;
+    display: flex !important;
+    align-items: center !important;
+    height: 90px !important;
+    margin-bottom: 12px !important;
 }
 
-/* ช่องทิป: บังคับกรอบชัดเจน ไม่ลอย */
-#tipInp {
-    font-size: 24px !important; font-weight: 800 !important;
-    text-align: center !important; color: #ef4444 !important;
-    background: var(--input-bg) !important;
-    border: 2px solid var(--border) !important;
-    border-radius: 18px !important; padding: 12px !important;
+/* ลบกรอบที่ตัวเลขด้านในทิ้ง (เพื่อไม่ให้ซ้อน) */
+#priceInp {
+    font-size: 55px !important; font-weight: 900 !important;
+    text-align: right !important; color: var(--text) !important;
+    background: transparent !important; /* ให้โปร่งใสตามตัวแม่ */
+    border: none !important; /* ห้ามมีกรอบซ้อน */
     width: 100% !important; outline: none !important;
 }
 
-/* ช่องเริ่ม-เสร็จ: จัดระเบียบไม่ให้ชิดกัน */
-.time-input-container {
-    display: flex !important; gap: 15px !important; margin: 15px 0 !important;
-}
-.time-input-container input {
-    flex: 1; background: var(--input-bg) !important;
-    border: 1px solid var(--border) !important; border-radius: 12px !important;
-    padding: 12px !important; color: var(--text) !important; text-align: center;
+/* 🎯 ช่องทิป: โครงสร้างแบบเดียวกัน */
+.tip-input-inner, .tip-input-container {
+    background: var(--input-bg) !important;
+    border: 2px solid var(--border) !important;
+    border-radius: 18px !important;
+    padding: 8px !important;
+    margin-top: 5px;
 }
 
-/* ========= 💾 กู้ชีพปุ่มบันทึก (หน้า 1) ========= */
-.btn-pay, button[onclick*="saveData"], #p1 button[style*="background: linear-gradient"] {
+#tipInp {
+    font-size: 26px !important; font-weight: 800 !important;
+    text-align: center !important; color: #ef4444 !important;
+    background: transparent !important;
+    border: none !important;
+    width: 100% !important; outline: none !important;
+}
+
+/* ========= 💾 ปุ่มบันทึกข้อมูล ============== */
+.btn-pay, button[onclick*="saveData"] {
     display: flex !important; align-items: center !important; justify-content: center !important;
     width: 100% !important; height: 65px !important;
     background: linear-gradient(135deg, var(--save1), var(--save2)) !important;
     color: var(--btn-text) !important; font-size: 22px !important; font-weight: 900 !important;
     border-radius: 22px !important; border: none !important;
     box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important; margin-top: 20px !important;
-    cursor: pointer !important;
 }
 
-/* ========= 📊 กู้ชีพหน้ารายงาน (หน้า 3) ========= */
-
-/* กำจัดเส้นขาวและแถบประหลาดที่มึงวงแดงไว้ */
-[style*="justify-content: space-between"], #settleBar, .d-list-item {
-    background: var(--card) !important;
+/* ========= 📊 หน้ารายงาน (ล้างแถบขาว) ========= */
+[style*="justify-content: space-between"], #settleBar {
+    background: var(--input-bg) !important;
     border: 1px solid var(--border) !important;
     border-radius: 15px !important; padding: 10px !important;
-    color: var(--text) !important;
 }
 
-/* บังคับสีตัวหนังสือในรายงานวันที่ */
+/* เปลี่ยนสีตัวหนังสือ "รายงานวันที่" ให้เห็นชัด */
 [style*="color: #1e293b"], b[style*="font-size: 13px"] {
     color: var(--text) !important;
-}
-
-/* ปุ่มในหน้า 3 */
-#p3 button {
-    background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)) !important;
-    color: var(--btn-text) !important; border-radius: 12px !important;
-    padding: 12px !important; border: none !important; width: 100%;
 }
 
 /* ========= 📱 NAVIGATION ========= */
@@ -332,7 +333,7 @@ nav {
     backdrop-filter: blur(25px); border-radius: 22px;
     display: flex; align-items: center; justify-content: space-around; z-index: 9999;
 }
-.nav-item { flex: 1; text-align: center; opacity: .5; color: var(--text); text-decoration: none; }
+.nav-item { flex: 1; text-align: center; opacity: .5; color: var(--text); }
 .nav-item.active { color: var(--accent) !important; font-weight: 900; opacity: 1; }
 
 @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
