@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro  </title>
+    <title>Barber Note Pro 2 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -179,170 +179,171 @@ function openReportModal(title, htmlContent) {
 </script>
 </head>
 <style>
-/* ========= 💎 1. THEME VARIABLES & SYSTEM (NEW COLOR SET) ========= */
-:root {
-    /* ⚪ LIGHT MODE: โทนขาว-ฟ้าใส (เน้นความสะอาดตา) */
-    --bg: #f0f2f5;           /* พื้นหลังเทาอ่อนขาว เพื่อให้ card สีขาวดูลอยเด่น */
-    --card: #ffffff;         /* การ์ดขาวบริสุทธิ์ */
-    --text: #1e293b;
-    --accent: #3b82f6;       /* สีฟ้าหลัก */
-    --primary: #2563eb;      /* สีน้ำเงินเข้มขึ้น */
-    --border: rgba(0, 0, 0, 0.08);
-    --input-bg: #f8fafc;     /* ช่องกรอกสีเทาจางๆ */
-    --radius: 28px;
-    --blur: 20px;
-
-    /* สีปุ่มรับเงินธีมสว่าง (ใช้สีสดใสแต่ไม่ทึบ) */
-    --cash1: #34d399; --cash2: #10b981; /* เขียวสด */
-    --trans1: #60a5fa; --trans2: #3b82f6; /* ฟ้าสด */
-    --mix1: #818cf8; --mix2: #6366f1; /* ม่วงคราม */
-    --save1: #3b82f6; --save2: #1e40af; /* ปุ่มบันทึกสีน้ำเงินชัดเจน */
-    --btn-text: #ffffff;
-
-    /* 🟢 เพิ่มใหม่: สีปุ่มหน้ารายงาน/บัญชี (ใช้สีเทาสุภาพ เพื่อให้ต่างจากปุ่มบันทึก) */
-    --btn-clear1: #88f246; --btn-clear2: #139e03; 
-    --btn-his1: #f2ca5a;   --btn-his2: #ed781f;  
-body.navy {
-    /* 🌌 NAVY MODE: โทนน้ำเงินเข้มลึก (เน้นความพรีเมียมและ Contrast สูง) */
-    --bg: #020617;           /* พื้นหลังน้ำเงินเกือบดำ เพื่อให้แยกจาก card ชัดเจน */
-    --card: #0f172a;         /* การ์ดน้ำเงินเข้ม */
-    --text: #f1f5f9;
-    --accent: #0891b2;       /* สีฟ้าสว่างแบบนีออน (Cyan) เพื่อให้เด้งออกมา */
-    --primary: #031691;      /* สีฟ้าคราม */
-    --border: rgba(255, 255, 255, 0.1);
-    --input-bg: #1e293b;     /* ช่องกรอกสีน้ำเงินสว่าง เพื่อให้เห็นขอบ */
-    --btn-text: #ffffff;
-
-    /* สีปุ่มรับเงินธีม Navy (เน้นสีสะท้อนแสง) */
-    --cash1: #4ade80; --cash2: #16a34a; 
-    --trans1: #8549f5; --trans2: #4402ad; 
-    --mix1: #38bdf8; --mix2: #0284c7; 
-    --save1: #2154fc; --save2: #0b0161; 
-
-    /* 🟢 เพิ่มใหม่: สีปุ่มหน้ารายงาน/บัญชี (ใช้สีน้ำเงินเทาเข้มตัดกับพื้นหลัง) */
---btn-clear1: #ff4d4d; --btn-clear2: #b30000; 
---btn-his1: #334155;   --btn-his2: #1e293b;   
-
-/* body.dark (ดำทอง) ของคุณดีอยู่แล้ว ไม่ต้องแก้ครับ */
-body.dark {
-    --bg: #121212;
-    --card: rgba(28, 28, 28, .95);
-    --text: #fbbf24;
-    --accent: #fbbf24;
-    --border: rgba(251, 191, 36, .2);
-    --input-bg: rgba(0, 0, 0, 0.4);
-    --btn-text: #1a1a1a;
-    --cash1: #fbbf24; --cash2: #d97706;
-    --trans1: #f59e0b; --trans2: #b45309;
-    --mix1: #fde047; --mix2: #a16207;
-    --save1: #fbbf24; --save2: #d97706;
-   --btn-clear1: #fbbf24; --btn-clear2: #d97706; /* ดำทองใช้โทนทองเหมือนเดิม */
-    --btn-his1: #4b5563;   --btn-his2: #1f2937;   /* ประวัติ: เทาดำ */
-}
-/* ========= 🛠️ 2. THE FINAL ABSOLUTE FIX (รวมงาน แก้กรอบ ปรับสมดุล) ========= */
-* { box-sizing: border-box; font-family: 'Kanit', sans-serif; }
-::-webkit-scrollbar { display: none; }
-
-body {
-    margin: 0; background: var(--bg) !important; color: var(--text) !important;
-    padding-bottom: 95px; overflow-x: hidden;
+/* ========= GLOBAL & RESET ========= */
+*{
+    box-sizing:border-box;
+    font-family:'Kanit',sans-serif;
+    -webkit-tap-highlight-color: transparent; /* ลบสีฟ้าเวลาคลิกบนมือถือ */
 }
 
-/* 🚫 MODAL SYSTEM: บังคับซ่อนขยะและตั้งค่า Modal ให้เป๊ะ */
-.modal {
-    position: fixed !important; inset: 0 !important; 
-    background: rgba(0, 0, 0, 0.75) !important; 
-    display: none !important; align-items: center !important; justify-content: center !important;
-    z-index: 10000 !important; backdrop-filter: blur(6px) !important;
-}
-.modal-content {
-    background: var(--card) !important; border-radius: 28px !important; 
-    padding: 25px !important; width: 92% !important; max-width: 420px !important; 
-    border: 1px solid var(--border) !important; color: var(--text) !important;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.4) !important;
+body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    padding-bottom:100px; /* เพิ่มระยะกันชนข้างล่างนิดนึง */
+    transition: background 0.3s ease;
 }
 
-/* ลบติ่งขยะ "รายงาน/ประวัติ" และส่วนเกินกลางจอ */
+/* 🚫 กำจัดเศษขยะ HTML ที่อาจหลุดมา */
 center, .history-link-container, [style*="margin-top: 20px; background: white"] {
     display: none !important;
 }
 
-/* 📋 PAGE CONTROL & BALANCE (ปรับระยะห่างให้สมดุล) */
-.page {
-    display: none; background: var(--card) !important;
-    border-radius: var(--radius) !important; border: 1px solid var(--border) !important; 
-    padding: 22px !important; margin: 15px 14px 100px !important; 
-    min-height: calc(100vh - 180px);
+/* ========= PAGE ========= */
+.page{
+    display:none;
+    background:var(--card);
+    border-radius:var(--radius);
+    border:1px solid var(--border);
+    padding:22px;
+    margin:14px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05); /* เพิ่มเงาจางๆ ให้ดูมีมิติ */
 }
-.page.active { display: block; animation: slideUp 0.3s ease-out; }
-.page > div, .page > section { margin-bottom: 15px !important; }
+.page.active{ display:block; animation: slideUp 0.3s ease-out; }
 
-/* 💰 INPUTS: ลบกรอบซ้อนหน้าบันทึกและหน้าบัญชี (ไอ้เส้นฟ้าที่มึงวงไว้) */
-.price-input-container, .price-input-inner, .input-wrapper-main, 
-[style*="border: 1px solid #3b82f6"], [style*="border:1px solid #3b82f6"] {
-    border: none !important; background: transparent !important; box-shadow: none !important;
-}
+/* ========= 💰 INPUT SYSTEM (ป้องกันกรอบซ้อน) ========= */
 
-/* ช่องราคา (หน้า 1) และ ช่องยอดคงเหลือ (หน้า 3) - บังคับกรอบชั้นเดียว */
-#priceInp, #p3 input[readonly], [id*="total"], [id*="balance"] {
-    font-size: 50px !important; font-weight: 900 !important;
-    text-align: center !important; color: var(--text) !important;
-    background: var(--input-bg) !important;
-    border: 2px solid var(--border) !important;
-    border-radius: 20px !important; padding: 15px !important;
-    width: 100% !important; height: 90px !important; outline: none !important;
+/* ลบกรอบส่วนเกินที่ตัวครอบ (Wrapper) */
+.price-input-container, .input-wrapper, [style*="border: 1px solid #3b82f6"] {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
-/* ช่องทิป: ให้สมดุลกับช่องราคา */
+#priceInp, #p3 input[readonly] {
+    width:100%; height:90px;
+    font-size:48px; font-weight:900;
+    text-align:center;
+    background:var(--input-bg);
+    border:2px solid var(--border); /* กรอบชั้นเดียวเน้นๆ */
+    border-radius:18px;
+    color:var(--text);
+    outline: none;
+    margin-bottom: 15px;
+}
+
 #tipInp {
-    font-size: 24px !important; font-weight: 800 !important;
-    text-align: center !important; color: #ef4444 !important;
-    background: var(--input-bg) !important;
-    border: 2px solid var(--border) !important;
-    border-radius: 18px !important; padding: 12px !important;
-    width: 100% !important; margin-bottom: 5px !important;
+    width:100%; font-size:22px; font-weight:800;
+    text-align:center;
+    background:var(--input-bg);
+    border:2px solid var(--border);
+    border-radius:16px;
+    padding:12px;
+    color:#ef4444;
+    outline: none;
+    margin-bottom: 5px;
 }
 
-/* 📅 ช่องวันที่: แก้ปัญหาชิด/ห่าง ด้วย Grid */
+/* ========= 📅 DATE & TIME (BALANCE) ========= */
 .time-input-container {
-    display: grid !important; grid-template-columns: 1fr 1fr !important; 
-    gap: 12px !important; margin: 10px 0 !important;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:12px; /* ระยะห่างตรงกลาง */
+    margin: 10px 0 15px;
 }
 .time-input-container input {
-    background: var(--input-bg) !important; border: 1px solid var(--border) !important;
-    border-radius: 14px !important; padding: 12px !important;
-    color: var(--text) !important; font-weight: 700 !important;
-    width: 100% !important; text-align: center !important;
+    width: 100% !important; /* บังคับเต็มช่อง Grid */
+    background:var(--input-bg);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:12px;
+    text-align:center;
+    color:var(--text);
+    font-size: 14px;
+    font-weight: 600;
+}
+/* ========= 🎨 THEME SELECTOR CUSTOM  ========= */
+#setTheme {
+    appearance: none; 
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 15px;
+    padding-right: 40px !important; 
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-/* 🔘 BUTTONS SYSTEM: ปุ่มเปลี่ยนสีตามธีม */
-#p3 button, .btn-clear, button[onclick*="settle"], button[onclick*="clear"] {
-    background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)) !important;
-    color: var(--btn-text) !important; border-radius: 18px !important; border: none !important;
-    padding: 16px !important; font-weight: 800 !important; font-size: 18px !important;
-    width: 100% !important; margin-top: 12px !important;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important; cursor: pointer;
+/* แถม: เวลาเอาเมาส์ไปจี้หรือกด ให้กรอบมันชัดขึ้นนิดนึง */
+#setTheme:focus {
+    border-color: var(--accent) !important;
+}
+/* ========= 🔘 BUTTONS (THEME-READY) ========= */
+.btn-pay, .btn-clear, .btn-history {
+    cursor: pointer;
+    transition: transform 0.1s active, opacity 0.2s;
+}
+.btn-pay:active, .btn-clear:active, .btn-history:active { transform: scale(0.98); }
+
+.btn-pay {
+    width:100%; height:65px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px; font-weight:900;
+    border:none; border-radius:20px;
+    background:linear-gradient(135deg, var(--save1), var(--save2));
+    color:var(--btn-text);
+    margin-top:10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
-.btn-pay, button[onclick*="saveData"] {
-    display: flex !important; align-items: center !important; justify-content: center !important;
-    height: 65px !important; width: 100% !important;
-    background: linear-gradient(135deg, var(--save1), var(--save2)) !important;
-    color: var(--btn-text) !important; font-size: 22px !important; font-weight: 900 !important;
-    border-radius: 22px !important; border: none !important;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important; margin-top: 10px !important;
+.btn-clear {
+    width:100%; padding:16px;
+    font-size:18px; font-weight:800;
+    border:none; border-radius:18px;
+    background:linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2));
+    color:var(--btn-text);
+    margin-top:12px;
 }
 
-/* 📱 NAVIGATION */
+.btn-history {
+    width:100%; padding:16px;
+    font-size:18px; font-weight:800;
+    border:none; border-radius:18px;
+    background:linear-gradient(135deg, var(--btn-his1), var(--btn-his2));
+    color:var(--btn-text);
+    margin-top:10px;
+}
+
+/* ========= 📱 NAVIGATION ========= */
 nav {
-    position: fixed; bottom: 12px; left: 12px; right: 12px;
-    height: 72px; background: var(--card) !important;
-    border: 1px solid var(--border) !important;
-    backdrop-filter: blur(25px); border-radius: 22px;
-    display: flex; align-items: center; justify-content: space-around; z-index: 9999;
+    position:fixed; bottom:12px; left:12px; right:12px;
+    height:72px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:22px;
+    display:flex; align-items:center; justify-content:space-around;
+    z-index:9999;
+    backdrop-filter: blur(10px); /* เพิ่มความหรู */
 }
-.nav-item { flex: 1; text-align: center; opacity: .5; color: var(--text); text-decoration: none; }
-.nav-item.active { color: var(--accent) !important; font-weight: 900; opacity: 1; }
+.nav-item { flex:1; text-align:center; color:var(--text); opacity:.5; text-decoration:none; transition: 0.2s; }
+.nav-item.active { opacity:1; color:var(--accent); font-weight:900; }
+
+/* ========= 📦 MODAL ========= */
+.modal {
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.7);
+    display:none; /* JS จะเปลี่ยนเป็น flex ตอนเปิด */
+    align-items:center; justify-content:center;
+    z-index:10000;
+    backdrop-filter: blur(5px);
+}
+.modal-content {
+    background:var(--card); border-radius:28px;
+    padding:25px; width:92%; max-width:420px;
+    border:1px solid var(--border);
+    animation: slideUp 0.3s ease-out;
+}
 
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 </style>
@@ -2732,25 +2733,38 @@ function handleSave(event) {
         $("tEnd").focus();
     }
 }
-function applyTheme(t) {
-    // 1. เปลี่ยน Class ที่ Body แค่นี้จบ สีทุกอย่างจะสลับตาม CSS ทันที
+/* 🎨 ฟังก์ชันเปลี่ยนธีม */
+function applyTheme(theme) {
+    // ลบ class เก่าทั้งหมดในทีเดียว (ป้องกัน class ซ้อน)
     document.body.classList.remove("dark", "navy");
-    if (t !== "light") {
-        document.body.classList.add(t);
+
+    // ถ้าไม่ใช่ light ให้ใส่ class ตามชื่อธีม
+    if (theme && theme !== "light") {
+        document.body.classList.add(theme);
     }
-    
-    // 2. บันทึกธีม
-    localStorage.setItem("selectedTheme", t);
+
+    // บันทึกค่าลงเครื่อง
+    localStorage.setItem("selectedTheme", theme);
 }
 
-// 🎯 ทำงานทันทีที่เปิดหน้าเว็บ
-document.addEventListener("DOMContentLoaded", () => {
+/* 🚀 โหลดธีมทันทีที่เปิดเว็บ */
+document.addEventListener("DOMContentLoaded", function() {
+    // ดึงค่าที่บันทึกไว้ ถ้าไม่มีให้เช็คว่าเครื่องผู้ใช้ตั้ง Dark Mode ไว้ไหม (ถ้าไม่ตั้งให้เป็น light)
     const savedTheme = localStorage.getItem("selectedTheme") || "light";
+
+    // รันฟังก์ชันทันที
     applyTheme(savedTheme);
 
-    // ปรับ Dropdown ให้ตรงกับธีมที่บันทึก
+    // จัดการตัวเลือก Dropdown (ถ้ามี)
     const themeSelector = document.getElementById("setTheme");
-    if (themeSelector) themeSelector.value = savedTheme;
+    if (themeSelector) {
+        themeSelector.value = savedTheme;
+        themeSelector.addEventListener("change", function() {
+            applyTheme(this.value);
+            // เพิ่มลูกเล่น: สั่งสั่นนิดนึงเวลาเปลี่ยนธีม (ถ้าใช้บนมือถือ)
+            if (navigator.vibrate) navigator.vibrate(10); 
+        });
+    }
 });
 /* ==========================================================
    SECTION 9: SYSTEM STARTUP & EVENT LISTENERS
