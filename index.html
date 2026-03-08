@@ -185,33 +185,43 @@ function openReportModal(title, htmlContent) {
 <style>
 /* ========= 💎 1. THEME SYSTEM (ครบทุกโหมด) ========= */
 :root {
-    --bg:#f6f8fb; --card:#fff; --text:#0f172a; --accent:#2563eb;
-    --border:rgba(15,23,42,0.08); --input-bg:#f9fafb; --radius:24px;
-    --cash1:#22c55e; --cash2:#16a34a; --trans1:#60a5fa; --trans2:#2563eb;
-    --mix1:#818cf8; --mix2:#4f46e5; --save1:#1d4ed8; --save2:#1e40af;
-    --btn-clear1:#4ade80; --btn-clear2:#16a34a; --btn-his1:#f59e0b; --btn-his2:#d97706;
-    --btn-monthly1:#6366f1; --btn-monthly2:#4338ca; --btn-compare1:#8b5cf6; --btn-compare2:#6d28d9;
-    --btn-text:#fff; --summary-bg:#eff6ff; --summary-border:#93c5fd;
+    /* ⚪ Light Mode: เน้นความสะอาด ตาสว่างแบบหรูๆ */
+    --bg:#f8fafc; --card:#ffffff; --text:#0f172a; --accent:#2563eb;
+    --border:rgba(15,23,42,0.08); --input-bg:#f1f5f9; --radius:24px;
+    --cash1:#10b981; --cash2:#059669; --trans1:#3b82f6; --trans2:#1d4ed8;
+    --mix1:#8b5cf6; --mix2:#6d28d9; --save1:#1e40af; --save2:#1e3a8a;
+    --btn-clear1:#34d399; --btn-clear2:#059669; --btn-his1:#f59e0b; --btn-his2:#d97706;
+    --btn-text:#ffffff; --summary-bg:#eff6ff; --summary-border:#93c5fd;
     --danger:#ef4444; --primary:#3b82f6; --success:#22c55e; --warning:#f59e0b;
+    --btn-monthly1:#6366f1; --btn-monthly2:#4338ca; 
+    --btn-compare1:#a855f7; --btn-compare2:#7e22ce;
 }
 
 body.navy {
-    --bg:#020617; --card:#0f172a; --text:#e2e8f0; --accent:#38bdf8;
-    --border:rgba(255,255,255,0.08); --input-bg:#1e293b;
-    --cash1:#4ade80; --cash2:#16a34a; --trans1:#818cf8; --trans2:#4f46e5;
-    --mix1:#38bdf8; --mix2:#0284c7; --save1:#2563eb; --save2:#1e40af;
-    --btn-clear1:#34d399; --btn-clear2:#059669; --btn-his1:#fb923c; --btn-his2:#ea580c;
-    --summary-bg:#1e293b; --summary-border:#38bdf8;
+    /* 🔵 Navy Mode: เน้นความลึกและดูแพง (Deep Ocean) */
+    --bg:#020617; --card:#0f172a; --text:#f1f5f9; --accent:#38bdf8;
+    --border:rgba(255,255,255,0.1); --input-bg:#1e293b;
+    --cash1:#34d399; --cash2:#10b981; --trans1:#60a5fa; --trans2:#2563eb;
+    --mix1:#818cf8; --mix2:#6366f1; --save1:#3b82f6; --save2:#1d4ed8;
+    --btn-clear1:#06b6d4; --btn-clear2:#0891b2; /* เปลี่ยนจากสีฟ้าอ่อนเป็น Cyan เข้ม */
+    --btn-his1:#64748b; --btn-his2:#334155;    /* เปลี่ยนจากแดงเป็นเทาเข้ม ดูสุขุมกว่า */
+    --btn-text:#ffffff; --summary-bg:#1e293b; --summary-border:#38bdf8;
+    --btn-monthly1:#1e40af; --btn-monthly2:#1e1b4b; 
+    --btn-compare1:#4338ca; --btn-compare2:#312e81;
 }
 
 body.dark {
-    --bg:#121212; --card:#1c1c1c; --text:#fbbf24; --accent:#fbbf24;
-    --border:rgba(251,191,36,0.2); --input-bg:#00000066;
+    /* 🟡 Dark Gold: เน้นความดุดันและหรูหราแบบ Black & Gold */
+    --bg:#0a0a0a; --card:#171717; --text:#fbbf24; --accent:#fbbf24;
+    --border:rgba(251,191,36,0.15); --input-bg:#000000;
     --cash1:#fbbf24; --cash2:#d97706; --trans1:#f59e0b; --trans2:#b45309;
     --mix1:#fde047; --mix2:#a16207; --save1:#fbbf24; --save2:#d97706;
-    --btn-clear1:#facc15; --btn-clear2:#ca8a04; --btn-his1:#fbbf24; --btn-his2:#92400e;
-    --btn-monthly1:#fbbf24; --btn-monthly2:#78350f; --btn-compare1:#fde047; --btn-compare2:#92400e;
-    --btn-text:#1a1a1a; --summary-bg:#000000; --summary-border:#fbbf24; --primary:#fbbf24;
+    --btn-clear1:#fbbf24; --btn-clear2:#b45309;
+    --btn-his1:#404040; --btn-his2:#171717;    /* ปุ่มประวัติใช้สีเทาดำ ขับสีทองให้เด่น */
+    --btn-text:#000000; /* ตัวหนังสือบนปุ่มทองต้องสีดำถึงจะพรีเมี่ยม */
+    --summary-bg:#000000; --summary-border:#fbbf24;
+    --btn-monthly1:#78350f; --btn-monthly2:#451a03; /* สีน้ำตาลไหม้/ทองแดง */
+    --btn-compare1:#525252; --btn-compare2:#262626;
 }
 /* ========= 🛠️ 2. GLOBAL & RESET ========= */
 * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
