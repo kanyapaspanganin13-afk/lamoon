@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 03 </title>
+    <title>Barber Note Pro 13 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -256,22 +256,49 @@ input[type="text"], input[type="number"], input[type="date"], input[type="time"]
 }
 
 /* ========= 🔘 6. BUTTONS & NAV ========= */
-.btn-pay {
+.btn-pay, .btn-save {
     width: 100%;
     height: 75px;
     border: none;
     border-radius: 20px;
     background: linear-gradient(135deg, var(--save1), var(--save2));
     color: #fff;
-    display: flex;
-    flex-direction: column;
+    display: flex !important;
+    flex-direction: row !important; /* ไอคอนกับข้อความเรียงกัน */
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 12px;
     cursor: pointer;
     box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    font-size: 24px;
+    font-weight: 900;
 }
 
+/* ปุ่มตัวเลือก (เงินสด / โอน / ผสม) */
+.btn-cash, .btn-transfer, .btn-mix, .btn-clear, .btn-history {
+    border: none;
+    border-radius: 18px;
+    padding: 12px;
+    display: flex;
+    flex-direction: row; /* จัดให้ไอคอนอยู่ข้างข้อความ */
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 800;
+    transition: 0.2s;
+}
+/* สีของปุ่มต่างๆ ตามที่พี่เพิ่มมา */
+.btn-cash { background: linear-gradient(135deg, var(--cash1), var(--cash2)); color: var(--btn-text); }
+.btn-transfer { background: linear-gradient(135deg, var(--trans1), var(--trans2)); color: var(--btn-text); }
+.btn-mix { background: linear-gradient(135deg, var(--mix1), var(--mix2)); color: var(--btn-text); }
+.btn-clear { background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)); color: var(--btn-text); }
+.btn-history { background: linear-gradient(135deg, var(--btn-his1), var(--btn-his2)); color: var(--btn-text); }
+/* เอฟเฟกต์ตอนกดปุ่ม */
+.btn-cash:active, .btn-transfer:active, .btn-mix:active, .btn-pay:active {
+    transform: scale(0.95);
+    opacity: 0.9;
+}
 nav {
     position: fixed;
     bottom: 0;
@@ -395,15 +422,15 @@ nav {
 </div>
 
         <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-            <select id="hairStyle" style="height:70px; border-radius:15px; border: 1px solid var(--border); font-weight:700; background: var(--bg); color: var(--text); padding:0 8px; font-size:18px; outline:none;">
+            <select id="hairStyle" style="height:70px; border-radius:15px; border: 1px solid var(--border); font-weight:700; background: var(--bg); color: var(--text); padding:0 8px; font-size:22px; outline:none;">
                 <option value="">✂️ ทรงผม</option>
                 <option>แฟชั่น</option><option>สกินเฟด</option><option>รองทรง</option><option>ตำรวจ/ทหาร</option><option>นักเรียน</option><option>ซอยผม/เล็มผม</option><option>แก้ผม</option><option>โกนผม</option>    
             </select>
-            <select id="extra1" style="height:70px; border-radius:15px; border: 1px solid var(--border); font-weight:700; background: var(--bg); color: var(--text); padding:0 5px; font-size:18px; outline:none;">
+            <select id="extra1" style="height:70px; border-radius:15px; border: 1px solid var(--border); font-weight:700; background: var(--bg); color: var(--text); padding:0 5px; font-size:22px; outline:none;">
                 <option value="">บริการ1</option>
                 <option value="เด็ก">เด็ก</option><option>โกนหนวด</option><option>กันหน้า</option><option>กันจอน</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>ย้อมแฟชั่น</option>
             </select>
-            <select id="extra2" style="height:70px; border-radius:15px; border: 1px solid var(--border); font-weight:700; background: var(--bg); color: var(--text); padding:0 5px; font-size:18px; outline:none;">
+            <select id="extra2" style="height:70px; border-radius:15px; border: 1px solid var(--border); font-weight:700; background: var(--bg); color: var(--text); padding:0 5px; font-size:22px; outline:none;">
                 <option value="">บริการ2</option>
                 <option value="เด็ก">เด็ก</option><option>โกนหนวด</option><option>กันหน้า</option><option>กันจอน</option><option>สระผม</option><option>ย้อมผม</option><option>ดัดผม</option><option>ย้อมแฟชั่น</option>
             </select>
@@ -417,7 +444,7 @@ nav {
     </div>
 
         <input type="number" id="tipInp" placeholder="ทิป" inputmode="numeric" 
-        style="height: 100%; background: rgba(225, 245, 254, 0.1); border: 2px solid #ad2c18; border-radius: 20px; font-size: 26px; font-weight: 900; color: #ad2c18; text-align: center; outline: none; box-sizing: border-box;">
+        style="height: 100%; background: rgba(225, 245, 254, 0.1); border: 2px solid var(--accent); border-radius: 20px; font-size: 32px; font-weight: 900; color: #ad2c18; text-align: center; outline: none; box-sizing: border-box;">
     </div>    
 
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:12px;">
@@ -447,25 +474,25 @@ nav {
         </div>
 
         <div style="background: var(--card); padding:12px 15px; border-radius:20px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid var(--border); display:flex; flex-direction:column; justify-content:space-between; gap:5px; transition: 0.3s;">
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:700;">
                 <span style="color: var(--text); opacity: 0.7; display:flex; align-items:center; gap:5px;">
                     <i class="fas fa-mobile-alt" style="width:14px; color: var(--trans1);"></i> โอน
                 </span> 
                 <b id="dTrans" style="color: var(--text);">0</b>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:700;">
                 <span style="color: var(--text); opacity: 0.7; display:flex; align-items:center; gap:5px;">
                     <i class="fas fa-money-bill-wave" style="width:14px; color: var(--cash1);"></i> สด
                 </span> 
                 <b id="dCash" style="color: var(--text);">0</b>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:700;">
                 <span style="color: var(--text); opacity: 0.7; display:flex; align-items:center; gap:5px;">
                     <i class="fas fa-cut" style="width:14px; color: var(--accent);"></i> ช่าง
                 </span> 
                 <b id="dBarber" style="color: var(--text);">0</b>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:800; border-top: 1px dashed var(--border); padding-top: 5px; margin-top: 2px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:800; border-top: 1px dashed var(--border); padding-top: 5px; margin-top: 2px;">
                 <span style="color: var(--text); display:flex; align-items:center; gap:5px;">
                     <i class="fas fa-store" style="width:14px; color: var(--danger);"></i> ร้าน
                 </span> 
