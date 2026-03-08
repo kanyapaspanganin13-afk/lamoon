@@ -199,6 +199,7 @@ body.navy {
     --btn-clear1:#22c55e; --btn-clear2:#15803d;
     --btn-his1:#334155; --btn-his2:#1e293b; --btn-text:#ffffff;
     --summary-bg: #1e293b; --summary-border: #0891b2;
+    --danger: #ef4444; --primary: #3b82f6; --success: #22c55e; --warning: #f59e0b;
 }
 
 body.dark {
@@ -209,6 +210,7 @@ body.dark {
     --btn-clear1:#fbbf24; --btn-clear2:#d97706;
     --btn-his1:#4b5563; --btn-his2:#1f2937; --btn-text:#1a1a1a;
     --summary-bg: #000000; --summary-border: #fbbf24;
+    --danger: #ef4444; --primary: #3b82f6; --success: #22c55e; --warning: #f59e0b;
 }
 
 /* ========= 🛠️ 2. GLOBAL & RESET ========= */
@@ -226,9 +228,35 @@ body > center, body > a, body > br { display: none !important; }
     display: none; 
 }
 .page.active { display: block; animation: slideUp 0.3s ease-out; }
+/* ========= 💰 3.5 INPUT PRICE & TIP (เพิ่มใหม่: หน้า 1) ========= */
+#priceInp {
+    width: 100% !important;
+    height: 100px !important; 
+    font-size: 56px !important; 
+    font-weight: 900 !important;
+    text-align: center !important;
+    background: var(--input-bg) !important;
+    border: 2px solid var(--border) !important;
+    border-radius: 22px !important;
+    color: var(--text) !important;
+    margin-bottom: 25px !important; /* ถ่างระยะห่างจากทิป */
+    outline: none;
+}
 
+#tipInp {
+    width: 100% !important;
+    height: 60px !important;
+    font-size: 24px !important;
+    font-weight: 800 !important;
+    text-align: center !important;
+    background: var(--input-bg) !important;
+    border: 1px solid var(--border) !important; 
+    border-radius: 18px !important;
+    color: #ef4444 !important;
+    margin-bottom: 15px !important;
+    outline: none;
+}
 /* ========= 💰 4. INPUT & SUMMARY หน้า 3 ========= */
-
 /* ปรับยอดเงินรวมหน้า 3 ให้เด่น (accTotalVal) */
 #accTotalVal {
     font-size: 42px !important;
@@ -244,32 +272,79 @@ input[type="text"], input[type="number"], input[type="date"], input[type="time"]
     outline: none;
 }
 
-/* ========= 💇‍♂️ 5. SERVICE GRID (บังคับ 3 ช่องหน้า 1) ========= */
+/* ========= 💇‍♂️ 5. SERVICE GRID & TIME (ปรับช่องบริการและเวลา) ========= */
 
-/* จัดการ Grid ของ ทรงผม / บริการ 1 / บริการ 2 ให้เท่ากันเป๊ะ */
-#hairStyle, #extra1, #extra2 {
+/* 1. จัดการ Grid 3 ช่อง (ทรงผม / บริการ 1 / บริการ 2) */
+.service-selection, .service-grid, [style*="display: flex; gap: 10px"] {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr !important; /* แบ่ง 3 ส่วนเท่ากัน */
+    gap: 10px !important;
     width: 100% !important;
-    border-radius: 15px !important;
-    font-size: 16px !important; /* ปรับขนาดฟอนต์ให้พอดี 3 ช่อง */
+    margin: 15px 0 !important;
 }
 
+#hairStyle, #extra1, #extra2 {
+    width: 100% !important;
+    height: 45px !important;
+    border-radius: 12px !important;
+    font-size: 14px !important; /* ขนาดกำลังดีสำหรับ 3 ช่อง */
+    font-weight: 600 !important;
+    padding: 0 5px !important;
+    text-align: center !important;
+}
+
+/* 2. แก้ช่องเวลา (เริ่ม - เสร็จ) ให้ห่างกัน ไม่ติดกันเกินไป */
+.time-input-container {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important; /* แบ่งครึ่งซ้ายขวา */
+    gap: 20px !important; /* เพิ่มระยะห่างระหว่างช่องเริ่มกับช่องเสร็จ */
+    margin: 20px 0 !important;
+    padding: 0 5px !important;
+}
+
+/* ปรับแต่งช่อง Input เวลาให้ดูพรีเมียม */
+.time-input-container input {
+    width: 100% !important;
+    height: 45px !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--border) !important;
+    background: var(--input-bg) !important;
+    color: var(--text) !important;
+    font-size: 16px !important;
+    font-weight: bold !important;
+    text-align: center !important;
+    outline: none !important;
+}
+/* ระยะห่างของ Label (ถ้ามีคำว่า เริ่ม/เสร็จ อยู่ข้างบน) */
+.time-input-container label {
+    display: block !important;
+    margin-bottom: 8px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    opacity: 0.8;
+}
 /* ========= 🔘 6. BUTTONS & NAV ========= */
 .btn-pay {
     width: 100%;
-    height: 75px;
+    height: 70px; 
     border: none;
     border-radius: 20px;
     background: linear-gradient(135deg, var(--save1), var(--save2));
     color: #fff;
     display: flex;
-    flex-direction: column;
+    flex-direction: row !important; /* บังคับไอคอนอยู่บรรทัดเดียวกับข้อความ */
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 12px; /* เว้นระยะไอคอนกับข้อความ */
     cursor: pointer;
     box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    font-size: 20px;
+    font-weight: 800;
 }
-
+.btn-pay i {
+    font-size: 24px;
+    margin-bottom: 0 !important; /* เอา margin ล่างออก ไม่ให้มันดันข้อความลง */
+}
 nav {
     position: fixed;
     bottom: 0;
