@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 23 </title>
+    <title>Barber Note Pro 3 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -185,9 +185,10 @@ function openReportModal(title, htmlContent) {
     --border:rgba(0,0,0,0.08); --input-bg:#f8fafc; --radius:24px;
     --cash1:#34d399; --cash2:#10b981; --trans1:#60a5fa; --trans2:#3b82f6;
     --mix1:#818cf8; --mix2:#6366f1; --save1:#3b82f6; --save2:#1e40af;
-    --btn-clear1:#88f246; --btn-clear2:#139e03;
-    --btn-his1:#f2ca5a; --btn-his2:#ed781f; --btn-text:#ffffff;
+    --btn-clear1:#22c55e; --btn-clear2:#16a34a; /* ปรับสีเขียวเคลียร์เงิน */
+    --btn-his1:#f59e0b; --btn-his2:#d97706; --btn-text:#ffffff;
     --summary-bg: #eff6ff; --summary-border: #bfdbfe;
+    --danger: #ef4444; --primary: #3b82f6; --success: #22c55e; --warning: #f59e0b;
 }
 
 body.navy {
@@ -195,7 +196,7 @@ body.navy {
     --border:rgba(255,255,255,0.1); --input-bg:#1e293b;
     --cash1:#4ade80; --cash2:#16a34a; --trans1:#8549f5; --trans2:#4402ad;
     --mix1:#38bdf8; --mix2:#0284c7; --save1:#2154fc; --save2:#0b0161;
-    --btn-clear1:#ff4d4d; --btn-clear2:#b30000;
+    --btn-clear1:#22c55e; --btn-clear2:#15803d;
     --btn-his1:#334155; --btn-his2:#1e293b; --btn-text:#ffffff;
     --summary-bg: #1e293b; --summary-border: #0891b2;
 }
@@ -212,7 +213,7 @@ body.dark {
 
 /* ========= 🛠️ 2. GLOBAL & RESET ========= */
 * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
-body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 100px; transition: background 0.3s; }
+body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 100px; transition: background 0.3s; overflow-x: hidden; }
 
 /* 🚫 ฆ่าเศษขยะ */
 center, .history-link-container, #p3 br, [style*="margin-top: 20px; background: white"], [style*="background: white"] {
@@ -222,105 +223,126 @@ body > center, body > a, body > br { display: none !important; }
 
 /* ========= 📋 3. PAGE CONTROL ========= */
 .page {
-    display: none; background: var(--card); border-radius: var(--radius);
-    border: 1px solid var(--border); padding: 22px; margin: 14px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    display: none; 
 }
 .page.active { display: block; animation: slideUp 0.3s ease-out; }
 
-/* ========= 💰 4. INPUT SYSTEM (หน้า 1 คลีน / หน้า 3 สรุปเด่น) ========= */
+/* ========= 💰 4. INPUT & SUMMARY หน้า 3 ========= */
 
-/* ช่องกรอกราคาหน้า 1 */
-#priceInp {
-    width: 100% !important; height: 90px !important; font-size: 48px !important; font-weight: 900 !important;
-    text-align: center !important; background: var(--input-bg) !important;
-    border: 2px solid var(--border) !important; border-radius: 18px !important;
-    color: var(--text) !important; outline: none !important; margin-bottom: 15px !important;
+/* ปรับยอดเงินรวมหน้า 3 ให้เด่น (accTotalVal) */
+#accTotalVal {
+    font-size: 42px !important;
+    font-weight: 900 !important;
+    letter-spacing: -1px;
 }
 
-/* ช่องแสดงยอดรวมหน้า 3 (ขอบทอง/น้ำเงิน/ฟ้า) */
-#p3 input[readonly], [id*="total"], [id*="balance"] {
-    width: 100% !important; height: 100px !important; font-size: 52px !important; font-weight: 900 !important;
-    text-align: center !important; background: var(--summary-bg) !important;
-    border: 3px solid var(--summary-border) !important; color: var(--text) !important;
-    border-radius: 22px !important; outline: none !important; margin-bottom: 20px !important;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+/* ช่อง input ภายในหน้าตั้งค่าและบัญชี */
+input[type="text"], input[type="number"], input[type="date"], input[type="time"], select {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    outline: none;
 }
 
-/* ช่องทิป ไร้กรอบ เนียนตามธีม */
-#tipInp {
-    width: 100% !important; font-size: 22px !important; font-weight: 800 !important; text-align: center !important;
-    background: var(--input-bg) !important; border: none !important; 
-    border-radius: 16px !important; padding: 14px !important; color: #ef4444 !important;
-    outline: none !important; box-shadow: none !important; margin-bottom: 10px !important;
-}
+/* ========= 💇‍♂️ 5. SERVICE GRID (บังคับ 3 ช่องหน้า 1) ========= */
 
-/* ========= 📅 5. DATE, TIME & SERVICE GRID (แก้ล้น/แก้เบียด) ========= */
-
-/* ช่องวันที่และเวลา */
-.time-input-container {
-    display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 12px !important; margin: 10px 0 15px !important;
-}
-.time-input-container input {
-    width: 100% !important; background: var(--input-bg) !important; border: 1px solid var(--border) !important;
-    border-radius: 12px !important; padding: 12px !important; text-align: center !important; 
-    color: var(--text) !important; font-size: 14px !important; font-weight: 600 !important;
-}
-
-/* 💇‍♂️ แก้ช่อง ทรงผม/บริการ 1/บริการ 2 (บังคับ 3 ช่องไม่ให้ล้นจอ) */
-.service-selection, .service-grid, [style*="display: flex; gap: 10px"] {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr 1fr !important;
-    gap: 8px !important;
+/* จัดการ Grid ของ ทรงผม / บริการ 1 / บริการ 2 ให้เท่ากันเป๊ะ */
+#hairStyle, #extra1, #extra2 {
     width: 100% !important;
-    margin: 10px 0 !important;
-}
-.service-selection select, .service-grid select {
-    width: 100% !important; background: var(--input-bg) !important;
-    border: 1px solid var(--border) !important; border-radius: 12px !important;
-    padding: 10px 2px !important; color: var(--text) !important;
-    font-size: 13px !important; font-weight: 700 !important; outline: none !important;
+    border-radius: 15px !important;
+    font-size: 16px !important; /* ปรับขนาดฟอนต์ให้พอดี 3 ช่อง */
 }
 
 /* ========= 🔘 6. BUTTONS & NAV ========= */
-.btn-pay, .btn-clear, .btn-history { cursor: pointer; transition: 0.2s; border: none !important; }
-.btn-pay:active, .btn-clear:active, .btn-history:active { transform: scale(0.97); }
-
 .btn-pay {
-    width: 100%; height: 65px; display: flex; align-items: center; justify-content: center;
-    font-size: 22px; font-weight: 900; border-radius: 20px;
-    background: linear-gradient(135deg, var(--save1), var(--save2)); color: var(--btn-text); margin-top: 10px;
-}
-
-.btn-clear {
-    width: 100%; padding: 16px; font-size: 18px; font-weight: 800; border-radius: 18px;
-    background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)); color: var(--btn-text); margin-top: 12px;
-}
-
-.btn-history {
-    width: 100%; padding: 16px; font-size: 18px; font-weight: 800; border-radius: 18px;
-    background: linear-gradient(135deg, var(--btn-his1), var(--btn-his2)); color: var(--btn-text); margin-top: 10px;
+    width: 100%;
+    height: 75px;
+    border: none;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--save1), var(--save2));
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
 nav {
-    position: fixed; bottom: 12px; left: 12px; right: 12px; height: 72px;
-    background: var(--card); border: 1px solid var(--border); border-radius: 22px;
-    display: flex; align-items: center; justify-content: space-around; z-index: 9999;
-    backdrop-filter: blur(10px);
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    height: 70px;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 999;
+    padding-bottom: env(safe-area-inset-bottom);
 }
-.nav-item { flex: 1; text-align: center; color: var(--text); opacity: .5; text-decoration: none; }
-.nav-item.active { opacity: 1; color: var(--accent); font-weight: 900; }
 
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    opacity: 0.5;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.nav-item.active {
+    opacity: 1;
+    color: var(--accent);
+}
+
+.nav-item i {
+    font-size: 20px;
+    margin-bottom: 4px;
+}
+
+/* ========= 📦 7. MODALS ========= */
 .modal {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-    display: none; align-items: center; justify-content: center; z-index: 10000;
-}
-.modal-content {
-    background: var(--card); border-radius: 28px; padding: 25px;
-    width: 92%; max-width: 420px; border: 1px solid var(--border);
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(5px);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
 }
 
-@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-content {
+    width: 90%;
+    max-width: 400px;
+    padding: 20px;
+    border-radius: 25px;
+    position: relative;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp { 
+    from { transform: translateY(30px); opacity: 0; } 
+    to { transform: translateY(0); opacity: 1; } 
+}
+
+/* Custom Scrollbar สำหรับรายงาน */
+#reportContent::-webkit-scrollbar, #accHistory::-webkit-scrollbar {
+    width: 5px;
+}
+#reportContent::-webkit-scrollbar-thumb, #accHistory::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+}
 </style>
 </head>
 <body>
