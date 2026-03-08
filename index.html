@@ -398,7 +398,16 @@ nav {
     position: relative;
     animation: slideUp 0.3s ease-out;
 }
-
+/* บังคับให้หน้าต่างแจ้งเตือนใช้ฟอนต์ Kanit */
+.swal2-popup {
+    font-family: 'Kanit', sans-serif !important;
+    border-radius: 20px !important;
+    background: var(--card) !important; /* เปลี่ยนสีตามธีมพี่เลย */
+    color: var(--text) !important;
+}
+.swal2-title, .swal2-content {
+    color: var(--text) !important;
+}
 @keyframes slideUp { 
     from { transform: translateY(30px); opacity: 0; } 
     to { transform: translateY(0); opacity: 1; } 
@@ -662,7 +671,7 @@ nav {
                     <button onclick="document.getElementById('modalSet').style.display='none'" style="background:var(--bg); color:var(--text); opacity:0.7; height:60px; border-radius:20px; border:none; font-weight:800; font-size:16px;">ปิด</button>
                 </div>
                 <div style="text-align:center; line-height: 1.4; opacity: 0.5;">
-                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.5</div>
+                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.7</div>
                     <div style="font-size:9px; color:var(--text); font-weight:400;">Update: 08/03/2026</div>
                 </div>
             </div>
@@ -698,7 +707,7 @@ nav {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.5"; 
+const APP_VERSION = "1.0.7"; 
 const LAST_UPDATED = "08/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
@@ -777,7 +786,6 @@ function go(p) {
             loadAccountStatus(); 
         }
     }
-
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function updateDateDisplay(v) {
@@ -821,7 +829,7 @@ function exportBackup() {
         const data = {
             db: JSON.parse(localStorage.getItem("barber_db") || "[]"),
             archives: JSON.parse(localStorage.getItem("barber_archives") || "[]"),
-            account: account, 
+            account: typeof account !== 'undefined' ? account : {}, 
             settings: JSON.parse(localStorage.getItem("barber_settings") || "{}")
         };
         const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
@@ -830,11 +838,24 @@ function exportBackup() {
         a.href = url;
         a.download = `Barber-Note-Backup-${new Date().toISOString().split('T')[0]}.json`;
         a.click();
-        // ใช้ notify แทน alert เพื่อความสุภาพ
-        notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการสำรองข้อมูลเรียบร้อยแล้วค่ะ/ครับ");
+        
+        // แจ้งเตือนแบบใช้คำเป็นกลางและฟอนต์ Kanit
+        Swal.fire({
+            title: 'สำรองข้อมูลสำเร็จ',
+            text: 'ระบบดำเนินการจัดเก็บข้อมูลเรียบร้อยแล้ว',
+            icon: 'success',
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: 'var(--success)'
+        });
         
     } catch (e) { 
-        notify("error", "เกิดข้อผิดพลาด", "ขออภัยค่ะ ไม่สามารถดำเนินการสำรองข้อมูลได้ในขณะนี้");
+        Swal.fire({
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถสำรองข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง',
+            icon: 'error',
+            confirmButtonText: 'รับทราบ',
+            confirmButtonColor: 'var(--danger)'
+        });
     }
 }
 // 2. ฟังก์ชันนำเข้าข้อมูลจากไฟล์ (Import)
@@ -843,27 +864,37 @@ function importBackup(input) {
     reader.onload = function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            // ใช้ SweetAlert2 เพื่อการยืนยันที่ดูเป็นทางการ
+            
             Swal.fire({
                 title: 'ยืนยันการนำเข้าข้อมูล',
-                text: "ข้อมูลปัจจุบันทั้งหมดจะถูกแทนที่ด้วยข้อมูลใหม่ ท่านต้องการดำเนินการต่อหรือไม่?",
+                text: "ข้อมูลปัจจุบันทั้งหมดจะถูกแทนที่ด้วยข้อมูลใหม่ ต้องการดำเนินการต่อหรือไม่?",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: 'var(--success)',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'ยืนยันการนำเข้า',
+                cancelButtonColor: 'var(--danger)',
+                confirmButtonText: 'ยืนยัน',
                 cancelButtonText: 'ยกเลิก',
                 background: 'var(--card)',
                 color: 'var(--text)'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // ล้างข้อมูลเก่าและเขียนทับด้วยข้อมูลจากไฟล์
                     localStorage.clear(); 
                     localStorage.setItem("barber_db", JSON.stringify(data.db || []));
                     localStorage.setItem("barber_archives", JSON.stringify(data.archives || []));
                     localStorage.setItem("barber_account", JSON.stringify(data.account || { balance: 0, logs: [] }));
                     localStorage.setItem("barber_settings", JSON.stringify(data.settings || {}));
                     
-                    notify("success", "นำเข้าข้อมูลสำเร็จ", "ระบบกำลังเริ่มการทำงานใหม่ กรุณารอสักครู่ค่ะ/ครับ");
+                    Swal.fire({
+                        title: 'นำเข้าข้อมูลสำเร็จ',
+                        text: 'ระบบกำลังเริ่มการทำงานใหม่ กรุณารอสักครู่',
+                        icon: 'success',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        background: 'var(--card)',
+                        color: 'var(--text)'
+                    });
+
                     setTimeout(() => {
                         location.reload();
                     }, 2000);
@@ -871,7 +902,15 @@ function importBackup(input) {
             });
 
         } catch(err) { 
-            notify("error", "ไฟล์ไม่ถูกต้อง", "ขออภัยค่ะ รูปแบบไฟล์ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้งค่ะ/ครับ");
+            Swal.fire({
+                title: 'ไฟล์ไม่ถูกต้อง',
+                text: 'รูปแบบไฟล์ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง',
+                icon: 'error',
+                confirmButtonText: 'ตกลง',
+                confirmButtonColor: 'var(--accent)',
+                background: 'var(--card)',
+                color: 'var(--text)'
+            });
         }
     };
     if (input.files && input.files[0]) reader.readAsText(input.files[0]);
@@ -892,8 +931,16 @@ function restoreData(jsonData) {
         if (typeof save === "function") save();
         if (typeof saveDB === "function") saveDB();
 
-        // แจ้งเตือนความสำเร็จด้วยภาษาสุภาพ
-        notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการคืนค่าข้อมูลและล้างยอดบัญชีเรียบร้อยแล้วค่ะ/ครับ");
+        // แจ้งเตือนความสำเร็จ (ตัดคำแทนตัวและคำลงท้าย)
+        Swal.fire({
+            title: 'ดำเนินการสำเร็จ',
+            text: 'ระบบคืนค่าข้อมูลและล้างยอดบัญชีเรียบร้อยแล้ว',
+            icon: 'success',
+            showConfirmButton: false,
+            timer: 2000,
+            background: 'var(--card)',
+            color: 'var(--text)'
+        });
 
         // หน่วงเวลาเล็กน้อยก่อนรีเฟรชหน้าจอ
         setTimeout(() => {
@@ -901,19 +948,25 @@ function restoreData(jsonData) {
         }, 2000);
         
     } catch (e) {
-        notify("error", "เกิดข้อผิดพลาด", "ขออภัยค่ะ ไม่สามารถคืนค่าข้อมูลได้เนื่องจากรูปแบบข้อมูลไม่ถูกต้อง");
+        Swal.fire({
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถคืนค่าข้อมูลได้เนื่องจากรูปแบบข้อมูลไม่ถูกต้อง',
+            icon: 'error',
+            confirmButtonText: 'รับทราบ',
+            confirmButtonColor: 'var(--danger)',
+            background: 'var(--card)',
+            color: 'var(--text)'
+        });
     }
 }
-
 // 4. ฟังก์ชันล้างข้อมูลแอป (Hard Reset)
 function clearData() {
-    // ใช้ SweetAlert2 เพื่อความเป็นทางการและสุภาพ
     Swal.fire({
         title: 'ยืนยันการล้างข้อมูลระบบ',
-        text: "การดำเนินการนี้จะทำให้ข้อมูลทั้งหมดรวมถึงรายงานบัญชีถูกลบอย่างถาวร ท่านต้องการดำเนินการต่อหรือไม่?",
+        text: "ข้อมูลทั้งหมดรวมถึงรายงานบัญชีจะถูกลบอย่างถาวร ต้องการดำเนินการต่อหรือไม่?",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#ef4444', // สีแดงเพื่อความระมัดระวัง
+        confirmButtonColor: 'var(--danger)', // ใช้ตัวแปรสีแดงจากธีม
         cancelButtonColor: '#6b7280',
         confirmButtonText: 'ยืนยันการลบข้อมูล',
         cancelButtonText: 'ยกเลิก',
@@ -921,10 +974,18 @@ function clearData() {
         color: 'var(--text)'
     }).then((result) => {
         if (result.isConfirmed) {
-            // ล้างข้อมูลทุกอย่าง
+            // ล้างข้อมูลทุกอย่างใน LocalStorage
             localStorage.clear(); 
             
-            notify("success", "ล้างข้อมูลสำเร็จ", "ระบบได้ดำเนินการล้างข้อมูลทั้งหมดเรียบร้อยแล้วค่ะ/ครับ");
+            Swal.fire({
+                title: 'ล้างข้อมูลสำเร็จ',
+                text: 'ระบบดำเนินการล้างข้อมูลทั้งหมดเรียบร้อยแล้ว',
+                icon: 'success',
+                showConfirmButton: false,
+                timer: 2000,
+                background: 'var(--card)',
+                color: 'var(--text)'
+            });
             
             setTimeout(() => {
                 location.reload(); 
@@ -1090,14 +1151,14 @@ $("mixCash").addEventListener("input", function() {
             }
 
 function speak(type) {
-    // 1. ตรวจสอบว่าเปิดหรือปิดเสียงในหน้า "ตั้งค่า"
-    if (typeof conf !== 'undefined' && conf.sound === "off") return;
+    // 1. ตรวจสอบสถานะเสียง (ป้องกัน Error ถ้า conf ยังไม่ถูกโหลด)
+    if (typeof conf === 'undefined' || conf.sound === "off") return;
 
-    // 2. ตรวจสอบเพศที่เลือกไว้ (male หรือ female)
+    // 2. ตรวจสอบเพศเสียงที่เลือกไว้
     const isMan = conf.voice === "male" || conf.voice === "default.mp3"; 
     let audioId = "";
 
-    // 3. เลือก ID ของเสียงให้ตรงกับเหตุการณ์
+    // 3. เลือก ID เสียงตามประเภทเหตุการณ์
     if (type === "success") {
         audioId = isMan ? "successSoundMan" : "successSoundWoman";
     } else if (type === "error") {
@@ -1107,28 +1168,32 @@ function speak(type) {
     // 4. สั่งเล่นเสียง
     const audio = document.getElementById(audioId);
     if (audio) {
-        audio.currentTime = 0; // รีเซ็ตเสียงให้เริ่มใหม่ทุกครั้งที่กด
-        audio.play().catch(e => console.log("ติดเงื่อนไข Browser ต้องมีการคลิกก่อนเสียงถึงจะดัง"));
-    }
-}
-function notify(type, title, text = "") {
-        speak(type); // สั่งเล่นเสียงคนจริงที่เราฝังไว้
-        
-        Swal.fire({
-            icon: type,
-            title: title,
-            text: text,
-            timer: 2000,
-            showConfirmButton: false,
-            timerProgressBar: true,
-            background: 'var(--card)',
-            color: 'var(--text)',
-            iconColor: type === 'success' ? 'var(--success)' : '#ef4444',
-            customClass: {
-                popup: 'my-swal-popup' // ถ้าพี่อยากคุมฟอนต์ผ่าน CSS
-            }
+        audio.pause();       // หยุดเสียงเดิมก่อน (กรณีเสียงเก่ายังเล่นไม่จบ)
+        audio.currentTime = 0; // รีเซ็ตไปจุดเริ่มต้น
+        audio.play().catch(e => {
+            console.log("Browser บล็อคเสียงอัตโนมัติ: ต้องมีการสัมผัสหน้าจอก่อนอย่างน้อย 1 ครั้ง");
         });
     }
+}
+
+function notify(type, title, text = "") {
+    speak(type); // เรียกใช้งานระบบเสียงคนจริง
+    
+    Swal.fire({
+        icon: type,
+        title: title,
+        text: text, // **อย่าลืม: ข้อความที่ส่งเข้าฟังก์ชันนี้ต้องไม่มี ครับ/ค่ะ**
+        timer: 2200, // เพิ่มเวลาเล็กน้อยให้สัมพันธ์กับเสียงพูด
+        showConfirmButton: false,
+        timerProgressBar: true,
+        background: 'var(--card)',
+        color: 'var(--text)',
+        iconColor: type === 'success' ? 'var(--success)' : 'var(--danger)',
+        customClass: {
+            popup: 'swal2-popup' // ใช้ Class ที่เราตั้งค่าฟอนต์ Kanit ไว้
+        }
+    });
+}
 // ลบรายการงานชั่วคราว
  function delRec(id) { if (confirm("ลบรายการนี้?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); } }
 // แก้ไขเวลาทำงาน
@@ -1271,10 +1336,10 @@ async function saveAndGo(date, total) {
     const btn = document.getElementById("btnSubmitSend");
     const icon = document.getElementById("btnIcon");
 
-    // 🎯 1. ดักจับข้อมูลซ้ำ (ใช้ notify สุภาพ)
+    // 🎯 1. ดักจับข้อมูลซ้ำ (ตัดครับ/ค่ะ ออก)
     const alreadySent = archives.some(a => a.date === date);
     if (alreadySent) {
-        notify("error", "แจ้งเตือน", `ข้อมูลของวันที่ ${date} ได้ดำเนินการส่งเรียบร้อยแล้วค่ะ/ครับ`);
+        notify("error", "แจ้งเตือน", `ข้อมูลของวันที่ ${date} ได้ดำเนินการส่งเรียบร้อยแล้ว`);
         if (btn) {
             btn.disabled = true; 
             btn.style.background = "#94a3b8";
@@ -1284,10 +1349,10 @@ async function saveAndGo(date, total) {
         return;
     }
 
-    // 🎯 2. ยืนยันก่อนส่ง (ใช้ SweetAlert2 แทน confirm)
+    // 🎯 2. ยืนยันก่อนส่ง (ปรับคำพูดให้เป็นกลาง)
     const result = await Swal.fire({
         title: 'ยืนยันการส่งข้อมูล',
-        text: `ท่านต้องการดำเนินการส่งข้อมูลของวันที่ ${date} ใช่หรือไม่?`,
+        text: `ต้องการดำเนินการส่งข้อมูลของวันที่ ${date} ใช่หรือไม่?`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: 'var(--success)',
@@ -1304,7 +1369,7 @@ async function saveAndGo(date, total) {
     if (btn) {
         if (btn.disabled) return; 
         btn.disabled = true;              
-        btn.style.background = "#22c55e"; 
+        btn.style.background = "var(--success)"; 
         if (icon) icon.className = "fas fa-spinner fa-spin"; 
     }
 
@@ -1344,27 +1409,27 @@ async function saveAndGo(date, total) {
 
         if (typeof loadAccountStatus === 'function') loadAccountStatus();
         
-        // 🎯 ส่งข้อมูลสำเร็จ
-        notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการส่งข้อมูลเรียบร้อยแล้วค่ะ/ครับ");
+        // 🎯 ส่งข้อมูลสำเร็จ (ใช้ภาษาเป็นกลาง)
+        notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการส่งข้อมูลเรียบร้อยแล้ว");
 
     } catch (e) {
         if (btn) {
             btn.disabled = false;
-            btn.style.background = "#ff6f00";
+            btn.style.background = "var(--danger)";
             if (icon) icon.className = "fas fa-paper-plane";
         }
-        notify("error", "เกิดข้อผิดพลาด", "ขออภัยค่ะ ไม่สามารถส่งข้อมูลได้ในขณะนี้: " + e);
+        notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถส่งข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง");
     }
 }
 // --- ฟังก์ชันลบข้อมูลแยกออกมา ---
 async function deleteArchiveDate(date) {
-    // 🎯 1. ยืนยันการลบ (ใช้ SweetAlert2 เพื่อความสวยงามและสุภาพ)
+    // 🎯 1. ยืนยันการลบ (ปรับคำพูดให้เป็นกลางและใช้สีตามธีม)
     const result = await Swal.fire({
         title: 'ยืนยันการลบข้อมูลประวัติ',
-        text: `ท่านต้องการลบข้อมูลของวันที่ ${date} ใช่หรือไม่? (หลังจากลบแล้ว ท่านจะต้องดำเนินการส่งข้อมูลใหม่อีกครั้ง)`,
+        text: `ต้องการลบข้อมูลของวันที่ ${date} ใช่หรือไม่? (หลังจากลบแล้ว จะต้องดำเนินการส่งข้อมูลใหม่อีกครั้ง)`,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#ef4444', // สีแดงเตือนภัย
+        confirmButtonColor: 'var(--danger)', // ใช้สีแดงตามธีมที่ตั้งไว้
         cancelButtonColor: '#6b7280',
         confirmButtonText: 'ยืนยันการลบ',
         cancelButtonText: 'ยกเลิก',
@@ -1381,39 +1446,42 @@ async function deleteArchiveDate(date) {
         try {
             if (typeof saveDB === "function") { await saveDB(); } else { await save(); }
             
-            // แจ้งเตือนสำเร็จด้วยภาษาสุภาพและเล่นเสียง
-            notify("success", "ดำเนินการสำเร็จ", `ระบบได้ลบข้อมูลประวัติของวันที่ ${date} เรียบร้อยแล้วค่ะ/ครับ`);
+            // แจ้งเตือนสำเร็จ (ตัดคำแทนตัวและคำลงท้าย)
+            notify("success", "ดำเนินการสำเร็จ", `ระบบได้ลบข้อมูลประวัติของวันที่ ${date} เรียบร้อยแล้ว`);
             
             // รีโหลดหน้าจอเพื่อให้สถานะอัปเดต
             if (typeof renderDay === 'function') renderDay(date); 
             if (typeof loadHistMonth === 'function') loadHistMonth();
             
         } catch (e) {
-            notify("error", "เกิดข้อผิดพลาด", "ขออภัยค่ะ ไม่สามารถดำเนินการลบข้อมูลได้ในขณะนี้: " + e);
+            notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถดำเนินการลบข้อมูลได้ในขณะนี้: " + e);
         }
     } else {
-        notify("error", "แจ้งเตือน", "ไม่พบข้อมูลบันทึกในวันที่ท่านเลือกค่ะ/ครับ");
+        notify("error", "แจ้งเตือน", "ไม่พบข้อมูลบันทึกในวันที่เลือก");
     }
 }
 // --- ระบบเปิดประกันรายได้ ---
 async function handleInsurance() {
     const d = $("dateInp")?.value || new Date().toISOString().split('T')[0];
     const g = parseInt(conf.guar) || 0;
-    // 1. ตรวจสอบว่ามีการตั้งค่ายอดประกันหรือยัง
+
+    // 1. ตรวจสอบตั้งค่ายอดประกัน
     if (g <= 0) {
-        notify("error", "ข้อมูลไม่ครบถ้วน", "กรุณาตั้งค่าวงเงินประกันรายได้ในระบบก่อนดำเนินการค่ะ/ครับ");
+        notify("error", "ข้อมูลไม่ครบถ้วน", "กรุณาตั้งค่าวงเงินประกันรายได้ในระบบก่อนดำเนินการ");
         return;
     }
-    // 2. ตรวจสอบว่าวันนี้เคยเปิดประกันไปหรือยัง
+
+    // 2. ตรวจสอบว่าเปิดประกันไปหรือยัง
     const isClaimed = db.find(r => r.date === d && r.type === "GUARANTEE_CLAIM");
     if (isClaimed) {
-        notify("error", "แจ้งเตือน", "ระบบประกันรายได้ของวันนี้มีการเปิดใช้งานเรียบร้อยแล้วค่ะ/ครับ");
+        notify("error", "แจ้งเตือน", "ระบบประกันรายได้ของวันนี้มีการเปิดใช้งานเรียบร้อยแล้ว");
         return;
     }
-    // 3. ยืนยันการเปิดระบบประกัน (ใช้ SweetAlert2 เพื่อความสุภาพและเป็นทางการ)
+
+    // 3. ยืนยันการเปิดระบบ (ใช้ภาษาเป็นกลาง)
     const result = await Swal.fire({
         title: 'ยืนยันการเปิดระบบประกัน',
-        text: `ท่านต้องการเปิดระบบประกันรายได้ (${g} บาท) สำหรับวันที่ ${d} ใช่หรือไม่?`,
+        text: `ต้องการเปิดระบบประกันรายได้ (${g} บาท) สำหรับวันที่ ${d} ใช่หรือไม่?`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: 'var(--success)',
@@ -1436,27 +1504,30 @@ async function handleInsurance() {
         });
 
         saveDB(); 
-        notify("success", "ดำเนินการสำเร็จ", `เปิดระบบประกันรายได้จำนวน ${g} บาท เรียบร้อยแล้วค่ะ/ครับ`);
+        notify("success", "ดำเนินการสำเร็จ", `เปิดระบบประกันรายได้จำนวน ${g} บาท เรียบร้อยแล้ว`);
         renderDay(d);
     }
 }
+
 // --- ระบบบันทึกวันหยุด ---
 async function handleHoliday() {
     const d = $("dateInp")?.value;
     if (!d) {
-        notify("error", "ข้อมูลไม่ครบถ้วน", "กรุณาเลือกวันที่ที่ท่านต้องการบันทึกวันหยุดค่ะ/ครับ");
+        notify("error", "ข้อมูลไม่ครบถ้วน", "กรุณาเลือกวันที่ต้องการบันทึกวันหยุด");
         return;
     }
-    // ตรวจสอบว่าบันทึกซ้ำหรือไม่
+
+    // ตรวจสอบบันทึกซ้ำ
     const isHoliday = db.find(r => r.date === d && r.type === "HOLIDAY");
     if (isHoliday) {
-        notify("error", "แจ้งเตือน", "วันที่เลือกได้ดำเนินการบันทึกเป็นวันหยุดเรียบร้อยแล้วค่ะ/ครับ");
+        notify("error", "แจ้งเตือน", "วันที่เลือกได้ดำเนินการบันทึกเป็นวันหยุดเรียบร้อยแล้ว");
         return;
     }
-    // ยืนยันการบันทึกวันหยุด
+
+    // ยืนยันการบันทึกวันหยุด (ปรับคำพูดให้เป็นกลาง)
     const result = await Swal.fire({
         title: 'ยืนยันการบันทึกวันหยุด',
-        text: `ท่านต้องการบันทึกวันที่ ${d} เป็น "วันหยุด" ใช่หรือไม่? (ระบบจะไม่คำนวณรายได้ในวันนี้)`,
+        text: `ต้องการบันทึกวันที่ ${d} เป็น "วันหยุด" ใช่หรือไม่? (ระบบจะไม่คำนวณรายได้ในวันนี้)`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: 'var(--success)',
@@ -1480,7 +1551,7 @@ async function handleHoliday() {
         });
 
         saveDB();
-        notify("success", "ดำเนินการสำเร็จ", "บันทึกข้อมูลวันหยุดพักผ่อนเรียบร้อยแล้วค่ะ/ครับ");
+        notify("success", "ดำเนินการสำเร็จ", "บันทึกข้อมูลวันหยุดพักผ่อนเรียบร้อยแล้ว");
         renderDay(d);
     }
 }
@@ -1827,19 +1898,19 @@ function updateStatusUI(net) {
 async function clearAccount() {
     const net = Number(account.balance) || 0;
     
-    // 1. ตรวจสอบยอดเงิน (สุภาพและเป็นทางการ)
+    // 1. ตรวจสอบยอดเงิน (ปรับเป็นภาษาเป็นกลาง)
     if (net === 0) {
-        notify("error", "แจ้งเตือน", "ขณะนี้ยอดคงค้างเป็นศูนย์เรียบร้อยแล้วค่ะ/ครับ");
+        notify("error", "แจ้งเตือน", "ขณะนี้ยอดคงค้างเป็นศูนย์เรียบร้อยแล้ว");
         return;
     }
 
     const accNoteEl = document.getElementById("accNote");
     const d = document.getElementById("accDate")?.value || new Date().toLocaleDateString('th-TH');
 
-    // 2. ยืนยันการเคลียร์ยอดด้วย SweetAlert2
+    // 2. ยืนยันการเคลียร์ยอด (ตัดคำแทนตัวออก)
     const result = await Swal.fire({
         title: 'ยืนยันการสรุปยอดบัญชี',
-        text: `ท่านต้องการดำเนินการเคลียร์ยอดค้างจำนวน ${Math.abs(net).toLocaleString()} บาท ใช่หรือไม่?`,
+        text: `ต้องการดำเนินการเคลียร์ยอดค้างจำนวน ${Math.abs(net).toLocaleString()} บาท ใช่หรือไม่?`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: 'var(--success)',
@@ -1849,40 +1920,46 @@ async function clearAccount() {
         background: 'var(--card)',
         color: 'var(--text)'
     });
+
     if (!result.isConfirmed) return;
+
     // 3. บันทึกลงประวัติ (logs)
     account.logs.push({
         date: d,
         amount: -net, 
         note: (accNoteEl && accNoteEl.value) || "สรุปยอดบัญชีค้างชำระ"
     });
-    // 4. ล้างยอดใน Archives ให้เป็น 0 (ตามที่ท่านเพิ่มเติมมา)
+
+    // 4. ล้างยอดใน Archives ให้เป็น 0
     if (typeof archives !== "undefined") {
         archives.forEach(day => {
             day.settle = 0; 
         });
         localStorage.setItem("barber_archives", JSON.stringify(archives));
     }
+
     // 5. บันทึกและอัปเดตการแสดงผล
     if (typeof save === "function") save();
-    if (typeof saveDB === "function") saveDB(); // เรียกใช้ฟังก์ชันบันทึกหลัก
+    if (typeof saveDB === "function") saveDB(); 
     if (typeof loadAccountHistory === 'function') loadAccountHistory();
     
     loadAccountStatus(); 
-    // 6. แจ้งเตือนความสำเร็จ
-    notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการเคลียร์ยอดบัญชีเรียบร้อยแล้วค่ะ/ครับ");
+
+    // 6. แจ้งเตือนความสำเร็จ (ปรับเป็นภาษาเป็นกลาง)
+    notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการเคลียร์ยอดบัญชีเรียบร้อยแล้ว");
+
     // ล้างค่าในช่องหมายเหตุ (ถ้ามี)
     if (accNoteEl) accNoteEl.value = "";
 }
 // 1. ฟังก์ชันลบประวัติบัญชี
 async function deleteAccountLog(index) {
-    // 1. ยืนยันการลบประวัติด้วยภาษาสุภาพ
+    // 1. ยืนยันการลบประวัติด้วยภาษาเป็นกลาง
     const result = await Swal.fire({
         title: 'ยืนยันการลบประวัติบัญชี',
-        text: "ท่านต้องการดำเนินการลบรายการนี้ใช่หรือไม่? ทั้งนี้ยอดเงินสุทธิจะถูกคำนวณใหม่ตามรายการที่คงเหลืออยู่ค่ะ/ครับ",
+        text: "ต้องการดำเนินการลบรายการนี้ใช่หรือไม่? ทั้งนี้ยอดเงินสุทธิจะถูกคำนวณใหม่ตามรายการที่คงเหลืออยู่",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#ef4444', // สีแดงเตือนภัย
+        confirmButtonColor: 'var(--danger)', // สีแดงตามโทนของธีม
         cancelButtonColor: '#6b7280',
         confirmButtonText: 'ยืนยันการลบ',
         cancelButtonText: 'ยกเลิก',
@@ -1895,27 +1972,31 @@ async function deleteAccountLog(index) {
     try {
         // 2. ดำเนินการลบข้อมูลจากรายการ
         account.logs.splice(index, 1);
-        // 3. บันทึกข้อมูลลงในหน่วยความจำ
+        
+        // 3. บันทึกข้อมูล
         if (typeof saveDB === "function") {
             saveDB();
         } else if (typeof save === "function") {
             save();
         }
-        // 4. แจ้งเตือนความสำเร็จและเล่นเสียงคนจริง
-        notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการลบข้อมูลประวัติเรียบร้อยแล้วค่ะ/ครับ");
+
+        // 4. แจ้งเตือนความสำเร็จและเล่นเสียง (ภาษาเป็นกลาง)
+        notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการลบข้อมูลประวัติเรียบร้อยแล้ว");
+
         // 5. อัปเดตการแสดงผลหน้าจอ
         if (typeof loadAccountHistory === "function") {
             loadAccountHistory();
         } else if (typeof renderHistoryList === "function") {
             renderHistoryList();
         }
+
         // 6. คำนวณยอดสรุปใหม่
         if (typeof loadAccountStatus === "function") {
             loadAccountStatus();
         }
 
     } catch (e) {
-        notify("error", "เกิดข้อผิดพลาด", "ขออภัยค่ะ ไม่สามารถดำเนินการลบรายการได้ในขณะนี้");
+        notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถดำเนินการลบรายการได้ในขณะนี้");
     }
 }
 // 2. ฟังก์ชันแก้ไขประวัติบัญชี
@@ -1923,15 +2004,15 @@ async function editAccountLog(index) {
     let log = account.logs[index];
     if (!log) return;
 
-    // 1. ใช้ SweetAlert2 ในการรับค่าการแก้ไขเพื่อให้ดูเป็นทางการ
+    // 1. ใช้ SweetAlert2 ในการรับค่าการแก้ไข (คุมฟอนต์และสีธีม)
     const { value: formValues } = await Swal.fire({
-        title: 'แก้ไขรายละเอียดรายการบัญชี',
+        title: 'แก้ไขรายละเอียดรายการ',
         html:
             `<div style="text-align: left; font-family: 'Kanit', sans-serif;">` +
-            `<label style="display:block; margin-bottom:5px;">หมายเหตุ:</label>` +
-            `<input id="swal-input1" class="swal2-input" value="${log.note}" style="margin-top:0; width:80%;">` +
-            `<label style="display:block; margin-top:15px; margin-bottom:5px;">จำนวนเงิน:</label>` +
-            `<input id="swal-input2" class="swal2-input" type="number" value="${Math.abs(log.amount)}" style="margin-top:0; width:80%;">` +
+            `<label style="display:block; margin-bottom:5px; font-weight:700;">หมายเหตุ:</label>` +
+            `<input id="swal-input1" class="swal2-input" value="${log.note}" style="margin:0 0 15px 0; width:100%; font-family:'Kanit';">` +
+            `<label style="display:block; margin-bottom:5px; font-weight:700;">จำนวนเงิน:</label>` +
+            `<input id="swal-input2" class="swal2-input" type="number" value="${Math.abs(log.amount)}" style="margin:0; width:100%; font-family:'Kanit';">` +
             `</div>`,
         focusConfirm: false,
         showCancelButton: true,
@@ -1947,16 +2028,19 @@ async function editAccountLog(index) {
             ]
         }
     });
+
     if (formValues) {
         const [newNote, newAmount] = formValues; 
-        // 2. ตรวจสอบค่าที่กรอก
+        
+        // 2. ตรวจสอบค่าที่กรอก (ภาษาเป็นกลาง)
         if (newNote.trim() === "" || newAmount.trim() === "") {
-            notify("error", "ข้อมูลไม่ครบถ้วน", "กรุณาระบุข้อมูลให้ครบทุกช่องก่อนดำเนินการบันทึกค่ะ/ครับ");
+            notify("error", "ข้อมูลไม่ครบถ้วน", "กรุณาระบุข้อมูลให้ครบทุกช่องก่อนดำเนินการบันทึก");
             return;
         }
+
         // 3. รักษาเครื่องหมายเดิม (บวกคือรับ/คืนร้าน, ลบคือจ่ายออก)
         const isNegative = log.amount < 0;
-        const val = parseFloat(newAmount.replace(/,/g, '')) || 0;
+        const val = parseFloat(newAmount) || 0;
         
         account.logs[index].note = newNote;
         account.logs[index].amount = isNegative ? -val : val;
@@ -1967,8 +2051,9 @@ async function editAccountLog(index) {
         } else if (typeof save === "function") {
             save();
         }
-        // 5. แจ้งเตือนความสำเร็จพร้อมเล่นเสียงคนจริง
-        notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการแก้ไขข้อมูลบัญชีเรียบร้อยแล้วค่ะ/ครับ");
+
+        // 5. แจ้งเตือนสำเร็จพร้อมเล่นเสียง (ภาษาเป็นกลาง)
+        notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการแก้ไขข้อมูลบัญชีเรียบร้อยแล้ว");
         
         // 6. อัปเดตการแสดงผล
         if (typeof loadAccountHistory === "function") loadAccountHistory();
@@ -2837,72 +2922,64 @@ function openSettings() {
     }
 }
 function saveSettings() {
-    // 1. ดึงค่าจากฟอร์ม (เพิ่ม sound เข้าไปครับ)
+    // 1. ดึงค่าจากฟอร์ม
     const settings = {
         shop:  $("setShop")?.value || "",
         perc:  parseFloat($("setPerc")?.value) || 0,
         guar:  parseFloat($("setGuar")?.value) || 0,
         theme: $("setTheme")?.value || "light",
         voice: $("setVoice")?.value || "default.mp3",
-        sound: $("setSound")?.value || "on"  // 🟢 เพิ่มบรรทัดนี้ครับ
+        sound: $("setSound")?.value || "on"
     };
 
     // 2. อัปเดตตัวแปรกลาง (conf) ทันที 
     Object.assign(conf, settings);
 
-    // 3. บันทึกลง LocalStorage (ก้อนเดียว JSON)
+    // 3. บันทึกลง LocalStorage
     localStorage.setItem('barber_conf', JSON.stringify(conf));
-
-    // 🟢 บันทึกแยก Key (เพิ่ม shopSound เข้าไปด้วยครับ)
     localStorage.setItem('shopName',  settings.shop);
     localStorage.setItem('shopPerc',  settings.perc);
     localStorage.setItem('shopGuar',  settings.guar);
     localStorage.setItem('shopTheme', settings.theme);
     localStorage.setItem('shopVoice', settings.voice);
-    localStorage.setItem('shopSound', settings.sound); // 🟢 เพิ่มบรรทัดนี้ครับ
+    localStorage.setItem('shopSound', settings.sound);
 
-    // 4. อัปเดตการแสดงผลทันที
-    if ($("shopNameDisp")) {
-        $("shopNameDisp").innerText = settings.shop.toUpperCase();
+    // 4. อัปเดตการแสดงผลชื่อร้าน
+    const nameDisp = $("shopNameDisp") || $("shopNameDisplay");
+    if (nameDisp) {
+        nameDisp.innerText = settings.shop.toUpperCase();
     } 
 
-    if (document.getElementById("shopNameDisplay")) {
-        document.getElementById("shopNameDisplay").innerText = settings.shop;
-    }
-
-    // 5. เรียกฟังก์ชันอัปเดต UI และคำนวณใหม่
+    // 5. เรียกฟังก์ชันอัปเดต UI 
     if (typeof applyTheme === "function")        applyTheme(settings.theme);
     if (typeof calculateMoney === "function")    calculateMoney(); 
     if (typeof renderDay === "function")         renderDay(); 
 
-    // 🟢 ถ้าช่างมีฟังก์ชันเปิด/ปิดเสียง ให้เรียกที่นี่ได้เลยครับ
-    // if (typeof updateSoundStatus === "function") updateSoundStatus(settings.sound);
-
-    // 6. ปิด Modal และแจ้งเตือน
+    // 6. ปิด Modal
     if ($("modalSet")) $("modalSet").style.display = 'none';
     
-    alert("✅ บันทึกการตั้งค่าเรียบร้อยแล้ว");
+    // 7. แจ้งเตือนความสำเร็จ (ใช้ notify แทน alert เพื่อคุมธีมและเล่นเสียง)
+    notify("success", "บันทึกสำเร็จ", "ระบบได้ดำเนินการบันทึกการตั้งค่าเรียบร้อยแล้ว");
 }
-function handleSave(event) {
+async function handleSave(event) {
     // 1. ดึงค่าพื้นฐานและตรวจสอบความถูกต้อง
     const price = parseInt($("priceInp")?.value) || 0;
     const tip = parseInt($("tipInp")?.value) || 0;
     const dateVal = $("dateInp")?.value;
     const custTypeVal = $("custType")?.value || 'none'; 
 
-    // 🔴 ส่วนที่ 1: ตรวจสอบว่าเลือกทรงผมหรือยัง (พร้อมเล่นเสียงเตือน)
+    // 🔴 ส่วนที่ 1: ตรวจสอบทรงผม (ใช้ภาษาเป็นกลางและ notify)
     const hairStyle = $("hairStyle")?.value;
     if (!hairStyle || hairStyle === "" || hairStyle === "เลือกทรงผม") {
-        speak("error"); // 🔊 เล่นเสียง "กรุณาตรวจสอบข้อมูลอีกครั้ง"
-        alert("⚠️ กรุณาเลือกทรงผมก่อนบันทึกครับ!");
+        notify("error", "ข้อมูลไม่ครบถ้วน", "กรุณาเลือกทรงผมก่อนดำเนินการบันทึก");
         if($("hairStyle")) $("hairStyle").focus(); 
-        return; // หยุดการบันทึกทันที
+        return; 
     }
 
     // ตรวจสอบราคาและวิธีจ่ายเงิน
     if (!price || !payMethod) {
-        speak("error"); // 🔊 เล่นเสียง "กรุณาตรวจสอบข้อมูลอีกครั้ง"
-        return alert("กรุณาใส่ราคาและเลือกวิธีจ่ายเงิน!");
+        notify("error", "ข้อมูลไม่ครบถ้วน", "กรุณาระบุราคาและเลือกวิธีชำระเงิน");
+        return;
     }
 
     // 2. จัดการเรื่องเวลา
@@ -2915,14 +2992,25 @@ function handleSave(event) {
         cashAmt = parseInt($("mixCash")?.value) || 0;
         transAmt = parseInt($("mixTrans")?.value) || 0;
         if (cashAmt + transAmt !== price + tip) {
-            const isConfirmed = confirm(`ยอดเงินไม่ตรงบิล (จ่ายจริง ${cashAmt + transAmt} / บิล ${price + tip})\nต้องการบันทึกต่อไปไหม?`);
-            if (!isConfirmed) return;
+            const result = await Swal.fire({
+                title: 'ยืนยันยอดเงิน',
+                text: `ยอดเงินไม่ตรงตามบิล (จ่ายจริง ${cashAmt + transAmt} / บิล ${price + tip}) ต้องการบันทึกต่อหรือไม่?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: 'var(--success)',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'บันทึกต่อไป',
+                cancelButtonText: 'ยกเลิก',
+                background: 'var(--card)',
+                color: 'var(--text)'
+            });
+            if (!result.isConfirmed) return;
         }
     } else {
         payMethod === 'Cash' ? cashAmt = price + tip : transAmt = price + tip;
     }
 
-    // 4. สร้างอ็อบเจกต์บันทึกข้อมูล (Record Object)
+    // 4. สร้างอ็อบเจกต์บันทึกข้อมูล
     const rec = {
         id: Date.now(), 
         date: dateVal, 
@@ -2942,20 +3030,20 @@ function handleSave(event) {
     db.push(rec); 
     saveDB(); 
 
-    // 🔊 เล่นเสียงบันทึกสำเร็จ (ตามเพศที่ตั้งค่าไว้ ไม่พูดรายงานยอดเงิน)
-    speak("success"); 
+    // 🔊 เล่นเสียงบันทึกสำเร็จ (ผ่าน notify)
+    notify("success", "บันทึกสำเร็จ", "ระบบดำเนินการบันทึกข้อมูลเรียบร้อยแล้ว");
 
     if (typeof renderDay === 'function') renderDay(); 
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
 
-    // 6. Animation แสดงสถานะสำเร็จ (เปลี่ยนสีตามธีม)
+    // 6. Animation ปุ่มบันทึก (คุมสีตามธีม)
     const btnSave = event.currentTarget || document.querySelector(".btn-main");
     if (btnSave) {
         const originalContent = btnSave.innerHTML;
         const originalBg = btnSave.style.background;
         
         btnSave.style.setProperty("background", "var(--success)", "important");
-        btnSave.innerHTML = `<i class="fas fa-check-circle" style="font-size:38px;"></i> <span style="font-size:32px; font-weight:900;">บันทึกสำเร็จ</span>`;
+        btnSave.innerHTML = `<i class="fas fa-check-circle"></i> <span>บันทึกสำเร็จ</span>`;
         
         setTimeout(() => {
             btnSave.style.background = originalBg;
@@ -2963,14 +3051,13 @@ function handleSave(event) {
         }, 1200);
     }
 
-    // 7. รีเซ็ตฟอร์ม
+    // 7. รีเซ็ตฟอร์มให้พร้อมรับคนต่อไป
     if ($("tStart") && endTime) {
         $("tStart").value = endTime;
     }
     const inputsToClear = ["priceInp", "tipInp", "mixCash", "mixTrans", "tEnd"];
     inputsToClear.forEach(id => { if($(id)) $(id).value = ""; });
 
-    // รีเซ็ตค่าประเภทลูกค้าและทรงผมกลับเป็นค่าเริ่มต้น
     const selectsToReset = ["hairStyle", "extra1", "extra2", "custType"]; 
     selectsToReset.forEach(id => { if($(id)) $(id).selectedIndex = 0; });
 
@@ -2981,9 +3068,7 @@ function handleSave(event) {
     if($("mixPanel")) $("mixPanel").style.display = 'none';
 
     // โฟกัสไปที่ประเภทลูกค้าเพื่อให้พร้อมรับลูกค้าคนต่อไป
-    if ($("custType")) {
-        $("custType").focus(); 
-    }
+    if ($("custType")) $("custType").focus(); 
 }
 /* 🎨 ฟังก์ชันเปลี่ยนธีม */
 function applyTheme(theme) {
@@ -2994,11 +3079,9 @@ function applyTheme(theme) {
     if (theme && theme !== "light") {
         document.body.classList.add(theme);
     }
-
     // บันทึกค่าลงเครื่อง
     localStorage.setItem("selectedTheme", theme);
 }
-
 /* 🚀 โหลดธีมทันทีที่เปิดเว็บ */
 document.addEventListener("DOMContentLoaded", function() {
     // ดึงค่าที่บันทึกไว้ ถ้าไม่มีให้เช็คว่าเครื่องผู้ใช้ตั้ง Dark Mode ไว้ไหม (ถ้าไม่ตั้งให้เป็น light)
@@ -3045,16 +3128,11 @@ window.addEventListener('touchstart', (e) => {
 window.addEventListener('touchmove', (e) => {
     let touchMove = e.targetTouches[0].pageY;
     let swipeDistance = touchMove - touchStart;
-    // 🟢 แก้ไขจุดนี้: 
-    // 1. ต้องอยู่บนสุดของหน้าจอจริงๆ (window.scrollY === 0)
-    // 2. ระยะลากต้องยาวขึ้น (เปลี่ยนจาก 180 เป็น 250px) เพื่อไม่ให้ลั่นง่าย
-    // 3. ป้องกันการรีเฟรชถ้ากำลังเลื่อนดูตารางที่มีการ Scroll อยู่
     if (window.scrollY === 0 && swipeDistance > 250) {
         // เช็คว่านิ้วไม่ได้กำลังลากอยู่บน Element ที่เลื่อนได้ (เช่น ตารางรายงาน)
         if (e.target.closest('.scrollable-table') || e.target.closest('#reportModal')) {
             return; // ถ้าลากบนตาราง ให้ยกเลิกการรีเฟรช
-        }
-        
+        } 
         document.body.style.opacity = "0.5";
         location.reload(); 
     }
