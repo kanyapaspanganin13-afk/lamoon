@@ -596,15 +596,22 @@ nav {
                 </div>
             </div>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <button onclick="clearAccount()" style="background: var(--success); color:#fff; border:none; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"><i class="fas fa-check-double"></i> เคลียร์เงิน</button>
-                <button onclick="openHistoryModal()" style="background:var(--warning); color:#fff; border:none; border-radius:18px; padding:15px 5px; font-size:14px; font-weight:800; cursor:pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"><i class="fas fa-history"></i> ประวัติเคลียร์เงิน</button>
+                <button onclick="clearAccount()" class="btn-clear" style="border:none; border-radius:18px; padding:15px 5px; font-size:14px; cursor:pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    <i class="fas fa-check-double"></i> เคลียร์เงิน
+                </button>
+                
+                <button onclick="openHistoryModal()" class="btn-history" style="border:none; border-radius:18px; padding:15px 5px; font-size:14px; cursor:pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    <i class="fas fa-history"></i> ประวัติเคลียร์เงิน
+                </button>
             </div>
-            <div onclick="document.getElementById('histMonth').showPicker()" style="background: linear-gradient(135deg, var(--primary), var(--trans2)); border-radius:25px; padding:15px 10px; text-align:center; color:#fff; position:relative; box-shadow:0 8px 20px rgba(0,0,0,0.15); cursor:pointer; margin-top: 15px; margin-bottom: 12px; transition: 0.3s;">
+            
+            <div onclick="document.getElementById('histMonth').showPicker()" class="btn-monthly" style="border-radius:25px; padding:15px 10px; text-align:center; position:relative; box-shadow:0 8px 20px rgba(0,0,0,0.15); cursor:pointer; margin-top: 15px; margin-bottom: 12px; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                 <i class="fas fa-calendar-check" style="font-size:26px; margin-bottom:8px; display:block;"></i>
                 <b style="font-size:18px; letter-spacing: 0.5px;">สรุปรายเดือน</b>
                 <input type="month" id="histMonth" onchange="loadHistMonth()" style="position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer;">
             </div>
-            <div onclick="openComparisonSelector()" style="background: linear-gradient(135deg, var(--accent), var(--trans1)); border-radius: 25px; padding: 15px; text-align: center; color: #fff; cursor: pointer; box-shadow: 0 8px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 10px;">        
+            
+            <div onclick="openComparisonSelector()" class="btn-compare" style="border-radius: 25px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 0 8px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 10px;">        
                 <i class="fas fa-chart-line" style="font-size: 24px;"></i>
                 <b style="font-size: 16px;">เปรียบเทียบช่วงวันที่</b>
             </div>
@@ -648,17 +655,17 @@ nav {
                 </div>
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:20px;">
-                    <button onclick="exportBackup()" style="height:48px; background:var(--card); border:1px solid var(--border); border-radius:12px; font-size:11px; font-weight:800; color:var(--text); cursor:pointer;"><i class="fas fa-file-download"></i> สำรอง</button>
+                    <button onclick="exportBackup()" style="height:48px; background:var(--card); border:1px solid var(--border); border-radius:12px; font-size:11px; font-weight:800; color:var(--text); cursor:pointer;"><i class="fas fa-file-download"></i> สำรองข้อมูล</button>
                     <button onclick="document.getElementById('fileInput').click()" style="height:48px; background:var(--card); border:1px solid var(--border); border-radius:12px; font-size:11px; font-weight:800; color:var(--text); cursor:pointer;"><i class="fas fa-file-upload"></i> คืนค่า</button>
-                    <button onclick="clearData()" style="height:48px; background:rgba(239, 68, 68, 0.1); border:1px solid var(--danger); border-radius:12px; font-size:11px; font-weight:800; color:var(--danger); cursor:pointer;"><i class="fas fa-trash-alt"></i> ล้าง</button>
+                    <button onclick="clearData()" style="height:48px; background:rgba(239, 68, 68, 0.1); border:1px solid var(--danger); border-radius:12px; font-size:11px; font-weight:800; color:var(--danger); cursor:pointer;"><i class="fas fa-trash-alt"></i> ล้างข้อมูล</button>
                 </div>
                 <div style="display:grid; grid-template-columns: 2fr 1.2fr; gap:12px; margin-bottom: 10px;">
                     <button onclick="saveSettings()" style="background:var(--accent); color:var(--btn-text); height:60px; border-radius:20px; border:none; font-weight:800; font-size:18px; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">บันทึก</button>
                     <button onclick="document.getElementById('modalSet').style.display='none'" style="background:var(--bg); color:var(--text); opacity:0.7; height:60px; border-radius:20px; border:none; font-weight:800; font-size:16px;">ปิด</button>
                 </div>
                 <div style="text-align:center; line-height: 1.4; opacity: 0.5;">
-                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.3</div>
-                    <div style="font-size:9px; color:var(--text); font-weight:400;">Update: 06/03/2026</div>
+                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.4</div>
+                    <div style="font-size:9px; color:var(--text); font-weight:400;">Update: 08/03/2026</div>
                 </div>
             </div>
         </div>
@@ -689,8 +696,8 @@ nav {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.3"; 
-const LAST_UPDATED = "06/03/2026"; 
+const APP_VERSION = "1.0.4"; 
+const LAST_UPDATED = "08/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
     const currentStoredVersion = localStorage.getItem("app_v");
@@ -2764,8 +2771,8 @@ function handleSave(event) {
     
     if($("mixPanel")) $("mixPanel").style.display = 'none';
 
-    if ($("tEnd")) {
-        $("tEnd").focus();
+    if ($("custType")) {
+        $("custType").focus(); 
     }
 }
 /* 🎨 ฟังก์ชันเปลี่ยนธีม */
