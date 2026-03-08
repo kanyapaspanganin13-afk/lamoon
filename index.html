@@ -207,7 +207,7 @@ body.navy {
     --btn-text:#ffffff; --summary-bg:#0f172a; --summary-border:#3b82f6;
     --danger:#ef4444; --primary:#4f5dff; --success:#22c55e; --warning:#f59e0b;
 }
-body.Vintage Brass {
+body.vintage {
     --bg:#121212; --card:#1c1c1c; --text:#d99c00; --accent:#fbbf24;
     --border:rgba(251,191,36,0.2); --input-bg:#00000066;
     --cash1:#fbbf24; --cash2:#f7b60c; --trans1:#f59e0b; --trans2:#b45309;
@@ -631,7 +631,7 @@ nav {
                     <select id="setTheme" onchange="applyTheme(this.value)" style="width:100%; height:52px; border-radius:16px; border: 1px solid var(--border); background:var(--bg); text-align:center; font-size:16px; font-weight:700; color:var(--text); outline:none;">
                         <option value="light">🌤 ธีมสว่าง</option>
                         <option value="navy">🌌 ธีมน้ำเงิน</option>
-                        <option value="Vintage Brass">🌑 ธีมดำ-ทอง</option>
+                        <option value="vintage">🌑 ธีมดำ-ทอง</option>
                     </select>
                 </div>
 
@@ -2781,7 +2781,7 @@ function handleSave(event) {
 /* 🎨 ฟังก์ชันเปลี่ยนธีม */
 function applyTheme(theme) {
     // ลบ class เก่าทั้งหมดในทีเดียว (ป้องกัน class ซ้อน)
-    document.body.classList.remove("Vintage Brass", "navy");
+    document.body.classList.remove("vintage", "navy");
 
     // ถ้าไม่ใช่ light ให้ใส่ class ตามชื่อธีม
     if (theme && theme !== "light") {
