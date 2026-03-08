@@ -2894,7 +2894,7 @@ function handleSave(event) {
     const hairStyle = $("hairStyle")?.value;
     if (!hairStyle || hairStyle === "" || hairStyle === "เลือกทรงผม") {
         speak("error"); // 🔊 เล่นเสียง "กรุณาตรวจสอบข้อมูลอีกครั้ง"
-        alert("⚠️ กรุณาเลือกทรงผมก่อนบันทึกครับพี่!");
+        alert("⚠️ กรุณาเลือกทรงผมก่อนบันทึกครับ!");
         if($("hairStyle")) $("hairStyle").focus(); 
         return; // หยุดการบันทึกทันที
     }
