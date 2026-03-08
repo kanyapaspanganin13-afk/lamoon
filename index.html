@@ -2688,9 +2688,18 @@ function handleSave(event) {
     const price = parseInt($("priceInp")?.value) || 0;
     const tip = parseInt($("tipInp")?.value) || 0;
     const dateVal = $("dateInp")?.value;
-    // 🟢 เพิ่มการดึงค่าประเภทลูกค้า
     const custTypeVal = $("custType")?.value || 'none'; 
 
+    // 🔴 ส่วนที่เพิ่ม: ตรวจสอบว่าเลือกทรงผมหรือยัง
+    const hairStyle = $("hairStyle")?.value;
+    if (!hairStyle || hairStyle === "" || hairStyle === "เลือกทรงผม") {
+        speak("กรุณาเลือกทรงผม"); // เสียงเตือน
+        alert("⚠️ กรุณาเลือกทรงผมก่อนบันทึก!");
+        if($("hairStyle")) $("hairStyle").focus(); 
+        return; // หยุดการบันทึกทันที
+    }
+
+    // ตรวจสอบราคาและวิธีจ่ายเงิน (ของเดิม)
     if (!price || !payMethod) {
         speak("กรุณาใส่ราคาและเลือกวิธีจ่ายเงิน");
         return alert("กรุณาใส่ราคาและเลือกวิธีจ่ายเงิน!");
@@ -2720,7 +2729,6 @@ function handleSave(event) {
         time: startTime, 
         endTime: endTime || (typeof addMinutes === 'function' ? addMinutes(startTime, 30) : startTime),
         svcs: [$("hairStyle")?.value, $("extra1")?.value, $("extra2")?.value].filter(Boolean),
-        // 🟢 เพิ่มฟิลด์ custType ลงในข้อมูลที่จะบันทึก
         custType: custTypeVal, 
         price: price, 
         tip: tip, 
@@ -2748,9 +2756,8 @@ function handleSave(event) {
         const originalContent = btnSave.innerHTML;
         const originalBg = btnSave.style.background;
         
-        btnSave.style.setProperty("background", "linear-gradient(135deg, #10b981, #059669)", "important");
+       btnSave.style.setProperty("background", "var(--success)", "important");
         btnSave.innerHTML = `<i class="fas fa-check-circle" style="font-size:38px;"></i> <span style="font-size:32px; font-weight:900;">บันทึกสำเร็จ</span>`;
-        
         setTimeout(() => {
             btnSave.style.background = originalBg;
             btnSave.innerHTML = originalContent;
@@ -2764,7 +2771,6 @@ function handleSave(event) {
     const inputsToClear = ["priceInp", "tipInp", "mixCash", "mixTrans", "tEnd"];
     inputsToClear.forEach(id => { if($(id)) $(id).value = ""; });
 
-    // 🟢 รีเซ็ตค่าประเภทลูกค้ากลับเป็น "ปิด" (none)
     const selectsToReset = ["hairStyle", "extra1", "extra2", "custType"]; 
     selectsToReset.forEach(id => { if($(id)) $(id).selectedIndex = 0; });
 
