@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 1</title>
+    <title>Barber Note Pro </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -185,54 +185,70 @@ function openReportModal(title, htmlContent) {
 <style>
 /* ========= 💎 1. THEME SYSTEM (ครบทุกโหมด) ========= */
 :root {
-    /* ⚪ Light Mode: เน้นความใสและสะอาดตาแบบ Glassmorphism */
-    --bg:#f0f2f5; --card:#ffffff; --text:#1e293b; --accent:#3b82f6;
-    --border:rgba(0,0,0,0.06); --input-bg:#fafbfc; --radius:24px;
-    /* ไล่เฉดเงินสด (เขียวมรกต) */
-    --cash1:#34d399; --cash2:#059669; 
-    /* ไล่เฉดเงินโอน (ฟ้าหลวง) */
-    --trans1:#60a5fa; --trans2:#2563eb; 
-    /* ไล่เฉดผสม (ม่วงคราม) */
-    --mix1:#818cf8; --mix2:#4f46e5; 
-    /* ปุ่มบันทึก (น้ำเงินเข้มพรีเมี่ยม) */
+    /* ⚪ Light Mode: เน้นความสะอาดแต่ปุ่มต้องเด้งออกมา */
+    --bg:#f8fafc; --card:#ffffff; --text:#0f172a; --accent:#2563eb;
+    --border:rgba(15,23,42,0.08); --input-bg:#f1f5f9; --radius:24px;
+    
+    /* 💰 การจ่ายเงิน: ใช้เขียว-ฟ้า-ม่วง ตามเดิมแต่ปรับเฉดสว่าง (Vibrant) */
+    --cash1:#10b981; --cash2:#059669;    /* เขียวสดใส */
+    --trans1:#3b82f6; --trans2:#1d4ed8;   /* ฟ้าดูมั่นคง */
+    --mix1:#8b5cf6; --mix2:#6d28d9;      /* ม่วงดูทันสมัย */
+    
+    /* 💾 ปุ่มหลัก: ปรับให้เข้มลึก (Deep Blue) เพื่อให้ต่างจากปุ่มวิธีจ่ายเงิน */
     --save1:#1e40af; --save2:#1e3a8a;
-    --btn-clear1:#34d399; --btn-clear2:#10b981; 
-    --btn-his1:#fbbf24; --btn-his2:#d97706; --btn-text:#ffffff;
-    --summary-bg:#eff6ff; --summary-border:#bfdbfe;
+    
+    --btn-clear1:#34d399; --btn-clear2:#10b981;
+    --btn-his1:#f59e0b; --btn-his2:#d97706; --btn-text:#ffffff;
+    --summary-bg:#eff6ff; --summary-border:#93c5fd;
+    
+    /* 📊 ปุ่มวิเคราะห์: ใช้โทน Indigo-Violet ให้ต่างจากปุ่มบันทึก */
+    --btn-monthly1:#4f46e5; --btn-monthly2:#3730a3; 
+    --btn-compare1:#7c3aed; --btn-compare2:#5b21b6;
+    
     --danger:#ef4444; --primary:#3b82f6; --success:#22c55e; --warning:#f59e0b;
-    /* ปุ่มรายงาน (น้ำเงิน-ม่วง) */
-    --btn-monthly1:#4f46e5; --btn-monthly2:#312e81; 
-    --btn-compare1:#7c3aed; --btn-compare2:#4c1d95;
 }
 
 body.navy {
-    /* 🔵 Navy Mode: น้ำเงินเข้มไล่เฉดให้ดูมีความลึก (Depth) */
-    --bg:#020617; --card:#0f172a; --text:#f1f5f9; --accent:#22d3ee;
+    /* 🔵 Navy Mode: น้ำเงินทะเลลึก ตัดด้วยฟ้าเนียนๆ */
+    --bg:#020617; --card:#0f172a; --text:#f1f5f9; --accent:#38bdf8;
     --border:rgba(255,255,255,0.08); --input-bg:#1e293b;
-    --cash1:#10b981; --cash2:#065f46;
-    --trans1:#3b82f6; --trans2:#1d4ed8;
-    --mix1:#0ea5e9; --mix2:#0369a1;
+    
+    /* ปรับเฉดในที่มืดให้ดูนวลตาขึ้น ไม่กระแทกตา */
+    --cash1:#34d399; --cash2:#065f46;
+    --trans1:#60a5fa; --trans2:#1e40af;
+    --mix1:#0ea5e9; --mix2:#0369a1;      /* เปลี่ยนจากม่วงเป็นฟ้าสว่างเพื่อให้ต่างในโหมดน้ำเงิน */
+    
     --save1:#2563eb; --save2:#1e40af;
+    
+    /* 🛠️ ปุ่มฟังก์ชันใน Navy: ใช้เฉด Cyan และ Slate ให้ดูแพง */
     --btn-clear1:#22d3ee; --btn-clear2:#0891b2;
-    --btn-his1:#475569; --btn-his2:#1e293b; /* ปรับประวัติเป็นเทาน้ำเงินดูพรีเมี่ยมกว่า */
-    --btn-text:#ffffff; --summary-bg:#1e293b; --summary-border:#0891b2;
+    --btn-his1:#475569; --btn-his2:#1e293b;    /* ประวัติสีเทา Navy สุขุม */
+    --btn-text:#ffffff; --summary-bg:#1e293b; --summary-border:#38bdf8;
+    
     --btn-monthly1:#1e1b4b; --btn-monthly2:#312e81; 
     --btn-compare1:#2e1065; --btn-compare2:#4c1d95;
 }
 
 body.dark {
-    /* 🟡 Dark Gold: สีดำตัดทองคำแบบไล่เฉดเหลว (Liquid Gold) */
+    /* 🟡 Dark Gold: ทองคำแท้ไล่เฉดเข้ม-อ่อน (Black & Luxury Gold) */
     --bg:#0a0a0a; --card:#171717; --text:#fbbf24; --accent:#fbbf24;
     --border:rgba(251,191,36,0.15); --input-bg:#000000;
-    --cash1:#fbbf24; --cash2:#92400e;
-    --trans1:#f59e0b; --trans2:#78350f;
-    --mix1:#fde047; --mix2:#854d0e;
-    --save1:#fbbf24; --save2:#b45309;
+    
+    /* 💰 ใช้สีทองหลายเฉดเพื่อให้แต่ละปุ่ม "ต่างกัน" */
+    --cash1:#fbbf24; --cash2:#d97706;    /* ทองเหลือง */
+    --trans1:#f59e0b; --trans2:#92400e;   /* ทองส้ม */
+    --mix1:#fde047; --mix2:#854d0e;      /* ทองสว่าง */
+    
+    --save1:#fbbf24; --save2:#b45309;    /* ทองเข้มดุดัน */
+    
     --btn-clear1:#fde047; --btn-clear2:#ca8a04;
-    --btn-his1:#404040; --btn-his2:#171717; /* ปุ่มประวัติสีดำเทา ขับสีทองให้เด่น */
-    --btn-text:#1a1a1a;
+    --btn-his1:#404040; --btn-his2:#171717;    /* ปุ่มประวัติสีดำ-เทา ขับสีทองรอบข้างให้เด่น */
+    --btn-text:#1a1a1a;                  /* ตัวหนังสือสีดำบนทอง = พรีเมี่ยมที่สุด */
+    
     --summary-bg:#000000; --summary-border:#fbbf24;
-    --btn-monthly1:#854d0e; --btn-monthly2:#451a03; 
+    
+    /* 📊 ปุ่มวิเคราะห์ในโหมดทอง: ใช้สีน้ำตาลครามและเทาเหล็ก */
+    --btn-monthly1:#78350f; --btn-monthly2:#451a03; 
     --btn-compare1:#525252; --btn-compare2:#262626;
 }
 /* ========= 🛠️ 2. GLOBAL & RESET ========= */
