@@ -189,6 +189,8 @@ function openReportModal(title, htmlContent) {
     --btn-his1:#f59e0b; --btn-his2:#d97706; --btn-text:#ffffff;
     --summary-bg: #eff6ff; --summary-border: #bfdbfe;
     --danger: #ef4444; --primary: #3b82f6; --success: #22c55e; --warning: #f59e0b;
+    --btn-monthly1: #7d96fa --btn-monthly2: #094ed9; 
+    --btn-compare1: #938ef5; --btn-compare2: #0b039e;
 }
 
 body.navy {
@@ -200,6 +202,8 @@ body.navy {
     --btn-his1:#334155; --btn-his2:#1e293b; --btn-text:#ffffff;
     --summary-bg: #1e293b; --summary-border: #0891b2;
     --danger: #ef4444; --primary: #3b82f6; --success: #22c55e; --warning: #f59e0b;
+    --btn-monthly1: #a855f7; --btn-monthly2: #7e22ce; /* โทนสีม่วง สำหรับสรุปรายเดือน */
+--btn-compare1: #64748b; --btn-compare2: #334155; /* โทนสีเทาเงิน/เข้ม สำหรับเปรียบเทียบ */
 }
 
 body.dark {
@@ -309,6 +313,8 @@ input[type="text"], input[type="number"], input[type="date"], input[type="time"]
 .btn-mix { background: linear-gradient(135deg, var(--mix1), var(--mix2)); color: var(--btn-text); }
 .btn-clear { background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)); color: var(--btn-text); }
 .btn-history { background: linear-gradient(135deg, var(--btn-his1), var(--btn-his2)); color: var(--btn-text); }
+.btn-monthly { background: linear-gradient(135deg, var(--btn-monthly1), var(--btn-monthly2)); color: var(--btn-text); }
+.btn-compare { background: linear-gradient(135deg, var(--btn-compare1), var(--btn-compare2)); color: var(--btn-text); }
 
 /* 🔒 ล็อคไอคอนภายในปุ่ม ไม่ให้ดีด */
 .btn-pay i {
