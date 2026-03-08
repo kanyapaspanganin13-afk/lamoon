@@ -105,7 +105,7 @@ function renderComparisonReport(v) {
         <div style="font-family:'Kanit', sans-serif; display:flex; flex-direction:column; height:75vh; width:100%; box-sizing:border-box; background:#ffffff; gap:10px; padding:5px;">
             
             <div style="text-align:center; font-size:12px; color:#64748b; flex-shrink:0; padding-bottom:5px; border-bottom:1px solid #f1f5f9;">
-                เปรียบเทียบข้อมูลเฉพาะรายได้ช่าง
+                วิเคราะห์ข้อมูลเฉพาะรายได้ช่าง
             </div>
             
         <div style="flex: 4; display:flex; flex-direction:column; background: var(--summary-bg); border: 1px solid var(--summary-border); border-radius:16px; padding:10px; overflow:hidden;">
@@ -140,7 +140,7 @@ function renderComparisonReport(v) {
     </div>`;
 
     // 🎯 เพิ่มการตั้งค่าให้ Swal กว้างเต็มที่
-    openReportModal("วิเคราะห์เปรียบเทียบข้อมูล", reportHtml);
+    openReportModal("รายงานการเปรียบเทียบข้อมูล", reportHtml);
 } 
 function openReportModal(title, htmlContent) {
     const modal = getEl('reportModal');
