@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BarberNote">
     <link rel="apple-touch-icon" href="https://i.ibb.co/kVrdspsT/Barber-note-pro.jpg">
-    <title>Barber Note Pro 6 </title>
+    <title>Barber Note Pro </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -185,29 +185,23 @@ function openReportModal(title, htmlContent) {
 <style>
 /* ========= 💎 1. THEME SYSTEM (ครบทุกโหมด) ========= */
 :root {
-    --bg:#f0f2f5; --card:#ffffff; --text:#1e293b; --accent:#3b82f6;
-    --border:rgba(0,0,0,0.08); --input-bg:#fafbfc; --radius:24px;
-    --cash1:#34d36c; --cash2:#02ba58; --trans1:#82c8fa; --trans2:#0764fa;
-    --mix1:#6f78d1; --mix2:#6366f1; --save1:#032687; --save2:#1e40af;
-    --btn-clear1:#38ff81; --btn-clear2:#16a34a; /* ปรับสีเขียวเคลียร์เงิน */
-    --btn-his1:#f59e0b; --btn-his2:#d97706; --btn-text:#ffffff;
-    --summary-bg: #eff6ff; --summary-border: #bfdbfe;
-    --danger: #ef4444; --primary: #3b82f6; --success: #22c55e; --warning: #f59e0b;
-    --btn-monthly1: #7d96fa; --btn-monthly2: #094ed9; 
-    --btn-compare1: #938ef5; --btn-compare2: #0b039e;
+    --bg:#f6f8fb; --card:#fff; --text:#0f172a; --accent:#2563eb;
+    --border:rgba(15,23,42,0.08); --input-bg:#f9fafb; --radius:24px;
+    --cash1:#22c55e; --cash2:#16a34a; --trans1:#60a5fa; --trans2:#2563eb;
+    --mix1:#818cf8; --mix2:#4f46e5; --save1:#1d4ed8; --save2:#1e40af;
+    --btn-clear1:#4ade80; --btn-clear2:#16a34a; --btn-his1:#f59e0b; --btn-his2:#d97706;
+    --btn-monthly1:#6366f1; --btn-monthly2:#4338ca; --btn-compare1:#8b5cf6; --btn-compare2:#6d28d9;
+    --btn-text:#fff; --summary-bg:#eff6ff; --summary-border:#93c5fd;
+    --danger:#ef4444; --primary:#3b82f6; --success:#22c55e; --warning:#f59e0b;
 }
 
 body.navy {
-    --bg:#020617; --card:#0f172a; --text:#f1f5f9; --accent:#22d3ee;
-    --border:rgba(255,255,255,0.1); --input-bg:#1e293b;
-    --cash1:#4ade80; --cash2:#16a34a; --trans1:#8549f5; --trans2:#4402ad;
-    --mix1:#38bdf8; --mix2:#0284c7; --save1:#2154fc; --save2:#0b0161;
-    --btn-clear1:#cdf8fa; --btn-clear2:#048bd4;
-    --btn-his1:#fadedf; --btn-his2:#de0215; --btn-text:#ffffff;
-    --summary-bg: #1e293b; --summary-border: #0891b2;
-    --danger: #ef4444; --primary: #3b82f6; --success: #22c55e; --warning: #f59e0b;
-    --btn-monthly1: #02144a; --btn-monthly2: #3d0373; 
-    --btn-compare1: #3200f2; --btn-compare2: #22044f;
+    --bg:#020617; --card:#0f172a; --text:#e2e8f0; --accent:#38bdf8;
+    --border:rgba(255,255,255,0.08); --input-bg:#1e293b;
+    --cash1:#4ade80; --cash2:#16a34a; --trans1:#818cf8; --trans2:#4f46e5;
+    --mix1:#38bdf8; --mix2:#0284c7; --save1:#2563eb; --save2:#1e40af;
+    --btn-clear1:#34d399; --btn-clear2:#059669; --btn-his1:#fb923c; --btn-his2:#ea580c;
+    --summary-bg:#1e293b; --summary-border:#38bdf8;
 }
 
 body.dark {
@@ -215,14 +209,10 @@ body.dark {
     --border:rgba(251,191,36,0.2); --input-bg:#00000066;
     --cash1:#fbbf24; --cash2:#d97706; --trans1:#f59e0b; --trans2:#b45309;
     --mix1:#fde047; --mix2:#a16207; --save1:#fbbf24; --save2:#d97706;
-    --btn-clear1:#ddf525; --btn-clear2:#dede04;
-    --btn-his1:#fadedf; --btn-his2:#875105; --btn-text:#1a1a1a;
-    --summary-bg: #000000; --summary-border: #fbbf24;
-    --danger: #ef4444; --primary: #3b82f6; --success: #22c55e; --warning: #f59e0b;
-    --btn-monthly1: #5b48b0; --btn-monthly2: #f7df63; 
-    --btn-compare1: #4b5563; --btn-compare2: #facd02;
+    --btn-clear1:#facc15; --btn-clear2:#ca8a04; --btn-his1:#fbbf24; --btn-his2:#92400e;
+    --btn-monthly1:#fbbf24; --btn-monthly2:#78350f; --btn-compare1:#fde047; --btn-compare2:#92400e;
+    --btn-text:#1a1a1a; --summary-bg:#000000; --summary-border:#fbbf24; --primary:#fbbf24;
 }
-
 /* ========= 🛠️ 2. GLOBAL & RESET ========= */
 * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
 body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 100px; transition: background 0.3s; overflow-x: hidden; }
@@ -666,7 +656,7 @@ nav {
                     <button onclick="document.getElementById('modalSet').style.display='none'" style="background:var(--bg); color:var(--text); opacity:0.7; height:60px; border-radius:20px; border:none; font-weight:800; font-size:16px;">ปิด</button>
                 </div>
                 <div style="text-align:center; line-height: 1.4; opacity: 0.5;">
-                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.4</div>
+                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.5</div>
                     <div style="font-size:9px; color:var(--text); font-weight:400;">Update: 08/03/2026</div>
                 </div>
             </div>
@@ -698,7 +688,7 @@ nav {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.4"; 
+const APP_VERSION = "1.0.5"; 
 const LAST_UPDATED = "08/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
