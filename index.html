@@ -2812,7 +2812,6 @@ function shareLine() {
             }
         }
     }
-
     let todayDiff = -settle; // แปลงค่าให้เป็น "ร้านค้างช่าง" เพื่อรวมกับ oldBalance
     let finalNet = oldBalance + todayDiff;
 
@@ -2820,10 +2819,10 @@ function shareLine() {
     let msg = `💈 รายงานร้าน: ${shopName}\n`;
     msg += `📅 วันที่: ${fDate}\n`;
     msg += `-------------------------\n`;
-    msg += `📝 ลูกค้าทั้งหมด: ${realCustomerCount} คน\n`;
+    msg += `👤 ลูกค้าทั้งหมด: ${realCustomerCount} คน\n`;
     if (newCount > 0 || regCount > 0) msg += ` ใหม่: ${newCount} | ประจำ: ${regCount}\n`;
     msg += `-------------------------\n${clientList}\n-------------------------\n`;
-    msg += `📊 สรุปงาน:\n${statText || '(ไม่มีรายการ)'}\n-------------------------\n`;
+    msg += `📝 สรุปงาน:\n${statText || '(ไม่มีรายการ)'}\n-------------------------\n`;
     msg += `💰 ยอด: ${tot.toLocaleString()} | 🧧 ทิป: ${tips}\n`;
     msg += `📱 โอน: ${trans.toLocaleString()} | 💶 เงินสด: ${cash.toLocaleString()}\n`;
     msg += `🤵 ช่าง: ${Math.floor(bEarn).toLocaleString()}\n🏠 ร้าน: ${Math.floor(shopEarn).toLocaleString()}\n`;
@@ -2831,19 +2830,18 @@ function shareLine() {
 
     // 8. ส่วนแสดงผลการจ่ายเงิน (Logic ซ่อน/แสดง)
     if (hasOldBalance && oldBalance !== 0) {
-        msg += `🟧 ${settle > 0 ? 'ช่างคืนร้านวันนี้' : 'ร้านคืนช่างวันนี้'}: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท\n`;
+        msg += `🟧 ${settle > 0 ? 'ช่างคืนร้าน' : 'ร้านคืนช่าง'}: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท\n`;
         msg += `-------------------------\n`;
-        msg += `สถานะบัญชี\n`;
+        msg += `🔄 สถานะบัญชี\n`;
         msg += `วันที่ ${periodText}: ${oldBalance > 0 ? 'ร้านค้าง' : 'ช่างค้าง'} ${Math.abs(oldBalance)} บาท\n`;
         msg += `(${Math.abs(oldBalance)} ${todayDiff >= 0 ? '+' : '-'} ${Math.abs(Math.floor(todayDiff))}) = ${Math.abs(Math.floor(finalNet))}\n\n`;
-        msg += `✅ ยอดสุทธิ: ${finalNet > 0 ? 'ร้านคืนช่าง' : 'ช่างคืนร้าน'} ${Math.abs(Math.floor(finalNet)).toLocaleString()} บาท\n`;
+        msg += `📌 ยอดสุทธิ: ${finalNet > 0 ? 'ร้านคืนช่าง' : 'ช่างคืนร้าน'} ${Math.abs(Math.floor(finalNet)).toLocaleString()} บาท\n`;
     } else {
         // กรณีไม่มีค้างเก่า โชว์บรรทัดเดียวจบ
         let todayText = settle > 0 ? `🟧 ช่างคืนร้าน: ${Math.abs(settle)} บาท` : `🟦 ร้านคืนช่าง: ${Math.abs(settle)} บาท`;
         if (settle === 0) todayText = `✅ ยอดลงตัวพอดี`;
         msg += `${todayText}\n`;
     }
-
     // 9. แสดง Preview
     const msgEdit = $("msgEdit");
     const previewArea = $("linePreview");
