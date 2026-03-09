@@ -823,173 +823,90 @@ function saveDB() {
         console.error("❌ ไม่สามารถบันทึกได้:", e);
     }
 }
-// 1. ฟังก์ชันส่งออกข้อมูล (Backup)
+// 1. ฟังก์ชันส่งออกข้อมูล (Backup) - ปรับให้ชื่อ Key ตรงกัน
 function exportBackup() {
     try {
         const data = {
             db: JSON.parse(localStorage.getItem("barber_db") || "[]"),
             archives: JSON.parse(localStorage.getItem("barber_archives") || "[]"),
-            account: typeof account !== 'undefined' ? account : {}, 
-            settings: JSON.parse(localStorage.getItem("barber_settings") || "{}")
+            account: typeof account !== 'undefined' ? account : { balance: 0, logs: [] }, 
+            conf: JSON.parse(localStorage.getItem("barber_conf") || "{}")
         };
         const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `Barber-Note-Backup-${new Date().toISOString().split('T')[0]}.json`;
+        a.download = `Barber-Backup-${new Date().toLocaleDateString('th-TH').replace(/\//g, '-')}.json`;
         a.click();
         
-        // แจ้งเตือนแบบใช้คำเป็นกลางและฟอนต์ Kanit
         Swal.fire({
             title: 'สำรองข้อมูลสำเร็จ',
-            text: 'ระบบดำเนินการจัดเก็บข้อมูลเรียบร้อยแล้ว',
+            text: 'ระบบสร้างไฟล์สำรองเรียบร้อยแล้ว',
             icon: 'success',
-            confirmButtonText: 'ตกลง',
             confirmButtonColor: 'var(--success)'
         });
-        
     } catch (e) { 
-        Swal.fire({
-            title: 'เกิดข้อผิดพลาด',
-            text: 'ไม่สามารถสำรองข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง',
-            icon: 'error',
-            confirmButtonText: 'รับทราบ',
-            confirmButtonColor: 'var(--danger)'
-        });
+        Swal.fire({ title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถสร้างไฟล์สำรองได้', icon: 'error' });
     }
 }
-// 2. ฟังก์ชันนำเข้าข้อมูลจากไฟล์ (Import)
+
+// 2. ฟังก์ชันนำเข้าข้อมูล (Import) - แก้ให้เขียนทับเฉพาะตัว ไม่ลบทั้งหมด
 function importBackup(input) {
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            
+            if (!data.db && !data.archives) throw new Error("Wrong format");
+
             Swal.fire({
                 title: 'ยืนยันการนำเข้าข้อมูล',
-                text: "ข้อมูลปัจจุบันทั้งหมดจะถูกแทนที่ด้วยข้อมูลใหม่ ต้องการดำเนินการต่อหรือไม่?",
+                text: "ข้อมูลปัจจุบันจะถูกแทนที่ด้วยข้อมูลจากไฟล์นี้",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: 'var(--success)',
-                cancelButtonColor: 'var(--danger)',
                 confirmButtonText: 'ยืนยัน',
                 cancelButtonText: 'ยกเลิก',
                 background: 'var(--card)',
                 color: 'var(--text)'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // ล้างข้อมูลเก่าและเขียนทับด้วยข้อมูลจากไฟล์
-                    localStorage.clear(); 
+                    // ✅ เขียนทับเฉพาะ Key ที่เกี่ยวข้อง ป้องกันค่า Config อื่นหาย
                     localStorage.setItem("barber_db", JSON.stringify(data.db || []));
                     localStorage.setItem("barber_archives", JSON.stringify(data.archives || []));
                     localStorage.setItem("barber_account", JSON.stringify(data.account || { balance: 0, logs: [] }));
-                    localStorage.setItem("barber_settings", JSON.stringify(data.settings || {}));
+                    localStorage.setItem("barber_conf", JSON.stringify(data.conf || {}));
                     
-                    Swal.fire({
-                        title: 'นำเข้าข้อมูลสำเร็จ',
-                        text: 'ระบบกำลังเริ่มการทำงานใหม่ กรุณารอสักครู่',
-                        icon: 'success',
-                        showConfirmButton: false,
-                        timer: 2000,
-                        background: 'var(--card)',
-                        color: 'var(--text)'
-                    });
-
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2000);
+                    Swal.fire({ title: 'สำเร็จ', text: 'กำลังรีโหลดข้อมูล...', icon: 'success', showConfirmButton: false, timer: 1500 });
+                    setTimeout(() => location.reload(), 1500);
                 }
             });
-
         } catch(err) { 
-            Swal.fire({
-                title: 'ไฟล์ไม่ถูกต้อง',
-                text: 'รูปแบบไฟล์ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง',
-                icon: 'error',
-                confirmButtonText: 'ตกลง',
-                confirmButtonColor: 'var(--accent)',
-                background: 'var(--card)',
-                color: 'var(--text)'
-            });
+            Swal.fire({ title: 'ไฟล์ไม่ถูกต้อง', text: 'กรุณาใช้ไฟล์ .json ที่สำรองจากแอปนี้เท่านั้น', icon: 'error' });
         }
     };
     if (input.files && input.files[0]) reader.readAsText(input.files[0]);
 }
-// 3. ฟังก์ชันคืนค่าข้อมูล (Restore จากตัวแปรตรงๆ)
-function restoreData(jsonData) {
-    try {
-        const data = JSON.parse(jsonData);
-        
-        // คืนค่าข้อมูลไปยังหน่วยความจำ
-        account = data.account || { balance: 0, logs: [] };
-        archives = data.archives || []; 
-        
-        // บันทึกลง Storage
-        localStorage.setItem("barber_account", JSON.stringify(account));
-        localStorage.setItem("barber_archives", JSON.stringify(archives));
-        
-        if (typeof save === "function") save();
-        if (typeof saveDB === "function") saveDB();
 
-        // แจ้งเตือนความสำเร็จ (ตัดคำแทนตัวและคำลงท้าย)
-        Swal.fire({
-            title: 'ดำเนินการสำเร็จ',
-            text: 'ระบบคืนค่าข้อมูลและล้างยอดบัญชีเรียบร้อยแล้ว',
-            icon: 'success',
-            showConfirmButton: false,
-            timer: 2000,
-            background: 'var(--card)',
-            color: 'var(--text)'
-        });
-
-        // หน่วงเวลาเล็กน้อยก่อนรีเฟรชหน้าจอ
-        setTimeout(() => {
-            location.reload(); 
-        }, 2000);
-        
-    } catch (e) {
-        Swal.fire({
-            title: 'เกิดข้อผิดพลาด',
-            text: 'ไม่สามารถคืนค่าข้อมูลได้เนื่องจากรูปแบบข้อมูลไม่ถูกต้อง',
-            icon: 'error',
-            confirmButtonText: 'รับทราบ',
-            confirmButtonColor: 'var(--danger)',
-            background: 'var(--card)',
-            color: 'var(--text)'
-        });
-    }
-}
-// 4. ฟังก์ชันล้างข้อมูลแอป (Hard Reset)
+// 3. ฟังก์ชันล้างข้อมูล (Hard Reset) - ใช้ตัวเดียวพอครับ
 function clearData() {
     Swal.fire({
-        title: 'ยืนยันการล้างข้อมูลระบบ',
-        text: "ข้อมูลทั้งหมดรวมถึงรายงานบัญชีจะถูกลบอย่างถาวร ต้องการดำเนินการต่อหรือไม่?",
+        title: 'ล้างข้อมูลทั้งหมด?',
+        text: "รายงานและบัญชีจะหายถาวร (ควรสำรองข้อมูลก่อน)",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: 'var(--danger)', // ใช้ตัวแปรสีแดงจากธีม
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: 'ยืนยันการลบข้อมูล',
+        confirmButtonColor: '#dc2626',
+        confirmButtonText: 'ยืนยันลบข้อมูล',
         cancelButtonText: 'ยกเลิก',
         background: 'var(--card)',
         color: 'var(--text)'
     }).then((result) => {
         if (result.isConfirmed) {
-            // ล้างข้อมูลทุกอย่างใน LocalStorage
-            localStorage.clear(); 
+            // ลบเฉพาะข้อมูลงาน แต่เก็บ Config ร้านไว้ (ถ้าพี่อยากลบเกลี้ยงค่อยใช้ clear)
+            localStorage.removeItem("barber_db");
+            localStorage.removeItem("barber_archives");
+            localStorage.removeItem("barber_account");
             
-            Swal.fire({
-                title: 'ล้างข้อมูลสำเร็จ',
-                text: 'ระบบดำเนินการล้างข้อมูลทั้งหมดเรียบร้อยแล้ว',
-                icon: 'success',
-                showConfirmButton: false,
-                timer: 2000,
-                background: 'var(--card)',
-                color: 'var(--text)'
-            });
-            
-            setTimeout(() => {
-                location.reload(); 
-            }, 2000);
+            Swal.fire({ title: 'ล้างข้อมูลสำเร็จ', icon: 'success', timer: 1000, showConfirmButton: false });
+            setTimeout(() => location.reload(), 1000);
         }
     });
 }
