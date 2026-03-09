@@ -408,6 +408,18 @@ nav {
 .swal2-title, .swal2-content {
     color: var(--text) !important;
 }
+/* ✅ เพิ่มส่วนนี้เพื่อดึงให้แจ้งเตือนมาอยู่หน้าสุด */
+.swal2-container {
+    z-index: 99999 !important; /* ต้องสูงกว่า 10000 ของ Modal พี่ */
+}
+
+/* อันนี้ของเดิมของพี่ (เก็บไว้เหมือนเดิมครับ) */
+.swal2-popup {
+    font-family: 'Kanit', sans-serif !important;
+    border-radius: 20px !important;
+    background: var(--card) !important;
+    color: var(--text) !important;
+}
 @keyframes slideUp { 
     from { transform: translateY(30px); opacity: 0; } 
     to { transform: translateY(0); opacity: 1; } 
