@@ -2949,13 +2949,15 @@ function saveSettings() {
     notify("success", "บันทึกสำเร็จ", "ระบบได้ดำเนินการบันทึกการตั้งค่าเรียบร้อยแล้ว");
 }
 async function handleSave(event) {
+    const $ = (id) => document.getElementById(id);
+    
     // 1. ดึงค่าพื้นฐาน
     const price = parseInt($("priceInp")?.value) || 0;
     const tip = parseInt($("tipInp")?.value) || 0;
     const dateVal = $("dateInp")?.value;
     const custTypeVal = $("custType")?.value || 'none'; 
 
-    // 🔴 ตรวจสอบรายการ (ต้องเลือกอย่างน้อย 1 อย่าง)
+    // 🔴 ตรวจสอบรายการ
     const hairStyle = $("hairStyle")?.value;
     const extra1 = $("extra1")?.value;
     const extra2 = $("extra2")?.value;
@@ -2964,9 +2966,26 @@ async function handleSave(event) {
     const e1Empty = (!extra1 || extra1 === "" || extra1 === "เลือกบริการ");
     const e2Empty = (!extra2 || extra2 === "" || extra2 === "เลือกบริการ");
 
-    // ถ้าไม่เลือกอะไรเลย หรือไม่ใส่ราคา/วิธีจ่าย ให้หยุดทำงานเงียบๆ (หรือสั่นถ้ามือถือรองรับ)
-    if ((hEmpty && e1Empty && e2Empty) || !price || !payMethod) {
-        if (navigator.vibrate) navigator.vibrate(100); 
+    // --- 🎯 แก้ไข Logic การตรวจสอบตามเงื่อนไขพี่ ---
+
+    // เงื่อนไข 1 & 2: ถ้าว่างทั้งหมด (ไม่มีทรงผม และ ไม่มีบริการ 1 และ ไม่มีบริการ 2)
+    // ให้เด้งไปที่ทรงผมเพื่อให้เลือกรายการ
+    if (hEmpty && e1Empty && e2Empty) {
+        if (navigator.vibrate) navigator.vibrate(100);
+        $("hairStyle").focus(); 
+        return; 
+    }
+
+    // เงื่อนไขที่ 3: ถ้าเลือกรายการแล้วแต่ไม่ระบุราคา
+    if (!price) {
+        if (navigator.vibrate) navigator.vibrate(100);
+        $("priceInp").focus(); 
+        return; 
+    }
+
+    // กรณีไม่ได้เลือกวิธีจ่ายเงิน
+    if (typeof payMethod === 'undefined' || !payMethod) {
+        if (navigator.vibrate) navigator.vibrate(100);
         return; 
     }
 
@@ -2974,7 +2993,7 @@ async function handleSave(event) {
     const startTime = $("tStart")?.value || new Date().toTimeString().slice(0, 5);
     const endTime = $("tEnd")?.value; 
 
-    // 3. จัดการยอดเงิน (เฉพาะจ่ายผสมที่ต้องกดยืนยันถ้าเงินไม่ตรง)
+    // 3. จัดการยอดเงิน (โหมด Mix จ่ายผสม)
     let cashAmt = 0, transAmt = 0;
     if (payMethod === 'Mix') {
         cashAmt = parseInt($("mixCash")?.value) || 0;
@@ -3013,11 +3032,10 @@ async function handleSave(event) {
         type: "SERVICE"
     };
 
-    db.push(rec); 
-    saveDB(); 
+    if (typeof db !== 'undefined') db.push(rec); 
+    if (typeof saveDB === 'function') saveDB(); 
 
-    // 🔊 5. เล่นเสียงแจ้งเตือน (แทนการขึ้น Popup)
-    // อย่าลืมเพิ่ม <audio id="successSound" src="..."></audio> ใน HTML นะครับ
+    // 🔊 5. เล่นเสียงแจ้งเตือนสำเร็จ
     const sfx = document.getElementById("successSound");
     if (sfx) {
         sfx.currentTime = 0;
@@ -3027,8 +3045,8 @@ async function handleSave(event) {
     if (typeof renderDay === 'function') renderDay(); 
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
 
-    // ✨ 6. Animation ปุ่มบันทึก (สื่อสารด้วยสีแทนข้อความ)
-    const btnSave = event.currentTarget || document.querySelector(".btn-save");
+    // ✨ 6. Animation ปุ่มบันทึก
+    const btnSave = event?.currentTarget || document.querySelector(".btn-save");
     if (btnSave) {
         const originalContent = btnSave.innerHTML;
         const originalBg = btnSave.style.background;
@@ -3041,7 +3059,6 @@ async function handleSave(event) {
             btnSave.innerHTML = originalContent;
         }, 1200);
     }
-
     // 7. รีเซ็ตฟอร์ม
     if ($("tStart") && endTime) $("tStart").value = endTime;
     ["priceInp", "tipInp", "mixCash", "mixTrans", "tEnd"].forEach(id => { if($(id)) $(id).value = ""; });
@@ -3050,6 +3067,8 @@ async function handleSave(event) {
     payMethod = ""; 
     ["btnCash", "btnTrans", "btnMix"].forEach(id => { if($(id)) $(id).className = "icon-card"; });
     if($("mixPanel")) $("mixPanel").style.display = 'none';
+    
+    // หลังบันทึกเสร็จ ให้เด้งกลับไปที่ประเภทลูกค้าเพื่อให้พร้อมรับลูกค้าคนถัดไป
     if ($("custType")) $("custType").focus(); 
 }
 /* 🎨 ฟังก์ชันเปลี่ยนธีม */
