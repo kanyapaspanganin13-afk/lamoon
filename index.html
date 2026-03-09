@@ -683,15 +683,15 @@ nav {
     <div id="linePreview" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(5px);"><div style="background: var(--card); width:100%; max-width:450px; padding:20px; border-radius:25px; box-shadow:0 15px 40px rgba(0,0,0,0.4); border: 1px solid var(--border);"><h3 style="margin:0 0 15px 0; color: var(--text); font-size:18px; display:flex; align-items:center; gap:8px;">📝 ตรวจสอบรายงาน</h3><textarea id="msgEdit" style="width:100%; height:300px; padding:15px; border:1px solid var(--border); border-radius:15px; background: var(--bg); color: var(--text); font-family:sans-serif; font-size:14px; line-height:1.5; outline:none; resize:none;"></textarea><div style="display:flex; gap:10px; margin-top:15px;"><button onclick="document.getElementById('linePreview').style.display='none'" style="flex:1; padding:12px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius:12px; font-weight:bold; cursor:pointer;">ยกเลิก</button><button onclick="sendToLineFinal()" style="flex:1; padding:12px; background: var(--success); color:#fff; border:none; border-radius:12px; font-weight:bold; cursor:pointer; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);">ส่งเข้า LINE ✅</button></div></div></div>
 
 <nav style="background: var(--card); border-top: 1px solid var(--border); backdrop-filter: blur(10px); position:fixed; bottom:0; width:100%; max-width:480px; height: 75px; display:flex; justify-content:space-around; align-items: center; z-index:1000; padding-bottom: env(safe-area-inset-bottom);">
-    <div onclick="go(1)" id="nav1" class="nav-item active" style="display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; flex: 1; color: var(--accent); transition: 0.3s;">
+    <div onclick="go(1)" id="nav1" class="nav-item active" style="display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; flex: 1; transition: 0.3s;">
         <i class="fas fa-edit" style="font-size: 24px; margin-bottom: 2px;"></i>
         <span style="font-size: 14px; font-weight: 800;">บันทึก</span>
     </div>
-    <div onclick="go(2)" id="nav2" class="nav-item" style="display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; flex: 1; color: var(--text); opacity: 0.5; transition: 0.3s;">
+    <div onclick="go(2)" id="nav2" class="nav-item" style="display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; flex: 1; transition: 0.3s;">
         <i class="fas fa-history" style="font-size: 24px; margin-bottom: 2px;"></i>
         <span style="font-size: 14px; font-weight: 800;">รายงาน</span>
     </div>
-    <div onclick="go(3)" id="nav3" class="nav-item" style="display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; flex: 1; color: var(--text); opacity: 0.5; transition: 0.3s;">
+    <div onclick="go(3)" id="nav3" class="nav-item" style="display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; flex: 1; transition: 0.3s;">
         <i class="fas fa-wallet" style="font-size: 24px; margin-bottom: 2px;"></i>
         <span style="font-size: 14px; font-weight: 800;">บัญชี</span>
     </div>
@@ -747,29 +747,30 @@ document.addEventListener("DOMContentLoaded", () => {
     if ($("display-date")) $("display-date").innerText = LAST_UPDATED;
 });
 function go(p) {
-    // 1. ซ่อน/แสดงหน้า (โค้ดเดิมของช่างดีอยู่แล้วครับ)
+    // 1. ซ่อน/แสดงหน้า
     document.querySelectorAll('.page').forEach(pg => {
         pg.classList.remove('active');
         pg.style.display = 'none'; 
     });
-    
     const targetPage = document.getElementById('p' + p);
     if (targetPage) {
         targetPage.classList.add('active');
         targetPage.style.display = 'block';
     }
-    // 2. จัดการเมนู Active
+    // 2. ✨ ส่วนที่แก้ไข: จัดการปุ่มเมนูให้เปลี่ยนสีตามหน้าปัจจุบัน
     document.querySelectorAll('.nav-item').forEach((btn, i) => {
-        btn.classList.toggle('active', (i + 1) === p);
+        const isSelected = (i + 1) === p;
+        btn.classList.toggle('active', isSelected);
+        // บังคับเปลี่ยนสีและค่าความชัดผ่าน JavaScript เพื่อสู้กับ Inline Style ใน HTML
+        btn.style.color = isSelected ? 'var(--accent)' : 'var(--text)';
+        btn.style.opacity = isSelected ? '1' : '0.5';
     });
-    // --- ✨ ส่วนที่เพิ่ม: โหลดชื่อร้านทุกครั้งที่สลับหน้า (ป้องกันชื่อหาย) ---
+    // --- ✨ ส่วนที่เพิ่ม: โหลดชื่อร้านทุกครั้งที่สลับหน้า ---
     const savedShopName = localStorage.getItem("shopName") || "BARBER SHOP";
     const shopTitleEl = document.querySelector('h2'); 
     if (shopTitleEl) shopTitleEl.innerText = savedShopName;
-
     // 3. เงื่อนไขพิเศษ
     const dateInpValue = $("dateInp")?.value || new Date().toISOString().split('T')[0];
-
     if (p === 2) {
         if (typeof renderDay === 'function') renderDay(dateInpValue);
         if ($("displayDateThai")) {
@@ -777,14 +778,11 @@ function go(p) {
             $("displayDateThai").innerText = `${d}/${m}/${parseInt(y) + 543}`;
         }
     }
-
     if (p === 3) { 
-        // หน้าบัญชี: ให้เช็คก่อนว่าข้อมูลเปลี่ยนไหม ค่อยโหลด (ลดการกระตุก)
         if ($("accDate") && $("dateInp")) {
             $("accDate").value = $("dateInp").value;
         }
         if (typeof loadAccountStatus === 'function') {
-            // เรียกใช้ฟังก์ชันเดิม แต่ไม่ต้องรีเฟรชหน้าจอ
             loadAccountStatus(); 
         }
     }
