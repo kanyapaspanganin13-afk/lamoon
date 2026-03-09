@@ -1012,7 +1012,7 @@ function addRecord() {
 
     // 🎯 1. ตรวจสอบ: กรณีไม่ได้ระบุราคา (ยกเว้นวันหยุดหรือประกัน)
     if (price === 0 && currentPay !== 'Holiday' && currentPay !== 'Guarantee') {
-        notify("error", "ข้อมูลไม่ครบถ้วน", "กรุณาระบุจำนวนเงินค่าบริการให้ถูกต้อง");
+        notify("error", "ระบุข้อมูลไม่ครบถ้วน", "กรุณาระบุจำนวนเงินค่าบริการให้ถูกต้อง");
         $("priceInp").focus();
         return;
     }
@@ -1020,7 +1020,7 @@ function addRecord() {
     // 🎯 2. ตรวจสอบ: กรณีไม่ได้เลือกรายการทรงผม
     const hairStyleSelect = $("hairStyle");
     if (hairStyleSelect && hairStyleSelect.value === "" && currentPay !== 'Holiday') {
-        notify("error", "ข้อมูลไม่ครบถ้วน", "กรุณาเลือกรายการทรงผมก่อนการบันทึก");
+        notify("error", "ระบุข้อมูลไม่ครบถ้วน", "กรุณาเลือกรายการทรงผมก่อนการบันทึก");
         hairStyleSelect.focus();
         return;
     }
@@ -1069,8 +1069,11 @@ function addRecord() {
             settle: result.settle, 
             type: (currentPay === 'Holiday') ? 'HOLIDAY' : 'WORK'
         };
-        if (idx > -1) { archives[idx].settle = result.settle; } 
-        else { archives.push(archiveData); }
+        if (idx > -1) { 
+            archives[idx].settle = result.settle; 
+        } else { 
+            archives.push(archiveData); 
+        }
         localStorage.setItem("barber_archives", JSON.stringify(archives));
     }
 
@@ -1083,8 +1086,12 @@ function addRecord() {
         if (icon) icon.className = "fas fa-paper-plane";
     }
 
-    // 🎯 3. แจ้งเตือนความสำเร็จด้วยภาษาสุภาพ
-    notify("success", "ดำเนินการสำเร็จ", "ระบบได้จัดเก็บข้อมูลการทำงานเรียบร้อยแล้วค่ะ/ครับ");
+    // 🔊 เล่นเสียงสำเร็จ (ถ้ามีระบบเสียง)
+    const sfx = document.getElementById("successSound");
+    if (sfx) { sfx.currentTime = 0; sfx.play(); }
+
+    // 🎯 3. แจ้งเตือนความสำเร็จ (ตัด ค่ะ/ครับ ออก)
+    notify("success", "ดำเนินการสำเร็จ", "ระบบจัดเก็บข้อมูลการทำงานเรียบร้อยแล้ว");
 
     // 🎯 4. ล้างค่าในฟอร์ม (Reset Form)
     if ($("priceInp")) $("priceInp").value = "";
@@ -1350,7 +1357,6 @@ async function saveAndGo(date, total) {
         }
         return;
     }
-
     // 🎯 2. ยืนยันก่อนส่ง (ปรับคำพูดให้เป็นกลาง)
     const result = await Swal.fire({
         title: 'ยืนยันการส่งข้อมูล',
@@ -1366,7 +1372,6 @@ async function saveAndGo(date, total) {
     });
 
     if (!result.isConfirmed) return;
-
     // 🎯 3. เริ่มดำเนินการส่ง
     if (btn) {
         if (btn.disabled) return; 
@@ -1410,8 +1415,7 @@ async function saveAndGo(date, total) {
         }
 
         if (typeof loadAccountStatus === 'function') loadAccountStatus();
-        
-        // 🎯 ส่งข้อมูลสำเร็จ (ใช้ภาษาเป็นกลาง)
+                // 🎯 ส่งข้อมูลสำเร็จ (ใช้ภาษาเป็นกลาง)
         notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการส่งข้อมูลเรียบร้อยแล้ว");
 
     } catch (e) {
@@ -1440,7 +1444,6 @@ async function deleteArchiveDate(date) {
     });
 
     if (!result.isConfirmed) return;
-
     // 🎯 2. ค้นหาและดำเนินการลบ
     const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) {
@@ -1466,20 +1469,17 @@ async function deleteArchiveDate(date) {
 async function handleInsurance() {
     const d = $("dateInp")?.value || new Date().toISOString().split('T')[0];
     const g = parseInt(conf.guar) || 0;
-
     // 1. ตรวจสอบตั้งค่ายอดประกัน
     if (g <= 0) {
         notify("error", "ข้อมูลไม่ครบถ้วน", "กรุณาตั้งค่าวงเงินประกันรายได้ในระบบก่อนดำเนินการ");
         return;
     }
-
     // 2. ตรวจสอบว่าเปิดประกันไปหรือยัง
     const isClaimed = db.find(r => r.date === d && r.type === "GUARANTEE_CLAIM");
     if (isClaimed) {
         notify("error", "แจ้งเตือน", "ระบบประกันรายได้ของวันนี้มีการเปิดใช้งานเรียบร้อยแล้ว");
         return;
     }
-
     // 3. ยืนยันการเปิดระบบ (ใช้ภาษาเป็นกลาง)
     const result = await Swal.fire({
         title: 'ยืนยันการเปิดระบบประกัน',
@@ -1510,7 +1510,6 @@ async function handleInsurance() {
         renderDay(d);
     }
 }
-
 // --- ระบบบันทึกวันหยุด ---
 async function handleHoliday() {
     const d = $("dateInp")?.value;
@@ -1525,7 +1524,6 @@ async function handleHoliday() {
         notify("error", "แจ้งเตือน", "วันที่เลือกได้ดำเนินการบันทึกเป็นวันหยุดเรียบร้อยแล้ว");
         return;
     }
-
     // ยืนยันการบันทึกวันหยุด (ปรับคำพูดให้เป็นกลาง)
     const result = await Swal.fire({
         title: 'ยืนยันการบันทึกวันหยุด',
@@ -1840,8 +1838,7 @@ function loadAccountStatus() {
             oldValEl.innerText = `฿0`;
         }
     }
-    
-    // ยอดรวมทั้งหมด
+        // ยอดรวมทั้งหมด
     if (getEl("accTotalVal")) {
         getEl("accTotalVal").innerText = `฿${Math.abs(totalBalance).toLocaleString()}`;
     }
@@ -1852,7 +1849,6 @@ function loadAccountStatus() {
             day: 'numeric', month: 'short', year: 'numeric' 
         });
     }
-
     // อัปเดตสถานะป้าย Badge (ยอดรวมสรุป)
     const badge = getEl("statusBadge");
     if (badge) {
@@ -1896,10 +1892,8 @@ async function clearAccount() {
         notify("error", "แจ้งเตือน", "ขณะนี้ยอดคงค้างเป็นศูนย์เรียบร้อยแล้ว");
         return;
     }
-
     const accNoteEl = document.getElementById("accNote");
     const d = document.getElementById("accDate")?.value || new Date().toLocaleDateString('th-TH');
-
     // 2. ยืนยันการเคลียร์ยอด 
     const result = await Swal.fire({
         title: 'ยืนยันการสรุปยอดบัญชี',
@@ -1936,7 +1930,6 @@ async function clearAccount() {
     if (typeof loadAccountHistory === 'function') loadAccountHistory();
     
     loadAccountStatus(); 
-
     // 6. แจ้งเตือนความสำเร็จ (ปรับเป็นภาษาเป็นกลาง)
     notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการเคลียร์ยอดบัญชีเรียบร้อยแล้ว");
 
@@ -2541,46 +2534,47 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         }).join("");
     };
 
-// --- 5. สรุปภาพรวม (Insights) ปรับปรุงใหม่แยกสีลูกค้า (โทน C: ฟ้า-ทอง) ---
-const insights = [
-    `วันทำงาน: เปิดร้านทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
-       // แสดงสัปดาห์ที่ลูกค้ามากที่สุด (นับรวมทุกคน)
-    `สัปดาห์ที่มีลูกค้ามากที่สุด: <b>${topCountWeek ? topCountWeek[0] : "-"}</b> (${topCountWeek ? (topCountWeek[1].customers || "-") : "-"} คน)`,
-    // แสดงสัปดาห์รายได้สูงสุด
-    (topIncomeWeek && (topIncomeWeek[1].income || 0) > 0) 
-        ? `สัปดาห์ที่มีรายได้สูงสุด: <b>${topIncomeWeek[0]}</b> (฿${topIncomeWeek[1].income.toLocaleString()})` 
-        : `สัปดาห์ที่มีรายได้สูงสุด: <b>-</b>`
-];
-// 🎯 เงื่อนไข: แสดงยอดแยกประเภทลูกค้า (ใช้สีตามธีม)
-if (totalNew > 0 || totalRegular > 0) {
-    // 🔵 ใช้สี Primary (น้ำเงิน/สว่าง) | 🟡 ใช้สี Warning/Accent (ส้ม/ทอง)
-    const newColor = "var(--primary)"; 
-    const regColor = "var(--warning)"; 
+    // --- 5. สรุปภาพรวม (Insights) ปรับปรุงใหม่แยกสีลูกค้า (โทน C: ฟ้า-ทอง) ---
+    const insights = [
+        `วันทำงาน: เปิดร้านทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
+        // แสดงสัปดาห์ที่ลูกค้ามากที่สุด (นับรวมทุกคน)
+        `สัปดาห์ที่มีลูกค้ามากที่สุด: <b>${topCountWeek ? topCountWeek[0] : "-"}</b> (${topCountWeek ? (topCountWeek[1].customers || "-") : "-"} คน)`,
+        // แสดงสัปดาห์รายได้สูงสุด
+        (topIncomeWeek && (topIncomeWeek[1].income || 0) > 0) 
+            ? `สัปดาห์ที่มีรายได้สูงสุด: <b>${topIncomeWeek[0]}</b> (฿${topIncomeWeek[1].income.toLocaleString()})` 
+            : `สัปดาห์ที่มีรายได้สูงสุด: <b>-</b>`
+    ];
+    
+    // 🎯 เงื่อนไข: แสดงยอดแยกประเภทลูกค้า (ใช้สีตามธีม)
+    if (totalNew > 0 || totalRegular > 0) {
+        // 🔵 ใช้สี Primary (น้ำเงิน/สว่าง) | 🟡 ใช้สี Warning/Accent (ส้ม/ทอง)
+        const newColor = "var(--primary)"; 
+        const regColor = "var(--warning)"; 
+        
+        // ย้ายปีกกามาปิดตรงนี้ เพื่อให้ตัวแปรสีถูกเรียกใช้ข้างล่างได้
+        const newText = `<span style="color: ${newColor}; font-weight: bold;">ใหม่ ${totalNew > 0 ? totalNew : "-"}</span>`;
+        const regText = `<span style="color: ${regColor}; font-weight: bold;">ประจำ ${totalRegular > 0 ? totalRegular : "-"}</span>`;
+        
+        insights.push(`โครงสร้างลูกค้าเดือนนี้: <b>${totalRegular > totalNew ? "ลูกค้าประจำเป็นฐานหลัก" : totalNew > totalRegular ? "ลูกค้าใหม่เพิ่มมากขึ้น" : "สัดส่วนลูกค้าพอๆ กัน"} (${regText} / ${newText})</b>`);
+        
+        // แยกสีตรงชื่อสัปดาห์ที่ลูกค้าแต่ละกลุ่มเยอะที่สุด
+        const maxNewText = `<span style="color: ${newColor};">ใหม่ (<b>${maxNewWeek !== "-" ? maxNewWeek : "-"}</b>)</span>`;
+        const maxRegText = `<span style="color: ${regColor};">ประจำ (<b>${maxRegWeek !== "-" ? maxRegWeek : "-"}</b>)</span>`;
+        
+        insights.push(`สถิติลูกค้าเยอะสุดแยกกลุ่ม: ${maxNewText} | ${maxRegText}`);
+    } 
+    // สถิติรายวัน (เข้าเยอะ/น้อย)
+    if (busiestDay && busiestDay.avg > 0) {
+        const dayText = (!quietestDay || busiestDay.avg === quietestDay.avg) 
+            ? `ลูกค้าเข้าเยอะใน <b>วัน${busiestDay.name}</b>` 
+            : `ลูกค้าเข้าเยอะใน <b>วัน${busiestDay.name}</b> และน้อยใน <b>วัน${quietestDay.name}</b>`;
+        insights.push(dayText);
+    } else {
+        insights.push(`สถิติรายวัน: -`);
     }
-    const newText = `<span style="color: ${newColor}; font-weight: bold;">ใหม่ ${totalNew > 0 ? totalNew : "-"}</span>`;
-    const regText = `<span style="color: ${regColor}; font-weight: bold;">ประจำ ${totalRegular > 0 ? totalRegular : "-"}</span>`;
     
-    insights.push(`โครงสร้างลูกค้าเดือนนี้: <b>${totalRegular > totalNew ? "ลูกค้าประจำเป็นฐานหลัก" : totalNew > totalRegular ? "ลูกค้าใหม่เพิ่มมากขึ้น" : "สัดส่วนลูกค้าพอๆ กัน"} (${regText} / ${newText})</b>`);
-    
-    // แยกสีตรงชื่อสัปดาห์ที่ลูกค้าแต่ละกลุ่มเยอะที่สุด
-    const maxNewText = `<span style="color: ${newColor};">ใหม่ (<b>${maxNewWeek !== "-" ? maxNewWeek : "-"}</b>)</span>`;
-    const maxRegText = `<span style="color: ${regColor};">ประจำ (<b>${maxRegWeek !== "-" ? maxRegWeek : "-"}</b>)</span>`;
-    
-    insights.push(`สถิติลูกค้าเยอะสุดแยกกลุ่ม: ${maxNewText} | ${maxRegText}`);
-}
-
-// สถิติรายวัน (เข้าเยอะ/น้อย)
-if (busiestDay && busiestDay.avg > 0) {
-    const dayText = (!quietestDay || busiestDay.avg === quietestDay.avg) 
-        ? `ลูกค้าเข้าเยอะใน <b>วัน${busiestDay.name}</b>` 
-        : `ลูกค้าเข้าเยอะใน <b>วัน${busiestDay.name}</b> และน้อยใน <b>วัน${quietestDay.name}</b>`;
-    insights.push(dayText);
-} else {
-    insights.push(`สถิติรายวัน: -`);
-}
-
-// ทรงผมและบริการยอดนิยม
-insights.push(`ทรงผมยอดนิยม: <b>${topHair ? topHair[0] : '-'}</b> | บริการยอดนิยม: <b>${topService ? topService[0] : '-'}</b>`);
+    // ทรงผมและบริการยอดนิยม
+    insights.push(`ทรงผมยอดนิยม: <b>${topHair ? topHair[0] : '-'}</b> | บริการยอดนิยม: <b>${topService ? topService[0] : '-'}</b>`);
    
     const weeklyHtml = weekEntries.map(([wk, data]) => {
         const weeklyTotalIncome = data.income || 0;
@@ -2740,9 +2734,9 @@ function shareLine() {
     const $ = (id) => document.getElementById(id);
     const dInp = $("dateInp").value;
     const today = db.filter(r => r.date === dInp);
-    // 🔴 กรณีไม่พบข้อมูล: เล่นเสียงเตือน + แจ้งเตือนแบบคุมธีม
+
+    // 🔴 กรณีไม่พบข้อมูล
     if (!today.length) {
-        // เล่นเสียง Error (ถ้ามีตั้ง id ไว้) หรือสั่น
         const errSfx = document.getElementById("errorSound"); 
         if (errSfx) errSfx.play();
         if (navigator.vibrate) navigator.vibrate(200);
@@ -2758,6 +2752,7 @@ function shareLine() {
         });
         return;
     }
+
     const [y, m, d] = dInp.split('-');
     const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
     const fDate = `${parseInt(d)} ${months[parseInt(m)-1]} ${(parseInt(y) + 543).toString().slice(-2)}`;
@@ -2766,9 +2761,9 @@ function shareLine() {
 
     let tot = 0, cash = 0, trans = 0, tips = 0;
     let stats = {}, realCustomerCount = 0;
-    // --- 🟢 เพิ่มตัวนับแยกประเภทลูกค้า ---
     let newCount = 0;
     let regCount = 0;
+
     // 1. ประมวลผลรายการลูกค้า
     const clientList = today
         .sort((a, b) => a.time.localeCompare(b.time))
@@ -2780,17 +2775,16 @@ function shareLine() {
             tot += p;
             tips += t;
 
+            // 💰 จัดการยอดเงิน: ทิปเงินสดไม่บวกเข้า cash เพราะช่างเก็บไว้เอง
             if (r.pay === 'Trans') {
-                trans += (p + t);
+                trans += (p + t); // โอนต้องรวมทิปเพราะเงินเข้าบัญชี (ร้าน/ช่าง)
             } else {
-                cash += p;
+                cash += p; // เงินสดบวกเฉพาะค่าบริการ (ทิปช่างเก็บไปแล้ว)
             }
 
             const isService = !['GUARANTEE', 'HOLIDAY'].includes(rType) && p > 0;
             if (isService) {
                 realCustomerCount++;
-                
-                // --- 🎯 เช็คประเภทลูกค้า (ใช้ custType ให้ตรงกับที่เก็บในฐานข้อมูล) ---
                 const cType = String(r.custType || "").toLowerCase().trim();
                 if (cType === 'new') newCount++;
                 else if (cType === 'regular') regCount++;
@@ -2806,7 +2800,7 @@ function shareLine() {
             return `${i + 1}. [${tShow}] ${icon} ${(r.svcs || []).join('+')} = ${p}${t ? ` (+ทิป ${t})` : ''} ${payIcon}`;
         }).join('\n');
 
-    // 2. จัดการสถิติ (คงเดิม)
+    // 2. จัดการสถิติ
     const allowed = ["เด็ก", "สระผม", "โกนหนวด", "ย้อมผม", "ย้อมสี"];
     const icons = { "เด็ก": "🧒", "สระ": "🧼", "โกน": "🪒", "ย้อม": "🎨" };
     
@@ -2817,7 +2811,7 @@ function shareLine() {
             return `${icons[iconKey] || '🔹'} ${k}: ${v}`;
         }).join('\n');
 
-    // 3. คำนวณรายได้ (คงเดิม)
+    // 3. คำนวณรายได้ (Settle Logic)
     let bEarn = Math.max(tot * (conf.perc / 100), conf.guar) + tips;
     let bEarnNoTip = bEarn - tips; 
     let shopEarn = tot - bEarnNoTip;
@@ -2827,13 +2821,13 @@ function shareLine() {
         ? `🟧 ช่างคืนร้าน: ${Math.floor(Math.abs(settle)).toLocaleString()} บาท` 
         : `🟦 ร้านคืนช่าง: ${Math.floor(Math.abs(settle)).toLocaleString()} บาท`;
 
-   // --- 4. ประกอบข้อความ (Template) - ปรับตามเงื่อนไขพี่ ---
+    // 4. ประกอบข้อความ (Template)
     let msg = `💈 รายงานร้าน: ${shopName}\n`;
     msg += `📅 วันที่: ${fDate}\n`;
     msg += `-------------------------\n`;
     if (newCount > 0 || regCount > 0) {
         msg += `📝 ลูกค้าทั้งหมด: ${realCustomerCount} คน\n`;
-        msg += ` ใหม่: ${newCount > 0 ? newCount : '-'} | ประจำ: ${regCount > 0 ? regCount : '-'}\n`;
+        msg += ` ใหม่: ${newCount > 0 ? newCount : '0'} | ประจำ: ${regCount > 0 ? regCount : '0'}\n`;
     } else {
         msg += `📝 ลูกค้า: ${realCustomerCount} คน\n`;
     }
@@ -2856,9 +2850,13 @@ function shareLine() {
     if (msgEdit && previewArea) {
         msgEdit.value = msg;
         previewArea.style.display = "flex";
-        console.log("✅ Line Report Generated with Customer Types");
     } else {
-        alert("ระบบพรีวิวมีปัญหา โปรดตรวจสอบ ID ของหน้าต่างพรีวิว");
+        Swal.fire({
+            title: 'ผิดพลาด',
+            text: 'ระบบพรีวิวมีปัญหา ตรวจสอบ ID msgEdit หรือ linePreview',
+            icon: 'error',
+            confirmButtonColor: 'var(--accent)'
+        });
     }
 }
 function sendToLineFinal() {
