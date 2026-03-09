@@ -2735,128 +2735,121 @@ function shareLine() {
     const dInp = $("dateInp").value;
     const today = db.filter(r => r.date === dInp);
 
-    // 🔴 กรณีไม่พบข้อมูล
+    // 🔴 1. ตรวจสอบข้อมูล
     if (!today.length) {
         const errSfx = document.getElementById("errorSound"); 
         if (errSfx) errSfx.play();
-        if (navigator.vibrate) navigator.vibrate(200);
-
-        Swal.fire({
-            title: 'ไม่พบข้อมูล',
-            text: 'วันที่เลือกไม่มีการบันทึกไว้',
-            icon: 'info',
-            confirmButtonText: 'ตกลง',
-            confirmButtonColor: 'var(--accent)',
-            background: 'var(--card)',
-            color: 'var(--text)'
-        });
+        Swal.fire({ title: 'ไม่พบข้อมูล', text: 'วันที่เลือกไม่มีการบันทึกไว้', icon: 'info' });
         return;
     }
 
+    // 🗓️ 2. จัดการวันที่และชื่อร้าน
     const [y, m, d] = dInp.split('-');
     const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
     const fDate = `${parseInt(d)} ${months[parseInt(m)-1]} ${(parseInt(y) + 543).toString().slice(-2)}`;
-    
     const shopName = conf.shop || "Barber Shop";
 
     let tot = 0, cash = 0, trans = 0, tips = 0;
     let stats = {}, realCustomerCount = 0;
-    let newCount = 0;
-    let regCount = 0;
+    let newCount = 0, regCount = 0;
 
-    // 1. ประมวลผลรายการลูกค้า
+    // 📝 3. ประมวลผลรายการลูกค้า
     const clientList = today
         .sort((a, b) => a.time.localeCompare(b.time))
         .map((r, i) => {
             const p = Number(r.price) || 0;
             const t = Number(r.tip) || 0;
-            const rType = r.type ? String(r.type).toUpperCase().trim() : '';
-            
-            tot += p;
-            tips += t;
+            tot += p; tips += t;
 
-            // 💰 จัดการยอดเงิน: ทิปเงินสดไม่บวกเข้า cash เพราะช่างเก็บไว้เอง
-            if (r.pay === 'Trans') {
-                trans += (p + t); // โอนต้องรวมทิปเพราะเงินเข้าบัญชี (ร้าน/ช่าง)
-            } else {
-                cash += p; // เงินสดบวกเฉพาะค่าบริการ (ทิปช่างเก็บไปแล้ว)
-            }
+            if (r.pay === 'Trans') trans += (p + t);
+            else cash += p;
 
-            const isService = !['GUARANTEE', 'HOLIDAY'].includes(rType) && p > 0;
-            if (isService) {
+            if (!['GUARANTEE', 'HOLIDAY'].includes(String(r.type).toUpperCase()) && p > 0) {
                 realCustomerCount++;
-                const cType = String(r.custType || "").toLowerCase().trim();
+                const cType = String(r.custType || "").toLowerCase();
                 if (cType === 'new') newCount++;
                 else if (cType === 'regular') regCount++;
-
                 if (r.hair && r.hair.includes("เด็ก")) stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
                 (r.svcs || []).forEach(s => { if (s) stats[s] = (stats[s] || 0) + 1; });
             }
-
             const tShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
-            const icon = rType === 'GUARANTEE' ? '🛡️' : (rType === 'HOLIDAY' ? '🏖️' : '');
-            const payIcon = r.pay === 'Trans' ? '📱' : '💶';
-
-            return `${i + 1}. [${tShow}] ${icon} ${(r.svcs || []).join('+')} = ${p}${t ? ` (+ทิป ${t})` : ''} ${payIcon}`;
+            return `${i + 1}. [${tShow}] ${(r.svcs || []).join('+')} = ${p}${t ? ` (+ทิป ${t})` : ''} ${r.pay === 'Trans' ? '📱' : '💶'}`;
         }).join('\n');
 
-    // 2. จัดการสถิติ
+    // 📊 4. สถิติงาน
     const allowed = ["เด็ก", "สระผม", "โกนหนวด", "ย้อมผม", "ย้อมสี"];
     const icons = { "เด็ก": "🧒", "สระ": "🧼", "โกน": "🪒", "ย้อม": "🎨" };
-    
     let statText = Object.entries(stats)
         .filter(([k]) => allowed.some(a => k.includes(a)))
-        .map(([k, v]) => {
-            const iconKey = Object.keys(icons).find(i => k.includes(i));
-            return `${icons[iconKey] || '🔹'} ${k}: ${v}`;
-        }).join('\n');
+        .map(([k, v]) => `${icons[Object.keys(icons).find(i => k.includes(i))] || '🔹'} ${k}: ${v}`).join('\n');
 
-    // 3. คำนวณรายได้ (Settle Logic)
+    // 💰 5. คำนวณรายได้ช่าง/ร้าน
     let bEarn = Math.max(tot * (conf.perc / 100), conf.guar) + tips;
-    let bEarnNoTip = bEarn - tips; 
-    let shopEarn = tot - bEarnNoTip;
-    
-    let settle = cash - bEarn;
-    let settleMsg = settle > 0 
-        ? `🟧 ช่างคืนร้าน: ${Math.floor(Math.abs(settle)).toLocaleString()} บาท` 
-        : `🟦 ร้านคืนช่าง: ${Math.floor(Math.abs(settle)).toLocaleString()} บาท`;
+    let shopEarn = tot - (bEarn - tips);
+    let settle = cash - bEarn; // บวก=ช่างคืนร้าน, ลบ=ร้านคืนช่าง
 
-    // 4. ประกอบข้อความ (Template)
+    // 🔄 6. ระบบยอดค้างสะสม (Period Logic)
+    let oldBalance = 0;
+    let periodText = "";
+    let hasOldBalance = false;
+
+    if (typeof archives !== "undefined") {
+        const pendingDays = archives.filter(day => day.date !== dInp && day.settle !== 0);
+        if (pendingDays.length > 0) {
+            hasOldBalance = true;
+            oldBalance = pendingDays.reduce((sum, day) => sum + (Number(-day.settle) || 0), 0);
+            
+            const fmt = (iso) => {
+                const [iy, im, id] = iso.split('-');
+                return `${parseInt(id)}/${parseInt(im)}`;
+            };
+            const yr = (iso) => (parseInt(iso.split('-')[0]) + 543).toString().slice(-2);
+
+            if (pendingDays.length === 1) {
+                periodText = `${fmt(pendingDays[0].date)}/${yr(pendingDays[0].date)}`;
+            } else {
+                periodText = `${fmt(pendingDays[0].date)} - ${fmt(pendingDays[pendingDays.length-1].date)}/${yr(pendingDays[pendingDays.length-1].date)}`;
+            }
+        }
+    }
+
+    let todayDiff = -settle; // แปลงค่าให้เป็น "ร้านค้างช่าง" เพื่อรวมกับ oldBalance
+    let finalNet = oldBalance + todayDiff;
+
+    // ✉️ 7. ประกอบข้อความ Template
     let msg = `💈 รายงานร้าน: ${shopName}\n`;
     msg += `📅 วันที่: ${fDate}\n`;
     msg += `-------------------------\n`;
-    if (newCount > 0 || regCount > 0) {
-        msg += `📝 ลูกค้าทั้งหมด: ${realCustomerCount} คน\n`;
-        msg += ` ใหม่: ${newCount > 0 ? newCount : '0'} | ประจำ: ${regCount > 0 ? regCount : '0'}\n`;
-    } else {
-        msg += `📝 ลูกค้า: ${realCustomerCount} คน\n`;
-    }
-    msg += `-------------------------\n`;
-    msg += `${clientList}\n`;
-    msg += `-------------------------\n`;
-    msg += `📊 สรุปงาน:\n${statText || '(ไม่มีรายการ)'}\n`;
-    msg += `-------------------------\n`;
+    msg += `📝 ลูกค้าทั้งหมด: ${realCustomerCount} คน\n`;
+    if (newCount > 0 || regCount > 0) msg += ` ใหม่: ${newCount} | ประจำ: ${regCount}\n`;
+    msg += `-------------------------\n${clientList}\n-------------------------\n`;
+    msg += `📊 สรุปงาน:\n${statText || '(ไม่มีรายการ)'}\n-------------------------\n`;
     msg += `💰 ยอด: ${tot.toLocaleString()} | 🧧 ทิป: ${tips}\n`;
     msg += `📱 โอน: ${trans.toLocaleString()} | 💶 เงินสด: ${cash.toLocaleString()}\n`;
-    msg += `🤵 ช่าง: ${Math.floor(bEarn).toLocaleString()}\n`;
-    msg += `🏠 ร้าน: ${Math.floor(shopEarn).toLocaleString()}\n`;
+    msg += `🤵 ช่าง: ${Math.floor(bEarn).toLocaleString()}\n🏠 ร้าน: ${Math.floor(shopEarn).toLocaleString()}\n`;
     msg += `-------------------------\n`;
-    msg += `${settleMsg}`;
 
-    // 5. แสดง Preview
+    // 8. ส่วนแสดงผลการจ่ายเงิน (Logic ซ่อน/แสดง)
+    if (hasOldBalance && oldBalance !== 0) {
+        msg += `🟧 ${settle > 0 ? 'ช่างคืนร้านวันนี้' : 'ร้านคืนช่างวันนี้'}: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท\n`;
+        msg += `-------------------------\n`;
+        msg += `สถานะบัญชี\n`;
+        msg += `วันที่ ${periodText}: ${oldBalance > 0 ? 'ร้านค้าง' : 'ช่างค้าง'} ${Math.abs(oldBalance)} บาท\n`;
+        msg += `(${Math.abs(oldBalance)} ${todayDiff >= 0 ? '+' : '-'} ${Math.abs(Math.floor(todayDiff))}) = ${Math.abs(Math.floor(finalNet))}\n\n`;
+        msg += `✅ ยอดสุทธิ: ${finalNet > 0 ? 'ร้านคืนช่าง' : 'ช่างคืนร้าน'} ${Math.abs(Math.floor(finalNet)).toLocaleString()} บาท\n`;
+    } else {
+        // กรณีไม่มีค้างเก่า โชว์บรรทัดเดียวจบ
+        let todayText = settle > 0 ? `🟧 ช่างคืนร้าน: ${Math.abs(settle)} บาท` : `🟦 ร้านคืนช่าง: ${Math.abs(settle)} บาท`;
+        if (settle === 0) todayText = `✅ ยอดลงตัวพอดี`;
+        msg += `${todayText}\n`;
+    }
+
+    // 9. แสดง Preview
     const msgEdit = $("msgEdit");
     const previewArea = $("linePreview");
-    
     if (msgEdit && previewArea) {
         msgEdit.value = msg;
         previewArea.style.display = "flex";
-    } else {
-        Swal.fire({
-            title: 'ผิดพลาด',
-            text: 'ระบบพรีวิวมีปัญหา ตรวจสอบ ID msgEdit หรือ linePreview',
-            icon: 'error',
-            confirmButtonColor: 'var(--accent)'
-        });
     }
 }
 function sendToLineFinal() {
