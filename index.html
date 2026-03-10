@@ -1520,10 +1520,8 @@ function renderDay(selectedDate) {
     const isHoliday = allRec.some(r => r.type && r.type.toUpperCase() === 'HOLIDAY');
     const stats = {};
 
-    // --- 🟢 จัดกลุ่มบริการเสริม (เพิ่ม กันจอน, ย้อม, ดัด เพื่อแยกป้ายสี) ---
     const extraSvcs = ["โกนหนวด", "กันหน้า", "สระผม", "กันจอน", "ย้อมแฟชั่น", "ดัดผม"];
-    const serviceGroup = ["โกนหนวด", "กันหน้า", "สระผม", "กันจอน", "ย้อมแฟชั่น", "ดัดผม"];
-
+    
     let tot = 0, trans = 0, cash = 0, tips = 0;
     let listHtml = "";
     let realCustomerCount = 0;
