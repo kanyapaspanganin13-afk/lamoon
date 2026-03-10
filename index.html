@@ -1506,11 +1506,11 @@ async function handleHoliday() {
         renderDay(d);
     }
 }
-function renderDay(selectedDate){
+function renderDay(selectedDate) {
     let dInp = selectedDate || ($("dateInp") ? $("dateInp").value : new Date().toISOString().split('T')[0]);
     if ($("dateInp")) $("dateInp").value = dInp;
     let allRec = db.filter(r => r.date === dInp);
-    
+
     if (allRec.length === 0 && typeof archives !== 'undefined') {
         const archivedDay = archives.find(a => a.date === dInp);
         if (archivedDay && archivedDay.details) {
@@ -1519,63 +1519,56 @@ function renderDay(selectedDate){
     }
     const isHoliday = allRec.some(r => r.type && r.type.toUpperCase() === 'HOLIDAY');
     const stats = {};
-    const extraSvcs = ["โกนหนวด", "กันหน้า", "สระผม"];
+
+    // --- 🟢 จัดกลุ่มบริการเสริม (เพิ่ม กันจอน, ย้อม, ดัด เพื่อแยกป้ายสี) ---
+    const extraSvcs = ["โกนหนวด", "กันหน้า", "สระผม"]; 
+    const serviceGroup = ["โกนหนวด", "กันหน้า", "สระผม", "กันจอน", "ย้อมแฟชั่น", "ดัดผม"];
+
     let tot = 0, trans = 0, cash = 0, tips = 0;
     let listHtml = "";
     let realCustomerCount = 0;
+    let countNew = 0;
+    let countRegular = 0;
 
-    // --- 🟢 เพิ่มตัวแปรสำหรับนับแยกประเภท ---
-    let countNew = 0;      // สำหรับ value="new"
-    let countRegular = 0;  // สำหรับ value="regular"
-    // --- ส่วนการประมวลผลข้อมูล ---
     allRec
-    .slice()
-    .sort((a,b) => a.time.localeCompare(b.time))
-    .forEach((r, i) => {
-        const p = parseFloat(r.price) || 0; 
-        const t = parseFloat(r.tip) || 0;
-        const rType = r.type ? String(r.type).toUpperCase().trim() : '';
-        const currentSvcs = Array.isArray(r.svcs) ? r.svcs : [];
-        const cType = r.custType || 'none'; // รับค่าประเภทลูกค้าจากฐานข้อมูล
+        .slice()
+        .sort((a, b) => a.time.localeCompare(b.time))
+        .forEach((r, i) => {
+            const p = parseFloat(r.price) || 0;
+            const t = parseFloat(r.tip) || 0;
+            const rType = r.type ? String(r.type).toUpperCase().trim() : '';
+            const currentSvcs = Array.isArray(r.svcs) ? r.svcs : [];
+            const cType = r.custType || 'none';
 
-        tot += p;
-        tips += t;
-        if (r.pay === 'Mix') {
-            const pCash = parseFloat(r.payCash) || 0;
-            const pTrans = parseFloat(r.payTrans) || 0; 
-            trans += pTrans;
-            cash += (pCash - t); 
-        } else if (r.pay === 'Trans' || r.pay === 'โอน') {
-            trans += (p + t);
-        } else {
-            cash += p;
-        }
-
-        if (rType === 'HOLIDAY' || rType === 'GUARANTEE' || p === 0) {
-            // ข้ามการนับ
-        } else {
-            if (currentSvcs.length > 0) {
-                realCustomerCount++; // นับรวมลูกค้า 1 คนเสมอ
-                
-                // 🟢 นับแยกตามประเภทที่เลือก
-                if (cType === 'new') countNew++;
-                if (cType === 'regular') countRegular++;
+            tot += p;
+            tips += t;
+            if (r.pay === 'Mix') {
+                const pCash = parseFloat(r.payCash) || 0;
+                const pTrans = parseFloat(r.payTrans) || 0;
+                trans += pTrans;
+                cash += (pCash - t);
+            } else if (r.pay === 'Trans' || r.pay === 'โอน') {
+                trans += (p + t);
+            } else {
+                cash += p;
             }
-            
-            const cleanExtras = extraSvcs.map(s => s.trim().toLowerCase());
-            const hasRealHaircut = currentSvcs.some(s => {
-                if (!s) return false;
-                const cleanS = s.trim().toLowerCase();
-                return !cleanExtras.includes(cleanS);
-            });
-            if (hasRealHaircut) {
-                stats["ตัดผม"] = (stats["ตัดผม"] || 0) + 1;
-            }
-            currentSvcs.forEach(s => {
-                if (s) stats[s] = (stats[s] || 0) + 1;
-            });
-        }
 
+            if (rType === 'HOLIDAY' || rType === 'GUARANTEE' || p === 0) {
+                // ข้ามการนับ
+            } else {
+                if (currentSvcs.length > 0) {
+                    realCustomerCount++;
+                    if (cType === 'new') countNew++;
+                    if (cType === 'regular') countRegular++;
+                }
+
+                // นับตามชื่อที่เลือกมาจริงๆ เท่านั้น (ลบ "ตัดผม" ออกแล้ว)
+                currentSvcs.forEach(s => {
+                    if (s) stats[s] = (stats[s] || 0) + 1;
+                });
+            }
+        }); // <-- ปิด forEach
+        } // <-- ปิด renderDay
         const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
         
         // 🟢 เพิ่มสัญลักษณ์แสดงประเภทในรายการ (History)
