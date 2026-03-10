@@ -2773,23 +2773,31 @@ function shareLine() {
     msg += `👤 ลูกค้าทั้งหมด: ${realCustomerCount} คน\n`;
     if (newCount > 0 || regCount > 0) msg += ` ใหม่: ${newCount} | ประจำ: ${regCount}\n`;
     msg += `-------------------------\n${clientList}\n-------------------------\n`;
-    msg += `📝 สรุปงาน:\n${statText || '(ไม่มีรายการ)'}\n-------------------------\n`;
-    msg += `💰 ยอด: ${tot.toLocaleString()} | 🧧 ทิป: ${tips}\n`;
+    msg += `🏷️ สรุปงาน:\n${statText || '(ไม่มีรายการ)'}\n-------------------------\n`;
+    msg += `💰 ยอด: ${tot.toLocaleString()} | 🧧 ทิปโอน: ${tips}\n`;
     msg += `📱 โอน: ${trans.toLocaleString()} | 💶 เงินสด: ${cash.toLocaleString()}\n`;
     msg += `🤵 ช่าง: ${Math.floor(bEarn).toLocaleString()}\n🏠 ร้าน: ${Math.floor(shopEarn).toLocaleString()}\n`;
     msg += `-------------------------\n`;
 
-    // 8. ส่วนแสดงผลการจ่ายเงิน (Logic ซ่อน/แสดง)
+// 8. ส่วนแสดงผลการจ่ายเงิน (Logic ซ่อน/แสดง)
     if (hasOldBalance && oldBalance !== 0) {
-        msg += `🟧 ${settle > 0 ? 'ช่างคืนร้าน' : 'ร้านคืนช่าง'}: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท\n`;
+        // ✅ ปรับตรงนี้ให้สลับสี 🟧 ส้ม (ช่างคืนร้าน) / 🟦 น้ำเงิน (ร้านคืนช่าง)
+        let settleColor = settle > 0 ? '🟧' : '🟦';
+        let settleText = settle > 0 ? 'ช่างคืนร้าน' : 'ร้านคืนช่าง';
+        
+        msg += `${settleColor} ${settleText}: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท\n`;
         msg += `-------------------------\n`;
-        msg += `🔄 สถานะบัญชี\n`;
+        msg += `🚨 สถานะบัญชี\n`;
         msg += `วันที่ ${periodText}: ${oldBalance > 0 ? 'ร้านค้าง' : 'ช่างค้าง'} ${Math.abs(oldBalance)} บาท\n`;
         msg += `(${Math.abs(oldBalance)} ${todayDiff >= 0 ? '+' : '-'} ${Math.abs(Math.floor(todayDiff))}) = ${Math.abs(Math.floor(finalNet))}\n\n`;
-        msg += `📌 ยอดสุทธิ: ${finalNet > 0 ? 'ร้านคืนช่าง' : 'ช่างคืนร้าน'} ${Math.abs(Math.floor(finalNet)).toLocaleString()} บาท\n`;
+        
+        // ✅ ปรับยอดสุทธิให้มีอีโมจิบอกสถานะชัดเจนด้วย
+        let finalColor = finalNet > 0 ? '🟦' : '🟧';
+        msg += `📌 ${finalColor} ยอดสุทธิ: ${finalNet > 0 ? 'ร้านคืนช่าง' : 'ช่างคืนร้าน'} ${Math.abs(Math.floor(finalNet)).toLocaleString()} บาท\n`;
+        
     } else {
-        // กรณีไม่มีค้างเก่า โชว์บรรทัดเดียวจบ
-        let todayText = settle > 0 ? `🟧 ช่างคืนร้าน: ${Math.abs(settle)} บาท` : `🟦 ร้านคืนช่าง: ${Math.abs(settle)} บาท`;
+        // กรณีไม่มีค้างเก่า โชว์บรรทัดเดียวจบ (อันนี้ของเดิมพี่ดีอยู่แล้ว)
+        let todayText = settle > 0 ? `🟧 ช่างคืนร้าน: ${Math.abs(settle).toLocaleString()} บาท` : `🟦 ร้านคืนช่าง: ${Math.abs(settle).toLocaleString()} บาท`;
         if (settle === 0) todayText = `✅ ยอดลงตัวพอดี`;
         msg += `${todayText}\n`;
     }
