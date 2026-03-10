@@ -1540,6 +1540,9 @@ function renderDay(selectedDate) {
             const currentSvcs = Array.isArray(r.svcs) ? r.svcs : [];
             const cType = r.custType || 'none';
 
+            // ✅ ย้าย timeShow มาไว้ข้างในนี้ เพื่อให้รู้จักตัวแปร r
+            const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
+
             tot += p;
             tips += t;
             if (r.pay === 'Mix') {
@@ -1562,14 +1565,10 @@ function renderDay(selectedDate) {
                     if (cType === 'regular') countRegular++;
                 }
 
-                // นับตามชื่อที่เลือกมาจริงๆ เท่านั้น (ลบ "ตัดผม" ออกแล้ว)
                 currentSvcs.forEach(s => {
                     if (s) stats[s] = (stats[s] || 0) + 1;
                 });
             }
-        }); // <-- ปิด forEach
-        } // <-- ปิด renderDay
-        const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
         
         // 🟢 เพิ่มสัญลักษณ์แสดงประเภทในรายการ (History)
         let custTag = ""; 
