@@ -689,8 +689,8 @@ nav {
                     <button onclick="document.getElementById('modalSet').style.display='none'" style="background:var(--bg); color:var(--text); opacity:0.7; height:60px; border-radius:20px; border:none; font-weight:800; font-size:16px;">ปิด</button>
                 </div>
                 <div style="text-align:center; line-height: 1.4; opacity: 0.5;">
-                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.2</div>
-                    <div style="font-size:9px; color:var(--text); font-weight:400;">Update: 09/03/2026</div>
+                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.3</div>
+                    <div style="font-size:9px; color:var(--text); font-weight:400;">Update: 10/03/2026</div>
                 </div>
             </div>
         </div>
@@ -727,8 +727,8 @@ nav {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.2"; 
-const LAST_UPDATED = "09/03/2026"; 
+const APP_VERSION = "1.0.3"; 
+const LAST_UPDATED = "10/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
     const currentStoredVersion = localStorage.getItem("app_v");
@@ -2283,7 +2283,6 @@ function loadHistMonth() {
         if (window.calcNetProfit) window.calcNetProfit();
         return openReportModal("📊 สรุปรายเดือน", `<div style='text-align:center;padding:50px;color:#94a3b8;'>ไม่พบข้อมูลของเดือน ${m}</div>`);
     }
-
     // --- 🟢 ตัวแปรสำหรับนับรวมรายเดือน ---
     let countNew = 0;      
     let countRegular = 0;  
@@ -2398,116 +2397,122 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     let totalRegular = 0;
 
     weekEntries.forEach(([wk, data]) => {
-        // นับยอดรวมลูกค้าใหม่/ประจำทั้งเดือน
-        totalNew += (data.countNew || 0);
-        totalRegular += (data.countRegular || 0);
+        // ✅ ป้องกันการต่อตัวอักษรด้วย Number()
+        totalNew += Number(data.countNew || 0);
+        totalRegular += Number(data.countRegular || 0);
 
         if (data.dailyCounts) {
             data.dailyCounts.forEach(d => {
                 const dayName = d.dayName.split(' ')[0];
                 if (!dayStats[dayName]) dayStats[dayName] = { total: 0, count: 0 };
-                if (d.count > 0) {
-                    dayStats[dayName].total += d.count;
+                const cCount = Number(d.count || 0);
+                if (cCount > 0) {
+                    dayStats[dayName].total += cCount;
                     dayStats[dayName].count += 1;
                 }
             });
         }
     });
 
-    const dayAverages = Object.entries(dayStats).filter(([name, data]) => data.count > 0).map(([name, data]) => ({ name, avg: data.total / data.count }));
-    const busiestDay = dayAverages.sort((a, b) => b.avg - a.avg)[0];
-    const quietestDay = dayAverages.sort((a, b) => a.avg - b.avg)[0];
-    const topIncomeWeek = weekEntries.length > 0 ? weekEntries.reduce((p, c) => ((c[1].income || 0) > (p[1].income || 0) ? c : p)) : null;
-    const topCountWeek = weekEntries.length > 0 ? weekEntries.reduce((p, c) => ((c[1].countNew + c[1].countRegular) > (p[1].countNew + p[1].countRegular) ? c : p)) : null;
+    const dayAverages = Object.entries(dayStats)
+        .filter(([name, data]) => data.count > 0)
+        .map(([name, data]) => ({ name, avg: data.total / data.count }));
+    
+    const busiestDay = dayAverages.length > 0 ? [...dayAverages].sort((a, b) => b.avg - a.avg)[0] : null;
+    const quietestDay = dayAverages.length > 0 ? [...dayAverages].sort((a, b) => a.avg - b.avg)[0] : null;
+
+    // ✅ แก้ไข Logic การเทียบรายได้สูงสุด
+    const topIncomeWeek = weekEntries.length > 0 
+        ? weekEntries.reduce((p, c) => (Number(c[1].income || 0) > Number(p[1].income || 0) ? c : p)) 
+        : null;
+
+    // ✅ แก้ไข Logic การเทียบจำนวนลูกค้าสูงสุด (รวม ใหม่ + ประจำ)
+    const topCountWeek = weekEntries.length > 0 
+        ? weekEntries.reduce((p, c) => {
+            const cTotal = Number(c[1].countNew || 0) + Number(c[1].countRegular || 0);
+            const pTotal = Number(p[1].countNew || 0) + Number(p[1].countRegular || 0);
+            return cTotal > pTotal ? c : p;
+        }) 
+        : null;
 
     const topHair = Object.entries(hairStats).sort((a, b) => b[1] - a[1])[0];
     const topService = Object.entries(serviceStats).sort((a, b) => b[1] - a[1])[0];
 
-   // --- 2. วิเคราะห์ลูกค้า (รายสัปดาห์ & รายเดือน) - แก้ไขตามเงื่อนไข ---
+    // --- 2. วิเคราะห์ลูกค้า (รายสัปดาห์ & รายเดือน) - แก้ไขตามเงื่อนไข ---
     let maxNewWeek = "-"; 
     let maxRegWeek = "-";
     let nUp = 0, nDown = 0, rUp = 0, rDown = 0;
 
     weekKeys.forEach((wk, idx) => {
         const curr = weeklyData[wk];
-        const n = curr.countNew || 0;
-        const r = curr.countRegular || 0;
+        const n = Number(curr.countNew || 0);
+        const r = Number(curr.countRegular || 0);
         
-        // วิเคราะห์สดรายสัปดาห์
         curr.newAnalysis = (n > r) ? "กลุ่มหลักอาทิตย์นี้" : (n < r) ? "น้อยกว่าลูกค้าประจำ" : "เท่ากับลูกค้าประจำ";
         curr.regAnalysis = (r > n) ? "กลุ่มหลักอาทิตย์นี้" : (r < n) ? "น้อยกว่าลูกค้าใหม่" : "เท่ากับลูกค้าใหม่";
 
-        // ถ้าลูกค้าใหม่ "มากกว่า" ลูกค้าประจำ และมากกว่ายอดสูงสุดที่เคยเก็บไว้
-        if (n > r && (maxNewWeek === "-" || n > (weeklyData[maxNewWeek]?.countNew || 0))) {
+        if (n > r && (maxNewWeek === "-" || n > Number(weeklyData[maxNewWeek]?.countNew || 0))) {
             maxNewWeek = wk;
         }
-        // ถ้าลูกค้าประจำ "มากกว่า" ลูกค้าใหม่ และมากกว่ายอดสูงสุดที่เคยเก็บไว้
-        if (r > n && (maxRegWeek === "-" || r > (weeklyData[maxRegWeek]?.countRegular || 0))) {
+        if (r > n && (maxRegWeek === "-" || r > Number(weeklyData[maxRegWeek]?.countRegular || 0))) {
             maxRegWeek = wk;
         }
-        // ส่วนการเปรียบเทียบสัปดาห์ก่อนหน้า (คงเดิม)
+        
         if (idx > 0) {
             const prev = weeklyData[weekKeys[idx - 1]];
-            const pN = prev.countNew || 0;
-            const pR = prev.countRegular || 0;
+            const pN = Number(prev.countNew || 0);
+            const pR = Number(prev.countRegular || 0);
             if (n > pN) nUp++; else if (n < pN) nDown++;
             if (r > pR) rUp++; else if (r < pR) rDown++;
         }
     });
-        // --- 3. ฟังก์ชัน Render กราฟสถิติ (เวอร์ชันรองรับธีมและแยกประเภท) ---
+
+    // --- 3. ฟังก์ชัน Render กราฟสถิติ ---
     const renderStats = (statsObj) => {
         const entries = Object.entries(statsObj).sort((a, b) => b[1] - a[1]);
         if (entries.length === 0) return `<div style="font-size:12px; color:var(--text); opacity:0.5;">ไม่มีข้อมูล</div>`;
         
         const maxVal = entries[0][1];
-        
-        // รายการที่ถือว่าเป็น "บริการเสริม" (จะใช้สีที่ต่างจากทรงผม)
         const extraSvcs = ["โกนหนวด", "กันหน้า", "สระผม", "กันจอน", "ย้อมแฟชั่น", "ดัดผม"];
     
         return entries.map(([name, count]) => {
             const width = maxVal > 0 ? (count / maxVal) * 100 : 0;
-            
-            // 🎨 เลือกสีตามประเภท:
-            // ถ้าเป็นบริการเสริม -> ใช้สี Primary (ฟ้า/น้ำเงิน ตามธีม)
-            // ถ้าเป็นทรงผม -> ใช้สี Warning (ส้ม/ทอง ตามธีม)
             const barColor = extraSvcs.includes(name) ? 'var(--primary)' : 'var(--warning)';
-    
+            
             return `
-            <div style="margin-bottom:10px;">
-                <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px;">
-                    <span style="color:var(--text); opacity:0.9;">${name}</span>
-                    <span style="font-weight:700; color:${barColor};">${count}</span>
-                </div>
-                <div style="width:100%; height:8px; background:rgba(128,128,128,0.15); border-radius:10px; overflow:hidden;">
-                    <div style="width:${width}%; height:100%; background:${barColor}; border-radius:10px; transition: width 0.8s ease-out;"></div>
-                </div>
-            </div>`;
-        }).join("");
+                <div style="margin-bottom:8px;">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:2px;">
+                        <span>${name}</span>
+                        <span>${count}</span>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.1); height:6px; border-radius:3px;">
+                        <div style="width:${width}%; height:100%; background:${barColor}; border-radius:3px;"></div>
+                    </div>
+                </div>`;
+        }).join('');
     };
-    // --- 5. สรุปภาพรวม (Insights) ปรับปรุงใหม่แยกสีลูกค้า (โทน C: ฟ้า-ทอง) ---
+
+    // --- 4. สรุปรายชื่อ Insights (ใช้แสดงผลในส่วนสรุปภาพรวม) ---
+    const maxCustInWeek = topCountWeek ? (Number(topCountWeek[1].countNew || 0) + Number(topCountWeek[1].countRegular || 0)) : 0;
+
     const insights = [
         `วันทำงาน: เปิดร้านทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
-        // แสดงสัปดาห์ที่ลูกค้ามากที่สุด (นับรวมทุกคน)
-        `สัปดาห์ที่มีลูกค้ามากที่สุด: <b>${topCountWeek ? topCountWeek[0] : "-"}</b> (${topCountWeek ? (topCountWeek[1].customers || "-") : "-"} คน)`,
-        // แสดงสัปดาห์รายได้สูงสุด
-        (topIncomeWeek && (topIncomeWeek[1].income || 0) > 0) 
-            ? `สัปดาห์ที่มีรายได้สูงสุด: <b>${topIncomeWeek[0]}</b> (฿${topIncomeWeek[1].income.toLocaleString()})` 
+        `สัปดาห์ที่มีลูกค้ามากที่สุด: <b>${topCountWeek ? topCountWeek[0] : "-"}</b> (${maxCustInWeek} คน)`,
+        (topIncomeWeek && Number(topIncomeWeek[1].income || 0) > 0) 
+            ? `สัปดาห์ที่มีรายได้สูงสุด: <b>${topIncomeWeek[0]}</b> (฿${Number(topIncomeWeek[1].income).toLocaleString()})` 
             : `สัปดาห์ที่มีรายได้สูงสุด: <b>-</b>`
     ];
-    
-    // 🎯 เงื่อนไข: แสดงยอดแยกประเภทลูกค้า (ใช้สีตามธีม)
+   
     if (totalNew > 0 || totalRegular > 0) {
         // 🔵 ใช้สี Primary (น้ำเงิน/สว่าง) | 🟡 ใช้สี Warning/Accent (ส้ม/ทอง)
         const newColor = "var(--primary)"; 
         const regColor = "var(--warning)"; 
         
-        // ย้ายปีกกามาปิดตรงนี้ เพื่อให้ตัวแปรสีถูกเรียกใช้ข้างล่างได้
         const newText = `<span style="color: ${newColor}; font-weight: bold;">ใหม่ ${totalNew > 0 ? totalNew : "-"}</span>`;
         const regText = `<span style="color: ${regColor}; font-weight: bold;">ประจำ ${totalRegular > 0 ? totalRegular : "-"}</span>`;
         
         insights.push(`โครงสร้างลูกค้าเดือนนี้: <b>${totalRegular > totalNew ? "ลูกค้าประจำเป็นฐานหลัก" : totalNew > totalRegular ? "ลูกค้าใหม่เพิ่มมากขึ้น" : "สัดส่วนลูกค้าพอๆ กัน"} (${regText} / ${newText})</b>`);
-        
-        // แยกสีตรงชื่อสัปดาห์ที่ลูกค้าแต่ละกลุ่มเยอะที่สุด
+       
         const maxNewText = `<span style="color: ${newColor};">ใหม่ (<b>${maxNewWeek !== "-" ? maxNewWeek : "-"}</b>)</span>`;
         const maxRegText = `<span style="color: ${regColor};">ประจำ (<b>${maxRegWeek !== "-" ? maxRegWeek : "-"}</b>)</span>`;
         
@@ -2522,8 +2527,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     } else {
         insights.push(`สถิติรายวัน: -`);
     }
-    
-    // ทรงผมและบริการยอดนิยม
+  
     insights.push(`ทรงผมยอดนิยม: <b>${topHair ? topHair[0] : '-'}</b> | บริการยอดนิยม: <b>${topService ? topService[0] : '-'}</b>`);
    
     const weeklyHtml = weekEntries.map(([wk, data]) => {
