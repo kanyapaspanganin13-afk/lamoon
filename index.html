@@ -689,7 +689,7 @@ nav {
                     <button onclick="document.getElementById('modalSet').style.display='none'" style="background:var(--bg); color:var(--text); opacity:0.7; height:60px; border-radius:20px; border:none; font-weight:800; font-size:16px;">ปิด</button>
                 </div>
                 <div style="text-align:center; line-height: 1.4; opacity: 0.5;">
-                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.4</div>
+                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.5</div>
                     <div style="font-size:9px; color:var(--text); font-weight:400;">Update: 10/03/2026</div>
                 </div>
             </div>
@@ -727,7 +727,7 @@ nav {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.4"; 
+const APP_VERSION = "1.0.5"; 
 const LAST_UPDATED = "10/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
@@ -2426,12 +2426,13 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         ? weekEntries.reduce((p, c) => (Number(c[1].income || 0) >= Number(p[1].income || 0) ? c : p)) 
         : null;
 
-    // ✅ แก้ไข Logic หาสัปดาห์ที่จำนวนคนสูงสุด (เปลี่ยนวิธีเทียบให้เด็ดขาดขึ้น)
+    // ✅ แก้ไข Logic การเทียบจำนวนลูกค้าสูงสุด (เปลี่ยนมาใช้ .customers ที่นับรวมทุกคนแล้ว)
     const topCountWeek = weekEntries.length > 0 
         ? weekEntries.reduce((p, c) => {
-            const cCount = Number(c[1].countNew || 0) + Number(c[1].countRegular || 0);
-            const pCount = Number(p[1].countNew || 0) + Number(p[1].countRegular || 0);
-            return cCount >= pCount ? c : p; // ใช้ >= เพื่อเลือกสัปดาห์ล่าสุดหากจำนวนเท่ากัน
+            // ใช้ค่า .customers โดยตรง เพราะใน loadHistMonth เรานับรวมทุกคนไว้ที่นี่แล้ว
+            const cTotal = Number(c[1].customers || 0); 
+            const pTotal = Number(p[1].customers || 0);
+            return cTotal >= pTotal ? c : p; 
         }) 
         : null;
 
@@ -2493,10 +2494,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
 
     // --- 4. สรุปรายชื่อ Insights ---
     // คำนวณหาจำนวนคนจากสัปดาห์ที่มากที่สุดที่หาได้จริง
-    const finalTopCount = topCountWeek 
-        ? (Number(topCountWeek[1].countNew || 0) + Number(topCountWeek[1].countRegular || 0)) 
-        : 0;
-
+    const finalTopCount = topCountWeek ? Number(topCountWeek[1].customers || 0) : 0;
     const insights = [
         `วันทำงาน: เปิดร้านทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
         `สัปดาห์ที่มีลูกค้ามากที่สุด: <b>${topCountWeek ? topCountWeek[0] : "-"}</b> (${finalTopCount} คน)`,
