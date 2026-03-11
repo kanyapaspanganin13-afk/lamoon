@@ -689,7 +689,7 @@ nav {
                     <button onclick="document.getElementById('modalSet').style.display='none'" style="background:var(--bg); color:var(--text); opacity:0.7; height:60px; border-radius:20px; border:none; font-weight:800; font-size:16px;">ปิด</button>
                 </div>
                 <div style="text-align:center; line-height: 1.4; opacity: 0.5;">
-                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.3</div>
+                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.4</div>
                     <div style="font-size:9px; color:var(--text); font-weight:400;">Update: 10/03/2026</div>
                 </div>
             </div>
@@ -727,7 +727,7 @@ nav {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.3"; 
+const APP_VERSION = "1.0.4"; 
 const LAST_UPDATED = "10/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
@@ -2388,7 +2388,7 @@ function loadHistMonth() {
     generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular);
 }
 function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular) {
-    // --- 1. เตรียมข้อมูลพื้นฐาน & นับยอดลูกค้าใหม่/ประจำใหม่ป้องกันค่าเป็น 0 ---
+    // --- 1. เตรียมข้อมูลพื้นฐาน & นับยอดลูกค้าใหม่/ประจำ ---
     const weekEntries = Object.entries(weeklyData);
     const weekKeys = Object.keys(weeklyData); 
     const dayStats = {};
@@ -2397,7 +2397,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     let totalRegular = 0;
 
     weekEntries.forEach(([wk, data]) => {
-        // ✅ ป้องกันการต่อตัวอักษรด้วย Number()
+        // บังคับเป็น Number ป้องกัน Error
         totalNew += Number(data.countNew || 0);
         totalRegular += Number(data.countRegular || 0);
 
@@ -2421,24 +2421,24 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     const busiestDay = dayAverages.length > 0 ? [...dayAverages].sort((a, b) => b.avg - a.avg)[0] : null;
     const quietestDay = dayAverages.length > 0 ? [...dayAverages].sort((a, b) => a.avg - b.avg)[0] : null;
 
-    // ✅ แก้ไข Logic การเทียบรายได้สูงสุด
+    // ✅ แก้ไข Logic หาสัปดาห์ที่รายได้สูงสุด
     const topIncomeWeek = weekEntries.length > 0 
-        ? weekEntries.reduce((p, c) => (Number(c[1].income || 0) > Number(p[1].income || 0) ? c : p)) 
+        ? weekEntries.reduce((p, c) => (Number(c[1].income || 0) >= Number(p[1].income || 0) ? c : p)) 
         : null;
 
-    // ✅ แก้ไข Logic การเทียบจำนวนลูกค้าสูงสุด (รวม ใหม่ + ประจำ)
+    // ✅ แก้ไข Logic หาสัปดาห์ที่จำนวนคนสูงสุด (เปลี่ยนวิธีเทียบให้เด็ดขาดขึ้น)
     const topCountWeek = weekEntries.length > 0 
         ? weekEntries.reduce((p, c) => {
-            const cTotal = Number(c[1].countNew || 0) + Number(c[1].countRegular || 0);
-            const pTotal = Number(p[1].countNew || 0) + Number(p[1].countRegular || 0);
-            return cTotal > pTotal ? c : p;
+            const cCount = Number(c[1].countNew || 0) + Number(c[1].countRegular || 0);
+            const pCount = Number(p[1].countNew || 0) + Number(p[1].countRegular || 0);
+            return cCount >= pCount ? c : p; // ใช้ >= เพื่อเลือกสัปดาห์ล่าสุดหากจำนวนเท่ากัน
         }) 
         : null;
 
     const topHair = Object.entries(hairStats).sort((a, b) => b[1] - a[1])[0];
     const topService = Object.entries(serviceStats).sort((a, b) => b[1] - a[1])[0];
 
-    // --- 2. วิเคราะห์ลูกค้า (รายสัปดาห์ & รายเดือน) - แก้ไขตามเงื่อนไข ---
+    // --- 2. วิเคราะห์ลูกค้า (รายสัปดาห์ & รายเดือน) ---
     let maxNewWeek = "-"; 
     let maxRegWeek = "-";
     let nUp = 0, nDown = 0, rUp = 0, rDown = 0;
@@ -2470,7 +2470,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     // --- 3. ฟังก์ชัน Render กราฟสถิติ ---
     const renderStats = (statsObj) => {
         const entries = Object.entries(statsObj).sort((a, b) => b[1] - a[1]);
-        if (entries.length === 0) return `<div style="font-size:12px; color:var(--text); opacity:0.5;">ไม่มีข้อมูล</div>`;
+        if (entries.length === 0) return `<div style="font-size:12px; opacity:0.5;">ไม่มีข้อมูล</div>`;
         
         const maxVal = entries[0][1];
         const extraSvcs = ["โกนหนวด", "กันหน้า", "สระผม", "กันจอน", "ย้อมแฟชั่น", "ดัดผม"];
@@ -2478,7 +2478,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         return entries.map(([name, count]) => {
             const width = maxVal > 0 ? (count / maxVal) * 100 : 0;
             const barColor = extraSvcs.includes(name) ? 'var(--primary)' : 'var(--warning)';
-            
             return `
                 <div style="margin-bottom:8px;">
                     <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:2px;">
@@ -2492,12 +2491,15 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         }).join('');
     };
 
-    // --- 4. สรุปรายชื่อ Insights (ใช้แสดงผลในส่วนสรุปภาพรวม) ---
-    const maxCustInWeek = topCountWeek ? (Number(topCountWeek[1].countNew || 0) + Number(topCountWeek[1].countRegular || 0)) : 0;
+    // --- 4. สรุปรายชื่อ Insights ---
+    // คำนวณหาจำนวนคนจากสัปดาห์ที่มากที่สุดที่หาได้จริง
+    const finalTopCount = topCountWeek 
+        ? (Number(topCountWeek[1].countNew || 0) + Number(topCountWeek[1].countRegular || 0)) 
+        : 0;
 
     const insights = [
         `วันทำงาน: เปิดร้านทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
-        `สัปดาห์ที่มีลูกค้ามากที่สุด: <b>${topCountWeek ? topCountWeek[0] : "-"}</b> (${maxCustInWeek} คน)`,
+        `สัปดาห์ที่มีลูกค้ามากที่สุด: <b>${topCountWeek ? topCountWeek[0] : "-"}</b> (${finalTopCount} คน)`,
         (topIncomeWeek && Number(topIncomeWeek[1].income || 0) > 0) 
             ? `สัปดาห์ที่มีรายได้สูงสุด: <b>${topIncomeWeek[0]}</b> (฿${Number(topIncomeWeek[1].income).toLocaleString()})` 
             : `สัปดาห์ที่มีรายได้สูงสุด: <b>-</b>`
