@@ -1029,8 +1029,8 @@ function addRecord() {
     // บันทึกข้อมูล
     db.push(newRec);
 
-    // 🟢 เพิ่มส่วนการเรียงลำดับข้อมูล (Sort) 
-    // เรียงตามวันที่ (date) ก่อน ถ้าวันที่ตรงกัน ให้เรียงตามเวลา (time)
+    // 🟢 เพิ่มการเรียงลำดับข้อมูล (Sort) ทุกครั้งก่อนบันทึก
+    // เรียงตามวันที่ (date) และตามด้วยเวลา (time)
     db.sort((a, b) => {
         if (a.date !== b.date) {
             return a.date.localeCompare(b.date);
@@ -1043,6 +1043,7 @@ function addRecord() {
     } else {
         localStorage.setItem("barber_db", JSON.stringify(db));
     }
+
     // --- ส่วนคำนวณและ Archive ---
     if (typeof calculateMoney === "function") {
         const result = calculateMoney(); 
@@ -1052,11 +1053,16 @@ function addRecord() {
             settle: result.settle, 
             type: (currentPay === 'Holiday') ? 'HOLIDAY' : 'WORK'
         };
+        
         if (idx > -1) { 
             archives[idx].settle = result.settle; 
         } else { 
             archives.push(archiveData); 
         }
+        
+        // 🟢 เรียงลำดับ Archives ตามวันที่ด้วยเพื่อให้หน้าสรุปรายงานเรียงถูกต้อง
+        archives.sort((a, b) => a.date.localeCompare(b.date));
+        
         localStorage.setItem("barber_archives", JSON.stringify(archives));
     }
 
@@ -1069,12 +1075,12 @@ function addRecord() {
         if (icon) icon.className = "fas fa-paper-plane";
     }
 
-    // 🔊 เล่นเสียงสำเร็จ (ถ้ามีระบบเสียง)
+    // 🔊 เล่นเสียงสำเร็จ
     const sfx = document.getElementById("successSound");
     if (sfx) { sfx.currentTime = 0; sfx.play(); }
 
-    // 🎯 3. แจ้งเตือนความสำเร็จ (ตัด ค่ะ/ครับ ออก)
-    notify("success", "ดำเนินการสำเร็จ", "ระบบจัดเก็บข้อมูลการทำงานเรียบร้อยแล้ว");
+    // 🎯 3. แจ้งเตือนความสำเร็จ
+    notify("success", "ดำเนินการสำเร็จ", "ระบบจัดเก็บและเรียงลำดับข้อมูลเรียบร้อยแล้ว");
 
     // 🎯 4. ล้างค่าในฟอร์ม (Reset Form)
     if ($("priceInp")) $("priceInp").value = "";
