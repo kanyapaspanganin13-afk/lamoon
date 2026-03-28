@@ -1028,12 +1028,21 @@ function addRecord() {
 
     // บันทึกข้อมูล
     db.push(newRec);
+
+    // 🟢 เพิ่มส่วนการเรียงลำดับข้อมูล (Sort) 
+    // เรียงตามวันที่ (date) ก่อน ถ้าวันที่ตรงกัน ให้เรียงตามเวลา (time)
+    db.sort((a, b) => {
+        if (a.date !== b.date) {
+            return a.date.localeCompare(b.date);
+        }
+        return a.time.localeCompare(b.time);
+    });
+
     if (typeof saveDB === "function") {
         saveDB();
     } else {
         localStorage.setItem("barber_db", JSON.stringify(db));
     }
-
     // --- ส่วนคำนวณและ Archive ---
     if (typeof calculateMoney === "function") {
         const result = calculateMoney(); 
