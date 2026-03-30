@@ -713,8 +713,8 @@ nav {
                     <button onclick="document.getElementById('modalSet').style.display='none'" style="background:var(--bg); color:var(--text); opacity:0.7; height:60px; border-radius:20px; border:none; font-weight:800; font-size:16px;">ปิด</button>
                 </div>
                 <div style="text-align:center; line-height: 1.4; opacity: 0.5;">
-                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.2</div>
-                    <div style="font-size:9px; color:var(--text); font-weight:400;">Update: 28/03/2026</div>
+                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.1</div>
+                    <div style="font-size:9px; color:var(--text); font-weight:400;">Update: 30/03/2026</div>
                 </div>
             </div>
         </div>
@@ -751,8 +751,8 @@ nav {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.2"; 
-const LAST_UPDATED = "28/03/2026"; 
+const APP_VERSION = "1.0.1"; 
+const LAST_UPDATED = "30/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
     const currentStoredVersion = localStorage.getItem("app_v");
@@ -2201,12 +2201,14 @@ async function exportToExcel() {
         console.log("Fetch error:", e);
     }
 
-    // 🏷️ 2. เตรียมชื่อร้านและเดือน
+    // 🏷️ 2. เตรียมชื่อร้าน/สาขาหลัก (ดึงจากฟังก์ชัน saveSettings ที่บันทึกไว้)
     const shopInput = document.getElementById("setShop");
     const savedName = localStorage.getItem('shopName');
-    const displayShopName = (shopInput && shopInput.value) 
-                            ? shopInput.value 
-                            : (savedName || (typeof conf !== 'undefined' ? conf.shop : "บาร์เบอร์"));
+    
+    // ดึงชื่อร้าน/สาขาที่ตั้งค่าไว้ในระบบมาเป็นค่าเริ่มต้น
+    const currentSystemShop = (shopInput && shopInput.value) 
+                               ? shopInput.value 
+                               : (savedName || (typeof conf !== 'undefined' ? conf.shop : "บาร์เบอร์"));
 
     if (typeof archives === 'undefined' || archives === null || archives.length === 0) {
         alert("ไม่พบข้อมูลประวัติในระบบ");
@@ -2229,7 +2231,10 @@ async function exportToExcel() {
     // 🏗️ 3. จัดกลุ่มข้อมูลตามสาขา
     const branches = {};
     filtered.forEach(item => {
-        const branchName = item.branch || "สาขาทั่วไป (ข้อมูลเดิม)"; 
+        // ใช้ชื่อสาขาที่ติดมากับข้อมูล (ถ้ามี) 
+        // หากไม่มี (ข้อมูลเก่า) ให้ใช้ชื่อร้านปัจจุบันจากระบบ (currentSystemShop)
+        const branchName = item.branch || currentSystemShop; 
+        
         if (!branches[branchName]) {
             branches[branchName] = [];
         }
@@ -2237,7 +2242,7 @@ async function exportToExcel() {
     });
 
     const thMonths = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-    const fullThaiMonths = ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+    const fullThaiMonths = ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤษภาคม", "ธันวาคม"];
     const [y, mm] = m.split('-');
     const headThai = `${fullThaiMonths[parseInt(mm)]} ${parseInt(y) + 543}`;
 
@@ -2260,11 +2265,11 @@ async function exportToExcel() {
     let finalCust = 0, finalBarber = 0, finalShave = 0, finalWash = 0, finalDye = 0;
 
     for (const branchName in branches) {
-        tableHtml += `<div class="branch-header">สาขา: ${branchName}</div>`;
+        tableHtml += `<div class="branch-header">ข้อมูลสาขา: ${branchName}</div>`;
         tableHtml += `<table>
             <thead>
                 <tr>
-                    <th>วันที่</th><th>วัน</th><th>ลูกค้า</th><th>ยอดช่าง</th><th>โกน</th><th>สระ</th><th>ย้อม</th><th>สาขา</th>
+                    <th>สาขา</th><th>วันที่</th><th>วัน</th><th>ลูกค้า</th><th>ยอดช่าง</th><th>โกน</th><th>สระ</th><th>ย้อม</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -2273,14 +2278,13 @@ async function exportToExcel() {
         
         branches[branchName].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-        // ส่วนที่แก้ไข: เพิ่มตัวแปรเช็คบรรทัดแรกของสาขา
         branches[branchName].forEach((day, index) => {
             const isOff = (day.off === true || day.type === "HOLIDAY");
             const dObj = new Date(day.date);
             const dateThai = `${dObj.getDate()} ${thMonths[dObj.getMonth() + 1]} ${(dObj.getFullYear() + 543).toString().slice(-2)}`;
             const dayName = dObj.toLocaleDateString('th-TH', { weekday: 'long' }).replace('วัน', '');
 
-            // ตัดสินใจว่าจะโชว์ชื่อสาขา หรือ เครื่องหมาย "
+            // แสดงชื่อสาขาเฉพาะแถวแรก แถวถัดไปเป็นเครื่องหมาย "
             const branchDisplay = (index === 0) ? branchName : '"';
 
             let countCust = 0, countShave = 0, countWash = 0, countDye = 0;
