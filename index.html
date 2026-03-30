@@ -2201,38 +2201,35 @@ async function exportToExcel() {
         console.log("Fetch error:", e);
     }
 
-    // 🏷️ 2. เตรียมชื่อร้าน/สาขาหลัก (ดึงจากฟังก์ชัน saveSettings ที่บันทึกไว้)
+    // 🏷️ 2. เตรียมข้อมูลชื่อร้าน/สาขา (ปรับให้ดึงจากโครงสร้างใหม่)
     const shopInput = document.getElementById("setShop");
     const savedName = localStorage.getItem('shopName');
     
-    // ดึงชื่อร้าน/สาขาที่ตั้งค่าไว้ในระบบมาเป็นค่าเริ่มต้น
-    const currentSystemShop = (shopInput && shopInput.value) 
-                               ? shopInput.value 
-                               : (savedName || (typeof conf !== 'undefined' ? conf.shop : "บาร์เบอร์"));
+    // ดึงรายชื่อสาขาทั้งหมดที่มีในระบบ (จากที่ saveSettings บันทึกไว้)
+    const allBranchesData = JSON.parse(localStorage.getItem('all_branches_data')) || {};
+    
+    // กำหนดชื่อสาขาปัจจุบันจากหน้าจอ หรือจากค่าล่าสุดที่เซฟไว้
+    const currentSystemShop = (shopInput && shopInput.value.trim()) 
+                               ? shopInput.value.trim() 
+                               : (savedName || "ทั่วไป");
 
     if (typeof archives === 'undefined' || archives === null || archives.length === 0) {
         alert("ไม่พบข้อมูลประวัติในระบบ");
         return;
     }
 
+    // ... (ส่วนการเลือกเดือนและ Filter ข้อมูลเหมือนเดิม) ...
     const monthInput = document.getElementById("histMonth");
     const m = monthInput ? monthInput.value : "";
-    if (!m) {
-        alert("กรุณาเลือกเดือนที่ต้องการส่งออก");
-        return;
-    }
-
+    if (!m) { alert("กรุณาเลือกเดือนที่ต้องการส่งออก"); return; }
     const filtered = archives.filter(a => a.date && a.date.startsWith(m));
-    if (!filtered.length) {
-        alert("ไม่พบข้อมูลในเดือนที่เลือก");
-        return;
-    }
+    if (!filtered.length) { alert("ไม่พบข้อมูลในเดือนที่เลือก"); return; }
 
     // 🏗️ 3. จัดกลุ่มข้อมูลตามสาขา
     const branches = {};
     filtered.forEach(item => {
-        // ใช้ชื่อสาขาที่ติดมากับข้อมูล (ถ้ามี) 
-        // หากไม่มี (ข้อมูลเก่า) ให้ใช้ชื่อร้านปัจจุบันจากระบบ (currentSystemShop)
+        // ใช้ชื่อสาขาที่ติดมากับรายการนั้นๆ (item.branch) 
+        // ถ้าไม่มี (เป็นข้อมูลเก่า) ให้จัดเข้ากลุ่ม currentSystemShop
         const branchName = item.branch || currentSystemShop; 
         
         if (!branches[branchName]) {
@@ -2241,22 +2238,11 @@ async function exportToExcel() {
         branches[branchName].push(item);
     });
 
+    // ... (ส่วนการเตรียมสไตล์และตัวแปรผลรวมเหมือนเดิม) ...
     const thMonths = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-    const fullThaiMonths = ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤษภาคม", "ธันวาคม"];
+    const fullThaiMonths = ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
     const [y, mm] = m.split('-');
     const headThai = `${fullThaiMonths[parseInt(mm)]} ${parseInt(y) + 543}`;
-
-    const style = `
-        <style>
-            body { padding: 20px; font-family: 'Tahoma', sans-serif; }
-            table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
-            th { border: 2px solid #ccc; padding: 10px; background-color: #1D6F42; color: white; font-size: 20px; }
-            td { border: 2px solid #ccc; padding: 8px; text-align: center; font-size: 18px; color: #000; }
-            .branch-header { background-color: #f0fdf4; padding: 10px; border-left: 8px solid #1D6F42; margin-top: 30px; font-size: 24px; font-weight: bold; }
-            .grand-total-box { margin-top: 40px; padding: 20px; border: 3px solid #1D6F42; background-color: #fff9c4; }
-            .grand-total-title { font-size: 26px; font-weight: bold; color: #04167d; text-align: center; margin-bottom: 10px; }
-        </style>
-    `;
 
     let tableHtml = `<html><head><meta charset="utf-8">${style}</head><body>`;
     tableHtml += `<h1 style="text-align:center;">รายงานสรุปยอดรวมทุกสาขา</h1>`;
@@ -2265,7 +2251,11 @@ async function exportToExcel() {
     let finalCust = 0, finalBarber = 0, finalShave = 0, finalWash = 0, finalDye = 0;
 
     for (const branchName in branches) {
-        tableHtml += `<div class="branch-header">ข้อมูลสาขา: ${branchName}</div>`;
+        // ดึงการตั้งค่าของสาขานั้นๆ มาดู (ถ้ามีใน all_branches_data)
+        const bSet = allBranchesData[branchName] || {};
+        const bPerc = bSet.perc || 0; // เผื่อกรณีอยากเอา % ไปคำนวณในตารางภายหลัง
+
+        tableHtml += `<div class="branch-header">สาขา: ${branchName} ${bPerc ? `(ส่วนแบ่ง ${bPerc}%)` : ''}</div>`;
         tableHtml += `<table>
             <thead>
                 <tr>
@@ -2274,8 +2264,8 @@ async function exportToExcel() {
             </thead>
             <tbody>`;
 
+        // ... (วนลูปสร้างแถวข้อมูลและเครื่องหมาย " เหมือนเดิม) ...
         let bTotalCust = 0, bTotalBarber = 0, bTotalShave = 0, bTotalWash = 0, bTotalDye = 0;
-        
         branches[branchName].sort((a, b) => new Date(a.date) - new Date(b.date));
 
         branches[branchName].forEach((day, index) => {
@@ -2283,8 +2273,6 @@ async function exportToExcel() {
             const dObj = new Date(day.date);
             const dateThai = `${dObj.getDate()} ${thMonths[dObj.getMonth() + 1]} ${(dObj.getFullYear() + 543).toString().slice(-2)}`;
             const dayName = dObj.toLocaleDateString('th-TH', { weekday: 'long' }).replace('วัน', '');
-
-            // แสดงชื่อสาขาเฉพาะแถวแรก แถวถัดไปเป็นเครื่องหมาย "
             const branchDisplay = (index === 0) ? branchName : '"';
 
             let countCust = 0, countShave = 0, countWash = 0, countDye = 0;
@@ -2304,21 +2292,19 @@ async function exportToExcel() {
             bTotalCust += countCust; bTotalBarber += barberEarn;
             bTotalShave += countShave; bTotalWash += countWash; bTotalDye += countDye;
 
-            tableHtml += `
-                <tr>
-                    <td style="background-color: #fafafa;">${branchDisplay}</td>
-                    <td>${dateThai}</td>
-                    <td>${isOff ? '<span style="color:red">หยุด</span>' : dayName}</td>
-                    <td>${countCust}</td>
-                    <td style="color:#0f0661;">${barberEarn.toLocaleString()}</td>
-                    <td>${countShave || "-"}</td>
-                    <td>${countWash || "-"}</td>
-                    <td>${countDye || "-"}</td>
-                </tr>`;
+            tableHtml += `<tr>
+                <td style="background-color: #fafafa;">${branchDisplay}</td>
+                <td>${dateThai}</td>
+                <td>${isOff ? '<span style="color:red">หยุด</span>' : dayName}</td>
+                <td>${countCust}</td>
+                <td style="color:#0f0661;">${barberEarn.toLocaleString()}</td>
+                <td>${countShave || "-"}</td>
+                <td>${countWash || "-"}</td>
+                <td>${countDye || "-"}</td>
+            </tr>`;
         });
 
-        tableHtml += `
-            <tr style="background-color: #fff176; font-weight: bold;">
+        tableHtml += `<tr style="background-color: #fff176; font-weight: bold;">
                 <td colspan="3">รวมเฉพาะสาขา ${branchName}</td>
                 <td>${bTotalCust.toLocaleString()}</td>
                 <td>${bTotalBarber.toLocaleString()}</td>
@@ -3120,20 +3106,28 @@ function openSettings() {
     }
 }
 function saveSettings() {
-    // 1. ดึงค่าจากฟอร์ม
+    // 1. ดึงค่าจากฟอร์มปัจจุบัน
+    const currentShopName = $("setShop")?.value.trim() || "ทั่วไป";
     const settings = {
-        shop:  $("setShop")?.value || "",
+        shop:  currentShopName,
         perc:  parseFloat($("setPerc")?.value) || 0,
         guar:  parseFloat($("setGuar")?.value) || 0,
         theme: $("setTheme")?.value || "light",
         voice: $("setVoice")?.value || "default.mp3",
-        sound: $("setSound")?.value || "on"
+        sound: $("setSound")?.value || "on",
+        lastUpdate: new Date().toISOString() // เก็บเวลาที่อัปเดตล่าสุดไว้ด้วย
     };
-
-    // 2. อัปเดตตัวแปรกลาง (conf) ทันที 
+    // 2. อัปเดตตัวแปรกลาง (conf) สำหรับใช้งานใน Session ปัจจุบัน
     Object.assign(conf, settings);
-
-    // 3. บันทึกลง LocalStorage
+    // 3. บันทึกลง LocalStorage แบบแยกสาขา (ไม่ให้ทับของเก่า)
+    // --- ส่วนการจัดการฐานข้อมูลรวมทุกสาขา ---
+    // ดึงข้อมูลเดิมที่มีอยู่ (ถ้าไม่มีให้สร้าง Object ว่าง {})
+    let allBranchesData = JSON.parse(localStorage.getItem('all_branches_data')) || {}; 
+    // บันทึก/อัปเดต ข้อมูลลงใน Key ของสาขานั้นๆ (ข้อมูลสาขา A จะไม่ทับ สาขา B)
+    allBranchesData[currentShopName] = settings; 
+    // เซฟฐานข้อมูลรวมกลับลงไป
+    localStorage.setItem('all_branches_data', JSON.stringify(allBranchesData));
+    // --- ส่วนการบันทึกค่า Flag ปัจจุบัน (สำหรับ UI หน้าหลัก) ---
     localStorage.setItem('barber_conf', JSON.stringify(conf));
     localStorage.setItem('shopName',  settings.shop);
     localStorage.setItem('shopPerc',  settings.perc);
@@ -3141,23 +3135,19 @@ function saveSettings() {
     localStorage.setItem('shopTheme', settings.theme);
     localStorage.setItem('shopVoice', settings.voice);
     localStorage.setItem('shopSound', settings.sound);
-
-    // 4. อัปเดตการแสดงผลชื่อร้าน
+    // 4. อัปเดตการแสดงผลชื่อร้านบนหน้าจอ
     const nameDisp = $("shopNameDisp") || $("shopNameDisplay");
     if (nameDisp) {
         nameDisp.innerText = settings.shop.toUpperCase();
     } 
-
     // 5. เรียกฟังก์ชันอัปเดต UI 
     if (typeof applyTheme === "function")        applyTheme(settings.theme);
     if (typeof calculateMoney === "function")    calculateMoney(); 
     if (typeof renderDay === "function")         renderDay(); 
-
     // 6. ปิด Modal
-    if ($("modalSet")) $("modalSet").style.display = 'none';
-    
-    // 7. แจ้งเตือนความสำเร็จ (ใช้ notify แทน alert เพื่อคุมธีมและเล่นเสียง)
-    notify("success", "บันทึกสำเร็จ", "ระบบได้ดำเนินการบันทึกการตั้งค่าเรียบร้อยแล้ว");
+    if ($("modalSet")) $("modalSet").style.display = 'none'; 
+    // 7. แจ้งเตือนความสำเร็จ
+    notify("success", "บันทึกข้อมูลสาขาเรียบร้อย", `บันทึกค่าของสาขา "${currentShopName}" สำเร็จ`);
 }
 async function handleSave(event) {
     const $ = (id) => document.getElementById(id);
