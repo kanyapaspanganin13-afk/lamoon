@@ -891,18 +891,21 @@ function exportBackup() {
         Swal.fire({ title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถสร้างไฟล์สำรองได้', icon: 'error' });
     }
 }
-
-// 2. ฟังก์ชันนำเข้าข้อมูล (Import) - แก้ให้เขียนทับเฉพาะตัว ไม่ลบทั้งหมด
+// 2. ฟังก์ชันนำเข้าข้อมูล (Import) - แก้ไขให้รองรับระบบหลายสาขา
 function importBackup(input) {
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            if (!data.db && !data.archives) throw new Error("Wrong format");
+            
+            // ตรวจสอบเบื้องต้นว่าใช่ไฟล์จากแอปเราไหม
+            if (!data.db && !data.archives && !data.all_branches_data) {
+                throw new Error("Wrong format");
+            }
 
             Swal.fire({
                 title: 'ยืนยันการนำเข้าข้อมูล',
-                text: "ข้อมูลปัจจุบันจะถูกแทนที่ด้วยข้อมูลจากไฟล์นี้",
+                text: "การนำเข้าจะรวมข้อมูลสาขาทั้งหมดและการตั้งค่าที่คุณเคยสำรองไว้กลับมา",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'ยืนยัน',
@@ -911,18 +914,51 @@ function importBackup(input) {
                 color: 'var(--text)'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // ✅ เขียนทับเฉพาะ Key ที่เกี่ยวข้อง ป้องกันค่า Config อื่นหาย
+                    // ✅ 1. นำเข้าข้อมูลการทำงานหลัก
                     localStorage.setItem("barber_db", JSON.stringify(data.db || []));
                     localStorage.setItem("barber_archives", JSON.stringify(data.archives || []));
                     localStorage.setItem("barber_account", JSON.stringify(data.account || { balance: 0, logs: [] }));
-                    localStorage.setItem("barber_conf", JSON.stringify(data.conf || {}));
+
+                    // ✅ 2. นำเข้าข้อมูลระบบสาขา (ที่แก้ไขให้เก็บค่าเดิม)
+                    // นำเข้าฐานข้อมูลรวมทุกสาขา (เพื่อให้หน้าตั้งค่าดึงมาโชว์ได้)
+                    if (data.all_branches_data) {
+                        localStorage.setItem("all_branches_data", JSON.stringify(data.all_branches_data));
+                    }
                     
-                    Swal.fire({ title: 'สำเร็จ', text: 'กำลังรีโหลดข้อมูล...', icon: 'success', showConfirmButton: false, timer: 1500 });
+                    // นำเข้ารายชื่อสาขาทั้งหมด (ที่เป็น Array)
+                    if (data.all_shop_branches) {
+                        localStorage.setItem("all_shop_branches", JSON.stringify(data.all_shop_branches));
+                    }
+
+                    // ✅ 3. นำเข้าการตั้งค่าปัจจุบัน (Config)
+                    const config = data.conf || {};
+                    localStorage.setItem("barber_conf", JSON.stringify(config));
+                    
+                    // กระจายค่า Config ลง Key ต่างๆ เพื่อให้ UI หน้าตั้งค่าทำงานถูกต้อง
+                    if (config.shop)  localStorage.setItem('shopName',  config.shop);
+                    if (config.perc)  localStorage.setItem('shopPerc',  config.perc);
+                    if (config.guar)  localStorage.setItem('shopGuar',  config.guar);
+                    if (config.theme) localStorage.setItem('shopTheme', config.theme);
+                    if (config.voice) localStorage.setItem('shopVoice', config.voice);
+                    if (config.sound) localStorage.setItem('shopSound', config.sound);
+                    
+                    Swal.fire({ 
+                        title: 'นำเข้าสำเร็จ', 
+                        text: 'ข้อมูลสาขาและรายงานถูกโหลดกลับมาแล้ว', 
+                        icon: 'success', 
+                        showConfirmButton: false, 
+                        timer: 1500 
+                    });
+                    
                     setTimeout(() => location.reload(), 1500);
                 }
             });
         } catch(err) { 
-            Swal.fire({ title: 'ไฟล์ไม่ถูกต้อง', text: 'กรุณาใช้ไฟล์ .json ที่สำรองจากแอปนี้เท่านั้น', icon: 'error' });
+            Swal.fire({ 
+                title: 'ไฟล์ไม่ถูกต้อง', 
+                text: 'กรุณาใช้ไฟล์ .json ที่มีข้อมูลสาขาที่ถูกต้อง', 
+                icon: 'error' 
+            });
         }
     };
     if (input.files && input.files[0]) reader.readAsText(input.files[0]);
