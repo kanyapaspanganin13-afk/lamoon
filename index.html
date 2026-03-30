@@ -1024,16 +1024,18 @@ function addRecord() {
     const tip = parseFloat($("tipInp").value) || 0;
     const total = price + tip; 
     
+    // 🔍 ดึงชื่อสาขาปัจจุบันที่ตั้งค่าไว้
+    const currentBranch = localStorage.getItem('shopName') || "ทั่วไป";
     const currentPay = payMethod; 
 
-    // 🎯 1. ตรวจสอบ: กรณีไม่ได้ระบุราคา (ยกเว้นวันหยุดหรือประกัน)
+    // 🎯 1. ตรวจสอบข้อมูลราคา
     if (price === 0 && currentPay !== 'Holiday' && currentPay !== 'Guarantee') {
         notify("error", "ระบุข้อมูลไม่ครบถ้วน", "กรุณาระบุจำนวนเงินค่าบริการให้ถูกต้อง");
         $("priceInp").focus();
         return;
     }
 
-    // 🎯 2. ตรวจสอบ: กรณีไม่ได้เลือกรายการทรงผม
+    // 🎯 2. ตรวจสอบรายการทรงผม
     const hairStyleSelect = $("hairStyle");
     if (hairStyleSelect && hairStyleSelect.value === "" && currentPay !== 'Holiday') {
         notify("error", "ระบุข้อมูลไม่ครบถ้วน", "กรุณาเลือกรายการทรงผมก่อนการบันทึก");
@@ -1055,9 +1057,11 @@ function addRecord() {
         finalTrans = total;
     }
 
+    // 🏗️ สร้าง Object ข้อมูลใหม่ (เพิ่ม branch เข้าไป)
     const newRec = {
         id: Date.now(),
         date: dInp,
+        branch: currentBranch, // ✅ เพิ่มบรรทัดนี้: ระบุว่ารายการนี้เป็นของสาขาไหน
         time: timeInp,
         price: price,
         tip: tip,
@@ -1071,12 +1075,9 @@ function addRecord() {
     // บันทึกข้อมูล
     db.push(newRec);
 
-    // 🟢 เพิ่มการเรียงลำดับข้อมูล (Sort) ทุกครั้งก่อนบันทึก
-    // เรียงตามวันที่ (date) และตามด้วยเวลา (time)
+    // 🟢 เรียงลำดับข้อมูล
     db.sort((a, b) => {
-        if (a.date !== b.date) {
-            return a.date.localeCompare(b.date);
-        }
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
         return a.time.localeCompare(b.time);
     });
 
@@ -1086,29 +1087,32 @@ function addRecord() {
         localStorage.setItem("barber_db", JSON.stringify(db));
     }
 
-    // --- ส่วนคำนวณและ Archive ---
+    // --- ส่วนคำนวณและ Archive (หน้าประวัติ) ---
     if (typeof calculateMoney === "function") {
         const result = calculateMoney(); 
-        const idx = archives.findIndex(a => a.date === dInp);
+        
+        // 🔍 แก้ไขการหา Index: ต้องหาทั้งวันที่และชื่อสาขาที่ตรงกัน
+        const idx = archives.findIndex(a => a.date === dInp && (a.branch === currentBranch || (!a.branch && currentBranch === "ทั่วไป")));
+        
         const archiveData = {
             date: dInp,
+            branch: currentBranch, // ✅ ระบุสาขาใน Archive ด้วย
             settle: result.settle, 
             type: (currentPay === 'Holiday') ? 'HOLIDAY' : 'WORK'
         };
         
         if (idx > -1) { 
-            archives[idx].settle = result.settle; 
+            archives[idx].settle = result.settle;
+            archives[idx].branch = currentBranch; // อัปเดตชื่อสาขาเผื่อกรณีข้อมูลเก่า
         } else { 
             archives.push(archiveData); 
         }
         
-        // 🟢 เรียงลำดับ Archives ตามวันที่ด้วยเพื่อให้หน้าสรุปรายงานเรียงถูกต้อง
         archives.sort((a, b) => a.date.localeCompare(b.date));
-        
         localStorage.setItem("barber_archives", JSON.stringify(archives));
     }
 
-    // --- ปรับสถานะปุ่มส่งข้อมูล ---
+    // --- ปรับสถานะปุ่มและเล่นเสียง ---
     const btn = $("btnSubmitSend");
     if (btn) {
         btn.disabled = false;
@@ -1117,23 +1121,20 @@ function addRecord() {
         if (icon) icon.className = "fas fa-paper-plane";
     }
 
-    // 🔊 เล่นเสียงสำเร็จ
     const sfx = document.getElementById("successSound");
     if (sfx) { sfx.currentTime = 0; sfx.play(); }
 
-    // 🎯 3. แจ้งเตือนความสำเร็จ
-    notify("success", "ดำเนินการสำเร็จ", "ระบบจัดเก็บและเรียงลำดับข้อมูลเรียบร้อยแล้ว");
+    notify("success", "ดำเนินการสำเร็จ", `บันทึกข้อมูลสาขา ${currentBranch} เรียบร้อยแล้ว`);
 
-    // 🎯 4. ล้างค่าในฟอร์ม (Reset Form)
+    // ล้างค่าในฟอร์ม
     if ($("priceInp")) $("priceInp").value = "";
     if ($("tipInp")) $("tipInp").value = "0";
     if (hairStyleSelect) hairStyleSelect.selectedIndex = 0; 
     if ($("mixCash")) $("mixCash").value = "";
     if ($("mixTrans")) $("mixTrans").value = "";
     
-    // รีเฟรชหน้าจอ
     if (typeof resetForm === 'function') resetForm();
-    if (typeof renderDay === 'function') renderDay();
+    if (typeof renderDay === 'function') renderDay(dInp); // ส่งวันที่เข้าไปเพื่อให้รีเฟรชตรงวัน
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
 }
 function resetForm() {
