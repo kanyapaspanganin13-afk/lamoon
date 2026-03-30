@@ -701,7 +701,7 @@ nav {
                         <i class="fas fa-file-download"></i> สำรองข้อมูล
                     </button>
                     <button onclick="document.getElementById('fileInput').click()" style="height:48px; background:var(--card); border:1px solid var(--border); border-radius:12px; font-size:11px; font-weight:800; color:var(--text); cursor:pointer;">
-                        <i class="fas fa-file-upload"></i> คืนค่า
+                        <i class="fas fa-file-upload"></i> นำเข้าข้อมูล
                     </button>
                     
                     <button onclick="clearData()" style="height:48px; background:rgba(239, 68, 68, 0.1); border:1px solid var(--danger); border-radius:12px; font-size:11px; font-weight:800; color:var(--danger); cursor:pointer;">
@@ -865,7 +865,37 @@ function saveDB() {
         console.error("❌ ไม่สามารถบันทึกได้:", e);
     }
 }
-// 1. ฟังก์ชันส่งออกข้อมูล (Backup) - ปรับให้ชื่อ Key ตรงกัน
+// ==========================================
+// SECTION: DATA MANAGEMENT & BRANCH SWITCHING
+// ==========================================
+
+function loadDataByBranch(branchName) {
+    // 1. ดึงข้อมูล "ทั้งหมด" ที่มีในเครื่องออกมาตรวจสอบก่อน
+    const fullDB = JSON.parse(localStorage.getItem('barber_db')) || [];
+    const fullArchives = JSON.parse(localStorage.getItem('barber_archives')) || [];
+
+    // 2. กรองข้อมูลเฉพาะของสาขาที่เลือก 
+    // (รองรับข้อมูลเก่าที่ไม่มี field branch ให้ไปอยู่สาขา "ทั่วไป")
+    db = fullDB.filter(r => {
+        if (branchName === "ทั่วไป") return !r.branch || r.branch === "ทั่วไป";
+        return r.branch === branchName;
+    });
+
+    archives = fullArchives.filter(a => {
+        if (branchName === "ทั่วไป") return !a.branch || a.branch === "ทั่วไป";
+        return a.branch === branchName;
+    });
+
+    // 3. อัปเดต UI ให้สอดคล้องกับข้อมูลสาขาใหม่
+    if (typeof calculateMoney === "function") calculateMoney();
+    if (typeof renderDay === "function") {
+        const dInp = document.getElementById("dateInp")?.value;
+        renderDay(dInp);
+    }
+    
+    console.log(`Switched to branch: ${branchName}`, { dbCount: db.length, arcCount: archives.length });
+}
+// 1. ฟังก์ชันส่งออกข้อมูล (Backup) 
 function exportBackup() {
     try {
         const data = {
@@ -3148,30 +3178,27 @@ function sendToLineFinal() {
    (การตั้งค่าแอปและธีม)
    ========================================================== */
 function openSettings() {
-    // 1. ตรวจสอบว่ามีข้อมูล configuration หรือไม่ (ถ้าไม่มีให้ใช้ค่าเริ่มต้น)
-    const config = conf || {};
-    // 2. รายการ mapping ระหว่าง ID ของ Element และค่าใน conf
-    // ช่วยให้โค้ดสะอาดขึ้น ไม่ต้องเขียน if ซ้ำๆ หลายบรรทัด
+    // ดึงชื่อสาขาปัจจุบันจาก localStorage
+    const currentBranch = localStorage.getItem('shopName') || "ทั่วไป";
+    // ดึงฐานข้อมูลรวมทุกสาขาออกมา
+    const allBranchesData = JSON.parse(localStorage.getItem('all_branches_data')) || {}; 
+    // เลือกเอาเฉพาะ Data ของสาขานี้ ถ้าไม่มีให้ใช้ค่าจาก conf หรือค่าเริ่มต้น
+    const branchConfig = allBranchesData[currentBranch] || conf || {};
     const fields = {
-        "setShop":  config.shop  || "",
-        "setTheme": config.theme || "light",
-        "setVoice": config.voice || "female",
-        "setSound": config.sound || "on",
-        "setPerc":  config.perc  || 50,
-        "setGuar":  config.guar  || 0
+        "setShop":  branchConfig.shop  || currentBranch, // ใช้ชื่อสาขาปัจจุบัน
+        "setPerc":  branchConfig.perc  || 50,
+        "setGuar":  branchConfig.guar  || 0,
+        "setTheme": branchConfig.theme || "light",
+        "setVoice": branchConfig.voice || "female",
+        "setSound": branchConfig.sound || "on"
     };
-    // 3. วนลูปเพื่อใส่ค่าลงในแต่ละ Input (ตรวจสอบก่อนว่ามี Element นั้นจริง)
+
     Object.entries(fields).forEach(([id, value]) => {
         const el = $(id);
         if (el) el.value = value;
     });
-    // 4. แสดงผล Modal
-    const modal = $("modalSet");
-    if (modal) {
-        modal.style.display = "flex";
-    } else {
-        console.error("ไม่พบ Element: modalSet");
-    }
+
+    if ($("modalSet")) $("modalSet").style.display = "flex";
 }
 function saveSettings() {
     // 1. ดึงค่าจากฟอร์มปัจจุบัน
@@ -3183,39 +3210,50 @@ function saveSettings() {
         theme: $("setTheme")?.value || "light",
         voice: $("setVoice")?.value || "default.mp3",
         sound: $("setSound")?.value || "on",
-        lastUpdate: new Date().toISOString() // เก็บเวลาที่อัปเดตล่าสุดไว้ด้วย
+        lastUpdate: new Date().toISOString()
     };
+
     // 2. อัปเดตตัวแปรกลาง (conf) สำหรับใช้งานใน Session ปัจจุบัน
     Object.assign(conf, settings);
-    // 3. บันทึกลง LocalStorage แบบแยกสาขา (ไม่ให้ทับของเก่า)
-    // --- ส่วนการจัดการฐานข้อมูลรวมทุกสาขา ---
-    // ดึงข้อมูลเดิมที่มีอยู่ (ถ้าไม่มีให้สร้าง Object ว่าง {})
+
+    // 3. จัดการฐานข้อมูลรวมทุกสาขา (ป้องกันการบันทึกทับสาขาอื่น)
     let allBranchesData = JSON.parse(localStorage.getItem('all_branches_data')) || {}; 
-    // บันทึก/อัปเดต ข้อมูลลงใน Key ของสาขานั้นๆ (ข้อมูลสาขา A จะไม่ทับ สาขา B)
     allBranchesData[currentShopName] = settings; 
-    // เซฟฐานข้อมูลรวมกลับลงไป
     localStorage.setItem('all_branches_data', JSON.stringify(allBranchesData));
-    // --- ส่วนการบันทึกค่า Flag ปัจจุบัน (สำหรับ UI หน้าหลัก) ---
+
+    // 4. บันทึกค่าปัจจุบันลง LocalStorage (Flag สำหรับ Filter)
     localStorage.setItem('barber_conf', JSON.stringify(conf));
     localStorage.setItem('shopName',  settings.shop);
-    localStorage.setItem('shopPerc',  settings.perc);
-    localStorage.setItem('shopGuar',  settings.guar);
+    localStorage.setItem('shopPerc',  settings.perc.toString());
+    localStorage.setItem('shopGuar',  settings.guar.toString());
     localStorage.setItem('shopTheme', settings.theme);
     localStorage.setItem('shopVoice', settings.voice);
     localStorage.setItem('shopSound', settings.sound);
-    // 4. อัปเดตการแสดงผลชื่อร้านบนหน้าจอ
+
+    // 🎯 5. ส่วนสำคัญ: สลับไปโหลดข้อมูล (db, archives) ของสาขาใหม่ทันที
+    if (typeof loadDataByBranch === "function") {
+        loadDataByBranch(currentShopName);
+    }
+
+    // 6. อัปเดตการแสดงผลชื่อร้านบน UI หน้าหลัก
     const nameDisp = $("shopNameDisp") || $("shopNameDisplay");
     if (nameDisp) {
         nameDisp.innerText = settings.shop.toUpperCase();
     } 
-    // 5. เรียกฟังก์ชันอัปเดต UI 
-    if (typeof applyTheme === "function")        applyTheme(settings.theme);
-    if (typeof calculateMoney === "function")    calculateMoney(); 
-    if (typeof renderDay === "function")         renderDay(); 
-    // 6. ปิด Modal
+
+    // 7. อัปเดต Theme และการคำนวณเงิน
+    if (typeof applyTheme === "function") applyTheme(settings.theme);
+    if (typeof calculateMoney === "function") calculateMoney(); 
+    
+    // รีเฟรชหน้ารายงานตามวันที่เลือกอยู่
+    const currentSelectedDate = $("dateInp")?.value;
+    if (typeof renderDay === "function") renderDay(currentSelectedDate); 
+
+    // 8. ปิด Modal
     if ($("modalSet")) $("modalSet").style.display = 'none'; 
-    // 7. แจ้งเตือนความสำเร็จ
-    notify("success", "บันทึกข้อมูลสาขาเรียบร้อย", `บันทึกค่าของสาขา "${currentShopName}" สำเร็จ`);
+
+    // 9. แจ้งเตือนความสำเร็จ
+    notify("success", "สลับสาขาสำเร็จ", `บันทึกและโหลดข้อมูลสาขา: "${currentShopName}" เรียบร้อยแล้ว`);
 }
 async function handleSave(event) {
     const $ = (id) => document.getElementById(id);
