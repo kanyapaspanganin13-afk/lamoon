@@ -2243,70 +2243,80 @@ async function exportToExcel() {
         console.log("Fetch error:", e);
     }
 
-    // 🏷️ 2. เตรียมข้อมูลชื่อร้าน/สาขา (ปรับให้ดึงจากโครงสร้างใหม่)
+    // 🏷️ 2. เตรียมข้อมูล
     const shopInput = document.getElementById("setShop");
     const savedName = localStorage.getItem('shopName');
-    
-    // ดึงรายชื่อสาขาทั้งหมดที่มีในระบบ (จากที่ saveSettings บันทึกไว้)
     const allBranchesData = JSON.parse(localStorage.getItem('all_branches_data')) || {};
     
-    // กำหนดชื่อสาขาปัจจุบันจากหน้าจอ หรือจากค่าล่าสุดที่เซฟไว้
     const currentSystemShop = (shopInput && shopInput.value.trim()) 
                                ? shopInput.value.trim() 
                                : (savedName || "ทั่วไป");
 
-    if (typeof archives === 'undefined' || archives === null || archives.length === 0) {
-        alert("ไม่พบข้อมูลประวัติในระบบ");
+    // 🚩 เปลี่ยน Alert เป็น Notify
+    if (typeof archives === 'undefined' || !archives || archives.length === 0) {
+        notify("error", "ไม่พบข้อมูล", "ระบบไม่พบประวัติการทำงานในฐานข้อมูล");
         return;
     }
 
-    // ... (ส่วนการเลือกเดือนและ Filter ข้อมูลเหมือนเดิม) ...
     const monthInput = document.getElementById("histMonth");
     const m = monthInput ? monthInput.value : "";
-    if (!m) { alert("กรุณาเลือกเดือนที่ต้องการส่งออก"); return; }
+    if (!m) { 
+        notify("warning", "กรุณาเลือกเดือน", "ระบุเดือนที่ต้องการสรุปยอดก่อนกดส่งออก");
+        return; 
+    }
+
     const filtered = archives.filter(a => a.date && a.date.startsWith(m));
-    if (!filtered.length) { alert("ไม่พบข้อมูลในเดือนที่เลือก"); return; }
+    if (!filtered.length) { 
+        notify("info", "ไม่มีข้อมูล", `ไม่พบรายการของเดือน ${m} ในระบบ`);
+        return; 
+    }
+
+    // แจ้งเตือนเริ่มต้นสร้างรายงาน
+    notify("success", "กำลังสร้างรายงาน", "กรุณารอสักครู่ ระบบกำลังจัดเตรียมไฟล์ Excel...");
 
     // 🏗️ 3. จัดกลุ่มข้อมูลตามสาขา
     const branches = {};
     filtered.forEach(item => {
-        // ใช้ชื่อสาขาที่ติดมากับรายการนั้นๆ (item.branch) 
-        // ถ้าไม่มี (เป็นข้อมูลเก่า) ให้จัดเข้ากลุ่ม currentSystemShop
         const branchName = item.branch || currentSystemShop; 
-        
         if (!branches[branchName]) {
             branches[branchName] = [];
         }
         branches[branchName].push(item);
     });
 
-    // ... (ส่วนการเตรียมสไตล์และตัวแปรผลรวมเหมือนเดิม) ...
-    const thMonths = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+    // 🎨 4. Style
+    const tableStyle = `
+        <style>
+            body { padding: 20px; font-family: 'Tahoma', sans-serif; background-color: #f4f4f4; }
+            table { border-collapse: collapse; width: 100%; margin-bottom: 30px; background: white; }
+            th { border: 2px solid #ccc; padding: 10px; background-color: #1D6F42; color: white; font-size: 18px; }
+            td { border: 2px solid #ccc; padding: 8px; text-align: center; font-size: 16px; color: #333; }
+            .branch-header { background-color: #e8f5e9; padding: 15px; border-left: 8px solid #1D6F42; margin-top: 30px; font-size: 22px; font-weight: bold; color: #1b5e20; }
+            .grand-total-box { margin-top: 40px; padding: 20px; border: 3px solid #1D6F42; background-color: #fff9c4; border-radius: 10px; }
+            .grand-total-title { font-size: 24px; font-weight: bold; color: #04167d; text-align: center; margin-bottom: 15px; }
+            .text-off { color: #d32f2f; font-weight: bold; }
+        </style>
+    `;
+
+    // 📅 5. หัวรายงาน
+    const thMonths = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค. "];
     const fullThaiMonths = ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
     const [y, mm] = m.split('-');
     const headThai = `${fullThaiMonths[parseInt(mm)]} ${parseInt(y) + 543}`;
 
-    let tableHtml = `<html><head><meta charset="utf-8">${style}</head><body>`;
+    let tableHtml = `<html><head><meta charset="utf-8">${tableStyle}</head><body>`;
     tableHtml += `<h1 style="text-align:center;">รายงานสรุปยอดรวมทุกสาขา</h1>`;
     tableHtml += `<h2 style="text-align:center;">ประจำเดือน: ${headThai}</h2>`;
 
     let finalCust = 0, finalBarber = 0, finalShave = 0, finalWash = 0, finalDye = 0;
 
     for (const branchName in branches) {
-        // ดึงการตั้งค่าของสาขานั้นๆ มาดู (ถ้ามีใน all_branches_data)
         const bSet = allBranchesData[branchName] || {};
-        const bPerc = bSet.perc || 0; // เผื่อกรณีอยากเอา % ไปคำนวณในตารางภายหลัง
+        const bPerc = bSet.perc || 0;
 
         tableHtml += `<div class="branch-header">สาขา: ${branchName} ${bPerc ? `(ส่วนแบ่ง ${bPerc}%)` : ''}</div>`;
-        tableHtml += `<table>
-            <thead>
-                <tr>
-                    <th>สาขา</th><th>วันที่</th><th>วัน</th><th>ลูกค้า</th><th>ยอดช่าง</th><th>โกน</th><th>สระ</th><th>ย้อม</th>
-                </tr>
-            </thead>
-            <tbody>`;
+        tableHtml += `<table><thead><tr><th>สาขา</th><th>วันที่</th><th>วัน</th><th>ลูกค้า</th><th>ยอดช่าง</th><th>โกน</th><th>สระ</th><th>ย้อม</th></tr></thead><tbody>`;
 
-        // ... (วนลูปสร้างแถวข้อมูลและเครื่องหมาย " เหมือนเดิม) ...
         let bTotalCust = 0, bTotalBarber = 0, bTotalShave = 0, bTotalWash = 0, bTotalDye = 0;
         branches[branchName].sort((a, b) => new Date(a.date) - new Date(b.date));
 
@@ -2329,70 +2339,40 @@ async function exportToExcel() {
                     }
                 });
             }
-            
             const barberEarn = Number(day.barber) || 0;
             bTotalCust += countCust; bTotalBarber += barberEarn;
             bTotalShave += countShave; bTotalWash += countWash; bTotalDye += countDye;
 
-            tableHtml += `<tr>
-                <td style="background-color: #fafafa;">${branchDisplay}</td>
-                <td>${dateThai}</td>
-                <td>${isOff ? '<span style="color:red">หยุด</span>' : dayName}</td>
-                <td>${countCust}</td>
-                <td style="color:#0f0661;">${barberEarn.toLocaleString()}</td>
-                <td>${countShave || "-"}</td>
-                <td>${countWash || "-"}</td>
-                <td>${countDye || "-"}</td>
-            </tr>`;
+            tableHtml += `<tr><td>${branchDisplay}</td><td>${dateThai}</td><td>${isOff ? '<span class="text-off">หยุด</span>' : dayName}</td><td>${countCust}</td><td style="font-weight:bold;">${barberEarn.toLocaleString()}</td><td>${countShave || "-"}</td><td>${countWash || "-"}</td><td>${countDye || "-"}</td></tr>`;
         });
 
-        tableHtml += `<tr style="background-color: #fff176; font-weight: bold;">
-                <td colspan="3">รวมเฉพาะสาขา ${branchName}</td>
-                <td>${bTotalCust.toLocaleString()}</td>
-                <td>${bTotalBarber.toLocaleString()}</td>
-                <td>${bTotalShave}</td>
-                <td>${bTotalWash}</td>
-                <td>${bTotalDye}</td>
-            </tr></tbody></table>`;
+        tableHtml += `<tr style="background-color: #fff176; font-weight: bold;"><td colspan="3">รวมเฉพาะสาขา ${branchName}</td><td>${bTotalCust}</td><td>${bTotalBarber.toLocaleString()}</td><td>${bTotalShave}</td><td>${bTotalWash}</td><td>${bTotalDye}</td></tr></tbody></table>`;
 
         finalCust += bTotalCust; finalBarber += bTotalBarber;
         finalShave += bTotalShave; finalWash += bTotalWash; finalDye += bTotalDye;
     }
 
-    tableHtml += `
-        <div class="grand-total-box">
-            <div class="grand-total-title">🏆 สรุปยอดรวมสุทธิ (ทุกสาขา)</div>
-            <table style="margin-bottom:0px;">
-                <tr style="background-color: #1D6F42; color: white; font-weight: bold;">
-                    <td style="color:white;">รวมลูกค้าทั้งหมด</td>
-                    <td style="color:white;">รวมยอดช่างทั้งหมด</td>
-                    <td style="color:white;">รวมงานโกน</td>
-                    <td style="color:white;">รวมงานสระ</td>
-                    <td style="color:white;">รวมงานย้อม</td>
-                </tr>
-                <tr style="font-size: 22px; font-weight: bold; background-color: white;">
-                    <td>${finalCust.toLocaleString()} คน</td>
-                    <td style="color: #d32f2f;">${finalBarber.toLocaleString()} บาท</td>
-                    <td>${finalShave}</td>
-                    <td>${finalWash}</td>
-                    <td>${finalDye}</td>
-                </tr>
-            </table>
-        </div>`;
+    // 🏆 สรุปท้าย
+    tableHtml += `<div class="grand-total-box"><div class="grand-total-title">🏆 สรุปยอดรวมสุทธิ (ทุกสาขา)</div><table><tr style="background-color: #1D6F42; color: white;"><td>รวมลูกค้า</td><td>รวมยอดช่าง</td><td>โกน</td><td>สระ</td><td>ย้อม</td></tr><tr style="font-size: 20px; font-weight: bold;"><td>${finalCust} คน</td><td style="color: #d32f2f;">${finalBarber.toLocaleString()}</td><td>${finalShave}</td><td>${finalWash}</td><td>${finalDye}</td></tr></table></div></body></html>`;
 
-    tableHtml += `</body></html>`;
-
-    const newTab = window.open();
-    if (newTab) {
-        newTab.document.write(tableHtml);
-        newTab.document.close();
-    } else {
-        const blob = new Blob([tableHtml], { type: 'application/vnd.ms-excel' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `Full_Report_${m}.xls`;
-        link.click();
+    // 🚀 เปิดไฟล์
+    try {
+        const newTab = window.open('', '_blank');
+        if (newTab) {
+            newTab.document.write(tableHtml);
+            newTab.document.close();
+        } else {
+            const blob = new Blob([tableHtml], { type: 'application/vnd.ms-excel' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `Report_${m}.xls`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    } catch (err) {
+        notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถเปิดรายงานได้ กรุณาตรวจสอบ Pop-up Blocker");
     }
 }
 function handleGoogleSheet() {
