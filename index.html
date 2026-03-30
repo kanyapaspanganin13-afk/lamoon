@@ -928,13 +928,33 @@ function importBackup(input) {
     if (input.files && input.files[0]) reader.readAsText(input.files[0]);
 }
 function clearData() {
+    const clearProcess = () => {
+        // 1. ลบข้อมูลรายการบันทึกและบัญชี
+        localStorage.removeItem("barber_db");
+        localStorage.removeItem("barber_archives");
+        localStorage.removeItem("barber_account");
+
+        // 2. ลบการตั้งค่าร้านและรายชื่อสาขาทั้งหมด (Reset เป็น 0)
+        localStorage.removeItem("barber_conf");
+        localStorage.removeItem("all_branches_data"); // ฐานข้อมูลรวมทุกสาขาที่เพิ่งเพิ่ม
+        localStorage.removeItem("all_shop_branches"); // รายชื่อสาขาที่เป็น Array
+        
+        // 3. ลบค่า Setting รายตัว (ที่บันทึกใน saveSettings)
+        localStorage.removeItem("shopName");
+        localStorage.removeItem("shopPerc");
+        localStorage.removeItem("shopGuar");
+        localStorage.removeItem("shopTheme");
+        localStorage.removeItem("shopVoice");
+        localStorage.removeItem("shopSound");
+
+        // รีโหลดหน้าเพื่อให้ UI กลับเป็นค่าเริ่มต้น
+        location.reload();
+    };
+
     // เช็คก่อนว่าในเครื่องมี SweetAlert (Swal) ไหม
     if (typeof Swal === 'undefined') {
-        if (confirm("ล้างข้อมูลทั้งหมด? รายงานและบัญชีจะหายถาวร")) {
-            localStorage.removeItem("barber_db");
-            localStorage.removeItem("barber_archives");
-            localStorage.removeItem("barber_account");
-            location.reload();
+        if (confirm("⚠️ ยืนยันล้างข้อมูลทั้งหมด? การตั้งค่าและรายงานทุกสาขาจะหายถาวรและกลับเป็นศูนย์")) {
+            clearProcess();
         }
         return;
     }
@@ -942,30 +962,16 @@ function clearData() {
     // ถ้ามี Swal ให้ใช้แบบสวยๆ
     Swal.fire({
         title: 'ล้างข้อมูลทั้งหมด?',
-        text: "รายงานและบัญชีจะหายถาวร (ควรสำรองข้อมูลก่อน)",
+        text: "การตั้งค่าทุกสาขาและรายงานจะถูกลบถาวร (กลับเป็นศูนย์)",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#dc2626', // สีแดง
         cancelButtonColor: '#6b7280', // สีเทา
-        confirmButtonText: 'ยืนยันลบข้อมูล',
+        confirmButtonText: 'ยืนยันล้างข้อมูล',
         cancelButtonText: 'ยกเลิก'
     }).then((result) => {
         if (result.isConfirmed) {
-            // ลบข้อมูลหลัก
-            localStorage.removeItem("barber_db");
-            localStorage.removeItem("barber_archives");
-            localStorage.removeItem("barber_account");
-            
-            Swal.fire({
-                title: 'ล้างข้อมูลสำเร็จ',
-                icon: 'success',
-                timer: 1000,
-                showConfirmButton: false
-            });
-            
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
+            clearProcess();
         }
     });
 }
