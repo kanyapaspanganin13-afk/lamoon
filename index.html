@@ -1611,18 +1611,34 @@ async function handleHoliday() {
     }
 }
 function renderDay(selectedDate) {
-    // 🔍 1. เพิ่มการดึงชื่อสาขาปัจจุบันที่กำลังใช้งานอยู่
+    // 1. ดึงชื่อสาขาปัจจุบัน
     const currentBranch = localStorage.getItem('shopName') || "ทั่วไป";
 
     let dInp = selectedDate || ($("dateInp") ? $("dateInp").value : new Date().toISOString().split('T')[0]);
     if ($("dateInp")) $("dateInp").value = dInp;
 
-    // 🔍 2. แก้ไขการ Filter ข้อมูล (ให้เช็คทั้งวันที่ และ ชื่อสาขา)
-    let allRec = db.filter(r => r.date === dInp && (r.branch === currentBranch || (!r.branch && currentBranch === "ทั่วไป")));
+    // 🎯 แก้ไขจุดนี้: ให้รองรับทั้งแบบมีสาขาตรงกัน หรือไม่มีสาขา (ข้อมูลเก่า)
+    let allRec = db.filter(r => {
+        const isSameDate = r.date === dInp;
+        const isSameBranch = r.branch === currentBranch;
+        const isLegacyData = !r.branch || r.branch === "" || r.branch === "ทั่วไป";
+        
+        // ถ้าเป็นสาขาทั่วไป ให้ดูข้อมูลที่ไม่มีสาขาได้ด้วย
+        if (currentBranch === "ทั่วไป") {
+            return isSameDate && isLegacyData;
+        }
+        // ถ้าเป็นสาขาใหม่ ให้ดูเฉพาะสาขาตัวเอง หรือข้อมูลที่ไม่มีสาขาติดมา (เผื่อนำเข้า)
+        return isSameDate && (isSameBranch || isLegacyData);
+    });
 
-    // 🔍 3. แก้ไขการหาใน Archives (ให้เช็คชื่อสาขาด้วย)
+    // 🔍 ตรวจสอบใน Archives ด้วยตรรกะเดียวกัน
     if (allRec.length === 0 && typeof archives !== 'undefined') {
-        const archivedDay = archives.find(a => a.date === dInp && (a.branch === currentBranch || (!a.branch && currentBranch === "ทั่วไป")));
+        const archivedDay = archives.find(a => {
+            const isSameDate = a.date === dInp;
+            const isMatch = a.branch === currentBranch || (!a.branch || a.branch === "ทั่วไป");
+            return isSameDate && isMatch;
+        });
+        
         if (archivedDay && archivedDay.details) {
             allRec = archivedDay.details;
         }
