@@ -713,7 +713,7 @@ nav {
                     <button onclick="document.getElementById('modalSet').style.display='none'" style="background:var(--bg); color:var(--text); opacity:0.7; height:60px; border-radius:20px; border:none; font-weight:800; font-size:16px;">ปิด</button>
                 </div>
                 <div style="text-align:center; line-height: 1.4; opacity: 0.5;">
-                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.1</div>
+                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.2</div>
                     <div style="font-size:9px; color:var(--text); font-weight:400;">Update: 30/03/2026</div>
                 </div>
             </div>
@@ -751,7 +751,7 @@ nav {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.1"; 
+const APP_VERSION = "1.0.2"; 
 const LAST_UPDATED = "30/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
@@ -1375,11 +1375,15 @@ async function saveAndGo(date, total) {
 
     const btn = document.getElementById("btnSubmitSend");
     const icon = document.getElementById("btnIcon");
+    
+    // 🔍 ดึงชื่อสาขาปัจจุบันจากระบบ
+    const currentBranch = localStorage.getItem('shopName') || "ทั่วไป";
 
-    // 🎯 1. ดักจับข้อมูลซ้ำ (ตัดครับ/ค่ะ ออก)
-    const alreadySent = archives.some(a => a.date === date);
+    // 🎯 1. ดักจับข้อมูลซ้ำ (เช็คทั้ง วันที่ และ สาขา)
+    const alreadySent = archives.some(a => a.date === date && (a.branch === currentBranch || (!a.branch && currentBranch === "ทั่วไป")));
+    
     if (alreadySent) {
-        notify("error", "แจ้งเตือน", `ข้อมูลของวันที่ ${date} ได้ดำเนินการส่งเรียบร้อยแล้ว`);
+        notify("error", "แจ้งเตือน", `ข้อมูลวันที่ ${date} ของสาขา ${currentBranch} ถูกส่งไปแล้ว`);
         if (btn) {
             btn.disabled = true; 
             btn.style.background = "#94a3b8";
@@ -1388,10 +1392,11 @@ async function saveAndGo(date, total) {
         }
         return;
     }
-    // 🎯 2. ยืนยันก่อนส่ง (ปรับคำพูดให้เป็นกลาง)
+
+    // 🎯 2. ยืนยันก่อนส่ง
     const result = await Swal.fire({
         title: 'ยืนยันการส่งข้อมูล',
-        text: `ต้องการดำเนินการส่งข้อมูลของวันที่ ${date} ใช่หรือไม่?`,
+        text: `ต้องการส่งข้อมูลวันที่ ${date} (สาขา: ${currentBranch}) ใช่หรือไม่?`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: 'var(--success)',
@@ -1403,6 +1408,7 @@ async function saveAndGo(date, total) {
     });
 
     if (!result.isConfirmed) return;
+
     // 🎯 3. เริ่มดำเนินการส่ง
     if (btn) {
         if (btn.disabled) return; 
@@ -1411,7 +1417,8 @@ async function saveAndGo(date, total) {
         if (icon) icon.className = "fas fa-spinner fa-spin"; 
     }
 
-    const allToday = db.filter(r => r.date === date);
+    // กรองข้อมูลเฉพาะของสาขาปัจจุบันในวันที่เลือก
+    const allToday = db.filter(r => r.date === date && (r.branch === currentBranch || (!r.branch && currentBranch === "ทั่วไป")));
     const todayData = allToday.filter(r => r.type === 'SERVICE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
     let cash = 0, tips = 0;
@@ -1428,12 +1435,27 @@ async function saveAndGo(date, total) {
     const baseEarn = Math.max(commission, Number(conf.guar) || 0); 
     const bEarn = isHoliday ? 0 : baseEarn + tips;
     const settle = isHoliday ? 0 : cash - bEarn;
-    const data = { date, total, cash, barber: Math.floor(bEarn), settle: settle, type: isHoliday ? "HOLIDAY" : "WORK", details: allToday };
+
+    // 🏗️ เตรียม Object ข้อมูลโดยเพิ่ม field 'branch' ลงไปด้วย
+    const data = { 
+        date, 
+        branch: currentBranch, 
+        total, 
+        cash, 
+        barber: Math.floor(bEarn), 
+        settle: settle, 
+        type: isHoliday ? "HOLIDAY" : "WORK", 
+        details: allToday 
+    };
     
-    const idx = archives.findIndex(a => a.date === date);
+    // บันทึกหรืออัปเดตข้อมูลใน Archives
+    const idx = archives.findIndex(a => a.date === date && a.branch === currentBranch);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
+    
     if (!isHoliday) { account.balance = -settle; }
-    db = db.filter(r => r.date !== date);
+
+    // ลบออกจาก db เฉพาะส่วนที่ส่งไปแล้วเท่านั้น
+    db = db.filter(r => !(r.date === date && (r.branch === currentBranch || (!r.branch && currentBranch === "ทั่วไป"))));
 
     try {
         if (typeof saveDB === "function") { await saveDB(); } else { await save(); }
@@ -1446,8 +1468,9 @@ async function saveAndGo(date, total) {
         }
 
         if (typeof loadAccountStatus === 'function') loadAccountStatus();
-                // 🎯 ส่งข้อมูลสำเร็จ (ใช้ภาษาเป็นกลาง)
-        notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการส่งข้อมูลเรียบร้อยแล้ว");
+        if (typeof renderDay === 'function') renderDay(date); // อัปเดตหน้าจอทันที
+
+        notify("success", "ดำเนินการสำเร็จ", `ส่งข้อมูลสาขา ${currentBranch} เรียบร้อยแล้ว`);
 
     } catch (e) {
         if (btn) {
@@ -1455,7 +1478,7 @@ async function saveAndGo(date, total) {
             btn.style.background = "var(--danger)";
             if (icon) icon.className = "fas fa-paper-plane";
         }
-        notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถส่งข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง");
+        notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถส่งข้อมูลได้ในขณะนี้");
     }
 }
 // --- ฟังก์ชันลบข้อมูลแยกออกมา ---
@@ -1587,12 +1610,18 @@ async function handleHoliday() {
     }
 }
 function renderDay(selectedDate) {
+    // 🔍 1. เพิ่มการดึงชื่อสาขาปัจจุบันที่กำลังใช้งานอยู่
+    const currentBranch = localStorage.getItem('shopName') || "ทั่วไป";
+
     let dInp = selectedDate || ($("dateInp") ? $("dateInp").value : new Date().toISOString().split('T')[0]);
     if ($("dateInp")) $("dateInp").value = dInp;
-    let allRec = db.filter(r => r.date === dInp);
 
+    // 🔍 2. แก้ไขการ Filter ข้อมูล (ให้เช็คทั้งวันที่ และ ชื่อสาขา)
+    let allRec = db.filter(r => r.date === dInp && (r.branch === currentBranch || (!r.branch && currentBranch === "ทั่วไป")));
+
+    // 🔍 3. แก้ไขการหาใน Archives (ให้เช็คชื่อสาขาด้วย)
     if (allRec.length === 0 && typeof archives !== 'undefined') {
-        const archivedDay = archives.find(a => a.date === dInp);
+        const archivedDay = archives.find(a => a.date === dInp && (a.branch === currentBranch || (!a.branch && currentBranch === "ทั่วไป")));
         if (archivedDay && archivedDay.details) {
             allRec = archivedDay.details;
         }
