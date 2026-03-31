@@ -865,9 +865,6 @@ function saveDB() {
         console.error("❌ ไม่สามารถบันทึกได้:", e);
     }
 }
-// ==========================================
-// SECTION: DATA MANAGEMENT & BRANCH SWITCHING
-// ==========================================
 
 function loadDataByBranch(branchName) {
     // 1. ดึงข้อมูล "ทั้งหมด" ที่มีในเครื่องออกมาตรวจสอบก่อน
@@ -1019,16 +1016,15 @@ function clearData() {
 
     // เช็คก่อนว่าในเครื่องมี SweetAlert (Swal) ไหม
     if (typeof Swal === 'undefined') {
-        if (confirm("⚠️ ยืนยันล้างข้อมูลทั้งหมด? การตั้งค่าและรายงานทุกสาขาจะหายถาวรและกลับเป็นศูนย์")) {
+        if (confirm("⚠️ ยืนยันล้างข้อมูลทั้งหมด? การตั้งค่าและรายงานทุกอย่างจะถูกลบออกจากระบบ")) {
             clearProcess();
         }
         return;
     }
-
     // ถ้ามี Swal ให้ใช้แบบสวยๆ
     Swal.fire({
         title: 'ล้างข้อมูลทั้งหมด?',
-        text: "การตั้งค่าทุกสาขาและรายงานจะถูกลบถาวร (กลับเป็นศูนย์)",
+        text: "การตั้งค่าและรายงานทุกอย่างจะถูกลบออกจากระบบ",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#dc2626', // สีแดง
@@ -1064,7 +1060,6 @@ function addRecord() {
         $("priceInp").focus();
         return;
     }
-
     // 🎯 2. ตรวจสอบรายการทรงผม
     const hairStyleSelect = $("hairStyle");
     if (hairStyleSelect && hairStyleSelect.value === "" && currentPay !== 'Holiday') {
@@ -1072,7 +1067,6 @@ function addRecord() {
         hairStyleSelect.focus();
         return;
     }
-
     // --- ส่วนจัดการยอดเงิน ---
     let finalCash = 0;
     let finalTrans = 0;
