@@ -856,16 +856,32 @@ function updateDateDisplay(v) {
    ========================================================== */
 function saveDB() {
     try {
-        localStorage.setItem("barber_db", JSON.stringify(db));
-        localStorage.setItem("barber_archives", JSON.stringify(archives));
+        const branchName = conf.shop || "ทั่วไป";
+        // --- ส่วนของ DB (รายการงานปัจจุบัน) ---
+        // 1. ดึงข้อมูลทั้งหมดที่มีในเครื่องออกมา
+        let fullDB = JSON.parse(localStorage.getItem("barber_db")) || [];
+        // 2. กรองเอาข้อมูล "สาขาอื่น" เก็บไว้ แล้วเอา "ข้อมูลปัจจุบัน" ใส่เข้าไปใหม่
+        fullDB = fullDB.filter(r => r.branch && r.branch !== branchName);
+        const dbWithBranch = db.map(r => ({ ...r, branch: branchName }));
+        const updatedDB = [...fullDB, ...dbWithBranch];
+
+        // --- ส่วนของ Archives (ประวัติที่ปิดยอดแล้ว) ---
+        let fullArchives = JSON.parse(localStorage.getItem("barber_archives")) || [];
+        fullArchives = fullArchives.filter(a => a.branch && a.branch !== branchName);
+        const arcWithBranch = archives.map(a => ({ ...a, branch: branchName }));
+        const updatedArchives = [...fullArchives, ...arcWithBranch];
+
+        // บันทึกกลับลงไป
+        localStorage.setItem("barber_db", JSON.stringify(updatedDB));
+        localStorage.setItem("barber_archives", JSON.stringify(updatedArchives));
         localStorage.setItem("barber_account", JSON.stringify(account));
         localStorage.setItem("barber_conf", JSON.stringify(conf));
-        console.log("💾 บันทึกข้อมูลเรียบร้อยแล้ว");
+
+        console.log(`💾 บันทึกข้อมูลสาขา [${branchName}] เรียบร้อยแล้ว`);
     } catch (e) {
         console.error("❌ ไม่สามารถบันทึกได้:", e);
     }
 }
-
 function loadDataByBranch(branchName) {
     // 1. ดึงข้อมูล "ทั้งหมด" ที่มีในเครื่องออกมาตรวจสอบก่อน
     const fullDB = JSON.parse(localStorage.getItem('barber_db')) || [];
@@ -892,6 +908,38 @@ function loadDataByBranch(branchName) {
     
     console.log(`Switched to branch: ${branchName}`, { dbCount: db.length, arcCount: archives.length });
 }
+function getAggregatedData(monthFilter = "") {
+    // 1. ดึงข้อมูลดิบทั้งหมด
+    const allArchives = JSON.parse(localStorage.getItem('barber_archives')) || [];
+    
+    // 2. กรองตามเดือน (ถ้ามีการระบุ)
+    const filtered = monthFilter 
+        ? allArchives.filter(a => a.date && a.date.startsWith(monthFilter))
+        : allArchives;
+
+    // 3. จัดกลุ่ม (Aggregate)
+    const summary = {
+        branches: {},
+        grandTotal: 0,
+        totalCustomers: 0
+    };
+
+    filtered.forEach(item => {
+        const bName = item.branch || "ทั่วไป";
+        if (!summary.branches[bName]) {
+            summary.branches[bName] = { total: 0, customers: 0, count: 0 };
+        }
+        
+        summary.branches[bName].total += Number(item.barber) || 0;
+        summary.branches[bName].customers += (item.details ? item.details.length : 0);
+        summary.branches[bName].count++;
+        
+        summary.grandTotal += Number(item.barber) || 0;
+        summary.totalCustomers += (item.details ? item.details.length : 0);
+    });
+
+    return summary;
+}        
 // 1. ฟังก์ชันส่งออกข้อมูล (Backup) 
 function exportBackup() {
     try {
@@ -2304,30 +2352,18 @@ function renderHistoryList() {
    (ส่วนสถิติ รายงาน และการส่งข้อมูลเข้า LINE)
    ========================================================== */
 async function exportToExcel() {
-    // 🔍 1. บังคับโหลดข้อมูลใหม่
-    try {
-        if (typeof fetchArchives === 'function') {
-            await fetchArchives(); 
-        }
-    } catch (e) {
-        console.log("Fetch error:", e);
-    }
+    // 🔍 1. ดึงข้อมูล "ดิบ" ทั้งหมดจาก Storage (เพื่อให้ได้ทุกสาขา ไม่ใช่แค่ที่โชว์บนหน้าจอ)
+    const allRawArchives = JSON.parse(localStorage.getItem('barber_archives')) || [];
+    const allBranchesConfig = JSON.parse(localStorage.getItem('all_branches_data')) || {};
+    const savedName = localStorage.getItem('shopName') || "ทั่วไป";
 
-    // 🏷️ 2. เตรียมข้อมูล
-    const shopInput = document.getElementById("setShop");
-    const savedName = localStorage.getItem('shopName');
-    const allBranchesData = JSON.parse(localStorage.getItem('all_branches_data')) || {};
-    
-    const currentSystemShop = (shopInput && shopInput.value.trim()) 
-                               ? shopInput.value.trim() 
-                               : (savedName || "ทั่วไป");
-
-    // 🚩 เปลี่ยน Alert เป็น Notify
-    if (typeof archives === 'undefined' || !archives || archives.length === 0) {
-        notify("error", "ไม่พบข้อมูล", "ระบบไม่พบประวัติการทำงานในฐานข้อมูล");
+    // 🚩 ตรวจสอบว่ามีข้อมูลไหม
+    if (allRawArchives.length === 0) {
+        notify("error", "ไม่พบข้อมูล", "ระบบไม่พบประวัติการทำงานใดๆ ในฐานข้อมูล");
         return;
     }
 
+    // 📅 2. ตรวจสอบการเลือกเดือน
     const monthInput = document.getElementById("histMonth");
     const m = monthInput ? monthInput.value : "";
     if (!m) { 
@@ -2335,40 +2371,38 @@ async function exportToExcel() {
         return; 
     }
 
-    const filtered = archives.filter(a => a.date && a.date.startsWith(m));
-    if (!filtered.length) { 
-        notify("info", "ไม่มีข้อมูล", `ไม่พบรายการของเดือน ${m} ในระบบ`);
+    // กรองข้อมูลตามเดือนที่เลือก (จากทุกสาขา)
+    const filtered = allRawArchives.filter(a => a.date && a.date.startsWith(m));
+    
+    if (filtered.length === 0) { 
+        notify("info", "ไม่มีข้อมูล", `ไม่พบรายการของเดือน ${m} ในทุกสาขา`);
         return; 
     }
 
-    // แจ้งเตือนเริ่มต้นสร้างรายงาน
-    notify("success", "กำลังสร้างรายงาน", "กรุณารอสักครู่ ระบบกำลังจัดเตรียมไฟล์ Excel...");
+    notify("success", "กำลังสร้างรายงาน", "ระบบกำลังรวบรวมข้อมูลจากทุกสาขา...");
 
-    // 🏗️ 3. จัดกลุ่มข้อมูลตามสาขา
+    // 🏗️ 3. จัดกลุ่มข้อมูลตามสาขา (Grouping)
     const branches = {};
     filtered.forEach(item => {
-        const branchName = item.branch || currentSystemShop; 
-        if (!branches[branchName]) {
-            branches[branchName] = [];
-        }
-        branches[branchName].push(item);
+        const bName = item.branch || savedName; // ถ้าไม่มี field branch ให้ถือเป็นสาขาหลัก
+        if (!branches[bName]) branches[bName] = [];
+        branches[bName].push(item);
     });
 
-    // 🎨 4. Style
+    // 🎨 4. Style (เหมือนเดิมของคุณ แต่ปรับ Font ให้รองรับ Excel)
     const tableStyle = `
         <style>
-            body { padding: 20px; font-family: 'Tahoma', sans-serif; background-color: #f4f4f4; }
-            table { border-collapse: collapse; width: 100%; margin-bottom: 30px; background: white; }
-            th { border: 2px solid #ccc; padding: 10px; background-color: #1D6F42; color: white; font-size: 18px; }
-            td { border: 2px solid #ccc; padding: 8px; text-align: center; font-size: 16px; color: #333; }
-            .branch-header { background-color: #e8f5e9; padding: 15px; border-left: 8px solid #1D6F42; margin-top: 30px; font-size: 22px; font-weight: bold; color: #1b5e20; }
-            .grand-total-box { margin-top: 40px; padding: 20px; border: 3px solid #1D6F42; background-color: #fff9c4; border-radius: 10px; }
-            .grand-total-title { font-size: 24px; font-weight: bold; color: #04167d; text-align: center; margin-bottom: 15px; }
-            .text-off { color: #d32f2f; font-weight: bold; }
+            body { font-family: 'Tahoma', sans-serif; padding: 20px; }
+            table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
+            th { border: 1px solid #000; padding: 10px; background-color: #1D6F42; color: white; }
+            td { border: 1px solid #000; padding: 8px; text-align: center; }
+            .branch-header { background-color: #e8f5e9; padding: 10px; border-left: 5px solid #1D6F42; margin: 20px 0 10px 0; font-size: 18px; font-weight: bold; }
+            .grand-total-box { margin-top: 30px; padding: 15px; border: 2px solid #1D6F42; background-color: #fff9c4; }
+            .text-off { color: #d32f2f; }
         </style>
     `;
 
-    // 📅 5. หัวรายงาน
+    // 📅 5. เตรียมหัวรายงาน
     const thMonths = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค. "];
     const fullThaiMonths = ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
     const [y, mm] = m.split('-');
@@ -2380,22 +2414,24 @@ async function exportToExcel() {
 
     let finalCust = 0, finalBarber = 0, finalShave = 0, finalWash = 0, finalDye = 0;
 
+    // 🚀 6. วนลูปสร้างตารางแยกตามสาขา
     for (const branchName in branches) {
-        const bSet = allBranchesData[branchName] || {};
-        const bPerc = bSet.perc || 0;
+        const bSet = allBranchesConfig[branchName] || {};
+        const bPerc = bSet.perc || "";
 
         tableHtml += `<div class="branch-header">สาขา: ${branchName} ${bPerc ? `(ส่วนแบ่ง ${bPerc}%)` : ''}</div>`;
-        tableHtml += `<table><thead><tr><th>สาขา</th><th>วันที่</th><th>วัน</th><th>ลูกค้า</th><th>ยอดช่าง</th><th>โกน</th><th>สระ</th><th>ย้อม</th></tr></thead><tbody>`;
+        tableHtml += `<table><thead><tr><th>วันที่</th><th>วัน</th><th>ลูกค้า</th><th>ยอดช่าง</th><th>โกน</th><th>สระ</th><th>ย้อม/สี</th></tr></thead><tbody>`;
 
         let bTotalCust = 0, bTotalBarber = 0, bTotalShave = 0, bTotalWash = 0, bTotalDye = 0;
+        
+        // เรียงวันที่จากน้อยไปมาก
         branches[branchName].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-        branches[branchName].forEach((day, index) => {
+        branches[branchName].forEach(day => {
             const isOff = (day.off === true || day.type === "HOLIDAY");
             const dObj = new Date(day.date);
-            const dateThai = `${dObj.getDate()} ${thMonths[dObj.getMonth() + 1]} ${(dObj.getFullYear() + 543).toString().slice(-2)}`;
-            const dayName = dObj.toLocaleDateString('th-TH', { weekday: 'long' }).replace('วัน', '');
-            const branchDisplay = (index === 0) ? branchName : '"';
+            const dateThai = `${dObj.getDate()} ${thMonths[dObj.getMonth() + 1]} ${ (dObj.getFullYear()+543).toString().slice(-2) }`;
+            const dayName = dObj.toLocaleDateString('th-TH', { weekday: 'short' });
 
             let countCust = 0, countShave = 0, countWash = 0, countDye = 0;
             if (day.details && Array.isArray(day.details)) {
@@ -2409,41 +2445,66 @@ async function exportToExcel() {
                     }
                 });
             }
+
             const barberEarn = Number(day.barber) || 0;
             bTotalCust += countCust; bTotalBarber += barberEarn;
             bTotalShave += countShave; bTotalWash += countWash; bTotalDye += countDye;
 
-            tableHtml += `<tr><td>${branchDisplay}</td><td>${dateThai}</td><td>${isOff ? '<span class="text-off">หยุด</span>' : dayName}</td><td>${countCust}</td><td style="font-weight:bold;">${barberEarn.toLocaleString()}</td><td>${countShave || "-"}</td><td>${countWash || "-"}</td><td>${countDye || "-"}</td></tr>`;
+            tableHtml += `<tr>
+                <td>${dateThai}</td>
+                <td>${isOff ? '<span class="text-off">หยุด</span>' : dayName}</td>
+                <td>${isOff ? '-' : countCust}</td>
+                <td style="font-weight:bold;">${isOff ? '-' : barberEarn.toLocaleString()}</td>
+                <td>${countShave || "-"}</td>
+                <td>${countWash || "-"}</td>
+                <td>${countDye || "-"}</td>
+            </tr>`;
         });
 
-        tableHtml += `<tr style="background-color: #fff176; font-weight: bold;"><td colspan="3">รวมเฉพาะสาขา ${branchName}</td><td>${bTotalCust}</td><td>${bTotalBarber.toLocaleString()}</td><td>${bTotalShave}</td><td>${bTotalWash}</td><td>${bTotalDye}</td></tr></tbody></table>`;
+        // แถวสรุปของแต่ละสาขา
+        tableHtml += `<tr style="background-color: #fff176; font-weight: bold;">
+            <td colspan="2">รวมเฉพาะสาขา ${branchName}</td>
+            <td>${bTotalCust}</td>
+            <td>${bTotalBarber.toLocaleString()}</td>
+            <td>${bTotalShave}</td>
+            <td>${bTotalWash}</td>
+            <td>${bTotalDye}</td>
+        </tr></tbody></table>`;
 
         finalCust += bTotalCust; finalBarber += bTotalBarber;
         finalShave += bTotalShave; finalWash += bTotalWash; finalDye += bTotalDye;
     }
 
-    // 🏆 สรุปท้าย
-    tableHtml += `<div class="grand-total-box"><div class="grand-total-title">🏆 สรุปยอดรวมสุทธิ (ทุกสาขา)</div><table><tr style="background-color: #1D6F42; color: white;"><td>รวมลูกค้า</td><td>รวมยอดช่าง</td><td>โกน</td><td>สระ</td><td>ย้อม</td></tr><tr style="font-size: 20px; font-weight: bold;"><td>${finalCust} คน</td><td style="color: #d32f2f;">${finalBarber.toLocaleString()}</td><td>${finalShave}</td><td>${finalWash}</td><td>${finalDye}</td></tr></table></div></body></html>`;
+    // 🏆 7. สรุปยอดรวมสุทธิทุกสาขา (Grand Total)
+    tableHtml += `
+        <div class="grand-total-box">
+            <h3 style="text-align:center; margin-top:0;">🏆 สรุปยอดรวมสุทธิ (ทุกสาขา)</h3>
+            <table style="margin-bottom:0;">
+                <tr style="background-color: #1D6F42; color: white; font-weight:bold;">
+                    <td>รวมลูกค้าทั้งหมด</td><td>รวมยอดช่างทั้งหมด</td><td>รวมงานโกน</td><td>รวมงานสระ</td><td>รวมงานย้อม</td>
+                </tr>
+                <tr style="font-size: 18px; font-weight: bold;">
+                    <td>${finalCust} คน</td>
+                    <td style="color: #d32f2f;">${finalBarber.toLocaleString()} บาท</td>
+                    <td>${finalShave}</td>
+                    <td>${finalWash}</td>
+                    <td>${finalDye}</td>
+                </tr>
+            </table>
+        </div>
+    </body></html>`;
 
-    // 🚀 เปิดไฟล์
-    try {
-        const newTab = window.open('', '_blank');
-        if (newTab) {
-            newTab.document.write(tableHtml);
-            newTab.document.close();
-        } else {
-            const blob = new Blob([tableHtml], { type: 'application/vnd.ms-excel' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = `Report_${m}.xls`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    } catch (err) {
-        notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถเปิดรายงานได้ กรุณาตรวจสอบ Pop-up Blocker");
-    }
+    // 🚀 8. การส่งออกไฟล์
+    const blob = new Blob([tableHtml], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Full_Report_${m}.xls`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    notify("success", "สำเร็จ", "ดาวน์โหลดรายงานเรียบร้อยแล้ว");
 }
 function handleGoogleSheet() {
     const isAndroid = /Android/i.test(navigator.userAgent);
