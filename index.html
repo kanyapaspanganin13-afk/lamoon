@@ -674,20 +674,22 @@ nav {
             <div style="padding: 20px 20px 5px; text-align: center;">
                 <h3 style="margin: 0; font-size: 22px; color: var(--text); font-weight: 900;">⚙️ ตั้งค่าระบบ</h3>
             </div>
-           <div style="padding: 5px 20px 25px;"> 
-            <!-- 🟢 แถวที่ 1: แบ่งซ้าย (ประเภท) - ขวา (ชื่ออิสระ) -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                <!-- ช่องซ้าย: เลือกประเภท -->
-                <select id="setBranchType" style="width: 100%; height: 52px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg); text-align: center; font-size: 16px; font-weight: 700; color: var(--text); outline: none; appearance: none; -webkit-appearance: none; cursor: pointer;">
-                    <option value="สาขาหลัก">🏠 หลัก</option>
-                    <option value="สาขาเวียน">🔄 เวียน</option>
-                </select>
-                <!-- ช่องขวา: ชื่อร้านอิสระ -->
-                <input type="text" id="setShop" placeholder="ระบุชื่อ/สาขา" style="width: 100%; height: 52px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg); text-align: center; font-size: 16px; font-weight: 700; color: var(--text); outline: none;">
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
-                <input type="number" id="setPerc" placeholder="% ช่าง" style="width:100%; height:52px; border-radius:16px; border:1px solid var(--border); background:var(--bg); text-align:center; font-size:18px; font-weight:700; color:var(--text); outline:none;">
-                <input type="number" id="setGuar" placeholder="ประกัน" style="width:100%; height:52px; border-radius:16px; border:1px solid var(--border); background:var(--bg); text-align:center; font-size:18px; font-weight:700; color:var(--text); outline:none;">
-            </div>
+<div style="padding: 5px 20px 25px;"> 
+    <!-- 🟢 ช่องที่ 1: ตัวเลือกสาขาที่ปฏิบัติงาน -->
+    <select id="setBranchType" style="width: 100%; height: 52px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg); text-align: center; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 10px; outline: none; appearance: none; -webkit-appearance: none; cursor: pointer;">
+        <option value="สาขาหลัก">🏠 สาขาหลัก</option>
+        <option value="สาขาเวียน">🔄 สาขาเวียน</option>
+    </select>
+
+    <!-- 🟢 ช่องที่ 2: กรอกชื่อร้าน/สาขาแบบอิสระ (ระบบจะจำค่านี้ไปแยกไฟล์) -->
+    <input type="text" id="setShop" placeholder="ระบุชื่อร้าน/สาขา (เช่น สาขาพหลโยธิน)" style="width: 100%; height: 52px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg); text-align: center; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 10px; outline: none;">
+
+    <!-- ส่วน % และ ประกัน -->
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+        <input type="number" id="setPerc" placeholder="% ช่าง" style="width:100%; height:52px; border-radius:16px; border:1px solid var(--border); background:var(--bg); text-align:center; font-size:18px; font-weight:700; color:var(--text); outline:none;">
+        <input type="number" id="setGuar" placeholder="ประกัน" style="width:100%; height:52px; border-radius:16px; border:1px solid var(--border); background:var(--bg); text-align:center; font-size:18px; font-weight:700; color:var(--text); outline:none;">
+    </div>
+</div>
             <div style="margin-bottom:10px;">
                 <select id="setTheme" onchange="applyTheme(this.value)" style="width:100%; height:52px; border-radius:16px; border: 1px solid var(--border); background:var(--bg); text-align:center; font-size:16px; font-weight:700; color:var(--text); outline:none;">
                      <option value="light">⛅ ธีมสว่าง</option>
