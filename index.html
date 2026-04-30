@@ -2510,20 +2510,30 @@ function loadHistDaily() {
 function loadHistMonth() {
     const $ = (id) => document.getElementById(id);
     const m = $("histMonth").value;
-    if (!m) return alert("กรุณาเลือกเดือนก่อนครับ");
 
-    if (typeof archives === 'undefined') return alert("ไม่พบฐานข้อมูลหลัก (archives)");
+    // --- 🟢 แสดงการแจ้งเตือนแบบ Notify ---
+    if (!m) {
+        if (window.notify) notify("⚠️ กรุณาเลือกเดือนก่อนครับ", "warning");
+        else alert("กรุณาเลือกเดือนก่อนครับ");
+        return;
+    }
+
+    if (typeof archives === 'undefined') {
+        if (window.notify) notify("❌ ไม่พบฐานข้อมูลหลัก (archives)", "error");
+        else alert("ไม่พบฐานข้อมูลหลัก (archives)");
+        return;
+    }
 
     const filtered = archives.filter(a => a.date && a.date.startsWith(m));
     if (!filtered.length) {
         if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
         if (window.calcNetProfit) window.calcNetProfit();
+        if (window.notify) notify(`📊 ไม่พบข้อมูลของเดือน ${m}`, "info");
         return openReportModal("📊 สรุปรายเดือน", `<div style='text-align:center;padding:50px;color:#94a3b8;'>ไม่พบข้อมูลของเดือน ${m}</div>`);
     }
 
-    // --- 🟢 ตัวแปรสำหรับนับรวมรายเดือน ---
-    let countNew = 0;      
-    let countRegular = 0;  
+    // ตัวแปรสะสมรายเดือน
+    let countNew = 0, countRegular = 0;  
     let monthTotal = 0, monthBarber = 0, monthCount = 0, monthGuarDays = 0; 
     let hairStats = {}, serviceStats = {};
     let offDays = 0, workDays = 0;
@@ -2535,10 +2545,8 @@ function loadHistMonth() {
     filtered.forEach(day => {
         const dObj = new Date(day.date);
         
-        // --- 🟢 แก้ไข Logic การนับสัปดาห์ตามปฏิทินจริง ---
-        // หาว่าวันที่ 1 ของเดือนนั้นตรงกับวันอะไร (0=อาทิตย์, 1=จันทร์...)
+        // --- 🟢 Logic การนับสัปดาห์ (เริ่มใหม่ทุกวันอาทิตย์) ---
         const firstDayOfMonth = new Date(dObj.getFullYear(), dObj.getMonth(), 1).getDay();
-        // คำนวณ Index ของสัปดาห์: (วันที่ปัจจุบัน + วันที่ว่างก่อนเริ่มวันที่ 1) / 7
         let wIdx = Math.ceil((dObj.getDate() + firstDayOfMonth) / 7);
         const wKey = `สัปดาห์ที่ ${wIdx}`;
 
@@ -2568,10 +2576,12 @@ function loadHistMonth() {
             weeklyData[wKey].guarDays++;
         }
 
+        // --- 🟢 ใช้ยอดเงินที่ถูกล็อคไว้จากกระบวนการ Save (day.barber) ---
         const dailyIncome = Number(day.total) || 0;
         const dailyBarber = Number(day.barber) || 0; 
+        
         monthTotal += dailyIncome;
-        monthBarber += dailyBarber;
+        monthBarber += dailyBarber; // ยอดนี้จะไม่เปลี่ยนแม้คุณจะแก้ Settings ภายหลัง
         weeklyData[wKey].income += dailyIncome;
 
         let dayCustomerCount = 0; 
@@ -2618,6 +2628,7 @@ function loadHistMonth() {
         });
     });
 
+    // คำนวณรายได้สุทธิของร้าน (ยอดทั้งหมด - ยอดที่ช่างได้ไป)
     const realShopEarn = monthTotal - monthBarber;
     if ($("shopTotalMonth")) {
         $("shopTotalMonth").innerText = "฿" + Math.floor(realShopEarn).toLocaleString();
@@ -2626,6 +2637,7 @@ function loadHistMonth() {
 
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
     
+    // ส่งข้อมูลไปยังตัวสร้าง Report
     generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular);
 }
 function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular) {
