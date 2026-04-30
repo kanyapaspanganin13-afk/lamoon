@@ -3112,9 +3112,9 @@ function openSettings() {
     }
 }
 function saveSettings() {
-    // 1. ดึงค่าจากฟอร์ม (เพิ่มการดึงค่าจาก setBranchType)
+    // 1. ดึงค่าจากฟอร์ม
     const settings = {
-        branchType: $("setBranchType")?.value || "สาขาหลัก", // 🟢 ดึงค่าประเภทสาขา
+        branchType: $("setBranchType")?.value || "สาขาหลัก", 
         shop:  $("setShop")?.value || "BARBER SHOP",
         perc:  parseFloat($("setPerc")?.value) || 0,
         guar:  parseFloat($("setGuar")?.value) || 0,
@@ -3123,30 +3123,27 @@ function saveSettings() {
         sound: $("setSound")?.value || "on"
     };
 
-    // 2. อัปเดตตัวแปรกลาง (conf) ทันที 
+    // 2. อัปเดตตัวแปรกลาง (conf) ทันที
     Object.assign(conf, settings);
 
-    // 3. บันทึกลง LocalStorage (เก็บไว้ในก้อนเดียวเพื่อความเป็นระเบียบ)
+    // 3. บันทึกลง LocalStorage (ระบบยังจำค่า branchType ไว้ในนี้)
     localStorage.setItem('barber_conf', JSON.stringify(conf));
     
-    // สำรองค่าแยก Key (ถ้าจำเป็นต้องใช้ที่อื่น)
     localStorage.setItem('shopName',  settings.shop);
     localStorage.setItem('shopPerc',  settings.perc);
     localStorage.setItem('shopGuar',  settings.guar);
 
-    // 4. อัปเดตการแสดงผลชื่อร้านและสาขาที่หัวเว็บ
-    // พยายามหา Element ที่ใช้แสดงชื่อร้าน (h2 หรือ id ที่ระบุ)
+    // 🎯 4. แก้ไขจุดนี้: แสดงเฉพาะชื่อร้าน (ซ่อนประเภทสาขา)
     const shopTitleEl = document.querySelector('h2') || $("shopNameDisp") || $("shopNameDisplay");
     if (shopTitleEl) {
-        // แสดงผลในรูปแบบ: ชื่อร้าน (ประเภทสาขา) เช่น BARBER SHOP (สาขาเวียน)
-        shopTitleEl.innerText = `${settings.shop.toUpperCase()} (${settings.branchType})`;
+        // แสดงแค่ชื่อร้านที่กรอก เช่น "สาขาA" โดยไม่มี (สาขาหลัก) ต่อท้าย
+        shopTitleEl.innerText = settings.shop.toUpperCase();
     } 
 
     // 5. เรียกฟังก์ชันอัปเดต UI 
     if (typeof applyTheme === "function")      applyTheme(settings.theme);
     if (typeof calculateMoney === "function")    calculateMoney(); 
     
-    // อัปเดตรรายการใหม่ (ถ้ามีค่าวันที่อยู่แล้วให้ใช้ค่าเดิม)
     const dateVal = $("dateInp")?.value || new Date().toISOString().split('T')[0];
     if (typeof renderDay === "function")         renderDay(dateVal); 
 
