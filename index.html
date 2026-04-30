@@ -764,15 +764,17 @@ nav {
     <audio id="errorSoundWoman" src="https://github.com/kanyapaspanganin13-afk/Barber-Note-Pro/raw/refs/heads/main/error_female.mp3" preload="auto"></audio>
 </div>
     <script>
- /* ==========================================================
+/* ==========================================================
    SECTION 1: INITIALIZATION & GLOBAL VARIABLES
    (ส่วนตั้งค่าเริ่มต้นและตัวแปรหลัก)
    ========================================================== */
 const $ = (id) => document.getElementById(id);
+
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
 const APP_VERSION = "1.0.7"; 
 const LAST_UPDATED = "27/03/2026"; 
-// 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
+
+// 2. ระบบอัปเดตอัตโนมัติ
 (function autoUpdate() {
     const currentStoredVersion = localStorage.getItem("app_v");
     if (currentStoredVersion !== APP_VERSION) {
@@ -782,33 +784,40 @@ const LAST_UPDATED = "27/03/2026";
                 for (let name of names) caches.delete(name);
             });
         }
-        // บังคับรีโหลดเพื่อรับโค้ดใหม่
         window.location.reload(true);
     }
 })();
-// 3. ตัวแปรหลักของระบบ (ปรับปรุงให้รองรับค่าที่บันทึกแยก Key ด้วย)
+
+// 3. ตัวแปรหลักของระบบ
 let db = JSON.parse(localStorage.getItem("barber_db")) || [];
 let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
 let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
 
-// 🎯 แก้ไขบรรทัดนี้: ให้ดึงค่าจาก localStorage ทุกตัวมาใส่ใน conf ทันที
+// 🎯 แก้ไขใหม่: ให้เก็บค่า branchType (ประเภท) และ shop (ชื่ออิสระ) แยกกัน
 let conf = JSON.parse(localStorage.getItem("barber_conf")) || { 
-    shop: localStorage.getItem("shopName") || "Barber Shop", 
-    perc: parseFloat(localStorage.getItem("shopPerc")) || 50, 
-    guar: parseFloat(localStorage.getItem("shopGuar")) || 0,
-    theme: localStorage.getItem("shopTheme") || "light",
-    voice: localStorage.getItem("shopVoice") || "default.mp3",
-    sound: localStorage.getItem("shopSound") || "on"
+    branchType: "สาขาหลัก",        // 🟢 เพิ่ม: เก็บประเภท (หลัก/เวียน)
+    shop: "BARBER SHOP",         // 🟢 เพิ่ม: เก็บชื่อร้านอิสระ
+    perc: 50, 
+    guar: 0,
+    theme: "light",
+    voice: "female",
+    sound: "on"
 };
 
 let payMethod = "";
+
 // 4. สั่งแสดงผลเลขเวอร์ชันและวันที่บนหน้าจอ
 document.addEventListener("DOMContentLoaded", () => {
     if ($("display-version")) $("display-version").innerText = APP_VERSION;
     if ($("display-date")) $("display-date").innerText = LAST_UPDATED;
+    
+    // โหลดข้อมูลล่าสุดมาใส่ใน Modal ตั้งค่าทันที
+    if($("setBranchType")) $("setBranchType").value = conf.branchType;
+    if($("setShop")) $("setShop").value = conf.shop;
 });
+
+// 5. ฟังก์ชันสลับหน้า (ปรับปรุงการแสดงชื่อร้าน)
 function go(p) {
-    // 1. ซ่อน/แสดงหน้า
     document.querySelectorAll('.page').forEach(pg => {
         pg.classList.remove('active');
         pg.style.display = 'none'; 
@@ -818,56 +827,29 @@ function go(p) {
         targetPage.classList.add('active');
         targetPage.style.display = 'block';
     }
-    // 2. ✨ ส่วนที่แก้ไข: จัดการปุ่มเมนูให้เปลี่ยนสีตามหน้าปัจจุบัน
+
     document.querySelectorAll('.nav-item').forEach((btn, i) => {
         const isSelected = (i + 1) === p;
         btn.classList.toggle('active', isSelected);
-        // บังคับเปลี่ยนสีและค่าความชัดผ่าน JavaScript เพื่อสู้กับ Inline Style ใน HTML
         btn.style.color = isSelected ? 'var(--accent)' : 'var(--text)';
         btn.style.opacity = isSelected ? '1' : '0.5';
     });
-    // --- ✨ ส่วนที่เพิ่ม: โหลดชื่อร้านทุกครั้งที่สลับหน้า ---
-    const savedShopName = localStorage.getItem("shopName") || "BARBER SHOP";
+
+    // 🟢 แสดงชื่อร้านและสาขาที่หัวเว็บแบบอิสระ
     const shopTitleEl = document.querySelector('h2'); 
-    if (shopTitleEl) shopTitleEl.innerText = savedShopName;
-    // 3. เงื่อนไขพิเศษ
+    if (shopTitleEl) {
+        shopTitleEl.innerText = `${conf.shop} (${conf.branchType})`;
+    }
+
     const dateInpValue = $("dateInp")?.value || new Date().toISOString().split('T')[0];
     if (p === 2) {
         if (typeof renderDay === 'function') renderDay(dateInpValue);
-        if ($("displayDateThai")) {
-            const [y, m, d] = dateInpValue.split('-');
-            $("displayDateThai").innerText = `${d}/${m}/${parseInt(y) + 543}`;
-        }
     }
     if (p === 3) { 
-        if ($("accDate") && $("dateInp")) {
-            $("accDate").value = $("dateInp").value;
-        }
-        if (typeof loadAccountStatus === 'function') {
-            loadAccountStatus(); 
-        }
+        if ($("accDate") && $("dateInp")) $("accDate").value = $("dateInp").value;
+        if (typeof loadAccountStatus === 'function') loadAccountStatus(); 
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-function updateDateDisplay(v) {
-    if (!v) return;
-    // 1. แยกวันที่ (v จะเป็นรูปแบบ 2026-02-13)
-    const [y, m, d] = v.split('-');
-    // 2. คำนวณปี พ.ศ. แบบสองหลัก (2026 + 543 = 2569 -> ตัดเหลือ 69)
-    const thaiYearFull = parseInt(y) + 543;
-    const thaiYearShort = thaiYearFull.toString().slice(-2); 
-    // 3. รายชื่อเดือนย่อ
-    const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-    // 4. ✨ จัดรูปแบบที่ต้องการ: "13 ก.พ. 69"
-    const formattedDate = `${parseInt(d)} ${months[parseInt(m)-1]} ${thaiYearShort}`;
-    // 5. นำไปแสดงผลในจุดต่างๆ
-    const el = document.getElementById("dateDisplay");
-    if (el) el.innerText = formattedDate;
-    // ถ้ามีจุดแสดงผลในหน้าบันทึก (หน้า 2) ก็อัปเดตด้วยครับ
-    const el2 = document.getElementById("displayDateThai");
-    if (el2) el2.innerText = formattedDate;
-    // สั่งโหลดข้อมูลใหม่ตามวันที่เลือก
-    if (typeof renderDay === "function") renderDay(v);
 }
 /* ==========================================================
    SECTION 2: CORE DATA & BACKUP SYSTEM
