@@ -3109,38 +3109,53 @@ function openSettings() {
     }
 }
 function saveSettings() {
-    // 1. ดึงค่าจากฟอร์ม
+    // 1. ดึงค่าจากฟอร์ม (เพิ่มการดึงค่าจาก setBranchType)
     const settings = {
-        shop:  $("setShop")?.value || "",
+        branchType: $("setBranchType")?.value || "สาขาหลัก", // 🟢 ดึงค่าประเภทสาขา
+        shop:  $("setShop")?.value || "BARBER SHOP",
         perc:  parseFloat($("setPerc")?.value) || 0,
         guar:  parseFloat($("setGuar")?.value) || 0,
         theme: $("setTheme")?.value || "light",
-        voice: $("setVoice")?.value || "default.mp3",
+        voice: $("setVoice")?.value || "female",
         sound: $("setSound")?.value || "on"
     };
+
     // 2. อัปเดตตัวแปรกลาง (conf) ทันที 
     Object.assign(conf, settings);
-    // 3. บันทึกลง LocalStorage
+
+    // 3. บันทึกลง LocalStorage (เก็บไว้ในก้อนเดียวเพื่อความเป็นระเบียบ)
     localStorage.setItem('barber_conf', JSON.stringify(conf));
+    
+    // สำรองค่าแยก Key (ถ้าจำเป็นต้องใช้ที่อื่น)
     localStorage.setItem('shopName',  settings.shop);
     localStorage.setItem('shopPerc',  settings.perc);
     localStorage.setItem('shopGuar',  settings.guar);
-    localStorage.setItem('shopTheme', settings.theme);
-    localStorage.setItem('shopVoice', settings.voice);
-    localStorage.setItem('shopSound', settings.sound);
-    // 4. อัปเดตการแสดงผลชื่อร้าน
-    const nameDisp = $("shopNameDisp") || $("shopNameDisplay");
-    if (nameDisp) {
-        nameDisp.innerText = settings.shop.toUpperCase();
+
+    // 4. อัปเดตการแสดงผลชื่อร้านและสาขาที่หัวเว็บ
+    // พยายามหา Element ที่ใช้แสดงชื่อร้าน (h2 หรือ id ที่ระบุ)
+    const shopTitleEl = document.querySelector('h2') || $("shopNameDisp") || $("shopNameDisplay");
+    if (shopTitleEl) {
+        // แสดงผลในรูปแบบ: ชื่อร้าน (ประเภทสาขา) เช่น BARBER SHOP (สาขาเวียน)
+        shopTitleEl.innerText = `${settings.shop.toUpperCase()} (${settings.branchType})`;
     } 
+
     // 5. เรียกฟังก์ชันอัปเดต UI 
-    if (typeof applyTheme === "function")        applyTheme(settings.theme);
+    if (typeof applyTheme === "function")      applyTheme(settings.theme);
     if (typeof calculateMoney === "function")    calculateMoney(); 
-    if (typeof renderDay === "function")         renderDay(); 
+    
+    // อัปเดตรรายการใหม่ (ถ้ามีค่าวันที่อยู่แล้วให้ใช้ค่าเดิม)
+    const dateVal = $("dateInp")?.value || new Date().toISOString().split('T')[0];
+    if (typeof renderDay === "function")         renderDay(dateVal); 
+
     // 6. ปิด Modal
     if ($("modalSet")) $("modalSet").style.display = 'none';
-        // 7. แจ้งเตือนความสำเร็จ (ใช้ notify แทน alert เพื่อคุมธีมและเล่นเสียง)
-    notify("success", "บันทึกสำเร็จ", "ระบบได้ดำเนินการบันทึกการตั้งค่าเรียบร้อยแล้ว");
+
+    // 7. แจ้งเตือนความสำเร็จ
+    if (typeof notify === "function") {
+        notify("success", "บันทึกสำเร็จ", `ระบบบันทึกข้อมูล ${settings.shop} เรียบร้อยแล้ว`);
+    } else {
+        alert("บันทึกสำเร็จ");
+    }
 }
 async function handleSave(event) {
     const $ = (id) => document.getElementById(id);
