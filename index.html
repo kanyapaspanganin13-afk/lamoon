@@ -1363,16 +1363,17 @@ async function saveAndGo(date, total) {
         else if (r.pay === "Mix") { cash += Number(r.payCash) || 0; }
     });
     
-    // --- 🟢 ส่วนที่ปรับปรุง: ล็อคค่าคอมมิชชันและค่าประกันของวันนี้ไว้ ---
+    // --- 🟢 ส่วนที่ปรับปรุง: ล็อคค่าคอมมิชชัน, ประกัน และ "ชื่อสาขา" ของวันนี้ไว้ ---
     const currentPerc = Number(conf.perc) || 0;
     const currentGuar = Number(conf.guar) || 0;
+    const currentShop = conf.shop || "BARBER SHOP"; // 🆕 ดึงชื่อร้านปัจจุบัน
+    const currentBranch = conf.branchType || "สาขาหลัก"; // 🆕 ดึงประเภทสาขาปัจจุบัน
 
     const commission = total * (currentPerc / 100);
     const baseEarn = Math.max(commission, currentGuar); 
     const bEarn = isHoliday ? 0 : baseEarn + tips;
     const settle = isHoliday ? 0 : cash - bEarn;
 
-    // เพิ่มฟิลด์ guar_used และ perc_used เพื่อใช้ตรวจสอบย้อนหลัง
     const data = { 
         date, 
         total, 
@@ -1381,8 +1382,10 @@ async function saveAndGo(date, total) {
         settle: settle, 
         type: isHoliday ? "HOLIDAY" : "WORK", 
         details: allToday,
-        guar_used: currentGuar, // ล็อคค่าประกัน ณ วันที่บันทึก
-        perc_used: currentPerc  // ล็อคค่า % ณ วันที่บันทึก
+        guar_used: currentGuar, 
+        perc_used: currentPerc,
+        shop_name: currentShop,   // 🆕 ล็อคชื่อร้าน ณ วันที่ส่ง
+        branch_type: currentBranch // 🆕 ล็อคประเภทสาขา ณ วันที่ส่ง
     };
     // -------------------------------------------------------
     
@@ -1402,7 +1405,7 @@ async function saveAndGo(date, total) {
         }
 
         if (typeof loadAccountStatus === 'function') loadAccountStatus();
-        if (window.notify) notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการส่งข้อมูลเรียบร้อยแล้ว");
+        if (window.notify) notify("success", "ดำเนินการสำเร็จ", `ส่งข้อมูล ${currentShop} (${currentBranch}) เรียบร้อยแล้ว`);
 
     } catch (e) {
         if (btn) {
