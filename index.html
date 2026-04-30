@@ -61,52 +61,43 @@ function renderComparisonReport(v) {
         const [y, m, d] = dateStr.split('-');
         return `${dayName} ${d}/${m}/${(parseInt(y) + 543).toString().slice(-2)}`;
     };
-    const fetchStats = (start, end) => {
-    let list = [];
-    let currentDate = new Date(start);
-    const stopDate = new Date(end);
-
-    while (currentDate <= stopDate) {
-        const dateStr = currentDate.toISOString().split('T')[0];
-        
-        if (typeof archives !== 'undefined') {
-            const dayData = archives.find(a => a.date === dateStr);
-            
-            // ตรวจสอบว่ามีข้อมูลในวันนั้นหรือไม่
-            if (dayData) {
-                let realCustomerCount = 0;
-                
-                // ตรวจสอบว่ามีรายละเอียดการรับบริการหรือไม่
-                if (dayData.details && Array.isArray(dayData.details) && dayData.details.length > 0) {
-                    realCustomerCount = dayData.details.filter(d => {
-                        const itemName = Array.isArray(d.svcs) ? d.svcs.join("") : String(d.svcs || "");
-                        const isInsurance = d.type === "GUARANTEE_CLAIM" || itemName.includes("ประกัน");
-                        return !isInsurance; 
-                    }).length;
-                } else {
-                    // หากไม่มี details ให้ตั้งค่าเป็น 0 ชัดเจน
-                    realCustomerCount = 0;
+        const fetchStats = (start, end) => {
+        let list = [];
+        let currentDate = new Date(start);
+        const stopDate = new Date(end);
+    
+        while (currentDate <= stopDate) {
+            const dateStr = currentDate.toISOString().split('T')[0];
+            if (typeof archives !== 'undefined') {
+                const dayData = archives.find(a => a.date === dateStr);
+                if (dayData) {
+                    let realCustomerCount = 0;
+                    if (dayData.details && Array.isArray(dayData.details)) {
+                        realCustomerCount = dayData.details.filter(d => {
+                            // เพิ่มการเช็ค: ถ้า d.svcs ว่าง หรือไม่มีข้อมูล ไม่ให้นับเป็นลูกค้า
+                            const hasService = Array.isArray(d.svcs) ? d.svcs.length > 0 : (d.svcs && d.svcs !== "");
+                            if (!hasService) return false;
+    
+                            const itemName = Array.isArray(d.svcs) ? d.svcs.join("") : String(d.svcs || "");
+                            const isInsurance = d.type === "GUARANTEE_CLAIM" || itemName.includes("ประกัน");
+                            return !isInsurance; 
+                        }).length;
+                    }
+                    
+                    // ตรวจสอบเพิ่มเติม: ถ้าไม่มีลูกค้า (count = 0) ให้ยอด barber เป็น 0 ด้วยเพื่อความแม่นยำ
+                    const displayBarber = realCustomerCount === 0 ? 0 : (dayData.barber || 0);
+    
+                    list.push({
+                        date: formatThaiDate(dateStr),
+                        count: realCustomerCount,
+                        barber: displayBarber
+                    });
                 }
-
-                list.push({
-                    date: formatThaiDate(dateStr),
-                    count: realCustomerCount,
-                    barber: dayData.barber || 0
-                });
-            } else {
-                // กรณีไม่พบข้อมูลใน archives เลย (เช่น วันหยุดที่ไม่ได้ลงบันทึก)
-                // หากต้องการให้แสดงในรายการเป็น 0 ให้ปลดคอมเมนต์ด้านล่างนี้
-                /*
-                list.push({
-                    date: formatThaiDate(dateStr),
-                    count: 0,
-                    barber: 0
-                });
-                */
             }
+            currentDate.setDate(currentDate.getDate() + 1);
         }
-        currentDate.setDate(currentDate.getDate() + 1);
-    }
+        
+        // คำนวณยอดรวมใหม่จากรายการที่กรองแล้ว
         const sumC = list.reduce((a, b) => a + Number(b.count || 0), 0);
         const sumE = list.reduce((a, b) => a + Number(b.barber || 0), 0);
         
