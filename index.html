@@ -65,40 +65,36 @@ function renderComparisonReport(v) {
     let list = [];
     let currentDate = new Date(start);
     const stopDate = new Date(end);
+
     while (currentDate <= stopDate) {
         const dateStr = currentDate.toISOString().split('T')[0];
         if (typeof archives !== 'undefined') {
             const dayData = archives.find(a => a.date === dateStr);
             if (dayData) {
                 let realCustomerCount = 0;
-                let isHoliday = false;
+                let displayBarber = Number(dayData.barber) || 0;
+                
+                // 🎯 1. เช็คสถานะวันหยุดจาก type โดยตรง (แม่นยำที่สุด)
+                const isHoliday = dayData.type === "HOLIDAY";
 
-                if (dayData.details && Array.isArray(dayData.details)) {
-                    // 1. เช็คว่าเป็นวันหยุดหรือไม่: 
-                    // ถ้าใน details ไม่มีรายการใดๆ เลย หรือมีแค่รายการว่างที่ไม่มีชื่อบริการ (svcs)
-                    const hasAnyWork = dayData.details.some(d => {
-                        const hasSvc = Array.isArray(d.svcs) ? d.svcs.length > 0 : (d.svcs && d.svcs !== "");
-                        return hasSvc;
-                    });
-                    // ถ้าไม่มีการลงงานเลย ให้ถือว่าเป็นวันหยุด
-                    if (!hasAnyWork) isHoliday = true;
-                    // 2. นับจำนวนลูกค้า (ไม่นับรายการประกัน)
-                    realCustomerCount = dayData.details.filter(d => {
+                if (isHoliday) {
+                    // ถ้ากดปุ่มวันหยุด: ลูกค้า 0, รายได้ 0
+                    realCustomerCount = 0;
+                    displayBarber = 0;
+                } else {
+                    // 🎯 2. ถ้าไม่ใช่ปกติ (วันทำงานหรือวันประกัน)
+                    const details = Array.isArray(dayData.details) ? dayData.details : [];
+                    
+                    // นับเฉพาะลูกค้าจริง (ไม่รวมประกัน)
+                    realCustomerCount = details.filter(d => {
                         const itemName = Array.isArray(d.svcs) ? d.svcs.join("") : String(d.svcs || "");
                         const isInsurance = d.type === "GUARANTEE_CLAIM" || itemName.includes("ประกัน");
                         const hasSvc = Array.isArray(d.svcs) ? d.svcs.length > 0 : (d.svcs && d.svcs !== "");
                         return hasSvc && !isInsurance;
                     }).length;
-                } else {
-                    // ถ้าไม่มี details เลย ให้ถือว่าเป็นวันหยุด
-                    isHoliday = true;
-                }
-                // 🎯 ตรรกะรายได้ (Income Logic) ตามที่คุณสั่ง:
-                // - วันที่กด "วันหยุด" (isHoliday): รายได้เป็น 0
-                // - วันที่กด "ประกันรายได้": ลูกค้าเป็น 0 (จาก filter ด้านบน) แต่รายได้แสดงตามปกติ
-                // - วันทำงานปกติ: ลูกค้าปกติ รายได้ปกติ
-                let displayBarber = isHoliday ? 0 : (Number(dayData.barber) || 0);
 
+                    // ยอดเงิน displayBarber คงค่าเดิมไว้ (ถ้าเป็นวันประกัน ยอดเงินจะโชว์ตามที่ตั้งค่า)
+                }
                 list.push({
                     date: formatThaiDate(dateStr),
                     count: realCustomerCount,
@@ -1006,7 +1002,6 @@ function addRecord() {
         $("priceInp").focus();
         return;
     }
-
     // 🎯 2. ตรวจสอบ: กรณีไม่ได้เลือกรายการทรงผม
     const hairStyleSelect = $("hairStyle");
     if (hairStyleSelect && hairStyleSelect.value === "" && currentPay !== 'Holiday') {
@@ -1014,7 +1009,6 @@ function addRecord() {
         hairStyleSelect.focus();
         return;
     }
-
     // --- ส่วนจัดการยอดเงิน ---
     let finalCash = 0;
     let finalTrans = 0;
@@ -1028,7 +1022,6 @@ function addRecord() {
         finalCash = 0;
         finalTrans = total;
     }
-
     const newRec = {
         id: Date.now(),
         date: dInp,
@@ -1041,7 +1034,6 @@ function addRecord() {
         payTrans: finalTrans,
         type: 'SERVICE'
     };
-
     // บันทึกข้อมูล
     db.push(newRec);
     if (typeof saveDB === "function") {
@@ -1049,7 +1041,6 @@ function addRecord() {
     } else {
         localStorage.setItem("barber_db", JSON.stringify(db));
     }
-
     // --- ส่วนคำนวณและ Archive ---
     if (typeof calculateMoney === "function") {
         const result = calculateMoney(); 
@@ -1066,7 +1057,6 @@ function addRecord() {
         }
         localStorage.setItem("barber_archives", JSON.stringify(archives));
     }
-
     // --- ปรับสถานะปุ่มส่งข้อมูล ---
     const btn = $("btnSubmitSend");
     if (btn) {
@@ -1075,7 +1065,6 @@ function addRecord() {
         const icon = $("btnIcon");
         if (icon) icon.className = "fas fa-paper-plane";
     }
-
     // 🔊 เล่นเสียงสำเร็จ (ถ้ามีระบบเสียง)
     const sfx = document.getElementById("successSound");
     if (sfx) { sfx.currentTime = 0; sfx.play(); }
