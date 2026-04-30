@@ -73,8 +73,7 @@ function renderComparisonReport(v) {
             if (dayData) {
                 let realCustomerCount = 0;
                 let displayBarber = Number(dayData.barber) || 0;
-                
-                // 🎯 1. เช็คสถานะวันหยุดจาก type โดยตรง (แม่นยำที่สุด)
+            
                 const isHoliday = dayData.type === "HOLIDAY";
 
                 if (isHoliday) {
@@ -118,7 +117,6 @@ function renderComparisonReport(v) {
 };
     const d1 = fetchStats(v.s1, v.e1);
     const d2 = fetchStats(v.s2, v.e2);
-// 🎯 ปรับสีพื้นหลังให้เข้มขึ้น (Blue/Green) และนำเส้นขอบออก
     const reportHtml = `
         <div style="font-family:'Kanit', sans-serif; display:flex; flex-direction:column; height:75vh; width:100%; box-sizing:border-box; background:#ffffff; gap:10px; padding:5px;">
             
@@ -156,8 +154,7 @@ function renderComparisonReport(v) {
             </div>
         </div>     
     </div>`;
-
-    // 🎯 เพิ่มการตั้งค่าให้ Swal กว้างเต็มที่
+    
     openReportModal("รายงานการเปรียบเทียบข้อมูล", reportHtml);
 } 
 function openReportModal(title, htmlContent) {
@@ -1324,10 +1321,10 @@ async function saveAndGo(date, total) {
     const btn = document.getElementById("btnSubmitSend");
     const icon = document.getElementById("btnIcon");
 
-    // 🎯 1. ดักจับข้อมูลซ้ำ (ตัดครับ/ค่ะ ออก)
+    // 🎯 1. ดักจับข้อมูลซ้ำ
     const alreadySent = archives.some(a => a.date === date);
     if (alreadySent) {
-        notify("error", "แจ้งเตือน", `ข้อมูลของวันที่ ${date} ได้ดำเนินการส่งเรียบร้อยแล้ว`);
+        if (window.notify) notify("error", "แจ้งเตือน", `ข้อมูลของวันที่ ${date} ได้ดำเนินการส่งเรียบร้อยแล้ว`);
         if (btn) {
             btn.disabled = true; 
             btn.style.background = "#94a3b8";
@@ -1336,7 +1333,8 @@ async function saveAndGo(date, total) {
         }
         return;
     }
-    // 🎯 2. ยืนยันก่อนส่ง (ปรับคำพูดให้เป็นกลาง)
+
+    // 🎯 2. ยืนยันก่อนส่ง
     const result = await Swal.fire({
         title: 'ยืนยันการส่งข้อมูล',
         text: `ต้องการดำเนินการส่งข้อมูลของวันที่ ${date} ใช่หรือไม่?`,
@@ -1351,6 +1349,7 @@ async function saveAndGo(date, total) {
     });
 
     if (!result.isConfirmed) return;
+
     // 🎯 3. เริ่มดำเนินการส่ง
     if (btn) {
         if (btn.disabled) return; 
@@ -1372,11 +1371,28 @@ async function saveAndGo(date, total) {
         else if (r.pay === "Mix") { cash += Number(r.payCash) || 0; }
     });
     
-    const commission = total * (Number(conf.perc) / 100);
-    const baseEarn = Math.max(commission, Number(conf.guar) || 0); 
+    // --- 🟢 ส่วนที่ปรับปรุง: ล็อคค่าคอมมิชชันและค่าประกันของวันนี้ไว้ ---
+    const currentPerc = Number(conf.perc) || 0;
+    const currentGuar = Number(conf.guar) || 0;
+
+    const commission = total * (currentPerc / 100);
+    const baseEarn = Math.max(commission, currentGuar); 
     const bEarn = isHoliday ? 0 : baseEarn + tips;
     const settle = isHoliday ? 0 : cash - bEarn;
-    const data = { date, total, cash, barber: Math.floor(bEarn), settle: settle, type: isHoliday ? "HOLIDAY" : "WORK", details: allToday };
+
+    // เพิ่มฟิลด์ guar_used และ perc_used เพื่อใช้ตรวจสอบย้อนหลัง
+    const data = { 
+        date, 
+        total, 
+        cash, 
+        barber: Math.floor(bEarn), 
+        settle: settle, 
+        type: isHoliday ? "HOLIDAY" : "WORK", 
+        details: allToday,
+        guar_used: currentGuar, // ล็อคค่าประกัน ณ วันที่บันทึก
+        perc_used: currentPerc  // ล็อคค่า % ณ วันที่บันทึก
+    };
+    // -------------------------------------------------------
     
     const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
@@ -1394,8 +1410,7 @@ async function saveAndGo(date, total) {
         }
 
         if (typeof loadAccountStatus === 'function') loadAccountStatus();
-                // 🎯 ส่งข้อมูลสำเร็จ (ใช้ภาษาเป็นกลาง)
-        notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการส่งข้อมูลเรียบร้อยแล้ว");
+        if (window.notify) notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการส่งข้อมูลเรียบร้อยแล้ว");
 
     } catch (e) {
         if (btn) {
@@ -1403,7 +1418,7 @@ async function saveAndGo(date, total) {
             btn.style.background = "var(--danger)";
             if (icon) icon.className = "fas fa-paper-plane";
         }
-        notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถส่งข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง");
+        if (window.notify) notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถส่งข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง");
     }
 }
 // --- ฟังก์ชันลบข้อมูลแยกออกมา ---
@@ -3099,10 +3114,8 @@ function saveSettings() {
         voice: $("setVoice")?.value || "default.mp3",
         sound: $("setSound")?.value || "on"
     };
-
     // 2. อัปเดตตัวแปรกลาง (conf) ทันที 
     Object.assign(conf, settings);
-
     // 3. บันทึกลง LocalStorage
     localStorage.setItem('barber_conf', JSON.stringify(conf));
     localStorage.setItem('shopName',  settings.shop);
@@ -3111,22 +3124,18 @@ function saveSettings() {
     localStorage.setItem('shopTheme', settings.theme);
     localStorage.setItem('shopVoice', settings.voice);
     localStorage.setItem('shopSound', settings.sound);
-
     // 4. อัปเดตการแสดงผลชื่อร้าน
     const nameDisp = $("shopNameDisp") || $("shopNameDisplay");
     if (nameDisp) {
         nameDisp.innerText = settings.shop.toUpperCase();
     } 
-
     // 5. เรียกฟังก์ชันอัปเดต UI 
     if (typeof applyTheme === "function")        applyTheme(settings.theme);
     if (typeof calculateMoney === "function")    calculateMoney(); 
     if (typeof renderDay === "function")         renderDay(); 
-
     // 6. ปิด Modal
     if ($("modalSet")) $("modalSet").style.display = 'none';
-    
-    // 7. แจ้งเตือนความสำเร็จ (ใช้ notify แทน alert เพื่อคุมธีมและเล่นเสียง)
+        // 7. แจ้งเตือนความสำเร็จ (ใช้ notify แทน alert เพื่อคุมธีมและเล่นเสียง)
     notify("success", "บันทึกสำเร็จ", "ระบบได้ดำเนินการบันทึกการตั้งค่าเรียบร้อยแล้ว");
 }
 async function handleSave(event) {
