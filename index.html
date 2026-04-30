@@ -1534,10 +1534,14 @@ async function handleHoliday() {
         renderDay(d);
     }
 }
-    function renderDay(selectedDate) {
+function renderDay(selectedDate) {
     let dInp = selectedDate || ($("dateInp") ? $("dateInp").value : new Date().toISOString().split('T')[0]);
     if ($("dateInp")) $("dateInp").value = dInp;
     let allRec = db.filter(r => r.date === dInp);
+
+    // 🎯 1. เพิ่มการคำนวณชื่อวัน (จ.-อา.) ไว้ด้านบนสุดของฟังก์ชัน
+    const days = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+    const dayName = days[new Date(dInp).getDay()];
 
     if (allRec.length === 0 && typeof archives !== 'undefined') {
         const archivedDay = archives.find(a => a.date === dInp);
@@ -1566,7 +1570,6 @@ async function handleHoliday() {
             const currentSvcs = Array.isArray(r.svcs) ? r.svcs : [];
             const cType = r.custType || 'none';
 
-            // ✅ ย้าย timeShow มาไว้ข้างในนี้ เพื่อให้รู้จักตัวแปร r
             const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
 
             tot += p;
@@ -1596,7 +1599,6 @@ async function handleHoliday() {
                 });
             }
         
-        // 🟢 เพิ่มสัญลักษณ์แสดงประเภทในรายการ (History)
         let custTag = ""; 
         let payIcon = r.pay === 'Trans' ? '📱' : '💶';
         let mixText = "";
@@ -1630,6 +1632,7 @@ async function handleHoliday() {
             </div>
         </div>`;
     });
+
     const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc / 100), conf.guar) + tips;
     const sEarn = isHoliday ? 0 : tot - (bEarn - tips);
     const settle = isHoliday ? 0 : cash - bEarn;
@@ -1640,52 +1643,45 @@ async function handleHoliday() {
     if ($("dBarber")) $("dBarber").innerText = Math.floor(bEarn).toLocaleString();
     if ($("dShop")) $("dShop").innerText = Math.floor(sEarn).toLocaleString();
 
-       // --- 🟢 ส่วนสรุปยอดลูกค้า (แก้ไขใหม่: แยกบรรทัดและปรับสี) ---
     if ($("dCounts")) {
-    if (isHoliday) {
-        $("dCounts").innerHTML = "<span style='color:#64748b;'>🏖️ วันหยุด</span>";
-    } else if (allRec.length === 0) {
-        $("dCounts").innerHTML = "<span style='color:#94a3b8;'>ไม่มีข้อมูล</span>";
-    } else {
-        // จัดรูปแบบการแสดงผลใหม่ แยกบรรทัด ใหม่/ประจำ
-        let detail = "";
-        if (countNew > 0 || countRegular > 0) {
-            detail = `
-        <div style="font-size: 13px; font-weight: 700; margin-top: 4px; border-top: 1px dashed var(--border); padding-top: 4px;">
-            <span style="color: var(--success);"> ใหม่: ${countNew}</span> 
-            <span style="color: var(--text); opacity: 0.5;"> | </span> 
-            <span style="color: var(--warning);"> ประจำ: ${countRegular}</span>
-        </div>`;
+        if (isHoliday) {
+            $("dCounts").innerHTML = "<span style='color:#64748b;'>🏖️ วันหยุด</span>";
+        } else if (allRec.length === 0) {
+            $("dCounts").innerHTML = "<span style='color:#94a3b8;'>ไม่มีข้อมูล</span>";
+        } else {
+            let detail = "";
+            if (countNew > 0 || countRegular > 0) {
+                detail = `
+                <div style="font-size: 13px; font-weight: 700; margin-top: 4px; border-top: 1px dashed var(--border); padding-top: 4px;">
+                    <span style="color: var(--success);"> ใหม่: ${countNew}</span> 
+                    <span style="color: var(--text); opacity: 0.5;"> | </span> 
+                    <span style="color: var(--warning);"> ประจำ: ${countRegular}</span>
+                </div>`;
+            }
+            $("dCounts").innerHTML = `
+                <div style="line-height: 1.2;">
+                    <b style="font-size: 16px; color:#fff;">ลูกค้า: ${realCustomerCount} คน</b>
+                    ${detail}
+                </div>`;
         }
-        // ปรับความสูงช่องและการแสดงตัวเลขหลัก
-        $("dCounts").innerHTML = `
-            <div style="line-height: 1.2;">
-                <b style="font-size: 16px; color:#fff;">ลูกค้า: ${realCustomerCount} คน</b>
-                ${detail}
-            </div>`;
     }
-}
-// --- 🟢 ปรับการแสดงผล Service Stats ให้เรียงตามประเภท (ทรงผมขึ้นก่อนเสมอ) ---
-let sH = `<div style="display:flex; flex-wrap:wrap; gap:4px; justify-content:center; margin-bottom:8px;">`;
-// 1. เตรียมรายชื่อบริการเสริมเพื่อใช้เช็ค
-const cleanExtras = extraSvcs.map(s => s.trim().toLowerCase());
-// 2. ดึงรายการทั้งหมดจาก stats และแยกเป็น 2 กลุ่ม
-const allStatsKeys = Object.keys(stats);
-// กลุ่มที่ 1: ทรงผม (อะไรก็ได้ที่ไม่ใช่ โกนหนวด/กันหน้า/สระผม)
-const haircutGroup = allStatsKeys.filter(k => !cleanExtras.includes(k.trim().toLowerCase()));
-// กลุ่มที่ 2: บริการเสริม (โกนหนวด/กันหน้า/สระผม)
-const extraGroup = allStatsKeys.filter(k => cleanExtras.includes(k.trim().toLowerCase()));
-// 3. แสดงผลกลุ่มทรงผมก่อน (ใช้สีน้ำเงินเข้ม) 
-// ไม่ว่าจะเป็น รองทรง, แฟชั่น, สกินเฮด จะเรียงต่อกันตรงนี้ครับ
-haircutGroup.forEach(k => {
-    sH += `<span style="background:#4338ca;color:#fff;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:800;">${k}: ${stats[k]}</span>`;
-});
-// 4. แสดงผลกลุ่มบริการเสริมต่อท้าย (ใช้สีฟ้าอ่อน)
-extraGroup.forEach(k => {
-    sH += `<span style="background:#e0f2fe;color:#0369a1;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;border:1px solid #bae6fd;">${k}: ${stats[k]}</span>`;
-});
-if ($("dServiceStats")) $("dServiceStats").innerHTML = sH + `</div>`;
 
+    // --- ส่วน Service Stats (คงเดิมตามความต้องการ) ---
+    let sH = `<div style="display:flex; flex-wrap:wrap; gap:4px; justify-content:center; margin-bottom:8px;">`;
+    const cleanExtras = extraSvcs.map(s => s.trim().toLowerCase());
+    const allStatsKeys = Object.keys(stats);
+    const haircutGroup = allStatsKeys.filter(k => !cleanExtras.includes(k.trim().toLowerCase()));
+    const extraGroup = allStatsKeys.filter(k => cleanExtras.includes(k.trim().toLowerCase()));
+
+    haircutGroup.forEach(k => {
+        sH += `<span style="background:#4338ca;color:#fff;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:800;">${k}: ${stats[k]}</span>`;
+    });
+    extraGroup.forEach(k => {
+        sH += `<span style="background:#e0f2fe;color:#0369a1;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;border:1px solid #bae6fd;">${k}: ${stats[k]}</span>`;
+    });
+    if ($("dServiceStats")) $("dServiceStats").innerHTML = sH + `</div>`;
+
+    // --- ส่วนสถานะ Settle Bar (คงเดิม) ---
     let txt = "", statusColor = "", icon = "";
     if (isHoliday) {
         txt = "วันหยุด"; statusColor = "#1e40af"; icon = "🏖️";
@@ -1710,16 +1706,16 @@ if ($("dServiceStats")) $("dServiceStats").innerHTML = sH + `</div>`;
                 <span style="margin-right:8px; font-size:18px;">${icon}</span> ${txt}
             </div>
           <button id="btnSubmitSend" onclick="saveAndGo('${dInp}', ${tot})" 
-        style="flex:2.2; height:55px; background:#ff6f00; color:#fff; border-radius:18px; border:none; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition: background 0.3s;">
+        style="flex:2.2; height:55px; background:#ff6f00; color:#fff; border-radius:18px; border:none; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
     <i id="btnIcon" class="fas fa-paper-plane"></i>
 </button>`;
     }
 
+    // --- 🎯 ส่วนที่คุณต้องการแก้ไข (รายงานวันที่) ---
     const dList = $("dailyList");
     if (dList) {
         const dateParts = dInp.split('-'); 
         let displayDateBE = dInp;
-
         if (dateParts.length === 3) {
             const d = dateParts[2];
             const m = dateParts[1];
@@ -1733,8 +1729,11 @@ if ($("dServiceStats")) $("dServiceStats").innerHTML = sH + `</div>`;
                 <div style="display: flex; align-items: center; gap: 10px; margin-right: 15px;">
                     <b style="font-size: 13px; color: #1e293b;">รายงานวันที่</b>              
                     
-                    <div style="position: relative; background: #f1f5f9; padding: 5px 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; cursor: pointer; width: 130px; height: 34px;"> 
-                        <span style="font-size: 14px; font-weight: 700; color: #6366f1; width: 100%; text-align: center;">${displayDateBE}</span>                 
+                    <!-- 🎯 แก้ไขส่วนแสดงวันที่: เพิ่ม dayName และปรับ width เป็น 160px เพื่อให้ชื่อวันไม่เบียด -->
+                    <div style="position: relative; background: #f1f5f9; padding: 5px 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; cursor: pointer; width: 160px; height: 34px;"> 
+                        <span style="font-size: 14px; font-weight: 700; color: #6366f1; width: 100%; text-align: center;">
+                            ${dayName} ${displayDateBE}
+                        </span>                  
                         <input type="date" id="reportDateSelector" value="${dInp}" 
                                onchange="renderDay(this.value)" 
                                style="position: absolute; opacity: 0; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer;">
