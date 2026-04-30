@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-title" content="Barber-MS">
     <link rel="apple-touch-icon" href="https://i.ibb.co/9mmX3c3R/Barber-Management-Icon.png">
     <link rel="icon" type="image/png" href="https://i.ibb.co/9mmX3c3R/Barber-Management-Icon.png">
-    <title>Barber-Management-System </title>
+    <title>Barber-Management-System 1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -701,7 +701,7 @@ nav {
                         <i class="fas fa-file-download"></i> สำรองข้อมูล
                     </button>
                     <button onclick="document.getElementById('fileInput').click()" style="height:48px; background:var(--card); border:1px solid var(--border); border-radius:12px; font-size:11px; font-weight:800; color:var(--text); cursor:pointer;">
-                        <i class="fas fa-file-upload"></i> นำเข้าข้อมูล
+                        <i class="fas fa-file-upload"></i> คืนค่า
                     </button>
                     
                     <button onclick="clearData()" style="height:48px; background:rgba(239, 68, 68, 0.1); border:1px solid var(--danger); border-radius:12px; font-size:11px; font-weight:800; color:var(--danger); cursor:pointer;">
@@ -713,8 +713,8 @@ nav {
                     <button onclick="document.getElementById('modalSet').style.display='none'" style="background:var(--bg); color:var(--text); opacity:0.7; height:60px; border-radius:20px; border:none; font-weight:800; font-size:16px;">ปิด</button>
                 </div>
                 <div style="text-align:center; line-height: 1.4; opacity: 0.5;">
-                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.2</div>
-                    <div style="font-size:9px; color:var(--text); font-weight:400;">Update: 30/03/2026</div>
+                    <div style="font-size:10px; color:var(--text); font-weight:600;">V.1.0.7</div>
+                    <div style="font-size:9px; color:var(--text); font-weight:400;">Update: 27/03/2026</div>
                 </div>
             </div>
         </div>
@@ -751,8 +751,8 @@ nav {
    ========================================================== */
 const $ = (id) => document.getElementById(id);
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่
-const APP_VERSION = "1.0.2"; 
-const LAST_UPDATED = "30/03/2026"; 
+const APP_VERSION = "1.0.7"; 
+const LAST_UPDATED = "27/03/2026"; 
 // 2. ระบบอัปเดตอัตโนมัติ (ใส่ไว้ตรงนี้เพื่อให้ทำงานทันทีที่โหลดสคริปต์)
 (function autoUpdate() {
     const currentStoredVersion = localStorage.getItem("app_v");
@@ -856,91 +856,16 @@ function updateDateDisplay(v) {
    ========================================================== */
 function saveDB() {
     try {
-        const branchName = conf.shop || "ทั่วไป";
-        // --- ส่วนของ DB (รายการงานปัจจุบัน) ---
-        // 1. ดึงข้อมูลทั้งหมดที่มีในเครื่องออกมา
-        let fullDB = JSON.parse(localStorage.getItem("barber_db")) || [];
-        // 2. กรองเอาข้อมูล "สาขาอื่น" เก็บไว้ แล้วเอา "ข้อมูลปัจจุบัน" ใส่เข้าไปใหม่
-        fullDB = fullDB.filter(r => r.branch && r.branch !== branchName);
-        const dbWithBranch = db.map(r => ({ ...r, branch: branchName }));
-        const updatedDB = [...fullDB, ...dbWithBranch];
-
-        // --- ส่วนของ Archives (ประวัติที่ปิดยอดแล้ว) ---
-        let fullArchives = JSON.parse(localStorage.getItem("barber_archives")) || [];
-        fullArchives = fullArchives.filter(a => a.branch && a.branch !== branchName);
-        const arcWithBranch = archives.map(a => ({ ...a, branch: branchName }));
-        const updatedArchives = [...fullArchives, ...arcWithBranch];
-
-        // บันทึกกลับลงไป
-        localStorage.setItem("barber_db", JSON.stringify(updatedDB));
-        localStorage.setItem("barber_archives", JSON.stringify(updatedArchives));
+        localStorage.setItem("barber_db", JSON.stringify(db));
+        localStorage.setItem("barber_archives", JSON.stringify(archives));
         localStorage.setItem("barber_account", JSON.stringify(account));
         localStorage.setItem("barber_conf", JSON.stringify(conf));
-
-        console.log(`💾 บันทึกข้อมูลสาขา [${branchName}] เรียบร้อยแล้ว`);
+        console.log("💾 บันทึกข้อมูลเรียบร้อยแล้ว");
     } catch (e) {
         console.error("❌ ไม่สามารถบันทึกได้:", e);
     }
 }
-function loadDataByBranch(branchName) {
-    // 1. ดึงข้อมูล "ทั้งหมด" ที่มีในเครื่องออกมาตรวจสอบก่อน
-    const fullDB = JSON.parse(localStorage.getItem('barber_db')) || [];
-    const fullArchives = JSON.parse(localStorage.getItem('barber_archives')) || [];
-
-    // 2. กรองข้อมูลเฉพาะของสาขาที่เลือก 
-    // (รองรับข้อมูลเก่าที่ไม่มี field branch ให้ไปอยู่สาขา "ทั่วไป")
-    db = fullDB.filter(r => {
-        if (branchName === "ทั่วไป") return !r.branch || r.branch === "ทั่วไป";
-        return r.branch === branchName;
-    });
-
-    archives = fullArchives.filter(a => {
-        if (branchName === "ทั่วไป") return !a.branch || a.branch === "ทั่วไป";
-        return a.branch === branchName;
-    });
-
-    // 3. อัปเดต UI ให้สอดคล้องกับข้อมูลสาขาใหม่
-    if (typeof calculateMoney === "function") calculateMoney();
-    if (typeof renderDay === "function") {
-        const dInp = document.getElementById("dateInp")?.value;
-        renderDay(dInp);
-    }
-    
-    console.log(`Switched to branch: ${branchName}`, { dbCount: db.length, arcCount: archives.length });
-}
-function getAggregatedData(monthFilter = "") {
-    // 1. ดึงข้อมูลดิบทั้งหมด
-    const allArchives = JSON.parse(localStorage.getItem('barber_archives')) || [];
-    
-    // 2. กรองตามเดือน (ถ้ามีการระบุ)
-    const filtered = monthFilter 
-        ? allArchives.filter(a => a.date && a.date.startsWith(monthFilter))
-        : allArchives;
-
-    // 3. จัดกลุ่ม (Aggregate)
-    const summary = {
-        branches: {},
-        grandTotal: 0,
-        totalCustomers: 0
-    };
-
-    filtered.forEach(item => {
-        const bName = item.branch || "ทั่วไป";
-        if (!summary.branches[bName]) {
-            summary.branches[bName] = { total: 0, customers: 0, count: 0 };
-        }
-        
-        summary.branches[bName].total += Number(item.barber) || 0;
-        summary.branches[bName].customers += (item.details ? item.details.length : 0);
-        summary.branches[bName].count++;
-        
-        summary.grandTotal += Number(item.barber) || 0;
-        summary.totalCustomers += (item.details ? item.details.length : 0);
-    });
-
-    return summary;
-}        
-// 1. ฟังก์ชันส่งออกข้อมูล (Backup) 
+// 1. ฟังก์ชันส่งออกข้อมูล (Backup) - ปรับให้ชื่อ Key ตรงกัน
 function exportBackup() {
     try {
         const data = {
@@ -966,21 +891,18 @@ function exportBackup() {
         Swal.fire({ title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถสร้างไฟล์สำรองได้', icon: 'error' });
     }
 }
-// 2. ฟังก์ชันนำเข้าข้อมูล (Import) - แก้ไขให้รองรับระบบหลายสาขา
+
+// 2. ฟังก์ชันนำเข้าข้อมูล (Import) - แก้ให้เขียนทับเฉพาะตัว ไม่ลบทั้งหมด
 function importBackup(input) {
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            
-            // ตรวจสอบเบื้องต้นว่าใช่ไฟล์จากแอปเราไหม
-            if (!data.db && !data.archives && !data.all_branches_data) {
-                throw new Error("Wrong format");
-            }
+            if (!data.db && !data.archives) throw new Error("Wrong format");
 
             Swal.fire({
                 title: 'ยืนยันการนำเข้าข้อมูล',
-                text: "การนำเข้าจะรวมข้อมูลสาขาทั้งหมดและการตั้งค่าที่คุณเคยสำรองไว้กลับมา",
+                text: "ข้อมูลปัจจุบันจะถูกแทนที่ด้วยข้อมูลจากไฟล์นี้",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'ยืนยัน',
@@ -989,99 +911,61 @@ function importBackup(input) {
                 color: 'var(--text)'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // ✅ 1. นำเข้าข้อมูลการทำงานหลัก
+                    // ✅ เขียนทับเฉพาะ Key ที่เกี่ยวข้อง ป้องกันค่า Config อื่นหาย
                     localStorage.setItem("barber_db", JSON.stringify(data.db || []));
                     localStorage.setItem("barber_archives", JSON.stringify(data.archives || []));
                     localStorage.setItem("barber_account", JSON.stringify(data.account || { balance: 0, logs: [] }));
-
-                    // ✅ 2. นำเข้าข้อมูลระบบสาขา (ที่แก้ไขให้เก็บค่าเดิม)
-                    // นำเข้าฐานข้อมูลรวมทุกสาขา (เพื่อให้หน้าตั้งค่าดึงมาโชว์ได้)
-                    if (data.all_branches_data) {
-                        localStorage.setItem("all_branches_data", JSON.stringify(data.all_branches_data));
-                    }
+                    localStorage.setItem("barber_conf", JSON.stringify(data.conf || {}));
                     
-                    // นำเข้ารายชื่อสาขาทั้งหมด (ที่เป็น Array)
-                    if (data.all_shop_branches) {
-                        localStorage.setItem("all_shop_branches", JSON.stringify(data.all_shop_branches));
-                    }
-
-                    // ✅ 3. นำเข้าการตั้งค่าปัจจุบัน (Config)
-                    const config = data.conf || {};
-                    localStorage.setItem("barber_conf", JSON.stringify(config));
-                    
-                    // กระจายค่า Config ลง Key ต่างๆ เพื่อให้ UI หน้าตั้งค่าทำงานถูกต้อง
-                    if (config.shop)  localStorage.setItem('shopName',  config.shop);
-                    if (config.perc)  localStorage.setItem('shopPerc',  config.perc);
-                    if (config.guar)  localStorage.setItem('shopGuar',  config.guar);
-                    if (config.theme) localStorage.setItem('shopTheme', config.theme);
-                    if (config.voice) localStorage.setItem('shopVoice', config.voice);
-                    if (config.sound) localStorage.setItem('shopSound', config.sound);
-                    
-                    Swal.fire({ 
-                        title: 'นำเข้าสำเร็จ', 
-                        text: 'ข้อมูลสาขาและรายงานถูกโหลดกลับมาแล้ว', 
-                        icon: 'success', 
-                        showConfirmButton: false, 
-                        timer: 1500 
-                    });
-                    
+                    Swal.fire({ title: 'สำเร็จ', text: 'กำลังรีโหลดข้อมูล...', icon: 'success', showConfirmButton: false, timer: 1500 });
                     setTimeout(() => location.reload(), 1500);
                 }
             });
         } catch(err) { 
-            Swal.fire({ 
-                title: 'ไฟล์ไม่ถูกต้อง', 
-                text: 'กรุณาใช้ไฟล์ .json ที่มีข้อมูลสาขาที่ถูกต้อง', 
-                icon: 'error' 
-            });
+            Swal.fire({ title: 'ไฟล์ไม่ถูกต้อง', text: 'กรุณาใช้ไฟล์ .json ที่สำรองจากแอปนี้เท่านั้น', icon: 'error' });
         }
     };
     if (input.files && input.files[0]) reader.readAsText(input.files[0]);
 }
 function clearData() {
-    const clearProcess = () => {
-        // 1. ลบข้อมูลรายการบันทึกและบัญชี
-        localStorage.removeItem("barber_db");
-        localStorage.removeItem("barber_archives");
-        localStorage.removeItem("barber_account");
-
-        // 2. ลบการตั้งค่าร้านและรายชื่อสาขาทั้งหมด (Reset เป็น 0)
-        localStorage.removeItem("barber_conf");
-        localStorage.removeItem("all_branches_data"); // ฐานข้อมูลรวมทุกสาขาที่เพิ่งเพิ่ม
-        localStorage.removeItem("all_shop_branches"); // รายชื่อสาขาที่เป็น Array
-        
-        // 3. ลบค่า Setting รายตัว (ที่บันทึกใน saveSettings)
-        localStorage.removeItem("shopName");
-        localStorage.removeItem("shopPerc");
-        localStorage.removeItem("shopGuar");
-        localStorage.removeItem("shopTheme");
-        localStorage.removeItem("shopVoice");
-        localStorage.removeItem("shopSound");
-
-        // รีโหลดหน้าเพื่อให้ UI กลับเป็นค่าเริ่มต้น
-        location.reload();
-    };
-
     // เช็คก่อนว่าในเครื่องมี SweetAlert (Swal) ไหม
     if (typeof Swal === 'undefined') {
-        if (confirm("⚠️ ยืนยันล้างข้อมูลทั้งหมด? การตั้งค่าและรายงานทุกอย่างจะถูกลบออกจากระบบ")) {
-            clearProcess();
+        if (confirm("ล้างข้อมูลทั้งหมด? รายงานและบัญชีจะหายถาวร")) {
+            localStorage.removeItem("barber_db");
+            localStorage.removeItem("barber_archives");
+            localStorage.removeItem("barber_account");
+            location.reload();
         }
         return;
     }
+
     // ถ้ามี Swal ให้ใช้แบบสวยๆ
     Swal.fire({
         title: 'ล้างข้อมูลทั้งหมด?',
-        text: "การตั้งค่าและรายงานทุกอย่างจะถูกลบออกจากระบบ",
+        text: "รายงานและบัญชีจะหายถาวร (ควรสำรองข้อมูลก่อน)",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#dc2626', // สีแดง
         cancelButtonColor: '#6b7280', // สีเทา
-        confirmButtonText: 'ยืนยันล้างข้อมูล',
+        confirmButtonText: 'ยืนยันลบข้อมูล',
         cancelButtonText: 'ยกเลิก'
     }).then((result) => {
         if (result.isConfirmed) {
-            clearProcess();
+            // ลบข้อมูลหลัก
+            localStorage.removeItem("barber_db");
+            localStorage.removeItem("barber_archives");
+            localStorage.removeItem("barber_account");
+            
+            Swal.fire({
+                title: 'ล้างข้อมูลสำเร็จ',
+                icon: 'success',
+                timer: 1000,
+                showConfirmButton: false
+            });
+            
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
         }
     });
 }
@@ -1098,23 +982,23 @@ function addRecord() {
     const tip = parseFloat($("tipInp").value) || 0;
     const total = price + tip; 
     
-    // 🔍 ดึงชื่อสาขาปัจจุบันที่ตั้งค่าไว้
-    const currentBranch = localStorage.getItem('shopName') || "ทั่วไป";
     const currentPay = payMethod; 
 
-    // 🎯 1. ตรวจสอบข้อมูลราคา
+    // 🎯 1. ตรวจสอบ: กรณีไม่ได้ระบุราคา (ยกเว้นวันหยุดหรือประกัน)
     if (price === 0 && currentPay !== 'Holiday' && currentPay !== 'Guarantee') {
         notify("error", "ระบุข้อมูลไม่ครบถ้วน", "กรุณาระบุจำนวนเงินค่าบริการให้ถูกต้อง");
         $("priceInp").focus();
         return;
     }
-    // 🎯 2. ตรวจสอบรายการทรงผม
+
+    // 🎯 2. ตรวจสอบ: กรณีไม่ได้เลือกรายการทรงผม
     const hairStyleSelect = $("hairStyle");
     if (hairStyleSelect && hairStyleSelect.value === "" && currentPay !== 'Holiday') {
         notify("error", "ระบุข้อมูลไม่ครบถ้วน", "กรุณาเลือกรายการทรงผมก่อนการบันทึก");
         hairStyleSelect.focus();
         return;
     }
+
     // --- ส่วนจัดการยอดเงิน ---
     let finalCash = 0;
     let finalTrans = 0;
@@ -1129,11 +1013,9 @@ function addRecord() {
         finalTrans = total;
     }
 
-    // 🏗️ สร้าง Object ข้อมูลใหม่ (เพิ่ม branch เข้าไป)
     const newRec = {
         id: Date.now(),
         date: dInp,
-        branch: currentBranch, // ✅ เพิ่มบรรทัดนี้: ระบุว่ารายการนี้เป็นของสาขาไหน
         time: timeInp,
         price: price,
         tip: tip,
@@ -1146,45 +1028,30 @@ function addRecord() {
 
     // บันทึกข้อมูล
     db.push(newRec);
-
-    // 🟢 เรียงลำดับข้อมูล
-    db.sort((a, b) => {
-        if (a.date !== b.date) return a.date.localeCompare(b.date);
-        return a.time.localeCompare(b.time);
-    });
-
     if (typeof saveDB === "function") {
         saveDB();
     } else {
         localStorage.setItem("barber_db", JSON.stringify(db));
     }
 
-    // --- ส่วนคำนวณและ Archive (หน้าประวัติ) ---
+    // --- ส่วนคำนวณและ Archive ---
     if (typeof calculateMoney === "function") {
         const result = calculateMoney(); 
-        
-        // 🔍 แก้ไขการหา Index: ต้องหาทั้งวันที่และชื่อสาขาที่ตรงกัน
-        const idx = archives.findIndex(a => a.date === dInp && (a.branch === currentBranch || (!a.branch && currentBranch === "ทั่วไป")));
-        
+        const idx = archives.findIndex(a => a.date === dInp);
         const archiveData = {
             date: dInp,
-            branch: currentBranch, // ✅ ระบุสาขาใน Archive ด้วย
             settle: result.settle, 
             type: (currentPay === 'Holiday') ? 'HOLIDAY' : 'WORK'
         };
-        
         if (idx > -1) { 
-            archives[idx].settle = result.settle;
-            archives[idx].branch = currentBranch; // อัปเดตชื่อสาขาเผื่อกรณีข้อมูลเก่า
+            archives[idx].settle = result.settle; 
         } else { 
             archives.push(archiveData); 
         }
-        
-        archives.sort((a, b) => a.date.localeCompare(b.date));
         localStorage.setItem("barber_archives", JSON.stringify(archives));
     }
 
-    // --- ปรับสถานะปุ่มและเล่นเสียง ---
+    // --- ปรับสถานะปุ่มส่งข้อมูล ---
     const btn = $("btnSubmitSend");
     if (btn) {
         btn.disabled = false;
@@ -1193,20 +1060,23 @@ function addRecord() {
         if (icon) icon.className = "fas fa-paper-plane";
     }
 
+    // 🔊 เล่นเสียงสำเร็จ (ถ้ามีระบบเสียง)
     const sfx = document.getElementById("successSound");
     if (sfx) { sfx.currentTime = 0; sfx.play(); }
 
-    notify("success", "ดำเนินการสำเร็จ", `บันทึกข้อมูลสาขา ${currentBranch} เรียบร้อยแล้ว`);
+    // 🎯 3. แจ้งเตือนความสำเร็จ (ตัด ค่ะ/ครับ ออก)
+    notify("success", "ดำเนินการสำเร็จ", "ระบบจัดเก็บข้อมูลการทำงานเรียบร้อยแล้ว");
 
-    // ล้างค่าในฟอร์ม
+    // 🎯 4. ล้างค่าในฟอร์ม (Reset Form)
     if ($("priceInp")) $("priceInp").value = "";
     if ($("tipInp")) $("tipInp").value = "0";
     if (hairStyleSelect) hairStyleSelect.selectedIndex = 0; 
     if ($("mixCash")) $("mixCash").value = "";
     if ($("mixTrans")) $("mixTrans").value = "";
     
+    // รีเฟรชหน้าจอ
     if (typeof resetForm === 'function') resetForm();
-    if (typeof renderDay === 'function') renderDay(dInp); // ส่งวันที่เข้าไปเพื่อให้รีเฟรชตรงวัน
+    if (typeof renderDay === 'function') renderDay();
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
 }
 function resetForm() {
@@ -1448,15 +1318,11 @@ async function saveAndGo(date, total) {
 
     const btn = document.getElementById("btnSubmitSend");
     const icon = document.getElementById("btnIcon");
-    
-    // 🔍 ดึงชื่อสาขาปัจจุบันจากระบบ
-    const currentBranch = localStorage.getItem('shopName') || "ทั่วไป";
 
-    // 🎯 1. ดักจับข้อมูลซ้ำ (เช็คทั้ง วันที่ และ สาขา)
-    const alreadySent = archives.some(a => a.date === date && (a.branch === currentBranch || (!a.branch && currentBranch === "ทั่วไป")));
-    
+    // 🎯 1. ดักจับข้อมูลซ้ำ (ตัดครับ/ค่ะ ออก)
+    const alreadySent = archives.some(a => a.date === date);
     if (alreadySent) {
-        notify("error", "แจ้งเตือน", `ข้อมูลวันที่ ${date} ของสาขา ${currentBranch} ถูกส่งไปแล้ว`);
+        notify("error", "แจ้งเตือน", `ข้อมูลของวันที่ ${date} ได้ดำเนินการส่งเรียบร้อยแล้ว`);
         if (btn) {
             btn.disabled = true; 
             btn.style.background = "#94a3b8";
@@ -1465,11 +1331,10 @@ async function saveAndGo(date, total) {
         }
         return;
     }
-
-    // 🎯 2. ยืนยันก่อนส่ง
+    // 🎯 2. ยืนยันก่อนส่ง (ปรับคำพูดให้เป็นกลาง)
     const result = await Swal.fire({
         title: 'ยืนยันการส่งข้อมูล',
-        text: `ต้องการส่งข้อมูลวันที่ ${date} (สาขา: ${currentBranch}) ใช่หรือไม่?`,
+        text: `ต้องการดำเนินการส่งข้อมูลของวันที่ ${date} ใช่หรือไม่?`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: 'var(--success)',
@@ -1481,7 +1346,6 @@ async function saveAndGo(date, total) {
     });
 
     if (!result.isConfirmed) return;
-
     // 🎯 3. เริ่มดำเนินการส่ง
     if (btn) {
         if (btn.disabled) return; 
@@ -1490,8 +1354,7 @@ async function saveAndGo(date, total) {
         if (icon) icon.className = "fas fa-spinner fa-spin"; 
     }
 
-    // กรองข้อมูลเฉพาะของสาขาปัจจุบันในวันที่เลือก
-    const allToday = db.filter(r => r.date === date && (r.branch === currentBranch || (!r.branch && currentBranch === "ทั่วไป")));
+    const allToday = db.filter(r => r.date === date);
     const todayData = allToday.filter(r => r.type === 'SERVICE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
     let cash = 0, tips = 0;
@@ -1508,27 +1371,12 @@ async function saveAndGo(date, total) {
     const baseEarn = Math.max(commission, Number(conf.guar) || 0); 
     const bEarn = isHoliday ? 0 : baseEarn + tips;
     const settle = isHoliday ? 0 : cash - bEarn;
-
-    // 🏗️ เตรียม Object ข้อมูลโดยเพิ่ม field 'branch' ลงไปด้วย
-    const data = { 
-        date, 
-        branch: currentBranch, 
-        total, 
-        cash, 
-        barber: Math.floor(bEarn), 
-        settle: settle, 
-        type: isHoliday ? "HOLIDAY" : "WORK", 
-        details: allToday 
-    };
+    const data = { date, total, cash, barber: Math.floor(bEarn), settle: settle, type: isHoliday ? "HOLIDAY" : "WORK", details: allToday };
     
-    // บันทึกหรืออัปเดตข้อมูลใน Archives
-    const idx = archives.findIndex(a => a.date === date && a.branch === currentBranch);
+    const idx = archives.findIndex(a => a.date === date);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
-    
     if (!isHoliday) { account.balance = -settle; }
-
-    // ลบออกจาก db เฉพาะส่วนที่ส่งไปแล้วเท่านั้น
-    db = db.filter(r => !(r.date === date && (r.branch === currentBranch || (!r.branch && currentBranch === "ทั่วไป"))));
+    db = db.filter(r => r.date !== date);
 
     try {
         if (typeof saveDB === "function") { await saveDB(); } else { await save(); }
@@ -1541,9 +1389,8 @@ async function saveAndGo(date, total) {
         }
 
         if (typeof loadAccountStatus === 'function') loadAccountStatus();
-        if (typeof renderDay === 'function') renderDay(date); // อัปเดตหน้าจอทันที
-
-        notify("success", "ดำเนินการสำเร็จ", `ส่งข้อมูลสาขา ${currentBranch} เรียบร้อยแล้ว`);
+                // 🎯 ส่งข้อมูลสำเร็จ (ใช้ภาษาเป็นกลาง)
+        notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการส่งข้อมูลเรียบร้อยแล้ว");
 
     } catch (e) {
         if (btn) {
@@ -1551,7 +1398,7 @@ async function saveAndGo(date, total) {
             btn.style.background = "var(--danger)";
             if (icon) icon.className = "fas fa-paper-plane";
         }
-        notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถส่งข้อมูลได้ในขณะนี้");
+        notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถส่งข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง");
     }
 }
 // --- ฟังก์ชันลบข้อมูลแยกออกมา ---
@@ -1683,34 +1530,12 @@ async function handleHoliday() {
     }
 }
 function renderDay(selectedDate) {
-    // 1. ดึงชื่อสาขาปัจจุบัน
-    const currentBranch = localStorage.getItem('shopName') || "ทั่วไป";
-
     let dInp = selectedDate || ($("dateInp") ? $("dateInp").value : new Date().toISOString().split('T')[0]);
     if ($("dateInp")) $("dateInp").value = dInp;
+    let allRec = db.filter(r => r.date === dInp);
 
-    // 🎯 แก้ไขจุดนี้: ให้รองรับทั้งแบบมีสาขาตรงกัน หรือไม่มีสาขา (ข้อมูลเก่า)
-    let allRec = db.filter(r => {
-        const isSameDate = r.date === dInp;
-        const isSameBranch = r.branch === currentBranch;
-        const isLegacyData = !r.branch || r.branch === "" || r.branch === "ทั่วไป";
-        
-        // ถ้าเป็นสาขาทั่วไป ให้ดูข้อมูลที่ไม่มีสาขาได้ด้วย
-        if (currentBranch === "ทั่วไป") {
-            return isSameDate && isLegacyData;
-        }
-        // ถ้าเป็นสาขาใหม่ ให้ดูเฉพาะสาขาตัวเอง หรือข้อมูลที่ไม่มีสาขาติดมา (เผื่อนำเข้า)
-        return isSameDate && (isSameBranch || isLegacyData);
-    });
-
-    // 🔍 ตรวจสอบใน Archives ด้วยตรรกะเดียวกัน
     if (allRec.length === 0 && typeof archives !== 'undefined') {
-        const archivedDay = archives.find(a => {
-            const isSameDate = a.date === dInp;
-            const isMatch = a.branch === currentBranch || (!a.branch || a.branch === "ทั่วไป");
-            return isSameDate && isMatch;
-        });
-        
+        const archivedDay = archives.find(a => a.date === dInp);
         if (archivedDay && archivedDay.details) {
             allRec = archivedDay.details;
         }
@@ -2352,159 +2177,152 @@ function renderHistoryList() {
    (ส่วนสถิติ รายงาน และการส่งข้อมูลเข้า LINE)
    ========================================================== */
 async function exportToExcel() {
-    // 🔍 1. ดึงข้อมูล "ดิบ" ทั้งหมดจาก Storage (เพื่อให้ได้ทุกสาขา ไม่ใช่แค่ที่โชว์บนหน้าจอ)
-    const allRawArchives = JSON.parse(localStorage.getItem('barber_archives')) || [];
-    const allBranchesConfig = JSON.parse(localStorage.getItem('all_branches_data')) || {};
-    const savedName = localStorage.getItem('shopName') || "ทั่วไป";
+    // 🔍 1. บังคับโหลดข้อมูลใหม่
+    try {
+        if (typeof fetchArchives === 'function') {
+            await fetchArchives(); 
+        }
+    } catch (e) {
+        console.log("Fetch error:", e);
+    }
+    // 🏷️ 2. ดึงชื่อร้าน (ดึงจากจุดที่คุณใช้ใน saveSettings)
+    // ลำดับ: จากช่อง Input > จาก LocalStorage (shopName) > จากตัวแปรกลาง (conf.shop) > ค่าเริ่มต้น
+    const shopInput = document.getElementById("setShop");
+    const savedName = localStorage.getItem('shopName');
+    
+    const displayShopName = (shopInput && shopInput.value) 
+                            ? shopInput.value 
+                            : (savedName || (typeof conf !== 'undefined' ? conf.shop : "บาร์เบอร์"));
 
-    // 🚩 ตรวจสอบว่ามีข้อมูลไหม
-    if (allRawArchives.length === 0) {
-        notify("error", "ไม่พบข้อมูล", "ระบบไม่พบประวัติการทำงานใดๆ ในฐานข้อมูล");
+    // เช็คข้อมูลประวัติ
+    if (typeof archives === 'undefined' || archives === null || archives.length === 0) {
+        alert("ไม่พบข้อมูลประวัติในระบบ กรุณาลองใหม่อีกครั้ง");
+        return;
+    }
+    const monthInput = document.getElementById("histMonth");
+    const m = monthInput ? monthInput.value : "";
+    
+    if (!m) {
+        alert("กรุณาเลือกเดือนที่ต้องการส่งออก");
+        if (monthInput && monthInput.showPicker) monthInput.showPicker();
         return;
     }
 
-    // 📅 2. ตรวจสอบการเลือกเดือน
-    const monthInput = document.getElementById("histMonth");
-    const m = monthInput ? monthInput.value : "";
-    if (!m) { 
-        notify("warning", "กรุณาเลือกเดือน", "ระบุเดือนที่ต้องการสรุปยอดก่อนกดส่งออก");
-        return; 
+    const filtered = archives.filter(a => a.date && a.date.startsWith(m));
+    if (!filtered.length) {
+        const [y, mm] = m.split('-');
+        alert(`ไม่พบข้อมูลของเดือน ${parseInt(mm)}/${parseInt(y)+543}`);
+        return;
     }
 
-    // กรองข้อมูลตามเดือนที่เลือก (จากทุกสาขา)
-    const filtered = allRawArchives.filter(a => a.date && a.date.startsWith(m));
-    
-    if (filtered.length === 0) { 
-        notify("info", "ไม่มีข้อมูล", `ไม่พบรายการของเดือน ${m} ในทุกสาขา`);
-        return; 
-    }
-
-    notify("success", "กำลังสร้างรายงาน", "ระบบกำลังรวบรวมข้อมูลจากทุกสาขา...");
-
-    // 🏗️ 3. จัดกลุ่มข้อมูลตามสาขา (Grouping)
-    const branches = {};
-    filtered.forEach(item => {
-        const bName = item.branch || savedName; // ถ้าไม่มี field branch ให้ถือเป็นสาขาหลัก
-        if (!branches[bName]) branches[bName] = [];
-        branches[bName].push(item);
-    });
-
-    // 🎨 4. Style (เหมือนเดิมของคุณ แต่ปรับ Font ให้รองรับ Excel)
-    const tableStyle = `
-        <style>
-            body { font-family: 'Tahoma', sans-serif; padding: 20px; }
-            table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
-            th { border: 1px solid #000; padding: 10px; background-color: #1D6F42; color: white; }
-            td { border: 1px solid #000; padding: 8px; text-align: center; }
-            .branch-header { background-color: #e8f5e9; padding: 10px; border-left: 5px solid #1D6F42; margin: 20px 0 10px 0; font-size: 18px; font-weight: bold; }
-            .grand-total-box { margin-top: 30px; padding: 15px; border: 2px solid #1D6F42; background-color: #fff9c4; }
-            .text-off { color: #d32f2f; }
-        </style>
-    `;
-
-    // 📅 5. เตรียมหัวรายงาน
-    const thMonths = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค. "];
+    const thMonths = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
     const fullThaiMonths = ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+    
     const [y, mm] = m.split('-');
     const headThai = `${fullThaiMonths[parseInt(mm)]} ${parseInt(y) + 543}`;
 
-    let tableHtml = `<html><head><meta charset="utf-8">${tableStyle}</head><body>`;
-    tableHtml += `<h1 style="text-align:center;">รายงานสรุปยอดรวมทุกสาขา</h1>`;
-    tableHtml += `<h2 style="text-align:center;">ประจำเดือน: ${headThai}</h2>`;
+    const style = `
+        <style>
+            body { padding: 20px; font-family: 'Tahoma', sans-serif; text-align: center; }
+            table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+            th { border: 2px solid #ccc; padding: 15px 5px; background-color: #1D6F42; color: white; font-size: 30px; white-space: nowrap; }
+            td { border: 2px solid #ccc; padding: 7px 10px; text-align: center; font-size: 27px; font-weight: 500; color: #000; }
+            tr:nth-child(even) { background-color: #f2f2f2; }
+            h1 { text-align:center; font-size: 38px; margin-bottom: 5px; color: #04167d; }
+            h2 { text-align:center; font-size: 32px; margin-bottom: 20px; color: #333; }
+        </style>
+    `;
 
-    let finalCust = 0, finalBarber = 0, finalShave = 0, finalWash = 0, finalDye = 0;
+    // 🏗️ สร้างหน้า HTML
+    let tableHtml = `<html><head><meta charset="utf-8">${style}</head><body>`; 
+    
+    // ✅ ใช้ชื่อร้านที่ดึงมาล่าสุด
+    tableHtml += `<h1>รายงานร้าน: ${displayShopName}</h1>`;
+    tableHtml += `<h2>ประจำเดือน: ${headThai}</h2>`;
 
-    // 🚀 6. วนลูปสร้างตารางแยกตามสาขา
-    for (const branchName in branches) {
-        const bSet = allBranchesConfig[branchName] || {};
-        const bPerc = bSet.perc || "";
+    tableHtml += `<table>
+        <thead>
+            <tr>
+                <th>วันที่</th>
+                <th>วัน</th>
+                <th>ลูกค้า</th>
+                <th>ยอดช่าง</th>
+                <th>โกน</th>
+                <th>สระ</th>
+                <th>ย้อม</th>
+            </tr>
+        </thead>
+        <tbody>`;
 
-        tableHtml += `<div class="branch-header">สาขา: ${branchName} ${bPerc ? `(ส่วนแบ่ง ${bPerc}%)` : ''}</div>`;
-        tableHtml += `<table><thead><tr><th>วันที่</th><th>วัน</th><th>ลูกค้า</th><th>ยอดช่าง</th><th>โกน</th><th>สระ</th><th>ย้อม/สี</th></tr></thead><tbody>`;
+    let grandTotalCust = 0, grandTotalBarber = 0, grandTotalShave = 0, grandTotalWash = 0, grandTotalDye = 0;
 
-        let bTotalCust = 0, bTotalBarber = 0, bTotalShave = 0, bTotalWash = 0, bTotalDye = 0;
+    filtered.forEach(day => {
+        const isOff = (day.off === true || day.type === "HOLIDAY");
+        const dObj = new Date(day.date);
+        const dateThai = `${dObj.getDate()} ${thMonths[dObj.getMonth() + 1]} ${(dObj.getFullYear() + 543).toString().slice(-2)}`;
+        const dayName = dObj.toLocaleDateString('th-TH', { weekday: 'long' }).replace('วัน', '');
         
-        // เรียงวันที่จากน้อยไปมาก
-        branches[branchName].sort((a, b) => new Date(a.date) - new Date(b.date));
+        const displayDay = isOff ? `<span style="color: #e74c3c; font-weight: bold;">หยุด</span>` : dayName;
 
-        branches[branchName].forEach(day => {
-            const isOff = (day.off === true || day.type === "HOLIDAY");
-            const dObj = new Date(day.date);
-            const dateThai = `${dObj.getDate()} ${thMonths[dObj.getMonth() + 1]} ${ (dObj.getFullYear()+543).toString().slice(-2) }`;
-            const dayName = dObj.toLocaleDateString('th-TH', { weekday: 'short' });
+        let countCust = 0, countShave = 0, countWash = 0, countDye = 0;
+        if (day.details && Array.isArray(day.details)) {
+            day.details.forEach(d => {
+                if (d.type === "SERVICE") {
+                    countCust++;
+                    const s = String(d.svcs || "").toLowerCase();
+                    if (s.includes("โกน")) countShave++;
+                    if (s.includes("สระ")) countWash++;
+                    if (s.includes("ย้อม") || s.includes("สี")) countDye++;
+                }
+            });
+        }
+        
+        const barberEarn = Number(day.barber) || 0;
+        grandTotalCust += countCust; 
+        grandTotalBarber += barberEarn;
+        grandTotalShave += countShave; 
+        grandTotalWash += countWash; 
+        grandTotalDye += countDye;
 
-            let countCust = 0, countShave = 0, countWash = 0, countDye = 0;
-            if (day.details && Array.isArray(day.details)) {
-                day.details.forEach(d => {
-                    if (d.type === "SERVICE") {
-                        countCust++;
-                        const s = String(d.svcs || "").toLowerCase();
-                        if (s.includes("โกน")) countShave++;
-                        if (s.includes("สระ")) countWash++;
-                        if (s.includes("ย้อม") || s.includes("สี")) countDye++;
-                    }
-                });
-            }
-
-            const barberEarn = Number(day.barber) || 0;
-            bTotalCust += countCust; bTotalBarber += barberEarn;
-            bTotalShave += countShave; bTotalWash += countWash; bTotalDye += countDye;
-
-            tableHtml += `<tr>
-                <td>${dateThai}</td>
-                <td>${isOff ? '<span class="text-off">หยุด</span>' : dayName}</td>
-                <td>${isOff ? '-' : countCust}</td>
-                <td style="font-weight:bold;">${isOff ? '-' : barberEarn.toLocaleString()}</td>
+        tableHtml += `
+            <tr>
+                <td style="white-space:nowrap;">${dateThai}</td>
+                <td>${displayDay}</td>
+                <td>${countCust}</td>
+                <td style="color:#0f0661;">${barberEarn.toLocaleString()}</td>
                 <td>${countShave || "-"}</td>
                 <td>${countWash || "-"}</td>
                 <td>${countDye || "-"}</td>
             </tr>`;
-        });
+    });
 
-        // แถวสรุปของแต่ละสาขา
-        tableHtml += `<tr style="background-color: #fff176; font-weight: bold;">
-            <td colspan="2">รวมเฉพาะสาขา ${branchName}</td>
-            <td>${bTotalCust}</td>
-            <td>${bTotalBarber.toLocaleString()}</td>
-            <td>${bTotalShave}</td>
-            <td>${bTotalWash}</td>
-            <td>${bTotalDye}</td>
-        </tr></tbody></table>`;
-
-        finalCust += bTotalCust; finalBarber += bTotalBarber;
-        finalShave += bTotalShave; finalWash += bTotalWash; finalDye += bTotalDye;
-    }
-
-    // 🏆 7. สรุปยอดรวมสุทธิทุกสาขา (Grand Total)
     tableHtml += `
-        <div class="grand-total-box">
-            <h3 style="text-align:center; margin-top:0;">🏆 สรุปยอดรวมสุทธิ (ทุกสาขา)</h3>
-            <table style="margin-bottom:0;">
-                <tr style="background-color: #1D6F42; color: white; font-weight:bold;">
-                    <td>รวมลูกค้าทั้งหมด</td><td>รวมยอดช่างทั้งหมด</td><td>รวมงานโกน</td><td>รวมงานสระ</td><td>รวมงานย้อม</td>
-                </tr>
-                <tr style="font-size: 18px; font-weight: bold;">
-                    <td>${finalCust} คน</td>
-                    <td style="color: #d32f2f;">${finalBarber.toLocaleString()} บาท</td>
-                    <td>${finalShave}</td>
-                    <td>${finalWash}</td>
-                    <td>${finalDye}</td>
-                </tr>
-            </table>
-        </div>
-    </body></html>`;
+        <tr style="background-color: #fcea23; font-weight: bold; font-size: 28px;">
+            <td colspan="2" style="border: 2px solid #ccc; padding: 15px;">รวมยอด</td>
+            <td style="border: 2px solid #ccc;">${grandTotalCust.toLocaleString()}</td>
+            <td style="border: 2px solid #ccc;">${grandTotalBarber.toLocaleString()}</td>
+            <td style="border: 2px solid #ccc;">${grandTotalShave}</td>
+            <td style="border: 2px solid #ccc;">${grandTotalWash}</td>
+            <td style="border: 2px solid #ccc;">${grandTotalDye}</td>
+        </tr>`;
 
-    // 🚀 8. การส่งออกไฟล์
-    const blob = new Blob([tableHtml], { type: 'application/vnd.ms-excel' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `Full_Report_${m}.xls`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    notify("success", "สำเร็จ", "ดาวน์โหลดรายงานเรียบร้อยแล้ว");
+    tableHtml += `</tbody></table></body></html>`;
+
+    // --- ส่วนแสดงผลรายงาน ---
+    const newTab = window.open();
+    if (newTab) {
+        newTab.document.write(tableHtml);
+        newTab.document.close();
+    } else {
+        const blob = new Blob([tableHtml], { type: 'application/vnd.ms-excel' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `Report_${m}.xls`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 }
 function handleGoogleSheet() {
     const isAndroid = /Android/i.test(navigator.userAgent);
@@ -3233,82 +3051,70 @@ function sendToLineFinal() {
    (การตั้งค่าแอปและธีม)
    ========================================================== */
 function openSettings() {
-    // ดึงชื่อสาขาปัจจุบันจาก localStorage
-    const currentBranch = localStorage.getItem('shopName') || "ทั่วไป";
-    // ดึงฐานข้อมูลรวมทุกสาขาออกมา
-    const allBranchesData = JSON.parse(localStorage.getItem('all_branches_data')) || {}; 
-    // เลือกเอาเฉพาะ Data ของสาขานี้ ถ้าไม่มีให้ใช้ค่าจาก conf หรือค่าเริ่มต้น
-    const branchConfig = allBranchesData[currentBranch] || conf || {};
+    // 1. ตรวจสอบว่ามีข้อมูล configuration หรือไม่ (ถ้าไม่มีให้ใช้ค่าเริ่มต้น)
+    const config = conf || {};
+    // 2. รายการ mapping ระหว่าง ID ของ Element และค่าใน conf
+    // ช่วยให้โค้ดสะอาดขึ้น ไม่ต้องเขียน if ซ้ำๆ หลายบรรทัด
     const fields = {
-        "setShop":  branchConfig.shop  || currentBranch, // ใช้ชื่อสาขาปัจจุบัน
-        "setPerc":  branchConfig.perc  || 50,
-        "setGuar":  branchConfig.guar  || 0,
-        "setTheme": branchConfig.theme || "light",
-        "setVoice": branchConfig.voice || "female",
-        "setSound": branchConfig.sound || "on"
+        "setShop":  config.shop  || "",
+        "setTheme": config.theme || "light",
+        "setVoice": config.voice || "female",
+        "setSound": config.sound || "on",
+        "setPerc":  config.perc  || 50,
+        "setGuar":  config.guar  || 0
     };
-
+    // 3. วนลูปเพื่อใส่ค่าลงในแต่ละ Input (ตรวจสอบก่อนว่ามี Element นั้นจริง)
     Object.entries(fields).forEach(([id, value]) => {
         const el = $(id);
         if (el) el.value = value;
     });
-
-    if ($("modalSet")) $("modalSet").style.display = "flex";
+    // 4. แสดงผล Modal
+    const modal = $("modalSet");
+    if (modal) {
+        modal.style.display = "flex";
+    } else {
+        console.error("ไม่พบ Element: modalSet");
+    }
 }
 function saveSettings() {
-    // 1. ดึงค่าจากฟอร์มปัจจุบัน
-    const currentShopName = $("setShop")?.value.trim() || "ทั่วไป";
+    // 1. ดึงค่าจากฟอร์ม
     const settings = {
-        shop:  currentShopName,
+        shop:  $("setShop")?.value || "",
         perc:  parseFloat($("setPerc")?.value) || 0,
         guar:  parseFloat($("setGuar")?.value) || 0,
         theme: $("setTheme")?.value || "light",
         voice: $("setVoice")?.value || "default.mp3",
-        sound: $("setSound")?.value || "on",
-        lastUpdate: new Date().toISOString()
+        sound: $("setSound")?.value || "on"
     };
 
-    // 2. อัปเดตตัวแปรกลาง (conf) สำหรับใช้งานใน Session ปัจจุบัน
+    // 2. อัปเดตตัวแปรกลาง (conf) ทันที 
     Object.assign(conf, settings);
 
-    // 3. จัดการฐานข้อมูลรวมทุกสาขา (ป้องกันการบันทึกทับสาขาอื่น)
-    let allBranchesData = JSON.parse(localStorage.getItem('all_branches_data')) || {}; 
-    allBranchesData[currentShopName] = settings; 
-    localStorage.setItem('all_branches_data', JSON.stringify(allBranchesData));
-
-    // 4. บันทึกค่าปัจจุบันลง LocalStorage (Flag สำหรับ Filter)
+    // 3. บันทึกลง LocalStorage
     localStorage.setItem('barber_conf', JSON.stringify(conf));
     localStorage.setItem('shopName',  settings.shop);
-    localStorage.setItem('shopPerc',  settings.perc.toString());
-    localStorage.setItem('shopGuar',  settings.guar.toString());
+    localStorage.setItem('shopPerc',  settings.perc);
+    localStorage.setItem('shopGuar',  settings.guar);
     localStorage.setItem('shopTheme', settings.theme);
     localStorage.setItem('shopVoice', settings.voice);
     localStorage.setItem('shopSound', settings.sound);
 
-    // 🎯 5. ส่วนสำคัญ: สลับไปโหลดข้อมูล (db, archives) ของสาขาใหม่ทันที
-    if (typeof loadDataByBranch === "function") {
-        loadDataByBranch(currentShopName);
-    }
-
-    // 6. อัปเดตการแสดงผลชื่อร้านบน UI หน้าหลัก
+    // 4. อัปเดตการแสดงผลชื่อร้าน
     const nameDisp = $("shopNameDisp") || $("shopNameDisplay");
     if (nameDisp) {
         nameDisp.innerText = settings.shop.toUpperCase();
     } 
 
-    // 7. อัปเดต Theme และการคำนวณเงิน
-    if (typeof applyTheme === "function") applyTheme(settings.theme);
-    if (typeof calculateMoney === "function") calculateMoney(); 
+    // 5. เรียกฟังก์ชันอัปเดต UI 
+    if (typeof applyTheme === "function")        applyTheme(settings.theme);
+    if (typeof calculateMoney === "function")    calculateMoney(); 
+    if (typeof renderDay === "function")         renderDay(); 
+
+    // 6. ปิด Modal
+    if ($("modalSet")) $("modalSet").style.display = 'none';
     
-    // รีเฟรชหน้ารายงานตามวันที่เลือกอยู่
-    const currentSelectedDate = $("dateInp")?.value;
-    if (typeof renderDay === "function") renderDay(currentSelectedDate); 
-
-    // 8. ปิด Modal
-    if ($("modalSet")) $("modalSet").style.display = 'none'; 
-
-    // 9. แจ้งเตือนความสำเร็จ
-    notify("success", "สลับสาขาสำเร็จ", `บันทึกและโหลดข้อมูลสาขา: "${currentShopName}" เรียบร้อยแล้ว`);
+    // 7. แจ้งเตือนความสำเร็จ (ใช้ notify แทน alert เพื่อคุมธีมและเล่นเสียง)
+    notify("success", "บันทึกสำเร็จ", "ระบบได้ดำเนินการบันทึกการตั้งค่าเรียบร้อยแล้ว");
 }
 async function handleSave(event) {
     const $ = (id) => document.getElementById(id);
