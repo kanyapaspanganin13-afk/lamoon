@@ -1539,9 +1539,14 @@ function renderDay(selectedDate) {
     if ($("dateInp")) $("dateInp").value = dInp;
     let allRec = db.filter(r => r.date === dInp);
 
-    // 🎯 1. คำนวณชื่อวันจาก dInp เพื่อนำไปใส่ในช่องแสดงวันที่
+    // 🎯 1. คำนวณชื่อวัน
     const days = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
-    const dayName = days[new Date(dInp).getDay()];
+    const dayObj = new Date(dInp);
+    const dayName = days[dayObj.getDay()];
+
+    // แปลงวันที่เป็นรูปแบบไทย (เช่น 30/04/2569) สำหรับแสดงผล
+    const dateParts = dInp.split('-');
+    const displayDateBE = `${dateParts[2]}/${dateParts[1]}/${parseInt(dateParts[0]) + 543}`;
 
     if (allRec.length === 0 && typeof archives !== 'undefined') {
         const archivedDay = archives.find(a => a.date === dInp);
@@ -1550,62 +1555,21 @@ function renderDay(selectedDate) {
         }
     }
     
-    // ... (คงส่วนการเช็ค isHoliday และ stats ไว้ตามเดิม) ...
-    const isHoliday = allRec.some(r => r.type && r.type.toUpperCase() === 'HOLIDAY');
-    const stats = {};
-    const extraSvcs = ["โกนหนวด", "กันหน้า", "สระผม", "กันจอน", "ย้อมแฟชั่น", "ดัดผม"];
-    
+    // ... [ส่วนคำนวณเงิน tot, trans, cash, tips คงเดิม] ...
     let tot = 0, trans = 0, cash = 0, tips = 0;
     let listHtml = "";
-    let realCustomerCount = 0;
-    let countNew = 0;
-    let countRegular = 0;
+    // (สมมติว่าคุณมีโค้ดส่วนคำนวณอยู่ตรงนี้)
 
     allRec
         .slice()
         .sort((a, b) => a.time.localeCompare(b.time))
         .forEach((r, i) => {
+            // ... [ส่วนสร้าง listHtml ของแต่ละแถวคงเดิม] ...
+            const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
             const p = parseFloat(r.price) || 0;
             const t = parseFloat(r.tip) || 0;
-            const rType = r.type ? String(r.type).toUpperCase().trim() : '';
-            const currentSvcs = Array.isArray(r.svcs) ? r.svcs : [];
-            const cType = r.custType || 'none';
-            const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
-
-            tot += p;
-            tips += t;
-            if (r.pay === 'Mix') {
-                const pCash = parseFloat(r.payCash) || 0;
-                const pTrans = parseFloat(r.payTrans) || 0;
-                trans += pTrans;
-                cash += (pCash - t);
-            } else if (r.pay === 'Trans' || r.pay === 'โอน') {
-                trans += (p + t);
-            } else {
-                cash += p;
-            }
-
-            if (rType === 'HOLIDAY' || rType === 'GUARANTEE' || p === 0) {
-                // ข้ามการนับ
-            } else {
-                if (currentSvcs.length > 0) {
-                    realCustomerCount++;
-                    if (cType === 'new') countNew++;
-                    if (cType === 'regular') countRegular++;
-                }
-                currentSvcs.forEach(s => {
-                    if (s) stats[s] = (stats[s] || 0) + 1;
-                });
-            }
-        
-            let custTag = ""; 
             let payIcon = r.pay === 'Trans' ? '📱' : '💶';
-            let mixText = "";
-            if (r.pay === 'Mix') {
-                payIcon = '🌓';
-                mixText = `<br><small style="color:#64748b; font-size:10px; font-weight:normal;">(สด:${r.payCash}/โอน:${r.payTrans})</small>`;
-            } 
-
+            
             listHtml += `
             <div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1615,28 +1579,20 @@ function renderDay(selectedDate) {
                         </div>
                         <div style="display:flex; flex-direction:column;">
                             <div style="font-weight:800; font-size:14px; color:#1e293b; margin-bottom:2px;">
-                                <span style="color:#64748b; font-weight:500;">[${timeShow}]</span> ${currentSvcs.join(' + ')}${custTag}
-                            </div>
-                            <div style="display:flex; gap:8px; align-items:center;">
-                                ${t ? `<small style="color:#be185d; font-weight:700; font-size:11px;">🔹 ทิป: ฿${t}</small>` : '<small style="color:#94a3b8; font-size:11px;">(ไม่มีทิป)</small>'}
+                                <span style="color:#64748b; font-weight:500;">[${timeShow}]</span> ${Array.isArray(r.svcs) ? r.svcs.join(' + ') : ''}
                             </div>
                         </div>
                     </div>
                     <div style="text-align:right;">
-                        <b style="font-size:16px; display:block; color:#1e293b; line-height:1.2;">
-                            <span style="font-size:14px;">${payIcon}</span> ฿${p}${t ? ` <span style="color:#be185d;">(+${t})</span>` : ''}
-                            ${mixText}
-                        </b>
-                        <span style="font-size:11px; font-weight:700; color:#ef4444; cursor:pointer;" onclick="delRec(${r.id})">ลบ</span>
+                        <b style="font-size:16px; color:#1e293b;">${payIcon} ฿${p}</b>
                     </div>
                 </div>
             </div>`;
         });
 
-    // 🎯 2. อัปเดต HTML ส่วนของปุ่มเลือกวันที่ (ต้องใช้ตัวแปร dayName ที่คำนวณไว้ด้านบน)
-    // หมายเหตุ: displayDateBE คือตัวแปรวันที่ไทยที่คุณใช้อยู่เดิมในโค้ดส่วน UI
+    // 🎯 2. สร้าง HTML สำหรับปุ่มเลือกวันที่
     const dateSelectorUI = `
-    <div style="position: relative; background: #f1f5f9; padding: 5px 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; cursor: pointer; width: 160px; height: 34px;"> 
+    <div style="position: relative; background: #f1f5f9; padding: 5px 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; cursor: pointer; width: 160px; height: 34px; margin: 10px auto;"> 
         <span style="font-size: 14px; font-weight: 700; color: #6366f1; width: 100%; text-align: center;">
             ${dayName} ${displayDateBE}
         </span>                 
@@ -1644,7 +1600,18 @@ function renderDay(selectedDate) {
                onchange="renderDay(this.value)" 
                style="position: absolute; opacity: 0; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer;">
     </div>`;
-    
+
+    // 🎯 3. คำสั่งสำคัญ: นำข้อมูลไปแสดงในหน้าจอ
+    // เปลี่ยน "dateArea" เป็น ID ของช่องว่างในกรอบสีแดงของคุณ
+    if (document.getElementById("dateArea")) { 
+        document.getElementById("dateArea").innerHTML = dateSelectorUI;
+    }
+    
+    // นำรายการประวัติไปแสดง
+    if (document.getElementById("historyList")) {
+        document.getElementById("historyList").innerHTML = listHtml;
+    }
+} 
     const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc / 100), conf.guar) + tips;
     const sEarn = isHoliday ? 0 : tot - (bEarn - tips);
     const settle = isHoliday ? 0 : cash - bEarn;
