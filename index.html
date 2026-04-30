@@ -2927,43 +2927,41 @@ function shareLine() {
 
     // 📝 3. ประมวลผลรายการลูกค้า (ปรับปรุงการแยกยอด Mix)
     const clientList = today
-        .sort((a, b) => a.time.localeCompare(b.time))
-        .map((r, i) => {
-            const p = Number(r.price) || 0;
-            const t = Number(r.tip) || 0;
-            tot += p; tips += t;
-
-            let detailText = ""; // สำหรับเก็บข้อความ (สด:xx/โอน:xx)
-
-            // ✅ ตรวจสอบการจ่ายแบบ Mix และดึงข้อมูลจาก r.payCash / r.payTrans
-            if (r.pay === 'Mix') {
-                const pTrans = Number(r.payTrans) || 0;
-                const pCash = Number(r.payCash) || 0;
-                trans += pTrans;
-                cash += (pCash - t); // หักทิปออกจากส่วนที่เป็นเงินสด
-                detailText = ` (สด:${pCash}/โอน:${pTrans})`; 
-            } else if (r.pay === 'Trans' || r.pay === 'โอน') {
-                trans += (p + t);
-            } else {
-                cash += p;
-            }
-
-            if (!['GUARANTEE', 'HOLIDAY'].includes(String(r.type).toUpperCase()) && p > 0) {
-                realCustomerCount++;
-                const cType = String(r.custType || "").toLowerCase();
-                if (cType === 'new') newCount++;
-                else if (cType === 'regular') regCount++;
-                if (r.hair && r.hair.includes("เด็ก")) stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
-                (r.svcs || []).forEach(s => { if (s) stats[s] = (stats[s] || 0) + 1; });
-            }
-
-            const tShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
-            const pIcon = r.pay === 'Trans' ? '📱' : (r.pay === 'Mix' ? '🌓' : '💶');
-            
-            // คืนค่ารูปแบบ: 1. [เวลา] งาน = ราคา (สด:xx/โอน:xx) ไอคอน
-            return `${i + 1}. [${tShow}] ${(r.svcs || []).join('+')} = ${p}${t ? ` (+ทิป ${t})` : ''}${detailText} ${pIcon}`;
-        }).join('\n');
-
+            .sort((a, b) => a.time.localeCompare(b.time))
+            .map((r, i) => {
+                const p = Number(r.price) || 0;
+                const t = Number(r.tip) || 0;
+                tot += p; tips += t;
+    
+                let detailText = ""; 
+    
+                if (r.pay === 'Mix') {
+                    const pTrans = Number(r.payTrans) || 0;
+                    const pCash = Number(r.payCash) || 0;
+                    trans += pTrans;
+                    cash += (pCash - t);
+                    detailText = ` (สด:${pCash}/โอน:${pTrans})`; // ✅ เตรียมข้อความยอดแยก
+                } else if (r.pay === 'Trans' || r.pay === 'โอน') {
+                    trans += (p + t);
+                } else {
+                    cash += p;
+                }
+    
+                if (!['GUARANTEE', 'HOLIDAY'].includes(String(r.type).toUpperCase()) && p > 0) {
+                    realCustomerCount++;
+                    const cType = String(r.custType || "").toLowerCase();
+                    if (cType === 'new') newCount++;
+                    else if (cType === 'regular') regCount++;
+                    if (r.hair && r.hair.includes("เด็ก")) stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
+                    (r.svcs || []).forEach(s => { if (s) stats[s] = (stats[s] || 0) + 1; });
+                }
+    
+                const tShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
+                const pIcon = r.pay === 'Trans' ? '📱' : (r.pay === 'Mix' ? '🌓' : '💶');
+                
+                // ✅ แก้ไขบรรทัดนี้: ใส่ detailText ลงไปในข้อความที่จะ return ด้วย
+                return `${i + 1}. [${tShow}] ${(r.svcs || []).join('+')} = ${p}${t ? ` (+ทิป ${t})` : ''}${detailText} ${pIcon}`;
+            }).join('\n');
     // 📊 4. สถิติงาน
     const allowed = ["เด็ก", "สระผม", "โกนหนวด", "ย้อมผม", "ย้อมสี"];
     const icons = { "เด็ก": "🧒", "สระ": "🧼", "โกน": "🪒", "ย้อม": "🎨" };
