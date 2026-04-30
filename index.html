@@ -1534,10 +1534,15 @@ async function handleHoliday() {
         renderDay(d);
     }
 }
-function renderDay(selectedDate) {
+    function renderDay(selectedDate) {
     let dInp = selectedDate || ($("dateInp") ? $("dateInp").value : new Date().toISOString().split('T')[0]);
     if ($("dateInp")) $("dateInp").value = dInp;
     let allRec = db.filter(r => r.date === dInp);
+
+    // --- ส่วนที่เพิ่ม: คำนวณชื่อวัน ---
+    const days = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+    const dayName = days[new Date(dInp).getDay()];
+    // ----------------------------
 
     if (allRec.length === 0 && typeof archives !== 'undefined') {
         const archivedDay = archives.find(a => a.date === dInp);
@@ -1566,7 +1571,6 @@ function renderDay(selectedDate) {
             const currentSvcs = Array.isArray(r.svcs) ? r.svcs : [];
             const cType = r.custType || 'none';
 
-            // ✅ ย้าย timeShow มาไว้ข้างในนี้ เพื่อให้รู้จักตัวแปร r
             const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
 
             tot += p;
@@ -1596,7 +1600,6 @@ function renderDay(selectedDate) {
                 });
             }
         
-        // 🟢 เพิ่มสัญลักษณ์แสดงประเภทในรายการ (History)
         let custTag = ""; 
         let payIcon = r.pay === 'Trans' ? '📱' : '💶';
         let mixText = "";
@@ -1604,6 +1607,7 @@ function renderDay(selectedDate) {
             payIcon = '🌓';
             mixText = `<br><small style="color:#64748b; font-size:10px; font-weight:normal;">(สด:${r.payCash}/โอน:${r.payTrans})</small>`;
         } 
+
         listHtml += `
         <div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1613,7 +1617,9 @@ function renderDay(selectedDate) {
                     </div>
                     <div style="display:flex; flex-direction:column;">
                         <div style="font-weight:800; font-size:14px; color:#1e293b; margin-bottom:2px;">
-                            <span style="color:#64748b; font-weight:500;">[${timeShow}]</span> ${currentSvcs.join(' + ')}${custTag}
+                            <!-- 🎯 เพิ่มชื่อวันตรงนี้ -->
+                            <span style="color:#6366f1; font-weight:700;">${dayName}</span>
+                            <span style="color:#64748b; font-weight:500;"> [${timeShow}]</span> ${currentSvcs.join(' + ')}${custTag}
                         </div>
                         <div style="display:flex; gap:8px; align-items:center;">
                             ${t ? `<small style="color:#be185d; font-weight:700; font-size:11px;">🔹 ทิป: ฿${t}</small>` : '<small style="color:#94a3b8; font-size:11px;">(ไม่มีทิป)</small>'}
@@ -1630,7 +1636,6 @@ function renderDay(selectedDate) {
             </div>
         </div>`;
     });
-
     const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc / 100), conf.guar) + tips;
     const sEarn = isHoliday ? 0 : tot - (bEarn - tips);
     const settle = isHoliday ? 0 : cash - bEarn;
