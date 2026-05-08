@@ -2635,184 +2635,186 @@ function loadHistMonth() {
     // ส่งข้อมูลไปยังตัวสร้าง Report
     generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular);
 }
-function processMonthlyStats(weeklyData, hairStats, serviceStats) {
-    const currentShopName = conf.shopName || "ชื่อร้าน";
-    const weekEntries = Object.entries(weeklyData);
-    const dayStats = {};
-    
-    let totalNew = 0, totalRegular = 0;
-    let maxNewWeek = "-", maxRegWeek = "-";
+function processMonthlyStats(weeklyData, hairStats, serviceStats, rotateBranchStats = {}) {
+    // ✅ กรองเฉพาะสาขาหลักสำหรับ Insights และ Hair Stats
+    const mainWeeklyData = Object.fromEntries(
+        Object.entries(weeklyData).filter(([_, d]) => !d.isRotateBranch)
+    );
+    const mainEntries = Object.entries(mainWeeklyData);
 
-    weekEntries.forEach(([wk, data]) => {
+    let totalNew = 0, totalRegular = 0;
+    const dayStats = {};
+
+    mainEntries.forEach(([wk, data]) => {
         totalNew += (data.countNew || 0);
         totalRegular += (data.countRegular || 0);
 
         if (data.dailyCounts) {
             data.dailyCounts.forEach(d => {
-                // 🚩 วิเคราะห์ Busiest Day เฉพาะวันที่ทำงานในร้านหลักเท่านั้น
-                if (d.branch === currentShopName && d.count > 0) {
-                    const dayName = d.dayName.split(' ')[0];
-                    if (!dayStats[dayName]) dayStats[dayName] = { total: 0, count: 0 };
+                const dayName = d.dayName.split(' ')[0];
+                if (!dayStats[dayName]) dayStats[dayName] = { total: 0, count: 0 };
+                if (d.count > 0) {
                     dayStats[dayName].total += d.count;
                     dayStats[dayName].count += 1;
                 }
             });
         }
-        
-        const n = data.countNew || 0, r = data.countRegular || 0;
-        data.newAnalysis = (n > r) ? "กลุ่มหลักอาทิตย์นี้" : (n < r) ? "น้อยกว่าลูกค้าประจำ" : "เท่ากับลูกค้าประจำ";
-        data.regAnalysis = (r > n) ? "กลุ่มหลักอาทิตย์นี้" : (r < n) ? "น้อยกว่าลูกค้าใหม่" : "เท่ากับลูกค้าใหม่";
-
-        if (n > r && (maxNewWeek === "-" || n > (weeklyData[maxNewWeek]?.countNew || 0))) maxNewWeek = wk;
-        if (r > n && (maxRegWeek === "-" || r > (weeklyData[maxRegWeek]?.countRegular || 0))) maxRegWeek = wk;
     });
 
-    const dayAverages = Object.entries(dayStats).map(([name, data]) => ({ name, avg: data.total / data.count }));
-    
+    const dayAverages = Object.entries(dayStats)
+        .filter(([_, d]) => d.count > 0)
+        .map(([name, d]) => ({ name, avg: d.total / d.count }));
+
     return {
-        totalNew, totalRegular, maxNewWeek, maxRegWeek,
+        totalNew,
+        totalRegular,
         busiestDay: dayAverages.sort((a, b) => b.avg - a.avg)[0],
         quietestDay: dayAverages.sort((a, b) => a.avg - b.avg)[0],
-        // 🚩 วิเคราะห์สัปดาห์รายได้สูงสุด เฉพาะยอดจากร้านหลัก (ดึงจาก mainBranchIncome ที่เราคำนวณไว้ก่อนหน้า)
-        topIncomeWeek: weekEntries.length > 0 ? weekEntries.reduce((p, c) => ((c[1].mainBranchIncome || 0) > (p[1].mainBranchIncome || 0) ? c : p)) : null,
-        topCountWeek: weekEntries.length > 0 ? weekEntries.reduce((p, c) => ((c[1].countNew + c[1].countRegular) > (p[1].countNew + p[1].countRegular) ? c : p)) : null,
-        topHair: Object.entries(hairStats).sort((a, b) => b[1] - a[1])[0],
-        topService: Object.entries(serviceStats).sort((a, b) => b[1] - a[1])[0]
+        topIncomeWeek: mainEntries.length > 0 ? mainEntries.reduce((p, c) => (c[1].income || 0) > (p[1].income || 0) ? c : p) : null,
+        topCountWeek: mainEntries.length > 0 ? mainEntries.reduce((p, c) => ((c[1].countNew || 0) + (c[1].countRegular || 0)) > ((p[1].countNew || 0) + (p[1].countRegular || 0)) ? c : p) : null,
+        topHair: Object.entries(hairStats).filter(([_, c]) => c > 0).sort((a, b) => b[1] - a[1])[0],
+        topService: Object.entries(serviceStats).sort((a, b) => b[1] - a[1])[0], // รวมทุกสาขา
+        rotateBranchStats
     };
 }
 
-function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular) {
-    const stats = processMonthlyStats(weeklyData, hairStats, serviceStats);
-    const currentShopName = conf.shopName || "ชื่อร้าน";
-    const currentPerc = Number(conf.perc) || 0;
-    const currentGuar = Number(conf.guar) || 0;
+function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular, rotateBranchStats = {}) {
+    const stats = processMonthlyStats(weeklyData, hairStats, serviceStats, rotateBranchStats);
 
-    // --- 🟢 คำนวณข้อมูลสาขาเวียน ---
-    let rotatingIncome = 0, rotatingCust = 0, rotatingBarberCalc = 0;
-    Object.values(weeklyData).forEach(w => {
-        w.dailyCounts.forEach(d => {
-            if (d.branch !== currentShopName) {
-                rotatingIncome += d.income;
-                rotatingCust += d.count;
-                rotatingBarberCalc += Math.max(d.income * (currentPerc / 100), currentGuar);
-            }
-        });
-    });
-
-    // --- 🟡 สร้าง HTML รายสัปดาห์ ---
-    const weeklyHtml = Object.entries(weeklyData).map(([wk, data]) => {
-        let mainOpen = 0, rotDays = 0;
-        data.dailyCounts.forEach(d => { 
-            if (d.branch === currentShopName) mainOpen++; 
-            else rotDays++;
-        });
-        const mainInc = data.mainBranchIncome || 0;
-        return `
-        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:12px; border-radius:15px; margin-bottom:8px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <div style="font-size:13px; font-weight:800; color:#f8fafc;">${wk}</div>
-                    <div style="font-size:10px; color:#94a3b8;">เปิด ${mainOpen} | เวียน ${rotDays} | หยุด ${data.offDays}</div>
+    // Helper: Progress Bar Render
+    const renderStats = (statsObj, color = "#38bdf8") => {
+        const entries = Object.entries(statsObj).sort((a, b) => b[1] - a[1]);
+        if (entries.length === 0) return `<div style="font-size:12px; color:#64748b; padding:10px;">ไม่มีข้อมูล</div>`;
+        const maxVal = entries[0][1];
+        return entries.map(([name, count]) => {
+            const width = maxVal > 0 ? (count / maxVal) * 100 : 0;
+            return `
+            <div style="margin-bottom:14px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
+                    <span style="color:#e2e8f0;">${name}</span>
+                    <span style="color:${color}; font-weight:800;">${count}</span>
                 </div>
-                <div style="text-align:right;">
-                    <div style="font-size:14px; font-weight:800; color:#facc15;">฿${mainInc.toLocaleString()}</div>
-                    <div style="font-size:9px; color:#64748b;">รายได้ที่ ${currentShopName}</div>
+                <div style="width:100%; height:6px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;">
+                    <div style="width:${width}%; height:100%; background:${color}; border-radius:10px;"></div>
                 </div>
-            </div>
-        </div>`;
-    }).join("");
+            </div>`;
+        }).join("");
+    };
 
-    // --- 🟣 HTML ส่วนสาขาเวียน (ซ่อนถ้าไม่มีข้อมูล) ---
-    const rotatingSection = rotatingIncome > 0 ? `
-    <div style="background:rgba(56,189,248,0.1); border:1px dashed #38bdf8; padding:15px; border-radius:18px; margin:15px 0;">
-        <div style="font-size:12px; color:#38bdf8; font-weight:800; margin-bottom:8px;">🚗 ข้อมูลสาขาเวียน (ไม่ใช่ ${currentShopName})</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:12px;">
-            <div>ลูกค้า: <b>${rotatingCust} คน</b></div>
-            <div>รายได้ช่าง: <b style="color:#38bdf8;">฿${rotatingBarberCalc.toLocaleString()}</b></div>
-            <div style="grid-column: span 2;">รายได้รวมสาขาเวียน: <b>฿${rotatingIncome.toLocaleString()}</b></div>
-        </div>
-    </div>` : "";
-
-    // --- 🟠 การเตรียม Insight แบบละเอียด ---
-    const insights = [
-        `วันทำงาน: เปิดร้านทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
-        `สัปดาห์ที่มีลูกค้ามากที่สุด: <b>${stats.topCountWeek ? stats.topCountWeek[0] : "-"}</b>`,
-        (stats.topIncomeWeek && (stats.topIncomeWeek[1].mainBranchIncome || 0) > 0) 
-            ? `สัปดาห์ที่มีรายได้สูงสุด: <b>${stats.topIncomeWeek[0]}</b> (฿${stats.topIncomeWeek[1].mainBranchIncome.toLocaleString()})` 
-            : `สัปดาห์ที่มีรายได้สูงสุด: <b>-</b>`
-    ];
-
-    // 🎯 เพิ่ม Logic วิเคราะห์ลูกค้า ใหม่/ประจำ
-    if (stats.totalNew > 0 || stats.totalRegular > 0) {
-        const newColor = "#38bdf8"; // สี Primary
-        const regColor = "#facc15"; // สี Warning
-        const newText = `<span style="color: ${newColor}; font-weight: bold;">ใหม่ ${stats.totalNew}</span>`;
-        const regText = `<span style="color: ${regColor}; font-weight: bold;">ประจำ ${stats.totalRegular}</span>`;
-        
-        insights.push(`โครงสร้างลูกค้าเดือนนี้: <b>${stats.totalRegular > stats.totalNew ? "ลูกค้าประเป็นหลัก" : stats.totalNew > stats.totalRegular ? "ลูกค้าใหม่เพิ่มขึ้น" : "สัดส่วนพอๆ กัน"} (${regText} / ${newText})</b>`);
-             
-        const maxNewText = `<span style="color: ${newColor};">ใหม่ (<b>${stats.maxNewWeek}</b>)</span>`;
-        const maxRegText = `<span style="color: ${regColor};">ประจำ (<b>${stats.maxRegWeek}</b>)</span>`;
-        
-        insights.push(`สัปดาห์ลูกค้าเยอะสุดแยกกลุ่ม: ${maxNewText} | ${maxRegText}`);
-    } 
-
-    // วิเคราะห์วันที่ลูกค้าเยอะ/น้อย
-    if (stats.busiestDay && stats.busiestDay.avg > 0) {
-        const dayText = (!stats.quietestDay || stats.busiestDay.avg === stats.quietestDay.avg) 
-            ? `ลูกค้าเข้าเยอะเป็นพิเศษใน <b>วัน${stats.busiestDay.name}</b>` 
-            : `ลูกค้าเข้าเยอะใน <b>วัน${stats.busiestDay.name}</b> และน้อยใน <b>วัน${stats.quietestDay.name}</b>`;
-        insights.push(dayText);
-    }
+    // UI: Weekly Cards (Main Branch Only)
+    const weeklyHtml = Object.entries(weeklyData)
+        .filter(([_, data]) => !data.isRotateBranch)
+        .map(([wk, data]) => {
+            const wBarber = data.dailyCounts ? data.dailyCounts.reduce((sum, d) => sum + Number(d.barberEarn || 0), 0) : 0;
+            const wShop = (data.income || 0) - wBarber;
+            return `
+            <div style="background:rgba(30,41,59,0.5); border:1px solid rgba(255,255,255,0.05); border-radius:20px; padding:16px; margin-bottom:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <span style="font-weight:800; color:#fff; font-size:14px;">🗓️ ${wk}</span>
+                    <span style="font-size:10px; color:#64748b; background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:8px;">${data.workDays} วัน</span>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px;">
+                    <div style="text-align:center;">
+                        <div style="font-size:9px; color:#64748b;">รายได้</div>
+                        <div style="font-size:13px; font-weight:700; color:#fff;">${(data.income || 0).toLocaleString()}</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div style="font-size:9px; color:#bef264;">ช่าง</div>
+                        <div style="font-size:13px; font-weight:700; color:#bef264;">${Math.floor(wBarber).toLocaleString()}</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div style="font-size:9px; color:#38bdf8;">ร้าน</div>
+                        <div style="font-size:13px; font-weight:700; color:#38bdf8;">${Math.floor(wShop).toLocaleString()}</div>
+                    </div>
+                </div>
+            </div>`;
+        }).join("");
 
     openReportModal(
-        `รายงานเดือน ${m}`,
-        `<div style="background:#0f172a; padding:20px; color:#f1f5f9; border-radius:20px; font-family:sans-serif;">
+        `Monthly Insight ${m}`,
+        `<div style="background:#020617; color:#f8fafc; padding:20px; font-family:-apple-system, sans-serif; line-height:1.5;">
             
-            <!-- ส่วนที่ 1: รายได้รวม -->
-            <div style="background:linear-gradient(180deg, #1e293b, #0f172a); border:1px solid rgba(255,255,255,0.1); padding:20px; border-radius:20px; text-align:center;">
-                <div style="font-size:12px; color:#94a3b8;">รายได้รวมทั้งหมด</div>
-                <div style="font-size:42px; font-weight:900; margin-bottom:15px;">฿${monthTotal.toLocaleString()}</div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; text-align:left;">
-                    <div><small style="color:#94a3b8;">รายได้ช่าง</small><br><b>฿${monthBarber.toLocaleString()}</b></div>
-                    <div><small style="color:#94a3b8;">รายได้ร้าน</small><br><b style="color:#facc15;">฿${(monthTotal-monthBarber).toLocaleString()}</b></div>
-                    <div><small style="color:#94a3b8;">ลูกค้าทั้งหมด</small><br><b>${monthCount} คน</b></div>
-                    <div><small style="color:#94a3b8;">งาน/หยุด</small><br><b>${workDays}/${offDays} วัน</b></div>
-                    <div style="grid-column: span 2;"><small style="color:#94a3b8;">ประกันรายได้</small><br><b style="color:#fb7185;">${monthGuarDays || 0} วัน</b></div>
+            <!-- Header -->
+            <div style="text-align:center; margin-bottom:24px; padding-top:10px;">
+                <div style="font-size:13px; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:1px;">Monthly Revenue</div>
+                <div style="font-size:42px; font-weight:900; color:#fff; margin:5px 0;">฿${monthTotal.toLocaleString()}</div>
+                <div style="display:inline-block; background:rgba(34,197,94,0.1); color:#4ade80; font-size:11px; padding:4px 12px; border-radius:20px;">
+                    เฉลี่ย ฿${Math.floor(monthTotal / workDays).toLocaleString()} / วัน
                 </div>
             </div>
 
-            ${rotatingSection}
+            <!-- 1. Summary Card (All-in-one) -->
+            <div style="background:linear-gradient(145deg, rgba(30,41,59,0.8), rgba(15,23,42,0.8)); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:20px; margin-bottom:20px; backdrop-filter:blur(10px);">
+                <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:15px;">
+                    <div>
+                        <div style="font-size:10px; color:#64748b;">✂️ รายได้ช่าง</div>
+                        <div style="font-size:18px; font-weight:800; color:#bef264;">฿${Math.floor(monthBarber).toLocaleString()}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:10px; color:#64748b;">🏪 รายได้ร้าน</div>
+                        <div style="font-size:18px; font-weight:800; color:#38bdf8;">฿${Math.floor(monthTotal - monthBarber).toLocaleString()}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:10px; color:#64748b;">👤 ลูกค้า</div>
+                        <div style="font-size:18px; font-weight:800;">${monthCount} <small style="font-size:10px; font-weight:400; color:#64748b;">คน</small></div>
+                    </div>
+                    <div>
+                        <div style="font-size:10px; color:#64748b;">📅 วันทำงาน/หยุด</div>
+                        <div style="font-size:18px; font-weight:800;">${workDays} / ${offDays}</div>
+                    </div>
+                    <div style="grid-column: 1/-1; border-top: 1px solid rgba(255,255,255,0.05); pt:15px; padding-top:12px; margin-top:5px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:11px; color:#facc15;">🛡️ ประกันรายได้</span>
+                        <span style="font-size:16px; font-weight:800; color:#facc15;">${monthGuarDays || 0} วัน</span>
+                    </div>
+                </div>
+            </div>
 
-            <!-- ส่วนรายสัปดาห์ -->
-            <div style="margin-top:20px;">
-                <div style="font-size:14px; font-weight:800; color:#bef264; margin-bottom:10px;">📊 สรุปรายสัปดาห์ (เฉพาะ ${currentShopName})</div>
+            <!-- 2. Rotate Branch (Conditional) -->
+            ${rotateBranchStats && rotateBranchStats.customers > 0 ? `
+            <div style="background:rgba(56,189,248,0.05); border:1px solid rgba(56,189,248,0.15); border-radius:24px; padding:18px; margin-bottom:20px;">
+                <div style="font-size:13px; font-weight:800; color:#38bdf8; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                    🔄 รายได้สาขาเวียน
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-size:10px; color:#94a3b8;">ลูกค้า</div>
+                        <div style="font-size:20px; font-weight:800;">${rotateBranchStats.customers}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:10px; color:#94a3b8;">รายได้ช่าง</div>
+                        <div style="font-size:20px; font-weight:800; color:#bef264;">฿${Math.floor(rotateBranchStats.barberIncome || 0).toLocaleString()}</div>
+                    </div>
+                </div>
+            </div>` : ''}
+
+            <!-- Insights (Main Only) -->
+            <div style="margin-bottom:24px;">
+                <div style="font-size:13px; font-weight:800; color:#facc15; margin-bottom:12px; padding-left:5px;">📊 Analytics Insights</div>
+                <div style="background:rgba(255,255,255,0.03); border-radius:20px; padding:15px; font-size:12px; color:#cbd5e1;">
+                    <div style="margin-bottom:8px;">• สัปดาห์ลูกค้าสูงสุด: <b>${stats.topCountWeek ? stats.topCountWeek[0] : '-'}</b></div>
+                    <div style="margin-bottom:8px;">• วันที่ลูกค้าเยอะสุด: <b>วัน${stats.busiestDay ? stats.busiestDay.name : '-'}</b></div>
+                    <div>• สัดส่วนลูกค้า: <span style="color:#4ade80;">ใหม่ ${stats.totalNew}</span> / <span style="color:#c084fc;">ประจำ ${stats.totalRegular}</span></div>
+                </div>
+            </div>
+
+            <!-- Weekly -->
+            <div style="margin-bottom:24px;">
+                <div style="font-size:13px; font-weight:800; color:#38bdf8; margin-bottom:12px; padding-left:5px;">🌀 Weekly Performance</div>
                 ${weeklyHtml}
             </div>
 
-            <!-- ส่วน Insights แบบละเอียด -->
-            <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; margin-top:20px; margin-bottom:25px;">
-                <div style="font-size:14px; font-weight:800; color:#facc15; margin-bottom:10px;">💡 Insights & Analysis</div>
-                ${insights.map(i => `<div style="font-size:12px; margin-bottom:8px; line-height:1.5;">• ${i}</div>`).join("")}
+            <!-- Charts Section -->
+            <div style="display:grid; grid-template-columns:1fr; gap:20px; margin-bottom:80px;">
+                <div style="background:rgba(255,255,255,0.02); padding:18px; border-radius:24px;">
+                    <div style="font-size:13px; font-weight:800; color:#bef264; margin-bottom:15px;">✂️ Popular Haircuts (Main)</div>
+                    ${renderStats(hairStats, "#bef264")}
+                </div>
+                <div style="background:rgba(255,255,255,0.02); padding:18px; border-radius:24px;">
+                    <div style="font-size:13px; font-weight:800; color:#38bdf8; margin-bottom:15px;">🧴 Popular Services (All)</div>
+                    ${renderStats(serviceStats, "#38bdf8")}
+                </div>
             </div>
 
-            <!-- ส่วนทรงผมยอดนิยม -->
-            <div style="margin-bottom:25px;">
-                <div style="font-size:15px; font-weight:800; color:#bef264; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
-                    <div style="width:4px; height:16px; background:#bef264; border-radius:2px;"></div> 
-                    ทรงผมยอดนิยม (เฉพาะ ${currentShopName})
-                </div>
-                ${renderStats(hairStats, "#bef264")}
-            </div>
-
-            <!-- ส่วนบริการยอดนิยม -->
-            <div style="margin-top:20px;">
-                <div style="font-size:15px; font-weight:800; color:#38bdf8; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
-                    <div style="width:4px; height:16px; background:#38bdf8; border-radius:2px;"></div>
-                    บริการยอดนิยม (ทุกสาขา)
-                </div>
-                ${renderStats(serviceStats, "#38bdf8")}
-            </div>
         </div>`
     );
 }
