@@ -2911,52 +2911,52 @@ const insights = [
 
     `สัปดาห์ลูกค้าเยอะสุด:
     <b>
-        ${topCountWeek ? topCountWeek[0] : "-"}
+        ${stats.topCountWeek ? stats.topCountWeek[0] : "-"}
     </b>`,
 
     `สัปดาห์รายได้สูงสุด:
     <b>
-        ${topIncomeWeek ? topIncomeWeek[0] : "-"}
+        ${stats.topIncomeWeek ? stats.topIncomeWeek[0] : "-"}
     </b>`
 
 ];
 
 // ✅ ลูกค้าใหม่ / ประจำ
-if (totalNew > 0 || totalRegular > 0) {
+if (stats.totalNew > 0 || stats.totalRegular > 0) {
 
     insights.push(`
         ลูกค้าใหม่
         <b style="color:#4ade80;">
-            ${totalNew}
+            ${stats.totalNew}
         </b>
         /
         ลูกค้าประจำ
         <b style="color:#c084fc;">
-            ${totalRegular}
+            ${stats.totalRegular}
         </b>
     `);
 
 }
 
 // ✅ busiest day
-if (busiestDay) {
+if (stats.busiestDay) {
 
     insights.push(`
         ลูกค้าเยอะสุด:
         <b>
-            วัน${busiestDay.name}
+            วัน${stats.busiestDay.name}
         </b>
     `);
 
 }
 
 // ✅ quietest day
-if (quietestDay) {
+if (stats.quietestDay) {
 
     insights.push(`
         ลูกค้าน้อยสุด:
         <b>
-            วัน${quietestDay.name}
+            วัน${stats.quietestDay.name}
         </b>
     `);
 
@@ -2965,12 +2965,12 @@ if (quietestDay) {
 // ✅ top hair/service
 insights.push(`
     ทรงผมยอดนิยม:
-    <b>${topHair ? topHair[0] : "-"}</b>
+    <b>${stats.topHair ? stats.topHair[0] : "-"}</b>
 `);
 
 insights.push(`
     บริการยอดนิยม:
-    <b>${topService ? topService[0] : "-"}</b>
+    <b>${stats.topService ? stats.topService[0] : "-"}</b>
 `);
 
 
