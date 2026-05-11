@@ -1011,16 +1011,29 @@ function addRecord() {
         finalCash = 0;
         finalTrans = total;
     }
-    const newRec = {
+        const newRec = {
         id: Date.now(),
+    
+        // ✅ branch info
+        shop_name: conf.shop || "BARBER SHOP",
+        branch_type: conf.branchType || "สาขาหลัก",
+    
         date: dInp,
         time: timeInp,
+    
         price: price,
         tip: tip,
-        pay: currentPay, 
-        svcs: (hairStyleSelect && hairStyleSelect.value !== "") ? [hairStyleSelect.value] : selectedServices,
+    
+        pay: currentPay,
+    
+        svcs:
+            (hairStyleSelect && hairStyleSelect.value !== "")
+            ? [hairStyleSelect.value]
+            : selectedServices,
+    
         payCash: finalCash,
         payTrans: finalTrans,
+    
         type: 'SERVICE'
     };
     // บันทึกข้อมูล
