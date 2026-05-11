@@ -1363,8 +1363,7 @@ async function saveAndGo(date, total) {
         btn.style.background = "var(--success)"; 
         if (icon) icon.className = "fas fa-spinner fa-spin"; 
     }
-
-    const allToday = db.filter(r => r.date === date);
+    const allToday = db.filter(r => r.date === date && r.shop_name === currentShop && r.branch_type === currentBranch);
     const todayData = allToday.filter(r => r.type === 'SERVICE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
     let cash = 0, tips = 0;
@@ -1376,13 +1375,10 @@ async function saveAndGo(date, total) {
         if (r.pay === "Cash" || r.pay === "เงินสด") { cash += (p + t); }
         else if (r.pay === "Mix") { cash += Number(r.payCash) || 0; }
     });
-    
     // --- 🟢 ส่วนที่ปรับปรุง: ล็อคค่าคอมมิชชัน, ประกัน และ "ชื่อสาขา" ของวันนี้ไว้ ---
     const currentPerc = Number(conf.perc) || 0;
     const currentGuar = Number(conf.guar) || 0;
-    const currentShop = conf.shop || "BARBER SHOP"; // 🆕 ดึงชื่อร้านปัจจุบัน
-    const currentBranch = conf.branchType || "สาขาหลัก"; // 🆕 ดึงประเภทสาขาปัจจุบัน
-
+    const alreadySent = archives.some(a => a.date === date && a.shop_name === currentShop && a.branch_type === currentBranch );
     const commission = total * (currentPerc / 100);
     const baseEarn = Math.max(commission, currentGuar); 
     const bEarn = isHoliday ? 0 : baseEarn + tips;
@@ -1402,11 +1398,11 @@ async function saveAndGo(date, total) {
         branch_type: currentBranch // 🆕 ล็อคประเภทสาขา ณ วันที่ส่ง
     };
     // -------------------------------------------------------
-    
-    const idx = archives.findIndex(a => a.date === date);
+    const idx = archives.findIndex(a => a.date === date && a.shop_name === currentShop && a.branch_type === currentBranch);
     if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
     if (!isHoliday) { account.balance = -settle; }
-    db = db.filter(r => r.date !== date);
+    db = db.filter(r => !( r.date === date && r.shop_name === currentShop && r.branch_type === currentBranch  )
+    );
 
     try {
         if (typeof saveDB === "function") { await saveDB(); } else { await save(); }
