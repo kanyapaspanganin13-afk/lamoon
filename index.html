@@ -857,13 +857,17 @@ function go(p) {
    ========================================================== */
 function saveDB() {
     try {
-        localStorage.setItem("barber_db", JSON.stringify(db));
-        localStorage.setItem("barber_archives", JSON.stringify(archives));
-        localStorage.setItem("barber_account", JSON.stringify(account));
-        localStorage.setItem("barber_conf", JSON.stringify(conf));
-        console.log("💾 บันทึกข้อมูลเรียบร้อยแล้ว");
+        // ตรวจสอบว่ามีข้อมูลจริงก่อนบันทึก (ป้องกันการบันทึกค่าว่างทับข้อมูลเก่า)
+        if (db) localStorage.setItem("barber_db", JSON.stringify(db));
+        if (archives) localStorage.setItem("barber_archives", JSON.stringify(archives));
+        if (account) localStorage.setItem("barber_account", JSON.stringify(account));
+        if (conf) localStorage.setItem("barber_conf", JSON.stringify(conf));
+        
+        console.log("💾 บันทึกข้อมูล [สาขา: " + (conf.branchType || "หลัก") + "] เรียบร้อยแล้ว");
     } catch (e) {
         console.error("❌ ไม่สามารถบันทึกได้:", e);
+        // หากหน่วยความจำเต็ม (QuotaExceededError) แจ้งเตือนผู้ใช้ด้วย notify
+        if (window.notify) notify("error", "บันทึกล้มเหลว", "หน่วยความจำเต็มหรือเกิดข้อผิดพลาด");
     }
 }
 // 1. ฟังก์ชันส่งออกข้อมูล (Backup) - ปรับให้ชื่อ Key ตรงกัน
