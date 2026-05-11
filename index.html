@@ -983,21 +983,23 @@ function addRecord() {
     const tip = parseFloat($("tipInp").value) || 0;
     const total = price + tip; 
     
-    const currentPay = payMethod; 
+    const currentPay = typeof payMethod !== 'undefined' ? payMethod : 'Cash'; 
 
-    // 🎯 1. ตรวจสอบ: กรณีไม่ได้ระบุราคา (ยกเว้นวันหยุดหรือประกัน)
+    // 🎯 1. ตรวจสอบ: ข้อมูลราคา
     if (price === 0 && currentPay !== 'Holiday' && currentPay !== 'Guarantee') {
-        notify("error", "ระบุข้อมูลไม่ครบถ้วน", "กรุณาระบุจำนวนเงินค่าบริการให้ถูกต้อง");
+        if (window.notify) notify("error", "ระบุข้อมูลไม่ครบถ้วน", "กรุณาระบุจำนวนเงินค่าบริการให้ถูกต้อง");
         $("priceInp").focus();
         return;
     }
-    // 🎯 2. ตรวจสอบ: กรณีไม่ได้เลือกรายการทรงผม
+
+    // 🎯 2. ตรวจสอบ: รายการทรงผม
     const hairStyleSelect = $("hairStyle");
     if (hairStyleSelect && hairStyleSelect.value === "" && currentPay !== 'Holiday') {
-        notify("error", "ระบุข้อมูลไม่ครบถ้วน", "กรุณาเลือกรายการทรงผมก่อนการบันทึก");
+        if (window.notify) notify("error", "ระบุข้อมูลไม่ครบถ้วน", "กรุณาเลือกรายการทรงผมก่อนการบันทึก");
         hairStyleSelect.focus();
         return;
     }
+
     // --- ส่วนจัดการยอดเงิน ---
     let finalCash = 0;
     let finalTrans = 0;
@@ -1011,55 +1013,51 @@ function addRecord() {
         finalCash = 0;
         finalTrans = total;
     }
-        const newRec = {
+
+    const newRec = {
         id: Date.now(),
-    
-        // ✅ branch info
         shop_name: conf.shop || "BARBER SHOP",
         branch_type: conf.branchType || "สาขาหลัก",
-    
         date: dInp,
         time: timeInp,
-    
         price: price,
         tip: tip,
-    
         pay: currentPay,
-    
-        svcs:
-            (hairStyleSelect && hairStyleSelect.value !== "")
-            ? [hairStyleSelect.value]
-            : selectedServices,
-    
+        svcs: (hairStyleSelect && hairStyleSelect.value !== "") ? [hairStyleSelect.value] : (typeof selectedServices !== 'undefined' ? selectedServices : []),
         payCash: finalCash,
         payTrans: finalTrans,
-    
         type: 'SERVICE'
     };
-    // บันทึกข้อมูล
+
+    // บันทึกข้อมูลลง DB
     db.push(newRec);
     if (typeof saveDB === "function") {
         saveDB();
     } else {
         localStorage.setItem("barber_db", JSON.stringify(db));
     }
-    // --- ส่วนคำนวณและ Archive ---
+
+    // --- ส่วนคำนวณและ Archive (แก้ไขเครื่องหมายใหม่ทั้งหมด) ---
     if (typeof calculateMoney === "function") {
         const result = calculateMoney(); 
-        const idx = archives.findIndex(a => a.date === dInp && a.shop_name === conf.shop && a.branch_type === conf.branchType);
-        const archiveData = { date: dInp, shop_name: conf.shop || "BARBER SHOP", branch_type: conf.branchType || "สาขาหลัก",
-        settle: result.settle, type:
-        (currentPay === 'Holiday')
-        ? 'HOLIDAY'
-        : 'WORK'
+        const archiveData = { 
+            date: dInp, 
+            shop_name: conf.shop || "BARBER SHOP", 
+            branch_type: conf.branchType || "สาขาหลัก",
+            settle: result.settle || 0, 
+            type: (currentPay === 'Holiday') ? 'HOLIDAY' : 'WORK'
         };
-        if (idx > -1) { archives[idx] = {...archives[idx],...archiveData };
-        }
+
+        const idx = archives.findIndex(a => a.date === dInp && a.shop_name === conf.shop && a.branch_type === conf.branchType);
+        
+        if (idx > -1) { 
+            archives[idx] = { ...archives[idx], ...archiveData };
         } else { 
             archives.push(archiveData); 
         }
         localStorage.setItem("barber_archives", JSON.stringify(archives));
     }
+
     // --- ปรับสถานะปุ่มส่งข้อมูล ---
     const btn = $("btnSubmitSend");
     if (btn) {
@@ -1068,12 +1066,13 @@ function addRecord() {
         const icon = $("btnIcon");
         if (icon) icon.className = "fas fa-paper-plane";
     }
-    // 🔊 เล่นเสียงสำเร็จ (ถ้ามีระบบเสียง)
+
+    // 🔊 เล่นเสียงสำเร็จ
     const sfx = document.getElementById("successSound");
     if (sfx) { sfx.currentTime = 0; sfx.play(); }
 
-    // 🎯 3. แจ้งเตือนความสำเร็จ (ตัด ค่ะ/ครับ ออก)
-    notify("success", "ดำเนินการสำเร็จ", "ระบบจัดเก็บข้อมูลการทำงานเรียบร้อยแล้ว");
+    // 🎯 3. แจ้งเตือนความสำเร็จ
+    if (window.notify) notify("success", "ดำเนินการสำเร็จ", "ระบบจัดเก็บข้อมูลการทำงานเรียบร้อยแล้ว");
 
     // 🎯 4. ล้างค่าในฟอร์ม (Reset Form)
     if ($("priceInp")) $("priceInp").value = "";
@@ -1327,10 +1326,15 @@ async function saveAndGo(date, total) {
     const btn = document.getElementById("btnSubmitSend");
     const icon = document.getElementById("btnIcon");
 
-    // 🎯 1. ดักจับข้อมูลซ้ำ
-    const alreadySent = archives.some(a => a.date === date);
-    if (alreadySent) {
-        if (window.notify) notify("error", "แจ้งเตือน", `ข้อมูลของวันที่ ${date} ได้ดำเนินการส่งเรียบร้อยแล้ว`);
+    // 🎯 1. ดักจับข้อมูลซ้ำ (เพิ่มการเช็ค Shop และ Branch ให้ละเอียดขึ้น)
+    const isAlreadySent = archives.some(a => 
+        a.date === date && 
+        a.shop_name === currentShop && 
+        a.branch_type === currentBranch
+    );
+
+    if (isAlreadySent) {
+        if (window.notify) notify("error", "แจ้งเตือน", `ข้อมูลของวันที่ ${date} (${currentShop}) ได้ดำเนินการส่งเรียบร้อยแล้ว`);
         if (btn) {
             btn.disabled = true; 
             btn.style.background = "#94a3b8";
@@ -1363,22 +1367,28 @@ async function saveAndGo(date, total) {
         btn.style.background = "var(--success)"; 
         if (icon) icon.className = "fas fa-spinner fa-spin"; 
     }
+
     const allToday = db.filter(r => r.date === date && r.shop_name === currentShop && r.branch_type === currentBranch);
     const todayData = allToday.filter(r => r.type === 'SERVICE');
     const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
+    
     let cash = 0, tips = 0;
     
     todayData.forEach(r => {
         const p = Number(r.price) || 0;
         const t = Number(r.tip) || 0;
         tips += t;
-        if (r.pay === "Cash" || r.pay === "เงินสด") { cash += (p + t); }
-        else if (r.pay === "Mix") { cash += Number(r.payCash) || 0; }
+        if (r.pay === "Cash" || r.pay === "เงินสด") { 
+            cash += (p + t); 
+        } else if (r.pay === "Mix") { 
+            cash += Number(r.payCash) || 0; 
+        }
     });
-    // --- 🟢 ส่วนที่ปรับปรุง: ล็อคค่าคอมมิชชัน, ประกัน และ "ชื่อสาขา" ของวันนี้ไว้ ---
+
+    // --- 🟢 ส่วนที่ปรับปรุง: คำนวณค่าต่างๆ ---
     const currentPerc = Number(conf.perc) || 0;
     const currentGuar = Number(conf.guar) || 0;
-    const alreadySent = archives.some(a => a.date === date && a.shop_name === currentShop && a.branch_type === currentBranch );
+    
     const commission = total * (currentPerc / 100);
     const baseEarn = Math.max(commission, currentGuar); 
     const bEarn = isHoliday ? 0 : baseEarn + tips;
@@ -1394,18 +1404,34 @@ async function saveAndGo(date, total) {
         details: allToday,
         guar_used: currentGuar, 
         perc_used: currentPerc,
-        shop_name: currentShop,   // 🆕 ล็อคชื่อร้าน ณ วันที่ส่ง
-        branch_type: currentBranch // 🆕 ล็อคประเภทสาขา ณ วันที่ส่ง
+        shop_name: currentShop,   
+        branch_type: currentBranch 
     };
+
     // -------------------------------------------------------
+    // อัปเดต archives
     const idx = archives.findIndex(a => a.date === date && a.shop_name === currentShop && a.branch_type === currentBranch);
-    if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
-    if (!isHoliday) { account.balance = -settle; }
-    db = db.filter(r => !( r.date === date && r.shop_name === currentShop && r.branch_type === currentBranch  )
-    );
+    if (idx > -1) { 
+        archives[idx] = data; 
+    } else { 
+        archives.push(data); 
+    }
+
+    // อัปเดตยอดค้างชำระ (Balance)
+    if (!isHoliday) { 
+        // แนะนำให้ใช้ -= เพื่อคำนวณสะสม หรือปรับตาม Logic บัญชีของคุณ
+        account.balance = (account.balance || 0) - settle; 
+    }
+
+    // ลบข้อมูลที่ส่งแล้วออกจาก db ชั่วคราว
+    db = db.filter(r => !(r.date === date && r.shop_name === currentShop && r.branch_type === currentBranch));
 
     try {
-        if (typeof saveDB === "function") { await saveDB(); } else { await save(); }
+        if (typeof saveDB === "function") { 
+            await saveDB(); 
+        } else { 
+            await save(); 
+        }
         
         if (btn) {
             btn.style.background = "#94a3b8";
@@ -1418,12 +1444,13 @@ async function saveAndGo(date, total) {
         if (window.notify) notify("success", "ดำเนินการสำเร็จ", `ส่งข้อมูล ${currentShop} (${currentBranch}) เรียบร้อยแล้ว`);
 
     } catch (e) {
+        console.error(e);
         if (btn) {
             btn.disabled = false;
             btn.style.background = "var(--danger)";
             if (icon) icon.className = "fas fa-paper-plane";
         }
-        if (window.notify) notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถส่งข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง");
+        if (window.notify) notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
     }
 }
 // --- ฟังก์ชันลบข้อมูลแยกออกมา ---
@@ -2513,525 +2540,198 @@ function loadHistDaily() {
     `);
 }
 function loadHistMonth() {
-
     const $ = (id) => document.getElementById(id);
-
-    const m = $("histMonth").value;
+    const m = $("histMonth") ? $("histMonth").value : "";
 
     // =====================================================
     // ✅ VALIDATE
     // =====================================================
-
     if (!m) {
-
-        if (window.notify)
-            notify("⚠️ กรุณาเลือกเดือนก่อน", "warning");
-        else
-            alert("กรุณาเลือกเดือนก่อน");
-
+        if (window.notify) notify("⚠️ กรุณาเลือกเดือนก่อน", "warning");
+        else alert("กรุณาเลือกเดือนก่อน");
         return;
-
     }
 
     if (typeof archives === 'undefined') {
-
-        if (window.notify)
-            notify("❌ ไม่พบฐานข้อมูลหลัก (archives)", "error");
-        else
-            alert("ไม่พบฐานข้อมูลหลัก (archives)");
-
+        if (window.notify) notify("❌ ไม่พบฐานข้อมูลหลัก (archives)", "error");
+        else alert("ไม่พบฐานข้อมูลหลัก (archives)");
         return;
-
     }
 
     // =====================================================
     // ✅ FILTER MONTH
     // =====================================================
-
-    const filtered = archives.filter(a =>
-        a.date &&
-        a.date.startsWith(m)
-    );
+    const filtered = archives.filter(a => a.date && a.date.startsWith(m));
 
     if (!filtered.length) {
+        if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
+        if (window.calcNetProfit) window.calcNetProfit();
+        if (window.notify) notify(`📊 ไม่พบข้อมูลของเดือน ${m}`, "info");
 
-        if ($("shopTotalMonth"))
-            $("shopTotalMonth").innerText = "฿0";
-
-        if (window.calcNetProfit)
-            window.calcNetProfit();
-
-        if (window.notify)
-            notify(`📊 ไม่พบข้อมูลของเดือน ${m}`, "info");
-
-        return openReportModal(
-            "📊 สรุปรายเดือน",
-            `
-            <div style='
-                text-align:center;
-                padding:50px;
-                color:#94a3b8;
-            '>
-                ไม่พบข้อมูลของเดือน ${m}
-            </div>
-            `
-        );
-
+        // ตรวจสอบว่ามีฟังก์ชัน openReportModal หรือไม่
+        if (typeof openReportModal === "function") {
+            openReportModal(
+                "📊 สรุปรายเดือน",
+                `<div style='text-align:center; padding:50px; color:#94a3b8;'>ไม่พบข้อมูลของเดือน ${m}</div>`
+            );
+        }
+        return;
     }
 
     // =====================================================
-    // ✅ MONTH VARIABLES
+    // ✅ INITIAL VARIABLES
     // =====================================================
-
     let countNew = 0;
     let countRegular = 0;
-
-    // ✅ MAIN BRANCH ONLY
     let monthTotal = 0;
     let monthBarber = 0;
     let monthCount = 0;
-
-    // ✅ ALL
     let monthGuarDays = 0;
-
     let hairStats = {};
     let serviceStats = {};
-
     let offDays = 0;
     let workDays = 0;
-
     let weeklyData = {};
 
-    // =====================================================
-    // ✅ ROTATE BRANCH
-    // =====================================================
-
     let rotateBranchStats = {
-
         totalIncome: 0,
         barberIncome: 0,
         customers: 0
-
     };
 
-    // =====================================================
-    // ✅ CONSTANTS
-    // =====================================================
-
-    const haircutList = [
-
-        "แฟชั่น",
-        "สกินเฟด",
-        "รองทรง",
-        "ตำรวจ/ทหาร",
-        "นักเรียน",
-        "ทรงนักเรียน",
-        "เปิดข้าง",
-        "ซอยผม/เล็มผม",
-        "แก้ผม",
-        "โกนผม",
-        "เด็ก"
-
-    ];
-
-    const dayNames = [
-
-        "อาทิตย์",
-        "จันทร์",
-        "อังคาร",
-        "พุธ",
-        "พฤหัสบดี",
-        "ศุกร์",
-        "เสาร์"
-
-    ];
+    const haircutList = ["แฟชั่น", "สกินเฟด", "รองทรง", "ตำรวจ/ทหาร", "นักเรียน", "ทรงนักเรียน", "เปิดข้าง", "ซอยผม/เล็มผม", "แก้ผม", "โกนผม", "เด็ก"];
+    const dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
 
     // =====================================================
     // ✅ LOOP DAYS
     // =====================================================
-
     filtered.forEach(day => {
-
         const dObj = new Date(day.date);
+        const isRotateBranch = day.branch_type === "สาขาเวียน";
 
-        // ✅ CHECK BRANCH
-        const isRotateBranch =
-            day.branch_type === "สาขาเวียน";
-
-        // =====================================================
-        // ✅ WEEK
-        // =====================================================
-
-        const firstDayOfMonth =
-            new Date(
-                dObj.getFullYear(),
-                dObj.getMonth(),
-                1
-            ).getDay();
-
-        let wIdx =
-            Math.ceil(
-                (dObj.getDate() + firstDayOfMonth) / 7
-            );
-
+        // --- คำนวณสัปดาห์ ---
+        const firstDayOfMonth = new Date(dObj.getFullYear(), dObj.getMonth(), 1).getDay();
+        let wIdx = Math.ceil((dObj.getDate() + firstDayOfMonth) / 7);
         const wKey = `สัปดาห์ที่ ${wIdx}`;
 
         if (!weeklyData[wKey]) {
-
             weeklyData[wKey] = {
-
-                customers: 0,
-
-                workDays: 0,
-                offDays: 0,
-
-                zeroDays: 0,
-                guarDays: 0,
-
-                dailyCounts: [],
-
-                countNew: 0,
-                countRegular: 0,
-
-                popularHair: {},
-                popularService: {},
-
-                income: 0
-
+                customers: 0, workDays: 0, offDays: 0, zeroDays: 0,
+                guarDays: 0, dailyCounts: [], countNew: 0, countRegular: 0,
+                popularHair: {}, popularService: {}, income: 0
             };
-
         }
 
-        // =====================================================
-        // ✅ HOLIDAY
-        // =====================================================
-
-        if (
-            day.off === true ||
-            day.type === "HOLIDAY"
-        ) {
-
+        // --- เช็ควันหยุด ---
+        if (day.off === true || day.type === "HOLIDAY") {
             if (!isRotateBranch) {
-
                 offDays++;
                 weeklyData[wKey].offDays++;
-
             }
-
             return;
-
         }
 
-        // =====================================================
-        // ✅ WORK DAYS
-        // =====================================================
-
+        // --- เช็ควันทำงาน ---
         if (!isRotateBranch) {
-
             workDays++;
             weeklyData[wKey].workDays++;
-
         }
 
-        // =====================================================
-        // ✅ GUARANTEE
-        // =====================================================
-
-        const hasInsurance =
-            day.details &&
-            day.details.some(
-                d => d.type === "GUARANTEE_CLAIM"
-            );
-
+        // --- เช็คประกัน ---
+        const hasInsurance = day.details && Array.isArray(day.details) && day.details.some(d => d.type === "GUARANTEE_CLAIM");
         if (hasInsurance) {
-
             monthGuarDays++;
-
-            if (!isRotateBranch) {
-
-                weeklyData[wKey].guarDays++;
-
-            }
-
+            if (!isRotateBranch) weeklyData[wKey].guarDays++;
         }
 
-        // =====================================================
-        // ✅ DAILY MONEY
-        // =====================================================
-
-        const dailyIncome =
-            Number(day.total) || 0;
-
-        const dailyBarber =
-            Number(day.barber) || 0;
-
-        // =====================================================
-        // ✅ SEPARATE BRANCH
-        // =====================================================
+        const dailyIncome = Number(day.total) || 0;
+        const dailyBarber = Number(day.barber) || 0;
 
         if (isRotateBranch) {
-
             rotateBranchStats.totalIncome += dailyIncome;
-
             rotateBranchStats.barberIncome += dailyBarber;
-
         } else {
-
             monthTotal += dailyIncome;
-
             monthBarber += dailyBarber;
-
             weeklyData[wKey].income += dailyIncome;
-
         }
 
-        // =====================================================
-        // ✅ CUSTOMER
-        // =====================================================
-
+        // --- ประมวลผลลูกค้า ---
         let dayCustomerCount = 0;
-
-        if (
-            day.details &&
-            Array.isArray(day.details)
-        ) {
-
+        if (day.details && Array.isArray(day.details)) {
             day.details.forEach(d => {
-
-                if (d.type !== "SERVICE")
-                    return;
-
-                // ✅ COUNT CUSTOMER
+                if (d.type !== "SERVICE") return;
 
                 if (isRotateBranch) {
-
                     rotateBranchStats.customers++;
-
                 } else {
-
                     monthCount++;
-
                     weeklyData[wKey].customers++;
-
                     dayCustomerCount++;
-
                 }
 
-                // =====================================================
-                // ✅ CUSTOMER TYPE
-                // =====================================================
-
-                const type =
-                    String(d.custType || "")
-                    .toLowerCase()
-                    .trim();
-
+                const type = String(d.custType || "").toLowerCase().trim();
                 if (type === "new") {
-
                     countNew++;
-
-                    if (!isRotateBranch) {
-
-                        weeklyData[wKey].countNew++;
-
-                    }
-
-                }
-                else if (type === "regular") {
-
+                    if (!isRotateBranch) weeklyData[wKey].countNew++;
+                } else if (type === "regular") {
                     countRegular++;
-
-                    if (!isRotateBranch) {
-
-                        weeklyData[wKey].countRegular++;
-
-                    }
-
+                    if (!isRotateBranch) weeklyData[wKey].countRegular++;
                 }
 
-                // =====================================================
-                // ✅ SERVICES
-                // =====================================================
-
-                const svcs =
-                    Array.isArray(d.svcs)
-                    ? d.svcs
-                    : [d.svcs];
-
+                const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
                 svcs.forEach(s => {
-
                     if (!s) return;
-
                     const cleanS = s.trim();
-
-                    // ✅ HAIR
-
-                    if (
-                        haircutList.includes(cleanS)
-                    ) {
-
-                        hairStats[cleanS] =
-                            (hairStats[cleanS] || 0) + 1;
-
-                        if (!isRotateBranch) {
-
-                            weeklyData[wKey]
-                            .popularHair[cleanS] =
-
-                                (
-                                    weeklyData[wKey]
-                                    .popularHair[cleanS] || 0
-                                ) + 1;
-
-                        }
-
+                    if (haircutList.includes(cleanS)) {
+                        hairStats[cleanS] = (hairStats[cleanS] || 0) + 1;
+                        if (!isRotateBranch) weeklyData[wKey].popularHair[cleanS] = (weeklyData[wKey].popularHair[cleanS] || 0) + 1;
+                    } else {
+                        serviceStats[cleanS] = (serviceStats[cleanS] || 0) + 1;
+                        if (!isRotateBranch) weeklyData[wKey].popularService[cleanS] = (weeklyData[wKey].popularService[cleanS] || 0) + 1;
                     }
-
-                    // ✅ SERVICE
-
-                    else {
-
-                        serviceStats[cleanS] =
-                            (serviceStats[cleanS] || 0) + 1;
-
-                        if (!isRotateBranch) {
-
-                            weeklyData[wKey]
-                            .popularService[cleanS] =
-
-                                (
-                                    weeklyData[wKey]
-                                    .popularService[cleanS] || 0
-                                ) + 1;
-
-                        }
-
-                    }
-
                 });
-
             });
-
         }
 
-        // =====================================================
-        // ✅ ZERO DAY
-        // =====================================================
-
-        if (
-            !isRotateBranch &&
-            dayCustomerCount === 0
-        ) {
-
+        if (!isRotateBranch && dayCustomerCount === 0) {
             weeklyData[wKey].zeroDays++;
-
         }
-
-        // =====================================================
-        // ✅ DAILY COUNTS
-        // =====================================================
 
         if (!isRotateBranch) {
-
             weeklyData[wKey].dailyCounts.push({
-
-                dayName:
-                    dayNames[dObj.getDay()],
-
-                count:
-                    dayCustomerCount,
-
-                income:
-                    dailyIncome,
-
-                barberEarn:
-                    dailyBarber
-
+                dayName: dayNames[dObj.getDay()],
+                count: dayCustomerCount,
+                income: dailyIncome,
+                barberEarn: dailyBarber
             });
-
         }
-
     });
 
     // =====================================================
-    // ✅ TOTAL ALL BRANCHES
+    // ✅ FINAL CALCULATION & DISPLAY
     // =====================================================
-
-    const allBranchTotal =
-
-        monthTotal +
-        rotateBranchStats.totalIncome;
-
-    const allBranchBarber =
-
-        monthBarber +
-        rotateBranchStats.barberIncome;
-
-    // =====================================================
-    // ✅ SHOP EARN
-    // =====================================================
-
-    const realShopEarn =
-        allBranchTotal - allBranchBarber;
+    const allBranchTotal = monthTotal + rotateBranchStats.totalIncome;
+    const allBranchBarber = monthBarber + rotateBranchStats.barberIncome;
+    const realShopEarn = allBranchTotal - allBranchBarber;
 
     if ($("shopTotalMonth")) {
-
-        $("shopTotalMonth").innerText =
-            "฿" +
-            Math.floor(realShopEarn)
-            .toLocaleString();
-
+        $("shopTotalMonth").innerText = "฿" + Math.floor(realShopEarn).toLocaleString();
     }
 
-    if (window.calcNetProfit)
-        window.calcNetProfit();
+    if (window.calcNetProfit) window.calcNetProfit();
 
-    // =====================================================
-    // ✅ AVG
-    // =====================================================
+    const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
 
-    const avgCustomerPerDay =
-
-        workDays > 0
-        ? (monthCount / workDays)
-        : 0;
-
-    // =====================================================
-    // ✅ REPORT
-    // =====================================================
-
-    generateMonthlyReport(
-
-        m,
-
-        // ✅ TOTAL ALL BRANCHES
-        allBranchTotal,
-
-        // ✅ TOTAL BARBER ALL BRANCHES
-        allBranchBarber,
-
-        // ✅ MAIN ONLY
-        monthCount,
-
-        workDays,
-        offDays,
-
-        avgCustomerPerDay,
-
-        weeklyData,
-
-        hairStats,
-        serviceStats,
-
-        monthGuarDays,
-
-        countNew,
-        countRegular,
-
-        rotateBranchStats
-
-    );
-
+    // ตรวจสอบว่ามีฟังก์ชันนี้ก่อนเรียกใช้
+    if (typeof generateMonthlyReport === "function") {
+        generateMonthlyReport(
+            m, allBranchTotal, allBranchBarber, monthCount,
+            workDays, offDays, avgCustomerPerDay, weeklyData,
+            hairStats, serviceStats, monthGuarDays,
+            countNew, countRegular, rotateBranchStats
+        );
+    }
 }
 function processMonthlyStats(
     weeklyData,
@@ -4176,39 +3876,42 @@ function openSettings() {
     }
 }
 function saveSettings() {
-    // 1. ดึงค่าจากฟอร์ม
+    // 1. ดึงค่าจากฟอร์ม (เพิ่ม .trim() เพื่อลบช่องว่างที่ชื่อร้าน)
     const settings = {
         branchType: $("setBranchType")?.value || "สาขาหลัก", 
-        shop:  $("setShop")?.value || "BARBER SHOP",
-        perc:  parseFloat($("setPerc")?.value) || 0,
-        guar:  parseFloat($("setGuar")?.value) || 0,
-        theme: $("setTheme")?.value || "light",
-        voice: $("setVoice")?.value || "female",
-        sound: $("setSound")?.value || "on"
+        shop:      ($("setShop")?.value || "BARBER SHOP").trim(),
+        perc:      parseFloat($("setPerc")?.value) || 0,
+        guar:      parseFloat($("setGuar")?.value) || 0,
+        theme:     $("setTheme")?.value || "light",
+        voice:     $("setVoice")?.value || "female",
+        sound:     $("setSound")?.value || "on"
     };
 
-    // 2. อัปเดตตัวแปรกลาง (conf) ทันที
-    Object.assign(conf, settings);
+    // 2. อัปเดตตัวแปรกลาง (conf)
+    if (typeof conf !== 'undefined') {
+        Object.assign(conf, settings);
+    }
 
-    // 3. บันทึกลง LocalStorage (ระบบยังจำค่า branchType ไว้ในนี้)
-    localStorage.setItem('barber_conf', JSON.stringify(conf));
+    // 3. บันทึกลง LocalStorage
+    localStorage.setItem('barber_conf', JSON.stringify(settings)); // บันทึกก้อนใหญ่ทีเดียว
     
+    // บันทึกแยกคีย์ (เพื่อความสะดวกในการดึงใช้จุดอื่น)
     localStorage.setItem('shopName', settings.shop);
     localStorage.setItem('shopPerc', settings.perc);
     localStorage.setItem('shopGuar', settings.guar);
-    
     localStorage.setItem('shopBranch', settings.branchType);
     localStorage.setItem('shopTheme', settings.theme);
     localStorage.setItem('shopVoice', settings.voice);
     localStorage.setItem('shopSound', settings.sound);
-    // 🎯 4. แก้ไขจุดนี้: แสดงเฉพาะชื่อร้าน (ซ่อนประเภทสาขา)
-    const shopTitleEl = document.querySelector('h2') || $("shopNameDisp") || $("shopNameDisplay");
+
+    // 🎯 4. อัปเดตชื่อร้านบนหน้าจอ (ซ่อนประเภทสาขาตามโจทย์)
+    const shopTitleEl = $("shopNameDisp") || $("shopNameDisplay") || document.querySelector('h2');
     if (shopTitleEl) {
-        // แสดงแค่ชื่อร้านที่กรอก เช่น "สาขาA" โดยไม่มี (สาขาหลัก) ต่อท้าย
-        shopTitleEl.innerText = settings.shop.toUpperCase();
+        // ใช้ textContent จะปลอดภัยกว่า innerText ในบาง Browser
+        shopTitleEl.textContent = settings.shop.toUpperCase();
     } 
 
-    // 5. เรียกฟังก์ชันอัปเดต UI 
+    // 5. เรียกฟังก์ชันอัปเดต UI (เพิ่มการเช็คเพื่อความปลอดภัย)
     if (typeof applyTheme === "function")      applyTheme(settings.theme);
     if (typeof calculateMoney === "function")    calculateMoney(); 
     
@@ -4216,13 +3919,14 @@ function saveSettings() {
     if (typeof renderDay === "function")         renderDay(dateVal); 
 
     // 6. ปิด Modal
-    if ($("modalSet")) $("modalSet").style.display = 'none';
+    const modal = $("modalSet");
+    if (modal) modal.style.display = 'none';
 
     // 7. แจ้งเตือนความสำเร็จ
     if (typeof notify === "function") {
         notify("success", "บันทึกสำเร็จ", `ระบบบันทึกข้อมูล ${settings.shop} เรียบร้อยแล้ว`);
     } else {
-        alert("บันทึกสำเร็จ");
+        alert(`บันทึกข้อมูล ${settings.shop} สำเร็จ`);
     }
 }
 async function handleSave(event) {
