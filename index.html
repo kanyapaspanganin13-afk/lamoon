@@ -1326,131 +1326,116 @@ async function saveAndGo(date, total) {
     const btn = document.getElementById("btnSubmitSend");
     const icon = document.getElementById("btnIcon");
 
-    // 🎯 1. ดักจับข้อมูลซ้ำ (เพิ่มการเช็ค Shop และ Branch ให้ละเอียดขึ้น)
+    // 🎯 1. ตรวจสอบสถานะร้านปัจจุบัน (ป้องกันค่าว่าง)
+    const activeShop = currentShop || "Unknown";
+    const activeBranch = currentBranch || "สาขาหลัก";
+
+    // ดักจับข้อมูลซ้ำ
     const isAlreadySent = archives.some(a => 
         a.date === date && 
-        a.shop_name === currentShop && 
-        a.branch_type === currentBranch
+        a.shop_name === activeShop && 
+        a.branch_type === activeBranch
     );
 
     if (isAlreadySent) {
-        if (window.notify) notify("error", "แจ้งเตือน", `ข้อมูลของวันที่ ${date} (${currentShop}) ได้ดำเนินการส่งเรียบร้อยแล้ว`);
-        if (btn) {
-            btn.disabled = true; 
-            btn.style.background = "#94a3b8";
-            if (icon) icon.className = "fas fa-paper-plane";
-            btn.style.cursor = "default";
-        }
+        if (window.notify) notify("error", "แจ้งเตือน", `ข้อมูลวันที่ ${date} (${activeShop}) ส่งไปแล้ว`);
         return;
     }
 
-    // 🎯 2. ยืนยันก่อนส่ง
+    // 🎯 2. ยืนยันการส่ง
     const result = await Swal.fire({
         title: 'ยืนยันการส่งข้อมูล',
-        text: `ต้องการดำเนินการส่งข้อมูลของวันที่ ${date} ใช่หรือไม่?`,
+        text: `ยืนยันส่งข้อมูล ${activeShop} (${activeBranch})`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: 'var(--success)',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: 'ยืนยันการส่ง',
-        cancelButtonText: 'ยกเลิก',
-        background: 'var(--card)',
-        color: 'var(--text)'
+        cancelButtonText: 'ยกเลิก'
     });
 
     if (!result.isConfirmed) return;
 
-    // 🎯 3. เริ่มดำเนินการส่ง
+    // 🎯 3. เริ่มดำเนินการ (แสดง Spinner)
     if (btn) {
-        if (btn.disabled) return; 
         btn.disabled = true;              
-        btn.style.background = "var(--success)"; 
         if (icon) icon.className = "fas fa-spinner fa-spin"; 
     }
 
-    const allToday = db.filter(r => r.date === date && r.shop_name === currentShop && r.branch_type === currentBranch);
-    const todayData = allToday.filter(r => r.type === 'SERVICE');
-    const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
-    
-    let cash = 0, tips = 0;
-    
-    todayData.forEach(r => {
-        const p = Number(r.price) || 0;
-        const t = Number(r.tip) || 0;
-        tips += t;
-        if (r.pay === "Cash" || r.pay === "เงินสด") { 
-            cash += (p + t); 
-        } else if (r.pay === "Mix") { 
-            cash += Number(r.payCash) || 0; 
-        }
-    });
-
-    // --- 🟢 ส่วนที่ปรับปรุง: คำนวณค่าต่างๆ ---
-    const currentPerc = Number(conf.perc) || 0;
-    const currentGuar = Number(conf.guar) || 0;
-    
-    const commission = total * (currentPerc / 100);
-    const baseEarn = Math.max(commission, currentGuar); 
-    const bEarn = isHoliday ? 0 : baseEarn + tips;
-    const settle = isHoliday ? 0 : cash - bEarn;
-
-    const data = { 
-        date, 
-        total, 
-        cash, 
-        barber: Math.floor(bEarn), 
-        settle: settle, 
-        type: isHoliday ? "HOLIDAY" : "WORK", 
-        details: allToday,
-        guar_used: currentGuar, 
-        perc_used: currentPerc,
-        shop_name: currentShop,   
-        branch_type: currentBranch 
-    };
-
-    // -------------------------------------------------------
-    // อัปเดต archives
-    const idx = archives.findIndex(a => a.date === date && a.shop_name === currentShop && a.branch_type === currentBranch);
-    if (idx > -1) { 
-        archives[idx] = data; 
-    } else { 
-        archives.push(data); 
-    }
-
-    // อัปเดตยอดค้างชำระ (Balance)
-    if (!isHoliday) { 
-        // แนะนำให้ใช้ -= เพื่อคำนวณสะสม หรือปรับตาม Logic บัญชีของคุณ
-        account.balance = (account.balance || 0) - settle; 
-    }
-
-    // ลบข้อมูลที่ส่งแล้วออกจาก db ชั่วคราว
-    db = db.filter(r => !(r.date === date && r.shop_name === currentShop && r.branch_type === currentBranch));
-
     try {
-        if (typeof saveDB === "function") { 
-            await saveDB(); 
-        } else { 
-            await save(); 
-        }
+        // กรองข้อมูลเฉพาะของสาขาและร้านที่กำลังเปิดอยู่
+        const allToday = db.filter(r => r.date === date && r.shop_name === activeShop && r.branch_type === activeBranch);
         
-        if (btn) {
-            btn.style.background = "#94a3b8";
-            if (icon) icon.className = "fas fa-paper-plane";
-            btn.disabled = true;              
-            btn.style.cursor = "default";
+        if (allToday.length === 0 && total > 0) {
+            throw new Error("ไม่พบรายการในฐานข้อมูล (โปรดรีเฟรชหน้าจอ)");
         }
 
-        if (typeof loadAccountStatus === 'function') loadAccountStatus();
-        if (window.notify) notify("success", "ดำเนินการสำเร็จ", `ส่งข้อมูล ${currentShop} (${currentBranch}) เรียบร้อยแล้ว`);
+        const todayData = allToday.filter(r => r.type === 'SERVICE');
+        const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
+        
+        let cash = 0, tips = 0;
+        todayData.forEach(r => {
+            const p = Number(r.price) || 0;
+            const t = Number(r.tip) || 0;
+            tips += t;
+            if (r.pay === "Cash" || r.pay === "เงินสด") cash += (p + t);
+            else if (r.pay === "Mix") cash += Number(r.payCash) || 0;
+        });
+
+        const currentPerc = Number(conf.perc) || 0;
+        const currentGuar = Number(conf.guar) || 0;
+        const commission = total * (currentPerc / 100);
+        const bEarn = isHoliday ? 0 : Math.max(commission, currentGuar) + tips;
+        const settle = isHoliday ? 0 : cash - bEarn;
+
+        const data = { 
+            date, total, cash, 
+            barber: Math.floor(bEarn), 
+            settle, 
+            type: isHoliday ? "HOLIDAY" : "WORK", 
+            details: allToday,
+            guar_used: currentGuar, 
+            perc_used: currentPerc,
+            shop_name: activeShop,   
+            branch_type: activeBranch 
+        };
+
+        // อัปเดต archives
+        const idx = archives.findIndex(a => a.date === date && a.shop_name === activeShop && a.branch_type === activeBranch);
+        if (idx > -1) archives[idx] = data; else archives.push(data);
+
+        // อัปเดต Balance (ถ้าไม่ใช่สาขาเวียน หรือตามกฎบัญชีของคุณ)
+        if (!isHoliday && typeof account !== 'undefined') {
+            account.balance = (account.balance || 0) - settle;
+        }
+
+        // ลบข้อมูลที่ส่งแล้วออกจาก db หลัก
+        db = db.filter(r => !(r.date === date && r.shop_name === activeShop && r.branch_type === activeBranch));
+
+        // 💾 บันทึกข้อมูล
+        if (typeof saveDB === "function") {
+            await saveDB(); 
+        } else if (typeof save === "function") {
+            await save();
+        }
+
+        if (window.notify) notify("success", "ดำเนินการสำเร็จ", `ส่งข้อมูลเรียบร้อยแล้ว`);
 
     } catch (e) {
-        console.error(e);
+        console.error("Save Error:", e);
+        if (window.notify) notify("error", "เกิดข้อผิดพลาด", e.message || "ไม่สามารถบันทึกข้อมูลได้");
+        
+        // 🚨 กรณี Error: คืนค่าปุ่มให้กดใหม่ได้
         if (btn) {
             btn.disabled = false;
-            btn.style.background = "var(--danger)";
             if (icon) icon.className = "fas fa-paper-plane";
         }
-        if (window.notify) notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+    } finally {
+        // ส่วนนี้จะทำงานเสมอ ป้องกัน Spinner หมุนค้าง
+        if (btn && btn.disabled === true) {
+            btn.style.background = "#94a3b8";
+            btn.style.cursor = "default";
+            if (icon) icon.className = "fas fa-paper-plane";
+        }
+        if (typeof loadAccountStatus === 'function') loadAccountStatus();
     }
 }
 // --- ฟังก์ชันลบข้อมูลแยกออกมา ---
