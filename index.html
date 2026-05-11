@@ -1321,16 +1321,18 @@ function updateMixValues() {
    (ระบบคำนวณส่วนแบ่งและการปิดยอดรายวัน)
    ========================================================== */
 async function saveAndGo(date, total) {
+    // 🛡️ เช็คพื้นฐานก่อนเริ่ม
     if (typeof db === 'undefined' || typeof archives === 'undefined') return;
 
     const btn = document.getElementById("btnSubmitSend");
     const icon = document.getElementById("btnIcon");
 
-    // 🎯 1. ตรวจสอบสถานะร้านปัจจุบัน (ป้องกันค่าว่าง)
-    const activeShop = currentShop || "Unknown";
-    const activeBranch = currentBranch || "สาขาหลัก";
+    // 🎯 1. แก้จุดตาย: ดึงค่าจาก Object conf แทนการใช้ตัวแปรลอยๆ
+    // ตรวจสอบว่าในไฟล์ config ของคุณใช้ชื่อฟิลด์ว่าอะไร (เช่น shopName, shop, หรือ name)
+    const activeShop = (typeof conf !== 'undefined' ? conf.shop : "") || "BARBER SHOP";
+    const activeBranch = (typeof conf !== 'undefined' ? conf.branchType : "") || "สาขาหลัก";
 
-    // ดักจับข้อมูลซ้ำ
+    // 🎯 2. ตรวจสอบข้อมูลซ้ำ
     const isAlreadySent = archives.some(a => 
         a.date === date && 
         a.shop_name === activeShop && 
@@ -1342,32 +1344,34 @@ async function saveAndGo(date, total) {
         return;
     }
 
-    // 🎯 2. ยืนยันการส่ง
+    // 🎯 3. ยืนยันการส่ง
     const result = await Swal.fire({
         title: 'ยืนยันการส่งข้อมูล',
         text: `ยืนยันส่งข้อมูล ${activeShop} (${activeBranch})`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: 'var(--success)',
-        cancelButtonText: 'ยกเลิก'
+        cancelButtonText: 'ยกเลิก',
+        background: 'var(--card)',
+        color: 'var(--text)'
     });
 
     if (!result.isConfirmed) return;
 
-    // 🎯 3. เริ่มดำเนินการ (แสดง Spinner)
+    // 🎯 4. ล็อคปุ่มป้องกันการกดซ้ำซ้อน
     if (btn) {
         btn.disabled = true;              
         if (icon) icon.className = "fas fa-spinner fa-spin"; 
     }
 
     try {
-        // กรองข้อมูลเฉพาะของสาขาและร้านที่กำลังเปิดอยู่
         const allToday = db.filter(r => r.date === date && r.shop_name === activeShop && r.branch_type === activeBranch);
         
         if (allToday.length === 0 && total > 0) {
-            throw new Error("ไม่พบรายการในฐานข้อมูล (โปรดรีเฟรชหน้าจอ)");
+            throw new Error("ไม่พบรายการในฐานข้อมูล กรุณารีเฟรชหน้าจอ");
         }
 
+        // --- Logic การคำนวณเงิน ---
         const todayData = allToday.filter(r => r.type === 'SERVICE');
         const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
         
@@ -1398,44 +1402,46 @@ async function saveAndGo(date, total) {
             branch_type: activeBranch 
         };
 
-        // อัปเดต archives
+        // บันทึกเข้า Archives
         const idx = archives.findIndex(a => a.date === date && a.shop_name === activeShop && a.branch_type === activeBranch);
         if (idx > -1) archives[idx] = data; else archives.push(data);
 
-        // อัปเดต Balance (ถ้าไม่ใช่สาขาเวียน หรือตามกฎบัญชีของคุณ)
+        // หักยอดค้างชำระ
         if (!isHoliday && typeof account !== 'undefined') {
             account.balance = (account.balance || 0) - settle;
         }
 
-        // ลบข้อมูลที่ส่งแล้วออกจาก db หลัก
+        // ลบข้อมูลที่ส่งแล้วออกจาก db หลัก (Temporary DB)
         db = db.filter(r => !(r.date === date && r.shop_name === activeShop && r.branch_type === activeBranch));
 
-        // 💾 บันทึกข้อมูล
-        if (typeof saveDB === "function") {
-            await saveDB(); 
-        } else if (typeof save === "function") {
-            await save();
-        }
+        // 💾 บันทึกถาวร
+        if (typeof saveDB === "function") await saveDB(); 
+        else if (typeof save === "function") await save();
 
         if (window.notify) notify("success", "ดำเนินการสำเร็จ", `ส่งข้อมูลเรียบร้อยแล้ว`);
 
     } catch (e) {
         console.error("Save Error:", e);
-        if (window.notify) notify("error", "เกิดข้อผิดพลาด", e.message || "ไม่สามารถบันทึกข้อมูลได้");
+        if (window.notify) notify("error", "เกิดข้อผิดพลาด", e.message);
         
-        // 🚨 กรณี Error: คืนค่าปุ่มให้กดใหม่ได้
+        // 🚨 สำคัญ: ถ้าพัง ต้องคืนค่าปุ่มให้กดใหม่ได้
         if (btn) {
             btn.disabled = false;
+            btn.style.background = "var(--danger)";
+            btn.style.cursor = "pointer";
             if (icon) icon.className = "fas fa-paper-plane";
         }
     } finally {
-        // ส่วนนี้จะทำงานเสมอ ป้องกัน Spinner หมุนค้าง
+        // ส่วนที่ทำงานเสมอเมื่อ "บันทึกสำเร็จ" หรือจบกระบวนการ
+        if (typeof loadAccountStatus === 'function') loadAccountStatus();
+        
+        // ถ้าต้องการล็อคปุ่มเฉพาะกรณีที่ส่งสำเร็จแล้ว (ป้องกันการกดซ้ำ)
+        // บรรทัดนี้จะทำงานเมื่อเข้าเงื่อนไข try สำเร็จ
         if (btn && btn.disabled === true) {
             btn.style.background = "#94a3b8";
             btn.style.cursor = "default";
             if (icon) icon.className = "fas fa-paper-plane";
         }
-        if (typeof loadAccountStatus === 'function') loadAccountStatus();
     }
 }
 // --- ฟังก์ชันลบข้อมูลแยกออกมา ---
