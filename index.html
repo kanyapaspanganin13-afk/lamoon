@@ -2513,137 +2513,525 @@ function loadHistDaily() {
     `);
 }
 function loadHistMonth() {
+
     const $ = (id) => document.getElementById(id);
+
     const m = $("histMonth").value;
 
-    // --- 🟢 แสดงการแจ้งเตือนแบบ Notify ---
+    // =====================================================
+    // ✅ VALIDATE
+    // =====================================================
+
     if (!m) {
-        if (window.notify) notify("⚠️ กรุณาเลือกเดือนก่อน", "warning");
-        else alert("กรุณาเลือกเดือนก่อน");
+
+        if (window.notify)
+            notify("⚠️ กรุณาเลือกเดือนก่อน", "warning");
+        else
+            alert("กรุณาเลือกเดือนก่อน");
+
         return;
+
     }
 
     if (typeof archives === 'undefined') {
-        if (window.notify) notify("❌ ไม่พบฐานข้อมูลหลัก (archives)", "error");
-        else alert("ไม่พบฐานข้อมูลหลัก (archives)");
+
+        if (window.notify)
+            notify("❌ ไม่พบฐานข้อมูลหลัก (archives)", "error");
+        else
+            alert("ไม่พบฐานข้อมูลหลัก (archives)");
+
         return;
+
     }
 
-    const filtered = archives.filter(a => a.date && a.date.startsWith(m));
+    // =====================================================
+    // ✅ FILTER MONTH
+    // =====================================================
+
+    const filtered = archives.filter(a =>
+        a.date &&
+        a.date.startsWith(m)
+    );
+
     if (!filtered.length) {
-        if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
-        if (window.calcNetProfit) window.calcNetProfit();
-        if (window.notify) notify(`📊 ไม่พบข้อมูลของเดือน ${m}`, "info");
-        return openReportModal("📊 สรุปรายเดือน", `<div style='text-align:center;padding:50px;color:#94a3b8;'>ไม่พบข้อมูลของเดือน ${m}</div>`);
+
+        if ($("shopTotalMonth"))
+            $("shopTotalMonth").innerText = "฿0";
+
+        if (window.calcNetProfit)
+            window.calcNetProfit();
+
+        if (window.notify)
+            notify(`📊 ไม่พบข้อมูลของเดือน ${m}`, "info");
+
+        return openReportModal(
+            "📊 สรุปรายเดือน",
+            `
+            <div style='
+                text-align:center;
+                padding:50px;
+                color:#94a3b8;
+            '>
+                ไม่พบข้อมูลของเดือน ${m}
+            </div>
+            `
+        );
+
     }
 
-    // ตัวแปรสะสมรายเดือน
-    let countNew = 0, countRegular = 0;  
-    let monthTotal = 0, monthBarber = 0, monthCount = 0, monthGuarDays = 0; 
-    let hairStats = {}, serviceStats = {};
-    let offDays = 0, workDays = 0;
+    // =====================================================
+    // ✅ MONTH VARIABLES
+    // =====================================================
+
+    let countNew = 0;
+    let countRegular = 0;
+
+    // ✅ MAIN BRANCH ONLY
+    let monthTotal = 0;
+    let monthBarber = 0;
+    let monthCount = 0;
+
+    // ✅ ALL
+    let monthGuarDays = 0;
+
+    let hairStats = {};
+    let serviceStats = {};
+
+    let offDays = 0;
+    let workDays = 0;
+
     let weeklyData = {};
 
-    const haircutList = ["แฟชั่น","สกินเฟด","รองทรง","ตำรวจ/ทหาร","นักเรียน","ทรงนักเรียน","เปิดข้าง","ซอยผม/เล็มผม","แก้ผม","โกนผม","เด็ก"];
-    const dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+    // =====================================================
+    // ✅ ROTATE BRANCH
+    // =====================================================
+
+    let rotateBranchStats = {
+
+        totalIncome: 0,
+        barberIncome: 0,
+        customers: 0
+
+    };
+
+    // =====================================================
+    // ✅ CONSTANTS
+    // =====================================================
+
+    const haircutList = [
+
+        "แฟชั่น",
+        "สกินเฟด",
+        "รองทรง",
+        "ตำรวจ/ทหาร",
+        "นักเรียน",
+        "ทรงนักเรียน",
+        "เปิดข้าง",
+        "ซอยผม/เล็มผม",
+        "แก้ผม",
+        "โกนผม",
+        "เด็ก"
+
+    ];
+
+    const dayNames = [
+
+        "อาทิตย์",
+        "จันทร์",
+        "อังคาร",
+        "พุธ",
+        "พฤหัสบดี",
+        "ศุกร์",
+        "เสาร์"
+
+    ];
+
+    // =====================================================
+    // ✅ LOOP DAYS
+    // =====================================================
 
     filtered.forEach(day => {
+
         const dObj = new Date(day.date);
-        
-        // --- 🟢 Logic การนับสัปดาห์ (เริ่มใหม่ทุกวันอาทิตย์) ---
-        const firstDayOfMonth = new Date(dObj.getFullYear(), dObj.getMonth(), 1).getDay();
-        let wIdx = Math.ceil((dObj.getDate() + firstDayOfMonth) / 7);
+
+        // ✅ CHECK BRANCH
+        const isRotateBranch =
+            day.branch_type === "สาขาเวียน";
+
+        // =====================================================
+        // ✅ WEEK
+        // =====================================================
+
+        const firstDayOfMonth =
+            new Date(
+                dObj.getFullYear(),
+                dObj.getMonth(),
+                1
+            ).getDay();
+
+        let wIdx =
+            Math.ceil(
+                (dObj.getDate() + firstDayOfMonth) / 7
+            );
+
         const wKey = `สัปดาห์ที่ ${wIdx}`;
 
         if (!weeklyData[wKey]) {
-            weeklyData[wKey] = { 
-                customers: 0, workDays: 0, offDays: 0, 
-                zeroDays: 0, guarDays: 0, dailyCounts: [],
-                countNew: 0, countRegular: 0, 
-                popularHair: {}, 
-                popularService: {}, 
-                income: 0 
+
+            weeklyData[wKey] = {
+
+                customers: 0,
+
+                workDays: 0,
+                offDays: 0,
+
+                zeroDays: 0,
+                guarDays: 0,
+
+                dailyCounts: [],
+
+                countNew: 0,
+                countRegular: 0,
+
+                popularHair: {},
+                popularService: {},
+
+                income: 0
+
             };
+
         }
 
-        if (day.off === true || day.type === "HOLIDAY") {
-            offDays++;
-            weeklyData[wKey].offDays++;
+        // =====================================================
+        // ✅ HOLIDAY
+        // =====================================================
+
+        if (
+            day.off === true ||
+            day.type === "HOLIDAY"
+        ) {
+
+            if (!isRotateBranch) {
+
+                offDays++;
+                weeklyData[wKey].offDays++;
+
+            }
+
             return;
+
         }
 
-        workDays++;
-        weeklyData[wKey].workDays++;
-        
-        const hasInsurance = day.details && day.details.some(d => d.type === "GUARANTEE_CLAIM");
+        // =====================================================
+        // ✅ WORK DAYS
+        // =====================================================
+
+        if (!isRotateBranch) {
+
+            workDays++;
+            weeklyData[wKey].workDays++;
+
+        }
+
+        // =====================================================
+        // ✅ GUARANTEE
+        // =====================================================
+
+        const hasInsurance =
+            day.details &&
+            day.details.some(
+                d => d.type === "GUARANTEE_CLAIM"
+            );
+
         if (hasInsurance) {
+
             monthGuarDays++;
-            weeklyData[wKey].guarDays++;
+
+            if (!isRotateBranch) {
+
+                weeklyData[wKey].guarDays++;
+
+            }
+
         }
 
-        // --- 🟢 ใช้ยอดเงินที่ถูกล็อคไว้จากกระบวนการ Save (day.barber) ---
-        const dailyIncome = Number(day.total) || 0;
-        const dailyBarber = Number(day.barber) || 0; 
-        
-        monthTotal += dailyIncome;
-        monthBarber += dailyBarber; // ยอดนี้จะไม่เปลี่ยนแม้คุณจะแก้ Settings ภายหลัง
-        weeklyData[wKey].income += dailyIncome;
+        // =====================================================
+        // ✅ DAILY MONEY
+        // =====================================================
 
-        let dayCustomerCount = 0; 
+        const dailyIncome =
+            Number(day.total) || 0;
 
-        if (day.details && Array.isArray(day.details)) {
+        const dailyBarber =
+            Number(day.barber) || 0;
+
+        // =====================================================
+        // ✅ SEPARATE BRANCH
+        // =====================================================
+
+        if (isRotateBranch) {
+
+            rotateBranchStats.totalIncome += dailyIncome;
+
+            rotateBranchStats.barberIncome += dailyBarber;
+
+        } else {
+
+            monthTotal += dailyIncome;
+
+            monthBarber += dailyBarber;
+
+            weeklyData[wKey].income += dailyIncome;
+
+        }
+
+        // =====================================================
+        // ✅ CUSTOMER
+        // =====================================================
+
+        let dayCustomerCount = 0;
+
+        if (
+            day.details &&
+            Array.isArray(day.details)
+        ) {
+
             day.details.forEach(d => {
-                if (d.type === "SERVICE") {
+
+                if (d.type !== "SERVICE")
+                    return;
+
+                // ✅ COUNT CUSTOMER
+
+                if (isRotateBranch) {
+
+                    rotateBranchStats.customers++;
+
+                } else {
+
                     monthCount++;
-                    dayCustomerCount++; 
-                    weeklyData[wKey].customers++; 
-                    
-                    const type = String(d.custType || "").toLowerCase().trim();
-                    if (type === "new") {
-                        countNew++;
+
+                    weeklyData[wKey].customers++;
+
+                    dayCustomerCount++;
+
+                }
+
+                // =====================================================
+                // ✅ CUSTOMER TYPE
+                // =====================================================
+
+                const type =
+                    String(d.custType || "")
+                    .toLowerCase()
+                    .trim();
+
+                if (type === "new") {
+
+                    countNew++;
+
+                    if (!isRotateBranch) {
+
                         weeklyData[wKey].countNew++;
-                    } else if (type === "regular") {
-                        countRegular++;
-                        weeklyData[wKey].countRegular++;
+
                     }
 
-                    const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
-                    svcs.forEach(s => {
-                        if (!s) return;
-                        const cleanS = s.trim();
-                        if (haircutList.includes(cleanS)) {
-                            hairStats[cleanS] = (hairStats[cleanS] || 0) + 1;
-                            weeklyData[wKey].popularHair[cleanS] = (weeklyData[wKey].popularHair[cleanS] || 0) + 1;
-                        } else {
-                            serviceStats[cleanS] = (serviceStats[cleanS] || 0) + 1;
-                            weeklyData[wKey].popularService[cleanS] = (weeklyData[wKey].popularService[cleanS] || 0) + 1;
-                        }
-                    });
                 }
+                else if (type === "regular") {
+
+                    countRegular++;
+
+                    if (!isRotateBranch) {
+
+                        weeklyData[wKey].countRegular++;
+
+                    }
+
+                }
+
+                // =====================================================
+                // ✅ SERVICES
+                // =====================================================
+
+                const svcs =
+                    Array.isArray(d.svcs)
+                    ? d.svcs
+                    : [d.svcs];
+
+                svcs.forEach(s => {
+
+                    if (!s) return;
+
+                    const cleanS = s.trim();
+
+                    // ✅ HAIR
+
+                    if (
+                        haircutList.includes(cleanS)
+                    ) {
+
+                        hairStats[cleanS] =
+                            (hairStats[cleanS] || 0) + 1;
+
+                        if (!isRotateBranch) {
+
+                            weeklyData[wKey]
+                            .popularHair[cleanS] =
+
+                                (
+                                    weeklyData[wKey]
+                                    .popularHair[cleanS] || 0
+                                ) + 1;
+
+                        }
+
+                    }
+
+                    // ✅ SERVICE
+
+                    else {
+
+                        serviceStats[cleanS] =
+                            (serviceStats[cleanS] || 0) + 1;
+
+                        if (!isRotateBranch) {
+
+                            weeklyData[wKey]
+                            .popularService[cleanS] =
+
+                                (
+                                    weeklyData[wKey]
+                                    .popularService[cleanS] || 0
+                                ) + 1;
+
+                        }
+
+                    }
+
+                });
+
             });
+
         }
 
-        if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
-        
-        weeklyData[wKey].dailyCounts.push({ 
-            dayName: dayNames[dObj.getDay()], 
-            count: dayCustomerCount, 
-            income: dailyIncome,
-            barberEarn: dailyBarber 
-        });
+        // =====================================================
+        // ✅ ZERO DAY
+        // =====================================================
+
+        if (
+            !isRotateBranch &&
+            dayCustomerCount === 0
+        ) {
+
+            weeklyData[wKey].zeroDays++;
+
+        }
+
+        // =====================================================
+        // ✅ DAILY COUNTS
+        // =====================================================
+
+        if (!isRotateBranch) {
+
+            weeklyData[wKey].dailyCounts.push({
+
+                dayName:
+                    dayNames[dObj.getDay()],
+
+                count:
+                    dayCustomerCount,
+
+                income:
+                    dailyIncome,
+
+                barberEarn:
+                    dailyBarber
+
+            });
+
+        }
+
     });
 
-    // คำนวณรายได้สุทธิของร้าน (ยอดทั้งหมด - ยอดที่ช่างได้ไป)
-    const realShopEarn = monthTotal - monthBarber;
-    if ($("shopTotalMonth")) {
-        $("shopTotalMonth").innerText = "฿" + Math.floor(realShopEarn).toLocaleString();
-    }
-    if (window.calcNetProfit) window.calcNetProfit();
+    // =====================================================
+    // ✅ TOTAL ALL BRANCHES
+    // =====================================================
 
-    const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
-    
-    // ส่งข้อมูลไปยังตัวสร้าง Report
-    generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular);
+    const allBranchTotal =
+
+        monthTotal +
+        rotateBranchStats.totalIncome;
+
+    const allBranchBarber =
+
+        monthBarber +
+        rotateBranchStats.barberIncome;
+
+    // =====================================================
+    // ✅ SHOP EARN
+    // =====================================================
+
+    const realShopEarn =
+        allBranchTotal - allBranchBarber;
+
+    if ($("shopTotalMonth")) {
+
+        $("shopTotalMonth").innerText =
+            "฿" +
+            Math.floor(realShopEarn)
+            .toLocaleString();
+
+    }
+
+    if (window.calcNetProfit)
+        window.calcNetProfit();
+
+    // =====================================================
+    // ✅ AVG
+    // =====================================================
+
+    const avgCustomerPerDay =
+
+        workDays > 0
+        ? (monthCount / workDays)
+        : 0;
+
+    // =====================================================
+    // ✅ REPORT
+    // =====================================================
+
+    generateMonthlyReport(
+
+        m,
+
+        // ✅ TOTAL ALL BRANCHES
+        allBranchTotal,
+
+        // ✅ TOTAL BARBER ALL BRANCHES
+        allBranchBarber,
+
+        // ✅ MAIN ONLY
+        monthCount,
+
+        workDays,
+        offDays,
+
+        avgCustomerPerDay,
+
+        weeklyData,
+
+        hairStats,
+        serviceStats,
+
+        monthGuarDays,
+
+        countNew,
+        countRegular,
+
+        rotateBranchStats
+
+    );
+
 }
 function processMonthlyStats(
     weeklyData,
