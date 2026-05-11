@@ -1321,18 +1321,16 @@ function updateMixValues() {
    (ระบบคำนวณส่วนแบ่งและการปิดยอดรายวัน)
    ========================================================== */
 async function saveAndGo(date, total) {
-    // 🛡️ เช็คพื้นฐานก่อนเริ่ม
     if (typeof db === 'undefined' || typeof archives === 'undefined') return;
 
     const btn = document.getElementById("btnSubmitSend");
     const icon = document.getElementById("btnIcon");
 
-    // 🎯 1. แก้จุดตาย: ดึงค่าจาก Object conf แทนการใช้ตัวแปรลอยๆ
-    // ตรวจสอบว่าในไฟล์ config ของคุณใช้ชื่อฟิลด์ว่าอะไร (เช่น shopName, shop, หรือ name)
-    const activeShop = (typeof conf !== 'undefined' ? conf.shop : "") || "BARBER SHOP";
-    const activeBranch = (typeof conf !== 'undefined' ? conf.branchType : "") || "สาขาหลัก";
+    // 🎯 1. ดึงค่ามาตรฐานเดียวกับ addRecord() เพื่อให้หาเจอกันแน่นอน
+    const activeShop = conf.shop || "BARBER SHOP";
+    const activeBranch = conf.branchType || "สาขาหลัก";
 
-    // 🎯 2. ตรวจสอบข้อมูลซ้ำ
+    // 🎯 2. ตรวจสอบข้อมูลซ้ำใน archives
     const isAlreadySent = archives.some(a => 
         a.date === date && 
         a.shop_name === activeShop && 
@@ -1340,38 +1338,42 @@ async function saveAndGo(date, total) {
     );
 
     if (isAlreadySent) {
-        if (window.notify) notify("error", "แจ้งเตือน", `ข้อมูลวันที่ ${date} (${activeShop}) ส่งไปแล้ว`);
+        if (window.notify) notify("error", "แจ้งเตือน", `ข้อมูลวันที่ ${date} (${activeShop}) ได้ดำเนินการส่งเรียบร้อยแล้ว`);
         return;
     }
 
     // 🎯 3. ยืนยันการส่ง
     const result = await Swal.fire({
         title: 'ยืนยันการส่งข้อมูล',
-        text: `ยืนยันส่งข้อมูล ${activeShop} (${activeBranch})`,
+        text: `ต้องการดำเนินการส่งข้อมูลของ ${activeShop} (${activeBranch}) ใช่หรือไม่?`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: 'var(--success)',
-        cancelButtonText: 'ยกเลิก',
-        background: 'var(--card)',
-        color: 'var(--text)'
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'ยืนยันการส่ง',
+        cancelButtonText: 'ยกเลิก'
     });
 
     if (!result.isConfirmed) return;
 
-    // 🎯 4. ล็อคปุ่มป้องกันการกดซ้ำซ้อน
+    // 🎯 4. เริ่มล็อคปุ่ม
     if (btn) {
         btn.disabled = true;              
         if (icon) icon.className = "fas fa-spinner fa-spin"; 
     }
 
     try {
-        const allToday = db.filter(r => r.date === date && r.shop_name === activeShop && r.branch_type === activeBranch);
+        // 🎯 5. กรองข้อมูลจาก db (ใช้เงื่อนไขเดียวกับ addRecord ตอนที่ push ข้อมูลเข้า)
+        const allToday = db.filter(r => 
+            r.date === date && 
+            r.shop_name === activeShop && 
+            r.branch_type === activeBranch
+        );
         
         if (allToday.length === 0 && total > 0) {
-            throw new Error("ไม่พบรายการในฐานข้อมูล กรุณารีเฟรชหน้าจอ");
+            throw new Error(`ไม่พบรายการของ ${activeShop} ในฐานข้อมูล กรุณารีเฟรชหน้าจอ`);
         }
 
-        // --- Logic การคำนวณเงิน ---
         const todayData = allToday.filter(r => r.type === 'SERVICE');
         const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
         
@@ -1380,8 +1382,12 @@ async function saveAndGo(date, total) {
             const p = Number(r.price) || 0;
             const t = Number(r.tip) || 0;
             tips += t;
-            if (r.pay === "Cash" || r.pay === "เงินสด") cash += (p + t);
-            else if (r.pay === "Mix") cash += Number(r.payCash) || 0;
+            // เช็คช่องทางชำระเงินให้ครอบคลุม
+            if (r.pay === "Cash" || r.pay === "เงินสด") {
+                cash += (p + t);
+            } else if (r.pay === "Mix") {
+                cash += Number(r.payCash) || 0;
+            }
         });
 
         const currentPerc = Number(conf.perc) || 0;
@@ -1402,41 +1408,54 @@ async function saveAndGo(date, total) {
             branch_type: activeBranch 
         };
 
-        // บันทึกเข้า Archives
-        const idx = archives.findIndex(a => a.date === date && a.shop_name === activeShop && a.branch_type === activeBranch);
-        if (idx > -1) archives[idx] = data; else archives.push(data);
+        // 🎯 6. อัปเดต Archives (ใช้มาตรฐานหา Index แบบเดียวกับ addRecord)
+        const idx = archives.findIndex(a => 
+            a.date === date && 
+            a.shop_name === activeShop && 
+            a.branch_type === activeBranch
+        );
 
-        // หักยอดค้างชำระ
+        if (idx > -1) { 
+            archives[idx] = data; 
+        } else { 
+            archives.push(data); 
+        }
+
+        // หักยอดค้างชำระ (เฉพาะเคสทำงานปกติ)
         if (!isHoliday && typeof account !== 'undefined') {
             account.balance = (account.balance || 0) - settle;
         }
 
-        // ลบข้อมูลที่ส่งแล้วออกจาก db หลัก (Temporary DB)
-        db = db.filter(r => !(r.date === date && r.shop_name === activeShop && r.branch_type === activeBranch));
+        // 🎯 7. ลบข้อมูลที่ส่งแล้วออกจาก db หลัก (เฉพาะร้าน/สาขาที่เลือก)
+        db = db.filter(r => !(
+            r.date === date && 
+            r.shop_name === activeShop && 
+            r.branch_type === activeBranch
+        ));
 
-        // 💾 บันทึกถาวร
-        if (typeof saveDB === "function") await saveDB(); 
-        else if (typeof save === "function") await save();
+        // 💾 8. บันทึกถาวร
+        if (typeof saveDB === "function") {
+            await saveDB(); 
+        } else if (typeof save === "function") {
+            await save();
+        }
 
-        if (window.notify) notify("success", "ดำเนินการสำเร็จ", `ส่งข้อมูลเรียบร้อยแล้ว`);
+        if (window.notify) notify("success", "ดำเนินการสำเร็จ", `ส่งข้อมูล ${activeShop} เรียบร้อยแล้ว`);
 
     } catch (e) {
         console.error("Save Error:", e);
         if (window.notify) notify("error", "เกิดข้อผิดพลาด", e.message);
         
-        // 🚨 สำคัญ: ถ้าพัง ต้องคืนค่าปุ่มให้กดใหม่ได้
+        // 🚨 คืนค่าปุ่มถ้าเกิด Error
         if (btn) {
             btn.disabled = false;
             btn.style.background = "var(--danger)";
-            btn.style.cursor = "pointer";
             if (icon) icon.className = "fas fa-paper-plane";
         }
     } finally {
-        // ส่วนที่ทำงานเสมอเมื่อ "บันทึกสำเร็จ" หรือจบกระบวนการ
         if (typeof loadAccountStatus === 'function') loadAccountStatus();
         
-        // ถ้าต้องการล็อคปุ่มเฉพาะกรณีที่ส่งสำเร็จแล้ว (ป้องกันการกดซ้ำ)
-        // บรรทัดนี้จะทำงานเมื่อเข้าเงื่อนไข try สำเร็จ
+        // ล็อคปุ่มเป็นสีเทาเมื่อส่งสำเร็จ
         if (btn && btn.disabled === true) {
             btn.style.background = "#94a3b8";
             btn.style.cursor = "default";
