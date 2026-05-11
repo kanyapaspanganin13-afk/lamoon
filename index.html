@@ -3795,10 +3795,14 @@ function saveSettings() {
     // 3. บันทึกลง LocalStorage (ระบบยังจำค่า branchType ไว้ในนี้)
     localStorage.setItem('barber_conf', JSON.stringify(conf));
     
-    localStorage.setItem('shopName',  settings.shop);
-    localStorage.setItem('shopPerc',  settings.perc);
-    localStorage.setItem('shopGuar',  settings.guar);
-
+    localStorage.setItem('shopName', settings.shop);
+    localStorage.setItem('shopPerc', settings.perc);
+    localStorage.setItem('shopGuar', settings.guar);
+    
+    localStorage.setItem('shopBranch', settings.branchType);
+    localStorage.setItem('shopTheme', settings.theme);
+    localStorage.setItem('shopVoice', settings.voice);
+    localStorage.setItem('shopSound', settings.sound);
     // 🎯 4. แก้ไขจุดนี้: แสดงเฉพาะชื่อร้าน (ซ่อนประเภทสาขา)
     const shopTitleEl = document.querySelector('h2') || $("shopNameDisp") || $("shopNameDisplay");
     if (shopTitleEl) {
