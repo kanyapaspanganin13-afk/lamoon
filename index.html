@@ -1321,147 +1321,147 @@ function updateMixValues() {
    (ระบบคำนวณส่วนแบ่งและการปิดยอดรายวัน)
    ========================================================== */
 async function saveAndGo(date, total) {
-    if (typeof db === 'undefined' || typeof archives === 'undefined') return;
+    if (typeof db === 'undefined' || typeof archives === 'undefined') return;
 
-    const btn = document.getElementById("btnSubmitSend");
-    const icon = document.getElementById("btnIcon");
+    const btn = document.getElementById("btnSubmitSend");
+    const icon = document.getElementById("btnIcon");
 
-    // 🎯 1. ดึงค่ามาตรฐานเดียวกับ addRecord() เพื่อให้หาเจอกันแน่นอน
-    const activeShop = conf.shop || "BARBER SHOP";
-    const activeBranch = conf.branchType || "สาขาหลัก";
+    // 🎯 1. ดึงค่ามาตรฐานเดียวกับ addRecord() เพื่อให้หาเจอกันแน่นอน
+    const activeShop = conf.shop || "BARBER SHOP";
+    const activeBranch = conf.branchType || "สาขาหลัก";
 
-    // 🎯 2. ตรวจสอบข้อมูลซ้ำใน archives
-    const isAlreadySent = archives.some(a => 
-        a.date === date && 
-        a.shop_name === activeShop && 
-        a.branch_type === activeBranch
-    );
+    // 🎯 2. ตรวจสอบข้อมูลซ้ำใน archives
+    const isAlreadySent = archives.some(a => 
+        a.date === date && 
+        a.shop_name === activeShop && 
+        a.branch_type === activeBranch
+    );
 
-    if (isAlreadySent) {
-        if (window.notify) notify("error", "แจ้งเตือน", `ข้อมูลวันที่ ${date} (${activeShop}) ได้ดำเนินการส่งเรียบร้อยแล้ว`);
-        return;
-    }
+    if (isAlreadySent) {
+        if (window.notify) notify("error", "แจ้งเตือน", `ข้อมูลวันที่ ${date} (${activeShop}) ได้ดำเนินการส่งเรียบร้อยแล้ว`);
+        return;
+    }
 
-    // 🎯 3. ยืนยันการส่ง
-    const result = await Swal.fire({
-        title: 'ยืนยันการส่งข้อมูล',
-        text: `ต้องการดำเนินการส่งข้อมูลของ ${activeShop} (${activeBranch}) ใช่หรือไม่?`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: 'var(--success)',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: 'ยืนยันการส่ง',
-        cancelButtonText: 'ยกเลิก'
-    });
+    // 🎯 3. ยืนยันการส่ง
+    const result = await Swal.fire({
+        title: 'ยืนยันการส่งข้อมูล',
+        text: `ต้องการดำเนินการส่งข้อมูลของ ${activeShop} (${activeBranch}) ใช่หรือไม่?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: 'var(--success)',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'ยืนยันการส่ง',
+        cancelButtonText: 'ยกเลิก'
+    });
 
-    if (!result.isConfirmed) return;
+    if (!result.isConfirmed) return;
 
-    // 🎯 4. เริ่มล็อคปุ่ม
-    if (btn) {
-        btn.disabled = true;              
-        if (icon) icon.className = "fas fa-spinner fa-spin"; 
-    }
+    // 🎯 4. เริ่มล็อคปุ่ม
+    if (btn) {
+        btn.disabled = true;              
+        if (icon) icon.className = "fas fa-spinner fa-spin"; 
+    }
 
-    try {
-        // 🎯 5. กรองข้อมูลจาก db (ใช้เงื่อนไขเดียวกับ addRecord ตอนที่ push ข้อมูลเข้า)
-        const allToday = db.filter(r => 
-            r.date === date && 
-            r.shop_name === activeShop && 
-            r.branch_type === activeBranch
-        );
-        
-        if (allToday.length === 0 && total > 0) {
-            throw new Error(`ไม่พบรายการของ ${activeShop} ในฐานข้อมูล กรุณารีเฟรชหน้าจอ`);
-        }
+    try {
+        // 🎯 5. กรองข้อมูลจาก db (ใช้เงื่อนไขเดียวกับ addRecord ตอนที่ push ข้อมูลเข้า)
+        const allToday = db.filter(r => 
+            r.date === date && 
+            r.shop_name === activeShop && 
+            r.branch_type === activeBranch
+        );
+        
+        if (allToday.length === 0 && total > 0) {
+            throw new Error(`ไม่พบรายการของ ${activeShop} ในฐานข้อมูล กรุณารีเฟรชหน้าจอ`);
+        }
 
-        const todayData = allToday.filter(r => r.type === 'SERVICE');
-        const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
-        
-        let cash = 0, tips = 0;
-        todayData.forEach(r => {
-            const p = Number(r.price) || 0;
-            const t = Number(r.tip) || 0;
-            tips += t;
-            // เช็คช่องทางชำระเงินให้ครอบคลุม
-            if (r.pay === "Cash" || r.pay === "เงินสด") {
-                cash += (p + t);
-            } else if (r.pay === "Mix") {
-                cash += Number(r.payCash) || 0;
-            }
-        });
+        const todayData = allToday.filter(r => r.type === 'SERVICE');
+        const isHoliday = allToday.some(r => r.type === 'HOLIDAY');
+        
+        let cash = 0, tips = 0;
+        todayData.forEach(r => {
+            const p = Number(r.price) || 0;
+            const t = Number(r.tip) || 0;
+            tips += t;
+            // เช็คช่องทางชำระเงินให้ครอบคลุม
+            if (r.pay === "Cash" || r.pay === "เงินสด") {
+                cash += (p + t);
+            } else if (r.pay === "Mix") {
+                cash += Number(r.payCash) || 0;
+            }
+        });
 
-        const currentPerc = Number(conf.perc) || 0;
-        const currentGuar = Number(conf.guar) || 0;
-        const commission = total * (currentPerc / 100);
-        const bEarn = isHoliday ? 0 : Math.max(commission, currentGuar) + tips;
-        const settle = isHoliday ? 0 : cash - bEarn;
+        const currentPerc = Number(conf.perc) || 0;
+        const currentGuar = Number(conf.guar) || 0;
+        const commission = total * (currentPerc / 100);
+        const bEarn = isHoliday ? 0 : Math.max(commission, currentGuar) + tips;
+        const settle = isHoliday ? 0 : cash - bEarn;
 
-        const data = { 
-            date, total, cash, 
-            barber: Math.floor(bEarn), 
-            settle, 
-            type: isHoliday ? "HOLIDAY" : "WORK", 
-            details: allToday,
-            guar_used: currentGuar, 
-            perc_used: currentPerc,
-            shop_name: activeShop,   
-            branch_type: activeBranch 
-        };
+        const data = { 
+            date, total, cash, 
+            barber: Math.floor(bEarn), 
+            settle, 
+            type: isHoliday ? "HOLIDAY" : "WORK", 
+            details: allToday,
+            guar_used: currentGuar, 
+            perc_used: currentPerc,
+            shop_name: activeShop,   
+            branch_type: activeBranch 
+        };
 
-        // 🎯 6. อัปเดต Archives (ใช้มาตรฐานหา Index แบบเดียวกับ addRecord)
-        const idx = archives.findIndex(a => 
-            a.date === date && 
-            a.shop_name === activeShop && 
-            a.branch_type === activeBranch
-        );
+        // 🎯 6. อัปเดต Archives (ใช้มาตรฐานหา Index แบบเดียวกับ addRecord)
+        const idx = archives.findIndex(a => 
+            a.date === date && 
+            a.shop_name === activeShop && 
+            a.branch_type === activeBranch
+        );
 
-        if (idx > -1) { 
-            archives[idx] = data; 
-        } else { 
-            archives.push(data); 
-        }
+        if (idx > -1) { 
+            archives[idx] = data; 
+        } else { 
+            archives.push(data); 
+        }
 
-        // หักยอดค้างชำระ (เฉพาะเคสทำงานปกติ)
-        if (!isHoliday && typeof account !== 'undefined') {
-            account.balance = (account.balance || 0) - settle;
-        }
+        // หักยอดค้างชำระ (เฉพาะเคสทำงานปกติ)
+        if (!isHoliday && typeof account !== 'undefined') {
+            account.balance = (account.balance || 0) - settle;
+        }
 
-        // 🎯 7. ลบข้อมูลที่ส่งแล้วออกจาก db หลัก (เฉพาะร้าน/สาขาที่เลือก)
-        db = db.filter(r => !(
-            r.date === date && 
-            r.shop_name === activeShop && 
-            r.branch_type === activeBranch
-        ));
+        // 🎯 7. ลบข้อมูลที่ส่งแล้วออกจาก db หลัก (เฉพาะร้าน/สาขาที่เลือก)
+        db = db.filter(r => !(
+            r.date === date && 
+            r.shop_name === activeShop && 
+            r.branch_type === activeBranch
+        ));
 
-        // 💾 8. บันทึกถาวร
-        if (typeof saveDB === "function") {
-            await saveDB(); 
-        } else if (typeof save === "function") {
-            await save();
-        }
+        // 💾 8. บันทึกถาวร
+        if (typeof saveDB === "function") {
+            await saveDB(); 
+        } else if (typeof save === "function") {
+            await save();
+        }
 
-        if (window.notify) notify("success", "ดำเนินการสำเร็จ", `ส่งข้อมูล ${activeShop} เรียบร้อยแล้ว`);
+        if (window.notify) notify("success", "ดำเนินการสำเร็จ", `ส่งข้อมูล ${activeShop} เรียบร้อยแล้ว`);
 
-    } catch (e) {
-        console.error("Save Error:", e);
-        if (window.notify) notify("error", "เกิดข้อผิดพลาด", e.message);
-        
-        // 🚨 คืนค่าปุ่มถ้าเกิด Error
-        if (btn) {
-            btn.disabled = false;
-            btn.style.background = "var(--danger)";
-            if (icon) icon.className = "fas fa-paper-plane";
-        }
-    } finally {
-        if (typeof loadAccountStatus === 'function') loadAccountStatus();
-        
-        // ล็อคปุ่มเป็นสีเทาเมื่อส่งสำเร็จ
-        if (btn && btn.disabled === true) {
-            btn.style.background = "#94a3b8";
-            btn.style.cursor = "default";
-            if (icon) icon.className = "fas fa-paper-plane";
-        }
-    }
+    } catch (e) {
+        console.error("Save Error:", e);
+        if (window.notify) notify("error", "เกิดข้อผิดพลาด", e.message);
+        
+        // 🚨 คืนค่าปุ่มถ้าเกิด Error
+        if (btn) {
+            btn.disabled = false;
+            btn.style.background = "var(--danger)";
+            if (icon) icon.className = "fas fa-paper-plane";
+        }
+    } finally {
+        if (typeof loadAccountStatus === 'function') loadAccountStatus();
+        
+        // ล็อคปุ่มเป็นสีเทาเมื่อส่งสำเร็จ
+        if (btn && btn.disabled === true) {
+            btn.style.background = "#94a3b8";
+            btn.style.cursor = "default";
+            if (icon) icon.className = "fas fa-paper-plane";
+        }
+    }
 }
 // --- ฟังก์ชันลบข้อมูลแยกออกมา ---
 async function deleteArchiveDate(date) {
@@ -3886,9 +3886,14 @@ function openSettings() {
     }
 }
 function saveSettings() {
-    // 1. ดึงค่าจากฟอร์ม (เพิ่ม .trim() เพื่อลบช่องว่างที่ชื่อร้าน)
+    const $ = (id) => document.getElementById(id);
+
+    // 1. ดึงค่าจากฟอร์ม พร้อมจัดการเงื่อนไขสาขา
+    const rawBranch = $("setBranchType")?.value || "สาขาหลัก";
+    
     const settings = {
-        branchType: $("setBranchType")?.value || "สาขาหลัก", 
+        // 🎯 แก้โจทย์: ถ้าเลือก "ทั่วไป" ให้บันทึกเป็น "สาขาหลัก" อัตโนมัติ เพื่อให้ addRecord หาค่าเจอ
+        branchType: (rawBranch === "ทั่วไป") ? "สาขาหลัก" : rawBranch, 
         shop:      ($("setShop")?.value || "BARBER SHOP").trim(),
         perc:      parseFloat($("setPerc")?.value) || 0,
         guar:      parseFloat($("setGuar")?.value) || 0,
@@ -3897,46 +3902,50 @@ function saveSettings() {
         sound:     $("setSound")?.value || "on"
     };
 
-    // 2. อัปเดตตัวแปรกลาง (conf)
+    // 2. อัปเดตตัวแปรกลาง (conf) ทันที เพื่อให้ฟังก์ชัน addRecord และ saveAndGo เรียกใช้ได้เลย
     if (typeof conf !== 'undefined') {
         Object.assign(conf, settings);
     }
 
-    // 3. บันทึกลง LocalStorage
-    localStorage.setItem('barber_conf', JSON.stringify(settings)); // บันทึกก้อนใหญ่ทีเดียว
-    
-    // บันทึกแยกคีย์ (เพื่อความสะดวกในการดึงใช้จุดอื่น)
+    // 3. บันทึกลง LocalStorage ทั้งแบบก้อนรวม และแยกคีย์
+    localStorage.setItem('barber_conf', JSON.stringify(settings));
+    localStorage.setItem('shopBranch', settings.branchType);
     localStorage.setItem('shopName', settings.shop);
     localStorage.setItem('shopPerc', settings.perc);
     localStorage.setItem('shopGuar', settings.guar);
-    localStorage.setItem('shopBranch', settings.branchType);
     localStorage.setItem('shopTheme', settings.theme);
     localStorage.setItem('shopVoice', settings.voice);
     localStorage.setItem('shopSound', settings.sound);
 
-    // 🎯 4. อัปเดตชื่อร้านบนหน้าจอ (ซ่อนประเภทสาขาตามโจทย์)
+    // 🎯 4. อัปเดตการแสดงผลบนหน้าจอ
     const shopTitleEl = $("shopNameDisp") || $("shopNameDisplay") || document.querySelector('h2');
     if (shopTitleEl) {
-        // ใช้ textContent จะปลอดภัยกว่า innerText ในบาง Browser
-        shopTitleEl.textContent = settings.shop.toUpperCase();
+        // แสดงชื่อร้าน และถ้าเป็นสาขาเวียน ให้มีสัญลักษณ์แจ้งเตือนเล็กน้อยกันลืม
+        const branchLabel = settings.branchType === "สาขาเวียน" ? " (🔄)" : "";
+        shopTitleEl.textContent = settings.shop.toUpperCase() + branchLabel;
     } 
 
-    // 5. เรียกฟังก์ชันอัปเดต UI (เพิ่มการเช็คเพื่อความปลอดภัย)
-    if (typeof applyTheme === "function")      applyTheme(settings.theme);
-    if (typeof calculateMoney === "function")    calculateMoney(); 
+    // 5. สั่งระบบอัปเดตข้อมูลตามค่าใหม่ที่เพิ่งบันทึก
+    if (typeof applyTheme === "function") applyTheme(settings.theme);
+    
+    // สำคัญ: ต้องคำนวณเงินใหม่ เพราะสาขาที่เลือกเปลี่ยนไปแล้ว
+    if (typeof calculateMoney === "function") calculateMoney(); 
     
     const dateVal = $("dateInp")?.value || new Date().toISOString().split('T')[0];
-    if (typeof renderDay === "function")         renderDay(dateVal); 
+    // รีเฟรชรายการหน้าจอให้กรองตามสาขาใหม่
+    if (typeof renderDay === "function") renderDay(dateVal); 
+    if (typeof loadAccountStatus === 'function') loadAccountStatus();
 
-    // 6. ปิด Modal
+    // 6. ปิดหน้าต่างตั้งค่า
     const modal = $("modalSet");
     if (modal) modal.style.display = 'none';
 
-    // 7. แจ้งเตือนความสำเร็จ
+    // 7. แจ้งเตือนสถานะ
+    const msg = `บันทึกข้อมูล ${settings.shop} [${settings.branchType}] เรียบร้อยแล้ว`;
     if (typeof notify === "function") {
-        notify("success", "บันทึกสำเร็จ", `ระบบบันทึกข้อมูล ${settings.shop} เรียบร้อยแล้ว`);
+        notify("success", "บันทึกสำเร็จ", msg);
     } else {
-        alert(`บันทึกข้อมูล ${settings.shop} สำเร็จ`);
+        alert(msg);
     }
 }
 async function handleSave(event) {
