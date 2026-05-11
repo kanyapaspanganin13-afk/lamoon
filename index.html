@@ -1046,14 +1046,15 @@ function addRecord() {
     // --- ส่วนคำนวณและ Archive ---
     if (typeof calculateMoney === "function") {
         const result = calculateMoney(); 
-        const idx = archives.findIndex(a => a.date === dInp);
-        const archiveData = {
-            date: dInp,
-            settle: result.settle, 
-            type: (currentPay === 'Holiday') ? 'HOLIDAY' : 'WORK'
+        const idx = archives.findIndex(a => a.date === dInp && a.shop_name === conf.shop && a.branch_type === conf.branchType);
+        const archiveData = { date: dInp, shop_name: conf.shop || "BARBER SHOP", branch_type: conf.branchType || "สาขาหลัก",
+        settle: result.settle, type:
+        (currentPay === 'Holiday')
+        ? 'HOLIDAY'
+        : 'WORK'
         };
-        if (idx > -1) { 
-            archives[idx].settle = result.settle; 
+        if (idx > -1) { archives[idx] = {...archives[idx],...archiveData };
+        }
         } else { 
             archives.push(archiveData); 
         }
