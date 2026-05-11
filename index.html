@@ -3892,12 +3892,18 @@ function openSettings() {
 function saveSettings() {
     const $ = (id) => document.getElementById(id);
 
-    // 1. ดึงค่าจากฟอร์ม พร้อมจัดการเงื่อนไขสาขา
-    const rawBranch = $("setBranchType")?.value || "สาขาหลัก";
+    // 1. ดึงค่าจาก Select (เช็ค ID ให้ชัวร์ว่าตรงกับ HTML)
+    const branchSelect = $("setBranchType");
+    const rawBranch = branchSelect ? branchSelect.value : "สาขาหลัก";
     
+    // 🎯 แก้จุดนี้: ตรวจสอบค่าที่ดึงมาได้จริง
+    let finalBranch = rawBranch;
+    if (rawBranch === "ทั่วไป" || !rawBranch) {
+        finalBranch = "สาขาหลัก";
+    }
+
     const settings = {
-        // 🎯 แก้โจทย์: ถ้าเลือก "ทั่วไป" ให้บันทึกเป็น "สาขาหลัก" อัตโนมัติ เพื่อให้ addRecord หาค่าเจอ
-        branchType: (rawBranch === "ทั่วไป") ? "สาขาหลัก" : rawBranch, 
+        branchType: finalBranch, 
         shop:      ($("setShop")?.value || "BARBER SHOP").trim(),
         perc:      parseFloat($("setPerc")?.value) || 0,
         guar:      parseFloat($("setGuar")?.value) || 0,
@@ -3906,50 +3912,37 @@ function saveSettings() {
         sound:     $("setSound")?.value || "on"
     };
 
-    // 2. อัปเดตตัวแปรกลาง (conf) ทันที เพื่อให้ฟังก์ชัน addRecord และ saveAndGo เรียกใช้ได้เลย
+    // 2. อัปเดตตัวแปร Global 'conf' (สำคัญมาก: ถ้าไม่ทำ addRecord จะไม่รู้ว่าเปลี่ยนสาขาแล้ว)
     if (typeof conf !== 'undefined') {
-        Object.assign(conf, settings);
+        conf.branchType = settings.branchType;
+        conf.shop = settings.shop;
+        conf.perc = settings.perc;
+        conf.guar = settings.guar;
+        // หรือ Object.assign(conf, settings);
     }
 
-    // 3. บันทึกลง LocalStorage ทั้งแบบก้อนรวม และแยกคีย์
+    // 3. บันทึกลง Storage
     localStorage.setItem('barber_conf', JSON.stringify(settings));
     localStorage.setItem('shopBranch', settings.branchType);
-    localStorage.setItem('shopName', settings.shop);
-    localStorage.setItem('shopPerc', settings.perc);
-    localStorage.setItem('shopGuar', settings.guar);
-    localStorage.setItem('shopTheme', settings.theme);
-    localStorage.setItem('shopVoice', settings.voice);
-    localStorage.setItem('shopSound', settings.sound);
 
-    // 🎯 4. อัปเดตการแสดงผลบนหน้าจอ
-    const shopTitleEl = $("shopNameDisp") || $("shopNameDisplay") || document.querySelector('h2');
+    // 🎯 4. อัปเดต UI ทันที
+    const shopTitleEl = $("shopNameDisp") || $("shopNameDisplay");
     if (shopTitleEl) {
-        // แสดงชื่อร้าน และถ้าเป็นสาขาเวียน ให้มีสัญลักษณ์แจ้งเตือนเล็กน้อยกันลืม
-        const branchLabel = settings.branchType === "สาขาเวียน" ? " (🔄)" : "";
-        shopTitleEl.textContent = settings.shop.toUpperCase() + branchLabel;
+        // บังคับแสดงผลให้เห็นชัดๆ ว่าตอนนี้เป็นสาขาอะไร
+        const displayType = settings.branchType === "สาขาเวียน" ? " [เวียน]" : "";
+        shopTitleEl.textContent = settings.shop.toUpperCase() + displayType;
     } 
 
-    // 5. สั่งระบบอัปเดตข้อมูลตามค่าใหม่ที่เพิ่งบันทึก
-    if (typeof applyTheme === "function") applyTheme(settings.theme);
-    
-    // สำคัญ: ต้องคำนวณเงินใหม่ เพราะสาขาที่เลือกเปลี่ยนไปแล้ว
+    // 5. สั่งรีเฟรชข้อมูล (เพื่อให้รายการในหน้าจอเปลี่ยนตามสาขา)
     if (typeof calculateMoney === "function") calculateMoney(); 
     
     const dateVal = $("dateInp")?.value || new Date().toISOString().split('T')[0];
-    // รีเฟรชรายการหน้าจอให้กรองตามสาขาใหม่
     if (typeof renderDay === "function") renderDay(dateVal); 
-    if (typeof loadAccountStatus === 'function') loadAccountStatus();
 
-    // 6. ปิดหน้าต่างตั้งค่า
-    const modal = $("modalSet");
-    if (modal) modal.style.display = 'none';
-
-    // 7. แจ้งเตือนสถานะ
-    const msg = `บันทึกข้อมูล ${settings.shop} [${settings.branchType}] เรียบร้อยแล้ว`;
+    // 6. ปิด Modal และแจ้งเตือน
+    if ($("modalSet")) $("modalSet").style.display = 'none';
     if (typeof notify === "function") {
-        notify("success", "บันทึกสำเร็จ", msg);
-    } else {
-        alert(msg);
+        notify("success", "เปลี่ยนสาขาสำเร็จ", `ตอนนี้กำลังทำงานที่: ${settings.branchType}`);
     }
 }
 async function handleSave(event) {
