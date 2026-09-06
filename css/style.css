@@ -189,3 +189,36 @@ nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width:
 .swal2-title, .swal2-content { color: var(--text) !important; }
 .swal2-container { z-index: 99999 !important; }
 .swal2-input { border-radius: 12px !important; border: 1px solid var(--border) !important; background: var(--bg) !important; color: var(--text) !important; font-size: 14px !important; height: 45px !important; }
+/* ปุ่มในหน้าตั้งค่า */
+.modal-content .btn {
+  padding: 10px 8px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  flex: 1;
+}
+.modal-content .btn.primary {
+  background: #2563eb;
+  color: white;
+}
+.modal-content .btn.secondary {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+.modal-content .btn.danger {
+  background: #fee2e2;
+  color: #dc2626;
+}
+.modal-content select,
+.modal-content input {
+  width: 100%;
+  padding: 12px 10px;
+  margin: 6px 0 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 15px;
+  box-sizing: border-box;
+  background: #f8fafc;
+}
