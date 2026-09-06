@@ -47,55 +47,85 @@ body > center, body > a, body > br { display: none !important; }
 /* ========= 📋 GRID LAYOUTS ========= */
 .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 8px; }
 .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 10px; }
-.grid-time { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin-bottom: 12px; }
-.grid-svc { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-.grid-price { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; margin-bottom: 15px; height: 95px; align-items: stretch; }
-.grid-pay { display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; margin-bottom: 12px; height: 80px; }
+.grid-time { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 10px; }
+.grid-svc { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+
+/* ✅ แก้ไข: ปลดล็อก height: 95px ออก ใช้ align-items: stretch ให้ทิปโอนสูงเท่าราคาพอดี */
+.grid-price { display: grid; grid-template-columns: 1.8fr 1fr; gap: 8px; margin-bottom: 12px; align-items: stretch; }
+.grid-pay { display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; margin-bottom: 12px; height: 55px; }
 .grid-summary { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; margin-bottom: 15px; align-items: stretch; }
 
 /* ========= 🧩 CARDS & BOXES ========= */
-h2 { text-align: center; color: var(--text); font-weight: 900; margin: 5px 0 15px; letter-spacing: 1px; text-transform: uppercase; font-size: 22px; }
-.icon-card { background: var(--bg); border: 1px solid var(--border); border-radius: 18px; height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
-.icon { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; color: #fff; font-size: 18px; }
+h2 { text-align: center; color: var(--text); font-weight: 900; margin: 5px 0 12px; letter-spacing: 0.5px; text-transform: uppercase; font-size: 20px; }
+.icon-card { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; height: 75px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+.icon { width: 30px; height: 30px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; color: #fff; font-size: 16px; }
 .grad-yellow { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
 .grad-red { background: linear-gradient(135deg, #f87171, #ef4444); }
 .grad-gray { background: linear-gradient(135deg, #94a3b8, #475569); }
-.icon-card span { color: var(--text); font-weight: 800; font-size: 11px; }
+.icon-card span { color: var(--text); font-weight: 700; font-size: 11px; }
 
-.input-date-wrap { position: relative; background: var(--bg); border: 1px solid var(--border); border-radius: 15px; height: 55px; display: flex; align-items: center; justify-content: center; }
-.input-date-wrap span { font-weight: 800; color: var(--text); font-size: 18px; }
+.input-date-wrap { position: relative; background: var(--bg); border: 1px solid var(--border); border-radius: 14px; height: 50px; display: flex; align-items: center; justify-content: center; }
+.input-date-wrap span { font-weight: 800; color: var(--text); font-size: 15px; }
 .input-date-wrap input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 
+/* ✅ แก้ไข: ปรับความสูงมาตรฐานและฟอนต์พื้นฐานให้พอดีมือถือ */
 select, input[type="text"], input[type="number"], input[type="date"], input[type="time"] {
-    width: 100%; height: 55px; border-radius: 15px; border: 1px solid var(--border); background: var(--bg); color: var(--text);
-    font-weight: 700; font-size: 16px; text-align: center; text-align-last: center; outline: none; appearance: none; -webkit-appearance: none;
+    width: 100%; height: 50px; border-radius: 14px; border: 1px solid var(--border); background: var(--bg); color: var(--text);
+    font-weight: 700; font-size: 15px; text-align: center; text-align-last: center; outline: none; appearance: none; -webkit-appearance: none;
 }
-select#hairStyle, select#extra1, select#extra2 { height: 70px; font-size: 22px; padding: 0 8px; }
+
+/* ✅ แก้ไข: ปรับลดความสูงและฟอนต์ช่องทรงผม / บริการ ให้พอดี ไม่ใหญ่เกินไป */
+select#hairStyle, select#extra1, select#extra2 { 
+    height: 52px; 
+    font-size: 14px; 
+    padding: 0 4px; 
+}
 
 .time-box { position: relative; }
-.time-box label { position: absolute; top: 4px; left: 10px; font-size: 13px; font-weight: 700; color: var(--text); opacity: 0.6; z-index: 1; }
-.time-input-custom { padding-top: 18px; font-size: 22px; font-weight: 900; }
+.time-box label { position: absolute; top: 4px; left: 10px; font-size: 11px; font-weight: 700; color: var(--text); opacity: 0.6; z-index: 1; }
+.time-input-custom { padding-top: 14px; font-size: 18px; font-weight: 800; }
 input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
 
-.price-box { position: relative; background: var(--bg); border: 2px solid var(--accent); border-radius: 20px; display: flex; align-items: center; overflow: hidden; height: 100%; }
-.baht { padding-left: 12px; font-size: 45px; color: var(--accent); font-weight: 900; }
-.price-box input { border: none; background: transparent; font-size: 50px; font-weight: 900; color: var(--text); text-align: right; padding-right: 15px; outline: none; }
-.tip-box { background: rgba(225,245,254,0.1); border: 2px solid var(--accent); border-radius: 20px; font-size: 28px; font-weight: 900; color: #ad2c18; text-align: center; }
+/* ✅ แก้ไข: ปรับสมดุลกล่องราคา และ ช่องทิปโอน ให้ยืดความสูงเท่ากันพอดี */
+.price-box { 
+    position: relative; 
+    background: var(--bg); 
+    border: 2px solid var(--accent); 
+    border-radius: 16px; 
+    display: flex; 
+    align-items: center; 
+    overflow: hidden; 
+    min-height: 60px;
+    padding: 4px 8px;
+}
+.baht { padding-left: 8px; font-size: 28px; color: var(--accent); font-weight: 900; }
+.price-box input { border: none; background: transparent; font-size: 32px; font-weight: 900; color: var(--text); text-align: right; padding-right: 8px; outline: none; height: 100%; }
+
+/* ✅ แก้ไข: ลบการกำหนดฟอนต์ใหญ่เกินไป ปรับเป็น height: 100% ให้สูงเท่ากล่องราคา */
+.tip-box { 
+    height: 100% !important; 
+    background: rgba(225,245,254,0.1); 
+    border: 2px solid var(--accent); 
+    border-radius: 16px; 
+    font-size: 16px; 
+    font-weight: 800; 
+    color: #ad2c18; 
+    text-align: center; 
+}
 
 .select-wrap { position: relative; width: 100%; height: 100%; }
-.select-wrap i:first-child { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text); font-size: 20px; z-index: 3; }
-.select-wrap select { height: 100%; padding: 0 25px 0 35px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-.select-wrap .arrow { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 12px; pointer-events: none; }
+.select-wrap i:first-child { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text); font-size: 16px; z-index: 3; }
+.select-wrap select { height: 100%; font-size: 14px; padding: 0 20px 0 32px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.select-wrap .arrow { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 12px; pointer-events: none; }
 
-.btn-pay { width: 100%; height: 100%; border: none; border-radius: 18px; background: linear-gradient(135deg, var(--save1), var(--save2)); color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 18px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-.btn-pay i { font-size: 22px; }
+.btn-pay { width: 100%; height: 100%; border: none; border-radius: 14px; background: linear-gradient(135deg, var(--save1), var(--save2)); color: #fff; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.btn-pay i { font-size: 18px; }
 
-#mixPanel { display: none; background: var(--input-bg); padding: 15px; border-radius: 20px; border: 2px dashed var(--accent); margin: 15px 0; }
-#mixPanel label { display: block; font-size: 14px; font-weight: 800; text-align: center; margin-bottom: 5px; }
+#mixPanel { display: none; background: var(--input-bg); padding: 12px; border-radius: 16px; border: 2px dashed var(--accent); margin: 12px 0; }
+#mixPanel label { display: block; font-size: 13px; font-weight: 800; text-align: center; margin-bottom: 4px; }
 #mixPanel label:first-of-type { color: var(--cash2); }
 #mixPanel label:last-of-type { color: var(--trans2); }
-#mixPanel input { height: 60px; border-radius: 15px; }
-
+#mixPanel input { height: 50px; border-radius: 12px; font-size: 16px; }
 /* ========= 📊 SUMMARY & REPORT ========= */
 .card-total { background: linear-gradient(135deg, var(--primary), var(--accent)); padding: 15px 10px; border-radius: 20px; text-align: center; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: center; }
 .card-total small { font-weight: 800; color: #fff; opacity: 0.8; text-transform: uppercase; font-size: 14px; }
