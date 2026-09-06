@@ -231,15 +231,15 @@
             <label class="settings-label">ชื่อร้าน</label>
             <input type="text" id="setShop" class="settings-input" value="Barber Shop">
 
-            <!-- ✅ ส่วนแบ่งช่าง + หลักประกัน → อยู่ในกรอบช่องป้อนข้อมูลชัดเจน -->
-            <div class="settings-row">
-                <div class="settings-col">
-                    <label class="settings-label">ส่วนแบ่งช่าง (%)</label>
-                    <input type="number" id="setPerc" class="settings-input" value="50">
+            <!-- ✅ ส่วนแบ่งช่าง + หลักประกัน → มีกรอบชัดเจน -->
+            <div class="settings-row" style="display: flex; gap: 16px; width: 100%; box-sizing: border-box;">
+                <div class="settings-col" style="flex: 1; min-width: 48%;">
+                    <label class="settings-label" style="display: block; margin-bottom: 6px; font-size: 13px; color: #374151; font-weight: 600;">ส่วนแบ่งช่าง (%)</label>
+                    <input type="number" id="setPerc" class="settings-input" style="width: 100%; box-sizing: border-box; border: 2px solid #d1d5db; border-radius: 10px; padding: 12px 14px; font-size: 15px; background: #fff;" value="50">
                 </div>
-                <div class="settings-col">
-                    <label class="settings-label">ประกันรายได้ (฿)</label>
-                    <input type="number" id="setGuar" class="settings-input" value="0">
+                <div class="settings-col" style="flex: 1; min-width: 48%;">
+                    <label class="settings-label" style="display: block; margin-bottom: 6px; font-size: 13px; color: #374151; font-weight: 600;">ประกันรายได้ (฿)</label>
+                    <input type="number" id="setGuar" class="settings-input" style="width: 100%; box-sizing: border-box; border: 2px solid #d1d5db; border-radius: 10px; padding: 12px 14px; font-size: 15px; background: #fff;" value="0">
                 </div>
             </div>
 
