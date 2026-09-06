@@ -222,3 +222,152 @@ nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width:
   box-sizing: border-box;
   background: #f8fafc;
 }
+/* ========== ตั้งค่า Modal — ปรับสำหรับมือถือ ========== */
+.settings-modal {
+  max-width: 95%;
+  width: 100%;
+  padding: 24px 20px;
+  margin: 5vh auto;
+  border-radius: 20px;
+  box-sizing: border-box;
+}
+
+.settings-title {
+  text-align: center;
+  font-size: 22px;
+  margin-bottom: 24px;
+}
+
+.settings-label {
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.settings-input,
+.settings-select {
+  width: 100%;
+  padding: 14px 12px;
+  font-size: 17px;
+  border-radius: 12px;
+  border: none;
+  box-sizing: border-box;
+  margin-bottom: 16px;
+  background: rgba(255,255,255,0.15);
+  color: inherit;
+}
+
+.settings-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.settings-col {
+  flex: 1;
+}
+
+/* ปุ่ม 3 คอลัมน์ — สำรอง | คืนค่า | ล้าง */
+.settings-btn-row-3 {
+  display: flex;
+  gap: 8px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+/* ปุ่ม 2 คอลัมน์ — บันทึก | ปิด */
+.settings-btn-row-2 {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.settings-btn {
+  flex: 1;
+  min-height: 52px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 8px;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+/* ปุ่มสีต่างๆ */
+.primary-btn {
+  background: #2563eb;
+  color: white;
+  font-size: 18px;
+}
+
+.secondary-btn {
+  background: rgba(255,255,255,0.15);
+  color: inherit;
+  font-size: 14px;
+}
+
+.danger-btn {
+  background: #dc2626;
+  color: white;
+  font-size: 14px;
+}
+
+.cancel-btn {
+  background: rgba(255,255,255,0.15);
+  color: inherit;
+  font-size: 18px;
+}
+
+/* ซ่อน input file ดิบ */
+.file-btn input {
+  display: none;
+}
+
+.settings-version {
+  text-align: right;
+  font-size: 12px;
+  opacity: 0.6;
+  margin-top: 20px;
+}
+
+/* ========== Responsive — หน้าจอเล็กกว่า 480px ========== */
+@media (max-width: 480px) {
+  .settings-modal {
+    padding: 18px 14px;
+    margin: 2vh auto;
+  }
+
+  .settings-title {
+    font-size: 20px;
+  }
+
+  .settings-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .settings-btn-row-3 {
+    flex-direction: column;
+  }
+
+  .settings-btn-row-2 {
+    flex-direction: column;
+  }
+
+  .settings-btn {
+    width: 100%;
+    min-height: 50px;
+  }
+
+  .secondary-btn,
+  .danger-btn {
+    font-size: 16px;
+  }
+}
