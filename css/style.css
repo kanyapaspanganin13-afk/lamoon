@@ -216,7 +216,6 @@ nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width:
   width: 100%;
   padding: 14px 12px;
   margin: 6px 0 12px;
-  border: none;
   border-radius: 12px;
   font-size: 17px;
   box-sizing: border-box;
@@ -224,7 +223,16 @@ nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width:
   color: inherit;
   appearance: none;
 }
-
+/* ✅ เพิ่มเส้นกรอบให้ช่องป้อนข้อมูลในตั้งค่า */
+.settings-modal .settings-input,
+.settings-modal .settings-select {
+  border: 2px solid rgba(148, 163, 184, 0.4) !important;
+}
+.settings-modal .settings-input:focus,
+.settings-modal .settings-select:focus {
+  border-color: #3b82f6 !important;
+  outline: none;
+}
 /* ========== ตั้งค่า Modal — แนวนอนตามรูป ========== */
 .settings-modal {
   max-width: 92%;
@@ -258,7 +266,6 @@ nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width:
 .settings-col {
   flex: 1;
 }
-
 /* ✅ ปุ่ม 3 ปุ่ม — เรียงแนวนอนเสมอ ตามรูป */
 .settings-btn-row-3 {
   display: flex !important;
@@ -267,7 +274,6 @@ nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width:
   margin: 24px 0 16px;
   width: 100%;
 }
-
 /* ✅ ปุ่มล่าง — บันทึก | ปิด — เรียงแนวนอนเสมอ */
 .settings-btn-row-2 {
   display: flex !important;
@@ -276,7 +282,6 @@ nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width:
   margin-top: 8px;
   width: 100%;
 }
-
 /* สไตล์ปุ่ม */
 .settings-btn {
   flex: 1;
@@ -312,7 +317,6 @@ nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width:
   color: inherit;
   font-size: 17px;
 }
-
 /* ซ่อน input file ปกติ */
 .file-btn input {
   display: none;
@@ -323,7 +327,6 @@ nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width:
   opacity: 0.6;
   margin-top: 20px;
 }
-
 /* ========== มือถือ — ยังคงแนวนอน ไม่เปลี่ยนเป็นแนวตั้ง ========== */
 @media (max-width: 480px) {
   .settings-modal {
