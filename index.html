@@ -215,48 +215,68 @@
     </div>
 
     <!-- Modal ต่างๆ -->
-    <div id="modalSet" class="modal">
-        <div class="modal-content">
-            <h3>⚙️ ตั้งค่าระบบ</h3>
-            <input type="text" id="setShop" placeholder="ชื่อร้าน">
-            <div class="grid-2">
-                <input type="number" id="setPerc" placeholder="% ช่าง">
-                <input type="number" id="setGuar" placeholder="ประกัน">
-            </div>
-            <select id="setTheme" onchange="applyTheme(this.value)">
-                <option value="light">⛅ ธีมสว่าง</option>
-                <option value="navy">🌌 ธีมน้ำเงิน</option>
-                <option value="vintage">🌑 ธีมดำ-ทอง</option>
-            </select>
-            <div class="grid-2">
-                <div class="input-select-wrap">
-                    <i class="fas fa-volume-up"></i>
-                    <select id="setSound">
-                        <option value="on">เปิดเสียง</option>
-                        <option value="off">ปิดเสียง</option>
-                    </select>
-                </div>
-                <div class="input-select-wrap">
-                    <i class="fas fa-user-friends"></i>
-                    <select id="setVoice">
-                        <option value="female">เสียงหญิง</option>
-                        <option value="male">เสียงชาย</option>
-                    </select>
-                </div>
-            </div>
-            <div class="grid-3">
-                <input type="file" id="fileInput" accept=".json" onchange="importBackup(this)">
-                <button onclick="exportBackup()">สำรองข้อมูล</button>
-                <button onclick="document.getElementById('fileInput').click()">คืนค่า</button>
-                <button onclick="clearData()">ล้างข้อมูล</button>
-            </div>
-            <div class="grid-2">
-                <button onclick="saveSettings()" class="btn-save">บันทึก</button>
-                <button onclick="document.getElementById('modalSet').style.display='none'" class="btn-close">ปิด</button>
-            </div>
-            <div class="version-info">V.1.0.7<br>Update: 27/03/2026</div>
-        </div>
+<div id="modalSet" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h3>⚙️ ตั้งค่าระบบ</h3>
+
+    <label>ชื่อร้าน</label>
+    <input type="text" id="setShop" value="Barber Shop">
+
+    <div style="display:flex;gap:10px;">
+      <div style="flex:1;">
+        <label>ส่วนแบ่งช่าง %</label>
+        <input type="number" id="setPerc" value="50">
+      </div>
+      <div style="flex:1;">
+        <label>หลักประกันขั้นต่ำ</label>
+        <input type="number" id="setGuar" value="0">
+      </div>
     </div>
+
+    <label>ธีมสว่าง</label>
+    <select id="setTheme">
+      <option value="light">ธีมสว่าง</option>
+      <option value="navy">ธีมสีน้ำเงิน</option>
+      <option value="vintage">ธีมวินเทจ</option>
+    </select>
+
+    <div style="display:flex;gap:10px;">
+      <div style="flex:1;">
+        <label>เสียงแจ้งเตือน</label>
+        <select id="setSound">
+          <option value="on" selected>เปิดเสียง</option>
+          <option value="off">ปิดเสียง</option>
+        </select>
+      </div>
+      <div style="flex:1;">
+        <label>เสียงพูด</label>
+        <select id="setVoice">
+          <option value="female" selected>เสียงหญิง</option>
+          <option value="male">เสียงชาย</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ✅ ปุ่มเรียงตามรูปขวา: สำรอง | คืนค่า | ล้างข้อมูล -->
+    <div style="display:flex;gap:10px;margin:15px 0;">
+      <button type="button" class="btn secondary" onclick="exportBackup()">📤 สำรองข้อมูล</button>
+      <label class="btn secondary" style="flex:1;display:flex;align-items:center;justify-content:center;margin:0;cursor:pointer;">
+        📥 คืนค่า
+        <input type="file" accept=".json" onchange="importBackup(this)" style="display:none;">
+      </label>
+      <button type="button" class="btn danger" onclick="clearData()">🗑️ ล้างข้อมูล</button>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:10px;">
+      <button class="btn primary" onclick="saveSettings()">บันทึก</button>
+      <button class="btn secondary" onclick="$('modalSet').style.display='none'">ปิด</button>
+    </div>
+
+    <div style="text-align:right;font-size:11px;color:#94a3b8;margin-top:10px;">
+      V1.0.7<br>Update: 27/03/2026
+    </div>
+  </div>
+</div>
     <div id="reportModal" class="modal">
         <div class="modal-content">
             <div class="modal-head">
