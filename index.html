@@ -223,11 +223,13 @@
     </div>
 
     <!-- ========== Modal ต่างๆ ========== -->
-    <div id="modalSet" class="modal" style="display:none;">
+<div id="modalSet" class="modal" style="display:none;">
         <div class="modal-content settings-modal">
             <h3 class="settings-title">⚙️ ตั้งค่าระบบ</h3>
+            
             <label class="settings-label">ชื่อร้าน</label>
             <input type="text" id="setShop" class="settings-input" value="Barber Shop">
+            
             <div class="settings-row">
                 <div class="settings-col">
                     <label class="settings-label">ส่วนแบ่งช่าง %</label>
@@ -238,12 +240,14 @@
                     <input type="number" id="setGuar" class="settings-input" value="0">
                 </div>
             </div>
+
             <label class="settings-label">ธีม</label>
             <select id="setTheme" class="settings-select">
                 <option value="light">ธีมสว่าง</option>
                 <option value="navy">ธีมสีน้ำเงิน</option>
                 <option value="vintage">ธีมวินเทจ</option>
             </select>
+
             <div class="settings-row">
                 <div class="settings-col">
                     <label class="settings-label">เสียงแจ้งเตือน</label>
@@ -260,6 +264,7 @@
                     </select>
                 </div>
             </div>
+
             <div class="settings-btn-row-3">
                 <button type="button" class="settings-btn secondary-btn" onclick="exportBackup()">📤 สำรองข้อมูล</button>
                 <label class="settings-btn secondary-btn file-btn">
@@ -268,10 +273,12 @@
                 </label>
                 <button type="button" class="settings-btn danger-btn" onclick="clearData()">🗑️ ล้างข้อมูล</button>
             </div>
+
             <div class="settings-btn-row-2">
                 <button class="settings-btn primary-btn" onclick="saveSettings()">บันทึก</button>
                 <button class="settings-btn cancel-btn" onclick="$('modalSet').style.display='none'">ปิด</button>
             </div>
+
             <div class="settings-version">V1.0. · Update: 06/09/2026</div>
         </div>
     </div>
@@ -322,10 +329,10 @@
 
     <!-- ========== ไฟล์เสียง ========== -->
     <div id="appAudioAssets" style="display:none;">
-        <audio id="successSoundMan" src="assets/sounds/success_male.mp3" preload="auto">
-        <audio id="successSoundWoman" src="assets/sounds/success_female.mp3" preload="auto">
-        <audio id="errorSoundMan" src="assets/sounds/error_male.mp3" preload="auto">
-        <audio id="errorSoundWoman" src="assets/sounds/error_female.mp3" preload="auto">
+        <audio id="successSoundMan" src="assets/sounds/success_male.mp3" preload="auto"></audio>
+        <audio id="successSoundWoman" src="assets/sounds/success_female.mp3" preload="auto"></audio>
+        <audio id="errorSoundMan" src="assets/sounds/error_male.mp3" preload="auto"></audio>
+        <audio id="errorSoundWoman" src="assets/sounds/error_female.mp3" preload="auto"></audio>
     </div>
 </div>
 </body>
