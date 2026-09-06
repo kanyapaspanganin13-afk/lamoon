@@ -198,50 +198,134 @@ function handleSave(event) {
 function renderDay(selectedDate) {
     const dInp = selectedDate || ($("dateInp")?.value || new Date().toISOString().split('T')[0]);
     if ($("dateInp")) $("dateInp").value = dInp;
-    let allRec = db.filter(r => r.date === dInp);
-    const archived = archives.find(a => a.date === dInp);
-    if (archived?.details) allRec = archived.details;
 
+    // แปลงวันที่ + ชื่อวัน (พุทธศักราช)
+    const days = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+    const dayName = days[new Date(dInp).getDay()];
+    const dateParts = dInp.split('-');
+    let displayDateBE = dInp;
+    if (dateParts.length === 3) {
+        const d = dateParts[2];
+        const m = dateParts[1];
+        const yBE = parseInt(dateParts[0]) + 543;
+        displayDateBE = `${d}/${m}/${yBE}`;
+    }
+
+    let allRec = db.filter(r => r.date === dInp);
+    if (typeof archives !== 'undefined') {
+        const archived = archives.find(a => a.date === dInp);
+        if (archived?.details) allRec = archived.details;
+    }
     const isHoliday = allRec.some(r => r.type === "HOLIDAY");
+
+    // คำนวณยอด
     let tot = 0, trans = 0, cash = 0, tips = 0;
     let realCustomerCount = 0;
     let listHtml = "";
 
-    allRec.slice().sort((a,b) => (a.time||"").localeCompare(b.time||"")).forEach((r,i) => {
-        const p = Number(r.price)||0, t = Number(r.tip)||0;
-        tot += p; tips += t;
-        if (/Trans|โอน/i.test(r.pay)) trans += p + t;
-        else if (/Mix/i.test(r.pay)) { cash += Number(r.payCash)||0; trans += Number(r.payTrans)||0; }
-        else if (!/Free/i.test(r.pay)) cash += p + t;
+    allRec.slice().sort((a, b) => (a.time || "").localeCompare(b.time || "")).forEach((r, i) => {
+        const p = Number(r.price) || 0;
+        const t = Number(r.tip) || 0;
+        tot += p;
+        tips += t;
 
-        if (!/HOLIDAY|GUARANTEE|Free/i.test(r.type||r.pay)) realCustomerCount++;
+        // แยกประเภทการจ่าย
+        if (/Trans|โอน/i.test(r.pay)) {
+            trans += p + t;
+        } else if (/Mix/i.test(r.pay)) {
+            cash += Number(r.payCash) || 0;
+            trans += Number(r.payTrans) || 0;
+        } else if (!/Free/i.test(r.pay)) {
+            cash += p + t;
+        }
+
+        // นับลูกค้า
+        if (!/HOLIDAY|GUARANTEE|Free/i.test(r.type || r.pay)) {
+            const svcs = Array.isArray(r.svcs) ? r.svcs : [];
+            if (svcs.length > 0) realCustomerCount++;
+        }
+
+        // แสดงรายการ
         const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
         const svcs = Array.isArray(r.svcs) ? r.svcs.join(' + ') : r.svcs;
+        const payIcon = /Trans|โอน/i.test(r.pay) ? '📱' : '💵';
         listHtml += `
         <div style="padding:12px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">
-            <div><b>${i+1}. ${timeShow} | ${svcs || '-'}</b><br><small>${r.pay} | ฿${p}${t?` + ทิป฿${t}`:''}</small></div>
+            <div><b>${i+1}. ${timeShow} | ${svcs || '-'}</b><br><small>${payIcon} ${r.pay} | ฿${p}${t ? ` + ทิป฿${t}` : ''}</small></div>
             <button onclick="delRec(${r.id})" style="border:none;background:#fee2e2;color:#dc2626;border-radius:8px;padding:4px 8px;cursor:pointer;">ลบ</button>
         </div>`;
     });
 
-    const bEarn = isHoliday ? 0 : Math.max(tot*(conf.perc/100), conf.guar) + tips;
+    // คำนวณส่วนแบ่ง
+    const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc / 100), conf.guar) + tips;
     const sEarn = isHoliday ? 0 : tot - (bEarn - tips);
     const settle = isHoliday ? 0 : cash - bEarn;
 
+    // อัปเดตค่าบนหน้าจอ
     if ($("dTotal")) $("dTotal").innerText = tot.toLocaleString();
     if ($("dTrans")) $("dTrans").innerText = trans.toLocaleString();
     if ($("dCash")) $("dCash").innerText = cash.toLocaleString();
     if ($("dBarber")) $("dBarber").innerText = Math.floor(bEarn).toLocaleString();
     if ($("dShop")) $("dShop").innerText = Math.floor(sEarn).toLocaleString();
-    if ($("dCounts")) $("dCounts").innerText = isHoliday ? "🏖️ วันหยุด" : `ลูกค้า ${realCustomerCount} คน`;
-
-    if ($("settleBar")) {
-        let statusText = settle > 0 ? `ช่างคืนร้าน ฿${Math.floor(settle).toLocaleString()}` 
-                       : settle < 0 ? `ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}` 
-                       : "ยอดพอดี";
-        $("settleBar").innerText = statusText;
+    if ($("dCounts")) {
+        if (isHoliday) {
+            $("dCounts").innerHTML = "🏖️ วันหยุด";
+        } else if (allRec.length === 0) {
+            $("dCounts").innerHTML = "ไม่มีข้อมูล";
+        } else {
+            $("dCounts").innerText = `ลูกค้า ${realCustomerCount} คน`;
+        }
     }
-    if ($("dailyList")) $("dailyList").innerHTML = listHtml || "<center style='padding:20px;color:#94a3b8'>ไม่มีข้อมูลวันนี้</center>";
+
+    // === แถบสถานะ + ปุ่มส่งงาน ส่วนบน ===
+    let statusText = "", statusColor = "", icon = "";
+    if (isHoliday) {
+        statusText = "วันหยุด"; statusColor = "#1e40af"; icon = "🏖️";
+    } else if (allRec.length === 0) {
+        statusText = "รอข้อมูล..."; statusColor = "#64748b"; icon = "📝";
+    } else if (settle > 0) {
+        statusText = `ช่างคืนร้าน ฿${Math.floor(settle).toLocaleString()}`; statusColor = "#b91c1c"; icon = "🥷";
+    } else if (settle < 0) {
+        statusText = `ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; statusColor = "#4338ca"; icon = "🏠";
+    } else {
+        statusText = "ยอดพอดี"; statusColor = "#15803d"; icon = "✅";
+    }
+
+    const settleBar = $("settleBarContainer") || $("settleBar");
+    if (settleBar) {
+        settleBar.style.display = "flex";
+        settleBar.style.gap = "10px";
+        settleBar.style.marginBottom = "18px";
+        settleBar.innerHTML = `
+            <div id="settleBar" style="flex:8; height:55px; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; border-radius:18px; font-weight:800; font-size:14px; color:${statusColor}; border:1px solid var(--border);">
+                <span style="margin-right:8px; font-size:18px;">${icon}</span> ${statusText}
+            </div>
+            <button onclick="saveAndGo('${dInp}', ${tot})" 
+                style="flex:2.2; height:55px; background:#ff7a00; color:#fff; border-radius:18px; border:none; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                ➤
+            </button>`;
+    }
+
+    // === แถบวันที่ + ปุ่มลบ + ปุ่มส่งไลน์ ส่วนล่าง ===
+    const dList = $("dailyList");
+    if (dList) {
+        dList.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px; background: rgba(255,255,255,0.08); border-radius: 16px; box-sizing: border-box; margin-bottom: 15px;">
+                <span style="font-size: 15px; font-weight: 600; color: var(--text); white-space: nowrap;">รายงานวันที่</span>
+                <div style="position: relative; flex:1; padding: 10px 12px; border-radius: 10px; background: rgba(37,99,235,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; min-width: 140px;">
+                    <span style="font-size: 15px; font-weight: 700; color: #93c5fd;">${dayName} ${displayDateBE}</span>
+                    <input type="date" value="${dInp}" onchange="renderDay(this.value)" style="position:absolute; opacity:0; width:100%; height:100%; cursor:pointer;">
+                </div>
+                <button onclick="deleteArchiveDate('${dInp}')" title="ลบข้อมูลวันนี้" 
+                    style="width: 44px; height: 44px; border-radius: 10px; border: none; background: #fee2e2; color: #dc2626; font-size: 18px; cursor: pointer;">🗑️</button>
+                <button onclick="shareLine()" 
+                    style="width: 60px; height: 44px; border-radius: 10px; border: none; background: #00c300; color: white; font-size: 13px; font-weight: 700; cursor: pointer;">LINE</button>
+            </div>
+            <div style="padding: 0 5px;">
+                ${isHoliday ? `<center style='padding:30px; color:#64748b;'>🏖️ วันหยุด (${dayName} ${displayDateBE})</center>` : (listHtml || "<center style='padding:30px; color:#94a3b8;'>ไม่มีข้อมูล</center>")}
+            </div>
+        `;
+    }
 }
 
 /* ========= SECTION 10: DELETE RECORD ========= */
