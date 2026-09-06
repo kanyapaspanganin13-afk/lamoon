@@ -189,7 +189,7 @@ nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width:
 .swal2-title, .swal2-content { color: var(--text) !important; }
 .swal2-container { z-index: 99999 !important; }
 .swal2-input { border-radius: 12px !important; border: 1px solid var(--border) !important; background: var(--bg) !important; color: var(--text) !important; font-size: 14px !important; height: 45px !important; }
-/* ปุ่มในหน้าตั้งค่า */
+/* ========== ปุ่มในหน้าตั้งค่า — แก้ไขแล้ว ========== */
 .modal-content .btn {
   padding: 10px 8px;
   border-radius: 10px;
@@ -204,89 +204,84 @@ nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width:
   color: white;
 }
 .modal-content .btn.secondary {
-  background: #e2e8f0;
-  color: #1e293b;
+  background: rgba(255,255,255,0.15);
+  color: inherit;
 }
 .modal-content .btn.danger {
-  background: #fee2e2;
-  color: #dc2626;
+  background: #dc2626;
+  color: white;
 }
 .modal-content select,
 .modal-content input {
   width: 100%;
-  padding: 12px 10px;
+  padding: 14px 12px;
   margin: 6px 0 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 15px;
+  border: none;
+  border-radius: 12px;
+  font-size: 17px;
   box-sizing: border-box;
-  background: #f8fafc;
+  background: rgba(255,255,255,0.15);
+  color: inherit;
+  appearance: none;
 }
-/* ========== ตั้งค่า Modal — ปรับสำหรับมือถือ ========== */
+
+/* ========== ตั้งค่า Modal — แนวนอนตามรูป ========== */
 .settings-modal {
-  max-width: 95%;
+  max-width: 92%;
   width: 100%;
   padding: 24px 20px;
   margin: 5vh auto;
   border-radius: 20px;
   box-sizing: border-box;
 }
-
 .settings-title {
   text-align: center;
   font-size: 22px;
   margin-bottom: 24px;
 }
-
 .settings-label {
   font-size: 15px;
   font-weight: 500;
-  margin-bottom: 8px;
+  margin: 16px 0 8px;
   display: block;
 }
-
 .settings-input,
 .settings-select {
-  width: 100%;
-  padding: 14px 12px;
-  font-size: 17px;
-  border-radius: 12px;
-  border: none;
-  box-sizing: border-box;
   margin-bottom: 16px;
-  background: rgba(255,255,255,0.15);
-  color: inherit;
 }
-
 .settings-row {
   display: flex;
   gap: 12px;
   width: 100%;
+  flex-direction: row !important;
 }
-
 .settings-col {
   flex: 1;
 }
 
-/* ปุ่ม 3 คอลัมน์ — สำรอง | คืนค่า | ล้าง */
+/* ✅ ปุ่ม 3 ปุ่ม — เรียงแนวนอนเสมอ ตามรูป */
 .settings-btn-row-3 {
-  display: flex;
+  display: flex !important;
+  flex-direction: row !important;
   gap: 8px;
-  margin: 20px 0;
-  flex-wrap: wrap;
+  margin: 24px 0 16px;
+  width: 100%;
 }
 
-/* ปุ่ม 2 คอลัมน์ — บันทึก | ปิด */
+/* ✅ ปุ่มล่าง — บันทึก | ปิด — เรียงแนวนอนเสมอ */
 .settings-btn-row-2 {
-  display: flex;
+  display: flex !important;
+  flex-direction: row !important;
   gap: 12px;
   margin-top: 8px;
+  width: 100%;
 }
 
+/* สไตล์ปุ่ม */
 .settings-btn {
   flex: 1;
   min-height: 52px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   border: none;
   border-radius: 12px;
@@ -295,41 +290,33 @@ nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width:
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 0 8px;
+  padding: 0 6px;
   box-sizing: border-box;
   white-space: nowrap;
 }
-
-/* ปุ่มสีต่างๆ */
 .primary-btn {
   background: #2563eb;
   color: white;
-  font-size: 18px;
+  font-size: 17px;
 }
-
 .secondary-btn {
   background: rgba(255,255,255,0.15);
   color: inherit;
-  font-size: 14px;
 }
-
 .danger-btn {
   background: #dc2626;
   color: white;
-  font-size: 14px;
 }
-
 .cancel-btn {
   background: rgba(255,255,255,0.15);
   color: inherit;
-  font-size: 18px;
+  font-size: 17px;
 }
 
-/* ซ่อน input file ดิบ */
+/* ซ่อน input file ปกติ */
 .file-btn input {
   display: none;
 }
-
 .settings-version {
   text-align: right;
   font-size: 12px;
@@ -337,37 +324,33 @@ nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width:
   margin-top: 20px;
 }
 
-/* ========== Responsive — หน้าจอเล็กกว่า 480px ========== */
+/* ========== มือถือ — ยังคงแนวนอน ไม่เปลี่ยนเป็นแนวตั้ง ========== */
 @media (max-width: 480px) {
   .settings-modal {
-    padding: 18px 14px;
-    margin: 2vh auto;
+    padding: 20px 16px;
+    margin: 3vh auto;
   }
-
   .settings-title {
     font-size: 20px;
   }
-
+  /* ✅ แถว 2 ช่อง → ยังแนวนอน */
   .settings-row {
-    flex-direction: column;
-    gap: 0;
+    flex-direction: row !important;
   }
-
+  /* ✅ ปุ่ม 3 ปุ่ม → แนวนอนเสมอ */
   .settings-btn-row-3 {
-    flex-direction: column;
+    flex-direction: row !important;
+    gap: 6px;
   }
-
+  .settings-btn-row-3 .settings-btn {
+    font-size: 12px;
+    padding: 0 2px;
+  }
+  /* ✅ บันทึก/ปิด → แนวนอนเสมอ */
   .settings-btn-row-2 {
-    flex-direction: column;
+    flex-direction: row !important;
   }
-
   .settings-btn {
-    width: 100%;
-    min-height: 50px;
-  }
-
-  .secondary-btn,
-  .danger-btn {
-    font-size: 16px;
+    min-height: 48px;
   }
 }
