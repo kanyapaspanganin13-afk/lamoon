@@ -215,65 +215,70 @@
     </div>
 
     <!-- Modal ต่างๆ -->
-<div id="modalSet" class="modal" style="display:none;">
-  <div class="modal-content">
-    <h3>⚙️ ตั้งค่าระบบ</h3>
+    <div id="modalSet" class="modal" style="display:none;">
+  <div class="modal-content settings-modal">
+    <h3 class="settings-title">⚙️ ตั้งค่าระบบ</h3>
 
-    <label>ชื่อร้าน</label>
-    <input type="text" id="setShop" value="Barber Shop">
+    <div class="settings-group">
+      <label class="settings-label">ชื่อร้าน</label>
+      <input type="text" id="setShop" class="settings-input" value="Barber Shop">
+    </div>
 
-    <div style="display:flex;gap:10px;">
-      <div style="flex:1;">
-        <label>ส่วนแบ่งช่าง %</label>
-        <input type="number" id="setPerc" value="50">
+    <div class="settings-row">
+      <div class="settings-col">
+        <label class="settings-label">ส่วนแบ่งช่าง %</label>
+        <input type="number" id="setPerc" class="settings-input" value="50">
       </div>
-      <div style="flex:1;">
-        <label>หลักประกันขั้นต่ำ</label>
-        <input type="number" id="setGuar" value="0">
+      <div class="settings-col">
+        <label class="settings-label">หลักประกันขั้นต่ำ</label>
+        <input type="number" id="setGuar" class="settings-input" value="0">
       </div>
     </div>
 
-    <label>ธีมสว่าง</label>
-    <select id="setTheme">
-      <option value="light">ธีมสว่าง</option>
-      <option value="navy">ธีมสีน้ำเงิน</option>
-      <option value="vintage">ธีมวินเทจ</option>
-    </select>
+    <div class="settings-group">
+      <label class="settings-label">ธีม</label>
+      <select id="setTheme" class="settings-select">
+        <option value="light">ธีมสว่าง</option>
+        <option value="navy">ธีมสีน้ำเงิน</option>
+        <option value="vintage">ธีมวินเทจ</option>
+      </select>
+    </div>
 
-    <div style="display:flex;gap:10px;">
-      <div style="flex:1;">
-        <label>เสียงแจ้งเตือน</label>
-        <select id="setSound">
+    <div class="settings-row">
+      <div class="settings-col">
+        <label class="settings-label">เสียงแจ้งเตือน</label>
+        <select id="setSound" class="settings-select">
           <option value="on" selected>เปิดเสียง</option>
           <option value="off">ปิดเสียง</option>
         </select>
       </div>
-      <div style="flex:1;">
-        <label>เสียงพูด</label>
-        <select id="setVoice">
+      <div class="settings-col">
+        <label class="settings-label">เสียงพูด</label>
+        <select id="setVoice" class="settings-select">
           <option value="female" selected>เสียงหญิง</option>
           <option value="male">เสียงชาย</option>
         </select>
       </div>
     </div>
 
-    <!-- ✅ ปุ่มเรียงตามรูปขวา: สำรอง | คืนค่า | ล้างข้อมูล -->
-    <div style="display:flex;gap:10px;margin:15px 0;">
-      <button type="button" class="btn secondary" onclick="exportBackup()">📤 สำรองข้อมูล</button>
-      <label class="btn secondary" style="flex:1;display:flex;align-items:center;justify-content:center;margin:0;cursor:pointer;">
+    <!-- ปุ่มจัดการข้อมูล — เต็มความกว้าง กดง่าย -->
+    <div class="settings-btn-row-3">
+      <button type="button" class="settings-btn secondary-btn" onclick="exportBackup()">📤 สำรองข้อมูล</button>
+      <label class="settings-btn secondary-btn file-btn">
         📥 คืนค่า
-        <input type="file" accept=".json" onchange="importBackup(this)" style="display:none;">
+        <input type="file" accept=".json" onchange="importBackup(this)">
       </label>
-      <button type="button" class="btn danger" onclick="clearData()">🗑️ ล้างข้อมูล</button>
+      <button type="button" class="settings-btn danger-btn" onclick="clearData()">🗑️ ล้างข้อมูล</button>
     </div>
 
-    <div style="display:flex;gap:10px;margin-top:10px;">
-      <button class="btn primary" onclick="saveSettings()">บันทึก</button>
-      <button class="btn secondary" onclick="$('modalSet').style.display='none'">ปิด</button>
+    <!-- ปุ่มหลัก — ใหญ่ เต็มแถว กดง่ายสุด -->
+    <div class="settings-btn-row-2">
+      <button class="settings-btn primary-btn" onclick="saveSettings()">บันทึก</button>
+      <button class="settings-btn cancel-btn" onclick="$('modalSet').style.display='none'">ปิด</button>
     </div>
 
-    <div style="text-align:right;font-size:11px;color:#94a3b8;margin-top:10px;">
-      V1.0.7<br>Update: 27/03/2026
+    <div class="settings-version">
+      V1.0.7<br>Update: 06/09/2026
     </div>
   </div>
 </div>
