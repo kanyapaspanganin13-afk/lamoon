@@ -223,24 +223,27 @@
     </div>
 
     <!-- ========== Modal ต่างๆ ========== -->
-<div id="modalSet" class="modal" style="display:none;">
+    <div id="modalSet" class="modal" style="display:none;">
         <div class="modal-content settings-modal">
             <h3 class="settings-title">⚙️ ตั้งค่าระบบ</h3>
-            
+
+            <!-- ชื่อร้าน -->
             <label class="settings-label">ชื่อร้าน</label>
             <input type="text" id="setShop" class="settings-input" value="Barber Shop">
-            
+
+            <!-- ✅ ส่วนแบ่งช่าง + หลักประกัน → อยู่ในกรอบช่องป้อนข้อมูลชัดเจน -->
             <div class="settings-row">
                 <div class="settings-col">
-                    <label class="settings-label">ส่วนแบ่งช่าง %</label>
+                    <label class="settings-label">ส่วนแบ่งช่าง (%)</label>
                     <input type="number" id="setPerc" class="settings-input" value="50">
                 </div>
                 <div class="settings-col">
-                    <label class="settings-label">หลักประกันขั้นต่ำ</label>
+                    <label class="settings-label">ประกันรายได้ (฿)</label>
                     <input type="number" id="setGuar" class="settings-input" value="0">
                 </div>
             </div>
 
+            <!-- ธีม -->
             <label class="settings-label">ธีม</label>
             <select id="setTheme" class="settings-select">
                 <option value="light">ธีมสว่าง</option>
@@ -248,6 +251,7 @@
                 <option value="vintage">ธีมวินเทจ</option>
             </select>
 
+            <!-- เสียงแจ้งเตือน + เสียงพูด -->
             <div class="settings-row">
                 <div class="settings-col">
                     <label class="settings-label">เสียงแจ้งเตือน</label>
@@ -265,6 +269,7 @@
                 </div>
             </div>
 
+            <!-- ปุ่ม 3 ปุ่ม -->
             <div class="settings-btn-row-3">
                 <button type="button" class="settings-btn secondary-btn" onclick="exportBackup()">📤 สำรองข้อมูล</button>
                 <label class="settings-btn secondary-btn file-btn">
@@ -274,12 +279,13 @@
                 <button type="button" class="settings-btn danger-btn" onclick="clearData()">🗑️ ล้างข้อมูล</button>
             </div>
 
+            <!-- ปุ่มล่าง -->
             <div class="settings-btn-row-2">
                 <button class="settings-btn primary-btn" onclick="saveSettings()">บันทึก</button>
                 <button class="settings-btn cancel-btn" onclick="$('modalSet').style.display='none'">ปิด</button>
             </div>
 
-            <div class="settings-version">V1.0. · Update: 06/09/2026</div>
+            <div class="settings-version">V1.0. Update: 06/09/2026</div>
         </div>
     </div>
 
