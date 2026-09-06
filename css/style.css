@@ -1,7 +1,7 @@
 /* ========= 💎 1. THEME SYSTEM ========= */
 :root {
     --bg: #f0f2f5; --card: #ffffff; --text: #1e293b; --accent: #3b82f6;
-    --border: rgba(0,0,0,0.08); --input-bg: #fafbfc; --radius: 24px;
+    --border: rgba(0,0,0,0.12); --input-bg: #fafbfc; --radius: 24px;
     --cash1: #34d36c; --cash2: #02ba58; --trans1: #82c8fa; --trans2: #0764fa;
     --mix1: #6f78d1; --mix2: #6366f1; --save1: #032687; --save2: #1e40af;
     --btn-clear1: #38ff81; --btn-clear2: #16a34a;
@@ -13,7 +13,7 @@
 }
 body.navy {
     --bg: #020617; --card: #0a0f24; --text: #e6edf6; --accent: #4f5dff;
-    --border: rgba(148,163,184,0.14); --input-bg: #101a38;
+    --border: rgba(148,163,184,0.2); --input-bg: #101a38;
     --cash1: #22c55e; --cash2: #15803d; --trans1: #2563eb; --trans2: #7a4ce6;
     --mix1: #636ff7; --mix2: #052e87; --save1: #363978; --save2: #051d61;
     --btn-clear1: #60a5fa; --btn-clear2: #3730a3; --btn-his1: #ef4444; --btn-his2: #7f1d1d;
@@ -22,7 +22,7 @@ body.navy {
 }
 body.vintage {
     --bg: #121212; --card: #1c1c1c; --text: #d99c00; --accent: #fbbf24;
-    --border: rgba(251,191,36,0.2); --input-bg: #00000066;
+    --border: rgba(251,191,36,0.3); --input-bg: #00000066;
     --cash1: #fbbf24; --cash2: #f7b60c; --trans1: #f59e0b; --trans2: #b45309;
     --mix1: #fde047; --mix2: #a16207; --save1: #fbbf24; --save2: #d97706;
     --btn-clear1: #fde047; --btn-clear2: #ca8a04;
@@ -110,7 +110,7 @@ input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
 .row-disp.border-top { border-top: 1px dashed var(--border); padding-top: 5px; margin-top: 2px; font-weight: 800; }
 
 #settleBarContainer { display: grid; grid-template-columns: 8fr 2.2fr; gap: 10px; margin-bottom: 18px; }
-#settleBar { height: 55px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; border-radius: 18px; font-weight: 800; font-size: 14px; color: #1e40af; border: 1px solid #e2e8f0; }
+#settleBar { height: 55px; background: var(--bg); display: flex; align-items: center; justify-content: center; border-radius: 18px; font-weight: 800; font-size: 14px; color: var(--accent); border: 1px solid var(--border); }
 #btnSubmitSend { height: 55px; background: #ff6f00; color: #fff; border-radius: 18px; border: none; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
 #dServiceStats { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin-bottom: 8px; }
@@ -138,7 +138,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 15px 0; }
 .input-field input { border: none; background: transparent; font-size: 16px; font-weight: 600; padding-left: 10px; outline: none; text-align: left; }
 
 .btn-clear, .btn-history { border: none; border-radius: 18px; padding: 15px 5px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); color: #fff; }
-.btn-clear { background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)); }
+.btn-clear { background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)); color: var(--btn-text); }
 .btn-history { background: linear-gradient(135deg, var(--btn-his1), var(--btn-his2)); }
 
 .btn-monthly, .btn-excel, .btn-sheets { border-radius: 18px; padding: 15px 5px; text-align: center; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.15); display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--border); color: #fff; font-weight: 700; font-size: 11px; position: relative; }
@@ -151,9 +151,9 @@ hr { border: none; border-top: 1px solid var(--border); margin: 15px 0; }
 .btn-compare { border-radius: 25px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 0 8px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, var(--btn-compare1), var(--btn-compare2)); color: #fff; font-weight: 700; margin-top: 15px; }
 .btn-compare i { font-size: 24px; }
 
-/* ========= 🪟 MODALS ========= */
+/* ========= 🪟 MODALS & SETTINGS (แก้ไขใหม่ทั้งหมด) ========= */
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 10000; align-items: center; justify-content: center; padding: 15px; }
-.modal-content { background: var(--card); width: 100%; max-width: 420px; border-radius: 25px; padding: 20px; border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease-out; }
+.modal-content { background: var(--card); width: 100%; max-width: 420px; border-radius: 25px; padding: 20px; border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease-out; color: var(--text); }
 .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 .modal-head h3 { margin: 0; color: var(--accent); font-size: 18px; }
 .btn-close-sm { background: var(--danger); color: #fff; border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 18px; cursor: pointer; opacity: 0.8; }
@@ -162,16 +162,163 @@ hr { border: none; border-top: 1px solid var(--border); margin: 15px 0; }
 .btn-save { background: var(--success); color: #fff; box-shadow: 0 4px 12px rgba(34,197,94,0.3); }
 .btn-close { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
 
-.modal-content h3 { text-align: center; margin-bottom: 20px; color: var(--text); font-size: 22px; }
-.modal-content input, .modal-content select { margin-bottom: 10px; text-align: left; text-align-last: left; padding: 0 15px; }
-.modal-content .grid-2 button { height: 60px; border-radius: 20px; border: none; font-size: 18px; font-weight: 800; cursor: pointer; }
-.version-info { text-align: center; margin-top: 20px; line-height: 1.4; opacity: 0.5; font-size: 10px; color: var(--text); }
-
-.input-select-wrap { position: relative; display: flex; align-items: center; }
-.input-select-wrap i { position: absolute; left: 12px; color: var(--text); opacity: 0.6; pointer-events: none; font-size: 14px; }
-.input-select-wrap select { padding-left: 35px; text-align: left; text-align-last: left; }
-
 textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--border); border-radius: 15px; background: var(--bg); color: var(--text); font-family: 'Kanit', sans-serif; font-size: 14px; line-height: 1.5; outline: none; resize: none; }
+
+/* ---------- ⚙️ โครงสร้าง MODAL SETTINGS ---------- */
+.settings-modal {
+  max-width: 420px;
+  width: 92%;
+  padding: 24px 20px;
+  margin: 3vh auto;
+  border-radius: 24px;
+  box-sizing: border-box;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.settings-title {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0 0 18px 0;
+  color: var(--text);
+}
+
+.settings-group {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.settings-label {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  display: block;
+  opacity: 0.9;
+  color: var(--text);
+}
+
+.settings-row {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.settings-col {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ช่องกรอกและตัวเลือกในหน้าตั้งค่า */
+.settings-input,
+.settings-select {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  box-sizing: border-box;
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  outline: none;
+  margin: 0 !important;
+  text-align: left !important;
+  text-align-last: left !important;
+}
+
+.settings-input:focus,
+.settings-select:focus {
+  border-color: var(--accent) !important;
+}
+
+/* แถวปุ่มกด */
+.settings-btn-row-3 {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 8px;
+  margin: 20px 0 12px;
+  width: 100%;
+}
+
+.settings-btn-row-2 {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 10px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.settings-btn {
+  flex: 1;
+  height: 48px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.primary-btn {
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
+  font-size: 16px;
+  height: 50px;
+}
+
+.secondary-btn {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.danger-btn {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.cancel-btn {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-size: 15px;
+  height: 50px;
+}
+
+.file-btn input {
+  display: none;
+}
+
+.settings-version {
+  text-align: center;
+  font-size: 11px;
+  opacity: 0.5;
+  margin-top: 16px;
+  color: var(--text);
+}
+
+/* Responsive บนมือถือ */
+@media (max-width: 480px) {
+  .settings-modal {
+    padding: 18px 14px;
+  }
+  .settings-btn-row-3 .settings-btn {
+    font-size: 11px;
+    padding: 0 2px;
+  }
+}
 
 /* ========= 🧭 NAVIGATION ========= */
 nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 75px; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
@@ -189,171 +336,3 @@ nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width:
 .swal2-title, .swal2-content { color: var(--text) !important; }
 .swal2-container { z-index: 99999 !important; }
 .swal2-input { border-radius: 12px !important; border: 1px solid var(--border) !important; background: var(--bg) !important; color: var(--text) !important; font-size: 14px !important; height: 45px !important; }
-/* ========== ปุ่มในหน้าตั้งค่า — แก้ไขแล้ว ========== */
-.modal-content .btn {
-  padding: 10px 8px;
-  border-radius: 10px;
-  border: none;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  flex: 1;
-}
-.modal-content .btn.primary {
-  background: #2563eb;
-  color: white;
-}
-.modal-content .btn.secondary {
-  background: rgba(255,255,255,0.15);
-  color: inherit;
-}
-.modal-content .btn.danger {
-  background: #dc2626;
-  color: white;
-}
-.modal-content select,
-.modal-content input {
-  width: 100%;
-  padding: 14px 12px;
-  margin: 6px 0 12px;
-  border-radius: 12px;
-  font-size: 17px;
-  box-sizing: border-box;
-  background: rgba(255,255,255,0.15);
-  color: inherit;
-  appearance: none;
-}
-/* ✅ เพิ่มเส้นกรอบให้ช่องป้อนข้อมูลในตั้งค่า */
-.settings-modal .settings-input,
-.settings-modal .settings-select {
-  border: 2px solid rgba(148, 163, 184, 0.4) !important;
-}
-.settings-modal .settings-input:focus,
-.settings-modal .settings-select:focus {
-  border-color: #3b82f6 !important;
-  outline: none;
-}
-/* ========== ตั้งค่า Modal — แนวนอนตามรูป ========== */
-.settings-modal {
-  max-width: 92%;
-  width: 100%;
-  padding: 24px 20px;
-  margin: 5vh auto;
-  border-radius: 20px;
-  box-sizing: border-box;
-}
-.settings-title {
-  text-align: center;
-  font-size: 22px;
-  margin-bottom: 24px;
-}
-.settings-label {
-  font-size: 15px;
-  font-weight: 500;
-  margin: 16px 0 8px;
-  display: block;
-}
-.settings-input,
-.settings-select {
-  margin-bottom: 16px;
-}
-.settings-row {
-  display: flex;
-  gap: 12px;
-  width: 100%;
-  flex-direction: row !important;
-}
-.settings-col {
-  flex: 1;
-}
-/* ✅ ปุ่ม 3 ปุ่ม — เรียงแนวนอนเสมอ ตามรูป */
-.settings-btn-row-3 {
-  display: flex !important;
-  flex-direction: row !important;
-  gap: 8px;
-  margin: 24px 0 16px;
-  width: 100%;
-}
-/* ✅ ปุ่มล่าง — บันทึก | ปิด — เรียงแนวนอนเสมอ */
-.settings-btn-row-2 {
-  display: flex !important;
-  flex-direction: row !important;
-  gap: 12px;
-  margin-top: 8px;
-  width: 100%;
-}
-/* สไตล์ปุ่ม */
-.settings-btn {
-  flex: 1;
-  min-height: 52px;
-  font-size: 14px;
-  font-weight: 600;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 0 6px;
-  box-sizing: border-box;
-  white-space: nowrap;
-}
-.primary-btn {
-  background: #2563eb;
-  color: white;
-  font-size: 17px;
-}
-.secondary-btn {
-  background: rgba(255,255,255,0.15);
-  color: inherit;
-}
-.danger-btn {
-  background: #dc2626;
-  color: white;
-}
-.cancel-btn {
-  background: rgba(255,255,255,0.15);
-  color: inherit;
-  font-size: 17px;
-}
-/* ซ่อน input file ปกติ */
-.file-btn input {
-  display: none;
-}
-.settings-version {
-  text-align: right;
-  font-size: 12px;
-  opacity: 0.6;
-  margin-top: 20px;
-}
-/* ========== มือถือ — ยังคงแนวนอน ไม่เปลี่ยนเป็นแนวตั้ง ========== */
-@media (max-width: 480px) {
-  .settings-modal {
-    padding: 20px 16px;
-    margin: 3vh auto;
-  }
-  .settings-title {
-    font-size: 20px;
-  }
-  /* ✅ แถว 2 ช่อง → ยังแนวนอน */
-  .settings-row {
-    flex-direction: row !important;
-  }
-  /* ✅ ปุ่ม 3 ปุ่ม → แนวนอนเสมอ */
-  .settings-btn-row-3 {
-    flex-direction: row !important;
-    gap: 6px;
-  }
-  .settings-btn-row-3 .settings-btn {
-    font-size: 12px;
-    padding: 0 2px;
-  }
-  /* ✅ บันทึก/ปิด → แนวนอนเสมอ */
-  .settings-btn-row-2 {
-    flex-direction: row !important;
-  }
-  .settings-btn {
-    min-height: 48px;
-  }
-}
