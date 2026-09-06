@@ -196,141 +196,110 @@ function handleSave(event) {
 
 /* ========= SECTION 9: RENDER DAILY REPORT ========= */
 function renderDay(selectedDate) {
-    const dInp = selectedDate || ($("dateInp")?.value || new Date().toISOString().split('T')[0]);
+    let dInp = selectedDate || ($("dateInp") ? $("dateInp").value : new Date().toISOString().split('T')[0]);
     if ($("dateInp")) $("dateInp").value = dInp;
+    let allRec = db.filter(r => r.date === dInp);
 
-    // แปลงวันที่ + ชื่อวัน (พุทธศักราช)
+    // 🎯 คำนวณชื่อวัน (จ.-อา.)
     const days = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
     const dayName = days[new Date(dInp).getDay()];
-    const dateParts = dInp.split('-');
-    let displayDateBE = dInp;
-    if (dateParts.length === 3) {
-        const d = dateParts[2];
-        const m = dateParts[1];
-        const yBE = parseInt(dateParts[0]) + 543;
-        displayDateBE = `${d}/${m}/${yBE}`;
+
+    if (allRec.length === 0 && typeof archives !== 'undefined') {
+        const archivedDay = archives.find(a => a.date === dInp);
+        if (archivedDay && archivedDay.details) {
+            allRec = archivedDay.details;
+        }
     }
+    const isHoliday = allRec.some(r => r.type && r.type.toUpperCase() === 'HOLIDAY');
 
-    let allRec = db.filter(r => r.date === dInp);
-    if (typeof archives !== 'undefined') {
-        const archived = archives.find(a => a.date === dInp);
-        if (archived?.details) allRec = archived.details;
-    }
+    // ตัวแปรสำหรับเก็บสถิติทรงผม/บริการ
+    const stats = {};
+    const extraSvcs = ["โกนหนวด", "กันหน้า", "สระผม", "กันจอน", "ย้อมแฟชั่น", "ดัดผม"];
 
-    const isHoliday = allRec.some(r => r.type === "HOLIDAY");
-
-    // ====================
-    // นับยอดตามรูปตัวอย่าง
-    // ====================
     let tot = 0, trans = 0, cash = 0, tips = 0;
-    let realCustomerCount = 0;
-
-    // ตัวแปรนับทรงผม
-    let cutCount = 0;
-    let permCount = 0;
-    let colorCount = 0;
-    let otherServiceCount = 0;
-
     let listHtml = "";
+    let realCustomerCount = 0;
+    let countNew = 0;
+    let countRegular = 0;
 
-    allRec.slice().sort((a, b) => (a.time || "").localeCompare(b.time || "")).forEach((r, i) => {
-        const p = Number(r.price) || 0;
-        const t = Number(r.tip) || 0;
+    allRec
+        .slice()
+        .sort((a, b) => a.time.localeCompare(b.time))
+        .forEach((r, i) => {
+            const p = parseFloat(r.price) || 0;
+            const t = parseFloat(r.tip) || 0;
+            const rType = r.type ? String(r.type).toUpperCase().trim() : '';
+            const currentSvcs = Array.isArray(r.svcs) ? r.svcs : [];
+            const cType = r.custType || 'none';
 
-        tot += p;
-        tips += t;
+            const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
 
-        // ====================
-        // จ่ายผสม แยกสด/โอน
-        // ====================
-        if (/Trans|โอน/i.test(r.pay)) {
-            trans += p + t;
-        } else if (/Mix/i.test(r.pay)) {
-            cash += Number(r.payCash) || 0;
-            trans += Number(r.payTrans) || 0;
-        } else if (!/Free/i.test(r.pay)) {
-            cash += p + t;
-        }
-
-        // ====================
-        // นับลูกค้า
-        // ====================
-        if (!/HOLIDAY|GUARANTEE|Free/i.test(r.type || r.pay)) {
-            const svcs = Array.isArray(r.svcs) ? r.svcs : [];
-            if (svcs.length > 0) realCustomerCount++;
-        }
-
-        // ====================
-        // นับทรงผม ตามรูปตัวอย่าง
-        // ====================
-        const svcs = Array.isArray(r.svcs) ? r.svcs : [];
-
-        svcs.forEach(s => {
-            const service = s?.trim().toLowerCase() || "";
-
-            if (/ผม|cut/i.test(service)) {
-                cutCount++;
-            } else if (/ดัด|perm/i.test(service)) {
-                permCount++;
-            } else if (/ย้อม|color/i.test(service)) {
-                colorCount++;
+            tot += p;
+            tips += t;
+            if (r.pay === 'Mix') {
+                const pCash = parseFloat(r.payCash) || 0;
+                const pTrans = parseFloat(r.payTrans) || 0;
+                trans += pTrans;
+                cash += (pCash - t);
+            } else if (r.pay === 'Trans' || r.pay === 'โอน') {
+                trans += (p + t);
             } else {
-                otherServiceCount++;
+                cash += p;
             }
+
+            if (rType === 'HOLIDAY' || rType === 'GUARANTEE' || p === 0) {
+                // ข้ามการนับ
+            } else {
+                if (currentSvcs.length > 0) {
+                    realCustomerCount++;
+                    if (cType === 'new') countNew++;
+                    if (cType === 'regular') countRegular++;
+                }
+
+                // 🎯 คำนวณนับจำนวนทรงผมและบริการเสริมตามปกติ
+                currentSvcs.forEach(s => {
+                    if (s) stats[s] = (stats[s] || 0) + 1;
+                });
+            }
+        
+            let custTag = ""; 
+            let payIcon = r.pay === 'Trans' ? '📱' : '💶';
+            let mixText = "";
+            if (r.pay === 'Mix') {
+                payIcon = '🌓';
+                mixText = `<br><small style="color:#64748b; font-size:10px; font-weight:normal;">(สด:${r.payCash}/โอน:${r.payTrans})</small>`;
+            } 
+            listHtml += `
+            <div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="width:28px; height:28px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#64748b; flex-shrink:0;">
+                            ${i+1}
+                        </div>
+                        <div style="display:flex; flex-direction:column;">
+                            <div style="font-weight:800; font-size:14px; color:#1e293b; margin-bottom:2px;">
+                                <span style="color:#64748b; font-weight:500;">[${timeShow}]</span> ${currentSvcs.join(' + ')}${custTag}
+                            </div>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                ${t ? `<small style="color:#be185d; font-weight:700; font-size:11px;">🔹 ทิป: ฿${t}</small>` : '<small style="color:#94a3b8; font-size:11px;">(ไม่มีทิป)</small>'}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <b style="font-size:16px; display:block; color:#1e293b; line-height:1.2;">
+                            <span style="font-size:14px;">${payIcon}</span> ฿${p}${t ? ` <span style="color:#be185d;">(+${t})</span>` : ''}
+                            ${mixText}
+                        </b>
+                        <span style="font-size:11px; font-weight:700; color:#ef4444; cursor:pointer;" onclick="delRec(${r.id})">ลบ</span>
+                    </div>
+                </div>
+            </div>`;
         });
 
-        // ====================
-        // แสดงรายการ
-        // ====================
-        const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
-        const serviceText = svcs.length > 0 ? svcs.join(' + ') : '-';
-
-        let payIcon = '💵';
-        let payLabel = 'สด';
-
-        if (/Trans|โอน/i.test(r.pay)) {
-            payIcon = '📱';
-            payLabel = 'โอน';
-        } else if (/Mix/i.test(r.pay)) {
-            payIcon = '🔀';
-            payLabel = 'ผสม';
-        }
-
-        // แสดงยอดแยกกรณีจ่ายผสม
-        let mixDetail = "";
-        if (/Mix/i.test(r.pay)) {
-            const pCash = Number(r.payCash) || 0;
-            const pTrans = Number(r.payTrans) || 0;
-
-            mixDetail = `
-                <div style="font-size:12px; color:#94a3b8; margin-top:2px;">
-                    สด ฿${pCash} / โอน ฿${pTrans}
-                </div>
-            `;
-        }
-
-        listHtml += `
-        <div style="padding:12px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">
-            <div>
-                <b>${i+1}. ${timeShow} | ${serviceText}</b>
-                <br>
-                <small>${payIcon} ${payLabel} | ฿${p}${t ? ` + ทิป฿${t}` : ''}</small>
-                ${mixDetail}
-            </div>
-            <button onclick="delRec(${r.id})" style="border:none;background:#fee2e2;color:#dc2626;border-radius:8px;padding:4px 8px;cursor:pointer;">ลบ</button>
-        </div>`;
-    });
-
-    // ====================
-    // คำนวณส่วนแบ่ง
-    // ====================
     const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc / 100), conf.guar) + tips;
     const sEarn = isHoliday ? 0 : tot - (bEarn - tips);
     const settle = isHoliday ? 0 : cash - bEarn;
 
-    // ====================
-    // อัปเดตยอดบนหน้าจอ
-    // ====================
     if ($("dTotal")) $("dTotal").innerText = tot.toLocaleString();
     if ($("dTrans")) $("dTrans").innerText = trans.toLocaleString();
     if ($("dCash")) $("dCash").innerText = cash.toLocaleString();
@@ -339,120 +308,115 @@ function renderDay(selectedDate) {
 
     if ($("dCounts")) {
         if (isHoliday) {
-            $("dCounts").innerHTML = "🏖️ วันหยุด";
+            $("dCounts").innerHTML = "<span style='color:#64748b;'>🏖️ วันหยุด</span>";
         } else if (allRec.length === 0) {
-            $("dCounts").innerHTML = "ไม่มีข้อมูล";
+            $("dCounts").innerHTML = "<span style='color:#94a3b8;'>ไม่มีข้อมูล</span>";
         } else {
-            $("dCounts").innerText = `ลูกค้า ${realCustomerCount} คน`;
+            let detail = "";
+            if (countNew > 0 || countRegular > 0) {
+                detail = `
+                <div style="font-size: 13px; font-weight: 700; margin-top: 4px; border-top: 1px dashed var(--border); padding-top: 4px;">
+                    <span style="color: var(--success);"> ใหม่: ${countNew}</span> 
+                    <span style="color: var(--text); opacity: 0.5;"> | </span> 
+                    <span style="color: var(--warning);"> ประจำ: ${countRegular}</span>
+                </div>`;
+            }
+            $("dCounts").innerHTML = `
+                <div style="line-height: 1.2;">
+                    <b style="font-size: 16px; color:#fff;">ลูกค้า: ${realCustomerCount} คน</b>
+                    ${detail}
+                </div>`;
         }
     }
 
-    // ====================
-    // แถบสถานะ + ปุ่มส่งงาน
-    // เปลี่ยนไอคอนส่งงานเป็น Paper Plane ตามตัวอย่าง
-    // ====================
-    let statusText = "", statusColor = "", icon = "";
+    // 🎯 แสดงผลแท็กทรงผมและบริการเสริมใน dServiceStats ตามปกติ
+    let sH = `<div style="display:flex; flex-wrap:wrap; gap:4px; justify-content:center; margin-bottom:8px;">`;
+    const cleanExtras = extraSvcs.map(s => s.trim().toLowerCase());
+    const allStatsKeys = Object.keys(stats);
+    const haircutGroup = allStatsKeys.filter(k => !cleanExtras.includes(k.trim().toLowerCase()));
+    const extraGroup = allStatsKeys.filter(k => cleanExtras.includes(k.trim().toLowerCase()));
 
+    haircutGroup.forEach(k => {
+        sH += `<span style="background:#4338ca;color:#fff;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:800;">${k}: ${stats[k]}</span>`;
+    });
+    extraGroup.forEach(k => {
+        sH += `<span style="background:#e0f2fe;color:#0369a1;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;border:1px solid #bae6fd;">${k}: ${stats[k]}</span>`;
+    });
+    if ($("dServiceStats")) $("dServiceStats").innerHTML = sH + `</div>`;
+
+    // --- ส่วนสถานะ Settle Bar ---
+    let txt = "", statusColor = "", icon = "";
     if (isHoliday) {
-        statusText = "วันหยุด";
-        statusColor = "#1e40af";
-        icon = "🏖️";
+        txt = "วันหยุด"; statusColor = "#1e40af"; icon = "🏖️";
     } else if (allRec.length === 0) {
-        statusText = "รอข้อมูล...";
-        statusColor = "#64748b";
-        icon = "📝";
+        txt = "รอข้อมูล..."; statusColor = "#64748b"; icon = "📝";
+    } else if (tot === 0) {
+        txt = "ร้านจ่ายประกัน"; statusColor = "#0369a1"; icon = "🛡️";
     } else if (settle > 0) {
-        statusText = `ช่างคืนร้าน ฿${Math.floor(settle).toLocaleString()}`;
-        statusColor = "#b91c1c";
-        icon = "🥷";
+        txt = `ช่างคืนร้าน ฿${Math.floor(settle).toLocaleString()}`; statusColor = "#b91c1c"; icon = "🥷";
     } else if (settle < 0) {
-        statusText = `ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`;
-        statusColor = "#4338ca";
-        icon = "🏠";
+        txt = `ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; statusColor = "#4338ca"; icon = "🏠";
     } else {
-        statusText = "ยอดพอดี";
-        statusColor = "#15803d";
-        icon = "✅";
+        txt = "ยอดพอดี"; statusColor = "#15803d"; icon = "✅";
     }
 
-    // ====================
-    // แถบนับทรงผมตามรูปตัวอย่าง
-    // ====================
-    let serviceCountHtml = "";
-
-    if (cutCount > 0) {
-        serviceCountHtml += `<span style="background:#4f46e5;color:#fff;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;">✂️ ผม ${cutCount}</span>`;
-    }
-    if (permCount > 0) {
-        serviceCountHtml += `<span style="background:#0ea5e9;color:#fff;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;">🌀 ดัด ${permCount}</span>`;
-    }
-    if (colorCount > 0) {
-        serviceCountHtml += `<span style="background:#ec4899;color:#fff;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;">🎨 ย้อม ${colorCount}</span>`;
-    }
-    if (otherServiceCount > 0) {
-        serviceCountHtml += `<span style="background:#8b5cf6;color:#fff;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;">อื่นๆ ${otherServiceCount}</span>`;
-    }
-
-    const settleBar = $("settleBarContainer") || $("settleBar");
-
-    if (settleBar) {
-        settleBar.style.display = "flex";
-        settleBar.style.flexDirection = "column";
-        settleBar.style.gap = "10px";
-        settleBar.style.marginBottom = "18px";
-
-        settleBar.innerHTML = `
-            <div style="display:flex; gap:8px; width:100%;">
-                <div id="settleBar" style="flex:1; min-height:55px; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; border-radius:18px; font-weight:800; font-size:14px; color:${statusColor}; border:1px solid var(--border);">
-                    <span style="margin-right:8px; font-size:18px;">${icon}</span> ${statusText}
-                </div>
-                <button onclick="saveAndGo('${dInp}', ${tot})" 
-                    style="width:55px; height:55px; background:#ff7a00; color:#fff; border-radius:18px; border:none; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
-                    📤
-                </button>
+    const actionBox = $("settleBarContainer");
+    if (actionBox) {
+        actionBox.style.display = "flex";
+        actionBox.style.gap = "10px";
+        actionBox.innerHTML = `
+            <div id="settleBar" style="flex:8; height:55px; background:#ffffff; display:flex; align-items:center; justify-content:center; border-radius:18px; font-weight:800; font-size:15px; color:${statusColor}; border:1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <span style="margin-right:8px; font-size:18px;">${icon}</span> ${txt}
             </div>
-
-            ${serviceCountHtml ? `
-                <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
-                    ${serviceCountHtml}
-                </div>
-            ` : ""}
-        `;
+            <button id="btnSubmitSend" onclick="saveAndGo('${dInp}', ${tot})" 
+                style="flex:2.2; height:55px; background:#ff6f00; color:#fff; border-radius:18px; border:none; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 2px 6px rgba(255,111,0,0.3);">
+                <i id="btnIcon" class="fas fa-paper-plane"></i>
+            </button>`;
     }
 
-    // ====================
-    // แถบวันที่ + ปุ่มลบ + ปุ่มส่งไลน์
-    // เปลี่ยนไอคอนตามตัวอย่าง
-    // ====================
+    // --- ส่วนรายงานวันที่ + ปุ่มลบ + ปุ่ม LINE ---
     const dList = $("dailyList");
-
     if (dList) {
+        const dateParts = dInp.split('-'); 
+        let displayDateBE = dInp;
+        if (dateParts.length === 3) {
+            const d = dateParts[2];
+            const m = dateParts[1];
+            const yBE = parseInt(dateParts[0]) + 543;
+            displayDateBE = `${d}/${m}/${yBE}`;
+        }
+
         dList.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px; background: rgba(255,255,255,0.08); border-radius: 16px; box-sizing: border-box; margin-bottom: 15px;">
-                <span style="font-size: 15px; font-weight: 600; color: var(--text); white-space: nowrap;">รายงานวันที่</span>
-                <div style="position: relative; flex:1; padding: 10px 12px; border-radius: 10px; background: rgba(37,99,235,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; min-width: 140px;">
-                    <span style="font-size: 15px; font-weight: 700; color: #93c5fd;">${dayName} ${displayDateBE}</span>
-                    <input type="date" value="${dInp}" onchange="renderDay(this.value)" style="position:absolute; opacity:0; width:100%; height:100%; cursor:pointer;">
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 8px 12px; border-radius: 16px; border-bottom: 2px solid #f1f5f9; margin-bottom: 10px;">           
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <b style="font-size: 14px; color: #1e293b; white-space: nowrap;">รายงานวันที่</b>             
+                    
+                    <div style="position: relative; background: #eef2ff; padding: 6px 12px; border-radius: 10px; border: 1px solid #e0e7ff; display: flex; align-items: center; cursor: pointer; min-width: 140px; height: 36px;"> 
+                        <span style="font-size: 14px; font-weight: 700; color: #4338ca; width: 100%; text-align: center;">
+                            ${dayName} ${displayDateBE}
+                        </span>                   
+                        <input type="date" id="reportDateSelector" value="${dInp}" 
+                               onchange="renderDay(this.value)" 
+                               style="position: absolute; opacity: 0; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer;">
+                    </div>
+
+                    <button onclick="deleteArchiveDate('${dInp}')" 
+                            title="ลบข้อมูลของวันนี้"
+                            style="background: #fde8e8; color: #e11d48; border: none; width: 38px; height: 36px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
+                        <i class="fas fa-trash-alt" style="font-size: 16px;"></i>
+                    </button>
                 </div>
 
-                <!-- เปลี่ยนไอคอนถังขยะเป็นแบบในรูป -->
-                <button onclick="deleteArchiveDate('${dInp}')" title="ลบข้อมูลวันนี้" 
-                    style="width: 44px; height: 44px; border-radius: 10px; border: none; background: rgba(255,255,255,0.08); color:#dc2626; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
-                    🗑️
-                </button>
-
-                <!-- เปลี่ยนไอคอนไลน์เป็นสีเขียวตามตัวอย่าง -->
-                <button onclick="shareLine()" 
-                    style="width: 44px; height: 44px; border-radius: 10px; border: none; background:#00c300; color:#fff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
-                    💬
-                </button>
+                <div style="display: flex; align-items: center;">
+                    <i class="fab fa-line" style="color: #06c755; font-size: 36px; cursor: pointer;" onclick="shareLine()"></i>
+                </div>
             </div>
 
             <div style="padding: 0 5px;">
-                ${isHoliday ? `<center style='padding:30px; color:#64748b;'>🏖️ วันหยุด (${dayName} ${displayDateBE})</center>` : (listHtml || "<center style='padding:30px; color:#94a3b8;'>ไม่มีข้อมูล</center>")}
+                ${isHoliday ? `<center style='padding:30px; color:#64748b;'>🏖️ วันหยุด (${displayDateBE})</center>` : (listHtml || "<center style='padding:30px; color:#94a3b8;'>ไม่มีข้อมูล</center>")}
             </div>
         `;
-    }
+    } 
 }
 /* ========= SECTION 10: DELETE RECORD ========= */
 function delRec(id) {
