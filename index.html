@@ -8,33 +8,29 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Barber-MS">
-
     <!-- ✅ ไอคอนจากโฟลเดอร์ assets -->
     <link rel="apple-touch-icon" href="assets/icon.png">
     <link rel="icon" type="image/png" href="assets/icon.png">
-
-    <title>Barber-Note 06</title>
-
-    <!-- ✅ ไลบรารีภายนอก (ใช้ CDN เหมือนเดิม) -->
+    <title>Barber-Note</title>
+    <!-- ✅ ไลบรารีภายนอก -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
     <!-- ✅ CSS จากโฟลเดอร์ css/ -->
     <link rel="stylesheet" href="css/style.css">
-
-    <!-- ✅ ไลบรารีภายนอก (ใช้ CDN เหมือนเดิม) -->
+    <!-- ✅ ไลบรารีภายนอก -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js" defer></script>
-
     <!-- ✅ JS จากโฟลเดอร์ js/ -->
     <script src="js/script.js" defer></script>
 </head>
 <body>
 <div class="container">
     <div class="container main-wrap">
-        <!-- หน้า 1: บันทึกข้อมูล -->
+        <!-- ========== หน้า 1: บันทึกข้อมูล ========== -->
         <div id="p1" class="page active">
             <h2 id="shopNameDisp">BARBER SHOP</h2>
+
+            <!-- ปุ่ม 3 ปุ่มบน -->
             <div class="grid-3">
                 <div class="icon-card" onclick="handleInsurance()">
                     <div class="icon grad-yellow"><i class="fas fa-shield-alt"></i></div>
@@ -49,17 +45,21 @@
                     <span>ตั้งค่าระบบ</span>
                 </div>
             </div>
+
+            <!-- วันที่ + ประเภทลูกค้า -->
             <div class="grid-2">
                 <div class="input-date-wrap">
                     <span id="dateDisplay">📅 วันที่</span>
                     <input type="date" id="dateInp" onchange="updateDateDisplay(this.value)">
                 </div>
                 <select id="custType">
-                    <option value="none">✳️ประเภทลูกค้า</option>
+                    <option value="none">✳️ ประเภทลูกค้า</option>
                     <option value="new">🌟 ลูกค้าใหม่</option>
                     <option value="regular">📌 ลูกค้าประจำ</option>
                 </select>
             </div>
+
+            <!-- เวลา เริ่ม - เสร็จ -->
             <div class="grid-time">
                 <div class="time-box">
                     <label>เริ่ม</label>
@@ -70,33 +70,39 @@
                     <input type="time" id="tEnd" class="time-input-custom">
                 </div>
             </div>
+
+            <!-- ✅ ช่องทรงผม + บริการ 1-2 → ลดฟอนต์ + ขยายความกว้าง ให้อ่านครบทุกคำ -->
             <div class="grid-svc">
-                <select id="hairStyle">
+                <select id="hairStyle" style="font-size: 14px; padding: 10px 8px;">
                     <option value="">✂️ ทรงผม</option>
                     <option>แฟชั่น</option><option>สกินเฟด</option><option>รองทรง</option>
                     <option>ตำรวจ/ทหาร</option><option>นักเรียน</option><option>ซอยผม/เล็มผม</option>
                     <option>แก้ผม</option><option>โกนผม</option>
                 </select>
-                <select id="extra1">
-                    <option value="">➕บริการ1</option>
+                <select id="extra1" style="font-size: 13px; padding: 10px 6px;">
+                    <option value="">➕ บริการ</option>
                     <option>เด็ก</option><option>โกนหนวด</option><option>กันหน้า</option>
                     <option>กันจอน</option><option>สระผม</option><option>ย้อมผม</option>
                     <option>ดัดผม</option><option>ย้อมแฟชั่น</option><option>แคะหู</option>
                 </select>
-                <select id="extra2">
-                    <option value="">➕บริการ2</option>
+                <select id="extra2" style="font-size: 13px; padding: 10px 6px;">
+                    <option value="">➕ บริการ</option>
                     <option>เด็ก</option><option>โกนหนวด</option><option>กันหน้า</option>
                     <option>กันจอน</option><option>สระผม</option><option>ย้อมผม</option>
                     <option>ดัดผม</option><option>ย้อมแฟชั่น</option><option>แคะหู</option>
                 </select>
             </div>
-            <div class="grid-price">
-                <div class="price-box">
-                    <span class="baht">฿</span>
-                    <input type="number" id="priceInp" placeholder="0" inputmode="numeric">
+
+            <!-- ✅ ราคา + ทิปโอน → ความสูงเท่ากันเป๊ะ align-items: stretch -->
+            <div class="grid-price" style="display: flex; gap: 10px; align-items: stretch;">
+                <div class="price-box" style="flex: 1; display: flex; align-items: center; justify-content: center; border: 2px solid #3b82f6; border-radius: 12px; background: #eef2ff; padding: 10px;">
+                    <span class="baht" style="font-size: 26px; font-weight: 800; color: #3b82f6;">฿</span>
+                    <input type="number" id="priceInp" placeholder="0" inputmode="numeric" style="border: none; background: transparent; font-size: 24px; font-weight: 700; width: 100%; outline: none; text-align: center;">
                 </div>
-                <input type="number" id="tipInp" placeholder="ทิปโอน" inputmode="numeric" class="tip-box">
+                <input type="number" id="tipInp" placeholder="ทิปโอน" inputmode="numeric" class="tip-box" style="width: 110px; border-radius: 12px; border: none; background: #f1f5f9; font-size: 15px; text-align: center; outline: none; height: auto; min-height: 58px;">
             </div>
+
+            <!-- วิธีชำระเงิน + ปุ่มบันทึก -->
             <div class="grid-pay">
                 <div class="select-wrap">
                     <i class="fas fa-wallet"></i>
@@ -116,6 +122,8 @@
                     <span>บันทึกข้อมูล</span>
                 </button>
             </div>
+
+            <!-- ช่องกรณีจ่ายผสม -->
             <div id="mixPanel">
                 <div class="grid-2">
                     <div>
@@ -130,7 +138,7 @@
             </div>
         </div>
 
-        <!-- หน้า 2: รายงาน -->
+        <!-- ========== หน้า 2: รายงาน ========== -->
         <div id="p2" class="page">
             <div class="grid-summary">
                 <div class="card-total">
@@ -151,7 +159,7 @@
             <div id="dailyList"></div>
         </div>
 
-        <!-- หน้า 3: บัญชี -->
+        <!-- ========== หน้า 3: บัญชี ========== -->
         <div id="p3" class="page">
             <div class="card">
                 <div class="card-header">
@@ -214,68 +222,60 @@
         </div>
     </div>
 
-    <!-- Modal ต่างๆ -->
+    <!-- ========== Modal ต่างๆ ========== -->
     <div id="modalSet" class="modal" style="display:none;">
-  <div class="modal-content settings-modal">
-    <h3 class="settings-title">⚙️ ตั้งค่าระบบ</h3>
-
-    <label class="settings-label">ชื่อร้าน</label>
-    <input type="text" id="setShop" class="settings-input" value="Barber Shop">
-
-    <div class="settings-row">
-      <div class="settings-col">
-        <label class="settings-label">ส่วนแบ่งช่าง %</label>
-        <input type="number" id="setPerc" class="settings-input" value="50">
-      </div>
-      <div class="settings-col">
-        <label class="settings-label">หลักประกันขั้นต่ำ</label>
-        <input type="number" id="setGuar" class="settings-input" value="0">
-      </div>
+        <div class="modal-content settings-modal">
+            <h3 class="settings-title">⚙️ ตั้งค่าระบบ</h3>
+            <label class="settings-label">ชื่อร้าน</label>
+            <input type="text" id="setShop" class="settings-input" value="Barber Shop">
+            <div class="settings-row">
+                <div class="settings-col">
+                    <label class="settings-label">ส่วนแบ่งช่าง %</label>
+                    <input type="number" id="setPerc" class="settings-input" value="50">
+                </div>
+                <div class="settings-col">
+                    <label class="settings-label">หลักประกันขั้นต่ำ</label>
+                    <input type="number" id="setGuar" class="settings-input" value="0">
+                </div>
+            </div>
+            <label class="settings-label">ธีม</label>
+            <select id="setTheme" class="settings-select">
+                <option value="light">ธีมสว่าง</option>
+                <option value="navy">ธีมสีน้ำเงิน</option>
+                <option value="vintage">ธีมวินเทจ</option>
+            </select>
+            <div class="settings-row">
+                <div class="settings-col">
+                    <label class="settings-label">เสียงแจ้งเตือน</label>
+                    <select id="setSound" class="settings-select">
+                        <option value="on" selected>เปิดเสียง</option>
+                        <option value="off">ปิดเสียง</option>
+                    </select>
+                </div>
+                <div class="settings-col">
+                    <label class="settings-label">เสียงพูด</label>
+                    <select id="setVoice" class="settings-select">
+                        <option value="female" selected>เสียงหญิง</option>
+                        <option value="male">เสียงชาย</option>
+                    </select>
+                </div>
+            </div>
+            <div class="settings-btn-row-3">
+                <button type="button" class="settings-btn secondary-btn" onclick="exportBackup()">📤 สำรองข้อมูล</button>
+                <label class="settings-btn secondary-btn file-btn">
+                    📥 คืนค่า
+                    <input type="file" accept=".json" onchange="importBackup(this)">
+                </label>
+                <button type="button" class="settings-btn danger-btn" onclick="clearData()">🗑️ ล้างข้อมูล</button>
+            </div>
+            <div class="settings-btn-row-2">
+                <button class="settings-btn primary-btn" onclick="saveSettings()">บันทึก</button>
+                <button class="settings-btn cancel-btn" onclick="$('modalSet').style.display='none'">ปิด</button>
+            </div>
+            <div class="settings-version">V1.0. · Update: 06/09/2026</div>
+        </div>
     </div>
 
-    <label class="settings-label">ธีม</label>
-    <select id="setTheme" class="settings-select">
-      <option value="light">ธีมสว่าง</option>
-      <option value="navy">ธีมสีน้ำเงิน</option>
-      <option value="vintage">ธีมวินเทจ</option>
-    </select>
-
-    <div class="settings-row">
-      <div class="settings-col">
-        <label class="settings-label">เสียงแจ้งเตือน</label>
-        <select id="setSound" class="settings-select">
-          <option value="on" selected>เปิดเสียง</option>
-          <option value="off">ปิดเสียง</option>
-        </select>
-      </div>
-      <div class="settings-col">
-        <label class="settings-label">เสียงพูด</label>
-        <select id="setVoice" class="settings-select">
-          <option value="female" selected>เสียงหญิง</option>
-          <option value="male">เสียงชาย</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- ปุ่ม 3 ปุ่มเรียงแถวเดียวกัน -->
-    <div class="settings-btn-row-3">
-      <button type="button" class="settings-btn secondary-btn" onclick="exportBackup()">📤 สำรองข้อมูล</button>
-      <label class="settings-btn secondary-btn file-btn">
-        📥 คืนค่า
-        <input type="file" accept=".json" onchange="importBackup(this)">
-      </label>
-      <button type="button" class="settings-btn danger-btn" onclick="clearData()">🗑️ ล้างข้อมูล</button>
-    </div>
-
-    <!-- ปุ่มล่าง -->
-    <div class="settings-btn-row-2">
-      <button class="settings-btn primary-btn" onclick="saveSettings()">บันทึก</button>
-      <button class="settings-btn cancel-btn" onclick="$('modalSet').style.display='none'">ปิด</button>
-    </div>
-
-    <div class="settings-version">V1.0. · Update: 06/09/2026</div>
-  </div>
-</div>
     <div id="reportModal" class="modal">
         <div class="modal-content">
             <div class="modal-head">
@@ -285,6 +285,7 @@
             <div id="reportContent"></div>
         </div>
     </div>
+
     <div id="historyModal" class="modal">
         <div class="modal-content">
             <div class="modal-head">
@@ -294,6 +295,7 @@
             <div id="accHistory"></div>
         </div>
     </div>
+
     <div id="linePreview" class="modal">
         <div class="modal-content">
             <h3>📝 ตรวจสอบรายงาน</h3>
@@ -305,7 +307,7 @@
         </div>
     </div>
 
-    <!-- แถบนำทาง -->
+    <!-- ========== แถบนำทาง ========== -->
     <nav>
         <div onclick="go(1)" id="nav1" class="nav-item active">
             <i class="fas fa-edit"></i><span>บันทึก</span>
@@ -318,7 +320,7 @@
         </div>
     </nav>
 
-    <!-- ✅ ไฟล์เสียงจากโฟลเดอร์ assets/sounds/ -->
+    <!-- ========== ไฟล์เสียง ========== -->
     <div id="appAudioAssets" style="display:none;">
         <audio id="successSoundMan" src="assets/sounds/success_male.mp3" preload="auto">
         <audio id="successSoundWoman" src="assets/sounds/success_female.mp3" preload="auto">
