@@ -48,38 +48,41 @@ function switchMainView(viewName) {
 }
 // ✅ ควบคุมเมนูล่าง — ซ่อนครบ + โฮมตรงกลาง
 function updateNavDisplay(viewName) {
-    // เริ่มต้น: แสดงทั้งหมด 4 ปุ่ม
+    // แสดงทั้งหมด 4 ปุ่ม + กว้างเท่าๆ กัน
     document.querySelectorAll('.nav-item').forEach(item => {
         item.style.display = 'flex';
     });
     document.querySelector('.bottom-nav').style.gridTemplateColumns = 'repeat(4, 1fr)';
 }
 
-// ✅ สลับแท็บ → ซ่อน + ย้ายโฮมตรงกลาง
+// ✅ สลับแท็บสรุป → ซ่อนปุ่มอื่น เหลือโฮมตรงกลาง
 const originalSwitchTab = switchSummaryTab;
 switchSummaryTab = function(tabId) {
     originalSwitchTab(tabId);
 
-    // ✅ รายชื่อแท็บที่ต้องซ่อนเมนูอื่น เหลือแค่โฮม
+    // ✅ ชื่อแท็บที่ต้องซ่อนเมนูอื่น
     const hideTabs = ['tabDaily', 'tabMonth', 'tabAnalytics'];
 
     if (hideTabs.includes(tabId)) {
-        // ซ่อนปุ่มอื่นทั้งหมด
-        document.querySelectorAll('.nav-item:not(:first-child)').forEach(item => {
-            item.style.display = 'none';
-        });
-        // ✅ เหลือแค่โฮม → กว้างเต็ม + ตรงกลาง
+        // ซ่อนปุ่ม บันทึก / รายงาน / บัญชี
+        document.getElementById('nav1').style.display = 'none';
+        document.getElementById('nav2').style.display = 'none';
+        document.getElementById('nav3').style.display = 'none';
+        // ✅ เหลือแค่โฮม → กว้างเต็มจอ ตรงกลาง
         document.querySelector('.bottom-nav').style.gridTemplateColumns = '1fr';
     } else {
         // แท็บอื่น → แสดงครบ 4 ปุ่ม
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.style.display = 'flex';
-        });
-        document.querySelector('.bottom-nav').style.gridTemplateColumns = 'repeat(4, 1fr)';
+        updateNavDisplay('normal');
     }
 };
 
-// ✅ สลับหน้าหลัก → กลับมาแสดงปกติ
+// ✅ สลับหน้าหลัก → แสดงเมนูปกติ
+const originalGoSub = goSub;
+function goSub(num) {
+    originalGoSub(num);
+    updateNavDisplay('sub' + num);
+}
+
 const originalSwitchMain = switchMainView;
 switchMainView = function(viewName) {
     originalSwitchMain(viewName);
