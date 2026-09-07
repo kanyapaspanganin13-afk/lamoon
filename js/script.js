@@ -46,38 +46,39 @@ function switchMainView(viewName) {
             break;
     }
 }
+// ✅ ควบคุมเมนูล่าง — แสดงเฉพาะปุ่มโฮมในหน้าสรุปย่อย
 function updateNavDisplay(viewName) {
-    const summarySubPages = ['tabDaily', 'tabMonth', 'tabAnalytics', 'tabAccount'];
-    
+    // แสดงเมนูทั้งหมดก่อน
     document.querySelectorAll('.nav-btn-work, .nav-btn-report, .nav-btn-account').forEach(btn => {
         btn.style.display = 'flex';
     });
-
-    if (summarySubPages.includes(viewName) || viewName === 'summaryPage') {
-        const activeTab = document.querySelector('.tab-panel.active');
-        if (activeTab && ['tabDaily', 'tabMonth', 'tabAnalytics'].includes(activeTab.id)) {
-            document.querySelector('.nav-btn-work').style.display = 'none';
-            document.querySelector('.nav-btn-report').style.display = 'none';
-            document.querySelector('.nav-btn-account').style.display = 'none';
-        }
-    }
+    // กลับไปเป็น 4 คอลัมน์ปกติ
+    document.querySelector('.bottom-nav').style.gridTemplateColumns = 'repeat(4, 1fr)';
 }
 
-// ✅ รวมการเรียกใช้ไว้ที่เดียว
+// ✅ สลับแท็บ → ซ่อนเมนูอื่น + ย้ายโฮมมาตรงกลาง
 const originalSwitchTab = switchSummaryTab;
 switchSummaryTab = function(tabId) {
     originalSwitchTab(tabId);
+    
+    // หน้าสรุปภาพรวม / รายเดือน / เปรียบเทียบ → เหลือแค่โฮม
     if (['tabDaily', 'tabMonth', 'tabAnalytics'].includes(tabId)) {
         document.querySelector('.nav-btn-work').style.display = 'none';
         document.querySelector('.nav-btn-report').style.display = 'none';
         document.querySelector('.nav-btn-account').style.display = 'none';
-    } else {
+        // ย้ายโฮมมาตรงกลาง → กว้าง 1 คอลัมน์ เดี่ยวตรงกลาง
+        document.querySelector('.bottom-nav').style.gridTemplateColumns = '1fr';
+    } 
+    // แท็บอื่นๆ → แสดงครบ 4 ปุ่ม
+    else {
         document.querySelector('.nav-btn-work').style.display = 'flex';
         document.querySelector('.nav-btn-report').style.display = 'flex';
         document.querySelector('.nav-btn-account').style.display = 'flex';
+        document.querySelector('.bottom-nav').style.gridTemplateColumns = 'repeat(4, 1fr)';
     }
 };
 
+// ✅ สลับหน้าหลัก → แสดงเมนูปกติ
 const originalSwitchMain = switchMainView;
 switchMainView = function(viewName) {
     originalSwitchMain(viewName);
