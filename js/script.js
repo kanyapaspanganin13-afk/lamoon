@@ -417,9 +417,9 @@ function renderDay(selectedDate) {
                         <span style="font-size:14px; font-weight:700; color:#4338ca;">${dayName} ${displayDateBE}</span>                   
                         <input type="date" id="reportDateSelector" value="${dInp}" onchange="renderDay(this.value)" style="position:absolute; opacity:0; left:0; top:0; width:100%; height:100%; cursor:pointer;">
                     </div>
-                    <button onclick="deleteArchiveDate('${dInp}')" title="ลบข้อมูลของวันนี้" style="background:#fde8e8; color:#e11d48; border:none; width:38px; height:36px; border-radius:10px; cursor:pointer;">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
+                    <button onclick="deleteArchiveDate('${dInp}')" title="ลบข้อมูลของวันนี้" style="background:#fde8e8; color:#e11d48; border:none; width:44px; height:44px; border-radius:12px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-size:18px;">
+                      <i class="fas fa-trash-alt"></i>
+                  </button>
                 </div>
                 <div style="display:flex; align-items:center;">
                     <i class="fab fa-line" style="color:#06c755; font-size:36px; cursor:pointer;" onclick="shareLine()"></i>
