@@ -46,39 +46,40 @@ function switchMainView(viewName) {
             break;
     }
 }
-// ✅ ควบคุมเมนูล่าง — แสดงเฉพาะปุ่มโฮมในหน้าสรุปย่อย
+// ✅ ควบคุมเมนูล่าง — ซ่อนครบ + โฮมตรงกลาง
 function updateNavDisplay(viewName) {
-    // แสดงเมนูทั้งหมดก่อน
-    document.querySelectorAll('.nav-btn-work, .nav-btn-report, .nav-btn-account').forEach(btn => {
-        btn.style.display = 'flex';
+    // เริ่มต้น: แสดงทั้งหมด 4 ปุ่ม
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.style.display = 'flex';
     });
-    // กลับไปเป็น 4 คอลัมน์ปกติ
     document.querySelector('.bottom-nav').style.gridTemplateColumns = 'repeat(4, 1fr)';
 }
 
-// ✅ สลับแท็บ → ซ่อนเมนูอื่น + ย้ายโฮมมาตรงกลาง
+// ✅ สลับแท็บ → ซ่อน + ย้ายโฮมตรงกลาง
 const originalSwitchTab = switchSummaryTab;
 switchSummaryTab = function(tabId) {
     originalSwitchTab(tabId);
-    
-    // หน้าสรุปภาพรวม / รายเดือน / เปรียบเทียบ → เหลือแค่โฮม
-    if (['tabDaily', 'tabMonth', 'tabAnalytics'].includes(tabId)) {
-        document.querySelector('.nav-btn-work').style.display = 'none';
-        document.querySelector('.nav-btn-report').style.display = 'none';
-        document.querySelector('.nav-btn-account').style.display = 'none';
-        // ย้ายโฮมมาตรงกลาง → กว้าง 1 คอลัมน์ เดี่ยวตรงกลาง
+
+    // ✅ รายชื่อแท็บที่ต้องซ่อนเมนูอื่น เหลือแค่โฮม
+    const hideTabs = ['tabDaily', 'tabMonth', 'tabAnalytics'];
+
+    if (hideTabs.includes(tabId)) {
+        // ซ่อนปุ่มอื่นทั้งหมด
+        document.querySelectorAll('.nav-item:not(:first-child)').forEach(item => {
+            item.style.display = 'none';
+        });
+        // ✅ เหลือแค่โฮม → กว้างเต็ม + ตรงกลาง
         document.querySelector('.bottom-nav').style.gridTemplateColumns = '1fr';
-    } 
-    // แท็บอื่นๆ → แสดงครบ 4 ปุ่ม
-    else {
-        document.querySelector('.nav-btn-work').style.display = 'flex';
-        document.querySelector('.nav-btn-report').style.display = 'flex';
-        document.querySelector('.nav-btn-account').style.display = 'flex';
+    } else {
+        // แท็บอื่น → แสดงครบ 4 ปุ่ม
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.style.display = 'flex';
+        });
         document.querySelector('.bottom-nav').style.gridTemplateColumns = 'repeat(4, 1fr)';
     }
 };
 
-// ✅ สลับหน้าหลัก → แสดงเมนูปกติ
+// ✅ สลับหน้าหลัก → กลับมาแสดงปกติ
 const originalSwitchMain = switchMainView;
 switchMainView = function(viewName) {
     originalSwitchMain(viewName);
