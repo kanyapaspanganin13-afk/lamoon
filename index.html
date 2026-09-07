@@ -170,11 +170,8 @@
                 <input type="number" id="tipInp" placeholder="ทิปโอน" inputmode="numeric" class="tip-box">
             </div>
 
-            <!-- วิธีชำระเงิน + ปุ่มบันทึก → ปุ่มหน้าหลักย้ายไปด้านล่างตรงกลาง -->
+            <!-- แถวที่ 1: วิธีชำระเงิน + ปุ่มบันทึกข้อมูล -->
             <div class="grid-pay">
-                <button class="btn-back-below" onclick="switchMainView('home')">
-                    <i class="fas fa-arrow-left"></i> หน้าหลัก
-                </button>
                 <div class="select-wrap">
                     <i class="fas fa-wallet"></i>
                     <select id="payTypeSelect" onchange="setPaymentType(this.value)">
@@ -188,9 +185,17 @@
                     </select>
                     <i class="fas fa-chevron-down arrow"></i>
                 </div>
+
                 <button class="btn-pay" onclick="handleSave(event)">
                     <i class="fas fa-save"></i>
                     <span>บันทึกข้อมูล</span>
+                </button>
+            </div>
+
+            <!-- แถวที่ 2: ปุ่มหน้าหลัก (อยู่บรรทัดล่างสุด ตรงกลาง) -->
+            <div class="home-btn-wrapper">
+                <button class="btn-back-below" onclick="switchMainView('home')">
+                    <i class="fas fa-arrow-left"></i> หน้าหลัก
                 </button>
             </div>
 
@@ -226,9 +231,6 @@
             </div>
             <div id="settleBarContainer"><div id="settleBar"></div></div>
             <div id="dServiceStats"></div>
-            <button class="btn-line-share" onclick="shareLine()">
-                <i class="fab fa-line"></i> ส่งรายงาน LINE
-            </button>
             <hr>
             <div id="dailyList"></div>
         </section>
