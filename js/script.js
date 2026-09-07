@@ -98,15 +98,36 @@ function saveDB() {
 }
 
 /* ========= SECTION 6: NOTIFY & SOUND ========= */
-function speak(type) {
+function speak(type, message = "") {
     if (conf.sound === "off") return;
     const isMan = conf.voice === "male";
     const audioId = (type === "success") 
         ? (isMan ? "successSoundMan" : "successSoundWoman")
         : (isMan ? "errorSoundMan" : "errorSoundWoman");
+    
     const audio = $(audioId);
-    if (audio) { audio.pause(); audio.currentTime = 0; audio.play().catch(()=>{}); }
+    if (audio) { 
+        audio.pause(); 
+        audio.currentTime = 0; 
+        audio.play().catch(e => console.warn("Audio autoplay prevented:", e)); 
+    }
+
+    // รองรับ Text-to-Speech เมื่อมีข้อความส่งมา
+    if (message && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.lang = 'th-TH';
+        window.speechSynthesis.speak(utterance);
+    }
 }
+
+// ปลดล็อกระบบเสียงสำหรับเบราว์เซอร์มือถือในการแตะครั้งแรก
+document.addEventListener('click', function unlockAudio() {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
+    }
+    document.removeEventListener('click', unlockAudio);
+}, { once: true });
 function notify(type, title, text = "") {
     speak(type);
     if (typeof Swal === 'undefined') { alert(`${title}\n${text}`); return; }
