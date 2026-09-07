@@ -109,7 +109,10 @@ body > center, body > a, body > br { display: none !important; }
 #pageWorkGroup {
     padding-bottom: 80px !important;
 }
-
+/* ✅ เมนูล่างเหลือปุ่มเดียว → กว้างเต็ม */
+.bottom-nav:has(.nav-btn-work[style*="display: none"]) {
+    grid-template-columns: 1fr !important;
+}
 /* ========= 📋 MENU GRID & CARDS ========= */
 .menu-grid {
     display: grid !important;
