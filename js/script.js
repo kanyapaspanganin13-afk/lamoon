@@ -59,9 +59,9 @@ function go(p) {
     });
     
     // อัปเดตชื่อร้าน
-    const savedShopName = localStorage.getItem("shopName") || "BARBER SHOP";
-    const shopTitleEl = document.querySelector('h2');
-    if (shopTitleEl) shopTitleEl.innerText = savedShopName;
+    //const savedShopName = localStorage.getItem("shopName") || "BARBER SHOP";
+    //const shopTitleEl = document.querySelector('h2');
+    //if (shopTitleEl) shopTitleEl.innerText = savedShopName;
     
     // โหลดข้อมูลเฉพาะหน้า
     const dateInpValue = $("dateInp")?.value || new Date().toISOString().split('T')[0];
@@ -567,7 +567,8 @@ function saveSettings() {
     localStorage.setItem("shopPerc", conf.perc);
     localStorage.setItem("shopGuar", conf.guar);
     saveDB();
-    document.querySelector("h2").innerText = conf.shop;
+    const entryShop = $("entryShopName");
+    if (entryShop) entryShop.innerText = conf.shop;
     applyTheme(conf.theme);
     $("modalSet").style.display = "none";
     notify("success", "บันทึกสำเร็จ", "ตั้งค่าถูกบันทึกแล้ว");
@@ -649,8 +650,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if ($("accDate")) $("accDate").value = today;
     
     // ตั้งค่าชื่อร้านและธีม
-    document.querySelector("h2").innerText = conf.shop;
-    applyTheme(conf.theme);
+   applyTheme(conf.theme);
+    const entryShop = $("entryShopName");
+    if (entryShop) entryShop.innerText = conf.shop;
     
     // ตั้งค่าเวลาปัจจุบัน
     const now = new Date();
