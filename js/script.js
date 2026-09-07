@@ -19,35 +19,32 @@ let conf = JSON.parse(localStorage.getItem("barber_conf")) || {
 let payMethod = "";
 
 /* ========= SECTION 2: NEW NAVIGATION SYSTEM — สลับหน้าหลัก ========= */
-function switchMainView(viewName) {
-    // ซ่อนทุกหน้าหลัก
-    document.querySelectorAll('.app-page').forEach(page => {
-        page.classList.remove('active');
-    });
-    // แสดงหน้าที่เลือก
-    switch(viewName) {
-        case 'home':
-            document.getElementById('pageHome').classList.add('active');
-            break;
-        case 'workGroup':
-            document.getElementById('pageWorkGroup').classList.add('active');
-            goSub(1); // เข้าหน้าย่อยบันทึกงานทันที
-            break;
-        case 'summaryPage':
-        case 'monthlySummary':
-        case 'comparePage':
-            document.getElementById('pageSummary').classList.add('active');
-            if (viewName === 'comparePage') {
-                switchSummaryTab('tabAnalytics');
-            } else if (viewName === 'summaryPage') {
-                switchSummaryTab('tabDaily');
-            } else {
-                switchSummaryTab('tabMonth');
-            }
-            break;
+// ✅ สลับแท็บ → แสดงเนื้อหาหน้านั้นๆ ปกติ ไม่มีหน้าต่างตั้งค่าเด้งขึ้นมาเอง
+function switchSummaryTab(tabId) {
+    // ✅ ซ่อนหน้าต่างตั้งค่าทุกครั้งที่สลับแท็บ ป้องกันเด้งเอง
+    const modal = document.getElementById('modalSet');
+    if (modal) modal.style.display = 'none';
+
+    // ✅ แสดงเนื้อหาแต่ละหน้าตามปกติ (หน้าสรุปภาพรวมก็จะแสดงผลครบถ้วน)
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.target.classList.add('active');
+
+    // ✅ ควบคุมเมนูล่าง — ซ่อนปุ่มอื่น เหลือโฮมตรงกลาง
+    const hideTabs = ['tabDaily', 'tabMonth', 'tabAnalytics'];
+    if (hideTabs.includes(tabId)) {
+        document.getElementById('nav1').style.display = 'none';
+        document.getElementById('nav2').style.display = 'none';
+        document.getElementById('nav3').style.display = 'none';
+        document.querySelector('.bottom-nav').style.gridTemplateColumns = '1fr';
+    } else {
+        document.getElementById('nav1').style.display = 'flex';
+        document.getElementById('nav2').style.display = 'flex';
+        document.getElementById('nav3').style.display = 'flex';
+        document.querySelector('.bottom-nav').style.gridTemplateColumns = 'repeat(4, 1fr)';
     }
 }
-
 // ✅ ควบคุมเมนูล่าง — แสดงทั้ง 4 ปุ่ม
 function updateNavDisplay(viewName) {
     document.getElementById('navHome').style.display = 'flex';
