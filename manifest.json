@@ -1,22 +1,22 @@
 {
-  "name": "Barber Note - ระบบบันทึกร้านตัดผม",
+  "name": "Barber Note - ระบบจัดการร้านตัดผม",
   "short_name": "Barber Note",
   "description": "แอปบันทึกรายรับ รายงานประจำวัน และคำนวณส่วนแบ่งรายได้ร้านตัดผม",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f0f2f5",
-  "theme_color": "#3b82f6",
+  "theme_color": "#0f172a",
   "orientation": "portrait",
   "scope": "./",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2907/2907336.png",
+      "src": "assets/icon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2907/2907336.png",
+      "src": "assets/icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
