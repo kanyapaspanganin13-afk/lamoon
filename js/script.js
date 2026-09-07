@@ -74,21 +74,12 @@ function goSub(num) {
 }
 
 /* ========= SECTION 4: SUMMARY TABS — สลับแท็บสรุปเดือน/วิเคราะห์ ========= */
-function switchSummaryTab(tabName) {
-    document.querySelectorAll('.tab-panel').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    document.querySelectorAll('.tab-header .tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-
-    if (tabName === 'tabMonth') {
-        document.getElementById('tabMonth').classList.add('active');
-        document.querySelector('.tab-header .tab-btn:first-child').classList.add('active');
-    } else {
-        document.getElementById('tabAnalytics').classList.add('active');
-        document.querySelector('.tab-header .tab-btn:last-child').classList.add('active');
-    }
+// ✅ สลับแท็บหน้าสรุป — รองรับ 3 แท็บ เต็มรูปแบบ
+function switchSummaryTab(tabId) {     
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));     
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));     
+    document.getElementById(tabId).classList.add('active');     
+    event.target.classList.add('active'); 
 }
 
 /* ========= SECTION 5: AUTO-UPDATE ========= */
