@@ -41,13 +41,13 @@ body > center, body > a, body > br { display: none !important; }
 .container { width: 100%; max-width: 480px; margin: 0 auto; }
 .main-wrap { width: 98%; padding: 15px; background: var(--card); border: 1px solid var(--border); border-radius: 25px; margin: 10px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
 
-/* ✅ แก้ไข: กำหนดให้ซ่อนทุกหน้าเป็น Default และซ่อน sub-page ด้วย */
+/* ✅ ควบคุมการแสดงผลของแต่ละหน้า */
 .page, .sub-page, .app-page { display: none !important; }
 .page.active, .sub-page.active, .app-page.active { display: block !important; }
 
 @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-/* ✅ เพิ่ม: จัดระเบียบ แถบบาร์ด้านบน (ปุ่มย้อนกลับ + ชื่อร้าน) */
+/* ✅ จัดระเบียบแถบบาร์ด้านบน (ปุ่มย้อนกลับ + หัวข้อ) */
 .top-bar {
     display: flex;
     align-items: center;
@@ -68,33 +68,75 @@ body > center, body > a, body > br { display: none !important; }
     font-size: 14px;
     cursor: pointer;
 }
-/* ✅ เพิ่ม: โครงสร้าง กริดเมนูหน้าหลัก ไม่ให้ปุ่มตกบรรทัดหรือซ้อนกัน */
+
+/* ========= 📋 MENU GRID & CARDS (แก้ไขปรับขนาดปุ่มให้เหมาะกับมือถือ + กดง่าย) ========= */
 .menu-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 15px;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+    margin: 15px 0 !important;
 }
+
 .menu-card {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 12px 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    cursor: pointer;
-    text-align: center;
-    color: var(--text);
-    font-weight: 700;
-    font-size: 13px;
-    transition: transform 0.1s ease;
+    background: var(--bg) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 18px !important;
+    padding: 12px 6px !important;
+    min-height: 88px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    cursor: pointer !important;
+    text-align: center !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
+    transition: transform 0.1s ease, background 0.2s !important;
 }
+
 .menu-card:active {
-    transform: scale(0.96);
+    transform: scale(0.95) !important;
+    background: var(--card) !important;
 }
+
+/* ป้องกันองค์ประกอบภายในบัง Event การกด */
+.menu-card .icon,
+.menu-card span,
+.menu-card img,
+.menu-card i {
+    pointer-events: none !important;
+}
+
+.menu-card .icon {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #fff !important;
+    font-size: 18px !important;
+    margin-bottom: 2px !important;
+}
+
+.menu-card span {
+    color: var(--text) !important;
+    font-weight: 800 !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+}
+
+/* ========= 📋 GRID LAYOUTS ========= */
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 8px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 10px; }
+.grid-time { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 10px; }
+.grid-svc { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+
+.grid-price { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 12px; height: 110px; align-items: stretch; }
+.grid-pay { display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; margin-bottom: 12px; height: 60px; }
+.grid-summary { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; margin-bottom: 15px; align-items: stretch; }
+
 /* ========= 🧩 CARDS & BOXES ========= */
 h2 { text-align: center; color: var(--text); font-weight: 900; margin: 5px 0 15px; letter-spacing: 0.5px; text-transform: uppercase; font-size: 24px; }
 .icon-card { background: var(--bg); border: 1px solid var(--border); border-radius: 18px; height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
@@ -113,7 +155,6 @@ select, input[type="text"], input[type="number"], input[type="date"], input[type
     font-weight: 800; font-size: 17px; text-align: center; text-align-last: center; outline: none; appearance: none; -webkit-appearance: none;
 }
 
-/* ✅ เพิ่มขนาดฟอนต์ช่องทรงผม / บริการ ให้ตัวใหญ่หนาชัดเจนเหมือนรูปตัวอย่าง */
 select#hairStyle, select#extra1, select#extra2 { 
     height: 62px; 
     font-size: 17px; 
@@ -126,7 +167,6 @@ select#hairStyle, select#extra1, select#extra2 {
 .time-input-custom { padding-top: 14px; font-size: 20px; font-weight: 900; }
 input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
 
-/* ✅ ปรับกล่องราคา + ตัวหนังสือ + สัญลักษณ์ ฿ ให้ทรงใหญ่และชัดเจนเท่ารูปเปรียบเทียบ */
 .price-box { 
     position: relative; 
     background: var(--bg); 
@@ -141,7 +181,6 @@ input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
 .baht { padding-left: 10px; font-size: 42px; color: #3b82f6; font-weight: 900; }
 .price-box input { border: none; background: transparent; font-size: 48px; font-weight: 900; color: var(--text); text-align: right; padding-right: 12px; outline: none; width: 100%; }
 
-/* ✅ ปรับช่องทิปโอนให้มีเส้นขอบและขนาดความสูงรับกันเป๊ะกับกล่องราคา */
 .tip-box { 
     height: 100% !important; 
     background: var(--bg); 
@@ -222,7 +261,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 15px 0; }
 .btn-compare { border-radius: 25px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 0 8px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, var(--btn-compare1), var(--btn-compare2)); color: #fff; font-weight: 700; margin-top: 15px; }
 .btn-compare i { font-size: 24px; }
 
-/* ========= 🪟 MODALS & SETTINGS (แก้ไขใหม่ทั้งหมด) ========= */
+/* ========= 🪟 MODALS & SETTINGS ========= */
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 10000; align-items: center; justify-content: center; padding: 15px; }
 .modal-content { background: var(--card); width: 100%; max-width: 420px; border-radius: 25px; padding: 20px; border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease-out; color: var(--text); }
 .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
@@ -284,7 +323,6 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
   min-width: 0;
 }
 
-/* ช่องกรอกและตัวเลือกในหน้าตั้งค่า */
 .settings-input,
 .settings-select {
   width: 100%;
@@ -308,7 +346,6 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
   border-color: var(--accent) !important;
 }
 
-/* แถวปุ่มกด */
 .settings-btn-row-3 {
   display: flex !important;
   flex-direction: row !important;
@@ -380,7 +417,6 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
   color: var(--text);
 }
 
-/* Responsive บนมือถือ */
 @media (max-width: 480px) {
   .settings-modal {
     padding: 18px 14px;
