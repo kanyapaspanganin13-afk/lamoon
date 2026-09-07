@@ -8,18 +8,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Barber-MS">
     <title>ระบบจัดการร้านตัดผม</title>
-
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="assets/icon.png">
     <link rel="icon" type="image/png" href="assets/icon.png">
-
     <!-- ไลบรารีภายนอก -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap">
-
     <!-- CSS หลัก -->
     <link rel="stylesheet" href="css/style.css">
-
     <!-- JS ภายนอก และ JS หลัก -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js" defer></script>
@@ -27,56 +23,47 @@
 </head>
 <body>
 <div class="container main-wrap">
-
     <!-- ==================== 🏠 1. หน้าแรก (MAIN MENU) ==================== -->
     <section id="pageHome" class="app-page active">
         <div class="home-header">
             <h2>ระบบจัดการร้านตัดผม</h2>
         </div>
-
         <div class="menu-grid">
             <!-- ปุ่ม 1: ตั้งค่าระบบ -->
             <button class="menu-card" onclick="openSettings()">
                 <div class="menu-icon grad-gray"><i class="fas fa-cog"></i></div>
                 <span> ตั้งค่าระบบ</span>
             </button>
-
             <!-- ปุ่ม 2: ประกันรายได้ -->
             <button class="menu-card" onclick="handleInsurance()">
                 <div class="menu-icon grad-yellow"><i class="fas fa-shield-alt"></i></div>
                 <span> ประกันรายได้</span>
             </button>
-
             <!-- ปุ่ม 3: วันหยุด -->
             <button class="menu-card" onclick="handleHoliday()">
                 <div class="menu-icon grad-red"><i class="fas fa-umbrella-beach"></i></div>
                 <span> วันหยุด</span>
             </button>
-
             <!-- ปุ่ม 4: บันทึกงาน -->
             <button class="menu-card primary-card" onclick="switchMainView('workGroup')">
                 <div class="menu-icon grad-blue"><i class="fas fa-edit"></i></div>
                 <span> บันทึกงาน</span>
             </button>
-
             <!-- ปุ่ม 5: สรุปภาพรวม -->
             <button class="menu-card" onclick="switchMainView('summaryPage')">
                 <div class="menu-icon grad-green"><i class="fas fa-chart-line"></i></div>
                 <span> สรุปภาพรวม</span>
             </button>
-
             <!-- ปุ่ม 6: สรุปรายเดือน -->
             <button class="menu-card" onclick="switchMainView('monthlySummary')">
                 <div class="menu-icon grad-emerald"><i class="fas fa-calendar-alt"></i></div>
                 <span> สรุปรายเดือน</span>
             </button>
-
             <!-- ปุ่ม 7: เปิด Sheet -->
             <button class="menu-card" onclick="handleGoogleSheet()">
                 <div class="menu-icon grad-green"><i class="fas fa-table"></i></div>
                 <span> เปิด Sheet</span>
             </button>
-
             <!-- ปุ่ม 8: เปรียบเทียบย้อนหลัง -->
             <button class="menu-card" onclick="switchMainView('comparePage')">
                 <div class="menu-icon grad-blue"><i class="fas fa-code-compare"></i></div>
@@ -85,16 +72,12 @@
         </div>
     </section>
 
-    <!-- ==================== 📂 2. กลุ่ม "บันทึกงาน" (3 หน้าย่อย + Nav ล่าง) ==================== -->
+    <!-- ==================== 📂 2. กลุ่ม "บันทึกงาน" (3 หน้าย่อย + Nav ล่าง 4 ปุ่ม) ==================== -->
     <div id="pageWorkGroup" class="app-page">
         <!-- ปุ่มย้อนกลับหน้าหลัก + ชื่อร้าน -->
         <div class="top-bar">
-            <button class="btn-back" onclick="switchMainView('home')">
-                <i class="fas fa-arrow-left"></i> หน้าหลัก
-            </button>
             <span id="shopNameDisp" class="top-title">BARBER SHOP</span>
         </div>
-
         <!-- Sub-page 1: ✍️ บันทึกงาน -->
         <section id="p1" class="sub-page active">
             <!-- วันที่ + ประเภทลูกค้า -->
@@ -109,7 +92,6 @@
                     <option value="regular">📌 ลูกค้าประจำ</option>
                 </select>
             </div>
-
             <!-- เวลา เริ่ม - เสร็จ -->
             <div class="grid-time">
                 <div class="time-box">
@@ -121,7 +103,6 @@
                     <input type="time" id="tEnd" class="time-input-custom">
                 </div>
             </div>
-
             <!-- ทรงผม + บริการเพิ่มเติม -->
             <div class="grid-svc">
                 <select id="hairStyle" class="select-svc-lg">
@@ -160,7 +141,6 @@
                     <option>แคะหู</option>
                 </select>
             </div>
-
             <!-- ราคา + ทิปโอน → สูงเท่ากัน พอดีจอมือถือ -->
             <div class="grid-price">
                 <div class="price-box">
@@ -169,7 +149,6 @@
                 </div>
                 <input type="number" id="tipInp" placeholder="ทิปโอน" inputmode="numeric" class="tip-box">
             </div>
-
             <!-- แถวที่ 1: วิธีชำระเงิน + ปุ่มบันทึกข้อมูล -->
             <div class="grid-pay">
                 <div class="select-wrap">
@@ -185,22 +164,14 @@
                     </select>
                     <i class="fas fa-chevron-down arrow"></i>
                 </div>
-
                 <button class="btn-pay" onclick="handleSave(event)">
                     <i class="fas fa-save"></i>
                     <span>บันทึกข้อมูล</span>
                 </button>
             </div>
-
-           <!-- แถวที่ 2: ปุ่มหน้าหลักไอคอน Home (บรรทัดล่างสุด ตรงกลาง) -->
-            <div class="home-btn-wrapper">
-                <button class="btn-back-small" onclick="switchMainView('home')" title="หน้าหลัก">
-                    <i class="fas fa-home"></i>
-                </button>
-            </div>
     
-         <!-- ช่องกรณีจ่ายผสม -->
-                <div id="mixPanel">
+            <!-- ช่องกรณีจ่ายผสม -->
+            <div id="mixPanel">
                 <div class="grid-2">
                     <div>
                         <label for="mixCash">ระบุเงินสด</label>
@@ -277,13 +248,16 @@
             </div>
         </section>
 
-        <!-- แถบนำทางล่างสุดสำหรับกลุ่มบันทึกงาน -->
+        <!-- ✅ แถบนำทางล่างสุด — 4 ปุ่ม: โฮม / บันทึก / รายงาน / บัญชี -->
         <nav class="bottom-nav">
+            <div onclick="switchMainView('home')" id="navHome" class="nav-item">
+                <i class="fas fa-home"></i><span>โฮม</span>
+            </div>
             <div onclick="goSub(1)" id="nav1" class="nav-item active">
                 <i class="fas fa-edit"></i><span>บันทึก</span>
             </div>
             <div onclick="goSub(2)" id="nav2" class="nav-item">
-                <i class="fas fa-history"></i><span>รายงาน</span>
+                <i class="fas fa-chart-bar"></i><span>รายงาน</span>
             </div>
             <div onclick="goSub(3)" id="nav3" class="nav-item">
                 <i class="fas fa-wallet"></i><span>บัญชี</span>
@@ -291,23 +265,19 @@
         </nav>
     </div>
 
-    <!-- ==================== 📊 3. หน้า "สรุปยอดรวม" (เต็มหน้าจอ 2 แท็บ) ==================== -->
+    <!-- ==================== 📊 3. หน้า "สรุปยอดรวม" — มีเมนูล่างเหมือนกัน ==================== -->
     <section id="pageSummary" class="app-page full-page">
         <div class="top-bar">
-            <button class="btn-back" onclick="switchMainView('home')">
-                <i class="fas fa-arrow-left"></i> หน้าหลัก
-            </button>
             <span class="top-title">📊 สรุปยอดรวม</span>
         </div>
-
-        <!-- แท็บสลับหน้า 2 แท็บ -->
+        <!-- แท็บสลับ 3 แท็บ: สรุปรายเดือน / สรุปภาพรวม / เปรียบเทียบ -->
         <div class="tab-header">
-            <button class="tab-btn active" onclick="switchSummaryTab('tabMonth')">📊 สรุปเดือน</button>
-            <button class="tab-btn" onclick="switchSummaryTab('tabAnalytics')">📈 วิเคราะห์เปรียบเทียบ</button>
+            <button class="tab-btn active" onclick="switchSummaryTab('tabMonth')">📊 สรุปรายเดือน</button>
+            <button class="tab-btn" onclick="switchSummaryTab('tabOverview')">📈 สรุปภาพรวม</button>
+            <button class="tab-btn" onclick="switchSummaryTab('tabAnalytics')">🔍 เปรียบเทียบ</button>
         </div>
-
         <div class="tab-content-wrap">
-            <!-- แท็บ 1: สรุปเดือน + ตารางรายวัน 7 คอลัมน์ + ปุ่มส่งออก Excel -->
+            <!-- แท็บ 1: สรุปรายเดือน -->
             <div id="tabMonth" class="tab-panel active">
                 <div class="filter-month-wrap">
                     <label for="summaryMonthSelect">เลือกเดือน:</label>
@@ -316,12 +286,7 @@
                         <i class="fas fa-file-excel"></i> สรุปรายเดือน (.csv)
                     </button>
                 </div>
-
-                <div id="monthlyCardSummary" class="monthly-cards">
-                    <!-- สรุปตัวเลขสำคัญประจำเดือนจะโหลดที่นี่ -->
-                </div>
-
-                <!-- ตารางสรุปรายวัน 7 คอลัมน์ (ตรงตามภาพ Blueprint 100%) -->
+                <div id="monthlyCardSummary" class="monthly-cards"></div>
                 <div class="table-responsive">
                     <table class="summary-table" id="monthlyDetailTable">
                         <thead>
@@ -335,39 +300,54 @@
                                 <th>ย้อม</th>
                             </tr>
                         </thead>
-                        <tbody id="monthlyTableBody">
-                            <!-- JS Render แถวรายวันและผลรวมท้ายสุด -->
-                        </tbody>
+                        <tbody id="monthlyTableBody"></tbody>
                     </table>
                 </div>
             </div>
-
-            <!-- แท็บ 2: วิเคราะห์เปรียบเทียบ -->
+            <!-- แท็บ 2: สรุปภาพรวม -->
+            <div id="tabOverview" class="tab-panel">
+                <div class="analytics-container">
+                    <h3 style="text-align:center; margin:16px 0;">📈 สรุปภาพรวม</h3>
+                    <div id="overviewContent" style="padding:12px;"></div>
+                </div>
+            </div>
+            <!-- แท็บ 3: เปรียบเทียบ -->
             <div id="tabAnalytics" class="tab-panel">
                 <div class="analytics-container">
+                    <h3 style="text-align:center; margin:16px 0;">🔍 วิเคราะห์เปรียบเทียบ</h3>
                     <div class="btn-compare-wrap">
                         <button class="btn-compare" onclick="openComparisonSelector()">
                             <i class="fas fa-chart-line"></i> เลือกช่วงเวลาเปรียบเทียบ
                         </button>
                     </div>
-                    <div id="analyticsChartContent">
-                        <!-- รายงานสัปดาห์ / กราฟทรงผม / บริการ -->
-                    </div>
+                    <div id="analyticsChartContent"></div>
                 </div>
             </div>
         </div>
+        <!-- ✅ แถบเมนูล่างเหมือนกันทุกหน้า -->
+        <nav class="bottom-nav">
+            <div onclick="switchMainView('home')" class="nav-item">
+                <i class="fas fa-home"></i><span>โฮม</span>
+            </div>
+            <div onclick="switchMainView('workGroup')" class="nav-item">
+                <i class="fas fa-edit"></i><span>บันทึก</span>
+            </div>
+            <div onclick="switchMainView('summaryPage')" class="nav-item active">
+                <i class="fas fa-chart-bar"></i><span>รายงาน</span>
+            </div>
+            <div onclick="switchMainView('pageAccount')" class="nav-item">
+                <i class="fas fa-wallet"></i><span>บัญชี</span>
+            </div>
+        </nav>
     </section>
 
     <!-- ==================== ⚙️ MODALS ต่างๆ ==================== -->
-    
     <!-- Modal ตั้งค่าระบบ -->
     <div id="modalSet" class="modal">
         <div class="modal-content settings-modal">
             <h3 class="settings-title">⚙️ ตั้งค่าระบบ</h3>
-
             <label class="settings-label" for="setShop">ชื่อร้าน</label>
             <input type="text" id="setShop" class="settings-input" value="Barber Shop">
-
             <div class="settings-row flex-row">
                 <div class="settings-col flex-col">
                     <label class="settings-label sm-label" for="setPerc">ส่วนแบ่งช่าง (%)</label>
@@ -378,14 +358,12 @@
                     <input type="number" id="setGuar" class="settings-input border-box" value="0">
                 </div>
             </div>
-
             <label class="settings-label" for="setTheme">ธีม</label>
             <select id="setTheme" class="settings-select">
                 <option value="light">ธีมสว่าง</option>
                 <option value="navy">ธีมสีน้ำเงิน</option>
                 <option value="vintage">ธีมวินเทจ</option>
             </select>
-
             <div class="settings-row">
                 <div class="settings-col">
                     <label class="settings-label" for="setSound">เสียงแจ้งเตือน</label>
@@ -402,7 +380,6 @@
                     </select>
                 </div>
             </div>
-
             <div class="settings-btn-row-3">
                 <button type="button" class="settings-btn secondary-btn" onclick="exportBackup()">📤 สำรองข้อมูล</button>
                 <label class="settings-btn secondary-btn file-btn">
@@ -411,16 +388,13 @@
                 </label>
                 <button type="button" class="settings-btn danger-btn" onclick="clearData()">🗑️ ล้างข้อมูล</button>
             </div>
-
             <div class="settings-btn-row-2">
                 <button class="settings-btn primary-btn" onclick="saveSettings()">บันทึก</button>
                 <button class="settings-btn cancel-btn" onclick="document.getElementById('modalSet').style.display='none'">ปิด</button>
             </div>
-
             <div class="settings-version">V1.0. Update: 06/09/2026</div>
         </div>
     </div>
-
     <!-- Modal รายงาน -->
     <div id="reportModal" class="modal">
         <div class="modal-content">
@@ -431,7 +405,6 @@
             <div id="reportContent"></div>
         </div>
     </div>
-
     <!-- Modal ประวัติเคลียร์เงิน -->
     <div id="historyModal" class="modal">
         <div class="modal-content">
@@ -442,7 +415,6 @@
             <div id="accHistory"></div>
         </div>
     </div>
-
     <!-- Modal ตัวอย่าง LINE -->
     <div id="linePreview" class="modal">
         <div class="modal-content">
@@ -454,15 +426,13 @@
             </div>
         </div>
     </div>
-
     <!-- ไฟล์เสียงซ่อน -->
     <div id="appAudioAssets" class="hidden-audio">
-        <audio id="successSoundMan" src="assets/sounds/success_male.mp3" preload="auto"></audio>
-        <audio id="successSoundWoman" src="assets/sounds/success_female.mp3" preload="auto"></audio>
-        <audio id="errorSoundMan" src="assets/sounds/error_male.mp3" preload="auto"></audio>
-        <audio id="errorSoundWoman" src="assets/sounds/error_female.mp3" preload="auto"></audio>
+        <audio id="successSoundMan" src="assets/sounds/success_male.mp3" preload="auto">
+        <audio id="successSoundWoman" src="assets/sounds/success_female.mp3" preload="auto">
+        <audio id="errorSoundMan" src="assets/sounds/error_male.mp3" preload="auto">
+        <audio id="errorSoundWoman" src="assets/sounds/error_female.mp3" preload="auto">
     </div>
-
 </div>
 </body>
 </html>
