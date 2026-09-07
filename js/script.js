@@ -46,7 +46,43 @@ function switchMainView(viewName) {
             break;
     }
 }
+function updateNavDisplay(viewName) {
+    const summarySubPages = ['tabDaily', 'tabMonth', 'tabAnalytics', 'tabAccount'];
+    
+    document.querySelectorAll('.nav-btn-work, .nav-btn-report, .nav-btn-account').forEach(btn => {
+        btn.style.display = 'flex';
+    });
 
+    if (summarySubPages.includes(viewName) || viewName === 'summaryPage') {
+        const activeTab = document.querySelector('.tab-panel.active');
+        if (activeTab && ['tabDaily', 'tabMonth', 'tabAnalytics'].includes(activeTab.id)) {
+            document.querySelector('.nav-btn-work').style.display = 'none';
+            document.querySelector('.nav-btn-report').style.display = 'none';
+            document.querySelector('.nav-btn-account').style.display = 'none';
+        }
+    }
+}
+
+// ✅ รวมการเรียกใช้ไว้ที่เดียว
+const originalSwitchTab = switchSummaryTab;
+switchSummaryTab = function(tabId) {
+    originalSwitchTab(tabId);
+    if (['tabDaily', 'tabMonth', 'tabAnalytics'].includes(tabId)) {
+        document.querySelector('.nav-btn-work').style.display = 'none';
+        document.querySelector('.nav-btn-report').style.display = 'none';
+        document.querySelector('.nav-btn-account').style.display = 'none';
+    } else {
+        document.querySelector('.nav-btn-work').style.display = 'flex';
+        document.querySelector('.nav-btn-report').style.display = 'flex';
+        document.querySelector('.nav-btn-account').style.display = 'flex';
+    }
+};
+
+const originalSwitchMain = switchMainView;
+switchMainView = function(viewName) {
+    originalSwitchMain(viewName);
+    updateNavDisplay(viewName);
+};
 /* ========= SECTION 3: SUB-PAGE NAVIGATION — สลับหน้าย่อยบันทึก/รายงาน/บัญชี ========= */
 function goSub(num) {
     // ซ่อนทุกหน้าย่อย
