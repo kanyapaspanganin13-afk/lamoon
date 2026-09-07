@@ -669,15 +669,20 @@ document.addEventListener("DOMContentLoaded", () => {
 function shareLine() {
     const $ = (id) => document.getElementById(id);
     const dateEl = $("dateInp");
+    
+    // Safety Guard: ตรวจสอบ Input วันที่
     if (!dateEl || !dateEl.value) {
         if (typeof Swal !== 'undefined') {
             Swal.fire({ title: 'กรุณาเลือกวันที่', icon: 'warning' });
         }
         return;
     }
+
     const dInp = dateEl.value;
     const dbList = typeof db !== "undefined" ? db : [];
     const today = dbList.filter(r => r.date === dInp);
+
+    // 🔴 1. ตรวจสอบข้อมูล
     if (!today.length) {
         const errSfx = document.getElementById("errorSound"); 
         if (errSfx) errSfx.play().catch(() => {});
@@ -688,20 +693,26 @@ function shareLine() {
         }
         return;
     }
+
+    // 🗓️ 2. จัดการวันที่และชื่อร้าน
     const [y, m, d] = dInp.split('-');
     const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
     const pY = parseInt(y, 10);
     const pM = parseInt(m, 10);
     const pD = parseInt(d, 10);
     const fDate = `${pD} ${months[pM - 1] || ''} ${(pY + 543).toString().slice(-2)}`;
+    
     const shopConf = typeof conf !== 'undefined' ? conf : {};
     const shopName = shopConf.shop || "Barber Shop";
     const perc = Number(shopConf.perc) || 0;
     const guar = Number(shopConf.guar) || 0;
+
     let tot = 0, cash = 0, trans = 0, tips = 0;
     let stats = {}, realCustomerCount = 0;
     let newCount = 0, regCount = 0;
     let giftCount = 0;
+
+    // 📝 3. ประมวลผลรายการลูกค้า (ใช้ slice() ป้องกันการแก้ไข Array ต้นฉบับ)
     const clientList = today
             .slice()
             .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
@@ -709,9 +720,11 @@ function shareLine() {
                 const p = Number(r.price) || 0;
                 const t = Number(r.tip) || 0;
                 const payType = String(r.pay || "").trim();
+                
                 let detailText = ""; 
                 let pIcon = '💵';
                 let displayPrice = p; 
+
                 if (['Free', 'Gift', 'ของขวัญ'].includes(payType)) {
                     displayPrice = 0;
                     pIcon = '🎁';
@@ -733,7 +746,7 @@ function shareLine() {
                     const pTrans = Number(r.payTrans) || 0;
                     const pCash = Number(r.payCash) || 0;
                     trans += pTrans;
-                    cash += pCash;
+                    cash += pCash; // แก้ไข: บวกเงินสดตามที่จ่ายจริง ไม่นำทิปมาลบออก
                     tot += p;
                     detailText = ` (สด:${pCash}/โอน:${pTrans})`; 
                     pIcon = '🌓';
@@ -746,7 +759,9 @@ function shareLine() {
                     tot += p;
                     pIcon = '💵';
                 }
+
                 tips += t;
+
                 if (!['GUARANTEE', 'HOLIDAY'].includes(String(r.type || '').toUpperCase())) {
                     realCustomerCount++;
                     const cType = String(r.custType || "").toLowerCase();
@@ -755,10 +770,13 @@ function shareLine() {
                     if (r.hair && r.hair.includes("เด็ก")) stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
                     (r.svcs || []).forEach(s => { if (s) stats[s] = (stats[s] || 0) + 1; });
                 }
+
                 const tShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
                 const svcsText = Array.isArray(r.svcs) ? r.svcs.join('+') : '';
                 return `${i + 1}. [${tShow}] ${svcsText} = ${displayPrice}${t ? ` (+ทิป ${t})` : ''}${detailText} ${pIcon}`;
             }).join('\n');
+
+    // 📊 4. สถิติงาน
     const allowed = ["เด็ก", "สระผม", "โกนหนวด", "ย้อมผม", "ย้อมสี"];
     const icons = { "เด็ก": "🧒", "สระ": "🧼", "โกน": "🪒", "ย้อม": "🎨" };
     let statText = Object.entries(stats)
@@ -768,12 +786,17 @@ function shareLine() {
             const icon = matchedKey ? icons[matchedKey] : '🔹';
             return `${icon} ${k}: ${v}`;
         }).join('\n');
+
+    // 💰 5. คำนวณรายได้ช่าง/ร้าน
     let bEarn = Math.max(tot * (perc / 100), guar) + tips;
     let shopEarn = tot - (bEarn - tips);
     let settle = cash - bEarn;
+
+    // 🔄 6. ระบบยอดค้างสะสม
     let oldBalance = 0;
     let periodText = "";
     let hasOldBalance = false;
+
     if (typeof archives !== "undefined" && Array.isArray(archives)) {
         const pendingDays = archives.filter(day => day.date !== dInp && Number(day.settle) !== 0);
         if (pendingDays.length > 0) {
@@ -792,8 +815,11 @@ function shareLine() {
             }
         }
     }
+
     let todayDiff = -settle;
     let finalNet = oldBalance + todayDiff;
+
+    // ✉️ 7. ประกอบข้อความ Template
     let msg = `💈 รายงานร้าน: ${shopName}\n`;
     msg += `📅 วันที่: ${fDate}\n`;
     msg += `-------------------------\n`;
@@ -801,57 +827,65 @@ function shareLine() {
     if (newCount > 0 || regCount > 0) msg += ` ใหม่: ${newCount} | ประจำ: ${regCount}\n`;
     msg += `-------------------------\n${clientList}\n-------------------------\n`;
     msg += `🏷️ สรุปงาน:\n${statText || '(ไม่มีรายการ)'}\n-------------------------\n`;
-   msg += `💰 ยอดรวม: ${tot.toLocaleString()} | 💸 ทิป: ${tips.toLocaleString()}\n`;
+    
+    msg += `💰 ยอด: ${tot.toLocaleString()} | 🧧 ทิปโอน: ${tips.toLocaleString()}\n`;
     
     let giftLine = giftCount > 0 ? ` | 🎁: ${giftCount}` : '';
-    msg += `📱 โอน: ${trans.toLocaleString()} | 💵 สด: ${cash.toLocaleString()}${giftLine}\n`;
+    msg += `📱 โอน: ${trans.toLocaleString()} | 💵 เงินสด: ${cash.toLocaleString()}${giftLine}\n`;
     
-    msg += `🤵 ส่วนช่าง: ${Math.floor(bEarn).toLocaleString()}\n🏪 ส่วนร้าน: ${Math.floor(shopEarn).toLocaleString()}\n`;
+    msg += `🤵 ช่าง: ${Math.floor(bEarn).toLocaleString()}\n🏠 ร้าน: ${Math.floor(shopEarn).toLocaleString()}\n`;
     msg += `-------------------------\n`;
 
+    // 8. ส่วนแสดงผลการจ่ายเงิน
     if (hasOldBalance && oldBalance !== 0) {
-        let settleLabel = settle > 0 ? 'ช่างคืนร้าน' : settle < 0 ? 'ร้านคืนช่าง' : 'ยอดพอดี';
-        let settleIcon = settle > 0 ? '🟧' : settle < 0 ? '🟦' : '✅';
-        msg += `${settleIcon} ${settleLabel}: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท\n`;
+        let settleColor = settle > 0 ? '🟧' : '🟦';
+        let settleText = settle > 0 ? 'ช่างคืนร้าน' : 'ร้านคืนช่าง';
+        msg += `${settleColor} ${settleText}: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท\n`;
         msg += `-------------------------\n`;
         msg += `🚨 สถานะบัญชี\n`;
-        msg += `📅 ช่วง ${periodText}: ${oldBalance > 0 ? 'ร้านค้าง' : 'ช่างค้าง'} ${Math.abs(oldBalance).toLocaleString()} บาท\n`;
+        msg += `วันที่ ${periodText}: ${oldBalance > 0 ? 'ร้านค้าง' : 'ช่างค้าง'} ${Math.abs(oldBalance).toLocaleString()} บาท\n`;
         msg += `(${Math.abs(oldBalance).toLocaleString()} ${todayDiff >= 0 ? '+' : '-'} ${Math.abs(Math.floor(todayDiff)).toLocaleString()}) = ${Math.abs(Math.floor(finalNet)).toLocaleString()}\n\n`;
-        let finalLabel = finalNet > 0 ? '🟦 ยอดสุทธิ: ร้านคืนช่าง' : finalNet < 0 ? '🟧 ยอดสุทธิ: ช่างคืนร้าน' : '✅ ยอดสุทธิ: พอดี';
-        msg += `📌 ${finalLabel} ${Math.abs(Math.floor(finalNet)).toLocaleString()} บาท\n`;
+        let finalColor = finalNet > 0 ? '🟦' : '🟧';
+        msg += `📌 ${finalColor} ยอดสุทธิ: ${finalNet > 0 ? 'ร้านคืนช่าง' : 'ช่างคืนร้าน'} ${Math.abs(Math.floor(finalNet)).toLocaleString()} บาท\n`;
     } else {
-        let todayLabel = settle > 0 ? '🟧 ช่างคืนร้าน' : settle < 0 ? '🟦 ร้านคืนช่าง' : '✅ ยอดพอดี';
-        msg += `${todayLabel} ${Math.abs(Math.floor(settle)).toLocaleString()} บาท\n`;
+        let todayText = settle > 0 ? `🟧 ช่างคืนร้าน: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท` : `🟦 ร้านคืนช่าง: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท`;
+        if (settle === 0) todayText = `✅ ยอดลงตัวพอดี`;
+        msg += `${todayText}\n`;
     }
 
-    const msgEdit = $("msgText");
-    const previewBox = $("linePreview");
-    if (msgEdit && previewBox) {
+    // 9. แสดง Preview หรือเปิด LINE ทันทีถ้าไม่มี Modal Preview
+    const msgEdit = $("msgEdit");
+    const previewArea = $("linePreview");
+    if (msgEdit && previewArea) {
         msgEdit.value = msg;
-        previewBox.innerText = msg;
-        $("lineModal").style.display = "flex";
+        previewArea.style.display = "flex";
     } else {
         const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(msg)}`;
         window.open(lineUrl, '_blank');
     }
 }
 
-function sendToLine() {
-    const msgEdit = document.getElementById("msgText");
+function sendToLineFinal() {
+    const msgEdit = document.getElementById("msgEdit");
+    const previewArea = document.getElementById("linePreview");
+    
     if (!msgEdit || !msgEdit.value.trim()) {
         if (typeof Swal !== 'undefined') {
-            Swal.fire({ title: 'ไม่พบข้อความ', icon: 'warning' });
+            Swal.fire({ title: 'ไม่พบข้อความ', text: 'กรุณาตรวจสอบข้อความก่อนส่ง', icon: 'warning' });
         } else {
-            alert("ไม่พบข้อความที่จะส่ง");
+            alert("กรุณาตรวจสอบข้อความก่อนส่ง");
         }
         return;
     }
-    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(msgEdit.value)}`;
+    
+    const finalMsg = msgEdit.value;
+    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(finalMsg)}`;
     window.open(lineUrl, '_blank');
-    const previewBox = document.getElementById("lineModal");
-    if (previewBox) previewBox.style.display = "none";
+    
+    if (previewArea) {
+        previewArea.style.display = "none";
+    }
 }
-
 function closeLineModal() {
     const previewBox = document.getElementById("lineModal");
     if (previewBox) previewBox.style.display = "none";
