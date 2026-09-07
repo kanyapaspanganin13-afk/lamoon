@@ -87,7 +87,7 @@
 
     <!-- ==================== 📂 2. กลุ่ม "บันทึกงาน" (3 หน้าย่อย + Nav ล่าง) ==================== -->
     <div id="pageWorkGroup" class="app-page">
-        <!-- ปุ่มย้อนกลับหน้าหลัก -->
+        <!-- ปุ่มย้อนกลับหน้าหลัก + ชื่อร้าน -->
         <div class="top-bar">
             <button class="btn-back" onclick="switchMainView('home')">
                 <i class="fas fa-arrow-left"></i> หน้าหลัก
@@ -161,7 +161,7 @@
                 </select>
             </div>
 
-            <!-- ราคา + ทิปโอน -->
+            <!-- ราคา + ทิปโอน → สูงเท่ากัน พอดีจอมือถือ -->
             <div class="grid-price">
                 <div class="price-box">
                     <span class="baht">฿</span>
@@ -170,8 +170,11 @@
                 <input type="number" id="tipInp" placeholder="ทิปโอน" inputmode="numeric" class="tip-box">
             </div>
 
-            <!-- วิธีชำระเงิน + ปุ่มบันทึก -->
+            <!-- วิธีชำระเงิน + ปุ่มบันทึก → ปุ่มหน้าหลักย้ายไปด้านล่างตรงกลาง -->
             <div class="grid-pay">
+                <button class="btn-back-below" onclick="switchMainView('home')">
+                    <i class="fas fa-arrow-left"></i> หน้าหลัก
+                </button>
                 <div class="select-wrap">
                     <i class="fas fa-wallet"></i>
                     <select id="payTypeSelect" onchange="setPaymentType(this.value)">
