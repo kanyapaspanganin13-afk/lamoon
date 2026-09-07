@@ -665,3 +665,194 @@ document.addEventListener("DOMContentLoaded", () => {
     // ✅ ตั้งค่าเริ่มต้นให้แสดงหน้าแรก
     go(1);
 });
+/* ========= SECTION 20: SHARE LINE ========= */
+function shareLine() {
+    const $ = (id) => document.getElementById(id);
+    const dateEl = $("dateInp");
+    if (!dateEl || !dateEl.value) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ title: 'กรุณาเลือกวันที่', icon: 'warning' });
+        }
+        return;
+    }
+    const dInp = dateEl.value;
+    const dbList = typeof db !== "undefined" ? db : [];
+    const today = dbList.filter(r => r.date === dInp);
+    if (!today.length) {
+        const errSfx = document.getElementById("errorSound"); 
+        if (errSfx) errSfx.play().catch(() => {});
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ title: 'ไม่พบข้อมูล', text: 'วันที่เลือกไม่มีการบันทึกไว้', icon: 'info' });
+        } else {
+            alert("ไม่พบข้อมูลในวันที่เลือก");
+        }
+        return;
+    }
+    const [y, m, d] = dInp.split('-');
+    const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    const pY = parseInt(y, 10);
+    const pM = parseInt(m, 10);
+    const pD = parseInt(d, 10);
+    const fDate = `${pD} ${months[pM - 1] || ''} ${(pY + 543).toString().slice(-2)}`;
+    const shopConf = typeof conf !== 'undefined' ? conf : {};
+    const shopName = shopConf.shop || "Barber Shop";
+    const perc = Number(shopConf.perc) || 0;
+    const guar = Number(shopConf.guar) || 0;
+    let tot = 0, cash = 0, trans = 0, tips = 0;
+    let stats = {}, realCustomerCount = 0;
+    let newCount = 0, regCount = 0;
+    let giftCount = 0;
+    const clientList = today
+            .slice()
+            .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
+            .map((r, i) => {
+                const p = Number(r.price) || 0;
+                const t = Number(r.tip) || 0;
+                const payType = String(r.pay || "").trim();
+                let detailText = ""; 
+                let pIcon = '💵';
+                let displayPrice = p; 
+                if (['Free', 'Gift', 'ของขวัญ'].includes(payType)) {
+                    displayPrice = 0;
+                    pIcon = '🎁';
+                    trans += t; 
+                    giftCount++;
+                } else if (payType === 'Free-Cash') {
+                    cash += p;
+                    tot += p;
+                    pIcon = '🎁+💵';
+                    displayPrice = p;
+                    giftCount++;
+                } else if (payType === 'Free-Trans') {
+                    trans += (p + t);
+                    tot += p;
+                    pIcon = '🎁+📱';
+                    displayPrice = p;
+                    giftCount++;
+                } else if (payType === 'Mix') {
+                    const pTrans = Number(r.payTrans) || 0;
+                    const pCash = Number(r.payCash) || 0;
+                    trans += pTrans;
+                    cash += pCash;
+                    tot += p;
+                    detailText = ` (สด:${pCash}/โอน:${pTrans})`; 
+                    pIcon = '🌓';
+                } else if (['Trans', 'โอน'].includes(payType)) {
+                    trans += (p + t);
+                    tot += p;
+                    pIcon = '📱';
+                } else {
+                    cash += p;
+                    tot += p;
+                    pIcon = '💵';
+                }
+                tips += t;
+                if (!['GUARANTEE', 'HOLIDAY'].includes(String(r.type || '').toUpperCase())) {
+                    realCustomerCount++;
+                    const cType = String(r.custType || "").toLowerCase();
+                    if (cType === 'new') newCount++;
+                    else if (cType === 'regular') regCount++;
+                    if (r.hair && r.hair.includes("เด็ก")) stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
+                    (r.svcs || []).forEach(s => { if (s) stats[s] = (stats[s] || 0) + 1; });
+                }
+                const tShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
+                const svcsText = Array.isArray(r.svcs) ? r.svcs.join('+') : '';
+                return `${i + 1}. [${tShow}] ${svcsText} = ${displayPrice}${t ? ` (+ทิป ${t})` : ''}${detailText} ${pIcon}`;
+            }).join('\n');
+    const allowed = ["เด็ก", "สระผม", "โกนหนวด", "ย้อมผม", "ย้อมสี"];
+    const icons = { "เด็ก": "🧒", "สระ": "🧼", "โกน": "🪒", "ย้อม": "🎨" };
+    let statText = Object.entries(stats)
+        .filter(([k]) => allowed.some(a => k.includes(a)))
+        .map(([k, v]) => {
+            const matchedKey = Object.keys(icons).find(i => k.includes(i));
+            const icon = matchedKey ? icons[matchedKey] : '🔹';
+            return `${icon} ${k}: ${v}`;
+        }).join('\n');
+    let bEarn = Math.max(tot * (perc / 100), guar) + tips;
+    let shopEarn = tot - (bEarn - tips);
+    let settle = cash - bEarn;
+    let oldBalance = 0;
+    let periodText = "";
+    let hasOldBalance = false;
+    if (typeof archives !== "undefined" && Array.isArray(archives)) {
+        const pendingDays = archives.filter(day => day.date !== dInp && Number(day.settle) !== 0);
+        if (pendingDays.length > 0) {
+            hasOldBalance = true;
+            oldBalance = pendingDays.reduce((sum, day) => sum + (Number(-day.settle) || 0), 0);
+            const fmt = (iso) => {
+                const parts = iso.split('-');
+                return `${parseInt(parts[2], 10)}/${parseInt(parts[1], 10)}`;
+            };
+            const yr = (iso) => (parseInt(iso.split('-')[0], 10) + 543).toString().slice(-2);
+            if (pendingDays.length === 1) {
+                periodText = `${fmt(pendingDays[0].date)}/${yr(pendingDays[0].date)}`;
+            } else {
+                const lastIdx = pendingDays.length - 1;
+                periodText = `${fmt(pendingDays[0].date)} - ${fmt(pendingDays[lastIdx].date)}/${yr(pendingDays[lastIdx].date)}`;
+            }
+        }
+    }
+    let todayDiff = -settle;
+    let finalNet = oldBalance + todayDiff;
+    let msg = `💈 รายงานร้าน: ${shopName}\n`;
+    msg += `📅 วันที่: ${fDate}\n`;
+    msg += `-------------------------\n`;
+    msg += `👤 ลูกค้าทั้งหมด: ${realCustomerCount} คน\n`;
+    if (newCount > 0 || regCount > 0) msg += ` ใหม่: ${newCount} | ประจำ: ${regCount}\n`;
+    msg += `-------------------------\n${clientList}\n-------------------------\n`;
+    msg += `🏷️ สรุปงาน:\n${statText || '(ไม่มีรายการ)'}\n-------------------------\n`;
+   msg += `💰 ยอดรวม: ${tot.toLocaleString()} | 💸 ทิป: ${tips.toLocaleString()}\n`;
+    
+    let giftLine = giftCount > 0 ? ` | 🎁: ${giftCount}` : '';
+    msg += `📱 โอน: ${trans.toLocaleString()} | 💵 สด: ${cash.toLocaleString()}${giftLine}\n`;
+    
+    msg += `🤵 ส่วนช่าง: ${Math.floor(bEarn).toLocaleString()}\n🏪 ส่วนร้าน: ${Math.floor(shopEarn).toLocaleString()}\n`;
+    msg += `-------------------------\n`;
+
+    if (hasOldBalance && oldBalance !== 0) {
+        let settleLabel = settle > 0 ? 'ช่างคืนร้าน' : settle < 0 ? 'ร้านคืนช่าง' : 'ยอดพอดี';
+        let settleIcon = settle > 0 ? '🟧' : settle < 0 ? '🟦' : '✅';
+        msg += `${settleIcon} ${settleLabel}: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท\n`;
+        msg += `-------------------------\n`;
+        msg += `🚨 สถานะบัญชี\n`;
+        msg += `📅 ช่วง ${periodText}: ${oldBalance > 0 ? 'ร้านค้าง' : 'ช่างค้าง'} ${Math.abs(oldBalance).toLocaleString()} บาท\n`;
+        msg += `(${Math.abs(oldBalance).toLocaleString()} ${todayDiff >= 0 ? '+' : '-'} ${Math.abs(Math.floor(todayDiff)).toLocaleString()}) = ${Math.abs(Math.floor(finalNet)).toLocaleString()}\n\n`;
+        let finalLabel = finalNet > 0 ? '🟦 ยอดสุทธิ: ร้านคืนช่าง' : finalNet < 0 ? '🟧 ยอดสุทธิ: ช่างคืนร้าน' : '✅ ยอดสุทธิ: พอดี';
+        msg += `📌 ${finalLabel} ${Math.abs(Math.floor(finalNet)).toLocaleString()} บาท\n`;
+    } else {
+        let todayLabel = settle > 0 ? '🟧 ช่างคืนร้าน' : settle < 0 ? '🟦 ร้านคืนช่าง' : '✅ ยอดพอดี';
+        msg += `${todayLabel} ${Math.abs(Math.floor(settle)).toLocaleString()} บาท\n`;
+    }
+
+    const msgEdit = $("msgText");
+    const previewBox = $("linePreview");
+    if (msgEdit && previewBox) {
+        msgEdit.value = msg;
+        previewBox.innerText = msg;
+        $("lineModal").style.display = "flex";
+    } else {
+        const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(msg)}`;
+        window.open(lineUrl, '_blank');
+    }
+}
+
+function sendToLine() {
+    const msgEdit = document.getElementById("msgText");
+    if (!msgEdit || !msgEdit.value.trim()) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ title: 'ไม่พบข้อความ', icon: 'warning' });
+        } else {
+            alert("ไม่พบข้อความที่จะส่ง");
+        }
+        return;
+    }
+    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(msgEdit.value)}`;
+    window.open(lineUrl, '_blank');
+    const previewBox = document.getElementById("lineModal");
+    if (previewBox) previewBox.style.display = "none";
+}
+
+function closeLineModal() {
+    const previewBox = document.getElementById("lineModal");
+    if (previewBox) previewBox.style.display = "none";
+}
