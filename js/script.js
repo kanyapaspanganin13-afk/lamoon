@@ -1,12 +1,10 @@
 /* ==========================================================
-   Barber-Note v1.0.7 — FULL COMPLETE VERSION
+   Barber-Note v1.1.0 — FULL VERSION + NEW NAVIGATION
    ========================================================== */
-
 /* ========= SECTION 1: GLOBAL VARIABLES ========= */
 const $ = id => document.getElementById(id);
-const APP_VERSION = "1.0";
-const LAST_UPDATED = "06/09/2026";
-
+const APP_VERSION = "1.1.0";
+const LAST_UPDATED = "07/09/2026";
 let db = JSON.parse(localStorage.getItem("barber_db")) || [];
 let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
 let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
@@ -20,7 +18,80 @@ let conf = JSON.parse(localStorage.getItem("barber_conf")) || {
 };
 let payMethod = "";
 
-/* ========= SECTION 2: AUTO-UPDATE ========= */
+/* ========= SECTION 2: NEW NAVIGATION SYSTEM — สลับหน้าหลัก ========= */
+function switchMainView(viewName) {
+    // ซ่อนทุกหน้าหลัก
+    document.querySelectorAll('.app-page').forEach(page => {
+        page.classList.remove('active');
+    });
+
+    // แสดงหน้าที่เลือก
+    switch(viewName) {
+        case 'home':
+            document.getElementById('pageHome').classList.add('active');
+            break;
+        case 'workGroup':
+            document.getElementById('pageWorkGroup').classList.add('active');
+            goSub(1); // เข้าหน้าย่อยบันทึกงานทันที
+            break;
+        case 'summaryPage':
+        case 'monthlySummary':
+        case 'comparePage':
+            document.getElementById('pageSummary').classList.add('active');
+            if (viewName === 'comparePage') {
+                switchSummaryTab('tabAnalytics');
+            } else {
+                switchSummaryTab('tabMonth');
+            }
+            break;
+    }
+}
+
+/* ========= SECTION 3: SUB-PAGE NAVIGATION — สลับหน้าย่อยบันทึก/รายงาน/บัญชี ========= */
+function goSub(num) {
+    // ซ่อนทุกหน้าย่อย
+    document.querySelectorAll('.sub-page').forEach(page => {
+        page.classList.remove('active');
+    });
+    // ปรับสถานะเมนู
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => {
+        nav.classList.remove('active');
+    });
+
+    // แสดงหน้าที่เลือก
+    const target = document.getElementById('p' + num);
+    if (target) target.classList.add('active');
+    const nav = document.getElementById('nav' + num);
+    if (nav) nav.classList.add('active');
+
+    // โหลดข้อมูลหน้าที่เปิด
+    const dInp = $("dateInp")?.value || new Date().toISOString().split('T')[0];
+    if (num === 2 && typeof renderDay === 'function') renderDay(dInp);
+    if (num === 3) {
+        if ($("accDate") && $("dateInp")) $("accDate").value = $("dateInp").value;
+        if (typeof loadAccountStatus === 'function') loadAccountStatus();
+    }
+}
+
+/* ========= SECTION 4: SUMMARY TABS — สลับแท็บสรุปเดือน/วิเคราะห์ ========= */
+function switchSummaryTab(tabName) {
+    document.querySelectorAll('.tab-panel').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-header .tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    if (tabName === 'tabMonth') {
+        document.getElementById('tabMonth').classList.add('active');
+        document.querySelector('.tab-header .tab-btn:first-child').classList.add('active');
+    } else {
+        document.getElementById('tabAnalytics').classList.add('active');
+        document.querySelector('.tab-header .tab-btn:last-child').classList.add('active');
+    }
+}
+
+/* ========= SECTION 5: AUTO-UPDATE ========= */
 (function autoUpdate() {
     const currentStoredVersion = localStorage.getItem("app_v");
     if (currentStoredVersion !== APP_VERSION) {
@@ -35,58 +106,22 @@ let payMethod = "";
     }
 })();
 
-/* ========= SECTION 3: PAGE NAVIGATION — ส่วนสำคัญที่ทำให้ปุ่มกดได้ ========= */
-function go(p) {
-    // ซ่อนทุกหน้า
-    document.querySelectorAll('.page').forEach(pg => { 
-        pg.classList.remove('active'); 
-        pg.style.display = 'none'; 
-    });
-    
-    // แสดงหน้าที่เลือก
-    const targetPage = $(`p${p}`);
-    if (targetPage) { 
-        targetPage.classList.add('active'); 
-        targetPage.style.display = 'block'; 
-    }
-    
-    // อัปเดตสถานะปุ่มเมนู
-    document.querySelectorAll('.nav-item').forEach((btn, i) => {
-        const isSelected = (i + 1) === p;
-        btn.classList.toggle('active', isSelected);
-        btn.style.color = isSelected ? 'var(--accent)' : 'var(--text)';
-        btn.style.opacity = isSelected ? '1' : '0.5';
-    });
-    
-    // อัปเดตชื่อร้านเฉพาะในหน้าบันทึกงาน (ถ้ามี element)
-    const savedShopName = localStorage.getItem("shopName") || "BARBER SHOP";
-    const entryShopTitle = $('entryShopName');
-    if (entryShopTitle) entryShopTitle.innerText = savedShopName;
-    
-    // โหลดข้อมูลเฉพาะหน้า
-    const dateInpValue = $("dateInp")?.value || new Date().toISOString().split('T')[0];
-    if (p === 2 && typeof renderDay === 'function') renderDay(dateInpValue);
-    if (p === 3) {
-        if ($("accDate") && $("dateInp")) $("accDate").value = $("dateInp").value;
-        if (typeof loadAccountStatus === 'function') loadAccountStatus();
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-/* ========= SECTION 4: DATE DISPLAY ========= */
+/* ========= SECTION 6: DATE DISPLAY ========= */
 function updateDateDisplay(v) {
     if (!v) return;
     const [y, m, d] = v.split('-');
     const thaiYearFull = parseInt(y) + 543;
     const thaiYearShort = thaiYearFull.toString().slice(-2);
     const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-    const formattedDate = `${parseInt(d)} ${months[parseInt(m)-1]} ${thaiYearShort}`;
+    const days = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+    const dayName = days[new Date(v + 'T00:00:00').getDay()].substring(0,2);
+    const formattedDate = `${parseInt(d)} ${months[parseInt(m)-1]} ${thaiYearShort} (${dayName})`;
     const el = $("dateDisplay");
     if (el) el.innerText = formattedDate;
     if (typeof renderDay === "function") renderDay(v);
 }
 
-/* ========= SECTION 5: SAVE DATA ========= */
+/* ========= SECTION 7: SAVE DATA ========= */
 function saveDB() {
     try {
         localStorage.setItem("barber_db", JSON.stringify(db));
@@ -97,7 +132,7 @@ function saveDB() {
     } catch (e) { console.error("❌ บันทึกไม่ได้:", e); return false; }
 }
 
-/* ========= SECTION 6: NOTIFY & SOUND ========= */
+/* ========= SECTION 8: NOTIFY & SOUND ========= */
 function speak(type, message = "") {
     if (conf.sound === "off") return;
     const isMan = conf.voice === "male";
@@ -111,8 +146,6 @@ function speak(type, message = "") {
         audio.currentTime = 0; 
         audio.play().catch(e => console.warn("Audio autoplay prevented:", e)); 
     }
-
-    // รองรับ Text-to-Speech เมื่อมีข้อความส่งมา
     if (message && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(message);
@@ -120,14 +153,13 @@ function speak(type, message = "") {
         window.speechSynthesis.speak(utterance);
     }
 }
-
-// ปลดล็อกระบบเสียงสำหรับเบราว์เซอร์มือถือในการแตะครั้งแรก
 document.addEventListener('click', function unlockAudio() {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
     }
     document.removeEventListener('click', unlockAudio);
 }, { once: true });
+
 function notify(type, title, text = "") {
     speak(type);
     if (typeof Swal === 'undefined') { alert(`${title}\n${text}`); return; }
@@ -138,7 +170,7 @@ function notify(type, title, text = "") {
     });
 }
 
-/* ========= SECTION 7: PAYMENT TYPE ========= */
+/* ========= SECTION 9: PAYMENT TYPE ========= */
 function setPaymentType(m) {
     payMethod = m;
     const mixPanel = $("mixPanel");
@@ -153,7 +185,7 @@ function setPaymentType(m) {
     }
 }
 
-/* ========= SECTION 8: SAVE RECORD ========= */
+/* ========= SECTION 10: SAVE RECORD ========= */
 function handleSave(event) {
     const dInp = $("dateInp")?.value || "";
     const tStart = $("tStart")?.value || "";
@@ -162,7 +194,6 @@ function handleSave(event) {
     const tip = parseFloat($("tipInp")?.value) || 0;
     const hairStyleSelect = $("hairStyle");
     const currentPay = payMethod;
-
     if (!currentPay) return notify("error", "ระบุข้อมูลไม่ครบ", "กรุณาเลือกวิธีชำระเงิน");
     if (price === 0 && !["Free","Free-Cash","Free-Trans","Holiday","Guarantee"].includes(currentPay)) {
         return notify("error", "ระบุข้อมูลไม่ครบ", "กรุณาระบุจำนวนเงิน");
@@ -170,7 +201,6 @@ function handleSave(event) {
     if (hairStyleSelect && hairStyleSelect.value === "" && !/^Free/.test(currentPay)) {
         return notify("error", "ระบุข้อมูลไม่ครบ", "กรุณาเลือกทรงผม");
     }
-
     let finalCash = 0, finalTrans = 0;
     switch (currentPay) {
         case "Free": finalCash = finalTrans = 0; break;
@@ -182,12 +212,10 @@ function handleSave(event) {
             finalCash = parseFloat($("mixCash")?.value) || 0;
             finalTrans = parseFloat($("mixTrans")?.value) || 0; break;
     }
-
     const svcs = [];
     if (hairStyleSelect?.value) svcs.push(hairStyleSelect.value);
     if ($("extra1")?.value) svcs.push($("extra1").value);
     if ($("extra2")?.value) svcs.push($("extra2").value);
-
     db.push({
         id: Date.now(), date: dInp, time: tStart, endTime: tEnd,
         price, tip, pay: currentPay, svcs,
@@ -195,36 +223,28 @@ function handleSave(event) {
         custType: $("custType")?.value || "none",
         type: 'SERVICE'
     });
-
     saveDB();
     notify("success", "บันทึกสำเร็จ", "จัดเก็บข้อมูลเรียบร้อยแล้ว");
-
-    // รีเซ็ตฟอร์ม
     $("priceInp").value = ""; $("tipInp").value = "0";
     payMethod = ""; setPaymentType("");
     if (hairStyleSelect) hairStyleSelect.selectedIndex = 0;
     $("extra1") && ($("extra1").selectedIndex = 0);
     $("extra2") && ($("extra2").selectedIndex = 0);
-
     const now = new Date();
     const curTime = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
     $("tStart") && ($("tStart").value = curTime);
     $("tEnd") && ($("tEnd").value = curTime);
-
     renderDay(dInp);
     loadAccountStatus();
 }
 
-/* ========= SECTION 9: RENDER DAILY REPORT ========= */
+/* ========= SECTION 11: RENDER DAILY REPORT ========= */
 function renderDay(selectedDate) {
     let dInp = selectedDate || ($("dateInp") ? $("dateInp").value : new Date().toISOString().split('T')[0]);
     if ($("dateInp")) $("dateInp").value = dInp;
     let allRec = db.filter(r => r.date === dInp);
-
-    // 🎯 คำนวณชื่อวัน (จ.-อา.)
     const days = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
     const dayName = days[new Date(dInp).getDay()];
-
     if (allRec.length === 0 && typeof archives !== 'undefined') {
         const archivedDay = archives.find(a => a.date === dInp);
         if (archivedDay && archivedDay.details) {
@@ -232,101 +252,78 @@ function renderDay(selectedDate) {
         }
     }
     const isHoliday = allRec.some(r => r.type && r.type.toUpperCase() === 'HOLIDAY');
-
-    // ตัวแปรสำหรับเก็บสถิติทรงผม/บริการ
     const stats = {};
     const extraSvcs = ["โกนหนวด", "กันหน้า", "สระผม", "กันจอน", "ย้อมแฟชั่น", "ดัดผม"];
-
     let tot = 0, trans = 0, cash = 0, tips = 0;
     let listHtml = "";
     let realCustomerCount = 0;
     let countNew = 0;
     let countRegular = 0;
-
-    allRec
-        .slice()
-        .sort((a, b) => a.time.localeCompare(b.time))
-        .forEach((r, i) => {
-            const p = parseFloat(r.price) || 0;
-            const t = parseFloat(r.tip) || 0;
-            const rType = r.type ? String(r.type).toUpperCase().trim() : '';
-            const currentSvcs = Array.isArray(r.svcs) ? r.svcs : [];
-            const cType = r.custType || 'none';
-
-            const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
-
-            tot += p;
-            tips += t;
-            if (r.pay === 'Mix') {
-                const pCash = parseFloat(r.payCash) || 0;
-                const pTrans = parseFloat(r.payTrans) || 0;
-                trans += pTrans;
-                cash += (pCash - t);
-            } else if (r.pay === 'Trans' || r.pay === 'โอน') {
-                trans += (p + t);
-            } else {
-                cash += p;
+    allRec.slice().sort((a, b) => a.time.localeCompare(b.time)).forEach((r, i) => {
+        const p = parseFloat(r.price) || 0;
+        const t = parseFloat(r.tip) || 0;
+        const rType = r.type ? String(r.type).toUpperCase().trim() : '';
+        const currentSvcs = Array.isArray(r.svcs) ? r.svcs : [];
+        const cType = r.custType || 'none';
+        const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
+        tot += p; tips += t;
+        if (r.pay === 'Mix') {
+            const pCash = parseFloat(r.payCash) || 0;
+            const pTrans = parseFloat(r.payTrans) || 0;
+            trans += pTrans; cash += (pCash - t);
+        } else if (r.pay === 'Trans' || r.pay === 'โอน') {
+            trans += (p + t);
+        } else {
+            cash += p;
+        }
+        if (rType === 'HOLIDAY' || rType === 'GUARANTEE' || p === 0) {
+        } else {
+            if (currentSvcs.length > 0) {
+                realCustomerCount++;
+                if (cType === 'new') countNew++;
+                if (cType === 'regular') countRegular++;
             }
-
-            if (rType === 'HOLIDAY' || rType === 'GUARANTEE' || p === 0) {
-                // ข้ามการนับ
-            } else {
-                if (currentSvcs.length > 0) {
-                    realCustomerCount++;
-                    if (cType === 'new') countNew++;
-                    if (cType === 'regular') countRegular++;
-                }
-
-                // 🎯 คำนวณนับจำนวนทรงผมและบริการเสริมตามปกติ
-                currentSvcs.forEach(s => {
-                    if (s) stats[s] = (stats[s] || 0) + 1;
-                });
-            }
-        
-            let custTag = ""; 
-            let payIcon = r.pay === 'Trans' ? '📱' : '💶';
-            let mixText = "";
-            if (r.pay === 'Mix') {
-                payIcon = '🌓';
-                mixText = `<br><small style="color:#64748b; font-size:10px; font-weight:normal;">(สด:${r.payCash}/โอน:${r.payTrans})</small>`;
-            } 
-            listHtml += `
-            <div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <div style="width:28px; height:28px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#64748b; flex-shrink:0;">
-                            ${i+1}
+            currentSvcs.forEach(s => { if (s) stats[s] = (stats[s] || 0) + 1; });
+        }
+        let custTag = ""; 
+        let payIcon = r.pay === 'Trans' ? '📱' : '💶';
+        let mixText = "";
+        if (r.pay === 'Mix') {
+            payIcon = '🌓';
+            mixText = `<br><small style="color:#64748b; font-size:10px;">(สด:${r.payCash}/โอน:${r.payTrans})</small>`;
+        } 
+        listHtml += `
+        <div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:28px; height:28px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#64748b;">${i+1}</div>
+                    <div style="display:flex; flex-direction:column;">
+                        <div style="font-weight:800; font-size:14px; color:#1e293b;">
+                            <span style="color:#64748b;">[${timeShow}]</span> ${currentSvcs.join(' + ')}${custTag}
                         </div>
-                        <div style="display:flex; flex-direction:column;">
-                            <div style="font-weight:800; font-size:14px; color:#1e293b; margin-bottom:2px;">
-                                <span style="color:#64748b; font-weight:500;">[${timeShow}]</span> ${currentSvcs.join(' + ')}${custTag}
-                            </div>
-                            <div style="display:flex; gap:8px; align-items:center;">
-                                ${t ? `<small style="color:#be185d; font-weight:700; font-size:11px;">🔹 ทิป: ฿${t}</small>` : '<small style="color:#94a3b8; font-size:11px;">(ไม่มีทิป)</small>'}
-                            </div>
+                        <div style="display:flex; gap:8px; margin-top:2px;">
+                            ${t ? `<small style="color:#be185d; font-weight:700;">🔹 ทิป: ฿${t}</small>` : ''}
                         </div>
                     </div>
-                    <div style="text-align:right;">
-                        <b style="font-size:16px; display:block; color:#1e293b; line-height:1.2;">
-                            <span style="font-size:14px;">${payIcon}</span> ฿${p}${t ? ` <span style="color:#be185d;">(+${t})</span>` : ''}
-                            ${mixText}
-                        </b>
+                </div>
+                <div style="text-align:right;">
+                    <b style="font-size:16px; color:#1e293b;">${payIcon} ฿${p}${t ? ` <span style="color:#be185d;">(+${t})</span>` : ''}</b>
+                    ${mixText}
+                    <div style="margin-top:4px;">
                         <span style="font-size:11px; font-weight:700; color:#ef4444; cursor:pointer;" onclick="delRec(${r.id})">ลบ</span>
                     </div>
                 </div>
-            </div>`;
-        });
-
+            </div>
+        </div>`;
+    });
     const bEarn = isHoliday ? 0 : Math.max(tot * (conf.perc / 100), conf.guar) + tips;
     const sEarn = isHoliday ? 0 : tot - (bEarn - tips);
     const settle = isHoliday ? 0 : cash - bEarn;
-
     if ($("dTotal")) $("dTotal").innerText = tot.toLocaleString();
     if ($("dTrans")) $("dTrans").innerText = trans.toLocaleString();
     if ($("dCash")) $("dCash").innerText = cash.toLocaleString();
     if ($("dBarber")) $("dBarber").innerText = Math.floor(bEarn).toLocaleString();
     if ($("dShop")) $("dShop").innerText = Math.floor(sEarn).toLocaleString();
-
     if ($("dCounts")) {
         if (isHoliday) {
             $("dCounts").innerHTML = "<span style='color:#64748b;'>🏖️ วันหยุด</span>";
@@ -335,67 +332,39 @@ function renderDay(selectedDate) {
         } else {
             let detail = "";
             if (countNew > 0 || countRegular > 0) {
-                detail = `
-                <div style="font-size: 13px; font-weight: 700; margin-top: 4px; border-top: 1px dashed var(--border); padding-top: 4px;">
-                    <span style="color: var(--success);"> ใหม่: ${countNew}</span> 
-                    <span style="color: var(--text); opacity: 0.5;"> | </span> 
-                    <span style="color: var(--warning);"> ประจำ: ${countRegular}</span>
-                </div>`;
+                detail = `<div style="margin-top:4px; padding-top:4px; border-top:1px dashed #e2e8f0;"><span style="color:#22c55e;">🌟 ใหม่: ${countNew}</span> <span style="opacity:0.5;">|</span> <span style="color:#f59e0b;">📌 ประจำ: ${countRegular}</span></div>`;
             }
-            $("dCounts").innerHTML = `
-                <div style="line-height: 1.2;">
-                    <b style="font-size: 16px; color:#fff;">ลูกค้า: ${realCustomerCount} คน</b>
-                    ${detail}
-                </div>`;
+            $("dCounts").innerHTML = `<b style="font-size:16px;">ลูกค้า: ${realCustomerCount} คน</b>${detail}`;
         }
     }
-
-    // 🎯 แสดงผลแท็กทรงผมและบริการเสริมใน dServiceStats ตามปกติ
-    let sH = `<div style="display:flex; flex-wrap:wrap; gap:4px; justify-content:center; margin-bottom:8px;">`;
+    let sH = `<div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px;">`;
     const cleanExtras = extraSvcs.map(s => s.trim().toLowerCase());
     const allStatsKeys = Object.keys(stats);
     const haircutGroup = allStatsKeys.filter(k => !cleanExtras.includes(k.trim().toLowerCase()));
     const extraGroup = allStatsKeys.filter(k => cleanExtras.includes(k.trim().toLowerCase()));
-
-    haircutGroup.forEach(k => {
-        sH += `<span style="background:#4338ca;color:#fff;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:800;">${k}: ${stats[k]}</span>`;
-    });
-    extraGroup.forEach(k => {
-        sH += `<span style="background:#e0f2fe;color:#0369a1;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;border:1px solid #bae6fd;">${k}: ${stats[k]}</span>`;
-    });
+    haircutGroup.forEach(k => { sH += `<span style="background:#4338ca;color:#fff;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:800;">${k}: ${stats[k]}</span>`; });
+    extraGroup.forEach(k => { sH += `<span style="background:#e0f2fe;color:#0369a1;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;">${k}: ${stats[k]}</span>`; });
     if ($("dServiceStats")) $("dServiceStats").innerHTML = sH + `</div>`;
-
-    // --- ส่วนสถานะ Settle Bar ---
     let txt = "", statusColor = "", icon = "";
-    if (isHoliday) {
-        txt = "วันหยุด"; statusColor = "#1e40af"; icon = "🏖️";
-    } else if (allRec.length === 0) {
-        txt = "รอข้อมูล..."; statusColor = "#64748b"; icon = "📝";
-    } else if (tot === 0) {
-        txt = "ร้านจ่ายประกัน"; statusColor = "#0369a1"; icon = "🛡️";
-    } else if (settle > 0) {
-        txt = `ช่างคืนร้าน ฿${Math.floor(settle).toLocaleString()}`; statusColor = "#b91c1c"; icon = "🥷";
-    } else if (settle < 0) {
-        txt = `ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; statusColor = "#4338ca"; icon = "🏠";
-    } else {
-        txt = "ยอดพอดี"; statusColor = "#15803d"; icon = "✅";
-    }
-
+    if (isHoliday) { txt = "วันหยุด"; statusColor = "#1e40af"; icon = "🏖️"; }
+    else if (allRec.length === 0) { txt = "รอข้อมูล..."; statusColor = "#64748b"; icon = "📝"; }
+    else if (tot === 0) { txt = "ร้านจ่ายประกัน"; statusColor = "#0369a1"; icon = "🛡️"; }
+    else if (settle > 0) { txt = `ช่างคืนร้าน ฿${Math.floor(settle).toLocaleString()}`; statusColor = "#b91c1c"; icon = "🥷"; }
+    else if (settle < 0) { txt = `ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; statusColor = "#4338ca"; icon = "🏠"; }
+    else { txt = "ยอดพอดี"; statusColor = "#15803d"; icon = "✅"; }
     const actionBox = $("settleBarContainer");
     if (actionBox) {
         actionBox.style.display = "flex";
         actionBox.style.gap = "10px";
         actionBox.innerHTML = `
-            <div id="settleBar" style="flex:8; height:55px; background:#ffffff; display:flex; align-items:center; justify-content:center; border-radius:18px; font-weight:800; font-size:15px; color:${statusColor}; border:1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <div id="settleBar" style="flex:8; height:55px; background:#fff; display:flex; align-items:center; justify-content:center; border-radius:18px; font-weight:800; font-size:15px; color:${statusColor}; border:1px solid #e2e8f0;">
                 <span style="margin-right:8px; font-size:18px;">${icon}</span> ${txt}
             </div>
             <button id="btnSubmitSend" onclick="saveAndGo('${dInp}', ${tot})" 
-                style="flex:2.2; height:55px; background:#ff6f00; color:#fff; border-radius:18px; border:none; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 2px 6px rgba(255,111,0,0.3);">
-                <i id="btnIcon" class="fas fa-paper-plane"></i>
+                style="flex:2.2; height:55px; background:#ff6f00; color:#fff; border-radius:18px; border:none; font-size:20px; cursor:pointer;">
+                <i class="fas fa-paper-plane"></i>
             </button>`;
     }
-
-    // --- ส่วนรายงานวันที่ + ปุ่มลบ + ปุ่ม LINE ---
     const dList = $("dailyList");
     if (dList) {
         const dateParts = dInp.split('-'); 
@@ -404,47 +373,44 @@ function renderDay(selectedDate) {
             const d = dateParts[2];
             const m = dateParts[1];
             const yBE = parseInt(dateParts[0]) + 543;
-            displayDateBE = `${d}/${m}/${yBE}`;
+            displayDateBE = `${d}/${m}/${yBE.toString().slice(-2)}`;
         }
-
         dList.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 8px 12px; border-radius: 16px; border-bottom: 2px solid #f1f5f9; margin-bottom: 10px;">           
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <b style="font-size: 14px; color: #1e293b; white-space: nowrap;">รายงานวันที่</b>             
-                    
-                    <div style="position: relative; background: #eef2ff; padding: 6px 12px; border-radius: 10px; border: 1px solid #e0e7ff; display: flex; align-items: center; cursor: pointer; min-width: 140px; height: 36px;"> 
-                        <span style="font-size: 14px; font-weight: 700; color: #4338ca; width: 100%; text-align: center;">
-                            ${dayName} ${displayDateBE}
-                        </span>                   
-                        <input type="date" id="reportDateSelector" value="${dInp}" 
-                               onchange="renderDay(this.value)" 
-                               style="position: absolute; opacity: 0; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#fff; border-radius:16px; border-bottom:2px solid #f1f5f9; margin-bottom:10px;">           
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <b style="font-size:14px; color:#1e293b;">รายงานวันที่</b>             
+                    <div style="position:relative; background:#eef2ff; padding:6px 12px; border-radius:10px; border:1px solid #e0e7ff; min-width:140px; height:36px;"> 
+                        <span style="font-size:14px; font-weight:700; color:#4338ca;">${dayName} ${displayDateBE}</span>                   
+                        <input type="date" id="reportDateSelector" value="${dInp}" onchange="renderDay(this.value)" style="position:absolute; opacity:0; left:0; top:0; width:100%; height:100%; cursor:pointer;">
                     </div>
-
-                    <button onclick="deleteArchiveDate('${dInp}')" 
-                            title="ลบข้อมูลของวันนี้"
-                            style="background: #fde8e8; color: #e11d48; border: none; width: 38px; height: 36px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
-                        <i class="fas fa-trash-alt" style="font-size: 16px;"></i>
+                    <button onclick="deleteArchiveDate('${dInp}')" title="ลบข้อมูลของวันนี้" style="background:#fde8e8; color:#e11d48; border:none; width:38px; height:36px; border-radius:10px; cursor:pointer;">
+                        <i class="fas fa-trash-alt"></i>
                     </button>
                 </div>
-
-                <div style="display: flex; align-items: center;">
-                    <i class="fab fa-line" style="color: #06c755; font-size: 36px; cursor: pointer;" onclick="shareLine()"></i>
+                <div style="display:flex; align-items:center;">
+                    <i class="fab fa-line" style="color:#06c755; font-size:36px; cursor:pointer;" onclick="shareLine()"></i>
                 </div>
             </div>
-
-            <div style="padding: 0 5px;">
+            <div style="padding:0 5px;">
                 ${isHoliday ? `<center style='padding:30px; color:#64748b;'>🏖️ วันหยุด (${displayDateBE})</center>` : (listHtml || "<center style='padding:30px; color:#94a3b8;'>ไม่มีข้อมูล</center>")}
-            </div>
-        `;
+            </div>`;
     } 
 }
-/* ========= SECTION 10: DELETE RECORD ========= */
+
+/* ========= SECTION 12: DELETE RECORD ========= */
 function delRec(id) {
     if (confirm("ลบรายการนี้?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); }
 }
+function deleteArchiveDate(date) {
+    if (confirm(`ลบข้อมูลวันที่ ${date} ทั้งหมด?`)) {
+        db = db.filter(r => r.date !== date);
+        archives = archives.filter(a => a.date !== date);
+        saveDB(); renderDay(); loadAccountStatus();
+        notify("success", "สำเร็จ", "ลบข้อมูลเรียบร้อย");
+    }
+}
 
-/* ========= SECTION 11: SAVE & CLOSE DAY ========= */
+/* ========= SECTION 13: SAVE & CLOSE DAY ========= */
 async function saveAndGo(date, total) {
     const alreadySent = archives.some(a => a.date === date);
     if (alreadySent) return notify("error", "แจ้งเตือน", `วันที่ ${date} ส่งข้อมูลแล้ว`);
@@ -472,7 +438,7 @@ async function saveAndGo(date, total) {
     renderDay(date); loadAccountStatus();
 }
 
-/* ========= SECTION 12: ACCOUNT STATUS ========= */
+/* ========= SECTION 14: ACCOUNT STATUS ========= */
 function loadAccountStatus() {
     const today = $("dateInp")?.value || new Date().toISOString().split('T')[0];
     if ($("accDate")) $("accDate").value = today;
@@ -480,7 +446,6 @@ function loadAccountStatus() {
     const todayArchive = archives.find(a => a.date === today);
     const bal = account.balance || 0;
     const totalBal = bal + (todayArchive ? todayArchive.settle : 0);
-
     if ($("accOldVal")) $("accOldVal").innerText = `฿${bal.toLocaleString()}`;
     if ($("accDateLabel")) $("accDateLabel").innerText = lastArchive ? lastArchive.date : "ยังไม่มีข้อมูล";
     if ($("accTodayVal")) $("accTodayVal").innerText = todayArchive ? `฿${todayArchive.settle.toLocaleString()}` : "฿0";
@@ -493,7 +458,7 @@ function loadAccountStatus() {
     }
 }
 
-/* ========= SECTION 13: CLEAR ACCOUNT & HISTORY ========= */
+/* ========= SECTION 15: CLEAR ACCOUNT & HISTORY ========= */
 async function clearAccount() {
     const date = $("accDate")?.value || new Date().toISOString().split('T')[0];
     const note = $("accNote")?.value || "เคลียร์ยอด";
@@ -508,7 +473,6 @@ async function clearAccount() {
     notify("success", "สำเร็จ", "เคลียร์ยอดเรียบร้อย");
     loadAccountStatus();
 }
-
 function openHistoryModal() {
     const list = $("accHistory");
     list.innerHTML = account.logs.length === 0 ? "<center style='padding:20px;color:#94a3b8'>ยังไม่มีประวัติ</center>"
@@ -517,7 +481,7 @@ function openHistoryModal() {
 }
 function closeHistoryModal() { $("historyModal").style.display = "none"; }
 
-/* ========= SECTION 14: HOLIDAY & INSURANCE ========= */
+/* ========= SECTION 16: HOLIDAY & INSURANCE ========= */
 function handleHoliday() {
     const date = $("dateInp")?.value || new Date().toISOString().split('T')[0];
     if (db.some(r => r.date === date && r.type === "HOLIDAY")) return notify("error", "แจ้งเตือน", "วันนี้บันทึกวันหยุดไปแล้ว");
@@ -537,7 +501,7 @@ function handleInsurance() {
     renderDay(date);
 }
 
-/* ========= SECTION 15: SETTINGS & THEME ========= */
+/* ========= SECTION 17: SETTINGS & THEME ========= */
 function openSettings() { 
     if ($("setShop")) $("setShop").value = conf.shop;
     if ($("setPerc")) $("setPerc").value = conf.perc;
@@ -547,15 +511,12 @@ function openSettings() {
     if ($("setVoice")) $("setVoice").value = conf.voice;
     $("modalSet").style.display = "flex"; 
 }
-function closeReportModal() { $("reportModal").style.display = "none"; }
-
 function applyTheme(t) {
     document.body.classList.remove("navy", "vintage");
     if (t === "navy") document.body.classList.add("navy");
     else if (t === "vintage") document.body.classList.add("vintage");
     conf.theme = t; localStorage.setItem("shopTheme", t);
 }
-
 function saveSettings() {
     conf.shop = $("setShop")?.value || "Barber Shop";
     conf.perc = parseFloat($("setPerc")?.value) || 50;
@@ -567,14 +528,12 @@ function saveSettings() {
     localStorage.setItem("shopPerc", conf.perc);
     localStorage.setItem("shopGuar", conf.guar);
     saveDB();
-    const entryShop = $("entryShopName");
-    if (entryShop) entryShop.innerText = conf.shop;
     applyTheme(conf.theme);
     $("modalSet").style.display = "none";
     notify("success", "บันทึกสำเร็จ", "ตั้งค่าถูกบันทึกแล้ว");
 }
 
-/* ========= SECTION 16: MONTHLY & EXPORT ========= */
+/* ========= SECTION 18: MONTHLY SUMMARY & EXCEL EXPORT ========= */
 function loadHistMonth() {
     const v = $("histMonth")?.value; if (!v) return;
     const [y, m] = v.split('-');
@@ -597,15 +556,25 @@ function exportToExcel(monthValue) {
     if (!list.length) return notify("error", "ไม่พบข้อมูล", name);
     const rows = [["วันที่", "ยอด", "สด", "ช่าง", "ค้าง"]];
     list.forEach(a => rows.push([a.date, a.total, a.cash, a.barber, a.settle]));
-    XLSX.writeFile(XLSX.utils.book_new(), `สรุป-${name}.xlsx`);
     const ws = XLSX.utils.aoa_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "สรุป");
     XLSX.writeFile(wb, `สรุป-${name}.xlsx`);
     notify("success", "สำเร็จ", "ดาวน์โหลดเรียบร้อย");
 }
+function exportMonthlyExcel() {
+    notify("info", "กำลังพัฒนา", "ฟังก์ชันส่งออกตารางรายวันจะเพิ่มเร็วๆ นี้");
+}
 
-/* ========= SECTION 17: IMPORT / EXPORT / CLEAR ========= */
+/* ========= SECTION 19: GOOGLE SHEETS & COMPARISON ========= */
+function handleGoogleSheet() {
+    window.open("https://docs.google.com/spreadsheets", "_blank");
+}
+function openComparisonSelector() {
+    notify("info", "กำลังพัฒนา", "ฟังก์ชันเปรียบเทียบจะเพิ่มเร็วๆ นี้");
+}
+
+/* ========= SECTION 20: IMPORT / EXPORT / CLEAR ========= */
 function exportBackup() {
     const backup = { db, archives, account, conf, exported: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
@@ -636,12 +605,94 @@ async function clearData() {
     if (isConfirmed) { localStorage.clear(); location.reload(); }
 }
 
-/* ========= SECTION 18: MODAL HELPERS ========= */
+/* ========= SECTION 21: MODAL HELPERS ========= */
 window.onclick = e => {
     if (e.target.classList.contains("modal")) e.target.style.display = "none";
 };
+function closeReportModal() { $("reportModal").style.display = "none"; }
 
-/* ========= ✅ SECTION 19: INITIALIZE — ส่วนสำคัญ โหลดค่าเริ่มต้น ========= */
+/* ========= SECTION 22: SHARE LINE ========= */
+function shareLine() {
+    const dateEl = $("dateInp");
+    if (!dateEl || !dateEl.value) {
+        if (typeof Swal !== 'undefined') Swal.fire({ title: 'กรุณาเลือกวันที่', icon: 'warning' });
+        return;
+    }
+    const dInp = dateEl.value;
+    const today = db.filter(r => r.date === dInp);
+    if (!today.length) {
+        if (typeof Swal !== 'undefined') Swal.fire({ title: 'ไม่พบข้อมูล', text: 'วันที่เลือกไม่มีการบันทึกไว้', icon: 'info' });
+        return;
+    }
+    const [y, m, d] = dInp.split('-');
+    const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    const fDate = `${parseInt(d)} ${months[parseInt(m)-1]} ${(parseInt(y)+543).toString().slice(-2)}`;
+    const shopName = conf.shop || "Barber Shop";
+    const perc = Number(conf.perc) || 0;
+    const guar = Number(conf.guar) || 0;
+    let tot = 0, cash = 0, trans = 0, tips = 0;
+    let stats = {}, realCustomerCount = 0, newCount = 0, regCount = 0, giftCount = 0;
+    const clientList = today.slice().sort((a,b)=>(a.time||'').localeCompare(b.time||'')).map((r,i)=>{
+        const p = Number(r.price)||0, t = Number(r.tip)||0;
+        const payType = String(r.pay||"").trim();
+        let detailText = "", pIcon = '💵', displayPrice = p;
+        if (['Free','Gift','ของขวัญ'].includes(payType)) { displayPrice=0; pIcon='🎁'; trans+=t; giftCount++; }
+        else if (payType==='Free-Cash') { cash+=p; tot+=p; pIcon='🎁+💵'; giftCount++; }
+        else if (payType==='Free-Trans') { trans+=(p+t); tot+=p; pIcon='🎁+📱'; giftCount++; }
+        else if (payType==='Mix') { const pc=Number(r.payCash)||0, pt=Number(r.payTrans)||0; cash+=pc; trans+=pt; tot+=p; detailText=` (สด:${pc}/โอน:${pt})`; pIcon='🌓'; }
+        else if (['Trans','โอน'].includes(payType)) { trans+=(p+t); tot+=p; pIcon='📱'; }
+        else { cash+=p; tot+=p; }
+        tips += t;
+        if (!['GUARANTEE','HOLIDAY'].includes(String(r.type||'').toUpperCase())) {
+            realCustomerCount++;
+            const cType = String(r.custType||"").toLowerCase();
+            if (cType==='new') newCount++; else if (cType==='regular') regCount++;
+            (r.svcs||[]).forEach(s=>{if(s) stats[s]=(stats[s]||0)+1;});
+        }
+        const tShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
+        const svcsText = Array.isArray(r.svcs) ? r.svcs.join('+') : '';
+        return `${i+1}. [${tShow}] ${svcsText} = ${displayPrice}${t?` (+ทิป ${t})`:''}${detailText} ${pIcon}`;
+    }).join('\n');
+    let bEarn = Math.max(tot*(perc/100), guar) + tips;
+    let shopEarn = tot - (bEarn - tips);
+    let settle = cash - bEarn;
+    let oldBalance = 0, periodText = "", hasOldBalance = false;
+    if (typeof archives !== "undefined" && Array.isArray(archives)) {
+        const pendingDays = archives.filter(day => day.date !== dInp && Number(day.settle) !== 0);
+        if (pendingDays.length > 0) {
+            hasOldBalance = true;
+            oldBalance = pendingDays.reduce((sum,day)=>sum+(Number(-day.settle)||0),0);
+            const fmt = iso=>{const p=iso.split('-');return `${parseInt(p[2])}/${parseInt(p[1])}`;};
+            const yr = iso=>(parseInt(iso.split('-')[0])+543).toString().slice(-2);
+            if (pendingDays.length===1) periodText = `${fmt(pendingDays[0].date)}/${yr(pendingDays[0].date)}`;
+            else { const l=pendingDays.length-1; periodText = `${fmt(pendingDays[0].date)} - ${fmt(pendingDays[l].date)}/${yr(pendingDays[l].date)}`; }
+        }
+    }
+    let todayDiff = -settle, finalNet = oldBalance + todayDiff;
+    let msg = `💈 รายงานร้าน: ${shopName}\n📅 วันที่: ${fDate}\n-------------------------\n👤 ลูกค้าทั้งหมด: ${realCustomerCount} คน${newCount||regCount?`\n ใหม่:${newCount} | ประจำ:${regCount}`:''}\n-------------------------\n${clientList}\n-------------------------\n💰 ยอด: ${tot.toLocaleString()} | 🧧 ทิปโอน: ${tips.toLocaleString()}\n📱 โอน: ${trans.toLocaleString()} | 💵 เงินสด: ${cash.toLocaleString()}${giftCount?` | 🎁: ${giftCount}`:''}\n🤵 ช่าง: ${Math.floor(bEarn).toLocaleString()}\n🏠 ร้าน: ${Math.floor(shopEarn).toLocaleString()}\n-------------------------\n`;
+    if (hasOldBalance && oldBalance !== 0) {
+        msg += settle>0?`🟧 ช่างคืนร้าน: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท\n`:`🟦 ร้านคืนช่าง: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท\n`;
+        msg += `-------------------------\n🚨 สถานะบัญชี\nวันที่ ${periodText}: ${oldBalance>0?'ร้านค้าง':'ช่างค้าง'} ${Math.abs(oldBalance).toLocaleString()} บาท\n(${Math.abs(oldBalance)} ${todayDiff>=0?'+':'-'} ${Math.abs(Math.floor(todayDiff)).toLocaleString()}) = ${Math.abs(Math.floor(finalNet)).toLocaleString()}\n\n`;
+        msg += finalNet>0?`📌 🟦 ยอดสุทธิ: ร้านคืนช่าง ${Math.abs(Math.floor(finalNet)).toLocaleString()} บาท`:`📌 🟧 ยอดสุทธิ: ช่างคืนร้าน ${Math.abs(Math.floor(finalNet)).toLocaleString()} บาท`;
+    } else {
+        msg += settle>0?`🟧 ช่างคืนร้าน: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท`:(settle<0?`🟦 ร้านคืนช่าง: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท`:`✅ ยอดลงตัวพอดี`);
+    }
+    const msgEdit = $("msgEdit"), previewArea = $("linePreview");
+    if (msgEdit && previewArea) { msgEdit.value = msg; previewArea.style.display = "flex"; }
+    else { window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`, '_blank'); }
+}
+function sendToLineFinal() {
+    const msgEdit = $("msgEdit"), previewArea = $("linePreview");
+    if (!msgEdit || !msgEdit.value.trim()) {
+        if (typeof Swal !== 'undefined') Swal.fire({ title:'ไม่พบข้อความ', text:'กรุณาตรวจสอบข้อความก่อนส่ง', icon:'warning' });
+        return;
+    }
+    window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msgEdit.value)}`, '_blank');
+    if (previewArea) previewArea.style.display = "none";
+}
+function closeLineModal() { const m=$("lineModal"); if(m)m.style.display="none"; }
+
+/* ========= ✅ INITIALIZE — โหลดค่าเริ่มต้นเมื่อเปิดหน้า ========= */
 document.addEventListener("DOMContentLoaded", () => {
     const today = new Date().toISOString().split('T')[0];
     
@@ -650,7 +701,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if ($("accDate")) $("accDate").value = today;
     
     // ตั้งค่าชื่อร้านและธีม
-   applyTheme(conf.theme);
+    applyTheme(conf.theme);
     const entryShop = $("entryShopName");
     if (entryShop) entryShop.innerText = conf.shop;
     
@@ -664,231 +715,51 @@ document.addEventListener("DOMContentLoaded", () => {
     renderDay(today);
     loadAccountStatus();
     
-    // ✅ ตั้งค่าเริ่มต้นให้แสดงหน้าแรก
-    go(1);
+       // ✅ เปิดหน้าแรกเมื่อโหลดเสร็จ
+    goSub(1);
+
+    // 🔄 อัปเดตชื่อร้านทุกจุดที่แสดง
+    const shopNameElements = document.querySelectorAll('.shop-name-display');
+    shopNameElements.forEach(el => {
+        el.innerText = conf.shop;
+    });
+
+    // 📅 ตั้งค่าช่วงเดือนเริ่มต้นสำหรับรายงาน
+    const nowDate = new Date();
+    const currentMonth = `${nowDate.getFullYear()}-${(nowDate.getMonth() + 1).toString().padStart(2, '0')}`;
+    if ($("histMonth")) {
+        $("histMonth").value = currentMonth;
+    }
+
+    // 🎯 ตั้งค่าปี-เดือนเริ่มต้นสำหรับเปรียบเทียบ
+    if ($("compMonth1")) {
+        const lastMonth = new Date(nowDate.getFullYear(), nowDate.getMonth() - 1, 1);
+        $("compMonth1").value = `${lastMonth.getFullYear()}-${(lastMonth.getMonth() + 1).toString().padStart(2, '0')}`;
+    }
+    if ($("compMonth2")) {
+        $("compMonth2").value = currentMonth;
+    }
+
+    // 🔊 ตั้งค่าสถานะเสียงตามค่าที่บันทึกไว้
+    if (conf.sound === "off") {
+        document.body.classList.add("muted");
+    } else {
+        document.body.classList.remove("muted");
+    }
+
+    // 📱 ปรับการแสดงผลบนมือถือ
+    const viewport = document.querySelector('meta[name="viewport"]');
+    if (viewport) {
+        viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
+    }
+
+    // ✅ ซ่อนหน้าโหลด / แสดงเนื้อหาหลัก
+    const loadingScreen = document.getElementById("loadingScreen");
+    if (loadingScreen) {
+        loadingScreen.style.display = "none";
+    }
+
+    // ✅ แจ้งเวอร์ชันและเวลาอัปเดต
+    console.log(`✅ Barber-Note v${APP_VERSION} โหลดสมบูรณ์ — ${LAST_UPDATED}`);
 });
-/* ========= SECTION 20: SHARE LINE ========= */
-function shareLine() {
-    const $ = (id) => document.getElementById(id);
-    const dateEl = $("dateInp");
-    
-    // Safety Guard: ตรวจสอบ Input วันที่
-    if (!dateEl || !dateEl.value) {
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({ title: 'กรุณาเลือกวันที่', icon: 'warning' });
-        }
-        return;
-    }
-
-    const dInp = dateEl.value;
-    const dbList = typeof db !== "undefined" ? db : [];
-    const today = dbList.filter(r => r.date === dInp);
-
-    // 🔴 1. ตรวจสอบข้อมูล
-    if (!today.length) {
-        const errSfx = document.getElementById("errorSound"); 
-        if (errSfx) errSfx.play().catch(() => {});
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({ title: 'ไม่พบข้อมูล', text: 'วันที่เลือกไม่มีการบันทึกไว้', icon: 'info' });
-        } else {
-            alert("ไม่พบข้อมูลในวันที่เลือก");
-        }
-        return;
-    }
-
-    // 🗓️ 2. จัดการวันที่และชื่อร้าน
-    const [y, m, d] = dInp.split('-');
-    const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-    const pY = parseInt(y, 10);
-    const pM = parseInt(m, 10);
-    const pD = parseInt(d, 10);
-    const fDate = `${pD} ${months[pM - 1] || ''} ${(pY + 543).toString().slice(-2)}`;
-    
-    const shopConf = typeof conf !== 'undefined' ? conf : {};
-    const shopName = shopConf.shop || "Barber Shop";
-    const perc = Number(shopConf.perc) || 0;
-    const guar = Number(shopConf.guar) || 0;
-
-    let tot = 0, cash = 0, trans = 0, tips = 0;
-    let stats = {}, realCustomerCount = 0;
-    let newCount = 0, regCount = 0;
-    let giftCount = 0;
-
-    // 📝 3. ประมวลผลรายการลูกค้า (ใช้ slice() ป้องกันการแก้ไข Array ต้นฉบับ)
-    const clientList = today
-            .slice()
-            .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
-            .map((r, i) => {
-                const p = Number(r.price) || 0;
-                const t = Number(r.tip) || 0;
-                const payType = String(r.pay || "").trim();
-                
-                let detailText = ""; 
-                let pIcon = '💵';
-                let displayPrice = p; 
-
-                if (['Free', 'Gift', 'ของขวัญ'].includes(payType)) {
-                    displayPrice = 0;
-                    pIcon = '🎁';
-                    trans += t; 
-                    giftCount++;
-                } else if (payType === 'Free-Cash') {
-                    cash += p;
-                    tot += p;
-                    pIcon = '🎁+💵';
-                    displayPrice = p;
-                    giftCount++;
-                } else if (payType === 'Free-Trans') {
-                    trans += (p + t);
-                    tot += p;
-                    pIcon = '🎁+📱';
-                    displayPrice = p;
-                    giftCount++;
-                } else if (payType === 'Mix') {
-                    const pTrans = Number(r.payTrans) || 0;
-                    const pCash = Number(r.payCash) || 0;
-                    trans += pTrans;
-                    cash += pCash; // แก้ไข: บวกเงินสดตามที่จ่ายจริง ไม่นำทิปมาลบออก
-                    tot += p;
-                    detailText = ` (สด:${pCash}/โอน:${pTrans})`; 
-                    pIcon = '🌓';
-                } else if (['Trans', 'โอน'].includes(payType)) {
-                    trans += (p + t);
-                    tot += p;
-                    pIcon = '📱';
-                } else {
-                    cash += p;
-                    tot += p;
-                    pIcon = '💵';
-                }
-
-                tips += t;
-
-                if (!['GUARANTEE', 'HOLIDAY'].includes(String(r.type || '').toUpperCase())) {
-                    realCustomerCount++;
-                    const cType = String(r.custType || "").toLowerCase();
-                    if (cType === 'new') newCount++;
-                    else if (cType === 'regular') regCount++;
-                    if (r.hair && r.hair.includes("เด็ก")) stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
-                    (r.svcs || []).forEach(s => { if (s) stats[s] = (stats[s] || 0) + 1; });
-                }
-
-                const tShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
-                const svcsText = Array.isArray(r.svcs) ? r.svcs.join('+') : '';
-                return `${i + 1}. [${tShow}] ${svcsText} = ${displayPrice}${t ? ` (+ทิป ${t})` : ''}${detailText} ${pIcon}`;
-            }).join('\n');
-
-    // 📊 4. สถิติงาน
-    const allowed = ["เด็ก", "สระผม", "โกนหนวด", "ย้อมผม", "ย้อมสี"];
-    const icons = { "เด็ก": "🧒", "สระ": "🧼", "โกน": "🪒", "ย้อม": "🎨" };
-    let statText = Object.entries(stats)
-        .filter(([k]) => allowed.some(a => k.includes(a)))
-        .map(([k, v]) => {
-            const matchedKey = Object.keys(icons).find(i => k.includes(i));
-            const icon = matchedKey ? icons[matchedKey] : '🔹';
-            return `${icon} ${k}: ${v}`;
-        }).join('\n');
-
-    // 💰 5. คำนวณรายได้ช่าง/ร้าน
-    let bEarn = Math.max(tot * (perc / 100), guar) + tips;
-    let shopEarn = tot - (bEarn - tips);
-    let settle = cash - bEarn;
-
-    // 🔄 6. ระบบยอดค้างสะสม
-    let oldBalance = 0;
-    let periodText = "";
-    let hasOldBalance = false;
-
-    if (typeof archives !== "undefined" && Array.isArray(archives)) {
-        const pendingDays = archives.filter(day => day.date !== dInp && Number(day.settle) !== 0);
-        if (pendingDays.length > 0) {
-            hasOldBalance = true;
-            oldBalance = pendingDays.reduce((sum, day) => sum + (Number(-day.settle) || 0), 0);
-            const fmt = (iso) => {
-                const parts = iso.split('-');
-                return `${parseInt(parts[2], 10)}/${parseInt(parts[1], 10)}`;
-            };
-            const yr = (iso) => (parseInt(iso.split('-')[0], 10) + 543).toString().slice(-2);
-            if (pendingDays.length === 1) {
-                periodText = `${fmt(pendingDays[0].date)}/${yr(pendingDays[0].date)}`;
-            } else {
-                const lastIdx = pendingDays.length - 1;
-                periodText = `${fmt(pendingDays[0].date)} - ${fmt(pendingDays[lastIdx].date)}/${yr(pendingDays[lastIdx].date)}`;
-            }
-        }
-    }
-
-    let todayDiff = -settle;
-    let finalNet = oldBalance + todayDiff;
-
-    // ✉️ 7. ประกอบข้อความ Template
-    let msg = `💈 รายงานร้าน: ${shopName}\n`;
-    msg += `📅 วันที่: ${fDate}\n`;
-    msg += `-------------------------\n`;
-    msg += `👤 ลูกค้าทั้งหมด: ${realCustomerCount} คน\n`;
-    if (newCount > 0 || regCount > 0) msg += ` ใหม่: ${newCount} | ประจำ: ${regCount}\n`;
-    msg += `-------------------------\n${clientList}\n-------------------------\n`;
-    msg += `🏷️ สรุปงาน:\n${statText || '(ไม่มีรายการ)'}\n-------------------------\n`;
-    
-    msg += `💰 ยอด: ${tot.toLocaleString()} | 🧧 ทิปโอน: ${tips.toLocaleString()}\n`;
-    
-    let giftLine = giftCount > 0 ? ` | 🎁: ${giftCount}` : '';
-    msg += `📱 โอน: ${trans.toLocaleString()} | 💵 เงินสด: ${cash.toLocaleString()}${giftLine}\n`;
-    
-    msg += `🤵 ช่าง: ${Math.floor(bEarn).toLocaleString()}\n🏠 ร้าน: ${Math.floor(shopEarn).toLocaleString()}\n`;
-    msg += `-------------------------\n`;
-
-    // 8. ส่วนแสดงผลการจ่ายเงิน
-    if (hasOldBalance && oldBalance !== 0) {
-        let settleColor = settle > 0 ? '🟧' : '🟦';
-        let settleText = settle > 0 ? 'ช่างคืนร้าน' : 'ร้านคืนช่าง';
-        msg += `${settleColor} ${settleText}: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท\n`;
-        msg += `-------------------------\n`;
-        msg += `🚨 สถานะบัญชี\n`;
-        msg += `วันที่ ${periodText}: ${oldBalance > 0 ? 'ร้านค้าง' : 'ช่างค้าง'} ${Math.abs(oldBalance).toLocaleString()} บาท\n`;
-        msg += `(${Math.abs(oldBalance).toLocaleString()} ${todayDiff >= 0 ? '+' : '-'} ${Math.abs(Math.floor(todayDiff)).toLocaleString()}) = ${Math.abs(Math.floor(finalNet)).toLocaleString()}\n\n`;
-        let finalColor = finalNet > 0 ? '🟦' : '🟧';
-        msg += `📌 ${finalColor} ยอดสุทธิ: ${finalNet > 0 ? 'ร้านคืนช่าง' : 'ช่างคืนร้าน'} ${Math.abs(Math.floor(finalNet)).toLocaleString()} บาท\n`;
-    } else {
-        let todayText = settle > 0 ? `🟧 ช่างคืนร้าน: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท` : `🟦 ร้านคืนช่าง: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท`;
-        if (settle === 0) todayText = `✅ ยอดลงตัวพอดี`;
-        msg += `${todayText}\n`;
-    }
-
-    // 9. แสดง Preview หรือเปิด LINE ทันทีถ้าไม่มี Modal Preview
-    const msgEdit = $("msgEdit");
-    const previewArea = $("linePreview");
-    if (msgEdit && previewArea) {
-        msgEdit.value = msg;
-        previewArea.style.display = "flex";
-    } else {
-        const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(msg)}`;
-        window.open(lineUrl, '_blank');
-    }
-}
-
-function sendToLineFinal() {
-    const msgEdit = document.getElementById("msgEdit");
-    const previewArea = document.getElementById("linePreview");
-    
-    if (!msgEdit || !msgEdit.value.trim()) {
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({ title: 'ไม่พบข้อความ', text: 'กรุณาตรวจสอบข้อความก่อนส่ง', icon: 'warning' });
-        } else {
-            alert("กรุณาตรวจสอบข้อความก่อนส่ง");
-        }
-        return;
-    }
-    
-    const finalMsg = msgEdit.value;
-    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(finalMsg)}`;
-    window.open(lineUrl, '_blank');
-    
-    if (previewArea) {
-        previewArea.style.display = "none";
-    }
-}
-function closeLineModal() {
-    const previewBox = document.getElementById("lineModal");
-    if (previewBox) previewBox.style.display = "none";
-}
+/* ========= END OF SCRIPT — สิ้นสุดโค้ดทั้งหมด ========= */
