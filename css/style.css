@@ -515,3 +515,56 @@ nav, nav.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translat
 .swal2-title, .swal2-content { color: var(--text) !important; }
 .swal2-container { z-index: 99999 !important; }
 .swal2-input { border-radius: 10px !important; border: 1px solid var(--border) !important; background: var(--bg) !important; color: var(--text) !important; font-size: 13px !important; height: 44px !important; }
+/* ==========================================
+   FIX: ปรับแต่งแถวชำระเงิน บันทึกข้อมูล และปุ่มหน้าหลัก
+   ========================================== */
+
+/* 1. แก้ไข Layout แถวชำระเงิน + บันทึกข้อมูล ไม่ให้โดนบีบ */
+.grid-pay {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important; /* แบ่งครึ่ง 50% เท่ากัน */
+    gap: 8px !important;
+    height: auto !important; /* ยกเลิกการล็อกความสูงเดิม */
+    margin-bottom: 12px !important;
+}
+
+/* 2. ปรับช่องเลือกวิธีชำระเงิน ให้ตัวหนังสือไม่ล้น */
+.select-wrap {
+    height: 52px !important;
+    width: 100% !important;
+}
+
+.select-wrap select {
+    height: 100% !important;
+    font-size: 13px !important; /* ลดขนาดฟอนต์ลงเล็กน้อยเพื่อให้อ่านออกครบ */
+    font-weight: 700 !important;
+    padding: 0 8px 0 30px !important; /* เว้นพื้นที่ให้ไอคอนกระเป๋าเงิน */
+    text-align: center !important;
+    text-align-last: center !important;
+    white-space: nowrap !important;
+}
+
+/* 3. ปรับปุ่มบันทึกข้อมูล ให้ขนาดและตัวอักษรพอดีช่อง */
+.btn-pay {
+    height: 52px !important;
+    font-size: 13.5px !important;
+    font-weight: 800 !important;
+    padding: 0 6px !important;
+    white-space: nowrap !important;
+}
+
+/* 4. จัดการปุ่มหน้าหลัก (วงกลมรูปบ้าน) ให้อยู่ตรงกลางล่างสุด */
+.home-btn-wrapper {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+}
+
+.btn-back-small {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 18px !important;
+    margin: 0 auto !important;
+}
