@@ -33,63 +33,55 @@ body.vintage {
 }
 /* ========= 🛠️ GLOBAL & RESET ========= */
 * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; margin:0; padding:0; }
-body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 90px; transition: background 0.3s; overflow-x: hidden; }
+body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 85px; transition: background 0.3s; overflow-x: hidden; }
 body > center, body > a, body > br { display: none !important; }
 /* ========= 📦 CONTAINER & PAGES ========= */
-.container { width: 100%; max-width: 480px; margin: 0 auto; }
-.main-wrap { width: 98%; padding: 15px; background: var(--card); border: 1px solid var(--border); border-radius: 25px; margin: 10px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-
+.container { width: 100%; max-width: 480px; margin: 0 auto; padding: 0 6px; }
+.main-wrap { width: 100%; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 24px; margin: 8px auto; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
 /* ✅ จัดการแสดงผลหน้า */
 .page, .sub-page, .app-page, .tab-panel { display: none !important; }
 .page.active, .sub-page.active, .app-page.active, .tab-panel.active { display: block !important; }
-@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-/* ✅ แถบด้านบน - ซ่อนปุ่มย้อนกลับเดิม */
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+/* ✅ แถบด้านบน */
 .top-bar {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    margin-bottom: 15px;
+    gap: 8px;
+    margin-bottom: 12px;
     position: relative;
 }
-/* ✅ ซ่อนปุ่มย้อนกลับด้านบน */
 .top-bar .btn-back { display: none !important; }
-
-/* ✅ ชื่อร้าน — ใหญ่ขึ้น */
+/* ✅ ชื่อร้าน — พอดีจอ ไม่ใหญ่เกินไป */
 .top-title {
-    font-size: 22px !important;
+    font-size: 20px !important;
     font-weight: 800 !important;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     color: var(--text);
 }
-
-/* ✅ จัดการตำแหน่งปุ่มหน้าหลักให้อยู่ตรงกลาง */
+/* ✅ ปุ่มบ้านตรงกลางล่าง */
 .home-btn-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    margin-top: 8px;
+    margin-top: 4px;
 }
-
-/* ✅ ปุ่มไอคอนรูปบ้านขนาดเล็กวงกลม */
 .btn-back-small {
-    width: 46px;
-    height: 46px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     border: 1px solid var(--border);
     background: var(--bg);
     color: var(--text);
-    font-size: 20px;
+    font-size: 17px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     transition: transform 0.1s, background 0.2s;
 }
-
 .btn-back-small:active {
     transform: scale(0.92);
     background: var(--input-bg);
@@ -99,30 +91,29 @@ body > center, body > a, body > br { display: none !important; }
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 10px !important;
-    margin: 15px 0 !important;
+    margin: 12px 0 !important;
 }
 .menu-card {
     background: var(--bg) !important;
     border: 1px solid var(--border) !important;
-    border-radius: 18px !important;
-    padding: 12px 6px !important;
-    min-height: 88px !important;
+    border-radius: 16px !important;
+    padding: 10px 6px !important;
+    min-height: 80px !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 6px !important;
+    gap: 4px !important;
     cursor: pointer !important;
     text-align: center !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03) !important;
     transition: transform 0.1s ease, background 0.2s !important;
     width: 100%;
 }
 .menu-card:active {
-    transform: scale(0.95) !important;
+    transform: scale(0.96) !important;
     background: var(--card) !important;
 }
-/* ป้องกันองค์ประกอบภายในบัง Event การกด */
 .menu-card .icon,
 .menu-card .menu-icon,
 .menu-card span,
@@ -132,90 +123,73 @@ body > center, body > a, body > br { display: none !important; }
 }
 .menu-card .icon,
 .menu-card .menu-icon {
-    width: 36px !important;
-    height: 36px !important;
-    border-radius: 12px !important;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 10px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     color: #fff !important;
-    font-size: 18px !important;
+    font-size: 17px !important;
     margin-bottom: 2px !important;
 }
 .menu-card span {
     color: var(--text) !important;
-    font-weight: 800 !important;
+    font-weight: 700 !important;
     font-size: 12px !important;
     line-height: 1.2 !important;
     white-space: nowrap !important;
 }
-/* Grad BG Options */
 .grad-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
 .grad-green { background: linear-gradient(135deg, #10b981, #047857); }
 .grad-yellow { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
 .grad-red { background: linear-gradient(135deg, #f87171, #ef4444); }
 .grad-gray { background: linear-gradient(135deg, #94a3b8, #475569); }
 .grad-emerald { background: linear-gradient(135deg, #059669, #047857); }
-/* ========= 📋 GRID LAYOUTS & CONTAINER ========= */
-/* ยืดการ์ดให้ใหญ่พอดีพื้นที่หน้าจอ */
-.card-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: calc(100vh - 100px);
-    padding: 16px;
-    box-sizing: border-box;
-}
-
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
-.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px; }
-.grid-time { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px; }
-
-/* ✅ ช่องบริการ */
-.grid-svc { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-
-/* ✅ ราคา + ทิปโอน */
+/* ========= 📋 GRID LAYOUTS ========= */
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
+.grid-time { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
+/* ✅ ช่องบริการ — พอดีจอ 3 ช่องเท่าสัดส่วน */
+.grid-svc { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+/* ✅ ราคา + ทิปโอน — สูงเท่ากัน พอดีพื้นที่ */
 .grid-price { 
     display: grid; 
     grid-template-columns: 2fr 1fr; 
-    gap: 12px; 
-    margin-bottom: 16px; 
+    gap: 10px; 
+    margin-bottom: 12px; 
     align-items: stretch; 
 }
-
-/* ✅ แถวชำระเงิน และ บันทึกข้อมูล */
+/* ✅ แถวล่าง — ชำระเงิน + บันทึก กว้างเท่ากัน สูงเท่ากัน พอดีภาพตัวอย่าง */
 .grid-pay { 
     display: grid; 
-    grid-template-columns: 1fr 1.2fr; /* ปรับสัดส่วนปุ่มบันทึกให้กว้างขึ้นกดง่าย */
-    gap: 12px; 
-    margin-bottom: 12px; 
-    height: 64px; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 10px; 
+    margin-bottom: 8px; 
+    height: 56px; 
     align-items: stretch;
 }
-.grid-summary { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; margin-bottom: 15px; align-items: stretch; }
-
+.grid-summary { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; margin-bottom: 12px; align-items: stretch; }
 /* ========= 🧩 CARDS & BOXES ========= */
-/* ชื่อร้านใหญ่โดดเด่น */
 h2 { 
     text-align: center; 
     color: var(--text); 
     font-weight: 900; 
-    margin: 4px 0 16px; 
-    letter-spacing: 0.8px; 
+    margin: 4px 0 12px; 
+    letter-spacing: 0.5px; 
     text-transform: uppercase; 
-    font-size: 26px; 
+    font-size: 20px; 
 }
-
-/* ✅ ขยายความสูงช่องป้อนข้อมูลทั้งหมดเป็น 64px ให้อ่านง่ายกดสะดวก */
+/* ✅ ช่องป้อนข้อมูลทั่วไป — สูงพอดี ตัวหนังสือพอดี */
 select, input[type="text"], input[type="number"], input[type="date"], input[type="time"], input[type="month"] {
     width: 100%; 
-    height: 64px; 
-    border-radius: 18px; 
+    height: 56px; 
+    border-radius: 16px; 
     border: 1px solid var(--border); 
     background: var(--bg); 
     color: var(--text);
-    font-weight: 800; 
-    font-size: 18px; 
+    font-weight: 700; 
+    font-size: 15px; 
     text-align: center; 
     text-align-last: center; 
     outline: none;
@@ -223,195 +197,169 @@ select, input[type="text"], input[type="number"], input[type="date"], input[type
     -webkit-appearance: none;
     box-sizing: border-box;
 }
-
 /* ✅ ช่องวันที่/เวลา */
 .input-date-wrap { 
     position: relative; 
     background: var(--bg); 
     border: 1px solid var(--border); 
-    border-radius: 18px; 
-    height: 64px; 
+    border-radius: 16px; 
+    height: 56px; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
 }
-.input-date-wrap span { font-weight: 800; color: var(--text); font-size: 18px; }
+.input-date-wrap span { font-weight: 700; color: var(--text); font-size: 15px; }
 .input-date-wrap input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
-
-/* ✅ ช่องเลือกทรงผมและบริการเสริม */
+/* ✅ ช่องเลือกบริการ — ตัวหนังสือพอดี ไม่ล้น */
 select#hairStyle, select#extra1, select#extra2 { 
-    height: 64px; 
-    font-size: 16px; 
+    height: 56px; 
+    font-size: 13.5px; 
     font-weight: 700;
-    padding: 0 8px; 
+    padding: 0 4px; 
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
 .time-box { position: relative; }
-.time-box label { position: absolute; top: 8px; left: 14px; font-size: 13px; font-weight: 800; color: var(--text); opacity: 0.6; z-index: 1; }
-.time-input-custom { padding-top: 18px; font-size: 22px; font-weight: 900; }
+.time-box label { position: absolute; top: 6px; left: 12px; font-size: 12px; font-weight: 700; color: var(--text); opacity: 0.6; z-index: 1; }
+.time-input-custom { padding-top: 16px; font-size: 20px; font-weight: 800; }
 input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
-
-/* ✅ ช่องราคาและทิปโอน — ขยายความสูงเป้น 80px ให้ตัวเลขใหญ่ชัดเจน */
+/* ✅ ช่องราคา — สูงพอดี ตัวเลขชัด */
 .price-box { 
     position: relative; 
     background: var(--bg); 
     border: 3px solid #3b82f6; 
-    border-radius: 20px; 
+    border-radius: 18px; 
     display: flex; 
     align-items: center; 
     overflow: hidden; 
-    height: 80px;
-    padding: 0 14px;
+    min-height: 62px;
+    padding: 0 10px;
 }
-.baht { font-size: 38px; color: #3b82f6; font-weight: 900; }
-.price-box input { border: none; background: transparent; font-size: 44px; font-weight: 900; color: var(--text); text-align: right; outline: none; width: 100%; }
-
+.baht { font-size: 30px; color: #3b82f6; font-weight: 900; padding-left: 6px; }
+.price-box input { border: none; background: transparent; font-size: 34px; font-weight: 900; color: var(--text); text-align: right; padding-right: 8px; outline: none; width: 100%; }
+/* ✅ ช่องทิปโอน — สูงเท่าช่องราคาเป๊ะ */
 .tip-box { 
-    height: 80px !important;
+    min-height: 62px !important; 
+    height: 100% !important;
     background: var(--bg); 
     border: 2px solid var(--border); 
-    border-radius: 20px; 
-    font-size: 20px; 
-    font-weight: 800; 
+    border-radius: 18px; 
+    font-size: 17px; 
+    font-weight: 700; 
     color: #64748b; 
     text-align: center; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-
-/* ✅ ปุ่มเลือกวิธีชำระเงิน */
+/* ✅ ช่องเลือกวิธีชำระเงิน — ปรับพอดีกับภาพตัวอย่าง */
 .select-wrap { position: relative; width: 100%; height: 100%; }
-.select-wrap i:first-child { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text); font-size: 18px; z-index: 3; }
-.select-wrap select { height: 100%; font-size: 16px; padding: 0 20px 0 38px; font-weight: 800; border-radius: 18px; }
-.select-wrap .arrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 12px; pointer-events: none; }
-
-/* ✅ ปุ่มบันทึกข้อมูล */
+.select-wrap i:first-child { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text); font-size: 17px; z-index: 3; }
+.select-wrap select { 
+    height: 100%; 
+    font-size: 13.5px; 
+    padding: 0 20px 0 34px; 
+    font-weight: 700; 
+    border-radius: 16px; 
+}
+.select-wrap .arrow { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 12px; pointer-events: none; }
+/* ✅ ปุ่มบันทึกข้อมูล — พอดีขนาด กดง่าย เหมือนภาพ */
 .btn-pay { 
     width: 100%; 
     height: 100%; 
     border: none; 
-    border-radius: 18px; 
+    border-radius: 16px; 
     background: linear-gradient(135deg, var(--save1), var(--save2)); 
     color: #fff; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    gap: 8px; 
-    font-size: 18px; 
+    gap: 5px; 
+    font-size: 14px; 
     font-weight: 800; 
     cursor: pointer; 
-    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2); 
+    box-shadow: 0 3px 8px rgba(30, 64, 175, 0.18); 
 }
-.btn-pay i { font-size: 20px; }
+.btn-pay i { font-size: 16px; }
 
-/* ✅ จัดระเบียบปุ่ม Home ไอคอนวงกลมไว้ตรงกลางล่างสุด */
-.home-btn-wrapper {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    width: 100% !important;
-    margin-top: 10px !important;
-}
-
-.btn-back-small {
-    width: 48px !important;
-    height: 48px !important;
-    border-radius: 50% !important;
-    background: var(--bg) !important;
-    border: 1.5px solid var(--border) !important;
-    color: var(--text) !important;
-    font-size: 20px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-    transition: background 0.2s, transform 0.1s !important;
-}
-
-.btn-back-small:active {
-    transform: scale(0.92) !important;
-    background: var(--input-bg) !important;
-}
-
-#mixPanel { display: none; background: var(--input-bg); padding: 12px; border-radius: 16px; border: 2px dashed var(--accent); margin: 12px 0; }
-#mixPanel label { display: block; font-size: 14px; font-weight: 800; text-align: center; margin-bottom: 4px; }
+#mixPanel { display: none; background: var(--input-bg); padding: 10px; border-radius: 14px; border: 2px dashed var(--accent); margin: 10px 0; }
+#mixPanel label { display: block; font-size: 13px; font-weight: 700; text-align: center; margin-bottom: 4px; }
 #mixPanel label:first-of-type { color: var(--cash2); }
 #mixPanel label:last-of-type { color: var(--trans2); }
-#mixPanel input { height: 55px; border-radius: 14px; font-size: 16px; }
+#mixPanel input { height: 52px; border-radius: 12px; font-size: 15px; }
 /* ========= 📊 SUMMARY & REPORT ========= */
-.card-total { background: linear-gradient(135deg, var(--primary), var(--accent)); padding: 15px 10px; border-radius: 20px; text-align: center; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: center; }
-.card-total small { font-weight: 800; color: #fff; opacity: 0.8; text-transform: uppercase; font-size: 14px; }
-.card-total > div:nth-child(2) { font-size: 42px; font-weight: 900; color: #fff; margin: 5px 0; letter-spacing: -1px; }
-.card-total > div:nth-child(3) { font-size: 13px; font-weight: 700; color: #fff; background: rgba(255,255,255,0.2); display: inline-block; padding: 4px 10px; border-radius: 12px; }
-.card-breakdown { background: var(--card); padding: 12px 15px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; gap: 5px; }
-.row-disp { display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: 700; }
-.row-disp span { color: var(--text); opacity: 0.7; display: flex; align-items: center; gap: 5px; }
+.card-total { background: linear-gradient(135deg, var(--primary), var(--accent)); padding: 12px 10px; border-radius: 18px; text-align: center; box-shadow: 0 8px 12px -3px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; }
+.card-total small { font-weight: 700; color: #fff; opacity: 0.8; text-transform: uppercase; font-size: 13px; }
+.card-total > div:nth-child(2) { font-size: 36px; font-weight: 900; color: #fff; margin: 4px 0; letter-spacing: -0.5px; }
+.card-total > div:nth-child(3) { font-size: 12px; font-weight: 600; color: #fff; background: rgba(255,255,255,0.2); display: inline-block; padding: 3px 10px; border-radius: 10px; }
+.card-breakdown { background: var(--card); padding: 12px 14px; border-radius: 18px; box-shadow: 0 8px 12px -3px rgba(0,0,0,0.08); display: flex; flex-direction: column; justify-content: space-between; gap: 4px; }
+.row-disp { display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: 700; }
+.row-disp span { color: var(--text); opacity: 0.7; display: flex; align-items: center; gap: 4px; }
 .row-disp span i { width: 14px; }
 .row-disp b { color: var(--text); }
-.row-disp.border-top { border-top: 1px dashed var(--border); padding-top: 5px; margin-top: 2px; font-weight: 800; }
-#settleBarContainer { display: grid; grid-template-columns: 8fr 2.2fr; gap: 10px; margin-bottom: 18px; }
-#settleBar { height: 55px; background: var(--bg); display: flex; align-items: center; justify-content: center; border-radius: 18px; font-weight: 800; font-size: 14px; color: var(--accent); border: 1px solid var(--border); }
-#btnSubmitSend { height: 55px; background: #ff6f00; color: #fff; border-radius: 18px; border: none; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-#dServiceStats { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin-bottom: 8px; }
-#dServiceStats span { padding: 3px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; }
-hr { border: none; border-top: 1px solid var(--border); margin: 15px 0; }
+.row-disp.border-top { border-top: 1px dashed var(--border); padding-top: 4px; margin-top: 2px; font-weight: 700; }
+#settleBarContainer { display: grid; grid-template-columns: 8fr 2.2fr; gap: 10px; margin-bottom: 14px; }
+#settleBar { height: 52px; background: var(--bg); display: flex; align-items: center; justify-content: center; border-radius: 14px; font-weight: 700; font-size: 13px; color: var(--accent); border: 1px solid var(--border); }
+#btnSubmitSend { height: 52px; background: #ff6f00; color: #fff; border-radius: 14px; border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#dServiceStats { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin-bottom: 6px; }
+#dServiceStats span { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; }
+hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 /* ========= 📊 TAB SYSTEM ========= */
-.tab-header { display: flex; gap: 8px; margin-bottom: 15px; background: var(--bg); padding: 4px; border-radius: 16px; border: 1px solid var(--border); }
-.tab-btn { flex: 1; padding: 10px; border: none; border-radius: 12px; font-weight: 800; font-size: 14px; background: transparent; color: var(--text); opacity: 0.7; cursor: pointer; }
-.tab-btn.active { background: var(--card); color: var(--accent); opacity: 1; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-.filter-month-wrap { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; }
-.filter-month-wrap input { flex: 1; height: 45px; }
-.btn-export-excel { background: var(--success); color: #fff; border: none; border-radius: 14px; padding: 0 12px; height: 45px; font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap; }
-.table-responsive { width: 100%; overflow-x: auto; margin-top: 15px; border-radius: 16px; border: 1px solid var(--border); }
-.summary-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; }
-.summary-table th { background: var(--bg); padding: 10px 6px; font-weight: 800; border-bottom: 1px solid var(--border); }
-.summary-table td { padding: 10px 6px; border-bottom: 1px solid var(--border); }
+.tab-header { display: flex; gap: 6px; margin-bottom: 12px; background: var(--bg); padding: 4px; border-radius: 14px; border: 1px solid var(--border); }
+.tab-btn { flex: 1; padding: 8px; border: none; border-radius: 10px; font-weight: 700; font-size: 13px; background: transparent; color: var(--text); opacity: 0.7; cursor: pointer; }
+.tab-btn.active { background: var(--card); color: var(--accent); opacity: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+.filter-month-wrap { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+.filter-month-wrap input { flex: 1; height: 44px; }
+.btn-export-excel { background: var(--success); color: #fff; border: none; border-radius: 12px; padding: 0 10px; height: 44px; font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap; }
+.table-responsive { width: 100%; overflow-x: auto; margin-top: 12px; border-radius: 14px; border: 1px solid var(--border); }
+.summary-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: center; }
+.summary-table th { background: var(--bg); padding: 8px 5px; font-weight: 700; border-bottom: 1px solid var(--border); }
+.summary-table td { padding: 8px 5px; border-bottom: 1px solid var(--border); }
 /* ========= 💰 ACCOUNT PAGE ========= */
-.card { background: var(--card); border-radius: 25px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border); margin-bottom: 15px; }
-.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.card-header b { font-size: 22px; color: var(--accent); }
-.status-dot { background: var(--success); width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 8px #22c55e; }
-.stat-box { background: var(--bg); border-radius: 18px; padding: 12px; text-align: center; border: 1px solid var(--border); }
-.stat-box small { font-size: 12px; color: var(--text); opacity: 0.6; font-weight: 700; }
-.stat-box b { font-size: 18px; color: var(--text); display: block; }
-.total-box { background: var(--bg); border-radius: 22px; padding: 20px; text-align: center; margin-bottom: 15px; border: 1px solid var(--border); }
-#statusBadge { display: inline-block; padding: 4px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; margin-bottom: 8px; background: var(--card); color: var(--text); }
-#accTotalVal { font-size: 42px; font-weight: 900; letter-spacing: -1px; color: var(--text); }
-.input-group { margin-bottom: 15px; }
-.input-field { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 15px; padding: 0 15px; margin-bottom: 8px; height: 50px; }
+.card { background: var(--card); border-radius: 20px; padding: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); border: 1px solid var(--border); margin-bottom: 12px; }
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.card-header b { font-size: 20px; color: var(--accent); }
+.status-dot { background: var(--success); width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 6px #22c55e; }
+.stat-box { background: var(--bg); border-radius: 14px; padding: 10px; text-align: center; border: 1px solid var(--border); }
+.stat-box small { font-size: 11px; color: var(--text); opacity: 0.6; font-weight: 700; }
+.stat-box b { font-size: 16px; color: var(--text); display: block; }
+.total-box { background: var(--bg); border-radius: 16px; padding: 16px; text-align: center; margin-bottom: 12px; border: 1px solid var(--border); }
+#statusBadge { display: inline-block; padding: 3px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; margin-bottom: 6px; background: var(--card); color: var(--text); }
+#accTotalVal { font-size: 36px; font-weight: 900; letter-spacing: -0.5px; color: var(--text); }
+.input-group { margin-bottom: 12px; }
+.input-field { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 0 12px; margin-bottom: 6px; height: 48px; }
 .input-field i { color: var(--primary); }
-.input-field input { border: none; background: transparent; font-size: 16px; font-weight: 600; padding-left: 10px; outline: none; text-align: left; }
-.btn-clear, .btn-history { border: none; border-radius: 18px; padding: 15px 5px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); color: #fff; }
+.input-field input { border: none; background: transparent; font-size: 15px; font-weight: 600; padding-left: 8px; outline: none; text-align: left; }
+.btn-clear, .btn-history { border: none; border-radius: 14px; padding: 12px 5px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 3px 8px rgba(0,0,0,0.08); color: #fff; }
 .btn-clear { background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)); color: var(--btn-text); }
 .btn-history { background: linear-gradient(135deg, var(--btn-his1), var(--btn-his2)); }
-.btn-monthly, .btn-excel, .btn-sheets { border-radius: 18px; padding: 15px 5px; text-align: center; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.15); display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--border); color: #fff; font-weight: 700; font-size: 11px; position: relative; }
+.btn-monthly, .btn-excel, .btn-sheets { border-radius: 14px; padding: 12px 5px; text-align: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--border); color: #fff; font-weight: 600; font-size: 10px; position: relative; }
 .btn-monthly { background: linear-gradient(135deg, var(--btn-monthly1), var(--btn-monthly2)); }
 .btn-excel { background: linear-gradient(135deg, var(--btn-clear1), var(--success)); }
 .btn-sheets { background: linear-gradient(135deg, #0F9D58, #0B8043); }
 .btn-monthly input, .btn-excel input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
-.btn-monthly i, .btn-excel i, .btn-sheets i { font-size: 20px; margin-bottom: 5px; }
-.btn-compare { border-radius: 25px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 0 8px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, var(--btn-compare1), var(--btn-compare2)); color: #fff; font-weight: 700; margin-top: 15px; }
-.btn-compare i { font-size: 24px; }
+.btn-monthly i, .btn-excel i, .btn-sheets i { font-size: 18px; margin-bottom: 4px; }
+.btn-compare { border-radius: 18px; padding: 12px; text-align: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, var(--btn-compare1), var(--btn-compare2)); color: #fff; font-weight: 600; margin-top: 12px; }
+.btn-compare i { font-size: 20px; }
 /* ========= 🪟 MODALS & SETTINGS ========= */
-.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 10000; align-items: center; justify-content: center; padding: 15px; }
-.modal-content { background: var(--card); width: 100%; max-width: 420px; border-radius: 25px; padding: 20px; border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease-out; color: var(--text); }
-.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.modal-head h3 { margin: 0; color: var(--accent); font-size: 18px; }
-.btn-close-sm { background: var(--danger); color: #fff; border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 18px; cursor: pointer; opacity: 0.8; }
-.modal-buttons { display: flex; gap: 10px; margin-top: 15px; }
-.btn-save, .btn-close { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
-.btn-save { background: var(--success); color: #fff; box-shadow: 0 4px 12px rgba(34,197,94,0.3); }
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); z-index: 10000; align-items: center; justify-content: center; padding: 12px; }
+.modal-content { background: var(--card); width: 100%; max-width: 400px; border-radius: 20px; padding: 16px; border: 1px solid var(--border); max-height: 92vh; overflow-y: auto; animation: slideUp 0.25s ease-out; color: var(--text); }
+.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.modal-head h3 { margin: 0; color: var(--accent); font-size: 17px; }
+.btn-close-sm { background: var(--danger); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; opacity: 0.85; }
+.modal-buttons { display: flex; gap: 8px; margin-top: 12px; }
+.btn-save, .btn-close { flex: 1; padding: 10px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 15px; }
+.btn-save { background: var(--success); color: #fff; box-shadow: 0 3px 8px rgba(34,197,94,0.25); }
 .btn-close { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
-textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--border); border-radius: 15px; background: var(--bg); color: var(--text); font-family: 'Kanit', sans-serif; font-size: 14px; line-height: 1.5; outline: none; resize: none; }
+textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); font-family: 'Kanit', sans-serif; font-size: 13px; line-height: 1.5; outline: none; resize: none; }
 /* ---------- ⚙️ MODAL SETTINGS ---------- */
 .settings-modal {
-  max-width: 420px;
-  width: 92%;
-  padding: 24px 20px;
+  max-width: 400px;
+  width: 94%;
+  padding: 20px 16px;
   margin: 3vh auto;
-  border-radius: 24px;
+  border-radius: 20px;
   box-sizing: border-box;
   background: var(--card);
   color: var(--text);
@@ -419,29 +367,29 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
 }
 .settings-title {
   text-align: center;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 800;
-  margin: 0 0 18px 0;
+  margin: 0 0 16px 0;
   color: var(--text);
 }
 .settings-group {
   width: 100%;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 .settings-label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
-  margin: 0 0 6px 0;
+  margin: 0 0 5px 0;
   display: block;
-  opacity: 0.9;
+  opacity: 0.85;
   color: var(--text);
 }
 .settings-row {
   display: flex !important;
   flex-direction: row !important;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   box-sizing: border-box;
 }
 .settings-col {
@@ -451,10 +399,10 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
 .settings-input,
 .settings-select {
   width: 100%;
-  height: 48px;
-  padding: 0 14px;
-  border-radius: 12px;
-  font-size: 15px;
+  height: 46px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 14px;
   font-weight: 600;
   box-sizing: border-box;
   background: var(--bg) !important;
@@ -472,23 +420,23 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
 .settings-btn-row-3 {
   display: flex !important;
   flex-direction: row !important;
-  gap: 8px;
-  margin: 20px 0 12px;
+  gap: 6px;
+  margin: 16px 0 10px;
   width: 100%;
 }
 .settings-btn-row-2 {
   display: flex !important;
   flex-direction: row !important;
-  gap: 10px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 6px;
   width: 100%;
 }
 .settings-btn {
   flex: 1;
-  height: 48px;
-  font-size: 13px;
+  height: 46px;
+  font-size: 12px;
   font-weight: 700;
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid var(--border);
   cursor: pointer;
   display: flex;
@@ -502,69 +450,68 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
   background: var(--accent);
   color: #ffffff;
   border: none;
-  font-size: 16px;
-  height: 50px;
+  font-size: 15px;
+  height: 48px;
 }
 .secondary-btn {
   background: var(--bg);
   color: var(--text);
 }
 .danger-btn {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(239, 68, 68, 0.12);
   color: #ef4444;
-  border-color: rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.25);
 }
 .cancel-btn {
   background: var(--bg);
   color: var(--text);
   border: 1px solid var(--border);
-  font-size: 15px;
-  height: 50px;
+  font-size: 14px;
+  height: 48px;
 }
 .file-btn input {
   display: none;
 }
 .settings-version {
   text-align: center;
-  font-size: 11px;
-  opacity: 0.5;
-  margin-top: 16px;
+  font-size: 10px;
+  opacity: 0.45;
+  margin-top: 12px;
   color: var(--text);
 }
-/* ========= 📱 RESPONSIVE — ปรับพอดีจอมือถือทุกขนาด ========= */
-@media (max-width: 480px) {
-  .settings-modal {
-    padding: 18px 14px;
-  }
-  .settings-btn-row-3 .settings-btn {
-    font-size: 11px;
-    padding: 0 2px;
-  }
-}
-@media (max-width: 390px) {
-  .grid-pay {
-    grid-template-columns: 75px 1fr 1.1fr;
-    gap: 8px;
-  }
+/* ========= 🧭 NAVIGATION ========= */
+nav, nav.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 70px; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+.nav-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; font-weight: 700; color: var(--text); opacity: 0.5; cursor: pointer; transition: 0.25s; }
+.nav-item.active { opacity: 1; color: var(--accent); }
+.nav-item i { font-size: 22px; margin-bottom: 2px; }
+/* ========= 📱 RESPONSIVE — ปรับพอดีทุกจอ ========= */
+@media (max-width: 400px) {
+  .main-wrap { padding: 10px; margin: 6px auto; border-radius: 20px; }
+  .grid-pay { grid-template-columns: 1fr 1fr; gap: 8px; height: 54px; }
   .top-title { font-size: 18px !important; }
   select#hairStyle, select#extra1, select#extra2 { font-size: 12px; }
-  .price-box input { font-size: 28px; }
+  .price-box input { font-size: 30px; }
   .baht { font-size: 26px; }
   .tip-box { font-size: 15px; }
-  .btn-pay { font-size: 13px; gap: 4px; }
-  .btn-back-below { font-size: 11px; padding: 0 4px; }
+  .btn-pay { font-size: 14px; gap: 4px; }
+  .menu-card { min-height: 72px; padding: 8px 4px; }
+  .menu-card span { font-size: 11px; }
+  .input-date-wrap span, select, input[type="text"], input[type="number"], input[type="date"], input[type="time"], input[type="month"] { font-size: 14px; }
 }
-/* ========= 🧭 NAVIGATION ========= */
-nav, nav.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 75px; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-.nav-item { display: flex; flex-direction: column; align-items: center; font-size: 12px; font-weight: 700; color: var(--text); opacity: 0.5; cursor: pointer; transition: 0.3s; }
-.nav-item.active { opacity: 1; color: var(--accent); }
-.nav-item i { font-size: 24px; margin-bottom: 2px; }
+@media (max-width: 360px) {
+  .grid-svc { grid-template-columns: 1.1fr 1fr 1fr; gap: 6px; }
+  .grid-price { gap: 8px; }
+  .price-box { min-height: 56px; }
+  .tip-box { min-height: 56px !important; }
+  .baht { font-size: 24px; }
+  .price-box input { font-size: 26px; }
+}
 /* ========= 📄 REPORT & HISTORY ========= */
 #dailyList, #accHistory, #reportContent { color: var(--text); }
-#accHistory::-webkit-scrollbar, #reportContent::-webkit-scrollbar { width: 5px; }
+#accHistory::-webkit-scrollbar, #reportContent::-webkit-scrollbar { width: 4px; }
 #accHistory::-webkit-scrollbar-thumb, #reportContent::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 /* ========= ✨ SweetAlert2 THEME ========= */
-.swal2-popup { font-family: 'Kanit', sans-serif !important; border-radius: 20px !important; background: var(--card) !important; color: var(--text) !important; }
+.swal2-popup { font-family: 'Kanit', sans-serif !important; border-radius: 16px !important; background: var(--card) !important; color: var(--text) !important; }
 .swal2-title, .swal2-content { color: var(--text) !important; }
 .swal2-container { z-index: 99999 !important; }
-.swal2-input { border-radius: 12px !important; border: 1px solid var(--border) !important; background: var(--bg) !important; color: var(--text) !important; font-size: 14px !important; height: 45px !important; }
+.swal2-input { border-radius: 10px !important; border: 1px solid var(--border) !important; background: var(--bg) !important; color: var(--text) !important; font-size: 13px !important; height: 44px !important; }
