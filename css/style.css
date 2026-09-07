@@ -31,44 +31,52 @@ body.vintage {
     --btn-monthly1: #edbe02; --btn-monthly2: #f59e0b; 
     --btn-compare1: #fbbf24; --btn-compare2: #b45309;
 }
-
 /* ========= 🛠️ GLOBAL & RESET ========= */
 * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; margin:0; padding:0; }
 body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 90px; transition: background 0.3s; overflow-x: hidden; }
 body > center, body > a, body > br { display: none !important; }
-
 /* ========= 📦 CONTAINER & PAGES ========= */
 .container { width: 100%; max-width: 480px; margin: 0 auto; }
 .main-wrap { width: 98%; padding: 15px; background: var(--card); border: 1px solid var(--border); border-radius: 25px; margin: 10px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-
-/* ✅ ควบคุมการแสดงผลของแต่ละหน้า และ Tab Panel ให้สลับได้อย่างถูกต้อง */
+/* ✅ จัดการแสดงผลหน้า */
 .page, .sub-page, .app-page, .tab-panel { display: none !important; }
 .page.active, .sub-page.active, .app-page.active, .tab-panel.active { display: block !important; }
-
 @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-/* ✅ จัดระเบียบแถบบาร์ด้านบน (ปุ่มย้อนกลับ + หัวข้อ) */
+/* ✅ แถบด้านบน - ซ่อนปุ่มย้อนกลับเดิม */
 .top-bar {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 10px;
     margin-bottom: 15px;
+    position: relative;
 }
-.btn-back {
+/* ✅ ซ่อนปุ่มย้อนกลับด้านบน */
+.top-bar .btn-back { display: none !important; }
+/* ✅ ชื่อร้าน — ใหญ่ขึ้น */
+.top-title {
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px;
+    color: var(--text);
+}
+/* ✅ ปุ่มหน้าหลักด้านล่าง */
+.btn-back-below {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    padding: 6px 12px;
+    justify-content: center;
+    gap: 4px;
+    padding: 0 6px;
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 14px;
     background: var(--bg);
     color: var(--text);
-    font-weight: 700;
-    font-size: 14px;
+    font-weight: 600;
+    font-size: 13px;
     cursor: pointer;
+    height: 56px;
+    white-space: nowrap;
 }
-
 /* ========= 📋 MENU GRID & CARDS ========= */
 .menu-grid {
     display: grid !important;
@@ -76,7 +84,6 @@ body > center, body > a, body > br { display: none !important; }
     gap: 10px !important;
     margin: 15px 0 !important;
 }
-
 .menu-card {
     background: var(--bg) !important;
     border: 1px solid var(--border) !important;
@@ -94,12 +101,10 @@ body > center, body > a, body > br { display: none !important; }
     transition: transform 0.1s ease, background 0.2s !important;
     width: 100%;
 }
-
 .menu-card:active {
     transform: scale(0.95) !important;
     background: var(--card) !important;
 }
-
 /* ป้องกันองค์ประกอบภายในบัง Event การกด */
 .menu-card .icon,
 .menu-card .menu-icon,
@@ -108,7 +113,6 @@ body > center, body > a, body > br { display: none !important; }
 .menu-card i {
     pointer-events: none !important;
 }
-
 .menu-card .icon,
 .menu-card .menu-icon {
     width: 36px !important;
@@ -121,7 +125,6 @@ body > center, body > a, body > br { display: none !important; }
     font-size: 18px !important;
     margin-bottom: 2px !important;
 }
-
 .menu-card span {
     color: var(--text) !important;
     font-weight: 800 !important;
@@ -129,7 +132,6 @@ body > center, body > a, body > br { display: none !important; }
     line-height: 1.2 !important;
     white-space: nowrap !important;
 }
-
 /* Grad BG Options */
 .grad-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
 .grad-green { background: linear-gradient(135deg, #10b981, #047857); }
@@ -137,44 +139,51 @@ body > center, body > a, body > br { display: none !important; }
 .grad-red { background: linear-gradient(135deg, #f87171, #ef4444); }
 .grad-gray { background: linear-gradient(135deg, #94a3b8, #475569); }
 .grad-emerald { background: linear-gradient(135deg, #059669, #047857); }
-
 /* ========= 📋 GRID LAYOUTS ========= */
 .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 8px; }
 .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 10px; }
 .grid-time { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 10px; }
+/* ✅ ปรับช่องบริการให้พอดีมือถือ */
 .grid-svc { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-
-.grid-price { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 12px; height: 110px; align-items: stretch; }
-.grid-pay { display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; margin-bottom: 12px; height: 60px; }
+/* ✅ ราคา + ทิปโอน สูงเท่ากัน */
+.grid-price { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 12px; height: auto; align-items: stretch; }
+/* ✅ แถวล่าง: ปุ่มหน้าหลัก + ชำระเงิน + บันทึก */
+.grid-pay { 
+    display: grid; 
+    grid-template-columns: 85px 1fr 1.3fr; 
+    gap: 10px; 
+    margin-bottom: 12px; 
+    height: 56px;
+    align-items: stretch;
+}
 .grid-summary { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; margin-bottom: 15px; align-items: stretch; }
-
 /* ========= 🧩 CARDS & BOXES ========= */
 h2 { text-align: center; color: var(--text); font-weight: 900; margin: 5px 0 15px; letter-spacing: 0.5px; text-transform: uppercase; font-size: 24px; }
 .icon-card { background: var(--bg); border: 1px solid var(--border); border-radius: 18px; height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
 .icon { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; color: #fff; font-size: 18px; }
 .icon-card span { color: var(--text); font-weight: 800; font-size: 12px; }
-
-.input-date-wrap { position: relative; background: var(--bg); border: 1px solid var(--border); border-radius: 16px; height: 55px; display: flex; align-items: center; justify-content: center; }
-.input-date-wrap span { font-weight: 800; color: var(--text); font-size: 17px; }
+.input-date-wrap { position: relative; background: var(--bg); border: 1px solid var(--border); border-radius: 16px; height: 56px; display: flex; align-items: center; justify-content: center; }
+.input-date-wrap span { font-weight: 800; color: var(--text); font-size: 16px; }
 .input-date-wrap input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
-
 select, input[type="text"], input[type="number"], input[type="date"], input[type="time"], input[type="month"] {
-    width: 100%; height: 55px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg); color: var(--text);
-    font-weight: 800; font-size: 17px; text-align: center; text-align-last: center; outline: none; appearance: none; -webkit-appearance: none;
+    width: 100%; height: 56px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg); color: var(--text);
+    font-weight: 800; font-size: 15px; text-align: center; text-align-last: center; outline: none; appearance: none; -webkit-appearance: none;
 }
-
+/* ✅ ปรับช่องเลือกบริการ — ตัวหนังสือไม่ล้น */
 select#hairStyle, select#extra1, select#extra2 { 
-    height: 62px; 
-    font-size: 17px; 
-    font-weight: 800;
+    height: 56px; 
+    font-size: 13px; 
+    font-weight: 700;
     padding: 0 4px; 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-
 .time-box { position: relative; }
 .time-box label { position: absolute; top: 4px; left: 12px; font-size: 12px; font-weight: 800; color: var(--text); opacity: 0.6; z-index: 1; }
 .time-input-custom { padding-top: 14px; font-size: 20px; font-weight: 900; }
 input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
-
+/* ✅ ช่องราคา */
 .price-box { 
     position: relative; 
     background: var(--bg); 
@@ -183,106 +192,88 @@ input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
     display: flex; 
     align-items: center; 
     overflow: hidden; 
-    height: 100%;
+    min-height: 64px;
     padding: 0 10px;
 }
-.baht { padding-left: 10px; font-size: 42px; color: #3b82f6; font-weight: 900; }
-.price-box input { border: none; background: transparent; font-size: 48px; font-weight: 900; color: var(--text); text-align: right; padding-right: 12px; outline: none; width: 100%; }
-
+.baht { padding-left: 8px; font-size: 32px; color: #3b82f6; font-weight: 900; }
+.price-box input { border: none; background: transparent; font-size: 36px; font-weight: 900; color: var(--text); text-align: right; padding-right: 10px; outline: none; width: 100%; }
+/* ✅ ช่องทิปโอน — สูงเท่าช่องราคา */
 .tip-box { 
-    height: 100% !important; 
+    min-height: 64px !important; 
+    height: 100% !important;
     background: var(--bg); 
     border: 2px solid var(--border); 
     border-radius: 20px; 
-    font-size: 22px; 
-    font-weight: 900; 
+    font-size: 18px; 
+    font-weight: 800; 
     color: #94a3b8; 
     text-align: center; 
 }
-
 .select-wrap { position: relative; width: 100%; height: 100%; }
 .select-wrap i:first-child { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text); font-size: 18px; z-index: 3; }
-.select-wrap select { height: 100%; font-size: 16px; padding: 0 20px 0 36px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.select-wrap select { height: 100%; font-size: 14px; padding: 0 20px 0 36px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-weight: 600; }
 .select-wrap .arrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 12px; pointer-events: none; }
-
-.btn-pay { width: 100%; height: 100%; border: none; border-radius: 16px; background: linear-gradient(135deg, var(--save1), var(--save2)); color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 17px; font-weight: 900; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-.btn-pay i { font-size: 20px; }
-
+.btn-pay { width: 100%; height: 100%; border: none; border-radius: 16px; background: linear-gradient(135deg, var(--save1), var(--save2)); color: #fff; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.btn-pay i { font-size: 18px; }
 #mixPanel { display: none; background: var(--input-bg); padding: 12px; border-radius: 16px; border: 2px dashed var(--accent); margin: 12px 0; }
 #mixPanel label { display: block; font-size: 14px; font-weight: 800; text-align: center; margin-bottom: 4px; }
 #mixPanel label:first-of-type { color: var(--cash2); }
 #mixPanel label:last-of-type { color: var(--trans2); }
-#mixPanel input { height: 55px; border-radius: 14px; font-size: 18px; }
-
+#mixPanel input { height: 55px; border-radius: 14px; font-size: 16px; }
 /* ========= 📊 SUMMARY & REPORT ========= */
 .card-total { background: linear-gradient(135deg, var(--primary), var(--accent)); padding: 15px 10px; border-radius: 20px; text-align: center; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: center; }
 .card-total small { font-weight: 800; color: #fff; opacity: 0.8; text-transform: uppercase; font-size: 14px; }
 .card-total > div:nth-child(2) { font-size: 42px; font-weight: 900; color: #fff; margin: 5px 0; letter-spacing: -1px; }
 .card-total > div:nth-child(3) { font-size: 13px; font-weight: 700; color: #fff; background: rgba(255,255,255,0.2); display: inline-block; padding: 4px 10px; border-radius: 12px; }
-
 .card-breakdown { background: var(--card); padding: 12px 15px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; gap: 5px; }
 .row-disp { display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: 700; }
 .row-disp span { color: var(--text); opacity: 0.7; display: flex; align-items: center; gap: 5px; }
 .row-disp span i { width: 14px; }
 .row-disp b { color: var(--text); }
 .row-disp.border-top { border-top: 1px dashed var(--border); padding-top: 5px; margin-top: 2px; font-weight: 800; }
-
 #settleBarContainer { display: grid; grid-template-columns: 8fr 2.2fr; gap: 10px; margin-bottom: 18px; }
 #settleBar { height: 55px; background: var(--bg); display: flex; align-items: center; justify-content: center; border-radius: 18px; font-weight: 800; font-size: 14px; color: var(--accent); border: 1px solid var(--border); }
 #btnSubmitSend { height: 55px; background: #ff6f00; color: #fff; border-radius: 18px; border: none; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-
 #dServiceStats { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin-bottom: 8px; }
 #dServiceStats span { padding: 3px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; }
-
 hr { border: none; border-top: 1px solid var(--border); margin: 15px 0; }
-
-/* ========= 📊 TAB SYSTEM (หน้าสรุปยอดรวม) ========= */
+/* ========= 📊 TAB SYSTEM ========= */
 .tab-header { display: flex; gap: 8px; margin-bottom: 15px; background: var(--bg); padding: 4px; border-radius: 16px; border: 1px solid var(--border); }
 .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 12px; font-weight: 800; font-size: 14px; background: transparent; color: var(--text); opacity: 0.7; cursor: pointer; }
 .tab-btn.active { background: var(--card); color: var(--accent); opacity: 1; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-
 .filter-month-wrap { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; }
 .filter-month-wrap input { flex: 1; height: 45px; }
 .btn-export-excel { background: var(--success); color: #fff; border: none; border-radius: 14px; padding: 0 12px; height: 45px; font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap; }
-
 .table-responsive { width: 100%; overflow-x: auto; margin-top: 15px; border-radius: 16px; border: 1px solid var(--border); }
 .summary-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; }
 .summary-table th { background: var(--bg); padding: 10px 6px; font-weight: 800; border-bottom: 1px solid var(--border); }
 .summary-table td { padding: 10px 6px; border-bottom: 1px solid var(--border); }
-
 /* ========= 💰 ACCOUNT PAGE ========= */
 .card { background: var(--card); border-radius: 25px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border); margin-bottom: 15px; }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 .card-header b { font-size: 22px; color: var(--accent); }
 .status-dot { background: var(--success); width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 8px #22c55e; }
-
 .stat-box { background: var(--bg); border-radius: 18px; padding: 12px; text-align: center; border: 1px solid var(--border); }
 .stat-box small { font-size: 12px; color: var(--text); opacity: 0.6; font-weight: 700; }
 .stat-box b { font-size: 18px; color: var(--text); display: block; }
-
 .total-box { background: var(--bg); border-radius: 22px; padding: 20px; text-align: center; margin-bottom: 15px; border: 1px solid var(--border); }
 #statusBadge { display: inline-block; padding: 4px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; margin-bottom: 8px; background: var(--card); color: var(--text); }
 #accTotalVal { font-size: 42px; font-weight: 900; letter-spacing: -1px; color: var(--text); }
-
 .input-group { margin-bottom: 15px; }
 .input-field { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 15px; padding: 0 15px; margin-bottom: 8px; height: 50px; }
 .input-field i { color: var(--primary); }
 .input-field input { border: none; background: transparent; font-size: 16px; font-weight: 600; padding-left: 10px; outline: none; text-align: left; }
-
 .btn-clear, .btn-history { border: none; border-radius: 18px; padding: 15px 5px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); color: #fff; }
 .btn-clear { background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)); color: var(--btn-text); }
 .btn-history { background: linear-gradient(135deg, var(--btn-his1), var(--btn-his2)); }
-
 .btn-monthly, .btn-excel, .btn-sheets { border-radius: 18px; padding: 15px 5px; text-align: center; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.15); display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--border); color: #fff; font-weight: 700; font-size: 11px; position: relative; }
 .btn-monthly { background: linear-gradient(135deg, var(--btn-monthly1), var(--btn-monthly2)); }
 .btn-excel { background: linear-gradient(135deg, var(--btn-clear1), var(--success)); }
 .btn-sheets { background: linear-gradient(135deg, #0F9D58, #0B8043); }
 .btn-monthly input, .btn-excel input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 .btn-monthly i, .btn-excel i, .btn-sheets i { font-size: 20px; margin-bottom: 5px; }
-
 .btn-compare { border-radius: 25px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 0 8px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, var(--btn-compare1), var(--btn-compare2)); color: #fff; font-weight: 700; margin-top: 15px; }
 .btn-compare i { font-size: 24px; }
-
 /* ========= 🪟 MODALS & SETTINGS ========= */
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 10000; align-items: center; justify-content: center; padding: 15px; }
 .modal-content { background: var(--card); width: 100%; max-width: 420px; border-radius: 25px; padding: 20px; border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease-out; color: var(--text); }
@@ -293,10 +284,8 @@ hr { border: none; border-top: 1px solid var(--border); margin: 15px 0; }
 .btn-save, .btn-close { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
 .btn-save { background: var(--success); color: #fff; box-shadow: 0 4px 12px rgba(34,197,94,0.3); }
 .btn-close { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
-
 textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--border); border-radius: 15px; background: var(--bg); color: var(--text); font-family: 'Kanit', sans-serif; font-size: 14px; line-height: 1.5; outline: none; resize: none; }
-
-/* ---------- ⚙️ โครงสร้าง MODAL SETTINGS ---------- */
+/* ---------- ⚙️ MODAL SETTINGS ---------- */
 .settings-modal {
   max-width: 420px;
   width: 92%;
@@ -308,7 +297,6 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
   color: var(--text);
   border: 1px solid var(--border);
 }
-
 .settings-title {
   text-align: center;
   font-size: 20px;
@@ -316,12 +304,10 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
   margin: 0 0 18px 0;
   color: var(--text);
 }
-
 .settings-group {
   width: 100%;
   margin-bottom: 12px;
 }
-
 .settings-label {
   font-size: 13px;
   font-weight: 700;
@@ -330,7 +316,6 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
   opacity: 0.9;
   color: var(--text);
 }
-
 .settings-row {
   display: flex !important;
   flex-direction: row !important;
@@ -339,12 +324,10 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
   margin-bottom: 12px;
   box-sizing: border-box;
 }
-
 .settings-col {
   flex: 1;
   min-width: 0;
 }
-
 .settings-input,
 .settings-select {
   width: 100%;
@@ -362,12 +345,10 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
   text-align: left !important;
   text-align-last: left !important;
 }
-
 .settings-input:focus,
 .settings-select:focus {
   border-color: var(--accent) !important;
 }
-
 .settings-btn-row-3 {
   display: flex !important;
   flex-direction: row !important;
@@ -375,7 +356,6 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
   margin: 20px 0 12px;
   width: 100%;
 }
-
 .settings-btn-row-2 {
   display: flex !important;
   flex-direction: row !important;
@@ -383,7 +363,6 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
   margin-top: 8px;
   width: 100%;
 }
-
 .settings-btn {
   flex: 1;
   height: 48px;
@@ -399,7 +378,6 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
   box-sizing: border-box;
   white-space: nowrap;
 }
-
 .primary-btn {
   background: var(--accent);
   color: #ffffff;
@@ -407,18 +385,15 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
   font-size: 16px;
   height: 50px;
 }
-
 .secondary-btn {
   background: var(--bg);
   color: var(--text);
 }
-
 .danger-btn {
   background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
   border-color: rgba(239, 68, 68, 0.3);
 }
-
 .cancel-btn {
   background: var(--bg);
   color: var(--text);
@@ -426,11 +401,9 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
   font-size: 15px;
   height: 50px;
 }
-
 .file-btn input {
   display: none;
 }
-
 .settings-version {
   text-align: center;
   font-size: 11px;
@@ -438,7 +411,7 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
   margin-top: 16px;
   color: var(--text);
 }
-
+/* ========= 📱 RESPONSIVE — ปรับพอดีจอมือถือทุกขนาด ========= */
 @media (max-width: 480px) {
   .settings-modal {
     padding: 18px 14px;
@@ -448,18 +421,28 @@ textarea { width: 100%; height: 300px; padding: 15px; border: 1px solid var(--bo
     padding: 0 2px;
   }
 }
-
+@media (max-width: 390px) {
+  .grid-pay {
+    grid-template-columns: 75px 1fr 1.1fr;
+    gap: 8px;
+  }
+  .top-title { font-size: 18px !important; }
+  select#hairStyle, select#extra1, select#extra2 { font-size: 12px; }
+  .price-box input { font-size: 28px; }
+  .baht { font-size: 26px; }
+  .tip-box { font-size: 15px; }
+  .btn-pay { font-size: 13px; gap: 4px; }
+  .btn-back-below { font-size: 11px; padding: 0 4px; }
+}
 /* ========= 🧭 NAVIGATION ========= */
 nav, nav.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 75px; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
 .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 12px; font-weight: 700; color: var(--text); opacity: 0.5; cursor: pointer; transition: 0.3s; }
 .nav-item.active { opacity: 1; color: var(--accent); }
 .nav-item i { font-size: 24px; margin-bottom: 2px; }
-
 /* ========= 📄 REPORT & HISTORY ========= */
 #dailyList, #accHistory, #reportContent { color: var(--text); }
 #accHistory::-webkit-scrollbar, #reportContent::-webkit-scrollbar { width: 5px; }
 #accHistory::-webkit-scrollbar-thumb, #reportContent::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-
 /* ========= ✨ SweetAlert2 THEME ========= */
 .swal2-popup { font-family: 'Kanit', sans-serif !important; border-radius: 20px !important; background: var(--card) !important; color: var(--text) !important; }
 .swal2-title, .swal2-content { color: var(--text) !important; }
