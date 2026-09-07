@@ -24,7 +24,6 @@ function switchMainView(viewName) {
     document.querySelectorAll('.app-page').forEach(page => {
         page.classList.remove('active');
     });
-
     // แสดงหน้าที่เลือก
     switch(viewName) {
         case 'home':
@@ -40,18 +39,21 @@ function switchMainView(viewName) {
             document.getElementById('pageSummary').classList.add('active');
             if (viewName === 'comparePage') {
                 switchSummaryTab('tabAnalytics');
+            } else if (viewName === 'summaryPage') {
+                switchSummaryTab('tabDaily');
             } else {
                 switchSummaryTab('tabMonth');
             }
             break;
     }
 }
-// ✅ ควบคุมเมนูล่าง — ซ่อนครบ + โฮมตรงกลาง
+
+// ✅ ควบคุมเมนูล่าง — แสดงทั้ง 4 ปุ่ม
 function updateNavDisplay(viewName) {
-    // แสดงทั้งหมด 4 ปุ่ม + กว้างเท่าๆ กัน
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.style.display = 'flex';
-    });
+    document.getElementById('navHome').style.display = 'flex';
+    document.getElementById('nav1').style.display = 'flex';
+    document.getElementById('nav2').style.display = 'flex';
+    document.getElementById('nav3').style.display = 'flex';
     document.querySelector('.bottom-nav').style.gridTemplateColumns = 'repeat(4, 1fr)';
 }
 
@@ -60,7 +62,6 @@ const originalSwitchTab = switchSummaryTab;
 switchSummaryTab = function(tabId) {
     originalSwitchTab(tabId);
 
-    // ✅ ชื่อแท็บที่ต้องซ่อนเมนูอื่น
     const hideTabs = ['tabDaily', 'tabMonth', 'tabAnalytics'];
 
     if (hideTabs.includes(tabId)) {
@@ -68,7 +69,7 @@ switchSummaryTab = function(tabId) {
         document.getElementById('nav1').style.display = 'none';
         document.getElementById('nav2').style.display = 'none';
         document.getElementById('nav3').style.display = 'none';
-        // ✅ เหลือแค่โฮม → กว้างเต็มจอ ตรงกลาง
+        // เหลือแค่โฮมตรงกลาง
         document.querySelector('.bottom-nav').style.gridTemplateColumns = '1fr';
     } else {
         // แท็บอื่น → แสดงครบ 4 ปุ่ม
@@ -76,16 +77,17 @@ switchSummaryTab = function(tabId) {
     }
 };
 
-// ✅ สลับหน้าหลัก → แสดงเมนูปกติ
+// ✅ สลับหน้าย่อย → แสดงเมนูครบ 4 ปุ่มเสมอ
 const originalGoSub = goSub;
-function goSub(num) {
-    originalGoSub(num);
+window.goSub = function(num) {
+    if (originalGoSub) originalGoSub(num);
     updateNavDisplay('sub' + num);
-}
+};
 
+// ✅ สลับหน้าหลัก → แสดงเมนูครบ 4 ปุ่มเสมอ
 const originalSwitchMain = switchMainView;
-switchMainView = function(viewName) {
-    originalSwitchMain(viewName);
+window.switchMainView = function(viewName) {
+    if (originalSwitchMain) originalSwitchMain(viewName);
     updateNavDisplay(viewName);
 };
 /* ========= SECTION 3: SUB-PAGE NAVIGATION — สลับหน้าย่อยบันทึก/รายงาน/บัญชี ========= */
