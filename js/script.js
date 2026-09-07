@@ -21,17 +21,17 @@ let payMethod = "";
 /* ========= SECTION 2: NEW NAVIGATION SYSTEM — สลับหน้าหลัก ========= */
 // ✅ สลับแท็บ → แสดงเนื้อหาหน้านั้นๆ ปกติ ไม่มีหน้าต่างตั้งค่าเด้งขึ้นมาเอง
 function switchSummaryTab(tabId) {
-    // ✅ ซ่อนหน้าต่างตั้งค่าทุกครั้งที่สลับแท็บ ป้องกันเด้งเอง
+    // ซ่อนหน้าต่างตั้งค่าเมื่อสลับแท็บ (ไม่ให้เด้งเอง)
     const modal = document.getElementById('modalSet');
     if (modal) modal.style.display = 'none';
 
-    // ✅ แสดงเนื้อหาแต่ละหน้าตามปกติ (หน้าสรุปภาพรวมก็จะแสดงผลครบถ้วน)
+    // แสดงเนื้อหาแท็บปกติ
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     event.target.classList.add('active');
 
-    // ✅ ควบคุมเมนูล่าง — ซ่อนปุ่มอื่น เหลือโฮมตรงกลาง
+    // ควบคุมเมนูล่าง
     const hideTabs = ['tabDaily', 'tabMonth', 'tabAnalytics'];
     if (hideTabs.includes(tabId)) {
         document.getElementById('nav1').style.display = 'none';
@@ -45,34 +45,6 @@ function switchSummaryTab(tabId) {
         document.querySelector('.bottom-nav').style.gridTemplateColumns = 'repeat(4, 1fr)';
     }
 }
-// ✅ ควบคุมเมนูล่าง — แสดงทั้ง 4 ปุ่ม
-function updateNavDisplay(viewName) {
-    document.getElementById('navHome').style.display = 'flex';
-    document.getElementById('nav1').style.display = 'flex';
-    document.getElementById('nav2').style.display = 'flex';
-    document.getElementById('nav3').style.display = 'flex';
-    document.querySelector('.bottom-nav').style.gridTemplateColumns = 'repeat(4, 1fr)';
-}
-
-// ✅ สลับแท็บสรุป → ซ่อนปุ่มอื่น เหลือโฮมตรงกลาง
-const originalSwitchTab = switchSummaryTab;
-switchSummaryTab = function(tabId) {
-    originalSwitchTab(tabId);
-
-    const hideTabs = ['tabDaily', 'tabMonth', 'tabAnalytics'];
-
-    if (hideTabs.includes(tabId)) {
-        // ซ่อนปุ่ม บันทึก / รายงาน / บัญชี
-        document.getElementById('nav1').style.display = 'none';
-        document.getElementById('nav2').style.display = 'none';
-        document.getElementById('nav3').style.display = 'none';
-        // เหลือแค่โฮมตรงกลาง
-        document.querySelector('.bottom-nav').style.gridTemplateColumns = '1fr';
-    } else {
-        // แท็บอื่น → แสดงครบ 4 ปุ่ม
-        updateNavDisplay('normal');
-    }
-};
 
 // ✅ สลับหน้าย่อย → แสดงเมนูครบ 4 ปุ่มเสมอ
 const originalGoSub = goSub;
