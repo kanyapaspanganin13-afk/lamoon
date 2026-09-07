@@ -51,6 +51,7 @@ body > center, body > a, body > br { display: none !important; }
     margin-bottom: 12px;
     position: relative;
 }
+/* ✅ ซ่อนปุ่มย้อนกลับเก่า */
 .top-bar .btn-back { display: none !important; }
 /* ✅ ชื่อร้าน — พอดีจอ ไม่ใหญ่เกินไป */
 .top-title {
@@ -59,33 +60,56 @@ body > center, body > a, body > br { display: none !important; }
     letter-spacing: 0.3px;
     color: var(--text);
 }
-/* ✅ ปุ่มบ้านตรงกลางล่าง */
-.home-btn-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+/* ✅ ซ่อนปุ่มโฮมวงกลมเก่า — ใช้เมนูล่างแทน */
+.home-btn-wrapper, .btn-back-small { display: none !important; }
+
+/* ========= 🧭 เมนูบาร์ล่าง 4 ปุ่ม — ทุกหน้าเหมือนกัน ========= */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
     width: 100%;
-    margin-top: 4px;
-}
-.btn-back-small {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
-    font-size: 17px;
-    display: flex;
+    max-width: 480px;
+    height: 70px;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 4px;
+    justify-items: center;
     align-items: center;
-    justify-content: center;
+    z-index: 999;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: var(--text);
+    opacity: 0.5;
     cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    transition: transform 0.1s, background 0.2s;
+    transition: all 0.2s;
 }
-.btn-back-small:active {
-    transform: scale(0.92);
-    background: var(--input-bg);
+.nav-item.active {
+    opacity: 1;
+    color: var(--accent);
 }
+.nav-item i {
+    font-size: 22px;
+}
+.nav-item span {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* ✅ ปรับเนื้อหาไม่โดนเมนูล่างบัง */
+.app-page.full-page,
+#pageWorkGroup {
+    padding-bottom: 80px !important;
+}
+
 /* ========= 📋 MENU GRID & CARDS ========= */
 .menu-grid {
     display: grid !important;
@@ -162,12 +186,11 @@ body > center, body > a, body > br { display: none !important; }
 }
 /* ✅ แถวล่าง — ชำระเงิน + บันทึก กว้างเท่ากัน สูงเท่ากัน พอดีภาพตัวอย่าง */
 .grid-pay { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
-    gap: 10px; 
-    margin-bottom: 8px; 
-    height: 56px; 
-    align-items: stretch;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    height: auto !important;
+    margin-bottom: 12px !important;
 }
 .grid-summary { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; margin-bottom: 12px; align-items: stretch; }
 /* ========= 🧩 CARDS & BOXES ========= */
@@ -254,20 +277,27 @@ input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
     justify-content: center;
 }
 /* ✅ ช่องเลือกวิธีชำระเงิน — ปรับพอดีกับภาพตัวอย่าง */
-.select-wrap { position: relative; width: 100%; height: 100%; }
+.select-wrap { 
+    position: relative; 
+    width: 100%; 
+    height: 52px !important;
+}
 .select-wrap i:first-child { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text); font-size: 17px; z-index: 3; }
 .select-wrap select { 
     height: 100%; 
-    font-size: 13.5px; 
-    padding: 0 20px 0 34px; 
+    font-size: 13px !important;
+    padding: 0 8px 0 30px !important;
     font-weight: 700; 
-    border-radius: 16px; 
+    border-radius: 16px;
+    text-align: center !important;
+    text-align-last: center !important;
+    white-space: nowrap !important;
 }
 .select-wrap .arrow { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 12px; pointer-events: none; }
 /* ✅ ปุ่มบันทึกข้อมูล — พอดีขนาด กดง่าย เหมือนภาพ */
 .btn-pay { 
     width: 100%; 
-    height: 100%; 
+    height: 52px !important;
     border: none; 
     border-radius: 16px; 
     background: linear-gradient(135deg, var(--save1), var(--save2)); 
@@ -276,13 +306,14 @@ input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
     align-items: center; 
     justify-content: center; 
     gap: 5px; 
-    font-size: 14px; 
+    font-size: 13.5px !important;
     font-weight: 800; 
     cursor: pointer; 
     box-shadow: 0 3px 8px rgba(30, 64, 175, 0.18); 
+    padding: 0 6px !important;
+    white-space: nowrap !important;
 }
 .btn-pay i { font-size: 16px; }
-
 #mixPanel { display: none; background: var(--input-bg); padding: 10px; border-radius: 14px; border: 2px dashed var(--accent); margin: 10px 0; }
 #mixPanel label { display: block; font-size: 13px; font-weight: 700; text-align: center; margin-bottom: 4px; }
 #mixPanel label:first-of-type { color: var(--cash2); }
@@ -306,16 +337,78 @@ input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
 #dServiceStats span { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; }
 hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 /* ========= 📊 TAB SYSTEM ========= */
-.tab-header { display: flex; gap: 6px; margin-bottom: 12px; background: var(--bg); padding: 4px; border-radius: 14px; border: 1px solid var(--border); }
-.tab-btn { flex: 1; padding: 8px; border: none; border-radius: 10px; font-weight: 700; font-size: 13px; background: transparent; color: var(--text); opacity: 0.7; cursor: pointer; }
-.tab-btn.active { background: var(--card); color: var(--accent); opacity: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
-.filter-month-wrap { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
-.filter-month-wrap input { flex: 1; height: 44px; }
-.btn-export-excel { background: var(--success); color: #fff; border: none; border-radius: 12px; padding: 0 10px; height: 44px; font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap; }
-.table-responsive { width: 100%; overflow-x: auto; margin-top: 12px; border-radius: 14px; border: 1px solid var(--border); }
-.summary-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: center; }
-.summary-table th { background: var(--bg); padding: 8px 5px; font-weight: 700; border-bottom: 1px solid var(--border); }
-.summary-table td { padding: 8px 5px; border-bottom: 1px solid var(--border); }
+.tab-header { 
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px;
+    margin-bottom: 14px;
+    background: var(--bg); 
+    padding: 4px; 
+    border-radius: 14px; 
+    border: 1px solid var(--border); 
+}
+.tab-btn { 
+    padding: 10px 4px !important;
+    border: none; 
+    border-radius: 12px !important; 
+    font-weight: 700; 
+    font-size: 12.5px !important; 
+    background: transparent; 
+    color: var(--text); 
+    opacity: 0.7; 
+    cursor: pointer; 
+    white-space: nowrap;
+}
+.tab-btn.active { 
+    background: var(--card); 
+    color: var(--accent); 
+    opacity: 1; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06); 
+}
+.filter-month-wrap { 
+    display: grid !important;
+    grid-template-columns: auto 1fr auto !important;
+    gap: 8px; 
+    align-items: center; 
+    margin-bottom: 12px; 
+}
+.filter-month-wrap label { font-size: 13px; font-weight: 700; white-space: nowrap; }
+.filter-month-wrap input { height: 46px; border-radius: 10px; font-size: 14px; }
+.btn-export-excel { 
+    height: 46px;
+    background: var(--success); 
+    color: #fff; 
+    border: none; 
+    border-radius: 12px; 
+    padding: 0 10px; 
+    font-weight: 700; 
+    font-size: 12.5px !important;
+    cursor: pointer; 
+    white-space: nowrap; 
+}
+.table-responsive { 
+    width: 100%; 
+    overflow-x: auto; 
+    margin-top: 12px; 
+    border-radius: 14px; 
+    border: 1px solid var(--border); 
+}
+.summary-table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    font-size: 12.5px; 
+    text-align: center; 
+}
+.summary-table th { 
+    background: var(--bg); 
+    padding: 9px 4px; 
+    font-weight: 700; 
+    border-bottom: 1px solid var(--border); 
+}
+.summary-table td { 
+    padding: 9px 4px; 
+    border-bottom: 1px solid var(--border); 
+}
 /* ========= 💰 ACCOUNT PAGE ========= */
 .card { background: var(--card); border-radius: 20px; padding: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); border: 1px solid var(--border); margin-bottom: 12px; }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
@@ -479,11 +572,6 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
   margin-top: 12px;
   color: var(--text);
 }
-/* ========= 🧭 NAVIGATION ========= */
-nav, nav.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 70px; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-.nav-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; font-weight: 700; color: var(--text); opacity: 0.5; cursor: pointer; transition: 0.25s; }
-.nav-item.active { opacity: 1; color: var(--accent); }
-.nav-item i { font-size: 22px; margin-bottom: 2px; }
 /* ========= 📱 RESPONSIVE — ปรับพอดีทุกจอ ========= */
 @media (max-width: 400px) {
   .main-wrap { padding: 10px; margin: 6px auto; border-radius: 20px; }
@@ -497,6 +585,10 @@ nav, nav.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translat
   .menu-card { min-height: 72px; padding: 8px 4px; }
   .menu-card span { font-size: 11px; }
   .input-date-wrap span, select, input[type="text"], input[type="number"], input[type="date"], input[type="time"], input[type="month"] { font-size: 14px; }
+  .tab-header { grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  .tab-btn { font-size: 11.5px; padding: 8px 2px !important; }
+  .filter-month-wrap { grid-template-columns: 1fr; gap: 6px; }
+  .summary-table th, .summary-table td { padding: 7px 2px; font-size: 11.5px; }
 }
 @media (max-width: 360px) {
   .grid-svc { grid-template-columns: 1.1fr 1fr 1fr; gap: 6px; }
@@ -515,56 +607,3 @@ nav, nav.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translat
 .swal2-title, .swal2-content { color: var(--text) !important; }
 .swal2-container { z-index: 99999 !important; }
 .swal2-input { border-radius: 10px !important; border: 1px solid var(--border) !important; background: var(--bg) !important; color: var(--text) !important; font-size: 13px !important; height: 44px !important; }
-/* ==========================================
-   FIX: ปรับแต่งแถวชำระเงิน บันทึกข้อมูล และปุ่มหน้าหลัก
-   ========================================== */
-
-/* 1. แก้ไข Layout แถวชำระเงิน + บันทึกข้อมูล ไม่ให้โดนบีบ */
-.grid-pay {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important; /* แบ่งครึ่ง 50% เท่ากัน */
-    gap: 8px !important;
-    height: auto !important; /* ยกเลิกการล็อกความสูงเดิม */
-    margin-bottom: 12px !important;
-}
-
-/* 2. ปรับช่องเลือกวิธีชำระเงิน ให้ตัวหนังสือไม่ล้น */
-.select-wrap {
-    height: 52px !important;
-    width: 100% !important;
-}
-
-.select-wrap select {
-    height: 100% !important;
-    font-size: 13px !important; /* ลดขนาดฟอนต์ลงเล็กน้อยเพื่อให้อ่านออกครบ */
-    font-weight: 700 !important;
-    padding: 0 8px 0 30px !important; /* เว้นพื้นที่ให้ไอคอนกระเป๋าเงิน */
-    text-align: center !important;
-    text-align-last: center !important;
-    white-space: nowrap !important;
-}
-
-/* 3. ปรับปุ่มบันทึกข้อมูล ให้ขนาดและตัวอักษรพอดีช่อง */
-.btn-pay {
-    height: 52px !important;
-    font-size: 13.5px !important;
-    font-weight: 800 !important;
-    padding: 0 6px !important;
-    white-space: nowrap !important;
-}
-
-/* 4. จัดการปุ่มหน้าหลัก (วงกลมรูปบ้าน) ให้อยู่ตรงกลางล่างสุด */
-.home-btn-wrapper {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    width: 100% !important;
-    margin-top: 4px !important;
-}
-
-.btn-back-small {
-    width: 44px !important;
-    height: 44px !important;
-    font-size: 18px !important;
-    margin: 0 auto !important;
-}
