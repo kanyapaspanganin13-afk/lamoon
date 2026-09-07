@@ -58,10 +58,10 @@ function go(p) {
         btn.style.opacity = isSelected ? '1' : '0.5';
     });
     
-    // อัปเดตชื่อร้าน
-    //const savedShopName = localStorage.getItem("shopName") || "BARBER SHOP";
-    //const shopTitleEl = document.querySelector('h2');
-    //if (shopTitleEl) shopTitleEl.innerText = savedShopName;
+    // อัปเดตชื่อร้านเฉพาะในหน้าบันทึกงาน (ถ้ามี element)
+    const savedShopName = localStorage.getItem("shopName") || "BARBER SHOP";
+    const entryShopTitle = $('entryShopName');
+    if (entryShopTitle) entryShopTitle.innerText = savedShopName;
     
     // โหลดข้อมูลเฉพาะหน้า
     const dateInpValue = $("dateInp")?.value || new Date().toISOString().split('T')[0];
