@@ -62,8 +62,8 @@ function switchSummaryTab(tabId, evt) {
         if (btn) btn.classList.add('active');
     }
 
-    // ✅ ควบคุมเมนูล่าง — ซ่อนปุ่มอื่น เหลือโฮมตรงกลาง
-    const hideTabs = ['tabDaily', 'tabMonth', 'tabAnalytics'];
+    // ✅ แก้ชื่อแท็บให้ตรงกับ HTML: tabOverview แทน tabDaily
+    const hideTabs = ['tabOverview', 'tabMonth', 'tabAnalytics'];
     const nav1 = document.getElementById('nav1');
     const nav2 = document.getElementById('nav2');
     const nav3 = document.getElementById('nav3');
@@ -75,10 +75,13 @@ function switchSummaryTab(tabId, evt) {
         if (nav3) nav3.style.display = 'none';
         if (bottomNav) bottomNav.style.gridTemplateColumns = '1fr';
     } else {
-        updateNavDisplay(viewName);
+        // ✅ แก้จาก viewName → ใช้ฟังก์ชันโดยตรง
+        if (nav1) nav1.style.display = 'flex';
+        if (nav2) nav2.style.display = 'flex';
+        if (nav3) nav3.style.display = 'flex';
+        if (bottomNav) bottomNav.style.gridTemplateColumns = 'repeat(4, 1fr)';
     }
 }
-
 // ✅ สลับหน้าย่อยบันทึก/รายงาน/บัญชี
 function goSub(num) {
     // ซ่อนทุกหน้าย่อย
