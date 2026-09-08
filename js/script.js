@@ -553,6 +553,7 @@ function handleInsurance() {
 }
 
 /* ========= SECTION 17: SETTINGS & THEME ========= */
+// ✅ เปิดหน้าต่างตั้งค่า — ป้องกันข้อผิดพลาด หาไม่เจอก็ไม่หยุดทำงาน
 function openSettings() { 
     if ($("setShop")) $("setShop").value = conf.shop;
     if ($("setPerc")) $("setPerc").value = conf.perc;
@@ -560,14 +561,22 @@ function openSettings() {
     if ($("setTheme")) $("setTheme").value = conf.theme;
     if ($("setSound")) $("setSound").value = conf.sound;
     if ($("setVoice")) $("setVoice").value = conf.voice;
-    $("modalSet").style.display = "flex"; 
+
+    // ✅ แก้ตรงนี้ — ถ้าหาเจอค่อยเปิด ป้องกัน Error
+    const modal = document.getElementById("modalSet");
+    if (modal) {
+        modal.style.display = "flex";
+        modal.style.zIndex = "10000"; // บังคับอยู่ชั้นบนสุด ไม่ถูกบัง
+    }
 }
+
 function applyTheme(t) {
     document.body.classList.remove("navy", "vintage");
     if (t === "navy") document.body.classList.add("navy");
     else if (t === "vintage") document.body.classList.add("vintage");
     conf.theme = t; localStorage.setItem("shopTheme", t);
 }
+
 function saveSettings() {
     conf.shop = $("setShop")?.value || "Barber Shop";
     conf.perc = parseFloat($("setPerc")?.value) || 50;
@@ -580,10 +589,13 @@ function saveSettings() {
     localStorage.setItem("shopGuar", conf.guar);
     saveDB();
     applyTheme(conf.theme);
-    $("modalSet").style.display = "none";
+
+    // ✅ ปิดแบบปลอดภัยเหมือนกัน
+    const modal = document.getElementById("modalSet");
+    if (modal) modal.style.display = "none";
+
     notify("success", "บันทึกสำเร็จ", "ตั้งค่าถูกบันทึกแล้ว");
 }
-
 /* ========= SECTION 18: MONTHLY SUMMARY & EXCEL EXPORT ========= */
 function loadHistMonth() {
     const v = $("histMonth")?.value; if (!v) return;
