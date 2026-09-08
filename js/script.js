@@ -82,53 +82,45 @@ function switchMainView(viewName) {
     // อัปเดตการแสดงผลเมนูล่าง
     updateNavDisplay(viewName);
 }
-
-// ✅ ควบคุมเมนูล่าง — แสดงตามความเหมาะสม
+// ✅ ควบคุมเมนูล่าง — แสดงเฉพาะปุ่ม "หน้าแรก" ให้อยู่ตรงกลางพอดี
 function updateNavDisplay(viewName) {
-    const allNavItems = document.querySelectorAll('.bottom-nav .nav-item');
     const bottomNav = document.querySelector('.bottom-nav');
-
     if (!bottomNav) return;
 
-    // แสดงทั้ง 4 เมนูมาตรฐาน
-    allNavItems.forEach(item => {
-        item.style.display = 'flex';
-    });
-    bottomNav.style.gridTemplateColumns = 'repeat(4, 1fr)';
-}
+    const allNavItems = bottomNav.querySelectorAll('.nav-item');
 
-// ✅ สลับแท็บภายใน Section ต่างๆ (ใช้ร่วมกันได้ทุกหน้า)
-function switchMainTab(sectionId, targetTabId, event) {
-    const parentSection = document.getElementById(sectionId);
-    if (!parentSection) return;
+    // รายชื่อ view ที่ต้องการให้เหลือแค่ปุ่ม "หน้าแรก" ปุ่มเดียว
+    const singleHomeViews = ['summaryPage', 'monthlySummary', 'comparePage'];
 
-    // ซ่อน Tab Panel ทั้งหมดใน Section นั้น
-    const panels = parentSection.querySelectorAll('.tab-panel');
-    panels.forEach(panel => {
-        panel.style.display = 'none';
-        panel.classList.remove('active');
-    });
+    if (singleHomeViews.includes(viewName)) {
+        // 1. ซ่อนปุ่มอื่นทั้งหมด เหลือแค่ปุ่มแรก (หน้าแรก)
+        allNavItems.forEach((item, index) => {
+            if (index === 0) {
+                item.style.display = 'flex';
+                item.style.margin = '0 auto'; // จัดตัวปุ่มให้อยู่ตรงกลาง
+                item.classList.add('active');
+            } else {
+                item.style.display = 'none';
+                item.classList.remove('active');
+            }
+        });
 
-    // เอาสถานะ active ออกจากปุ่มกดใน Section นั้น
-    const buttons = parentSection.querySelectorAll('.tab-btn');
-    buttons.forEach(btn => btn.classList.remove('active'));
+        // 2. ปรับการจัดวางของคอนเทนเนอร์หลักให้อยู่ตรงกลาง
+        bottomNav.style.display = 'flex';
+        bottomNav.style.justifyContent = 'center';
+        bottomNav.style.alignItems = 'center';
+        bottomNav.style.gridTemplateColumns = 'none';
+    } else {
+        // หน้าอื่นๆ ให้แสดงครบทั้ง 4 ปุ่มตามปกติ
+        allNavItems.forEach(item => {
+            item.style.display = 'flex';
+            item.style.margin = '0'; // คืนค่า margin
+        });
 
-    // เปิด Tab Panel ที่เลือก
-    const selectedPanel = parentSection.querySelector(`#${targetTabId}`);
-    if (selectedPanel) {
-        selectedPanel.style.display = 'block';
-        selectedPanel.classList.add('active');
-    }
-
-    // ไฮไลท์ปุ่มที่ถูกกด
-    const e = event || window.event;
-    const btn = e?.currentTarget || e?.target?.closest('.tab-btn');
-    if (btn) {
-        btn.classList.add('active');
-    } else if (buttons.length > 0) {
-        // หากไม่มี event (เช่น โดนเรียกจาก switchMainView) ให้ไฮไลท์ปุ่มแรกตรงกับแท็บ
-        const defaultBtn = Array.from(buttons).find(b => b.getAttribute('onclick')?.includes(targetTabId));
-        if (defaultBtn) defaultBtn.classList.add('active');
+        bottomNav.style.display = 'grid';
+        bottomNav.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        bottomNav.style.justifyContent = 'stretch';
+        bottomNav.style.alignItems = 'stretch';
     }
 }
 function goSub(num) {
