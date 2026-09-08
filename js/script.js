@@ -489,19 +489,38 @@ async function saveAndGo(date, total) {
 function loadAccountStatus() {
     const today = $("dateInp")?.value || new Date().toISOString().split('T')[0];
     if ($("accDate")) $("accDate").value = today;
-    const lastArchive = archives.sort((a,b) => b.date.localeCompare(a.date))[0];
+
+    // ดึงข้อมูล Archive ล่าสุด และ Archive ของวันนี้
+    const lastArchive = archives.slice().sort((a, b) => b.date.localeCompare(a.date))[0];
     const todayArchive = archives.find(a => a.date === today);
+
+    // คำนวณยอดเงินรวมคงเหลือตาม Logic เดิม
     const bal = account.balance || 0;
-    const totalBal = bal + (todayArchive ? todayArchive.settle : 0);
+    const todaySettle = todayArchive ? todayArchive.settle : 0;
+    const totalBal = bal + todaySettle;
+
+    // อัปเดต UI ตาม Element ของเดิม
     if ($("accOldVal")) $("accOldVal").innerText = `฿${bal.toLocaleString()}`;
     if ($("accDateLabel")) $("accDateLabel").innerText = lastArchive ? lastArchive.date : "ยังไม่มีข้อมูล";
-    if ($("accTodayVal")) $("accTodayVal").innerText = todayArchive ? `฿${todayArchive.settle.toLocaleString()}` : "฿0";
+    if ($("accTodayVal")) $("accTodayVal").innerText = `฿${todaySettle.toLocaleString()}`;
     if ($("accTotalVal")) $("accTotalVal").innerText = `฿${totalBal.toLocaleString()}`;
     if ($("accLight")) $("accLight").style.background = totalBal >= 0 ? "#22c55e" : "#ef4444";
+
+    // อัปเดต Badge แสดงสถานะ
     if ($("statusBadge")) {
-        if (totalBal > 0) { $("statusBadge").innerText = "ร้านคืนช่าง"; $("statusBadge").style.background = "#dbeafe"; $("statusBadge").style.color = "#1d4ed8"; }
-        else if (totalBal < 0) { $("statusBadge").innerText = "ช่างคืนร้าน"; $("statusBadge").style.background = "#fee2e2"; $("statusBadge").style.color = "#dc2626"; }
-        else { $("statusBadge").innerText = "ยอดพอดี"; $("statusBadge").style.background = "#dcfce7"; $("statusBadge").style.color = "#16a34a"; }
+        if (totalBal > 0) { 
+            $("statusBadge").innerText = "ร้านคืนช่าง"; 
+            $("statusBadge").style.background = "#dbeafe"; 
+            $("statusBadge").style.color = "#1d4ed8"; 
+        } else if (totalBal < 0) { 
+            $("statusBadge").innerText = "ช่างคืนร้าน"; 
+            $("statusBadge").style.background = "#fee2e2"; 
+            $("statusBadge").style.color = "#dc2626"; 
+        } else { 
+            $("statusBadge").innerText = "ยอดพอดี"; 
+            $("statusBadge").style.background = "#dcfce7"; 
+            $("statusBadge").style.color = "#16a34a"; 
+        }
     }
 }
 
@@ -509,24 +528,50 @@ function loadAccountStatus() {
 async function clearAccount() {
     const date = $("accDate")?.value || new Date().toISOString().split('T')[0];
     const note = $("accNote")?.value || "เคลียร์ยอด";
+
     const { isConfirmed } = await Swal.fire({
-        title: "ยืนยันเคลียร์เงิน", text: `ยืนยัน ณ วันที่ ${date} ?`, icon: "question",
-        showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก"
+        title: "ยืนยันเคลียร์เงิน", 
+        text: `ยืนยัน ณ วันที่ ${date} ?`, 
+        icon: "question",
+        showCancelButton: true, 
+        confirmButtonText: "ยืนยัน", 
+        cancelButtonText: "ยกเลิก"
     });
+
     if (!isConfirmed) return;
+
+    // เพิ่มรายการลงด้านหน้าสุด (unshift) และ reset balance เป็น 0 ตามของเดิม
     account.logs.unshift({ date, balance: account.balance, note });
     account.balance = 0;
-    saveDB();
+
+    if (typeof saveDB === "function") saveDB();
     notify("success", "สำเร็จ", "เคลียร์ยอดเรียบร้อย");
+
+    // ล้างช่องกรอกหมายเหตุ
+    if ($("accNote")) $("accNote").value = "";
+
     loadAccountStatus();
 }
+
 function openHistoryModal() {
     const list = $("accHistory");
-    list.innerHTML = account.logs.length === 0 ? "<center style='padding:20px;color:#94a3b8'>ยังไม่มีประวัติ</center>"
-        : account.logs.map(l => `<div style="padding:10px;border-bottom:1px solid #eee;"><b>${l.date}</b> | ${l.note}<br><span style="color:${l.balance>=0?'#22c55e':'#ef4444'}">฿${l.balance.toLocaleString()}</span></div>`).join("");
-    $("historyModal").style.display = "flex";
+    if (!list) return;
+
+    list.innerHTML = account.logs.length === 0 
+        ? "<center style='padding:20px;color:#94a3b8'>ยังไม่มีประวัติ</center>"
+        : account.logs.map(l => `
+            <div style="padding:10px;border-bottom:1px solid #eee;">
+                <b>${l.date}</b> | ${l.note}<br>
+                <span style="color:${l.balance >= 0 ? '#22c55e' : '#ef4444'}">฿${(l.balance || 0).toLocaleString()}</span>
+            </div>
+        `).join("");
+
+    if ($("historyModal")) $("historyModal").style.display = "flex";
 }
-function closeHistoryModal() { $("historyModal").style.display = "none"; }
+
+function closeHistoryModal() { 
+    if ($("historyModal")) $("historyModal").style.display = "none"; 
+}
 
 /* ========= SECTION 16: INSURANCE & HOLIDAY========= */
 async function handleInsurance() {
