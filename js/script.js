@@ -17,69 +17,125 @@ let conf = JSON.parse(localStorage.getItem("barber_conf")) || {
     sound: localStorage.getItem("shopSound") || "on"
 };
 let payMethod = "";
-/* ========= SECTION 2: NEW NAVIGATION SYSTEM — สลับหน้าหลัก ========= */
-// ✅ สลับหน้าหลัก — แก้ไขให้แสดงครบทุกหน้า
+/* =========================================================
+   SECTION 2: MAIN NAVIGATION
+   สลับหน้าหลักให้ตรงกับ HTML
+   ========================================================= */
 function switchMainView(viewName) {
-    // 1. ซ่อนทุกหน้า (.app-page)
+    // -----------------------------------------------------
+    // 1. ซ่อนหน้าหลักทั้งหมด
+    // -----------------------------------------------------
     document.querySelectorAll('.app-page').forEach(page => {
         page.classList.remove('active');
         page.style.display = 'none';
     });
-    // 2. แสดงหน้าตามที่เลือก — ตรงกับ ID ใน HTML
-    switch(viewName) {
-        // 🏠 หน้าแรก
-        case 'home':
-            const homePage = document.getElementById('pageHome');
-            if (homePage) {
-                homePage.classList.add('active');
-                homePage.style.display = 'block';
-            }
-            updateNavDisplay('home');
-            break;
 
-        // ✍️ กลุ่มบันทึกงาน (บันทึก / รายงาน / บัญชี อยู่ในนี้)
-        case 'workGroup':
-            const workPage = document.getElementById('pageWorkGroup');
-            if (workPage) {
-                workPage.classList.add('active');
-                workPage.style.display = 'block';
-            }
-            if (typeof goSub === 'function') goSub(1); // เข้าหน้าบันทึกงานทันที
-            break;
-
-        // 📊 หน้าสรุปภาพรวม / รายเดือน / เปรียบเทียบ
-        case 'summaryPage':
-        case 'monthlySummary':
-        case 'comparePage':
-            const summaryPage = document.getElementById('pageSummary');
-            if (summaryPage) {
-                summaryPage.classList.add('active');
-                summaryPage.style.display = 'block';
-                // เปิดแท็บที่ถูกต้อง
-                if (viewName === 'comparePage' && typeof switchSummaryTab === 'function') {
-                    switchSummaryTab('tabAnalytics');
-                } else if (typeof switchSummaryTab === 'function') {
-                    switchSummaryTab('tabMonth');
-                }
-            }
-            updateNavDisplay('summaryPage');
-            break;
+    // -----------------------------------------------------
+    // 2. 🏠 หน้าแรก
+    // HTML: id="pageHome"
+    // -----------------------------------------------------
+    if (viewName === 'home') {
+        const homePage = document.getElementById('pageHome');
+        if (homePage) {
+            homePage.classList.add('active');
+            homePage.style.display = 'block';
+        }
+        updateNavDisplay('home');
+        return;
     }
+
+    // -----------------------------------------------------
+    // 3. ✂️ กลุ่มบันทึกงาน
+    // HTML: id="pageWorkGroup"
+    // p1 = บันทึก / p2 = รายงาน / p3 = บัญชี
+    // -----------------------------------------------------
+    if (viewName === 'workGroup') {
+        const workPage = document.getElementById('pageWorkGroup');
+        if (!workPage) {
+            console.warn('ไม่พบ #pageWorkGroup');
+            return;
+        }
+        workPage.classList.add('active');
+        workPage.style.display = 'block';
+        goSub(1);
+        return;
+    }
+
+    // -----------------------------------------------------
+    // 4. 📊 สรุปยอดรวม
+    // HTML: id="pageSummary"
+    // summaryTab1 = รายได้ประจำเดือน
+    // summaryTab2 = วิเคราะห์รายได้
+    // summaryTab3 = ทรงผม & บริการ
+    // -----------------------------------------------------
+    if (viewName === 'summaryPage') {
+        const summaryPage = document.getElementById('pageSummary');
+        if (!summaryPage) {
+            console.warn('ไม่พบ #pageSummary');
+            return;
+        }
+        summaryPage.classList.add('active');
+        summaryPage.style.display = 'block';
+        switchMainTab('pageSummary', 'summaryTab1');
+        updateNavDisplay('summaryPage');
+        return;
+    }
+
+    // -----------------------------------------------------
+    // 5. 📅 สรุปรายเดือน
+    // HTML: id="pageMonthlyReport"
+    // monthlyTab1 / monthlyTab2
+    // -----------------------------------------------------
+    if (viewName === 'monthlySummary') {
+        const monthlyPage = document.getElementById('pageMonthlyReport');
+        if (!monthlyPage) {
+            console.warn('ไม่พบ #pageMonthlyReport');
+            return;
+        }
+        monthlyPage.classList.add('active');
+        monthlyPage.style.display = 'block';
+        switchMainTab('pageMonthlyReport', 'monthlyTab1');
+        updateNavDisplay('monthlySummary');
+        return;
+    }
+
+    // -----------------------------------------------------
+    // 6. 🔍 วิเคราะห์เปรียบเทียบ
+    // HTML: id="pageComparison"
+    // -----------------------------------------------------
+    if (viewName === 'comparePage') {
+        const comparisonPage = document.getElementById('pageComparison');
+        if (!comparisonPage) {
+            console.warn('ไม่พบ #pageComparison');
+            return;
+        }
+        comparisonPage.classList.add('active');
+        comparisonPage.style.display = 'block';
+        updateNavDisplay('comparePage');
+        return;
+    }
+
+    // -----------------------------------------------------
+    // 7. ไม่พบหน้า
+    // -----------------------------------------------------
+    console.warn('ไม่พบ viewName:', viewName);
 }
 
-// ✅ ควบคุมเมนูล่าง — ซ่อนหน้าแรก / แสดง 4 ปุ่มหน้าอื่นๆ
+/* =========================================================
+   SECTION 2.1: BOTTOM NAVIGATION
+   ========================================================= */
 function updateNavDisplay(viewName) {
-    // ค้นหาแถบเมนูเฉพาะหน้าที่กำลังแสดง
-    const bottomNavs = document.querySelectorAll('.bottom-nav');
-    bottomNavs.forEach(nav => nav.style.display = 'none');
+    document.querySelectorAll('.bottom-nav').forEach(nav => {
+        nav.style.display = 'none';
+    });
 
-    // 🏠 หน้าแรก → ซ่อนแถบเมนูทั้งหมด
+    // 🏠 หน้าแรก → ไม่มีเมนู
     if (viewName === 'home') {
         return;
     }
 
-    // ✍️ หน้ากลุ่มบันทึกงาน → แสดงเมนู 4 ปุ่ม
-    if (viewName === 'workGroup' || viewName.startsWith('sub')) {
+    // ✂️ กลุ่มบันทึกงาน
+    if (viewName === 'workGroup' || viewName === 'sub1' || viewName === 'sub2' || viewName === 'sub3') {
         const workPage = document.getElementById('pageWorkGroup');
         if (!workPage) return;
         const nav = workPage.querySelector('.bottom-nav');
@@ -99,8 +155,8 @@ function updateNavDisplay(viewName) {
         return;
     }
 
-    // 📊 หน้าสรุปภาพรวม → แสดงเมนู 4 ปุ่ม
-    if (viewName === 'summaryPage' || viewName === 'monthlySummary' || viewName === 'comparePage') {
+    // 📊 สรุปยอดรวม
+    if (viewName === 'summaryPage') {
         const summaryPage = document.getElementById('pageSummary');
         if (!summaryPage) return;
         const nav = summaryPage.querySelector('.bottom-nav');
@@ -115,53 +171,122 @@ function updateNavDisplay(viewName) {
             item.classList.remove('active');
             if (index === 2) item.classList.add('active');
         });
+        return;
+    }
+
+    // 📅 สรุปรายเดือน
+    if (viewName === 'monthlySummary') {
+        const monthlyPage = document.getElementById('pageMonthlyReport');
+        if (!monthlyPage) return;
+        const nav = monthlyPage.querySelector('.bottom-nav');
+        if (!nav) return;
+        nav.style.display = 'grid';
+        nav.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        nav.querySelectorAll('.nav-item').forEach(item => {
+            item.style.display = 'flex';
+            item.style.margin = '0';
+            item.classList.remove('active');
+        });
+        return;
+    }
+
+    // 🔍 เปรียบเทียบ
+    if (viewName === 'comparePage') {
+        const comparisonPage = document.getElementById('pageComparison');
+        if (!comparisonPage) return;
+        const nav = comparisonPage.querySelector('.bottom-nav');
+        if (!nav) return;
+        nav.style.display = 'grid';
+        nav.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        nav.querySelectorAll('.nav-item').forEach(item => {
+            item.style.display = 'flex';
+            item.style.margin = '0';
+            item.classList.remove('active');
+        });
+        return;
     }
 }
 
-/* ========= SECTION 3: SUB-PAGE NAVIGATION — สลับหน้าย่อยบันทึก/รายงาน/บัญชี ========= */
+/* =========================================================
+   SECTION 3: SUB-PAGE NAVIGATION
+   บันทึก / รายงาน / บัญชี
+   ========================================================= */
 function goSub(num) {
-    // ซ่อนทุกหน้าย่อย
-    document.querySelectorAll('.sub-page').forEach(page => {
+    const workPage = document.getElementById('pageWorkGroup');
+    if (!workPage) {
+        console.warn('ไม่พบ #pageWorkGroup');
+        return;
+    }
+
+    workPage.querySelectorAll('.sub-page').forEach(page => {
         page.classList.remove('active');
         page.style.display = 'none';
     });
-    // แสดงหน้าที่เลือก
+
     const target = document.getElementById('p' + num);
-    if (target) {
-        target.classList.add('active');
-        target.style.display = 'block';
+    if (!target) {
+        console.warn('ไม่พบ sub-page:', 'p' + num);
+        return;
     }
-    // ไฮไลท์เมนูตรงกับหน้า
-    document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => {
-        nav.classList.remove('active');
+    target.classList.add('active');
+    target.style.display = 'block';
+
+    workPage.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+        item.classList.remove('active');
     });
+
     const nav = document.getElementById('nav' + num);
     if (nav) nav.classList.add('active');
-    // อัปเดตสถานะเมนู
+
     updateNavDisplay('sub' + num);
-    // โหลดข้อมูล
-    const dateInput = document.getElementById("dateInp");
+
+    const dateInput = document.getElementById('dateInp');
     const dInp = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
+
     if (num === 2 && typeof renderDay === 'function') renderDay(dInp);
     if (num === 3) {
-        const accDate = document.getElementById("accDate");
+        const accDate = document.getElementById('accDate');
         if (accDate && dateInput) accDate.value = dateInput.value;
         if (typeof loadAccountStatus === 'function') loadAccountStatus();
     }
 }
 
-/* ========= SECTION 4: SUMMARY TABS — สลับแท็บสรุปเดือน/วิเคราะห์ ========= */
-// ✅ สลับแท็บหน้าสรุป — แก้ไขให้ทำงานแน่นอน
-function switchSummaryTab(tabId) {
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-    // ✅ แก้ไขปัญหา event.target หาย — ค้นหาจากข้อความแทน
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        if (btn.getAttribute('onclick')?.includes(`'${tabId}'`)) {
-            btn.classList.add('active');
-        }
+/* ========SECTION 4: MAIN TABSใช้ตรงกับ HTML ที่ส่งมา======== */
+function switchMainTab(pageId, tabId, evt) {
+    const page = document.getElementById(pageId);
+    if (!page) {
+        console.warn('ไม่พบหน้า:', pageId);
+        return;
+    }
+
+    const targetTab = document.getElementById(tabId);
+    if (!targetTab) {
+        console.warn('ไม่พบแท็บ:', tabId);
+        return;
+    }
+
+    page.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.remove('active');
+        panel.style.display = 'none';
     });
+
+    targetTab.classList.add('active');
+    targetTab.style.display = 'block';
+
+    page.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    if (evt && evt.currentTarget) {
+        evt.currentTarget.classList.add('active');
+    } else {
+        page.querySelectorAll('.tab-btn').forEach(btn => {
+            const onclick = btn.getAttribute('onclick');
+            if (onclick && onclick.includes(`'${tabId}'`)) {
+                btn.classList.add('active');
+            }
+        });
+    }
 }
 /* ========= SECTION 5: AUTO-UPDATE ========= */
 (function autoUpdate() {
