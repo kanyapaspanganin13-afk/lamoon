@@ -19,13 +19,27 @@ let conf = JSON.parse(localStorage.getItem("barber_conf")) || {
 let payMethod = "";
 
 /* ========= SECTION 2: NEW NAVIGATION SYSTEM — สลับหน้าหลัก ========= */
-// ✅ สลับแท็บ → ป้องกัน Uncaught Error และจัดการ Event Target อย่างถูกต้อง
+
+// ✅ ควบคุมเมนูล่าง — แสดงทั้ง 4 ปุ่ม
+function updateNavDisplay(viewName) {
+    const nav1 = document.getElementById('nav1');
+    const nav2 = document.getElementById('nav2');
+    const nav3 = document.getElementById('nav3');
+    const bottomNav = document.querySelector('.bottom-nav');
+    
+    if (nav1) nav1.style.display = 'flex';
+    if (nav2) nav2.style.display = 'flex';
+    if (nav3) nav3.style.display = 'flex';
+    if (bottomNav) bottomNav.style.gridTemplateColumns = 'repeat(4, 1fr)';
+}
+
+// ✅ สลับแท็บสรุป — ป้องกัน Error + ซ่อนเมนูเหลือโฮมตรงกลาง
 function switchSummaryTab(tabId, evt) {
     // ซ่อนหน้าต่างตั้งค่าเมื่อสลับแท็บ (ไม่ให้เด้งเอง)
     const modal = document.getElementById('modalSet');
     if (modal) modal.style.display = 'none';
 
-    // ตรวจสอบว่ามี Element ปลายทางหรือไม่ก่อนสั่งงาน
+    // ตรวจสอบว่ามี Element ปลายทางหรือไม่
     const targetTab = document.getElementById(tabId);
     if (!targetTab) {
         console.warn('ไม่พบ Element ID:', tabId);
@@ -48,7 +62,7 @@ function switchSummaryTab(tabId, evt) {
         if (btn) btn.classList.add('active');
     }
 
-    // ควบคุมเมนูล่าง
+    // ✅ ควบคุมเมนูล่าง — ซ่อนปุ่มอื่น เหลือโฮมตรงกลาง
     const hideTabs = ['tabDaily', 'tabMonth', 'tabAnalytics'];
     const nav1 = document.getElementById('nav1');
     const nav2 = document.getElementById('nav2');
@@ -61,28 +75,11 @@ function switchSummaryTab(tabId, evt) {
         if (nav3) nav3.style.display = 'none';
         if (bottomNav) bottomNav.style.gridTemplateColumns = '1fr';
     } else {
-        if (nav1) nav1.style.display = 'flex';
-        if (nav2) nav2.style.display = 'flex';
-        if (nav3) nav3.style.display = 'flex';
-        if (bottomNav) bottomNav.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        updateNavDisplay(viewName);
     }
 }
 
-// ✅ สลับหน้าย่อย → แสดงเมนูครบ 4 ปุ่มเสมอ
-const originalGoSub = typeof goSub === 'function' ? goSub : null;
-window.goSub = function(num) {
-    if (originalGoSub) originalGoSub(num);
-    if (typeof updateNavDisplay === 'function') updateNavDisplay('sub' + num);
-};
-
-// ✅ สลับหน้าหลัก → แสดงเมนูครบ 4 ปุ่มเสมอ
-const originalSwitchMain = typeof switchMainView === 'function' ? switchMainView : null;
-window.switchMainView = function(viewName) {
-    if (originalSwitchMain) originalSwitchMain(viewName);
-    if (typeof updateNavDisplay === 'function') updateNavDisplay(viewName);
-};
-
-/* ========= SECTION 3: SUB-PAGE NAVIGATION — สลับหน้าย่อยบันทึก/รายงาน/บัญชี ========= */
+// ✅ สลับหน้าย่อยบันทึก/รายงาน/บัญชี
 function goSub(num) {
     // ซ่อนทุกหน้าย่อย
     document.querySelectorAll('.sub-page').forEach(page => {
@@ -92,7 +89,6 @@ function goSub(num) {
     document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => {
         nav.classList.remove('active');
     });
-
     // แสดงหน้าที่เลือก
     const target = document.getElementById('p' + num);
     if (target) target.classList.add('active');
@@ -100,10 +96,12 @@ function goSub(num) {
     const nav = document.getElementById('nav' + num);
     if (nav) nav.classList.add('active');
 
+    // ✅ แสดงเมนูครบ 4 ปุ่ม
+    updateNavDisplay('sub' + num);
+
     // โหลดข้อมูลหน้าที่เปิด
     const dateInput = document.getElementById("dateInp");
     const dInp = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
-
     if (num === 2 && typeof renderDay === 'function') renderDay(dInp);
     if (num === 3) {
         const accDate = document.getElementById("accDate");
@@ -111,6 +109,13 @@ function goSub(num) {
         if (typeof loadAccountStatus === 'function') loadAccountStatus();
     }
 }
+
+// ✅ สลับหน้าหลัก → แสดงเมนูครบ 4 ปุ่มเสมอ
+const originalSwitchMain = typeof switchMainView === 'function' ? switchMainView : null;
+window.switchMainView = function(viewName) {
+    if (originalSwitchMain) originalSwitchMain(viewName);
+    updateNavDisplay(viewName);
+};
 /* ========= SECTION 4: SUMMARY TABS — สลับแท็บสรุปเดือน/วิเคราะห์ ========= */
 // ✅ สลับแท็บหน้าสรุป — รองรับ 3 แท็บ เต็มรูปแบบ
 function switchSummaryTab(tabId) {     
