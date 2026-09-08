@@ -19,46 +19,69 @@ let conf = JSON.parse(localStorage.getItem("barber_conf")) || {
 let payMethod = "";
 
 /* ========= SECTION 2: NEW NAVIGATION SYSTEM — สลับหน้าหลัก ========= */
-// ✅ สลับแท็บ → แสดงเนื้อหาหน้านั้นๆ ปกติ ไม่มีหน้าต่างตั้งค่าเด้งขึ้นมาเอง
-function switchSummaryTab(tabId) {
+// ✅ สลับแท็บ → ป้องกัน Uncaught Error และจัดการ Event Target อย่างถูกต้อง
+function switchSummaryTab(tabId, evt) {
     // ซ่อนหน้าต่างตั้งค่าเมื่อสลับแท็บ (ไม่ให้เด้งเอง)
     const modal = document.getElementById('modalSet');
     if (modal) modal.style.display = 'none';
 
-    // แสดงเนื้อหาแท็บปกติ
+    // ตรวจสอบว่ามี Element ปลายทางหรือไม่ก่อนสั่งงาน
+    const targetTab = document.getElementById(tabId);
+    if (!targetTab) {
+        console.warn('ไม่พบ Element ID:', tabId);
+        return;
+    }
+
+    // ลบ class active เดิมออก
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-    event.target.classList.add('active');
+
+    // เปิดใช้งานแท็บเป้าหมาย
+    targetTab.classList.add('active');
+
+    // จัดการ Event และ Active State ของปุ่ม
+    const currentEvent = evt || window.event;
+    if (currentEvent && currentEvent.currentTarget) {
+        currentEvent.currentTarget.classList.add('active');
+    } else if (currentEvent && currentEvent.target) {
+        const btn = currentEvent.target.closest('.tab-btn');
+        if (btn) btn.classList.add('active');
+    }
 
     // ควบคุมเมนูล่าง
     const hideTabs = ['tabDaily', 'tabMonth', 'tabAnalytics'];
+    const nav1 = document.getElementById('nav1');
+    const nav2 = document.getElementById('nav2');
+    const nav3 = document.getElementById('nav3');
+    const bottomNav = document.querySelector('.bottom-nav');
+
     if (hideTabs.includes(tabId)) {
-        document.getElementById('nav1').style.display = 'none';
-        document.getElementById('nav2').style.display = 'none';
-        document.getElementById('nav3').style.display = 'none';
-        document.querySelector('.bottom-nav').style.gridTemplateColumns = '1fr';
+        if (nav1) nav1.style.display = 'none';
+        if (nav2) nav2.style.display = 'none';
+        if (nav3) nav3.style.display = 'none';
+        if (bottomNav) bottomNav.style.gridTemplateColumns = '1fr';
     } else {
-        document.getElementById('nav1').style.display = 'flex';
-        document.getElementById('nav2').style.display = 'flex';
-        document.getElementById('nav3').style.display = 'flex';
-        document.querySelector('.bottom-nav').style.gridTemplateColumns = 'repeat(4, 1fr)';
+        if (nav1) nav1.style.display = 'flex';
+        if (nav2) nav2.style.display = 'flex';
+        if (nav3) nav3.style.display = 'flex';
+        if (bottomNav) bottomNav.style.gridTemplateColumns = 'repeat(4, 1fr)';
     }
 }
 
 // ✅ สลับหน้าย่อย → แสดงเมนูครบ 4 ปุ่มเสมอ
-const originalGoSub = goSub;
+const originalGoSub = typeof goSub === 'function' ? goSub : null;
 window.goSub = function(num) {
     if (originalGoSub) originalGoSub(num);
-    updateNavDisplay('sub' + num);
+    if (typeof updateNavDisplay === 'function') updateNavDisplay('sub' + num);
 };
 
 // ✅ สลับหน้าหลัก → แสดงเมนูครบ 4 ปุ่มเสมอ
-const originalSwitchMain = switchMainView;
+const originalSwitchMain = typeof switchMainView === 'function' ? switchMainView : null;
 window.switchMainView = function(viewName) {
     if (originalSwitchMain) originalSwitchMain(viewName);
-    updateNavDisplay(viewName);
+    if (typeof updateNavDisplay === 'function') updateNavDisplay(viewName);
 };
+
 /* ========= SECTION 3: SUB-PAGE NAVIGATION — สลับหน้าย่อยบันทึก/รายงาน/บัญชี ========= */
 function goSub(num) {
     // ซ่อนทุกหน้าย่อย
@@ -73,18 +96,21 @@ function goSub(num) {
     // แสดงหน้าที่เลือก
     const target = document.getElementById('p' + num);
     if (target) target.classList.add('active');
+    
     const nav = document.getElementById('nav' + num);
     if (nav) nav.classList.add('active');
 
     // โหลดข้อมูลหน้าที่เปิด
-    const dInp = $("dateInp")?.value || new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById("dateInp");
+    const dInp = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
+
     if (num === 2 && typeof renderDay === 'function') renderDay(dInp);
     if (num === 3) {
-        if ($("accDate") && $("dateInp")) $("accDate").value = $("dateInp").value;
+        const accDate = document.getElementById("accDate");
+        if (accDate && dateInput) accDate.value = dateInput.value;
         if (typeof loadAccountStatus === 'function') loadAccountStatus();
     }
 }
-
 /* ========= SECTION 4: SUMMARY TABS — สลับแท็บสรุปเดือน/วิเคราะห์ ========= */
 // ✅ สลับแท็บหน้าสรุป — รองรับ 3 แท็บ เต็มรูปแบบ
 function switchSummaryTab(tabId) {     
