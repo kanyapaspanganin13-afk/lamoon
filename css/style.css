@@ -186,22 +186,22 @@ h2 {
     text-align: center; 
     color: var(--text); 
     font-weight: 900; 
-    margin: 0 0 16px; 
-    padding: 12px 0; /* เพิ่มความสูงพื้นที่ชื่อร้าน */
+    margin: 0 0 20px; 
+    padding: 16px 0 8px; /* เพิ่มพื้นที่แนวตั้งส่วนหัว */
     letter-spacing: 1.5px; 
     text-transform: uppercase; 
-    font-size: 26px; /* ขยายขนาดชื่อร้าน BARBER SHOP */
+    font-size: 28px; /* ขยายขนาดหัวข้อ BARBER SHOP */
 }
 
 select, input[type="text"], input[type="number"], input[type="date"], input[type="time"], input[type="month"] {
     width: 100%; 
-    height: 58px; /* ปรับความสูงมาตรฐานช่องกรอก */
-    border-radius: 16px; 
+    height: 64px; /* ปรับความสูงมาตรฐานเพิ่มเป็น 64px */
+    border-radius: 18px; 
     border: 1px solid var(--border); 
     background: var(--bg); 
     color: var(--text);
     font-weight: 700; 
-    font-size: 16px; /* เพิ่มขนาดตัวหนังสือ */
+    font-size: 17px; /* ขยายขนาดตัวอักษร */
     text-align: center; 
     text-align-last: center; 
     outline: none;
@@ -214,51 +214,51 @@ select, input[type="text"], input[type="number"], input[type="date"], input[type
     position: relative; 
     background: var(--bg); 
     border: 1px solid var(--border); 
-    border-radius: 16px; 
-    height: 58px; 
+    border-radius: 18px; 
+    height: 64px; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
 }
-.input-date-wrap span { font-weight: 700; color: var(--text); font-size: 16px; }
+.input-date-wrap span { font-weight: 700; color: var(--text); font-size: 17px; }
 .input-date-wrap input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 
 select#hairStyle, select#extra1, select#extra2 { 
-    height: 58px; 
-    font-size: 18px; /* ปรับขนาดฟอนต์เมนูบริการให้ใหญ่ขึ้น */
+    height: 64px; 
+    font-size: 16px; 
     font-weight: 700;
-    padding: 0 6px; 
+    padding: 0 8px; 
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .time-box { position: relative; }
-.time-box label { position: absolute; top: 6px; left: 12px; font-size: 12px; font-weight: 700; color: var(--text); opacity: 0.6; z-index: 1; }
-.time-input-custom { padding-top: 16px; font-size: 22px; font-weight: 800; }
+.time-box label { position: absolute; top: 8px; left: 14px; font-size: 13px; font-weight: 700; color: var(--text); opacity: 0.6; z-index: 1; }
+.time-input-custom { padding-top: 18px; font-size: 24px; font-weight: 800; }
 input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
 
 .price-box { 
     position: relative; 
     background: var(--bg); 
     border: 3px solid #3b82f6; 
-    border-radius: 18px; 
+    border-radius: 20px; 
     display: flex; 
     align-items: center; 
     overflow: hidden; 
-    min-height: 68px; /* เพิ่มความสูงช่องราคา */
-    padding: 0 12px;
+    min-height: 74px; /* ขยายความสูงกล่องราคา */
+    padding: 0 14px;
 }
-.baht { font-size: 34px; color: #3b82f6; font-weight: 900; padding-left: 6px; }
-.price-box input { border: none; background: transparent; font-size: 38px; font-weight: 900; color: var(--text); text-align: right; padding-right: 8px; outline: none; width: 100%; }
+.baht { font-size: 36px; color: #3b82f6; font-weight: 900; padding-left: 6px; }
+.price-box input { border: none; background: transparent; font-size: 42px; font-weight: 900; color: var(--text); text-align: right; padding-right: 8px; outline: none; width: 100%; }
 
 .tip-box { 
-    min-height: 68px !important; 
+    min-height: 74px !important; 
     height: 100% !important;
     background: var(--bg); 
     border: 2px solid var(--border); 
-    border-radius: 18px; 
-    font-size: 22px; /* เพิ่มขนาดตัวเลขทิป */
+    border-radius: 20px; 
+    font-size: 24px; 
     font-weight: 800; 
     color: #64748b; 
     text-align: center; 
@@ -270,46 +270,46 @@ input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
 .select-wrap { 
     position: relative; 
     width: 100%; 
-    height: 56px !important; /* เพิ่มความสูงกล่องวิธีชำระเงิน */
+    height: 64px !important; /* ขยายความสูงกล่องวิธีชำระเงิน */
 }
-.select-wrap i:first-child { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text); font-size: 18px; z-index: 3; }
+.select-wrap i:first-child { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text); font-size: 20px; z-index: 3; }
 .select-wrap select { 
     height: 100%; 
-    font-size: 16px !important; /* เพิ่มขนาดตัวหนังสือวิธีชำระเงิน */
-    padding: 0 10px 0 34px !important;
+    font-size: 16px !important; 
+    padding: 0 10px 0 38px !important;
     font-weight: 700; 
-    border-radius: 16px;
+    border-radius: 18px;
     text-align: center !important;
     text-align-last: center !important;
     white-space: nowrap !important;
 }
-.select-wrap .arrow { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 13px; pointer-events: none; }
+.select-wrap .arrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 14px; pointer-events: none; }
 
 .btn-pay { 
     width: 100%; 
-    height: 56px !important; /* เพิ่มความสูงปุ่มบันทึกข้อมูล */
+    height: 64px !important; /* ขยายความสูงปุ่มบันทึก */
     border: none; 
-    border-radius: 16px; 
+    border-radius: 18px; 
     background: linear-gradient(135deg, var(--save1), var(--save2)); 
     color: #fff; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
     gap: 8px; 
-    font-size: 16px !important; /* เพิ่มขนาดตัวหนังสือปุ่มบันทึก */
+    font-size: 18px !important; 
     font-weight: 800; 
     cursor: pointer; 
-    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25); 
+    box-shadow: 0 4px 14px rgba(30, 64, 175, 0.28); 
     padding: 0 10px !important;
     white-space: nowrap !important;
 }
-.btn-pay i { font-size: 18px; }
+.btn-pay i { font-size: 20px; }
 
-#mixPanel { display: none; background: var(--input-bg); padding: 12px; border-radius: 14px; border: 2px dashed var(--accent); margin: 10px 0; }
+#mixPanel { display: none; background: var(--input-bg); padding: 14px; border-radius: 16px; border: 2px dashed var(--accent); margin: 12px 0; }
 #mixPanel label { display: block; font-size: 14px; font-weight: 700; text-align: center; margin-bottom: 6px; }
 #mixPanel label:first-of-type { color: var(--cash2); }
 #mixPanel label:last-of-type { color: var(--trans2); }
-#mixPanel input { height: 54px; border-radius: 12px; font-size: 16px; }
+#mixPanel input { height: 58px; border-radius: 14px; font-size: 17px; }
 /* ========= 📊 SUMMARY & REPORT ========= */
 .card-total { background: linear-gradient(135deg, var(--primary), var(--accent)); padding: 12px 10px; border-radius: 18px; text-align: center; box-shadow: 0 8px 12px -3px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; }
 .card-total small { font-weight: 700; color: #fff; opacity: 0.8; text-transform: uppercase; font-size: 13px; }
