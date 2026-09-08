@@ -17,7 +17,6 @@ let conf = JSON.parse(localStorage.getItem("barber_conf")) || {
     sound: localStorage.getItem("shopSound") || "on"
 };
 let payMethod = "";
-
 /* ========= SECTION 2: NEW NAVIGATION SYSTEM — สลับหน้าหลัก ========= */
 // ✅ สลับหน้าหลัก — แก้ไขให้แสดงครบทุกหน้า
 function switchMainView(viewName) {
@@ -26,7 +25,6 @@ function switchMainView(viewName) {
         page.classList.remove('active');
         page.style.display = 'none';
     });
-
     // 2. แสดงหน้าตามที่เลือก — ตรงกับ ID ใน HTML
     switch(viewName) {
         case 'home':
@@ -36,7 +34,6 @@ function switchMainView(viewName) {
                 homePage.style.display = 'block';
             }
             break;
-
         case 'workGroup':
             const workPage = document.getElementById('pageWorkGroup');
             if (workPage) {
@@ -45,7 +42,6 @@ function switchMainView(viewName) {
             }
             if (typeof goSub === 'function') goSub(1); // เข้าหน้าบันทึกงานทันที
             break;
-
         // 📊 หน้ารายงาน/สรุป — แสดงเนื้อหา + เปิดแท็บแรก
         case 'summaryPage':
         case 'monthlySummary':
@@ -62,7 +58,6 @@ function switchMainView(viewName) {
                 }
             }
             break;
-
         // 💰 หน้าบัญชี — เพิ่มเข้าไป
         case 'pageAccount':
             const accPage = document.getElementById('pageAccount');
@@ -73,7 +68,6 @@ function switchMainView(viewName) {
             }
             break;
     }
-
     // อัปเดตการแสดงผลเมนูล่าง
     updateNavDisplay(viewName);
 }
@@ -82,27 +76,22 @@ function switchMainView(viewName) {
 function updateNavDisplay(viewName) {
     const bottomNav = document.querySelector('.bottom-nav');
     if (!bottomNav) return;
-
     const allNavItems = bottomNav.querySelectorAll('.nav-item');
-
     // 🏠 หน้าแรก → ซ่อนแถบเมนูทั้งหมด
     if (viewName === 'home') {
         bottomNav.style.display = 'none';
         return;
     }
-
     // ✅ หน้าอื่นทั้งหมด → แสดง 4 ปุ่มครบ
     bottomNav.style.display = 'grid';
     bottomNav.style.gridTemplateColumns = 'repeat(4, 1fr)';
     bottomNav.style.justifyContent = 'stretch';
     bottomNav.style.alignItems = 'stretch';
-
     // ✅ แสดงปุ่มครบทุกปุ่ม + ไฮไลท์หน้าที่เปิด
     allNavItems.forEach((item, index) => {
         item.style.display = 'flex';
         item.style.margin = '0';
         item.classList.remove('active');
-
         // ไฮไลท์ปุ่มตรงกับหน้า
         if ((viewName === 'workGroup' || viewName.startsWith('sub')) && index === 1) {
             item.classList.add('active');
@@ -116,26 +105,23 @@ function updateNavDisplay(viewName) {
     });
 }
 
+/* ========= SECTION 3: SUB-PAGE NAVIGATION — สลับหน้าย่อยบันทึก/รายงาน/บัญชี ========= */
 function goSub(num) {
     // ซ่อนทุกหน้าย่อย
     document.querySelectorAll('.sub-page').forEach(page => {
         page.classList.remove('active');
     });
-
     // แสดงหน้าที่เลือก
     const target = document.getElementById('p' + num);
     if (target) target.classList.add('active');
-
     // ไฮไลท์เมนูตรงกับหน้า
     document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => {
         nav.classList.remove('active');
     });
     const nav = document.getElementById('nav' + num);
     if (nav) nav.classList.add('active');
-
     // อัปเดตสถานะเมนู
     updateNavDisplay('sub' + num);
-
     // โหลดข้อมูล
     const dateInput = document.getElementById("dateInp");
     const dInp = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
@@ -146,15 +132,20 @@ function goSub(num) {
         if (typeof loadAccountStatus === 'function') loadAccountStatus();
     }
 }
+
 /* ========= SECTION 4: SUMMARY TABS — สลับแท็บสรุปเดือน/วิเคราะห์ ========= */
-// ✅ สลับแท็บหน้าสรุป — รองรับ 3 แท็บ เต็มรูปแบบ
+// ✅ สลับแท็บหน้าสรุป — แก้ไขให้ทำงานแน่นอน
 function switchSummaryTab(tabId) {     
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));     
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));     
-    document.getElementById(tabId).classList.add('active');     
-    event.target.classList.add('active'); 
+    document.getElementById(tabId).classList.add('active');
+    // ✅ แก้ไขปัญหา event.target หาย — ค้นหาจากข้อความแทน
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        if (btn.getAttribute('onclick')?.includes(`'${tabId}'`)) {
+            btn.classList.add('active');
+        }
+    });
 }
-
 /* ========= SECTION 5: AUTO-UPDATE ========= */
 (function autoUpdate() {
     const currentStoredVersion = localStorage.getItem("app_v");
