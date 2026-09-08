@@ -83,44 +83,50 @@ function switchMainView(viewName) {
     updateNavDisplay(viewName);
 }
 // ✅ ควบคุมเมนูล่าง — แสดงเฉพาะปุ่ม "หน้าแรก" ให้อยู่ตรงกลางพอดี
+// ✅ ควบคุมเมนูล่าง — ซ่อนเมื่ออยู่หน้าแรก (Home)
 function updateNavDisplay(viewName) {
     const bottomNav = document.querySelector('.bottom-nav');
     if (!bottomNav) return;
 
     const allNavItems = bottomNav.querySelectorAll('.nav-item');
 
-    // รายชื่อ view ที่ต้องการให้เหลือแค่ปุ่ม "หน้าแรก" ปุ่มเดียว
+    // 1. กรณีอยู่หน้าแรก (home): ซ่อน Bottom Nav ทั้งหมด
+    if (viewName === 'home') {
+        bottomNav.style.display = 'none';
+        return;
+    }
+
+    // รายชื่อหน้าสรุป/เปรียบเทียบที่ต้องการให้แสดงเฉพาะปุ่ม "หน้าแรก" ปุ่มเดียวตรงกลาง
     const singleHomeViews = ['summaryPage', 'monthlySummary', 'comparePage'];
 
     if (singleHomeViews.includes(viewName)) {
-        // 1. ซ่อนปุ่มอื่นทั้งหมด เหลือแค่ปุ่มแรก (หน้าแรก)
+        // 2. หน้าสรุป/เปรียบเทียบ: แสดง Bottom Nav + โชว์เฉพาะปุ่มหน้าแรกตรงกลาง
+        bottomNav.style.display = 'flex';
+        bottomNav.style.justifyContent = 'center';
+        bottomNav.style.alignItems = 'center';
+        bottomNav.style.gridTemplateColumns = 'none';
+
         allNavItems.forEach((item, index) => {
             if (index === 0) {
                 item.style.display = 'flex';
-                item.style.margin = '0 auto'; // จัดตัวปุ่มให้อยู่ตรงกลาง
+                item.style.margin = '0 auto';
                 item.classList.add('active');
             } else {
                 item.style.display = 'none';
                 item.classList.remove('active');
             }
         });
-
-        // 2. ปรับการจัดวางของคอนเทนเนอร์หลักให้อยู่ตรงกลาง
-        bottomNav.style.display = 'flex';
-        bottomNav.style.justifyContent = 'center';
-        bottomNav.style.alignItems = 'center';
-        bottomNav.style.gridTemplateColumns = 'none';
     } else {
-        // หน้าอื่นๆ ให้แสดงครบทั้ง 4 ปุ่มตามปกติ
-        allNavItems.forEach(item => {
-            item.style.display = 'flex';
-            item.style.margin = '0'; // คืนค่า margin
-        });
-
+        // 3. หน้าย่อยบันทึกงาน (workGroup/subPage): แสดงครบทั้ง 4 ปุ่ม
         bottomNav.style.display = 'grid';
         bottomNav.style.gridTemplateColumns = 'repeat(4, 1fr)';
         bottomNav.style.justifyContent = 'stretch';
         bottomNav.style.alignItems = 'stretch';
+
+        allNavItems.forEach(item => {
+            item.style.display = 'flex';
+            item.style.margin = '0';
+        });
     }
 }
 function goSub(num) {
