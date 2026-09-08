@@ -549,8 +549,8 @@ function handleInsurance() {
 }
 
 /* ========= SECTION 17: SETTINGS & THEME ========= */
-// ✅ เปิดหน้าต่างตั้งค่า — ป้องกันข้อผิดพลาด หาไม่เจอก็ไม่หยุดทำงาน
-function openSettings() { 
+// ✅ เปิดหน้าต่างตั้งค่า
+function openSettings() {
     if ($("setShop")) $("setShop").value = conf.shop;
     if ($("setPerc")) $("setPerc").value = conf.perc;
     if ($("setGuar")) $("setGuar").value = conf.guar;
@@ -558,39 +558,54 @@ function openSettings() {
     if ($("setSound")) $("setSound").value = conf.sound;
     if ($("setVoice")) $("setVoice").value = conf.voice;
 
-    // ✅ แก้ตรงนี้ — ถ้าหาเจอค่อยเปิด ป้องกัน Error
     const modal = document.getElementById("modalSet");
     if (modal) {
         modal.style.display = "flex";
-        modal.style.zIndex = "10000"; // บังคับอยู่ชั้นบนสุด ไม่ถูกบัง
+        modal.style.zIndex = "10000";
     }
 }
 
-function applyTheme(t) {
-    document.body.classList.remove("navy", "vintage");
-    if (t === "navy") document.body.classList.add("navy");
-    else if (t === "vintage") document.body.classList.add("vintage");
-    conf.theme = t; localStorage.setItem("shopTheme", t);
+// ✅ ปิดหน้าต่างตั้งค่า
+function closeSettings() {
+    const modal = document.getElementById("modalSet");
+    if (modal) {
+        modal.style.display = "none";
+    }
 }
 
-function saveSettings() {
-    conf.shop = $("setShop")?.value || "Barber Shop";
-    conf.perc = parseFloat($("setPerc")?.value) || 50;
-    conf.guar = parseFloat($("setGuar")?.value) || 0;
-    conf.theme = $("setTheme")?.value || "light";
-    conf.sound = $("setSound")?.value || "on";
-    conf.voice = $("setVoice")?.value || "female";
-    localStorage.setItem("shopName", conf.shop);
-    localStorage.setItem("shopPerc", conf.perc);
-    localStorage.setItem("shopGuar", conf.guar);
-    saveDB();
-    applyTheme(conf.theme);
+// ✅ สลับแท็บ — ห้ามยุ่งกับหน้าต่างตั้งค่าเด็ดขาด!
+function switchSummaryTab(tabId, evt) {
+    // ❌ ไม่ต้องมีบรรทัดเกี่ยวกับ modal เลย ทั้งเปิดและปิด
 
-    // ✅ ปิดแบบปลอดภัยเหมือนกัน
-    const modal = document.getElementById("modalSet");
-    if (modal) modal.style.display = "none";
+    const targetTab = document.getElementById(tabId);
+    if (!targetTab) {
+        console.warn("ไม่พบแท็บ:", tabId);
+        return;
+    }
 
-    notify("success", "บันทึกสำเร็จ", "ตั้งค่าถูกบันทึกแล้ว");
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    targetTab.classList.add("active");
+
+    const e = evt || window.event;
+    const btn = e?.currentTarget || e?.target?.closest(".tab-btn");
+    if (btn) btn.classList.add("active");
+
+    const hideTabs = ["tabOverview", "tabMonth", "tabAnalytics"];
+    const allNav = document.querySelectorAll("#pageSummary .bottom-nav .nav-item");
+    const navWrap = document.querySelector("#pageSummary .bottom-nav");
+
+    if (hideTabs.includes(tabId)) {
+        allNav.forEach((item, i) => {
+            item.style.display = i === 0 ? "flex" : "none";
+        });
+        if (navWrap) navWrap.style.gridTemplateColumns = "1fr";
+    } else {
+        allNav.forEach(item => {
+            item.style.display = "flex";
+        });
+        if (navWrap) navWrap.style.gridTemplateColumns = "repeat(4, 1fr)";
+    }
 }
 /* ========= SECTION 18: MONTHLY SUMMARY & EXCEL EXPORT ========= */
 function loadHistMonth() {
