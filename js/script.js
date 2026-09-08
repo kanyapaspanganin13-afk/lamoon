@@ -20,9 +20,40 @@ let payMethod = "";
 
 /* ========= SECTION 2: NEW NAVIGATION SYSTEM — สลับหน้าหลัก ========= */
 
+// ✅ สลับหน้าหลัก — เขียนตรงนี้ครบ ไม่เรียกของเดิม
+function switchMainView(viewName) {
+    // ซ่อนทุกหน้า
+    document.querySelectorAll('.app-page').forEach(page => {
+        page.classList.remove('active');
+    });
+
+    // แสดงหน้าที่เลือก — ครบทุกชื่อปุ่มจากหน้าแรก
+    switch(viewName) {
+        case 'home':
+            document.getElementById('pageHome').classList.add('active');
+            break;
+        case 'workGroup':
+            document.getElementById('pageWorkGroup').classList.add('active');
+            goSub(1); // เข้าหน้าบันทึกงานทันที
+            break;
+        case 'summaryPage':     // สรุปภาพรวม
+        case 'monthlySummary':  // สรุปรายเดือน
+        case 'comparePage':     // เปรียบเทียบ
+            document.getElementById('pageSummary').classList.add('active');
+            // เลือกแท็บให้ตรงปุ่มที่กด
+            if (viewName === 'comparePage') {
+                switchSummaryTab('tabAnalytics', event);
+            } else if (viewName === 'monthlySummary') {
+                switchSummaryTab('tabMonth', event);
+            } else {
+                switchSummaryTab('tabOverview', event);
+            }
+            break;
+    }
+}
+
 // ✅ ควบคุมเมนูล่าง — แสดงทั้ง 4 ปุ่ม
 function updateNavDisplay(viewName) {
-    // หาปุ่มทุกแบบ โดยไม่ต้องอาศัย ID
     document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
         item.style.display = 'flex';
     });
@@ -30,7 +61,7 @@ function updateNavDisplay(viewName) {
     if (bottomNav) bottomNav.style.gridTemplateColumns = 'repeat(4, 1fr)';
 }
 
-// ✅ สลับแท็บสรุป — ป้องกัน Error + ซ่อนเมนูเหลือโฮมตรงกลาง
+// ✅ สลับแท็บในหน้าสรุป
 function switchSummaryTab(tabId, evt) {
     // ซ่อนหน้าต่างตั้งค่าเมื่อสลับแท็บ
     const modal = document.getElementById('modalSet');
@@ -38,7 +69,7 @@ function switchSummaryTab(tabId, evt) {
 
     const targetTab = document.getElementById(tabId);
     if (!targetTab) {
-        console.warn('ไม่พบ Element ID:', tabId);
+        console.warn('ไม่พบแท็บ:', tabId);
         return;
     }
 
@@ -46,54 +77,53 @@ function switchSummaryTab(tabId, evt) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     targetTab.classList.add('active');
 
-    const currentEvent = evt || window.event;
-    if (currentEvent && currentEvent.currentTarget) {
-        currentEvent.currentTarget.classList.add('active');
-    } else if (currentEvent && currentEvent.target) {
-        const btn = currentEvent.target.closest('.tab-btn');
-        if (btn) btn.classList.add('active');
-    }
+    // ไฮไลท์ปุ่มที่กด
+    const e = evt || window.event;
+    const btn = e?.currentTarget || e?.target?.closest('.tab-btn');
+    if (btn) btn.classList.add('active');
 
-    // ✅ ชื่อแท็บตรงกับ HTML แล้ว
+    // ซ่อนเมนูเหลือโฮมตรงกลาง
     const hideTabs = ['tabOverview', 'tabMonth', 'tabAnalytics'];
-    const allNavItems = document.querySelectorAll('.bottom-nav .nav-item');
-    const bottomNav = document.querySelector('.bottom-nav');
+    const allNav = document.querySelectorAll('#pageSummary .bottom-nav .nav-item');
+    const navWrap = document.querySelector('#pageSummary .bottom-nav');
 
     if (hideTabs.includes(tabId)) {
-        // ✅ ซ่อนปุ่มที่ 2,3,4 เหลือแค่โฮมอยู่ตรงกลาง
-        allNavItems.forEach((item, index) => {
-            item.style.display = index === 0 ? 'flex' : 'none';
+        // เหลือแค่โฮม อันอื่นซ่อน
+        allNav.forEach((item, i) => {
+            item.style.display = i === 0 ? 'flex' : 'none';
         });
-        if (bottomNav) bottomNav.style.gridTemplateColumns = '1fr';
+        if (navWrap) navWrap.style.gridTemplateColumns = '1fr';
     } else {
-        // ✅ แสดงทั้ง 4 ปุ่ม
-        allNavItems.forEach(item => {
+        // แสดงทั้ง 4
+        allNav.forEach(item => {
             item.style.display = 'flex';
         });
-        if (bottomNav) bottomNav.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        if (navWrap) navWrap.style.gridTemplateColumns = 'repeat(4, 1fr)';
     }
 }
-// ✅ สลับหน้าย่อยบันทึก/รายงาน/บัญชี
+
+// ✅ สลับหน้าย่อย บันทึก/รายงาน/บัญชี
 function goSub(num) {
     // ซ่อนทุกหน้าย่อย
     document.querySelectorAll('.sub-page').forEach(page => {
         page.classList.remove('active');
     });
-    // ปรับสถานะเมนู
     document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => {
         nav.classList.remove('active');
     });
+
     // แสดงหน้าที่เลือก
     const target = document.getElementById('p' + num);
     if (target) target.classList.add('active');
-    
+
+    // ไฮไลท์เมนูตรงกับหน้า (เฉพาะหน้าบันทึกที่มี ID nav1/nav2/nav3)
     const nav = document.getElementById('nav' + num);
     if (nav) nav.classList.add('active');
 
-    // ✅ แสดงเมนูครบ 4 ปุ่ม
+    // แสดงเมนูครบ 4 ปุ่ม
     updateNavDisplay('sub' + num);
 
-    // โหลดข้อมูลหน้าที่เปิด
+    // โหลดข้อมูล
     const dateInput = document.getElementById("dateInp");
     const dInp = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
     if (num === 2 && typeof renderDay === 'function') renderDay(dInp);
@@ -103,13 +133,6 @@ function goSub(num) {
         if (typeof loadAccountStatus === 'function') loadAccountStatus();
     }
 }
-
-// ✅ สลับหน้าหลัก → แสดงเมนูครบ 4 ปุ่มเสมอ
-const originalSwitchMain = typeof switchMainView === 'function' ? switchMainView : null;
-window.switchMainView = function(viewName) {
-    if (originalSwitchMain) originalSwitchMain(viewName);
-    updateNavDisplay(viewName);
-};
 /* ========= SECTION 4: SUMMARY TABS — สลับแท็บสรุปเดือน/วิเคราะห์ ========= */
 // ✅ สลับแท็บหน้าสรุป — รองรับ 3 แท็บ เต็มรูปแบบ
 function switchSummaryTab(tabId) {     
