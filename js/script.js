@@ -528,24 +528,93 @@ function openHistoryModal() {
 }
 function closeHistoryModal() { $("historyModal").style.display = "none"; }
 
-/* ========= SECTION 16: HOLIDAY & INSURANCE ========= */
-function handleHoliday() {
-    const date = $("dateInp")?.value || new Date().toISOString().split('T')[0];
-    if (db.some(r => r.date === date && r.type === "HOLIDAY")) return notify("error", "แจ้งเตือน", "วันนี้บันทึกวันหยุดไปแล้ว");
-    db.push({ id: Date.now(), date, type: "HOLIDAY" });
-    saveDB();
-    notify("success", "สำเร็จ", "บันทึกวันหยุดเรียบร้อย");
-    renderDay(date);
+/* ========= SECTION 16: INSURANCE & HOLIDAY========= */
+async function handleInsurance() {
+    const d = $("dateInp")?.value || new Date().toISOString().split('T')[0];
+    const g = parseInt(conf.guar) || 0;
+
+    // 1. ตรวจสอบการตั้งค่ายอดประกัน
+    if (g <= 0) {
+        notify("error", "ข้อมูลไม่ครบถ้วน", "กรุณาตั้งค่าเงินประกันรายได้ในระบบก่อนดำเนินการ");
+        return;
+    }
+
+    // 2. ตรวจสอบว่าเปิดประกันไปหรือยัง
+    const isClaimed = db.some(r => r.date === d && r.type === "GUARANTEE_CLAIM");
+    if (isClaimed) {
+        notify("error", "แจ้งเตือน", "ระบบประกันรายได้ของวันนี้มีการเปิดใช้งานเรียบร้อยแล้ว");
+        return;
+    }
+
+    // 3. ยืนยันการเปิดระบบประกันรายได้
+    const result = await Swal.fire({
+        title: 'ยืนยันการเปิดระบบประกัน',
+        text: `ต้องการเปิดระบบประกันรายได้จำนวน ฿${g.toLocaleString()} สำหรับวันที่ ${d} ใช่หรือไม่?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: 'var(--success)',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'ยืนยันการเปิดระบบ',
+        cancelButtonText: 'ยกเลิก',
+        background: 'var(--card)',
+        color: 'var(--text)'
+    });
+
+    if (result.isConfirmed) {
+        db.push({ 
+            id: Date.now(), 
+            date: d, 
+            time: "00:00", 
+            svcs: ["🛡️ ประกันรายวัน"], 
+            price: g, // บันทึกยอดประกันตามที่กำหนดในตั้งค่า (conf.guar)
+            pay: "N/A", 
+            type: "GUARANTEE_CLAIM" 
+        });
+        saveDB(); 
+        notify("success", "ดำเนินการสำเร็จ", `เปิดระบบประกันรายได้จำนวน ฿${g.toLocaleString()} เรียบร้อยแล้ว`);
+        renderDay(d);
+    }
 }
-function handleInsurance() {
-    const date = $("dateInp")?.value || new Date().toISOString().split('T')[0];
-    const total = db.filter(r => r.date === date).reduce((s,r)=>s+(r.price||0),0);
-    if (total >= conf.guar) return notify("success", "ไม่ต้องใช้สิทธิ", `ยอด ฿${total} ≥ หลักประกัน ฿${conf.guar}`);
-    const short = conf.guar - total;
-    db.push({ id: Date.now(), date, type: "GUARANTEE_CLAIM", price: short });
-    saveDB();
-    notify("success", "ใช้สิทธิสำเร็จ", `ขอเพิ่ม ฿${short}`);
-    renderDay(date);
+
+async function handleHoliday() {
+    const d = $("dateInp")?.value || new Date().toISOString().split('T')[0];
+
+    // ตรวจสอบบันทึกซ้ำ
+    const isHoliday = db.some(r => r.date === d && r.type === "HOLIDAY");
+    if (isHoliday) {
+        notify("error", "แจ้งเตือน", "วันที่เลือกได้ดำเนินการบันทึกเป็นวันหยุดเรียบร้อยแล้ว");
+        return;
+    }
+
+    // ยืนยันการบันทึกวันหยุด
+    const result = await Swal.fire({
+        title: 'ยืนยันการบันทึกวันหยุด',
+        text: `ต้องการบันทึกวันที่ ${d} เป็น "วันหยุด" ใช่หรือไม่? (ระบบจะไม่คำนวณรายได้ในวันนี้)`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: 'var(--success)',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'ยืนยันการบันทึก',
+        cancelButtonText: 'ยกเลิก',
+        background: 'var(--card)',
+        color: 'var(--text)'
+    });
+
+    if (result.isConfirmed) {
+        db.push({
+            id: Date.now(),
+            date: d, 
+            time: "00:00",
+            svcs: ["🏖️ วันหยุด"],
+            price: 0, 
+            pay: "N/A",
+            type: "HOLIDAY",
+            off: true  
+        });
+        saveDB();
+        notify("success", "ดำเนินการสำเร็จ", "บันทึกข้อมูลวันหยุดเรียบร้อยแล้ว");
+        renderDay(d);
+    }
 }
 
 /* ========= SECTION 17: SETTINGS & THEME ========= */
