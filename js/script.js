@@ -178,7 +178,63 @@ function saveDB() {
         return true;
     } catch (e) { console.error("❌ บันทึกไม่ได้:", e); return false; }
 }
+function saveSettings() {
+    try {
+        // 1. ดึงค่าจากฟอร์ม
+        const settings = {
+            shop:  $("setShop")?.value || "",
+            perc:  parseFloat($("setPerc")?.value) || 0,
+            guar:  parseFloat($("setGuar")?.value) || 0,
+            theme: $("setTheme")?.value || "light",
+            voice: $("setVoice")?.value || "default.mp3",
+            sound: $("setSound")?.value || "on"
+        };
 
+        // 2. อัปเดตตัวแปรกลาง (conf) ทันที 
+        if (typeof conf !== "undefined") {
+            Object.assign(conf, settings);
+        }
+
+        // 3. บันทึกลง LocalStorage และ DB
+        localStorage.setItem('barber_conf', JSON.stringify(conf));
+        localStorage.setItem('shopName',  settings.shop);
+        localStorage.setItem('shopPerc',  settings.perc);
+        localStorage.setItem('shopGuar',  settings.guar);
+        localStorage.setItem('shopTheme', settings.theme);
+        localStorage.setItem('shopVoice', settings.voice);
+        localStorage.setItem('shopSound', settings.sound);
+
+        if (typeof saveDB === "function") saveDB();
+
+        // 4. อัปเดตการแสดงผลชื่อร้าน
+        const nameDisp = $("shopNameDisp") || $("shopNameDisplay");
+        if (nameDisp) {
+            nameDisp.innerText = settings.shop.toUpperCase();
+        } 
+
+        // 5. เรียกฟังก์ชันอัปเดต UI 
+        if (typeof applyTheme === "function") applyTheme(settings.theme);
+        if (typeof calculateMoney === "function") calculateMoney(); 
+        
+        // ดึงวันที่จาก dateInp เพื่อป้องกันการส่งค่า undefined ให้ renderDay
+        const currentDate = $("dateInp")?.value || new Date().toISOString().split('T')[0];
+        if (typeof renderDay === "function") renderDay(currentDate); 
+
+        // 6. ปิด Modal
+        if ($("modalSet")) $("modalSet").style.display = 'none';
+        
+        // 7. แจ้งเตือนความสำเร็จ
+        if (typeof notify === "function") {
+            notify("success", "บันทึกสำเร็จ", "ระบบได้ดำเนินการบันทึกการตั้งค่าเรียบร้อยแล้ว");
+        }
+
+    } catch (e) {
+        console.error("saveSettings error:", e);
+        if (typeof notify === "function") {
+            notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลตั้งค่าได้");
+        }
+    }
+}
 /* ========= SECTION 8: NOTIFY & SOUND ========= */
 function speak(type, message = "") {
     if (conf.sound === "off") return;
