@@ -109,55 +109,49 @@ body > center, body > a, body > br { display: none !important; }
 /* ========= 📋 MENU GRID & CARDS ========= */
 .menu-grid {
     display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 10px !important;
-    margin: 12px 0 !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* ✅ 2 คอลัมน์ เต็มจอ */
+    gap: 14px !important; /* เพิ่มระยะห่างนิดหน่อย */
+    margin: 16px 0 !important;
+    width: 100% !important;
 }
 .menu-card {
-    background: var(--bg) !important;
-    border: 1px solid var(--border) !important;
+    background: #ffffff !important; /* ✅ พื้นขาว ตามรูปที่ 2 */
+    border: 1px solid #e5e7eb !important;
     border-radius: 16px !important;
-    padding: 10px 6px !important;
-    min-height: 80px !important;
+    padding: 18px 12px !important; /* ✅ เพิ่มความสูง */
+    min-height: 100px !important; /* ✅ ปุ่มสูงพอดีมือถือ */
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 4px !important;
+    gap: 8px !important; /* ✅ ระยะห่างไอคอนกับข้อความ */
     cursor: pointer !important;
     text-align: center !important;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.03) !important;
-    transition: transform 0.1s ease, background 0.2s !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04) !important;
+    transition: transform 0.15s ease, box-shadow 0.2s !important;
     width: 100%;
 }
 .menu-card:active {
-    transform: scale(0.96) !important;
-    background: var(--card) !important;
-}
-.menu-card .icon,
-.menu-card .menu-icon,
-.menu-card span,
-.menu-card img,
-.menu-card i {
-    pointer-events: none !important;
+    transform: scale(0.97) !important;
+    background: #f8fafc !important;
 }
 .menu-card .icon,
 .menu-card .menu-icon {
-    width: 34px !important;
-    height: 34px !important;
-    border-radius: 10px !important;
+    width: 48px !important;  /* ✅ ไอคอนใหญ่ขึ้น */
+    height: 48px !important;
+    border-radius: 12px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     color: #fff !important;
-    font-size: 17px !important;
-    margin-bottom: 2px !important;
+    font-size: 22px !important;
+    margin-bottom: 4px !important;
 }
 .menu-card span {
     color: var(--text) !important;
     font-weight: 700 !important;
-    font-size: 12px !important;
-    line-height: 1.2 !important;
+    font-size: 14px !important;  /* ✅ ตัวหนังสือชัดขึ้น */
+    line-height: 1.3 !important;
     white-space: nowrap !important;
 }
 .grad-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
