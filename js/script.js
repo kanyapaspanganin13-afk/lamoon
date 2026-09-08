@@ -63,10 +63,6 @@ function updateNavDisplay(viewName) {
 
 // ✅ สลับแท็บในหน้าสรุป
 function switchSummaryTab(tabId, evt) {
-    // ซ่อนหน้าต่างตั้งค่าเมื่อสลับแท็บ
-    const modal = document.getElementById('modalSet');
-    if (modal) modal.style.display = 'none';
-
     const targetTab = document.getElementById(tabId);
     if (!targetTab) {
         console.warn('ไม่พบแท็บ:', tabId);
