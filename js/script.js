@@ -19,8 +19,7 @@ let conf = JSON.parse(localStorage.getItem("barber_conf")) || {
 let payMethod = "";
 
 /* ========= SECTION 2: NEW NAVIGATION SYSTEM — สลับหน้าหลัก ========= */
-
-// ✅ สลับหน้าหลัก — เขียนตรงนี้ครบ ไม่เรียกของเดิม
+// ✅ สลับหน้าหลัก — แก้ไขให้แสดงครบทุกหน้า
 function switchMainView(viewName) {
     // 1. ซ่อนทุกหน้า (.app-page)
     document.querySelectorAll('.app-page').forEach(page => {
@@ -28,7 +27,7 @@ function switchMainView(viewName) {
         page.style.display = 'none';
     });
 
-    // 2. แสดงหน้าตามที่เลือก
+    // 2. แสดงหน้าตามที่เลือก — ตรงกับ ID ใน HTML
     switch(viewName) {
         case 'home':
             const homePage = document.getElementById('pageHome');
@@ -47,34 +46,30 @@ function switchMainView(viewName) {
             if (typeof goSub === 'function') goSub(1); // เข้าหน้าบันทึกงานทันที
             break;
 
-        // 📊 ปุ่มสรุปยอดรวม (3 แท็บ: รายได้ประจำเดือน, วิเคราะห์รายได้, ทรงผม&บริการ)
+        // 📊 หน้ารายงาน/สรุป — แสดงเนื้อหา + เปิดแท็บแรก
         case 'summaryPage':
+        case 'monthlySummary':
+        case 'comparePage':
             const summaryPage = document.getElementById('pageSummary');
             if (summaryPage) {
                 summaryPage.classList.add('active');
                 summaryPage.style.display = 'block';
-                // เปิดแท็บแรก (รายได้ประจำเดือน) เป็นค่าเริ่มต้น
-                switchMainTab('pageSummary', 'summaryTab1');
+                // เปิดแท็บที่ถูกต้อง
+                if (viewName === 'comparePage' && typeof switchSummaryTab === 'function') {
+                    switchSummaryTab('tabAnalytics');
+                } else if (typeof switchSummaryTab === 'function') {
+                    switchSummaryTab('tabMonth');
+                }
             }
             break;
 
-        // 📅 ปุ่มสรุปรายเดือน (2 แท็บ)
-        case 'monthlySummary':
-            const monthlyPage = document.getElementById('pageMonthlyReport');
-            if (monthlyPage) {
-                monthlyPage.classList.add('active');
-                monthlyPage.style.display = 'block';
-                // เปิดแท็บแรกเป็นค่าเริ่มต้น
-                switchMainTab('pageMonthlyReport', 'monthlyTab1');
-            }
-            break;
-
-        // 🔍 ปุ่มเปรียบเทียบ (1 หน้าเดี่ยว)
-        case 'comparePage':
-            const comparePage = document.getElementById('pageComparison');
-            if (comparePage) {
-                comparePage.classList.add('active');
-                comparePage.style.display = 'block';
+        // 💰 หน้าบัญชี — เพิ่มเข้าไป
+        case 'pageAccount':
+            const accPage = document.getElementById('pageAccount');
+            if (accPage) {
+                accPage.classList.add('active');
+                accPage.style.display = 'block';
+                if (typeof loadAccountStatus === 'function') loadAccountStatus();
             }
             break;
     }
@@ -82,71 +77,63 @@ function switchMainView(viewName) {
     // อัปเดตการแสดงผลเมนูล่าง
     updateNavDisplay(viewName);
 }
-// ✅ ควบคุมเมนูล่าง — แสดงเฉพาะปุ่ม "หน้าแรก" ให้อยู่ตรงกลางพอดี
-// ✅ ควบคุมเมนูล่าง — ซ่อนเมื่ออยู่หน้าแรก (Home)
+
+// ✅ ควบคุมเมนูล่าง — ซ่อนหน้าแรก / แสดง 4 ปุ่มหน้าอื่นๆ
 function updateNavDisplay(viewName) {
     const bottomNav = document.querySelector('.bottom-nav');
     if (!bottomNav) return;
 
     const allNavItems = bottomNav.querySelectorAll('.nav-item');
 
-    // 1. กรณีอยู่หน้าแรก (home): ซ่อน Bottom Nav ทั้งหมด
+    // 🏠 หน้าแรก → ซ่อนแถบเมนูทั้งหมด
     if (viewName === 'home') {
         bottomNav.style.display = 'none';
         return;
     }
 
-    // รายชื่อหน้าสรุป/เปรียบเทียบที่ต้องการให้แสดงเฉพาะปุ่ม "หน้าแรก" ปุ่มเดียวตรงกลาง
-    const singleHomeViews = ['summaryPage', 'monthlySummary', 'comparePage'];
+    // ✅ หน้าอื่นทั้งหมด → แสดง 4 ปุ่มครบ
+    bottomNav.style.display = 'grid';
+    bottomNav.style.gridTemplateColumns = 'repeat(4, 1fr)';
+    bottomNav.style.justifyContent = 'stretch';
+    bottomNav.style.alignItems = 'stretch';
 
-    if (singleHomeViews.includes(viewName)) {
-        // 2. หน้าสรุป/เปรียบเทียบ: แสดง Bottom Nav + โชว์เฉพาะปุ่มหน้าแรกตรงกลาง
-        bottomNav.style.display = 'flex';
-        bottomNav.style.justifyContent = 'center';
-        bottomNav.style.alignItems = 'center';
-        bottomNav.style.gridTemplateColumns = 'none';
+    // ✅ แสดงปุ่มครบทุกปุ่ม + ไฮไลท์หน้าที่เปิด
+    allNavItems.forEach((item, index) => {
+        item.style.display = 'flex';
+        item.style.margin = '0';
+        item.classList.remove('active');
 
-        allNavItems.forEach((item, index) => {
-            if (index === 0) {
-                item.style.display = 'flex';
-                item.style.margin = '0 auto';
-                item.classList.add('active');
-            } else {
-                item.style.display = 'none';
-                item.classList.remove('active');
-            }
-        });
-    } else {
-        // 3. หน้าย่อยบันทึกงาน (workGroup/subPage): แสดงครบทั้ง 4 ปุ่ม
-        bottomNav.style.display = 'grid';
-        bottomNav.style.gridTemplateColumns = 'repeat(4, 1fr)';
-        bottomNav.style.justifyContent = 'stretch';
-        bottomNav.style.alignItems = 'stretch';
-
-        allNavItems.forEach(item => {
-            item.style.display = 'flex';
-            item.style.margin = '0';
-        });
-    }
+        // ไฮไลท์ปุ่มตรงกับหน้า
+        if ((viewName === 'workGroup' || viewName.startsWith('sub')) && index === 1) {
+            item.classList.add('active');
+        }
+        if ((viewName === 'summaryPage' || viewName === 'monthlySummary' || viewName === 'comparePage') && index === 2) {
+            item.classList.add('active');
+        }
+        if (viewName === 'pageAccount' && index === 3) {
+            item.classList.add('active');
+        }
+    });
 }
+
 function goSub(num) {
     // ซ่อนทุกหน้าย่อย
     document.querySelectorAll('.sub-page').forEach(page => {
         page.classList.remove('active');
-    });
-    document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => {
-        nav.classList.remove('active');
     });
 
     // แสดงหน้าที่เลือก
     const target = document.getElementById('p' + num);
     if (target) target.classList.add('active');
 
-    // ไฮไลท์เมนูตรงกับหน้า (เฉพาะหน้าบันทึกที่มี ID nav1/nav2/nav3)
+    // ไฮไลท์เมนูตรงกับหน้า
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => {
+        nav.classList.remove('active');
+    });
     const nav = document.getElementById('nav' + num);
     if (nav) nav.classList.add('active');
 
-    // แสดงเมนูครบ 4 ปุ่ม
+    // อัปเดตสถานะเมนู
     updateNavDisplay('sub' + num);
 
     // โหลดข้อมูล
