@@ -269,64 +269,83 @@
     </div>
 
     <!-- ==================== 📊 3. หน้า "สรุปยอดรวม" — มีเมนูล่างเหมือนกัน ==================== -->
+    <!-- ================= 1. SECTION: สรุปยอดรวม (3 แท็บ) ================= -->
     <section id="pageSummary" class="app-page full-page">
         <div class="top-bar">
             <span class="top-title">📊 สรุปยอดรวม</span>
         </div>
-        <!-- แท็บสลับ 3 แท็บ: สรุปรายเดือน / สรุปภาพรวม / เปรียบเทียบ -->
+    
+        <!-- แท็บสลับ 3 แท็บ -->
         <div class="tab-header">
-            <button class="tab-btn" onclick="switchSummaryTab('tabMonth', event)">📊 สรุปรายเดือน</button>
-            <button class="tab-btn" onclick="switchSummaryTab('tabOverview', event)">📈 สรุปภาพรวม</button>
-            <button class="tab-btn" onclick="switchSummaryTab('tabAnalytics', event)">🔍 เปรียบเทียบ</button>
+            <button class="tab-btn active" onclick="switchMainTab('pageSummary', 'summaryTab1', event)">📊 รายได้ประจำเดือน</button>
+            <button class="tab-btn" onclick="switchMainTab('pageSummary', 'summaryTab2', event)">📈 วิเคราะห์รายได้</button>
+            <button class="tab-btn" onclick="switchMainTab('pageSummary', 'summaryTab3', event)">✂️ ทรงผม&บริการ</button>
         </div>
+    
         <div class="tab-content-wrap">
-            <!-- แท็บ 1: สรุปรายเดือน -->
-            <div id="tabMonth" class="tab-panel active">
-                <div class="filter-month-wrap">
-                    <label for="summaryMonthSelect">เลือกเดือน:</label>
-                    <input type="month" id="summaryMonthSelect" onchange="loadMonthlySummary(this.value)">
-                    <button class="btn-export-excel" onclick="exportMonthlyExcel()">
-                        <i class="fas fa-file-excel"></i> สรุปรายเดือน (.csv)
-                    </button>
-                </div>
-                <div id="monthlyCardSummary" class="monthly-cards"></div>
-                <div class="table-responsive">
-                    <table class="summary-table" id="monthlyDetailTable">
-                        <thead>
-                            <tr>
-                                <th>วันที่</th>
-                                <th>วัน</th>
-                                <th>ลูกค้า</th>
-                                <th>ยอดช่าง</th>
-                                <th>โกน</th>
-                                <th>สระ</th>
-                                <th>ย้อม</th>
-                            </tr>
-                        </thead>
-                        <tbody id="monthlyTableBody"></tbody>
-                    </table>
-                </div>
+            <!-- แท็บ 1: รายได้ประจำเดือน -->
+            <div id="summaryTab1" class="tab-panel active">
+                <h3 class="panel-title">📊 รายได้ประจำเดือน</h3>
+                <div id="monthlyIncomeContent"></div>
             </div>
-            <!-- แท็บ 2: สรุปภาพรวม -->
-            <div id="tabOverview" class="tab-panel">
-                <div class="analytics-container">
-                    <h3 style="text-align:center; margin:16px 0;">📈 สรุปภาพรวม</h3>
-                    <div id="overviewContent" style="padding:12px;"></div>
-                </div>
+    
+            <!-- แท็บ 2: วิเคราะห์รายได้ -->
+            <div id="summaryTab2" class="tab-panel" style="display: none;">
+                <h3 class="panel-title">📈 วิเคราะห์รายได้</h3>
+                <div id="incomeAnalyticsContent"></div>
             </div>
-            <!-- แท็บ 3: เปรียบเทียบ -->
-            <div id="tabAnalytics" class="tab-panel">
-                <div class="analytics-container">
-                    <h3 style="text-align:center; margin:16px 0;">🔍 วิเคราะห์เปรียบเทียบ</h3>
-                    <div class="btn-compare-wrap">
-                        <button class="btn-compare" onclick="openComparisonSelector()">
-                            <i class="fas fa-chart-line"></i> เลือกช่วงเวลาเปรียบเทียบ
-                        </button>
-                    </div>
-                    <div id="analyticsChartContent"></div>
-                </div>
+    
+            <!-- แท็บ 3: ทรงผม & บริการ -->
+            <div id="summaryTab3" class="tab-panel" style="display: none;">
+                <h3 class="panel-title">✂️ ทรงผม & บริการ</h3>
+                <div id="servicesStatsContent"></div>
             </div>
         </div>
+    </section>
+    
+    
+    <!-- ================= 2. SECTION: สรุปรายเดือน (2 แท็บ) ================= -->
+    <section id="pageMonthlyReport" class="app-page full-page" style="display: none;">
+        <div class="top-bar">
+            <span class="top-title">📅 สรุปรายเดือน</span>
+        </div>
+    
+        <!-- แท็บสลับ 2 แท็บ (เว้นชื่อไว้ก่อน) -->
+        <div class="tab-header">
+            <button class="tab-btn active" onclick="switchMainTab('pageMonthlyReport', 'monthlyTab1', event)">[ แท็บที่ 1 ]</button>
+            <button class="tab-btn" onclick="switchMainTab('pageMonthlyReport', 'monthlyTab2', event)">[ แท็บที่ 2 ]</button>
+        </div>
+    
+        <div class="tab-content-wrap">
+            <!-- แท็บ 1 -->
+            <div id="monthlyTab1" class="tab-panel active">
+                <div id="monthlyContent1"></div>
+            </div>
+    
+            <!-- แท็บ 2 -->
+            <div id="monthlyTab2" class="tab-panel" style="display: none;">
+                <div id="monthlyContent2"></div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- ================= 3. SECTION: เปรียบเทียบ (1 หน้า) ================= -->
+    <section id="pageComparison" class="app-page full-page" style="display: none;">
+        <div class="top-bar">
+            <span class="top-title">🔍 วิเคราะห์เปรียบเทียบ</span>
+        </div>
+    
+        <!-- หน้าเดียว เดี่ยวๆ ไม่ต้องมีแท็บ -->
+        <div class="single-page-content" style="padding: 16px;">
+            <h3 class="panel-title">🔍 วิเคราะห์เปรียบเทียบข้อมูล</h3>
+            <div class="btn-compare-wrap" style="text-align:center; margin: 15px 0;">
+                <button class="btn-compare" onclick="openComparisonSelector()">
+                    <i class="fas fa-chart-line"></i> เลือกช่วงเวลาเปรียบเทียบ
+                </button>
+            </div>
+            <div id="comparisonSingleContent"></div>
+        </div>
+    </section>
         <!-- ✅ แถบเมนูล่าง — แสดงตามเงื่อนไข -->
         <nav class="bottom-nav">
             <div onclick="switchMainView('home')" class="nav-item">
