@@ -22,38 +22,30 @@ let payMethod = "";
 
 // ✅ ควบคุมเมนูล่าง — แสดงทั้ง 4 ปุ่ม
 function updateNavDisplay(viewName) {
-    const nav1 = document.getElementById('nav1');
-    const nav2 = document.getElementById('nav2');
-    const nav3 = document.getElementById('nav3');
+    // หาปุ่มทุกแบบ โดยไม่ต้องอาศัย ID
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+        item.style.display = 'flex';
+    });
     const bottomNav = document.querySelector('.bottom-nav');
-    
-    if (nav1) nav1.style.display = 'flex';
-    if (nav2) nav2.style.display = 'flex';
-    if (nav3) nav3.style.display = 'flex';
     if (bottomNav) bottomNav.style.gridTemplateColumns = 'repeat(4, 1fr)';
 }
 
 // ✅ สลับแท็บสรุป — ป้องกัน Error + ซ่อนเมนูเหลือโฮมตรงกลาง
 function switchSummaryTab(tabId, evt) {
-    // ซ่อนหน้าต่างตั้งค่าเมื่อสลับแท็บ (ไม่ให้เด้งเอง)
+    // ซ่อนหน้าต่างตั้งค่าเมื่อสลับแท็บ
     const modal = document.getElementById('modalSet');
     if (modal) modal.style.display = 'none';
 
-    // ตรวจสอบว่ามี Element ปลายทางหรือไม่
     const targetTab = document.getElementById(tabId);
     if (!targetTab) {
         console.warn('ไม่พบ Element ID:', tabId);
         return;
     }
 
-    // ลบ class active เดิมออก
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-
-    // เปิดใช้งานแท็บเป้าหมาย
     targetTab.classList.add('active');
 
-    // จัดการ Event และ Active State ของปุ่ม
     const currentEvent = evt || window.event;
     if (currentEvent && currentEvent.currentTarget) {
         currentEvent.currentTarget.classList.add('active');
@@ -62,23 +54,22 @@ function switchSummaryTab(tabId, evt) {
         if (btn) btn.classList.add('active');
     }
 
-    // ✅ แก้ชื่อแท็บให้ตรงกับ HTML: tabOverview แทน tabDaily
+    // ✅ ชื่อแท็บตรงกับ HTML แล้ว
     const hideTabs = ['tabOverview', 'tabMonth', 'tabAnalytics'];
-    const nav1 = document.getElementById('nav1');
-    const nav2 = document.getElementById('nav2');
-    const nav3 = document.getElementById('nav3');
+    const allNavItems = document.querySelectorAll('.bottom-nav .nav-item');
     const bottomNav = document.querySelector('.bottom-nav');
 
     if (hideTabs.includes(tabId)) {
-        if (nav1) nav1.style.display = 'none';
-        if (nav2) nav2.style.display = 'none';
-        if (nav3) nav3.style.display = 'none';
+        // ✅ ซ่อนปุ่มที่ 2,3,4 เหลือแค่โฮมอยู่ตรงกลาง
+        allNavItems.forEach((item, index) => {
+            item.style.display = index === 0 ? 'flex' : 'none';
+        });
         if (bottomNav) bottomNav.style.gridTemplateColumns = '1fr';
     } else {
-        // ✅ แก้จาก viewName → ใช้ฟังก์ชันโดยตรง
-        if (nav1) nav1.style.display = 'flex';
-        if (nav2) nav2.style.display = 'flex';
-        if (nav3) nav3.style.display = 'flex';
+        // ✅ แสดงทั้ง 4 ปุ่ม
+        allNavItems.forEach(item => {
+            item.style.display = 'flex';
+        });
         if (bottomNav) bottomNav.style.gridTemplateColumns = 'repeat(4, 1fr)';
     }
 }
