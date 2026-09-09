@@ -23,58 +23,53 @@
 </head>
 <body>
 <div class="container main-wrap">
-    <!-- ==================== 🏠 1. หน้าแรก (MAIN MENU) ==================== -->
- <section id="pageHome" class="app-page active">
+<!-- ================= SECTION: หน้าแรก ================= -->
+<section id="pageHome" class="app-page active">
     <div class="home-header">
         <h2 style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
             <span>Barber Manager</span>
             <span style="font-size: 12px; font-weight: 500; opacity: 0.75; letter-spacing: 0px;">ระบบจัดการร้านตัดผม</span>
         </h2>
     </div>
-        <div class="menu-grid">
-            <!-- ปุ่ม 1: ตั้งค่าระบบ -->
-            <button class="menu-card" onclick="openSettings()">
-                <div class="menu-icon grad-gray"><i class="fas fa-cog"></i></div>
-                <span> ตั้งค่าระบบ</span>
-            </button>
-            <!-- ปุ่ม 2: ประกันรายได้ -->
-            <button class="menu-card" onclick="handleInsurance()">
-                <div class="menu-icon grad-yellow"><i class="fas fa-shield-alt"></i></div>
-                <span> ประกันรายได้</span>
-            </button>
-            <!-- ปุ่ม 3: วันหยุด -->
-            <button class="menu-card" onclick="handleHoliday()">
-                <div class="menu-icon grad-red"><i class="fas fa-umbrella-beach"></i></div>
-                <span> วันหยุด</span>
-            </button>
-            <!-- ปุ่ม 4: บันทึกงาน -->
-            <button class="menu-card primary-card" onclick="switchMainView('workGroup')">
-                <div class="menu-icon grad-blue"><i class="fas fa-edit"></i></div>
-                <span> บันทึกงาน</span>
-            </button>
-            <!-- ปุ่ม 5: สรุปภาพรวม -->
-            <button class="menu-card" onclick="switchMainView('summaryPage')">
-                <div class="menu-icon grad-green"><i class="fas fa-chart-line"></i></div>
-                <span> สรุปภาพรวม</span>
-            </button>
-            <!-- ปุ่ม 6: สรุปรายเดือน -->
-            <button class="menu-card" onclick="switchMainView('monthlySummary')">
-                <div class="menu-icon grad-emerald"><i class="fas fa-calendar-alt"></i></div>
-                <span> สรุปรายเดือน</span>
-            </button>
-            <!-- ปุ่ม 7: เปิด Sheet -->
-            <button class="menu-card" onclick="handleGoogleSheet()">
-                <div class="menu-icon grad-green"><i class="fas fa-table"></i></div>
-                <span> เปิด Sheet</span>
-            </button>
-            <!-- ปุ่ม 8: เปรียบเทียบย้อนหลัง -->
-            <button class="menu-card" onclick="switchMainView('comparePage')">
-                <div class="menu-icon grad-blue"><i class="fas fa-code-compare"></i></div>
-                <span> เปรียบเทียบ</span>
-            </button>
-        </div>
-    </section>
 
+    <div class="menu-grid">
+        <!-- ปุ่ม 1: ประกันรายได้ -->
+        <button class="menu-card" onclick="handleInsurance()">
+            <div class="menu-icon grad-yellow"><i class="fas fa-shield-alt"></i></div>
+            <span> ประกันรายได้</span>
+        </button>
+
+        <!-- ปุ่ม 2: วันหยุด -->
+        <button class="menu-card" onclick="handleHoliday()">
+            <div class="menu-icon grad-red"><i class="fas fa-umbrella-beach"></i></div>
+            <span> วันหยุด</span>
+        </button>
+
+        <!-- ปุ่ม 3: สรุปยอดรวม -->
+        <button class="menu-card" onclick="switchMainView('summaryPage')">
+            <div class="menu-icon grad-green"><i class="fas fa-chart-line"></i></div>
+            <span> สรุปยอดรวม</span>
+        </button>
+
+        <!-- ปุ่ม 4: สรุปรายเดือน -->
+        <button class="menu-card" onclick="switchMainView('monthlySummary')">
+            <div class="menu-icon grad-emerald"><i class="fas fa-calendar-alt"></i></div>
+            <span> สรุปรายเดือน</span>
+        </button>
+
+        <!-- ปุ่ม 5: เปิด Sheet -->
+        <button class="menu-card" onclick="handleGoogleSheet()">
+            <div class="menu-icon grad-green"><i class="fas fa-table"></i></div>
+            <span> เปิด Sheet</span>
+        </button>
+
+        <!-- ปุ่ม 6: เปรียบเทียบยอด -->
+        <button class="menu-card" onclick="switchMainView('comparePage')">
+            <div class="menu-icon grad-blue"><i class="fas fa-code-compare"></i></div>
+            <span> เปรียบเทียบยอด</span>
+        </button>
+    </div>
+</section>
     <!-- ==================== 📂 2. กลุ่ม "บันทึกงาน" (3 หน้าย่อย + Nav ล่าง 4 ปุ่ม) ==================== -->
     <div id="pageWorkGroup" class="app-page">
         <!-- ปุ่มย้อนกลับหน้าหลัก + ชื่อร้าน -->
@@ -251,13 +246,13 @@
             </div>
         </section>
 
-        <!-- ✅ แถบนำทางล่างสุด — 4 ปุ่ม: หน้าแรก / บันทึก / รายงาน / บัญชี -->
+        <!-- ✅ แถบนำทางล่างสุด — เพิ่ม ตั้งค่าระบบ เข้ามาแสดงคู่กับ บันทึกงาน (รวมเป็น 5 เมนู) -->
         <nav class="bottom-nav">
             <div onclick="switchMainView('home')" id="navHome" class="nav-item">
                 <i class="fas fa-home"></i><span>หน้าแรก</span>
             </div>
-            <div onclick="goSub(1)" id="nav1" class="nav-item active">
-                <i class="fas fa-edit"></i><span>บันทึก</span>
+            <div onclick="switchMainView('workGroup')" id="nav1" class="nav-item">
+                <i class="fas fa-edit"></i><span>บันทึกงาน</span>
             </div>
             <div onclick="goSub(2)" id="nav2" class="nav-item">
                 <i class="fas fa-chart-bar"></i><span>รายงาน</span>
@@ -265,11 +260,12 @@
             <div onclick="goSub(3)" id="nav3" class="nav-item">
                 <i class="fas fa-wallet"></i><span>บัญชี</span>
             </div>
+            <div onclick="openSettings()" id="navSettings" class="nav-item">
+                <i class="fas fa-cog"></i><span>ตั้งค่า</span>
+            </div>
         </nav>
-    </div>
-
-    <!-- ==================== 📊 3. หน้า "สรุปยอดรวม" — มีเมนูล่างเหมือนกัน ==================== -->
-    <!-- ================= 1. SECTION: สรุปยอดรวม (3 แท็บ) ================= -->
+    </section>
+     <!-- ================= 1. SECTION: สรุปยอดรวม (3 แท็บ) ================= -->
     <section id="pageSummary" class="app-page full-page">
         <div class="top-bar">
             <span class="top-title">📊 สรุปยอดรวม</span>
