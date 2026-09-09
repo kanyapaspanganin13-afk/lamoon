@@ -122,89 +122,41 @@ function switchMainView(viewName) {
 }
 
 /* =========================================================
-   SECTION 2.1: BOTTOM NAVIGATION
+   SECTION 2.1: BOTTOM NAVIGATION (ตรึงไว้เสมอ + รองรับ 5 ปุ่ม)
    ========================================================= */
 function updateNavDisplay(viewName) {
     document.querySelectorAll('.bottom-nav').forEach(nav => {
-        nav.style.display = 'none';
+        // แสดงแถบนำทางไว้เสมอโดยไม่ซ่อน
+        nav.style.display = 'grid';
+        nav.style.gridTemplateColumns = 'repeat(5, 1fr)';
+        nav.style.justifyContent = 'stretch';
+        nav.style.alignItems = 'stretch';
+
+        // ปลดสถานะ active จากทุกปุ่มก่อน
+        nav.querySelectorAll('.nav-item').forEach(item => {
+            item.style.display = 'flex';
+            item.style.margin = '0';
+            item.classList.remove('active');
+        });
+
+        // จัดการไฮไลท์ปุ่มตาม viewName
+        if (viewName === 'home') {
+            const homeBtn = nav.querySelector('#navHome');
+            if (homeBtn) homeBtn.classList.add('active');
+        } else if (viewName === 'workGroup' || viewName === 'sub1') {
+            const workBtn = nav.querySelector('#nav1');
+            if (workBtn) workBtn.classList.add('active');
+        } else if (viewName === 'sub2') {
+            const reportBtn = nav.querySelector('#nav2');
+            if (reportBtn) reportBtn.classList.add('active');
+        } else if (viewName === 'sub3') {
+            const accBtn = nav.querySelector('#nav3');
+            if (accBtn) accBtn.classList.add('active');
+        } else if (viewName === 'settings') {
+            const setBtn = nav.querySelector('#navSettings');
+            if (setBtn) setBtn.classList.add('active');
+        }
     });
-
-    // 🏠 หน้าแรก → ไม่มีเมนู
-    if (viewName === 'home') {
-        return;
-    }
-
-    // ✂️ กลุ่มบันทึกงาน
-    if (viewName === 'workGroup' || viewName === 'sub1' || viewName === 'sub2' || viewName === 'sub3') {
-        const workPage = document.getElementById('pageWorkGroup');
-        if (!workPage) return;
-        const nav = workPage.querySelector('.bottom-nav');
-        if (!nav) return;
-        nav.style.display = 'grid';
-        nav.style.gridTemplateColumns = 'repeat(4, 1fr)';
-        nav.style.justifyContent = 'stretch';
-        nav.style.alignItems = 'stretch';
-        nav.querySelectorAll('.nav-item').forEach((item, index) => {
-            item.style.display = 'flex';
-            item.style.margin = '0';
-            item.classList.remove('active');
-            if (viewName === 'workGroup' && index === 1) item.classList.add('active');
-            if (viewName === 'sub2' && index === 2) item.classList.add('active');
-            if (viewName === 'sub3' && index === 3) item.classList.add('active');
-        });
-        return;
-    }
-
-    // 📊 สรุปยอดรวม
-    if (viewName === 'summaryPage') {
-        const summaryPage = document.getElementById('pageSummary');
-        if (!summaryPage) return;
-        const nav = summaryPage.querySelector('.bottom-nav');
-        if (!nav) return;
-        nav.style.display = 'grid';
-        nav.style.gridTemplateColumns = 'repeat(4, 1fr)';
-        nav.style.justifyContent = 'stretch';
-        nav.style.alignItems = 'stretch';
-        nav.querySelectorAll('.nav-item').forEach((item, index) => {
-            item.style.display = 'flex';
-            item.style.margin = '0';
-            item.classList.remove('active');
-            if (index === 2) item.classList.add('active');
-        });
-        return;
-    }
-
-    // 📅 สรุปรายเดือน
-    if (viewName === 'monthlySummary') {
-        const monthlyPage = document.getElementById('pageMonthlyReport');
-        if (!monthlyPage) return;
-        const nav = monthlyPage.querySelector('.bottom-nav');
-        if (!nav) return;
-        nav.style.display = 'grid';
-        nav.style.gridTemplateColumns = 'repeat(4, 1fr)';
-        nav.querySelectorAll('.nav-item').forEach(item => {
-            item.style.display = 'flex';
-            item.style.margin = '0';
-            item.classList.remove('active');
-        });
-        return;
-    }
-
-    // 🔍 เปรียบเทียบ
-    if (viewName === 'comparePage') {
-        const comparisonPage = document.getElementById('pageComparison');
-        if (!comparisonPage) return;
-        const nav = comparisonPage.querySelector('.bottom-nav');
-        if (!nav) return;
-        nav.style.display = 'grid';
-        nav.style.gridTemplateColumns = 'repeat(4, 1fr)';
-        nav.querySelectorAll('.nav-item').forEach(item => {
-            item.style.display = 'flex';
-            item.style.margin = '0';
-            item.classList.remove('active');
-        });
-        return;
-    }
 }
 
 /* =========================================================
@@ -251,7 +203,9 @@ function goSub(num) {
     }
 }
 
-/* ========SECTION 4: MAIN TABSใช้ตรงกับ HTML ที่ส่งมา======== */
+/* =========================================================
+   SECTION 4: MAIN TABS
+   ========================================================= */
 function switchMainTab(pageId, tabId, evt) {
     const page = document.getElementById(pageId);
     if (!page) {
