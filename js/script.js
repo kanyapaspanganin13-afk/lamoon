@@ -17,10 +17,8 @@ let conf = JSON.parse(localStorage.getItem("barber_conf")) || {
     sound: localStorage.getItem("shopSound") || "on"
 };
 let payMethod = "";
-/* =========================================================
-   SECTION 2: MAIN NAVIGATION
-   สลับหน้าหลักให้ตรงกับ HTML
-   ========================================================= */
+
+/* =========  SECTION 2: MAIN NAVIGATION สลับหน้าหลักให้ตรงกับ HTML ========= */
 function switchMainView(viewName, subNum = null) {
     // 1. ซ่อนหน้าหลักทั้งหมด
     document.querySelectorAll('.app-page').forEach(page => {
@@ -98,9 +96,7 @@ function switchMainView(viewName, subNum = null) {
     console.warn('ไม่พบ viewName:', viewName);
 }
 
-/* =========================================================
-   SECTION 2.1: BOTTOM NAVIGATION (ไฮไลท์ปุ่มตามหน้าปัจจุบัน)
-   ========================================================= */
+/* =========  SECTION 2.1: BOTTOM NAVIGATION (ไฮไลท์ปุ่มตามหน้าปัจจุบัน) ========= */
 function updateNavDisplay(viewName) {
     const nav = document.querySelector('.bottom-nav');
     if (!nav) return;
@@ -130,10 +126,7 @@ function updateNavDisplay(viewName) {
         nav.querySelector('#navSettings')?.classList.add('active');
     }
 }
-
-/* =========================================================
-   SECTION 3: SUB-PAGE NAVIGATION
-   ========================================================= */
+/* =========  SECTION SECTION 3: SUB-PAGE NAVIGATION ========= */
 function goSub(num) {
     const workPage = document.getElementById('pageWorkGroup');
     if (!workPage) {
@@ -174,9 +167,7 @@ function goSub(num) {
         }
     }
 }
-/* =========================================================
-   SECTION 4: MAIN TABS
-   ========================================================= */
+/* =========  SECTION 4: MAIN TABS ========= */
 function switchMainTab(pageId, tabId, evt) {
     const page = document.getElementById(pageId);
     if (!page) {
