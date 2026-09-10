@@ -22,33 +22,25 @@ let payMethod = "";
    สลับหน้าหลักให้ตรงกับ HTML
    ========================================================= */
 function switchMainView(viewName) {
-    // -----------------------------------------------------
     // 1. ซ่อนหน้าหลักทั้งหมด
-    // -----------------------------------------------------
     document.querySelectorAll('.app-page').forEach(page => {
         page.classList.remove('active');
         page.style.display = 'none';
     });
 
-    // -----------------------------------------------------
     // 2. 🏠 หน้าแรก
-    // HTML: id="pageHome"
-    // -----------------------------------------------------
     if (viewName === 'home') {
         const homePage = document.getElementById('pageHome');
         if (homePage) {
             homePage.classList.add('active');
             homePage.style.display = 'block';
         }
+        // ✅ บังคับเรียกอัปเดตเมนูบาร์เมื่อกลับหน้าแรก
         updateNavDisplay('home');
         return;
     }
 
-    // -----------------------------------------------------
     // 3. ✂️ กลุ่มบันทึกงาน
-    // HTML: id="pageWorkGroup"
-    // p1 = บันทึก / p2 = รายงาน / p3 = บัญชี
-    // -----------------------------------------------------
     if (viewName === 'workGroup') {
         const workPage = document.getElementById('pageWorkGroup');
         if (!workPage) {
@@ -61,13 +53,7 @@ function switchMainView(viewName) {
         return;
     }
 
-    // -----------------------------------------------------
     // 4. 📊 สรุปยอดรวม
-    // HTML: id="pageSummary"
-    // summaryTab1 = รายได้ประจำเดือน
-    // summaryTab2 = วิเคราะห์รายได้
-    // summaryTab3 = ทรงผม & บริการ
-    // -----------------------------------------------------
     if (viewName === 'summaryPage') {
         const summaryPage = document.getElementById('pageSummary');
         if (!summaryPage) {
@@ -81,11 +67,7 @@ function switchMainView(viewName) {
         return;
     }
 
-    // -----------------------------------------------------
     // 5. 📅 สรุปรายเดือน
-    // HTML: id="pageMonthlyReport"
-    // monthlyTab1 / monthlyTab2
-    // -----------------------------------------------------
     if (viewName === 'monthlySummary') {
         const monthlyPage = document.getElementById('pageMonthlyReport');
         if (!monthlyPage) {
@@ -99,10 +81,7 @@ function switchMainView(viewName) {
         return;
     }
 
-    // -----------------------------------------------------
     // 6. 🔍 วิเคราะห์เปรียบเทียบ
-    // HTML: id="pageComparison"
-    // -----------------------------------------------------
     if (viewName === 'comparePage') {
         const comparisonPage = document.getElementById('pageComparison');
         if (!comparisonPage) {
@@ -115,12 +94,8 @@ function switchMainView(viewName) {
         return;
     }
 
-    // -----------------------------------------------------
-    // 7. ไม่พบหน้า
-    // -----------------------------------------------------
     console.warn('ไม่พบ viewName:', viewName);
 }
-
 /* =========================================================
    SECTION 2.1: BOTTOM NAVIGATION (ตรึงไว้เสมอ + รองรับ 5 ปุ่ม)
    ========================================================= */
