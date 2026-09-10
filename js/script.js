@@ -901,6 +901,9 @@ function switchSummaryTab(tabId, evt) {
 }
 /* ========= SECTION 18: MONTHLY SUMMARY & EXCEL EXPORT ========= */
 function loadHistDaily() {
+    // Helper Selector ป้องกัน Error กรณีไม่ได้ประกาศ $ ไว้ใน Scope หลัก
+    const $ = id => typeof window.$ === 'function' ? window.$(id) : document.getElementById(id);
+
     const d = $("histDate")?.value;
     if (!d) return;
 
@@ -982,72 +985,76 @@ function loadHistDaily() {
             </div>`;
         }).join("");
 
-    // 4. แปลงรูปแบบวันที่แสดงหัวข้อ (เช่น 10 ก.ย. 69)
+    // 4. แปลงรูปแบบวันที่แสดงหัวข้อ (แก้ไขจุดเสี่ยง Date parsing บน iOS)
     let displayTitleDate = d;
     try {
-        const [y, m, dayNum] = d.split('-');
+        const [y, m, dayNum] = d.split('-').map(Number);
         const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
         const days = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
-        const dayIdx = new Date(`${d}T00:00:00`).getDay();
-        const shortYear = (parseInt(y) + 543).toString().slice(-2);
-        displayTitleDate = `${parseInt(dayNum)} ${months[parseInt(m) - 1]} ${shortYear} (${days[dayIdx]})`;
+        
+        const dateObj = new Date(y, m - 1, dayNum);
+        const dayIdx = dateObj.getDay();
+        const shortYear = (y + 543).toString().slice(-2);
+        
+        displayTitleDate = `${dayNum} ${months[m - 1]} ${shortYear} (${days[dayIdx]})`;
     } catch (e) {
         displayTitleDate = d;
     }
 
-// ✅ 5. แสดงผลลงใน Container บนหน้าจอโดยตรง (ไม่ต้องเปิด Modal)
-const targetContainer = $("dailyReportInlineContent") || $("monthlyContent1");
-if (targetContainer) {
-    targetContainer.innerHTML = `
-        <div style="font-family:'Inter', system-ui, sans-serif; background:#0f172a; padding:20px; color:#f1f5f9; border-radius:16px;">
-            <div style="text-align:center; margin-bottom:20px;">
-                <div style="font-size:18px; font-weight:800; color:#38bdf8;">รายงาน ${displayTitleDate}</div>
-                <div style="font-size:14px; color:#94a3b8; font-weight:600; margin-top:10px;">ยอดเงินรวม</div>
-                <div style="font-size:40px; font-weight:900; color:#ffffff; margin-top:2px;">฿${totalRevenue.toLocaleString()}</div>
-            </div>
-
-            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:20px;">
-                <div style="background:#14532d; padding:12px 6px; border-radius:14px; text-align:center; color:#ffffff;">
-                    <div style="font-size:12px; opacity:0.8; font-weight:600; margin-bottom:2px;">💶 เงินสด</div>
-                    <div style="font-size:15px; font-weight:800;">฿${cashTotal.toLocaleString()}</div>
+    // 5. แสดงผลลงใน Container บนหน้าจอโดยตรง
+    const targetContainer = $("dailyReportInlineContent") || $("monthlyContent1");
+    if (targetContainer) {
+        targetContainer.innerHTML = `
+            <div style="font-family:'Inter', system-ui, sans-serif; background:#0f172a; padding:20px; color:#f1f5f9; border-radius:16px;">
+                <div style="text-align:center; margin-bottom:20px;">
+                    <div style="font-size:18px; font-weight:800; color:#38bdf8;">รายงาน ${displayTitleDate}</div>
+                    <div style="font-size:14px; color:#94a3b8; font-weight:600; margin-top:10px;">ยอดเงินรวม</div>
+                    <div style="font-size:40px; font-weight:900; color:#ffffff; margin-top:2px;">฿${totalRevenue.toLocaleString()}</div>
                 </div>
-                <div style="background:#1e3a8a; padding:12px 6px; border-radius:14px; text-align:center; color:#ffffff;">
-                    <div style="font-size:12px; opacity:0.8; font-weight:600; margin-bottom:2px;">📱 เงินโอน</div>
-                    <div style="font-size:15px; font-weight:800;">฿${transTotal.toLocaleString()}</div>
-                </div>
-                <div style="background:#78350f; padding:12px 6px; border-radius:14px; text-align:center; color:#ffffff;">
-                    <div style="font-size:12px; opacity:0.8; font-weight:600; margin-bottom:2px;">👤 ลูกค้า</div>
-                    <div style="font-size:15px; font-weight:800;">${customerCount}</div>
-                </div>
-            </div>
 
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
-                <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:12px; border-radius:14px; text-align:center;">
-                    <div style="font-size:13px; color:#94a3b8; font-weight:600; margin-bottom:2px;">ยอดเงินช่าง</div>
-                    <div style="font-size:18px; font-weight:800; color:#f8fafc;">฿${barberEarn.toLocaleString()}</div>
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:20px;">
+                    <div style="background:#14532d; padding:12px 6px; border-radius:14px; text-align:center; color:#ffffff;">
+                        <div style="font-size:12px; opacity:0.8; font-weight:600; margin-bottom:2px;">💶 เงินสด</div>
+                        <div style="font-size:15px; font-weight:800;">฿${cashTotal.toLocaleString()}</div>
+                    </div>
+                    <div style="background:#1e3a8a; padding:12px 6px; border-radius:14px; text-align:center; color:#ffffff;">
+                        <div style="font-size:12px; opacity:0.8; font-weight:600; margin-bottom:2px;">📱 เงินโอน</div>
+                        <div style="font-size:15px; font-weight:800;">฿${transTotal.toLocaleString()}</div>
+                    </div>
+                    <div style="background:#78350f; padding:12px 6px; border-radius:14px; text-align:center; color:#ffffff;">
+                        <div style="font-size:12px; opacity:0.8; font-weight:600; margin-bottom:2px;">👤 ลูกค้า</div>
+                        <div style="font-size:15px; font-weight:800;">${customerCount}</div>
+                    </div>
                 </div>
-                <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:12px; border-radius:14px; text-align:center;">
-                    <div style="font-size:13px; color:#94a3b8; font-weight:600; margin-bottom:2px;">ยอดเงินร้าน</div>
-                    <div style="font-size:18px; font-weight:800; color:#f8fafc;">฿${shopEarn.toLocaleString()}</div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+                    <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:12px; border-radius:14px; text-align:center;">
+                        <div style="font-size:13px; color:#94a3b8; font-weight:600; margin-bottom:2px;">ยอดเงินช่าง</div>
+                        <div style="font-size:18px; font-weight:800; color:#f8fafc;">฿${barberEarn.toLocaleString()}</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:12px; border-radius:14px; text-align:center;">
+                        <div style="font-size:13px; color:#94a3b8; font-weight:600; margin-bottom:2px;">ยอดเงินร้าน</div>
+                        <div style="font-size:18px; font-weight:800; color:#f8fafc;">฿${shopEarn.toLocaleString()}</div>
+                    </div>
+                </div>
+
+                ${settleHTML}
+
+                <div style="margin-bottom:20px;">
+                    <div style="font-size:13px; color:#94a3b8; font-weight:700; text-transform:uppercase; margin-bottom:8px; text-align:center;">สรุปประเภทงาน</div>
+                    <div style="text-align:center;">${svcHTML || '<span style="color:#64748b; font-size:13px;">ไม่มีข้อมูลบริการ</span>'}</div>
+                </div>
+
+                <div style="font-weight:800; font-size:15px; color:#f8fafc; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                    <div style="width:4px; height:16px; background:#cbd5e1; border-radius:2px;"></div>
+                    รายละเอียดงาน
+                </div>
+                <div>
+                    ${rows || '<div style="text-align:center; color:#64748b; padding:20px;">ไม่มีรายการย่อย</div>'}
                 </div>
             </div>
-
-            ${settleHTML}
-
-            <div style="margin-bottom:20px;">
-                <div style="font-size:13px; color:#94a3b8; font-weight:700; text-transform:uppercase; margin-bottom:8px; text-align:center;">สรุปประเภทงาน</div>
-                <div style="text-align:center;">${svcHTML || '<span style="color:#64748b; font-size:13px;">ไม่มีข้อมูลบริการ</span>'}</div>
-            </div>
-
-            <div style="font-weight:800; font-size:15px; color:#f8fafc; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
-                <div style="width:4px; height:16px; background:#cbd5e1; border-radius:2px;"></div>
-                รายละเอียดงาน
-            </div>
-            <div>
-                ${rows || '<div style="text-align:center; color:#64748b; padding:20px;">ไม่มีรายการย่อย</div>'}
-            </div>
-        </div>
-    `;
+        `;
+    }
 }
 function loadHistMonth() {
     const $ = (id) => document.getElementById(id);
@@ -1066,11 +1073,12 @@ function loadHistMonth() {
         return;
     }
 
-    const [y, mNum] = m.split('-');
+    const [y, mNum] = m.split('-').map(Number);
     const monthName = new Date(y, mNum - 1, 1).toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
-    const filtered = archives.filter(a => a.date && a.date.startsWith(`${y}-${mNum.padStart(2, '0')}`));
+    const targetPrefix = `${y}-${String(mNum).padStart(2, '0')}`;
+    const filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
 
-   if (!filtered.length) {
+    if (!filtered.length) {
         if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
         if (window.calcNetProfit) window.calcNetProfit();
         if (typeof notify === 'function') notify("error", "ไม่พบข้อมูล", monthName);
@@ -1097,11 +1105,13 @@ function loadHistMonth() {
 
     // --- 3. วนลูปประมวลผลข้อมูลรายวัน ---
     filtered.forEach(day => {
-        const dObj = new Date(day.date + 'T00:00:00');
+        // แก้ไขจุดที่ 1: Date Parsing ป้องกัน Error ใน Safari/iOS
+        const [dYear, dMonth, dDay] = day.date.split('-').map(Number);
+        const dObj = new Date(dYear, dMonth - 1, dDay);
         
-        // Logic คำนวณสัปดาห์ (เริ่มใหม่ทุกวันอาทิตย์)
-        const firstDayOfMonth = new Date(dObj.getFullYear(), dObj.getMonth(), 1).getDay();
-        let wIdx = Math.ceil((dObj.getDate() + firstDayOfMonth) / 7);
+        // แก้ไขจุดที่ 2: ปรับปรุง Logic คำนวณสัปดาห์ (เริ่มใหม่ทุกวันอาทิตย์)
+        const firstDayOfMonth = new Date(dYear, dMonth - 1, 1).getDay();
+        let wIdx = Math.ceil((dDay + firstDayOfMonth) / 7);
         const wKey = `สัปดาห์ที่ ${wIdx}`;
 
         if (!weeklyData[wKey]) {
@@ -1189,11 +1199,12 @@ function loadHistMonth() {
     if (window.calcNetProfit) window.calcNetProfit();
 
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
- // --- 5. เรียกตัวสร้างรายงาน ---
+
+    // --- 5. เรียกตัวสร้างรายงาน ---
     if (typeof generateMonthlyReport === 'function') {
         generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular);
     } else {
-        // Fallback แบบแสดงลงแท็บโดยตรง (ไม่เปิด Pop-up)
+        // Fallback แบบแสดงลงแท็บโดยตรง
         if ($("monthlyIncomeContent")) {
             $("monthlyIncomeContent").innerHTML = `
                 <div style="background:#1e293b; padding:20px; border-radius:16px; color:#f8fafc; text-align:center;">
@@ -1207,7 +1218,8 @@ function loadHistMonth() {
                 </div>
             `;
         }
-    }   
+    }
+}
 function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular) {
     // Helper Selector กัน Error เรื่อง $
     const $ = id => document.getElementById(id);
