@@ -231,66 +231,113 @@
         </div>
     </section>
 
-    <!-- ================= SECTION 3: สรุปยอดรวม ================= -->
-    <section id="pageSummary" class="app-page full-page" style="display: none;">
-        <div class="top-bar">
-            <span class="top-title">📊 สรุปยอดรวม</span>
-        </div>
-        <div class="tab-header">
-            <button class="tab-btn active" onclick="switchMainTab('pageSummary', 'summaryTab1', event)">📊 รายได้ประจำเดือน</button>
-            <button class="tab-btn" onclick="switchMainTab('pageSummary', 'summaryTab2', event)">📈 วิเคราะห์รายได้</button>
-            <button class="tab-btn" onclick="switchMainTab('pageSummary', 'summaryTab3', event)">✂️ ทรงผม&บริการ</button>
-        </div>
-        <div class="tab-content-wrap">
-            <div id="summaryTab1" class="tab-panel active">
-                <h3 class="panel-title">📊 รายได้ประจำเดือน</h3>
-                <div id="monthlyIncomeContent"></div>
+<!-- ================= SECTION 3: สรุปยอดรวม ================= -->
+<section id="pageSummary" class="app-page full-page" style="display: none;">
+    <div class="top-bar">
+        <span class="top-title">📊 สรุปยอดรวม</span>
+    </div>
+    <div class="tab-header">
+        <button class="tab-btn active" onclick="switchMainTab('pageSummary', 'summaryTab1', event)">📊 รายได้ประจำเดือน</button>
+        <button class="tab-btn" onclick="switchMainTab('pageSummary', 'summaryTab2', event)">📈 วิเคราะห์รายได้</button>
+        <button class="tab-btn" onclick="switchMainTab('pageSummary', 'summaryTab3', event)">✂️ ทรงผม&บริการ</button>
+    </div>
+    <div class="tab-content-wrap">
+        <!-- แท็บที่ 1: เพิ่ม Month Picker ไว้ด้านบนเพื่อให้เลือกเดือนดูรายงานได้ -->
+        <div id="summaryTab1" class="tab-panel active">
+            <div style="margin-bottom: 15px; text-align: center;">
+                <input type="month" id="summaryMonthPicker" class="form-control" onchange="renderSummaryPageData(this.value)">
             </div>
-            <div id="summaryTab2" class="tab-panel" style="display: none;">
-                <h3 class="panel-title">📈 วิเคราะห์รายได้</h3>
-                <div id="incomeAnalyticsContent"></div>
-            </div>
-            <div id="summaryTab3" class="tab-panel" style="display: none;">
-                <h3 class="panel-title">✂️ ทรงผม & บริการ</h3>
-                <div id="servicesStatsContent"></div>
-            </div>
+            <div id="monthlyIncomeContent"></div>
         </div>
-    </section>
 
-    <!-- ================= SECTION 4: สรุปรายเดือน ================= -->
-    <section id="pageMonthlyReport" class="app-page full-page" style="display: none;">
-        <div class="top-bar">
-            <span class="top-title">📅 สรุปรายเดือน</span>
+        <!-- แท็บที่ 2: ใช้ ID เดิม ไม่ต้องแก้ HTML -->
+        <div id="summaryTab2" class="tab-panel" style="display: none;">
+            <div id="incomeAnalyticsContent"></div>
         </div>
-        <div class="tab-header">
-            <button class="tab-btn active" onclick="switchMainTab('pageMonthlyReport', 'monthlyTab1', event)">[ แท็บที่ 1 ]</button>
-            <button class="tab-btn" onclick="switchMainTab('pageMonthlyReport', 'monthlyTab2', event)">[ แท็บที่ 2 ]</button>
-        </div>
-        <div class="tab-content-wrap">
-            <div id="monthlyTab1" class="tab-panel active">
-                <div id="monthlyContent1"></div>
-            </div>
-            <div id="monthlyTab2" class="tab-panel" style="display: none;">
-                <div id="monthlyContent2"></div>
-            </div>
-        </div>
-    </section>
 
-    <!-- ================= SECTION 5: เปรียบเทียบ ================= -->
-    <section id="pageComparison" class="app-page full-page" style="display: none;">
-        <div class="top-bar">
-            <span class="top-title">🔍 วิเคราะห์เปรียบเทียบ</span>
+        <!-- แท็บที่ 3: ใช้ ID เดิม ไม่ต้องแก้ HTML -->
+        <div id="summaryTab3" class="tab-panel" style="display: none;">
+            <div id="servicesStatsContent"></div>
         </div>
-        <div class="single-page-content" style="padding: 16px;">
-            <h3 class="panel-title">🔍 วิเคราะห์เปรียบเทียบข้อมูล</h3>
-            <div class="btn-compare-wrap" style="text-align:center; margin: 15px 0;">
-                <button class="btn-compare" onclick="openComparisonSelector()">
-                    <i class="fas fa-chart-line"></i> เลือกช่วงเวลาเปรียบเทียบ
+    </div>
+</section>
+<!-- ================= SECTION 4: สรุปรายเดือน ================= -->
+<section id="pageMonthlyReport" class="app-page full-page" style="display: none;">
+    <div class="top-bar">
+        <span class="top-title">📅 สรุปรายเดือน</span>
+    </div>
+    <div class="tab-header">
+        <button class="tab-btn active" onclick="switchMainTab('pageMonthlyReport', 'monthlyTab1', event)">📋 รายงานประจำเดือน</button>
+        <button class="tab-btn" onclick="switchMainTab('pageMonthlyReport', 'monthlyTab2', event)">📊 รายได้ย้อนหลัง</button>
+    </div>
+    <div class="tab-content-wrap">
+        <!-- แท็บที่ 1: ตารางรายงานรายวันของเดือนที่เลือก + ปุ่มแชร์ Excel -->
+        <div id="monthlyTab1" class="tab-panel active">
+            <div class="filter-bar" style="display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <input type="month" id="monthlyReportPicker" class="form-control" onchange="renderDailyTableReport()">
+                <button class="btn-export" onclick="exportMonthlyToExcel()" style="background: #16a34a; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                    <i class="fas fa-file-excel"></i> แชร์ Excel
                 </button>
             </div>
-            <div id="comparisonSingleContent"></div>
+            <div id="monthlyContent1" class="table-responsive">
+                <!-- ตารางรายวันแบบเดียวกับในภาพแรกจะแสดงตรงนี้ -->
+            </div>
         </div>
-    </section>
+
+        <!-- แท็บที่ 2: ตารางสรุปรายได้รวมเรียงตามเดือน (สำหรับดูย้อนหลัง) -->
+        <div id="monthlyTab2" class="tab-panel" style="display: none;">
+            <div class="filter-bar" style="margin-bottom: 12px;">
+                <select id="yearFilterSelect" class="form-control" onchange="renderYearlyIncomeSummary()">
+                    <option value="2026">ปี 2026</option>
+                    <option value="2025">ปี 2025</option>
+                </select>
+            </div>
+            <div id="monthlyContent2" class="table-responsive">
+                <!-- ตารางสรุปรายได้เฉพาะยอดรวมทุกเดือนจะแสดงตรงนี้ -->
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ================= SECTION 5: เปรียบเทียบ ================= -->
+<section id="pageComparison" class="app-page full-page" style="display: none;">
+    <div class="top-bar">
+        <span class="top-title">🔍 วิเคราะห์เปรียบเทียบ</span>
+    </div>
+    <div class="single-page-content" style="padding: 16px;">
+        <h3 class="panel-title">🔍 เลือกช่วงเวลา & ข้อมูลที่ต้องการเปรียบเทียบ</h3>
+        
+        <!-- 1. เลือกช่วงเวลา -->
+        <div class="compare-inputs-wrap" style="display: flex; gap: 8px; margin-bottom: 10px;">
+            <input type="month" id="compareMonth1" class="form-control">
+            <span style="align-self: center; font-weight: bold;">VS</span>
+            <input type="month" id="compareMonth2" class="form-control">
+        </div>
+
+        <!-- 2. เลือกหัวข้อ/ตัวแปรที่จะเปรียบเทียบ -->
+        <div style="margin-bottom: 15px;">
+            <label style="font-weight: bold; font-size: 14px;">📊 เลือกหัวข้อเปรียบเทียบ:</label>
+            <select id="compareTypeSelect" class="form-control" style="width: 100%; height: 45px; margin-top: 5px;">
+                <option value="all">📌 แสดงภาพรวมทั้งหมด</option>
+                <option value="income">💰 ยอดขายรวม (รายได้ช่าง vs รายได้ร้าน)</option>
+                <option value="customers">👥 จำนวนลูกค้า (ลูกค้าใหม่ vs ลูกค้าประจำ)</option>
+                <option value="services">✂️ ทรงผม & บริการยอดนิยม</option>
+            </select>
+        </div>
+
+        <!-- 3. ปุ่มกดประมวลผล และ ปุ่ม Export Excel -->
+        <div class="btn-compare-wrap" style="display: flex; gap: 8px; justify-content: center; margin: 15px 0;">
+            <button class="btn-compare" onclick="executeComparison()" style="flex: 1; height: 48px; background: #2563eb; color: white; border-radius: 12px; font-weight: bold;">
+                <i class="fas fa-chart-line"></i> ประมวลผล
+            </button>
+            <button class="btn-export" onclick="exportComparisonToExcel()" style="height: 48px; background: #16a34a; color: white; border-radius: 12px; font-weight: bold; padding: 0 16px;">
+                <i class="fas fa-file-excel"></i> แชร์ Excel
+            </button>
+        </div>
+
+        <!-- 4. แสดงผลลัพธ์ -->
+        <div id="comparisonSingleContent"></div>
+    </div>
+</section>
 
     <!-- ✅ แถบนำทางล่างสุด (แก้ไขฟังก์ชัน onclick ของ รายงาน และ บัญชี ให้ถูกต้อง) -->
     <nav class="bottom-nav">
