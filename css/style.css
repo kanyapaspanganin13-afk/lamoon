@@ -64,7 +64,7 @@ body > center, body > a, body > br { display: none !important; }
 }
 .home-btn-wrapper, .btn-back-small { display: none !important; }
 
-/* ========= 🧭 เมนูบาร์ล่าง 4 ปุ่ม ========= */
+/* ========= 🧭 เมนูบาร์ล่าง 5 ปุ่ม ========= */
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -76,18 +76,22 @@ body > center, body > a, body > br { display: none !important; }
     background: var(--card);
     border-top: 1px solid var(--border);
     display: grid;
-    /* ยอมให้ JS ปรับเปลี่ยน gridTemplateColumns ได้เมื่อเปิดแท็บสรุป */
-    grid-template-columns: repeat(4, 1fr); 
-    gap: 4px;
+    /* เปลี่ยนเป็น repeat(5, 1fr) เพื่อรองรับ 5 ปุ่มให้อยู่แถวเดียวกัน */
+    grid-template-columns: repeat(5, 1fr); 
+    gap: 2px;
     justify-items: center;
     align-items: center;
     z-index: 999;
     padding-bottom: env(safe-area-inset-bottom);
+    box-sizing: border-box;
 }
 .nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
     gap: 2px;
     color: var(--text);
     opacity: 0.5;
@@ -98,9 +102,14 @@ body > center, body > a, body > br { display: none !important; }
     opacity: 1;
     color: var(--accent);
 }
-.nav-item i { font-size: 22px; }
-.nav-item span { font-size: 11px; font-weight: 700; }
-
+.nav-item i { 
+    font-size: 20px; 
+}
+.nav-item span { 
+    font-size: 10px; 
+    font-weight: 700; 
+    white-space: nowrap;
+}
 .app-page.full-page,
 #pageWorkGroup {
     padding-bottom: 80px !important;
