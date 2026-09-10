@@ -1,13 +1,20 @@
 /* ==========================================================
    Barber-Note v1.1.0 — FULL VERSION + NEW NAVIGATION
    ========================================================== */
-/* ========= SECTION 1: GLOBAL VARIABLES ========= */
+/* ==========================================================
+   SECTION 1: INITIALIZATION & GLOBAL VARIABLES
+   ========================================================== */
 const $ = id => document.getElementById(id);
+
+// 1. ตั้งค่าเลขเวอร์ชันและวันที่อัปเดตล่าสุด
 const APP_VERSION = "1.1.0";
 const LAST_UPDATED = "07/09/2026";
+
+// 2. ตัวแปรหลักของระบบ
 let db = JSON.parse(localStorage.getItem("barber_db")) || [];
 let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
 let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
+
 let conf = JSON.parse(localStorage.getItem("barber_conf")) || { 
     shop: localStorage.getItem("shopName") || "Barber Shop", 
     perc: parseFloat(localStorage.getItem("shopPerc")) || 50, 
@@ -16,9 +23,23 @@ let conf = JSON.parse(localStorage.getItem("barber_conf")) || {
     voice: localStorage.getItem("shopVoice") || "female",
     sound: localStorage.getItem("shopSound") || "on"
 };
+
 let payMethod = "";
 
-/* =========  SECTION 2: MAIN NAVIGATION สลับหน้าหลักให้ตรงกับ HTML ========= */
+// 3. แสดงผลเลขเวอร์ชัน วันที่ และชื่อร้านเมื่อ DOM พร้อม
+document.addEventListener("DOMContentLoaded", () => {
+    if ($("display-version")) $("display-version").innerText = APP_VERSION;
+    if ($("display-date")) $("display-date").innerText = LAST_UPDATED;
+
+    const savedShopName = localStorage.getItem("shopName") || conf.shop || "BARBER SHOP";
+    const shopTitleEl = document.querySelector('h2'); 
+    if (shopTitleEl) shopTitleEl.innerText = savedShopName;
+});
+
+
+/* ==========================================================
+   SECTION 2: MAIN NAVIGATION
+   ========================================================== */
 function switchMainView(viewName, subNum = null) {
     // 1. ซ่อนหน้าหลักทั้งหมด
     document.querySelectorAll('.app-page').forEach(page => {
@@ -37,7 +58,7 @@ function switchMainView(viewName, subNum = null) {
         return;
     }
 
-    // 3. ✂️ กลุ่มบันทึกงาน (รองรับทั้ง บันทึก, รายงานประจำวัน, และ บัญชี)
+    // 3. ✂️ กลุ่มบันทึกงาน
     if (viewName === 'workGroup') {
         const workPage = document.getElementById('pageWorkGroup');
         if (!workPage) {
@@ -46,13 +67,11 @@ function switchMainView(viewName, subNum = null) {
         }
         workPage.classList.add('active');
         workPage.style.display = 'block';
-        
-        // สลับไป Sub-page ที่ระบุ (ถ้าไม่ระบุให้เปิด Sub 1)
         goSub(subNum || 1);
         return;
     }
 
-    // 4. 📊 สรุปยอดรวม (สำหรับปุ่มบนหน้าแรก)
+    // 4. 📊 สรุปยอดรวม
     if (viewName === 'summaryPage') {
         const summaryPage = document.getElementById('pageSummary');
         if (!summaryPage) {
@@ -96,7 +115,47 @@ function switchMainView(viewName, subNum = null) {
     console.warn('ไม่พบ viewName:', viewName);
 }
 
-/* =========  SECTION 2.1: BOTTOM NAVIGATION (ไฮไลท์ปุ่มตามหน้าปัจจุบัน) ========= */
+/* รองรับระบบเรียกหน้าแบบเก่า (go) เพื่อป้องกันโค้ดเดิมค้าง */
+function go(p) {
+    document.querySelectorAll('.page, .app-page').forEach(pg => {
+        pg.classList.remove('active');
+        pg.style.display = 'none'; 
+    });
+    
+    const targetPage = document.getElementById('p' + p) || document.getElementById('page' + p);
+    if (targetPage) {
+        targetPage.classList.add('active');
+        targetPage.style.display = 'block';
+    }
+    
+    document.querySelectorAll('.nav-item').forEach((btn, i) => {
+        const isSelected = (i + 1) === p;
+        btn.classList.toggle('active', isSelected);
+        btn.style.color = isSelected ? 'var(--accent)' : 'var(--text)';
+        btn.style.opacity = isSelected ? '1' : '0.5';
+    });
+
+    const savedShopName = localStorage.getItem("shopName") || conf.shop || "BARBER SHOP";
+    const shopTitleEl = document.querySelector('h2'); 
+    if (shopTitleEl) shopTitleEl.innerText = savedShopName;
+
+    const dateInpValue = $("dateInp")?.value || new Date().toISOString().split('T')[0];
+    if (p === 2) {
+        if (typeof renderDay === 'function') renderDay(dateInpValue);
+        updateDateDisplay(dateInpValue);
+    }
+    if (p === 3) { 
+        if ($("accDate") && $("dateInp")) {
+            $("accDate").value = $("dateInp").value;
+        }
+        if (typeof loadAccountStatus === 'function') {
+            loadAccountStatus(); 
+        }
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ========= SECTION 2.1: BOTTOM NAVIGATION ========= */
 function updateNavDisplay(viewName) {
     const nav = document.querySelector('.bottom-nav');
     if (!nav) return;
@@ -106,14 +165,12 @@ function updateNavDisplay(viewName) {
     nav.style.justifyContent = 'stretch';
     nav.style.alignItems = 'stretch';
 
-    // ล้างสถานะ active ออกทั้งหมด
     nav.querySelectorAll('.nav-item').forEach(item => {
         item.style.display = 'flex';
         item.style.margin = '0';
         item.classList.remove('active');
     });
 
-    // ไฮไลท์ปุ่มให้ถูกต้อง
     if (viewName === 'home') {
         nav.querySelector('#navHome')?.classList.add('active');
     } else if (viewName === 'workGroup' || viewName === 'sub1') {
@@ -126,7 +183,11 @@ function updateNavDisplay(viewName) {
         nav.querySelector('#navSettings')?.classList.add('active');
     }
 }
-/* =========  SECTION SECTION 3: SUB-PAGE NAVIGATION ========= */
+
+
+/* ==========================================================
+   SECTION 3: SUB-PAGE NAVIGATION
+   ========================================================== */
 function goSub(num) {
     const workPage = document.getElementById('pageWorkGroup');
     if (!workPage) {
@@ -134,13 +195,11 @@ function goSub(num) {
         return;
     }
 
-    // ซ่อน sub-page ทั้งหมด
     workPage.querySelectorAll('.sub-page').forEach(page => {
         page.classList.remove('active');
         page.style.display = 'none';
     });
 
-    // แสดง sub-page ที่เลือก
     const target = document.getElementById('p' + num);
     if (!target) {
         console.warn('ไม่พบ sub-page:', 'p' + num);
@@ -149,15 +208,14 @@ function goSub(num) {
     target.classList.add('active');
     target.style.display = 'block';
 
-    // อัปเดตไฮไลท์ปุ่ม Bottom Nav
     updateNavDisplay('sub' + num);
 
-    // ดึงค่าวันที่และประมวลผลข้อมูล
     const dateInput = document.getElementById('dateInp');
     const dInp = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
 
-    if (num === 2 && typeof renderDay === 'function') {
-        renderDay(dInp);
+    if (num === 2) {
+        if (typeof renderDay === 'function') renderDay(dInp);
+        updateDateDisplay(dInp);
     }
     if (num === 3) {
         const accDate = document.getElementById('accDate');
@@ -167,7 +225,11 @@ function goSub(num) {
         }
     }
 }
-/* =========  SECTION 4: MAIN TABS ========= */
+
+
+/* ==========================================================
+   SECTION 4: MAIN TABS
+   ========================================================== */
 function switchMainTab(pageId, tabId, evt) {
     const page = document.getElementById(pageId);
     if (!page) {
@@ -204,7 +266,9 @@ function switchMainTab(pageId, tabId, evt) {
         });
     }
 }
-/* ========= SECTION 5: AUTO-UPDATE ========= */
+/* ==========================================================
+   SECTION 5: AUTO-UPDATE
+   ========================================================== */
 (function autoUpdate() {
     const currentStoredVersion = localStorage.getItem("app_v");
     if (currentStoredVersion !== APP_VERSION) {
@@ -218,22 +282,29 @@ function switchMainTab(pageId, tabId, evt) {
         }
     }
 })();
-
-/* ========= SECTION 6: DATE DISPLAY ========= */
+/* ==========================================================
+   SECTION 6: DATE DISPLAY
+   ========================================================== */
 function updateDateDisplay(v) {
     if (!v) return;
     const [y, m, d] = v.split('-');
     const thaiYearFull = parseInt(y) + 543;
     const thaiYearShort = thaiYearFull.toString().slice(-2);
     const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-    const days = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
-    const dayName = days[new Date(v + 'T00:00:00').getDay()].substring(0,2);
-    const formattedDate = `${parseInt(d)} ${months[parseInt(m)-1]} ${thaiYearShort} (${dayName})`;
+    const days = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+    
+    // ดึงชื่อวันภาษาไทยแบบย่อ
+    const dayName = days[new Date(v + 'T00:00:00').getDay()].substring(0, 2);
+    const formattedDate = `${parseInt(d)} ${months[parseInt(m) - 1]} ${thaiYearShort} (${dayName})`;
+    
     const el = $("dateDisplay");
     if (el) el.innerText = formattedDate;
+
+    const el2 = $("displayDateThai");
+    if (el2) el2.innerText = formattedDate;
+
     if (typeof renderDay === "function") renderDay(v);
 }
-
 /* ========= SECTION 7: SAVE DATA ========= */
 function saveDB() {
     try {
