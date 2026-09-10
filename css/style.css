@@ -64,57 +64,60 @@ body > center, body > a, body > br { display: none !important; }
 }
 .home-btn-wrapper, .btn-back-small { display: none !important; }
 
-/* ========= 🧭 เมนูบาร์ล่าง 5 ปุ่ม ========= */
+/* ========= 🧭 เมนูบาร์ล่าง 5 ปุ่มแสดงเต็มแถวบนมือถือ ========= */
 .bottom-nav {
     position: fixed;
     bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 480px;
-    height: 70px;
+    left: 0;
+    right: 0;
+    width: 100vw; /* บังคับกว้างเต็มหน้าจออุปกรณ์ */
+    max-width: 100%;
+    height: 65px;
     background: var(--card);
     border-top: 1px solid var(--border);
-    display: grid;
-    /* เปลี่ยนเป็น repeat(5, 1fr) เพื่อรองรับ 5 ปุ่มให้อยู่แถวเดียวกัน */
-    grid-template-columns: repeat(5, 1fr); 
-    gap: 2px;
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important; /* บังคับแบ่ง 5 ช่องเท่ากัน */
+    gap: 0;
     justify-items: center;
     align-items: center;
-    z-index: 999;
-    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 9999;
+    padding-bottom: env(safe-area-inset-bottom); /* รองรับขอบล่าง iPhone */
     box-sizing: border-box;
 }
 .nav-item {
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     width: 100%;
     height: 100%;
-    gap: 2px;
+    padding: 4px 0;
     color: var(--text);
     opacity: 0.5;
     cursor: pointer;
     transition: all 0.2s;
+    box-sizing: border-box;
 }
 .nav-item.active {
     opacity: 1;
     color: var(--accent);
 }
 .nav-item i { 
-    font-size: 20px; 
+    font-size: 18px !important; /* ปรับขนาดไอคอนให้พอดีไม่ดันข้อความ */
+    margin-bottom: 2px;
 }
 .nav-item span { 
-    font-size: 10px; 
-    font-weight: 700; 
-    white-space: nowrap;
+    font-size: 10px !important; 
+    font-weight: 600; 
+    white-space: nowrap; /* ป้องกันข้อความตัดบรรทัด */
+    line-height: 1.1;
 }
+/* ปรับระยะขอบล่างของหน้าเนื้อหาไม่ให้ถูกแถบเมนูทับ */
 .app-page.full-page,
-#pageWorkGroup {
-    padding-bottom: 80px !important;
+#pageWorkGroup,
+#pageHome {
+    padding-bottom: 85px !important;
 }
-
 /* ========= 📋 MENU GRID & CARDS ========= */
 .menu-grid {
     display: grid !important;
