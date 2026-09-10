@@ -1208,41 +1208,47 @@ function loadHistMonth() {
             `;
         }
     }   
-
 function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular) {
+    // Helper Selector กัน Error เรื่อง $
+    const $ = id => document.getElementById(id);
+
     // --- 1. เตรียมข้อมูลพื้นฐาน & นับยอดลูกค้าใหม่/ประจำใหม่ป้องกันค่าเป็น 0 ---
-    const weekEntries = Object.entries(weeklyData);
-    const weekKeys = Object.keys(weeklyData); 
+    const weekEntries = Object.entries(weeklyData || {});
+    const weekKeys = Object.keys(weeklyData || {}); 
     const dayStats = {};
     
     let totalNew = 0;
     let totalRegular = 0;
 
     weekEntries.forEach(([wk, data]) => {
-        // นับยอดรวมลูกค้าใหม่/ประจำทั้งเดือน
         totalNew += (data.countNew || 0);
         totalRegular += (data.countRegular || 0);
 
         if (data.dailyCounts) {
             data.dailyCounts.forEach(d => {
-                const dayName = d.dayName.split(' ')[0];
-                if (!dayStats[dayName]) dayStats[dayName] = { total: 0, count: 0 };
-                if (d.count > 0) {
-                    dayStats[dayName].total += d.count;
-                    dayStats[dayName].count += 1;
+                const dayName = d.dayName ? d.dayName.split(' ')[0] : '';
+                if (dayName) {
+                    if (!dayStats[dayName]) dayStats[dayName] = { total: 0, count: 0 };
+                    if (d.count > 0) {
+                        dayStats[dayName].total += d.count;
+                        dayStats[dayName].count += 1;
+                    }
                 }
             });
         }
     });
 
     const dayAverages = Object.entries(dayStats).filter(([name, data]) => data.count > 0).map(([name, data]) => ({ name, avg: data.total / data.count }));
-    const busiestDay = dayAverages.sort((a, b) => b.avg - a.avg)[0];
-    const quietestDay = dayAverages.sort((a, b) => a.avg - b.avg)[0];
+    
+    // แก้ไขจุดที่ 1: Copy Array ก่อน Sort ป้องกันข้อมูลตีกัน
+    const busiestDay = [...dayAverages].sort((a, b) => b.avg - a.avg)[0];
+    const quietestDay = [...dayAverages].sort((a, b) => a.avg - b.avg)[0];
+    
     const topIncomeWeek = weekEntries.length > 0 ? weekEntries.reduce((p, c) => ((c[1].income || 0) > (p[1].income || 0) ? c : p)) : null;
-    const topCountWeek = weekEntries.length > 0 ? weekEntries.reduce((p, c) => ((c[1].countNew + c[1].countRegular) > (p[1].countNew + p[1].countRegular) ? c : p)) : null;
+    const topCountWeek = weekEntries.length > 0 ? weekEntries.reduce((p, c) => (((c[1].countNew || 0) + (c[1].countRegular || 0)) > ((p[1].countNew || 0) + (p[1].countRegular || 0)) ? c : p)) : null;
 
-    const topHair = Object.entries(hairStats).sort((a, b) => b[1] - a[1])[0];
-    const topService = Object.entries(serviceStats).sort((a, b) => b[1] - a[1])[0];
+    const topHair = Object.entries(hairStats || {}).sort((a, b) => b[1] - a[1])[0];
+    const topService = Object.entries(serviceStats || {}).sort((a, b) => b[1] - a[1])[0];
 
     // --- 2. วิเคราะห์ลูกค้า (รายสัปดาห์ & รายเดือน) ---
     let maxNewWeek = "-"; 
@@ -1254,15 +1260,12 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         const n = curr.countNew || 0;
         const r = curr.countRegular || 0;
         
-        // วิเคราะห์สดรายสัปดาห์
         curr.newAnalysis = (n > r) ? "กลุ่มหลักอาทิตย์นี้" : (n < r) ? "น้อยกว่าลูกค้าประจำ" : "เท่ากับลูกค้าประจำ";
         curr.regAnalysis = (r > n) ? "กลุ่มหลักอาทิตย์นี้" : (r < n) ? "น้อยกว่าลูกค้าใหม่" : "เท่ากับลูกค้าใหม่";
 
-        // ถ้าลูกค้าใหม่ "มากกว่า" ลูกค้าประจำ และมากกว่ายอดสูงสุดที่เคยเก็บไว้
         if (n > r && (maxNewWeek === "-" || n > (weeklyData[maxNewWeek]?.countNew || 0))) {
             maxNewWeek = wk;
         }
-        // ถ้าลูกค้าประจำ "มากกว่า" ลูกค้าใหม่ และมากกว่ายอดสูงสุดที่เคยเก็บไว้
         if (r > n && (maxRegWeek === "-" || r > (weeklyData[maxRegWeek]?.countRegular || 0))) {
             maxRegWeek = wk;
         }
@@ -1278,15 +1281,16 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
 
     // --- 3. ฟังก์ชัน Render กราฟสถิติ ---
     const renderStats = (statsObj, defaultColor) => {
+        if (!statsObj || typeof statsObj !== 'object') return `<div style="font-size:12px; color:#94a3b8; opacity:0.5; text-align:center;">ไม่มีข้อมูล</div>`;
         const entries = Object.entries(statsObj).sort((a, b) => b[1] - a[1]);
-        if (entries.length === 0) return `<div style="font-size:12px; color:var(--text, #94a3b8); opacity:0.5; text-align:center;">ไม่มีข้อมูล</div>`;
+        if (entries.length === 0) return `<div style="font-size:12px; color:#94a3b8; opacity:0.5; text-align:center;">ไม่มีข้อมูล</div>`;
         
         const maxVal = entries[0][1];
         const extraSvcs = ["โกนหนวด", "กันหน้า", "สระผม", "กันจอน", "ย้อมแฟชั่น", "ดัดผม", "แคะหู"];
     
         return entries.map(([name, count]) => {
             const width = maxVal > 0 ? (count / maxVal) * 100 : 0;
-            const barColor = defaultColor || (extraSvcs.includes(name) ? 'var(--primary, #38bdf8)' : 'var(--warning, #facc15)');
+            const barColor = defaultColor || (extraSvcs.includes(name) ? '#38bdf8' : '#facc15');
     
             return `
             <div style="margin-bottom:10px;">
@@ -1364,7 +1368,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         <div style="background:#020617; border:1px solid rgba(255,255,255,0.08); padding:16px; border-radius:22px; margin-bottom:12px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <div style="font-size:15px; font-weight:800; color:#f8fafc;">🗓️ ${wk}</div>
-                <div style="font-size:10px; color:#94a3b8;">เปิด ${data.workDays} | หยุด ${data.offDays}</div>
+                <div style="font-size:10px; color:#94a3b8;">เปิด ${data.workDays || 0} | หยุด ${data.offDays || 0}</div>
             </div>
             <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-bottom:10px;">
                 <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); padding:6px 4px; border-radius:12px; text-align:center;">
@@ -1384,7 +1388,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px;">
                 <div style="background: rgba(255,255,255,0.02); padding: 6px 4px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
                     <div style="font-size: 8px; color: #64748b; margin-bottom: 2px;">👤 รวม</div>
-                    <div style="font-size: 12px; font-weight: 700; color: #38bdf8;">${data.customers}</div>
+                    <div style="font-size: 12px; font-weight: 700; color: #38bdf8;">${data.customers || 0}</div>
                 </div>
                 <div style="background: rgba(34,197,94,0.05); padding: 6px 4px; border-radius: 12px; text-align: center; border: 1px solid rgba(34,197,94,0.1);">
                     <div style="font-size: 8px; color: #4ade80; margin-bottom: 2px;">🌟 ใหม่</div>
@@ -1408,16 +1412,13 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         </div>`;
     }).join("");
 
-    // แปลงฟอร์แมตวันที่แสดงใน Modal Header
     let displayMonthTitle = m;
     try {
         const [y, mNum] = m.split('-');
         displayMonthTitle = new Date(y, mNum - 1, 1).toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
     } catch(e) { displayMonthTitle = m; }
 
-   // --- 6. ฉีด HTML แยกแสดงผลลงใน 3 แท็บหลัก (ไม่ใช้ Pop-up Modal) ---
-
-    // 6.1 แท็บที่ 1: สรุปรายได้ (monthlyIncomeContent)
+    // --- 6. ฉีด HTML แยกแสดงผลลงใน 3 แท็บหลัก ---
     if ($("monthlyIncomeContent")) {
         $("monthlyIncomeContent").innerHTML = `
             <div style="background:#0f172a; padding:20px; color:#f1f5f9; border-radius:20px; font-family: system-ui, sans-serif;">
@@ -1460,14 +1461,13 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                         🛡️ ประกัน ${monthGuarDays || 0} วัน
                     </div>
                     <div style="background: rgba(147,51,234,0.15); padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 600; color: #a855f7;">
-                        📊 เฉลี่ย ${avgCustomerPerDay.toFixed(2)} คน/วัน
+                        📊 เฉลี่ย ${(avgCustomerPerDay || 0).toFixed(2)} คน/วัน
                     </div>
                 </div>
             </div>
         `;
     }
 
-    // 6.2 แท็บที่ 2: วิเคราะห์รายสัปดาห์ & ภาพรวม (incomeAnalyticsContent)
     if ($("incomeAnalyticsContent")) {
         $("incomeAnalyticsContent").innerHTML = `
             <div style="background:#0f172a; padding:20px; color:#f1f5f9; border-radius:20px; font-family: system-ui, sans-serif;">
@@ -1484,7 +1484,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         `;
     }
 
-    // 6.3 แท็บที่ 3: สถิติทรงผม & บริการ (servicesStatsContent)
     if ($("servicesStatsContent")) {
         $("servicesStatsContent").innerHTML = `
             <div style="background:#0f172a; padding:20px; color:#f1f5f9; border-radius:20px; font-family: system-ui, sans-serif;">
@@ -1505,18 +1504,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         `;
     }
 }
-function renderStats(obj, accentColor) {
-    if (!obj || typeof obj !== 'object') return "<div style='color:rgba(255,255,255,0.2); padding:10px; font-size:13px;'>ไม่มีข้อมูลสถิติ</div>";
 
-    const entries = Object.entries(obj).sort((a, b) => b[1] - a[1]);
-    if (!entries.length) return "<div style='color:rgba(255,255,255,0.2); padding:10px; font-size:13px;'>ไม่มีข้อมูลสถิติ</div>";
-    
-    return entries.map(([k, v]) => `
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; margin-bottom:8px;">
-            <div style="font-weight:600; color:#f1f5f9; font-size:14px;">${k}</div>
-            <div style="font-weight:800; color:${accentColor}; font-size:16px;">${v} <span style="font-size:11px; opacity:0.5; color:#fff;">ครั้ง</span></div>
-        </div>`).join("");
-}
 function exportToExcel(monthValue) {
     if (!monthValue || typeof XLSX === 'undefined') return;
     const [y, m] = monthValue.split('-');
