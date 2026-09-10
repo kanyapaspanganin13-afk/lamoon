@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Barber-MS">
-    <title>Barber Note V.1</title>
+    <title>Barber Note V.2</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="assets/icon.png">
     <link rel="icon" type="image/png" href="assets/icon.png">
@@ -343,21 +343,24 @@
         </div>
     </section>
         <!-- ✅ แถบเมนูล่าง — แสดงตามเงื่อนไข -->
+        <!-- ✅ นำ nav มาไว้นอกสุด (ต่อท้ายทุก section) พร้อมใส่ id และเพิ่มปุ่มตั้งค่า -->
         <nav class="bottom-nav">
-            <div onclick="switchMainView('home')" class="nav-item">
+            <div onclick="switchMainView('home')" id="navHome" class="nav-item">
                 <i class="fas fa-home"></i><span>หน้าแรก</span>
             </div>
-            <div onclick="switchMainView('workGroup')" class="nav-item nav-btn-work">
+            <div onclick="switchMainView('workGroup')" id="nav1" class="nav-item nav-btn-work">
                 <i class="fas fa-edit"></i><span>บันทึก</span>
             </div>
-            <div onclick="switchMainView('Pagesummary')" class="nav-item nav-btn-report">
+            <div onclick="switchMainView('summaryPage')" id="nav2" class="nav-item nav-btn-report">
                 <i class="fas fa-chart-bar"></i><span>รายงาน</span>
             </div>
-            <div onclick="switchMainView('pageAccount')" class="nav-item nav-btn-account">
+            <div onclick="switchMainView('pageAccount')" id="nav3" class="nav-item nav-btn-account">
                 <i class="fas fa-wallet"></i><span>บัญชี</span>
             </div>
+            <div onclick="openSettings()" id="navSettings" class="nav-item">
+                <i class="fas fa-cog"></i><span>ตั้งค่า</span>
+            </div>
         </nav>
-</section>
     <!-- ==================== ⚙️ MODALS ต่างๆ ==================== -->
     <!-- Modal ตั้งค่าระบบ -->
     <div id="modalSet" class="modal">
