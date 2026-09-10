@@ -125,38 +125,34 @@ function switchMainView(viewName) {
    SECTION 2.1: BOTTOM NAVIGATION (ตรึงไว้เสมอ + รองรับ 5 ปุ่ม)
    ========================================================= */
 function updateNavDisplay(viewName) {
-    document.querySelectorAll('.bottom-nav').forEach(nav => {
-        // แสดงแถบนำทางไว้เสมอโดยไม่ซ่อน
-        nav.style.display = 'grid';
-        nav.style.gridTemplateColumns = 'repeat(5, 1fr)';
-        nav.style.justifyContent = 'stretch';
-        nav.style.alignItems = 'stretch';
+    const nav = document.querySelector('.bottom-nav');
+    if (!nav) return;
 
-        // ปลดสถานะ active จากทุกปุ่มก่อน
-        nav.querySelectorAll('.nav-item').forEach(item => {
-            item.style.display = 'flex';
-            item.style.margin = '0';
-            item.classList.remove('active');
-        });
+    // แสดงแถบนำทางตลอดเวลา แบ่งเป็น 5 คอลัมน์เท่ากัน
+    nav.style.display = 'grid';
+    nav.style.gridTemplateColumns = 'repeat(5, 1fr)';
+    nav.style.justifyContent = 'stretch';
+    nav.style.alignItems = 'stretch';
 
-        // จัดการไฮไลท์ปุ่มตาม viewName
-        if (viewName === 'home') {
-            const homeBtn = nav.querySelector('#navHome');
-            if (homeBtn) homeBtn.classList.add('active');
-        } else if (viewName === 'workGroup' || viewName === 'sub1') {
-            const workBtn = nav.querySelector('#nav1');
-            if (workBtn) workBtn.classList.add('active');
-        } else if (viewName === 'sub2') {
-            const reportBtn = nav.querySelector('#nav2');
-            if (reportBtn) reportBtn.classList.add('active');
-        } else if (viewName === 'sub3') {
-            const accBtn = nav.querySelector('#nav3');
-            if (accBtn) accBtn.classList.add('active');
-        } else if (viewName === 'settings') {
-            const setBtn = nav.querySelector('#navSettings');
-            if (setBtn) setBtn.classList.add('active');
-        }
+    // ล้างสถานะ active ออกทั้งหมด
+    nav.querySelectorAll('.nav-item').forEach(item => {
+        item.style.display = 'flex';
+        item.style.margin = '0';
+        item.classList.remove('active');
     });
+
+    // ไฮไลท์ปุ่มตามหน้าปัจจุบัน
+    if (viewName === 'home') {
+        nav.querySelector('#navHome')?.classList.add('active');
+    } else if (viewName === 'workGroup' || viewName === 'sub1') {
+        nav.querySelector('#nav1')?.classList.add('active');
+    } else if (viewName === 'summaryPage' || viewName === 'sub2') {
+        nav.querySelector('#nav2')?.classList.add('active');
+    } else if (viewName === 'pageAccount' || viewName === 'sub3') {
+        nav.querySelector('#nav3')?.classList.add('active');
+    } else if (viewName === 'settings') {
+        nav.querySelector('#navSettings')?.classList.add('active');
+    }
 }
 
 /* =========================================================
