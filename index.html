@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Barber-MS">
-    <title>Barber Note V.3</title>
+    <title>Barber Note V.1</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="assets/icon.png">
     <link rel="icon" type="image/png" href="assets/icon.png">
@@ -292,18 +292,18 @@
         </div>
     </section>
 
-    <!-- ✅ แถบนำทางล่างสุด 5 ปุ่ม (ตรึงไว้ด้านล่าง อยู่นอกทุก section) -->
+    <!-- ✅ แถบนำทางล่างสุด (แก้ไขฟังก์ชัน onclick ของ รายงาน และ บัญชี ให้ถูกต้อง) -->
     <nav class="bottom-nav">
         <div onclick="switchMainView('home')" id="navHome" class="nav-item">
             <i class="fas fa-home"></i><span>หน้าแรก</span>
         </div>
-        <div onclick="switchMainView('workGroup')" id="nav1" class="nav-item nav-btn-work">
+        <div onclick="switchMainView('workGroup')" id="nav1" class="nav-item">
             <i class="fas fa-edit"></i><span>บันทึก</span>
         </div>
-        <div onclick="switchMainView('summaryPage')" id="nav2" class="nav-item nav-btn-report">
+        <div onclick="switchMainView('workGroup'); goSub(2);" id="nav2" class="nav-item">
             <i class="fas fa-chart-bar"></i><span>รายงาน</span>
         </div>
-        <div onclick="switchMainView('pageAccount')" id="nav3" class="nav-item nav-btn-account">
+        <div onclick="switchMainView('workGroup'); goSub(3);" id="nav3" class="nav-item">
             <i class="fas fa-wallet"></i><span>บัญชี</span>
         </div>
         <div onclick="openSettings()" id="navSettings" class="nav-item">
