@@ -256,13 +256,15 @@ function saveSettings() {
             sound: $("setSound")?.value || "on"
         };
 
-        // 2. อัปเดตตัวแปรกลาง (conf) ทันที 
+        // 2. อัปเดตตัวแปรกลาง (conf) ทันที
         if (typeof conf !== "undefined") {
             Object.assign(conf, settings);
         }
 
         // 3. บันทึกลง LocalStorage และ DB
-        localStorage.setItem('barber_conf', JSON.stringify(conf));
+        if (typeof conf !== "undefined") {
+            localStorage.setItem('barber_conf', JSON.stringify(conf));
+        }
         localStorage.setItem('shopName',  settings.shop);
         localStorage.setItem('shopPerc',  settings.perc);
         localStorage.setItem('shopGuar',  settings.guar);
@@ -301,6 +303,43 @@ function saveSettings() {
         }
     }
 }
+
+/* 🎨 ฟังก์ชันเปลี่ยนธีม (อัปเดตให้รองรับ dataset/attribute เพิ่มเติมเพื่อ CSS) */
+function applyTheme(theme) {
+    // ลบ class เก่าทั้งหมด
+    document.body.classList.remove("vintage", "navy", "light");
+    
+    // กำหนดธีมใหม่
+    const selectedTheme = theme || "light";
+    if (selectedTheme !== "light") {
+        document.body.classList.add(selectedTheme);
+    }
+    
+    // อัปเดต data-theme ให้ตรงกับ CSS Selector [data-theme="..."]
+    document.body.setAttribute("data-theme", selectedTheme);
+
+    // บันทึกค่าลงเครื่อง
+    localStorage.setItem("selectedTheme", selectedTheme);
+    localStorage.setItem("shopTheme", selectedTheme);
+}
+
+/* 🚀 โหลดธีมทันทีที่เปิดเว็บ */
+document.addEventListener("DOMContentLoaded", function() {
+    const savedTheme = localStorage.getItem("selectedTheme") || localStorage.getItem("shopTheme") || "light";
+
+    // สั่งเปลี่ยนธีม
+    applyTheme(savedTheme);
+
+    // จัดการตัวเลือก Dropdown
+    const themeSelector = $("setTheme");
+    if (themeSelector) {
+        themeSelector.value = savedTheme;
+        themeSelector.addEventListener("change", function() {
+            applyTheme(this.value);
+            if (navigator.vibrate) navigator.vibrate(10); 
+        });
+    }
+});
 /* ========= SECTION 8: NOTIFY & SOUND ========= */
 function speak(type, message = "") {
     if (conf.sound === "off") return;
