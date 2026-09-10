@@ -210,44 +210,47 @@ body > center, body > a, body > br { display: none !important; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
 .grid-time { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
-.grid-svc { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.grid-svc { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
 .grid-price { 
     display: grid; 
     grid-template-columns: 2fr 1fr; 
     gap: 10px; 
-    margin-bottom: 12px; 
+    margin-bottom: 10px; 
     align-items: stretch; 
 }
 .grid-pay { 
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
-    gap: 8px !important;
+    gap: 10px !important;
     height: auto !important;
-    margin-bottom: 12px !important;
+    margin-bottom: 10px !important;
 }
-.grid-summary { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; margin-bottom: 12px; align-items: stretch; }
+.grid-summary { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; margin-bottom: 10px; align-items: stretch; }
 
 /* ========= 🧩 CARDS & BOXES ========= */
-h2 { 
+
+/* ✅ 1. ขยับชื่อร้านขึ้นสูง + ปรับขนาดให้พอดี */
+h2, .top-bar, .top-title { 
     text-align: center; 
     color: var(--text); 
     font-weight: 900; 
-    margin: 0 0 20px; 
-    padding: 16px 0 8px;
-    letter-spacing: 1.5px; 
+    margin: 4px 0 10px 0 !important; 
+    padding: 0 !important;
+    letter-spacing: 1.2px; 
     text-transform: uppercase; 
-    font-size: 28px; 
+    font-size: 24px !important; 
 }
 
+/* ✅ 2. ขยายขนาดช่องกรอกและฟอนต์พื้นฐาน */
 select, input[type="text"], input[type="number"], input[type="date"], input[type="time"], input[type="month"] {
     width: 100%; 
-    height: 64px; 
+    height: 68px; /* เพิ่มความสูงช่อง */
     border-radius: 18px; 
     border: 1px solid var(--border); 
     background: var(--bg); 
     color: var(--text);
     font-weight: 700; 
-    font-size: 17px; 
+    font-size: 18px; /* ขยายฟอนต์ */
     text-align: center; 
     text-align-last: center; 
     outline: none;
@@ -257,60 +260,65 @@ select, input[type="text"], input[type="number"], input[type="date"], input[type
     transition: background 0.3s, color 0.3s, border-color 0.3s;
 }
 
+/* ✅ 3. ช่องเลือกวันที่ */
 .input-date-wrap { 
     position: relative; 
     background: var(--bg); 
     border: 1px solid var(--border); 
     border-radius: 18px; 
-    height: 64px; 
+    height: 68px; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
     transition: background 0.3s, border-color 0.3s;
 }
-.input-date-wrap span { font-weight: 700; color: var(--text); font-size: 17px; }
+.input-date-wrap span { font-weight: 800; color: var(--text); font-size: 18px; }
 .input-date-wrap input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 
-select#hairStyle, select#extra1, select#extra2 { 
-    height: 64px; 
+/* ✅ 4. ช่องเลือกทรงผม / บริการเสริม / ประเภทลูกค้า */
+select#hairStyle, select#extra1, select#extra2, select#custType { 
+    height: 68px; 
     font-size: 16px; 
     font-weight: 700;
-    padding: 0 8px; 
+    padding: 0 4px; 
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
+/* ✅ 5. ช่องเวลาเริ่ม-เสร็จ */
 .time-box { position: relative; }
-.time-box label { position: absolute; top: 8px; left: 14px; font-size: 13px; font-weight: 700; color: var(--text); opacity: 0.6; z-index: 1; }
-.time-input-custom { padding-top: 18px; font-size: 24px; font-weight: 800; }
+.time-box label { position: absolute; top: 6px; left: 12px; font-size: 13px; font-weight: 700; color: var(--text); opacity: 0.7; z-index: 1; }
+.time-input-custom { padding-top: 16px; font-size: 26px; font-weight: 800; }
 input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
 
+/* ✅ 6. ช่องใส่ราคา */
 .price-box { 
     position: relative; 
     background: var(--bg); 
-    border: 3px solid var(--accent); /* ✅ ใช้สี accent ตามธีม */
+    border: 2.5px solid var(--accent); 
     border-radius: 20px; 
     display: flex; 
     align-items: center; 
     overflow: hidden; 
-    min-height: 74px; 
-    padding: 0 14px;
+    min-height: 76px; 
+    padding: 0 12px;
     transition: background 0.3s, border-color 0.3s;
 }
-.baht { font-size: 36px; color: var(--accent); font-weight: 900; padding-left: 6px; }
-.price-box input { border: none; background: transparent; font-size: 42px; font-weight: 900; color: var(--text); text-align: right; padding-right: 8px; outline: none; width: 100%; }
+.baht { font-size: 38px; color: var(--accent); font-weight: 900; padding-left: 4px; }
+.price-box input { border: none; background: transparent; font-size: 44px; font-weight: 900; color: var(--text); text-align: right; padding-right: 6px; outline: none; width: 100%; }
 
+/* ✅ 7. ช่องทิป */
 .tip-box { 
-    min-height: 74px !important; 
+    min-height: 76px !important; 
     height: 100% !important;
     background: var(--bg); 
-    border: 2px solid var(--border); 
+    border: 1px solid var(--border); 
     border-radius: 20px; 
-    font-size: 24px; 
+    font-size: 28px; 
     font-weight: 800; 
     color: var(--text); 
-    opacity: 0.7;
+    opacity: 0.8;
     text-align: center; 
     display: flex;
     align-items: center;
@@ -318,51 +326,52 @@ input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
     transition: background 0.3s, border-color 0.3s, color 0.3s;
 }
 
+/* ✅ 8. ช่องเลือกวิธีชำระเงิน */
 .select-wrap { 
     position: relative; 
     width: 100%; 
-    height: 64px !important; 
+    height: 70px !important; 
 }
-.select-wrap i:first-child { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text); font-size: 20px; z-index: 3; }
+.select-wrap i:first-child { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text); font-size: 22px; z-index: 3; }
 .select-wrap select { 
     height: 100%; 
-    font-size: 16px !important; 
-    padding: 0 10px 0 38px !important;
-    font-weight: 700; 
-    border-radius: 18px;
+    font-size: 18px !important; 
+    padding: 0 10px 0 42px !important;
+    font-weight: 800; 
+    border-radius: 20px;
     text-align: center !important;
     text-align-last: center !important;
     white-space: nowrap !important;
 }
-.select-wrap .arrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 14px; pointer-events: none; }
+.select-wrap .arrow { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 14px; pointer-events: none; }
 
+/* ✅ 9. ปุ่มบันทึกข้อมูล */
 .btn-pay { 
     width: 100%; 
-    height: 64px !important; 
+    height: 70px !important; 
     border: none; 
-    border-radius: 18px; 
-    background: linear-gradient(135deg, var(--save1), var(--save2)); /* ✅ เปลี่ยนตามธีม */
+    border-radius: 20px; 
+    background: linear-gradient(135deg, var(--save1), var(--save2)); 
     color: var(--btn-text); 
     display: flex; 
     align-items: center; 
     justify-content: center; 
     gap: 8px; 
-    font-size: 18px !important; 
+    font-size: 20px !important; 
     font-weight: 800; 
     cursor: pointer; 
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2); 
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25); 
     padding: 0 10px !important;
     white-space: nowrap !important;
     transition: background 0.3s, color 0.3s;
 }
-.btn-pay i { font-size: 20px; }
+.btn-pay i { font-size: 22px; }
 
 #mixPanel { display: none; background: var(--input-bg); padding: 14px; border-radius: 16px; border: 2px dashed var(--accent); margin: 12px 0; }
 #mixPanel label { display: block; font-size: 14px; font-weight: 700; text-align: center; margin-bottom: 6px; }
 #mixPanel label:first-of-type { color: var(--cash2); }
 #mixPanel label:last-of-type { color: var(--trans2); }
-#mixPanel input { height: 58px; border-radius: 14px; font-size: 17px; }
-
+#mixPanel input { height: 58px; border-radius: 14px; font-size: 18px; }
 /* ========= 📊 SUMMARY & REPORT ========= */
 .card-total { background: linear-gradient(135deg, var(--primary), var(--accent)); padding: 12px 10px; border-radius: 18px; text-align: center; box-shadow: 0 8px 12px -3px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; }
 .card-total small { font-weight: 700; color: #fff; opacity: 0.8; text-transform: uppercase; font-size: 13px; }
@@ -625,32 +634,28 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
   margin-top: 12px;
   color: var(--text);
 }
-
-/* ========= 📱 RESPONSIVE ========= */
+/* ========= 📱 RESPONSIVE (ปรับขนาดความจุพอดีหน้าจอมือถือเล็ก) ========= */
 @media (max-width: 400px) {
-  .main-wrap { padding: 10px; margin: 6px auto; border-radius: 20px; }
-  .grid-pay { grid-template-columns: 1fr 1fr; gap: 8px; height: 54px; }
-  .top-title { font-size: 18px !important; }
-  select#hairStyle, select#extra1, select#extra2 { font-size: 12px; }
-  .price-box input { font-size: 30px; }
-  .baht { font-size: 26px; }
-  .tip-box { font-size: 15px; }
-  .btn-pay { font-size: 14px; gap: 4px; }
-  .menu-card { min-height: 72px; padding: 8px 4px; }
-  .menu-card span { font-size: 11px; }
-  .input-date-wrap span, select, input[type="text"], input[type="number"], input[type="date"], input[type="time"], input[type="month"] { font-size: 14px; }
-  .tab-header { grid-template-columns: repeat(3, 1fr); gap: 4px; }
-  .tab-btn { font-size: 11.5px; padding: 8px 2px !important; }
-  .filter-month-wrap { grid-template-columns: 1fr; gap: 6px; }
-  .summary-table th, .summary-table td { padding: 7px 2px; font-size: 11.5px; }
+  .main-wrap { padding: 8px; margin: 4px auto; border-radius: 18px; }
+  .grid-pay { grid-template-columns: 1fr 1fr; gap: 8px; }
+  h2, .top-title { font-size: 20px !important; margin-bottom: 8px !important; }
+  select#hairStyle, select#extra1, select#extra2 { font-size: 14px !important; }
+  .price-box input { font-size: 36px !important; }
+  .baht { font-size: 30px !important; }
+  .tip-box { font-size: 22px !important; }
+  .btn-pay { font-size: 17px !important; gap: 4px; }
+  .select-wrap select { font-size: 16px !important; padding-left: 36px !important; }
+  .input-date-wrap span, select, input[type="text"], input[type="number"], input[type="date"], input[type="time"], input[type="month"] { font-size: 16px; }
 }
+
 @media (max-width: 360px) {
   .grid-svc { grid-template-columns: 1.1fr 1fr 1fr; gap: 6px; }
-  .grid-price { gap: 8px; }
-  .price-box { min-height: 56px; }
-  .tip-box { min-height: 56px !important; }
-  .baht { font-size: 24px; }
-  .price-box input { font-size: 26px; }
+  .grid-price { gap: 6px; }
+  .price-box { min-height: 68px; }
+  .tip-box { min-height: 68px !important; }
+  .baht { font-size: 26px !important; }
+  .price-box input { font-size: 32px !important; }
+  select#hairStyle, select#extra1, select#extra2 { font-size: 13px !important; }
 }
 
 /* ========= 📄 REPORT & HISTORY ========= */
