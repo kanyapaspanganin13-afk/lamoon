@@ -21,7 +21,7 @@ let payMethod = "";
    SECTION 2: MAIN NAVIGATION
    สลับหน้าหลักให้ตรงกับ HTML
    ========================================================= */
-function switchMainView(viewName) {
+function switchMainView(viewName, subNum = null) {
     // 1. ซ่อนหน้าหลักทั้งหมด
     document.querySelectorAll('.app-page').forEach(page => {
         page.classList.remove('active');
@@ -35,12 +35,11 @@ function switchMainView(viewName) {
             homePage.classList.add('active');
             homePage.style.display = 'block';
         }
-        // ✅ บังคับเรียกอัปเดตเมนูบาร์เมื่อกลับหน้าแรก
         updateNavDisplay('home');
         return;
     }
 
-    // 3. ✂️ กลุ่มบันทึกงาน
+    // 3. ✂️ กลุ่มบันทึกงาน (รองรับทั้ง บันทึก, รายงานประจำวัน, และ บัญชี)
     if (viewName === 'workGroup') {
         const workPage = document.getElementById('pageWorkGroup');
         if (!workPage) {
@@ -49,11 +48,13 @@ function switchMainView(viewName) {
         }
         workPage.classList.add('active');
         workPage.style.display = 'block';
-        goSub(1);
+        
+        // สลับไป Sub-page ที่ระบุ (ถ้าไม่ระบุให้เปิด Sub 1)
+        goSub(subNum || 1);
         return;
     }
 
-    // 4. 📊 สรุปยอดรวม
+    // 4. 📊 สรุปยอดรวม (สำหรับปุ่มบนหน้าแรก)
     if (viewName === 'summaryPage') {
         const summaryPage = document.getElementById('pageSummary');
         if (!summaryPage) {
@@ -96,14 +97,14 @@ function switchMainView(viewName) {
 
     console.warn('ไม่พบ viewName:', viewName);
 }
+
 /* =========================================================
-   SECTION 2.1: BOTTOM NAVIGATION (ตรึงไว้เสมอ + รองรับ 5 ปุ่ม)
+   SECTION 2.1: BOTTOM NAVIGATION (ไฮไลท์ปุ่มตามหน้าปัจจุบัน)
    ========================================================= */
 function updateNavDisplay(viewName) {
     const nav = document.querySelector('.bottom-nav');
     if (!nav) return;
 
-    // แสดงแถบนำทางตลอดเวลา แบ่งเป็น 5 คอลัมน์เท่ากัน
     nav.style.display = 'grid';
     nav.style.gridTemplateColumns = 'repeat(5, 1fr)';
     nav.style.justifyContent = 'stretch';
@@ -116,14 +117,14 @@ function updateNavDisplay(viewName) {
         item.classList.remove('active');
     });
 
-    // ไฮไลท์ปุ่มตามหน้าปัจจุบัน
+    // ไฮไลท์ปุ่มให้ถูกต้อง
     if (viewName === 'home') {
         nav.querySelector('#navHome')?.classList.add('active');
     } else if (viewName === 'workGroup' || viewName === 'sub1') {
         nav.querySelector('#nav1')?.classList.add('active');
-    } else if (viewName === 'summaryPage' || viewName === 'sub2') {
+    } else if (viewName === 'sub2') {
         nav.querySelector('#nav2')?.classList.add('active');
-    } else if (viewName === 'pageAccount' || viewName === 'sub3') {
+    } else if (viewName === 'sub3' || viewName === 'pageAccount') {
         nav.querySelector('#nav3')?.classList.add('active');
     } else if (viewName === 'settings') {
         nav.querySelector('#navSettings')?.classList.add('active');
@@ -132,7 +133,6 @@ function updateNavDisplay(viewName) {
 
 /* =========================================================
    SECTION 3: SUB-PAGE NAVIGATION
-   บันทึก / รายงาน / บัญชี
    ========================================================= */
 function goSub(num) {
     const workPage = document.getElementById('pageWorkGroup');
@@ -141,11 +141,13 @@ function goSub(num) {
         return;
     }
 
+    // ซ่อน sub-page ทั้งหมด
     workPage.querySelectorAll('.sub-page').forEach(page => {
         page.classList.remove('active');
         page.style.display = 'none';
     });
 
+    // แสดง sub-page ที่เลือก
     const target = document.getElementById('p' + num);
     if (!target) {
         console.warn('ไม่พบ sub-page:', 'p' + num);
@@ -154,26 +156,24 @@ function goSub(num) {
     target.classList.add('active');
     target.style.display = 'block';
 
-    workPage.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
-        item.classList.remove('active');
-    });
-
-    const nav = document.getElementById('nav' + num);
-    if (nav) nav.classList.add('active');
-
+    // อัปเดตไฮไลท์ปุ่ม Bottom Nav
     updateNavDisplay('sub' + num);
 
+    // ดึงค่าวันที่และประมวลผลข้อมูล
     const dateInput = document.getElementById('dateInp');
     const dInp = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
 
-    if (num === 2 && typeof renderDay === 'function') renderDay(dInp);
+    if (num === 2 && typeof renderDay === 'function') {
+        renderDay(dInp);
+    }
     if (num === 3) {
         const accDate = document.getElementById('accDate');
         if (accDate && dateInput) accDate.value = dateInput.value;
-        if (typeof loadAccountStatus === 'function') loadAccountStatus();
+        if (typeof loadAccountStatus === 'function') {
+            loadAccountStatus();
+        }
     }
 }
-
 /* =========================================================
    SECTION 4: MAIN TABS
    ========================================================= */
