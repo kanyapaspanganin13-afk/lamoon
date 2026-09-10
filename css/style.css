@@ -207,50 +207,49 @@ body > center, body > a, body > br { display: none !important; }
 .grad-emerald { background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)); }
 
 /* ========= 📋 GRID LAYOUTS ========= */
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
-.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
-.grid-time { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
-.grid-svc { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 8px; }
+.grid-time { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 8px; }
+.grid-svc { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
 .grid-price { 
     display: grid; 
-    grid-template-columns: 2fr 1fr; 
-    gap: 10px; 
-    margin-bottom: 10px; 
+    grid-template-columns: 1.8fr 1.2fr; 
+    gap: 8px; 
+    margin-bottom: 8px; 
     align-items: stretch; 
 }
 .grid-pay { 
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
-    gap: 10px !important;
+    gap: 8px !important;
     height: auto !important;
-    margin-bottom: 10px !important;
+    margin-bottom: 6px !important;
 }
 .grid-summary { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; margin-bottom: 10px; align-items: stretch; }
 
 /* ========= 🧩 CARDS & BOXES ========= */
-
-/* ✅ 1. ขยับชื่อร้านขึ้นสูง + ปรับขนาดให้พอดี */
+/* ✅ 1. ชื่อร้านขยับขึ้นสูงขึ้น + ปรับขนาดให้พอดี */
 h2, .top-bar, .top-title { 
     text-align: center; 
     color: var(--text); 
     font-weight: 900; 
-    margin: 4px 0 10px 0 !important; 
+    margin: 2px 0 8px 0 !important; 
     padding: 0 !important;
-    letter-spacing: 1.2px; 
+    letter-spacing: 1.5px; 
     text-transform: uppercase; 
-    font-size: 24px !important; 
+    font-size: 26px !important; 
 }
 
-/* ✅ 2. ขยายขนาดช่องกรอกและฟอนต์พื้นฐาน */
+/* ✅ 2. อินพุตและ Dropdown ขยายใหญ่ สัมผัสง่าย */
 select, input[type="text"], input[type="number"], input[type="date"], input[type="time"], input[type="month"] {
     width: 100%; 
-    height: 68px; /* เพิ่มความสูงช่อง */
-    border-radius: 18px; 
+    height: 76px !important; 
+    border-radius: 20px; 
     border: 1px solid var(--border); 
     background: var(--bg); 
     color: var(--text);
-    font-weight: 700; 
-    font-size: 18px; /* ขยายฟอนต์ */
+    font-weight: 800; 
+    font-size: 20px !important; 
     text-align: center; 
     text-align-last: center; 
     outline: none;
@@ -265,22 +264,23 @@ select, input[type="text"], input[type="number"], input[type="date"], input[type
     position: relative; 
     background: var(--bg); 
     border: 1px solid var(--border); 
-    border-radius: 18px; 
-    height: 68px; 
+    border-radius: 20px; 
+    height: 76px !important; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
     transition: background 0.3s, border-color 0.3s;
 }
-.input-date-wrap span { font-weight: 800; color: var(--text); font-size: 18px; }
+.input-date-wrap span { font-weight: 800; color: var(--text); font-size: 20px !important; }
 .input-date-wrap input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 
-/* ✅ 4. ช่องเลือกทรงผม / บริการเสริม / ประเภทลูกค้า */
-select#hairStyle, select#extra1, select#extra2, select#custType { 
-    height: 68px; 
-    font-size: 16px; 
-    font-weight: 700;
-    padding: 0 4px; 
+/* ✅ 4. ช่องทรงผม / บริการ / ประเภทลูกค้า (ปรับแก้ตัวหนังสือล้น) */
+select#custType, select#hairStyle, select#extra1, select#extra2 { 
+    height: 76px !important; 
+    font-size: 18px !important; 
+    font-weight: 800;
+    padding: 0 4px !important; 
+    letter-spacing: -0.2px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -288,37 +288,36 @@ select#hairStyle, select#extra1, select#extra2, select#custType {
 
 /* ✅ 5. ช่องเวลาเริ่ม-เสร็จ */
 .time-box { position: relative; }
-.time-box label { position: absolute; top: 6px; left: 12px; font-size: 13px; font-weight: 700; color: var(--text); opacity: 0.7; z-index: 1; }
-.time-input-custom { padding-top: 16px; font-size: 26px; font-weight: 800; }
+.time-box label { position: absolute; top: 6px; left: 14px; font-size: 14px !important; font-weight: 800; color: var(--text); opacity: 0.8; z-index: 1; }
+.time-input-custom { padding-top: 18px !important; font-size: 28px !important; font-weight: 900; }
 input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
 
-/* ✅ 6. ช่องใส่ราคา */
+/* ✅ 6. ช่องราคาสินค้า */
 .price-box { 
     position: relative; 
     background: var(--bg); 
-    border: 2.5px solid var(--accent); 
-    border-radius: 20px; 
+    border: 3px solid var(--accent); 
+    border-radius: 22px; 
     display: flex; 
     align-items: center; 
     overflow: hidden; 
-    min-height: 76px; 
-    padding: 0 12px;
+    height: 82px !important; 
+    padding: 0 10px;
     transition: background 0.3s, border-color 0.3s;
 }
-.baht { font-size: 38px; color: var(--accent); font-weight: 900; padding-left: 4px; }
-.price-box input { border: none; background: transparent; font-size: 44px; font-weight: 900; color: var(--text); text-align: right; padding-right: 6px; outline: none; width: 100%; }
+.baht { font-size: 42px !important; color: var(--accent); font-weight: 900; padding-left: 4px; }
+.price-box input { border: none; background: transparent; font-size: 50px !important; font-weight: 900; color: var(--text); text-align: right; padding-right: 6px; outline: none; width: 100%; }
 
 /* ✅ 7. ช่องทิป */
 .tip-box { 
-    min-height: 76px !important; 
-    height: 100% !important;
+    height: 82px !important; 
     background: var(--bg); 
-    border: 1px solid var(--border); 
-    border-radius: 20px; 
-    font-size: 28px; 
+    border: 2px solid var(--border); 
+    border-radius: 22px; 
+    font-size: 26px !important; 
     font-weight: 800; 
     color: var(--text); 
-    opacity: 0.8;
+    opacity: 0.9;
     text-align: center; 
     display: flex;
     align-items: center;
@@ -330,15 +329,15 @@ input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
 .select-wrap { 
     position: relative; 
     width: 100%; 
-    height: 70px !important; 
+    height: 78px !important; 
 }
-.select-wrap i:first-child { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text); font-size: 22px; z-index: 3; }
+.select-wrap i:first-child { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text); font-size: 24px !important; z-index: 3; }
 .select-wrap select { 
-    height: 100%; 
-    font-size: 18px !important; 
-    padding: 0 10px 0 42px !important;
+    height: 100% !important; 
+    font-size: 19px !important; 
+    padding: 0 8px 0 38px !important;
     font-weight: 800; 
-    border-radius: 20px;
+    border-radius: 22px;
     text-align: center !important;
     text-align-last: center !important;
     white-space: nowrap !important;
@@ -348,24 +347,24 @@ input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
 /* ✅ 9. ปุ่มบันทึกข้อมูล */
 .btn-pay { 
     width: 100%; 
-    height: 70px !important; 
+    height: 78px !important; 
     border: none; 
-    border-radius: 20px; 
+    border-radius: 22px; 
     background: linear-gradient(135deg, var(--save1), var(--save2)); 
     color: var(--btn-text); 
     display: flex; 
     align-items: center; 
     justify-content: center; 
     gap: 8px; 
-    font-size: 20px !important; 
-    font-weight: 800; 
+    font-size: 22px !important; 
+    font-weight: 900; 
     cursor: pointer; 
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25); 
     padding: 0 10px !important;
     white-space: nowrap !important;
     transition: background 0.3s, color 0.3s;
 }
-.btn-pay i { font-size: 22px; }
+.btn-pay i { font-size: 26px !important; }
 
 #mixPanel { display: none; background: var(--input-bg); padding: 14px; border-radius: 16px; border: 2px dashed var(--accent); margin: 12px 0; }
 #mixPanel label { display: block; font-size: 14px; font-weight: 700; text-align: center; margin-bottom: 6px; }
@@ -634,30 +633,27 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
   margin-top: 12px;
   color: var(--text);
 }
-/* ========= 📱 RESPONSIVE (ปรับขนาดความจุพอดีหน้าจอมือถือเล็ก) ========= */
-@media (max-width: 400px) {
+/* ========= 📱 RESPONSIVE (ปรับสเกลอัตโนมัติ ไม่ให้ล้นจอมือถือเล็ก) ========= */
+@media (max-width: 395px) {
   .main-wrap { padding: 8px; margin: 4px auto; border-radius: 18px; }
-  .grid-pay { grid-template-columns: 1fr 1fr; gap: 8px; }
-  h2, .top-title { font-size: 20px !important; margin-bottom: 8px !important; }
-  select#hairStyle, select#extra1, select#extra2 { font-size: 14px !important; }
-  .price-box input { font-size: 36px !important; }
-  .baht { font-size: 30px !important; }
-  .tip-box { font-size: 22px !important; }
-  .btn-pay { font-size: 17px !important; gap: 4px; }
-  .select-wrap select { font-size: 16px !important; padding-left: 36px !important; }
-  .input-date-wrap span, select, input[type="text"], input[type="number"], input[type="date"], input[type="time"], input[type="month"] { font-size: 16px; }
+  select, input, .input-date-wrap { height: 70px !important; font-size: 17px !important; }
+  select#custType, select#hairStyle, select#extra1, select#extra2 { font-size: 16px !important; }
+  .price-box, .tip-box { height: 74px !important; }
+  .price-box input { font-size: 42px !important; }
+  .baht { font-size: 34px !important; }
+  .select-wrap, .btn-pay { height: 72px !important; font-size: 18px !important; }
+  .btn-pay i { font-size: 22px !important; }
 }
 
 @media (max-width: 360px) {
   .grid-svc { grid-template-columns: 1.1fr 1fr 1fr; gap: 6px; }
   .grid-price { gap: 6px; }
   .price-box { min-height: 68px; }
-  .tip-box { min-height: 68px !important; }
-  .baht { font-size: 26px !important; }
-  .price-box input { font-size: 32px !important; }
-  select#hairStyle, select#extra1, select#extra2 { font-size: 13px !important; }
+  .tip-box { min-height: 68px !important; font-size: 22px !important; }
+  .baht { font-size: 28px !important; }
+  .price-box input { font-size: 34px !important; }
+  select#hairStyle, select#extra1, select#extra2 { font-size: 14px !important; }
 }
-
 /* ========= 📄 REPORT & HISTORY ========= */
 #dailyList, #accHistory, #reportContent { color: var(--text); }
 #accHistory::-webkit-scrollbar, #reportContent::-webkit-scrollbar { width: 4px; }
