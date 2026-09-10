@@ -24,24 +24,23 @@ let conf = JSON.parse(localStorage.getItem("barber_conf")) || {
 
 let payMethod = "";
 
-// 3. แสดงผลเลขเวอร์ชัน วันที่ และชื่อร้านเมื่อ DOM พร้อม
+// 3. แสดงผลเลขเวอร์ชัน วันที่ และชื่อร้านเฉพาะจุดเมื่อ DOM พร้อม
 document.addEventListener("DOMContentLoaded", () => {
     if ($("display-version")) $("display-version").innerText = APP_VERSION;
     if ($("display-date")) $("display-date").innerText = LAST_UPDATED;
 
+    // ✅ แก้ไข: แสดงชื่อร้านเฉพาะจุดที่มี ID หรือ Class สำหรับชื่อร้านเท่านั้น (ไม่ทับหน้าแรก)
     const savedShopName = localStorage.getItem("shopName") || conf.shop || "BARBER SHOP";
-    const shopTitleEl = document.querySelector('h2'); 
-    if (shopTitleEl) shopTitleEl.innerText = savedShopName;
+    if ($("shopTitleDisplay")) $("shopTitleDisplay").innerText = savedShopName;
+    document.querySelectorAll('.shop-title-text').forEach(el => el.innerText = savedShopName);
 });
 /* =========== SECTION 2: MAIN NAVIGATION =========== */
 function switchMainView(viewName, subNum = null) {
-    // 1. ซ่อนหน้าหลักทั้งหมด
     document.querySelectorAll('.app-page').forEach(page => {
         page.classList.remove('active');
         page.style.display = 'none';
     });
 
-    // 2. 🏠 หน้าแรก
     if (viewName === 'home') {
         const homePage = document.getElementById('pageHome');
         if (homePage) {
@@ -52,26 +51,18 @@ function switchMainView(viewName, subNum = null) {
         return;
     }
 
-    // 3. ✂️ กลุ่มบันทึกงาน
     if (viewName === 'workGroup') {
         const workPage = document.getElementById('pageWorkGroup');
-        if (!workPage) {
-            console.warn('ไม่พบ #pageWorkGroup');
-            return;
-        }
+        if (!workPage) return;
         workPage.classList.add('active');
         workPage.style.display = 'block';
         goSub(subNum || 1);
         return;
     }
 
-    // 4. 📊 สรุปยอดรวม
     if (viewName === 'summaryPage') {
         const summaryPage = document.getElementById('pageSummary');
-        if (!summaryPage) {
-            console.warn('ไม่พบ #pageSummary');
-            return;
-        }
+        if (!summaryPage) return;
         summaryPage.classList.add('active');
         summaryPage.style.display = 'block';
         switchMainTab('pageSummary', 'summaryTab1');
@@ -79,13 +70,9 @@ function switchMainView(viewName, subNum = null) {
         return;
     }
 
-    // 5. 📅 สรุปรายเดือน
     if (viewName === 'monthlySummary') {
         const monthlyPage = document.getElementById('pageMonthlyReport');
-        if (!monthlyPage) {
-            console.warn('ไม่พบ #pageMonthlyReport');
-            return;
-        }
+        if (!monthlyPage) return;
         monthlyPage.classList.add('active');
         monthlyPage.style.display = 'block';
         switchMainTab('pageMonthlyReport', 'monthlyTab1');
@@ -93,23 +80,16 @@ function switchMainView(viewName, subNum = null) {
         return;
     }
 
-    // 6. 🔍 วิเคราะห์เปรียบเทียบ
     if (viewName === 'comparePage') {
         const comparisonPage = document.getElementById('pageComparison');
-        if (!comparisonPage) {
-            console.warn('ไม่พบ #pageComparison');
-            return;
-        }
+        if (!comparisonPage) return;
         comparisonPage.classList.add('active');
         comparisonPage.style.display = 'block';
         updateNavDisplay('comparePage');
         return;
     }
-
-    console.warn('ไม่พบ viewName:', viewName);
 }
 
-/* รองรับระบบเรียกหน้าแบบเก่า (go) เพื่อป้องกันโค้ดเดิมค้าง */
 function go(p) {
     document.querySelectorAll('.page, .app-page').forEach(pg => {
         pg.classList.remove('active');
@@ -129,10 +109,7 @@ function go(p) {
         btn.style.opacity = isSelected ? '1' : '0.5';
     });
 
-    const savedShopName = localStorage.getItem("shopName") || conf.shop || "BARBER SHOP";
-    const shopTitleEl = document.querySelector('h2'); 
-    if (shopTitleEl) shopTitleEl.innerText = savedShopName;
-
+    // ✅ แก้ไข: ลบการเขียนทับ h2 ออกจากฟังก์ชัน go
     const dateInpValue = $("dateInp")?.value || new Date().toISOString().split('T')[0];
     if (p === 2) {
         if (typeof renderDay === 'function') renderDay(dateInpValue);
@@ -180,10 +157,7 @@ function updateNavDisplay(viewName) {
 /* =========== SECTION 3: SUB-PAGE NAVIGATION =========== */
 function goSub(num) {
     const workPage = document.getElementById('pageWorkGroup');
-    if (!workPage) {
-        console.warn('ไม่พบ #pageWorkGroup');
-        return;
-    }
+    if (!workPage) return;
 
     workPage.querySelectorAll('.sub-page').forEach(page => {
         page.classList.remove('active');
@@ -191,10 +165,7 @@ function goSub(num) {
     });
 
     const target = document.getElementById('p' + num);
-    if (!target) {
-        console.warn('ไม่พบ sub-page:', 'p' + num);
-        return;
-    }
+    if (!target) return;
     target.classList.add('active');
     target.style.display = 'block';
 
@@ -218,16 +189,10 @@ function goSub(num) {
 /* =========== SECTION 4: MAIN TABS =========== */   
 function switchMainTab(pageId, tabId, evt) {
     const page = document.getElementById(pageId);
-    if (!page) {
-        console.warn('ไม่พบหน้า:', pageId);
-        return;
-    }
+    if (!page) return;
 
     const targetTab = document.getElementById(tabId);
-    if (!targetTab) {
-        console.warn('ไม่พบแท็บ:', tabId);
-        return;
-    }
+    if (!targetTab) return;
 
     page.querySelectorAll('.tab-panel').forEach(panel => {
         panel.classList.remove('active');
@@ -275,7 +240,6 @@ function updateDateDisplay(v) {
     const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
     const days = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
     
-    // ดึงชื่อวันภาษาไทยแบบย่อ
     const dayName = days[new Date(v + 'T00:00:00').getDay()].substring(0, 2);
     const formattedDate = `${parseInt(d)} ${months[parseInt(m) - 1]} ${thaiYearShort} (${dayName})`;
     
