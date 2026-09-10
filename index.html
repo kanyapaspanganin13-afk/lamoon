@@ -23,62 +23,52 @@
 </head>
 <body>
 <div class="container main-wrap">
-<!-- ================= SECTION: หน้าแรก ================= -->
-<section id="pageHome" class="app-page active">
-    <div class="home-header">
-        <h2 style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
-            <span>Barber Manager</span>
-            <span style="font-size: 12px; font-weight: 500; opacity: 0.75; letter-spacing: 0px;">ระบบจัดการร้านตัดผม</span>
-        </h2>
-    </div>
 
-    <div class="menu-grid">
-        <!-- ปุ่ม 1: ประกันรายได้ -->
-        <button class="menu-card" onclick="handleInsurance()">
-            <div class="menu-icon grad-yellow"><i class="fas fa-shield-alt"></i></div>
-            <span> ประกันรายได้</span>
-        </button>
+    <!-- ================= SECTION 1: หน้าแรก ================= -->
+    <section id="pageHome" class="app-page active">
+        <div class="home-header">
+            <h2 style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                <span>Barber Manager</span>
+                <span style="font-size: 12px; font-weight: 500; opacity: 0.75; letter-spacing: 0px;">ระบบจัดการร้านตัดผม</span>
+            </h2>
+        </div>
 
-        <!-- ปุ่ม 2: วันหยุด -->
-        <button class="menu-card" onclick="handleHoliday()">
-            <div class="menu-icon grad-red"><i class="fas fa-umbrella-beach"></i></div>
-            <span> วันหยุด</span>
-        </button>
+        <div class="menu-grid">
+            <button class="menu-card" onclick="handleInsurance()">
+                <div class="menu-icon grad-yellow"><i class="fas fa-shield-alt"></i></div>
+                <span>ประกันรายได้</span>
+            </button>
+            <button class="menu-card" onclick="handleHoliday()">
+                <div class="menu-icon grad-red"><i class="fas fa-umbrella-beach"></i></div>
+                <span>วันหยุด</span>
+            </button>
+            <button class="menu-card" onclick="switchMainView('summaryPage')">
+                <div class="menu-icon grad-green"><i class="fas fa-chart-line"></i></div>
+                <span>สรุปยอดรวม</span>
+            </button>
+            <button class="menu-card" onclick="switchMainView('monthlySummary')">
+                <div class="menu-icon grad-emerald"><i class="fas fa-calendar-alt"></i></div>
+                <span>สรุปรายเดือน</span>
+            </button>
+            <button class="menu-card" onclick="handleGoogleSheet()">
+                <div class="menu-icon grad-green"><i class="fas fa-table"></i></div>
+                <span>เปิด Sheet</span>
+            </button>
+            <button class="menu-card" onclick="switchMainView('comparePage')">
+                <div class="menu-icon grad-blue"><i class="fas fa-code-compare"></i></div>
+                <span>เปรียบเทียบยอด</span>
+            </button>
+        </div>
+    </section>
 
-        <!-- ปุ่ม 3: สรุปยอดรวม -->
-        <button class="menu-card" onclick="switchMainView('summaryPage')">
-            <div class="menu-icon grad-green"><i class="fas fa-chart-line"></i></div>
-            <span> สรุปยอดรวม</span>
-        </button>
-
-        <!-- ปุ่ม 4: สรุปรายเดือน -->
-        <button class="menu-card" onclick="switchMainView('monthlySummary')">
-            <div class="menu-icon grad-emerald"><i class="fas fa-calendar-alt"></i></div>
-            <span> สรุปรายเดือน</span>
-        </button>
-
-        <!-- ปุ่ม 5: เปิด Sheet -->
-        <button class="menu-card" onclick="handleGoogleSheet()">
-            <div class="menu-icon grad-green"><i class="fas fa-table"></i></div>
-            <span> เปิด Sheet</span>
-        </button>
-
-        <!-- ปุ่ม 6: เปรียบเทียบยอด -->
-        <button class="menu-card" onclick="switchMainView('comparePage')">
-            <div class="menu-icon grad-blue"><i class="fas fa-code-compare"></i></div>
-            <span> เปรียบเทียบยอด</span>
-        </button>
-    </div>
-</section>
-    <!-- ==================== 📂 2. กลุ่ม "บันทึกงาน" (3 หน้าย่อย + Nav ล่าง 4 ปุ่ม) ==================== -->
-    <div id="pageWorkGroup" class="app-page">
-        <!-- ปุ่มย้อนกลับหน้าหลัก + ชื่อร้าน -->
+    <!-- ================= SECTION 2: กลุ่มบันทึกงาน ================= -->
+    <section id="pageWorkGroup" class="app-page" style="display: none;">
         <div class="top-bar">
             <span id="shopNameDisp" class="top-title">BARBER SHOP</span>
         </div>
+
         <!-- Sub-page 1: ✍️ บันทึกงาน -->
-        <section id="p1" class="sub-page active">
-            <!-- วันที่ + ประเภทลูกค้า -->
+        <div id="p1" class="sub-page active">
             <div class="grid-2">
                 <div class="input-date-wrap">
                     <span id="dateDisplay">📅 วันที่</span>
@@ -90,7 +80,6 @@
                     <option value="regular">📌 ลูกค้าประจำ</option>
                 </select>
             </div>
-            <!-- เวลา เริ่ม - เสร็จ -->
             <div class="grid-time">
                 <div class="time-box">
                     <label for="tStart">เริ่ม</label>
@@ -101,7 +90,6 @@
                     <input type="time" id="tEnd" class="time-input-custom">
                 </div>
             </div>
-            <!-- ทรงผม + บริการเพิ่มเติม -->
             <div class="grid-svc">
                 <select id="hairStyle" class="select-svc-lg">
                     <option value="">✂️ ทรงผม</option>
@@ -139,7 +127,6 @@
                     <option>แคะหู</option>
                 </select>
             </div>
-            <!-- ราคา + ทิปโอน → สูงเท่ากัน พอดีจอมือถือ -->
             <div class="grid-price">
                 <div class="price-box">
                     <span class="baht">฿</span>
@@ -147,7 +134,6 @@
                 </div>
                 <input type="number" id="tipInp" placeholder="ทิปโอน" inputmode="numeric" class="tip-box">
             </div>
-            <!-- แถวที่ 1: วิธีชำระเงิน + ปุ่มบันทึกข้อมูล -->
             <div class="grid-pay">
                 <div class="select-wrap">
                     <i class="fas fa-wallet"></i>
@@ -167,8 +153,6 @@
                     <span>บันทึกข้อมูล</span>
                 </button>
             </div>
-    
-            <!-- ช่องกรณีจ่ายผสม -->
             <div id="mixPanel">
                 <div class="grid-2">
                     <div>
@@ -181,10 +165,10 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
         <!-- Sub-page 2: 📊 รายงาน -->
-        <section id="p2" class="sub-page">
+        <div id="p2" class="sub-page">
             <div class="grid-summary">
                 <div class="card-total">
                     <small>ยอดรวมวันนี้</small>
@@ -202,10 +186,10 @@
             <div id="dServiceStats"></div>
             <hr>
             <div id="dailyList"></div>
-        </section>
+        </div>
 
         <!-- Sub-page 3: 📘 บัญชี -->
-        <section id="p3" class="sub-page">
+        <div id="p3" class="sub-page">
             <div class="card">
                 <div class="card-header">
                     <b><i class="fas fa-wallet"></i> สถานะบัญชี</b>
@@ -244,94 +228,59 @@
                     </button>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- ✅ แถบนำทางล่างสุด — เพิ่ม ตั้งค่าระบบ เข้ามาแสดงคู่กับ บันทึกงาน (รวมเป็น 5 เมนู) -->
-        <nav class="bottom-nav">
-            <div onclick="switchMainView('home')" id="navHome" class="nav-item">
-                <i class="fas fa-home"></i><span>หน้าแรก</span>
-            </div>
-            <div onclick="switchMainView('workGroup')" id="nav1" class="nav-item">
-                <i class="fas fa-edit"></i><span>บันทึกงาน</span>
-            </div>
-            <div onclick="goSub(2)" id="nav2" class="nav-item">
-                <i class="fas fa-chart-bar"></i><span>รายงาน</span>
-            </div>
-            <div onclick="goSub(3)" id="nav3" class="nav-item">
-                <i class="fas fa-wallet"></i><span>บัญชี</span>
-            </div>
-            <div onclick="openSettings()" id="navSettings" class="nav-item">
-                <i class="fas fa-cog"></i><span>ตั้งค่า</span>
-            </div>
-        </nav>
- 
-     <!-- ================= 1. SECTION: สรุปยอดรวม (3 แท็บ) ================= -->
-    <section id="pageSummary" class="app-page full-page">
+    <!-- ================= SECTION 3: สรุปยอดรวม ================= -->
+    <section id="pageSummary" class="app-page full-page" style="display: none;">
         <div class="top-bar">
             <span class="top-title">📊 สรุปยอดรวม</span>
         </div>
-    
-        <!-- แท็บสลับ 3 แท็บ -->
         <div class="tab-header">
             <button class="tab-btn active" onclick="switchMainTab('pageSummary', 'summaryTab1', event)">📊 รายได้ประจำเดือน</button>
             <button class="tab-btn" onclick="switchMainTab('pageSummary', 'summaryTab2', event)">📈 วิเคราะห์รายได้</button>
             <button class="tab-btn" onclick="switchMainTab('pageSummary', 'summaryTab3', event)">✂️ ทรงผม&บริการ</button>
         </div>
-    
         <div class="tab-content-wrap">
-            <!-- แท็บ 1: รายได้ประจำเดือน -->
             <div id="summaryTab1" class="tab-panel active">
                 <h3 class="panel-title">📊 รายได้ประจำเดือน</h3>
                 <div id="monthlyIncomeContent"></div>
             </div>
-    
-            <!-- แท็บ 2: วิเคราะห์รายได้ -->
             <div id="summaryTab2" class="tab-panel" style="display: none;">
                 <h3 class="panel-title">📈 วิเคราะห์รายได้</h3>
                 <div id="incomeAnalyticsContent"></div>
             </div>
-    
-            <!-- แท็บ 3: ทรงผม & บริการ -->
             <div id="summaryTab3" class="tab-panel" style="display: none;">
                 <h3 class="panel-title">✂️ ทรงผม & บริการ</h3>
                 <div id="servicesStatsContent"></div>
             </div>
         </div>
     </section>
-    
-    
-    <!-- ================= 2. SECTION: สรุปรายเดือน (2 แท็บ) ================= -->
+
+    <!-- ================= SECTION 4: สรุปรายเดือน ================= -->
     <section id="pageMonthlyReport" class="app-page full-page" style="display: none;">
         <div class="top-bar">
             <span class="top-title">📅 สรุปรายเดือน</span>
         </div>
-    
-        <!-- แท็บสลับ 2 แท็บ (เว้นชื่อไว้ก่อน) -->
         <div class="tab-header">
             <button class="tab-btn active" onclick="switchMainTab('pageMonthlyReport', 'monthlyTab1', event)">[ แท็บที่ 1 ]</button>
             <button class="tab-btn" onclick="switchMainTab('pageMonthlyReport', 'monthlyTab2', event)">[ แท็บที่ 2 ]</button>
         </div>
-    
         <div class="tab-content-wrap">
-            <!-- แท็บ 1 -->
             <div id="monthlyTab1" class="tab-panel active">
                 <div id="monthlyContent1"></div>
             </div>
-    
-            <!-- แท็บ 2 -->
             <div id="monthlyTab2" class="tab-panel" style="display: none;">
                 <div id="monthlyContent2"></div>
             </div>
         </div>
     </section>
-    
-    <!-- ================= 3. SECTION: เปรียบเทียบ (1 หน้า) ================= -->
+
+    <!-- ================= SECTION 5: เปรียบเทียบ ================= -->
     <section id="pageComparison" class="app-page full-page" style="display: none;">
         <div class="top-bar">
             <span class="top-title">🔍 วิเคราะห์เปรียบเทียบ</span>
         </div>
-    
-        <!-- หน้าเดียว เดี่ยวๆ ไม่ต้องมีแท็บ -->
         <div class="single-page-content" style="padding: 16px;">
             <h3 class="panel-title">🔍 วิเคราะห์เปรียบเทียบข้อมูล</h3>
             <div class="btn-compare-wrap" style="text-align:center; margin: 15px 0;">
@@ -342,27 +291,27 @@
             <div id="comparisonSingleContent"></div>
         </div>
     </section>
-        <!-- ✅ แถบเมนูล่าง — แสดงตามเงื่อนไข -->
-        <!-- ✅ นำ nav มาไว้นอกสุด (ต่อท้ายทุก section) พร้อมใส่ id และเพิ่มปุ่มตั้งค่า -->
-        <nav class="bottom-nav">
-            <div onclick="switchMainView('home')" id="navHome" class="nav-item">
-                <i class="fas fa-home"></i><span>หน้าแรก</span>
-            </div>
-            <div onclick="switchMainView('workGroup')" id="nav1" class="nav-item nav-btn-work">
-                <i class="fas fa-edit"></i><span>บันทึก</span>
-            </div>
-            <div onclick="switchMainView('summaryPage')" id="nav2" class="nav-item nav-btn-report">
-                <i class="fas fa-chart-bar"></i><span>รายงาน</span>
-            </div>
-            <div onclick="switchMainView('pageAccount')" id="nav3" class="nav-item nav-btn-account">
-                <i class="fas fa-wallet"></i><span>บัญชี</span>
-            </div>
-            <div onclick="openSettings()" id="navSettings" class="nav-item">
-                <i class="fas fa-cog"></i><span>ตั้งค่า</span>
-            </div>
-        </nav>
-    <!-- ==================== ⚙️ MODALS ต่างๆ ==================== -->
-    <!-- Modal ตั้งค่าระบบ -->
+
+    <!-- ✅ แถบนำทางล่างสุด 5 ปุ่ม (ตรึงไว้ด้านล่าง อยู่นอกทุก section) -->
+    <nav class="bottom-nav">
+        <div onclick="switchMainView('home')" id="navHome" class="nav-item">
+            <i class="fas fa-home"></i><span>หน้าแรก</span>
+        </div>
+        <div onclick="switchMainView('workGroup')" id="nav1" class="nav-item nav-btn-work">
+            <i class="fas fa-edit"></i><span>บันทึก</span>
+        </div>
+        <div onclick="switchMainView('summaryPage')" id="nav2" class="nav-item nav-btn-report">
+            <i class="fas fa-chart-bar"></i><span>รายงาน</span>
+        </div>
+        <div onclick="switchMainView('pageAccount')" id="nav3" class="nav-item nav-btn-account">
+            <i class="fas fa-wallet"></i><span>บัญชี</span>
+        </div>
+        <div onclick="openSettings()" id="navSettings" class="nav-item">
+            <i class="fas fa-cog"></i><span>ตั้งค่า</span>
+        </div>
+    </nav>
+
+    <!-- ================= MODALS ต่างๆ ================= -->
     <div id="modalSet" class="modal">
         <div class="modal-content settings-modal">
             <h3 class="settings-title">⚙️ ตั้งค่าระบบ</h3>
@@ -415,7 +364,7 @@
             <div class="settings-version">V1.0. Update: 06/09/2026</div>
         </div>
     </div>
-    <!-- Modal รายงาน -->
+
     <div id="reportModal" class="modal">
         <div class="modal-content">
             <div class="modal-head">
@@ -425,7 +374,7 @@
             <div id="reportContent"></div>
         </div>
     </div>
-    <!-- Modal ประวัติเคลียร์เงิน -->
+
     <div id="historyModal" class="modal">
         <div class="modal-content">
             <div class="modal-head">
@@ -435,7 +384,7 @@
             <div id="accHistory"></div>
         </div>
     </div>
-    <!-- Modal ตัวอย่าง LINE -->
+
     <div id="linePreview" class="modal">
         <div class="modal-content">
             <h3>📝 ตรวจสอบรายงาน</h3>
@@ -446,13 +395,15 @@
             </div>
         </div>
     </div>
+
     <!-- ไฟล์เสียงซ่อน -->
     <div id="appAudioAssets" class="hidden-audio">
-        <audio id="successSoundMan" src="assets/sounds/success_male.mp3" preload="auto">
-        <audio id="successSoundWoman" src="assets/sounds/success_female.mp3" preload="auto">
-        <audio id="errorSoundMan" src="assets/sounds/error_male.mp3" preload="auto">
-        <audio id="errorSoundWoman" src="assets/sounds/error_female.mp3" preload="auto">
+        <audio id="successSoundMan" src="assets/sounds/success_male.mp3" preload="auto"></audio>
+        <audio id="successSoundWoman" src="assets/sounds/success_female.mp3" preload="auto"></audio>
+        <audio id="errorSoundMan" src="assets/sounds/error_male.mp3" preload="auto"></audio>
+        <audio id="errorSoundWoman" src="assets/sounds/error_female.mp3" preload="auto"></audio>
     </div>
+
 </div>
 </body>
 </html>
