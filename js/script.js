@@ -1,9 +1,7 @@
 /* ==========================================================
    Barber-Note v1.1.0 — FULL VERSION + NEW NAVIGATION
    ========================================================== */
-/* ==========================================================
-   SECTION 1: INITIALIZATION & GLOBAL VARIABLES
-   ========================================================== */
+/* =========== SECTION 1: INITIALIZATION & GLOBAL VARIABLES =========== */
 const $ = id => document.getElementById(id);
 
 // 1. ตั้งค่าเลขเวอร์ชันและวันที่อัปเดตล่าสุด
@@ -35,11 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const shopTitleEl = document.querySelector('h2'); 
     if (shopTitleEl) shopTitleEl.innerText = savedShopName;
 });
-
-
-/* ==========================================================
-   SECTION 2: MAIN NAVIGATION
-   ========================================================== */
+/* =========== SECTION 2: MAIN NAVIGATION =========== */
 function switchMainView(viewName, subNum = null) {
     // 1. ซ่อนหน้าหลักทั้งหมด
     document.querySelectorAll('.app-page').forEach(page => {
@@ -183,11 +177,7 @@ function updateNavDisplay(viewName) {
         nav.querySelector('#navSettings')?.classList.add('active');
     }
 }
-
-
-/* ==========================================================
-   SECTION 3: SUB-PAGE NAVIGATION
-   ========================================================== */
+/* =========== SECTION 3: SUB-PAGE NAVIGATION =========== */
 function goSub(num) {
     const workPage = document.getElementById('pageWorkGroup');
     if (!workPage) {
@@ -225,11 +215,7 @@ function goSub(num) {
         }
     }
 }
-
-
-/* ==========================================================
-   SECTION 4: MAIN TABS
-   ========================================================== */
+/* =========== SECTION 4: MAIN TABS =========== */   
 function switchMainTab(pageId, tabId, evt) {
     const page = document.getElementById(pageId);
     if (!page) {
@@ -266,9 +252,7 @@ function switchMainTab(pageId, tabId, evt) {
         });
     }
 }
-/* ==========================================================
-   SECTION 5: AUTO-UPDATE
-   ========================================================== */
+/* =========== SECTION 5: AUTO-UPDATE =========== */  
 (function autoUpdate() {
     const currentStoredVersion = localStorage.getItem("app_v");
     if (currentStoredVersion !== APP_VERSION) {
@@ -282,9 +266,7 @@ function switchMainTab(pageId, tabId, evt) {
         }
     }
 })();
-/* ==========================================================
-   SECTION 6: DATE DISPLAY
-   ========================================================== */
+/* ===========  SECTION 6: DATE DISPLAY =========== */  
 function updateDateDisplay(v) {
     if (!v) return;
     const [y, m, d] = v.split('-');
