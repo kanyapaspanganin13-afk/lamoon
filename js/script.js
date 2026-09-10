@@ -1511,36 +1511,142 @@ function openComparisonSelector() {
 }
 
 /* ========= SECTION 20: IMPORT / EXPORT / CLEAR ========= */
+// 1. ฟังก์ชันส่งออกข้อมูล (Export)
 function exportBackup() {
-    const backup = { db, archives, account, conf, exported: new Date().toISOString() };
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = `backup-${new Date().toISOString().slice(0,10)}.json`; a.click();
-    URL.revokeObjectURL(url);
-    notify("success", "สำเร็จ", "สำรองข้อมูลเรียบร้อย");
+    try {
+        const data = {
+            db: typeof db !== 'undefined' ? db : JSON.parse(localStorage.getItem("barber_db") || "[]"),
+            archives: typeof archives !== 'undefined' ? archives : JSON.parse(localStorage.getItem("barber_archives") || "[]"),
+            account: typeof account !== 'undefined' ? account : JSON.parse(localStorage.getItem("barber_account") || '{"balance":0,"logs":[]}'), 
+            conf: typeof conf !== 'undefined' ? conf : JSON.parse(localStorage.getItem("barber_conf") || "{}"),
+            exported: new Date().toISOString()
+        };
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Barber-Backup-${new Date().toLocaleDateString('th-TH').replace(/\//g, '-')}.json`;
+        a.click();
+        
+        // คืนค่า Memory
+        URL.revokeObjectURL(url);
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'สำรองข้อมูลสำเร็จ',
+                text: 'ระบบสร้างไฟล์สำรองเรียบร้อยแล้ว',
+                icon: 'success',
+                confirmButtonColor: 'var(--success, #22c55e)'
+            });
+        } else if (typeof notify === 'function') {
+            notify("success", "สำรองข้อมูลเรียบร้อย", "สำเร็จ");
+        }
+    } catch (e) { 
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถสร้างไฟล์สำรองได้', icon: 'error' });
+        } else if (typeof notify === 'function') {
+            notify("error", "ไม่สามารถสร้างไฟล์สำรองได้", "ข้อผิดพลาด");
+        }
+    }
 }
+// 2. ฟังก์ชันนำเข้าข้อมูล (Import)
 function importBackup(input) {
-    const f = input.files?.[0]; if (!f) return;
+    const file = input.files?.[0];
+    if (!file) return;
+
     const reader = new FileReader();
-    reader.onload = e => {
+    reader.onload = function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            if (!data.db || !data.archives || !data.account || !data.conf) throw "Invalid";
-            db = data.db; archives = data.archives; account = data.account; conf = data.conf;
-            saveDB(); location.reload();
-        } catch { notify("error", "ไฟล์ไม่ถูกต้อง"); }
+            // ตรวจสอบโครงสร้างไฟล์
+            if (!data.db && !data.archives) throw new Error("Wrong format");
+
+            const processImport = () => {
+                // เขียนทับ LocalStorage
+                localStorage.setItem("barber_db", JSON.stringify(data.db || []));
+                localStorage.setItem("barber_archives", JSON.stringify(data.archives || []));
+                localStorage.setItem("barber_account", JSON.stringify(data.account || { balance: 0, logs: [] }));
+                localStorage.setItem("barber_conf", JSON.stringify(data.conf || {}));
+
+                // อัปเดตตัวแปร Global ใน App (ถ้ามี)
+                if (typeof db !== 'undefined') db = data.db || [];
+                if (typeof archives !== 'undefined') archives = data.archives || [];
+                if (typeof account !== 'undefined') account = data.account || { balance: 0, logs: [] };
+                if (typeof conf !== 'undefined') conf = data.conf || {};
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({ title: 'สำเร็จ', text: 'กำลังรีโหลดข้อมูล...', icon: 'success', showConfirmButton: false, timer: 1500 });
+                }
+                setTimeout(() => location.reload(), 1500);
+            };
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'ยืนยันการนำเข้าข้อมูล',
+                    text: "ข้อมูลปัจจุบันจะถูกแทนที่ด้วยข้อมูลจากไฟล์นี้",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'ยืนยัน',
+                    cancelButtonText: 'ยกเลิก',
+                    background: 'var(--card, #1e293b)',
+                    color: 'var(--text, #f8fafc)'
+                }).then((result) => {
+                    if (result.isConfirmed) processImport();
+                });
+            } else {
+                if (confirm("นำเข้าข้อมูล? ข้อมูลปัจจุบันจะถูกแทนที่ด้วยข้อมูลจากไฟล์นี้")) {
+                    processImport();
+                }
+            }
+        } catch(err) { 
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ title: 'ไฟล์ไม่ถูกต้อง', text: 'กรุณาใช้ไฟล์ .json ที่สำรองจากแอปนี้เท่านั้น', icon: 'error' });
+            } else if (typeof notify === 'function') {
+                notify("error", "กรุณาใช้ไฟล์ .json ที่สำรองจากแอปนี้เท่านั้น", "ไฟล์ไม่ถูกต้อง");
+            }
+        }
     };
-    reader.readAsText(f);
-}
-async function clearData() {
-    const { isConfirmed } = await Swal.fire({
-        title: "⚠️ ล้างข้อมูลทั้งหมด", text: "แน่ใจหรือไม่?", icon: "warning",
-        showCancelButton: true, confirmButtonColor: "#ef4444"
-    });
-    if (isConfirmed) { localStorage.clear(); location.reload(); }
+    reader.readAsText(file);
 }
 
+// 3. ฟังก์ชันล้างข้อมูล (Clear Data)
+function clearData() {
+    const executeClear = () => {
+        localStorage.removeItem("barber_db");
+        localStorage.removeItem("barber_archives");
+        localStorage.removeItem("barber_account");
+        
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'ล้างข้อมูลสำเร็จ',
+                icon: 'success',
+                timer: 1000,
+                showConfirmButton: false
+            });
+        }
+        setTimeout(() => location.reload(), 1000);
+    };
+
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'ล้างข้อมูลทั้งหมด?',
+            text: "รายงานและบัญชีจะหายถาวร (ควรสำรองข้อมูลก่อน)",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'ยืนยันลบข้อมูล',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) executeClear();
+        });
+    } else {
+        if (confirm("ล้างข้อมูลทั้งหมด? รายงานและบัญชีจะหายถาวร")) {
+            executeClear();
+        }
+    }
+}
 /* ========= SECTION 21: MODAL HELPERS ========= */
 window.onclick = e => {
     if (e.target.classList.contains("modal")) e.target.style.display = "none";
