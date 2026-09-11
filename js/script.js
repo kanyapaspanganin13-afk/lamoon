@@ -204,24 +204,31 @@ function switchMainTab(pageId, tabId, evt) {
     const targetTab = document.getElementById(tabId);
     if (!targetTab) return;
 
+    // 1. ซ่อนทุกแท็บย่อย
     page.querySelectorAll('.tab-panel').forEach(panel => {
         panel.classList.remove('active');
         panel.style.display = 'none';
     });
 
+    // 2. แสดงเฉพาะแท็บที่เลือก
     targetTab.classList.add('active');
     targetTab.style.display = 'block';
 
+    // 3. รีเซ็ตปุ่มกดทั้งหมด
     page.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('active');
     });
 
-    if (evt && evt.currentTarget) {
-        evt.currentTarget.classList.add('active');
+    // 4. ไฮไลต์ปุ่มกดที่ active
+    const activeBtn = evt ? (evt.currentTarget || evt.target?.closest('.tab-btn')) : null;
+    
+    if (activeBtn) {
+        activeBtn.classList.add('active');
     } else {
+        // ค้นหาปุ่มที่มี onclick ตรงกับ tabId
         page.querySelectorAll('.tab-btn').forEach(btn => {
-            const onclick = btn.getAttribute('onclick');
-            if (onclick && onclick.includes(`'${tabId}'`)) {
+            const onclickAttr = btn.getAttribute('onclick') || '';
+            if (onclickAttr.includes(`'${tabId}'`) || onclickAttr.includes(`"${tabId}"`)) {
                 btn.classList.add('active');
             }
         });
