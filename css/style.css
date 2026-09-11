@@ -420,6 +420,36 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     opacity: 1; 
     box-shadow: 0 2px 4px rgba(0,0,0,0.06); 
 }
+/* ========= 🗓️ CUSTOM MONTH PICKER & WRAPPER ========= */
+.month-picker-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 8px 15px;
+}
+
+.month-picker-wrap input[type="month"] {
+    max-width: 220px;
+    height: 40px;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    padding: 0 10px;
+}
+
+.tab-content-wrap {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    min-height: 250px;
+}
 .filter-month-wrap { 
     display: grid !important;
     grid-template-columns: auto 1fr auto !important;
