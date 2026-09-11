@@ -1631,20 +1631,12 @@ function getShortThaiMonth(m) {
     return months[m];
 }
 function renderYearlyIncomeSummary() {
-    const picker = document.getElementById('yearlyReportPicker');
+    const select = document.getElementById('yearFilterSelect');
+    if (!select) return;
+
+    const selectedYear = select.value || String(new Date().getFullYear());
     const tbody = document.getElementById('yearlyTableBody');
     if (!tbody) return;
-
-    // ถ้ายังไม่มีการเลือก ให้กำหนดค่าเริ่มต้นเป็นปีปัจจุบัน
-    if (picker && !picker.value) {
-        const now = new Date();
-        const yyyy = now.getFullYear();
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        picker.value = `${yyyy}-${mm}`;
-    }
-
-    // ดึงเฉพาะตัวเลขปี (YYYY) จากค่าปฏิทินที่เลือก
-    const selectedYear = picker && picker.value ? picker.value.split('-')[0] : String(new Date().getFullYear());
 
     const monthNames = [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -1653,27 +1645,33 @@ function renderYearlyIncomeSummary() {
 
     let grandCust = 0;
     let grandBarber = 0;
+    let grandShop = 0;
     let grandTotal = 0;
     let html = '';
 
     monthNames.forEach((monthName, idx) => {
         const mKey = `${selectedYear}-${String(idx + 1).padStart(2, '0')}`;
-        
-        // กรองข้อมูล Archives ประจำเดือนนั้นๆ
         const monthData = (window.archives || []).filter(a => a.date?.startsWith(mKey));
-        
+
         let mCust = 0;
         let mBarber = 0;
+        let mShop = 0;
         let mTotal = 0;
 
         monthData.forEach(a => {
             mCust += a.count || (a.details ? a.details.length : 0);
             mBarber += a.barber || 0;
+            
+            // คำนวณรายได้ร้าน (หากไม่มีฟิลด์ shop โดยตรง ให้ใช้ total - barber หรือดึงจาก a.shop)
+            const shopInc = a.shop !== undefined ? a.shop : ((a.total || 0) - (a.barber || 0));
+            mShop += shopInc;
+            
             mTotal += a.total || 0;
         });
 
         grandCust += mCust;
         grandBarber += mBarber;
+        grandShop += mShop;
         grandTotal += mTotal;
 
         html += `
@@ -1681,6 +1679,7 @@ function renderYearlyIncomeSummary() {
                 <td style="text-align: left; font-weight: 600;">${idx + 1}. ${monthName}</td>
                 <td>${mCust ? mCust.toLocaleString() : '-'}</td>
                 <td>${mBarber ? mBarber.toLocaleString('th-TH', { minimumFractionDigits: 2 }) : '-'}</td>
+                <td>${mShop ? mShop.toLocaleString('th-TH', { minimumFractionDigits: 2 }) : '-'}</td>
                 <td style="font-weight: 700;">${mTotal ? mTotal.toLocaleString('th-TH', { minimumFractionDigits: 2 }) : '-'}</td>
             </tr>
         `;
@@ -1691,25 +1690,22 @@ function renderYearlyIncomeSummary() {
     // สรุปผลรวมท้ายตาราง
     document.getElementById('yearlyTotalCust').innerText = grandCust.toLocaleString();
     document.getElementById('yearlyTotalBarber').innerText = grandBarber.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+    document.getElementById('yearlyTotalShop').innerText = grandShop.toLocaleString('th-TH', { minimumFractionDigits: 2 });
     document.getElementById('yearlyGrandTotal').innerText = grandTotal.toLocaleString('th-TH', { minimumFractionDigits: 2 });
 }
-function initYearSelectOptions() {
+function initYearOptions() {
     const select = document.getElementById('yearFilterSelect');
     if (!select) return;
 
     const currentYear = new Date().getFullYear();
-    const startYear = currentYear - 5; // ย้อนหลัง 5 ปี
-    const endYear = currentYear + 1;   // เผื่ออนาคต 1 ปี
+    let html = '';
 
-    let optionsHTML = '';
-    for (let y = endYear; y >= startYear; y--) {
-        const selected = y === currentYear ? 'selected' : '';
-        optionsHTML += `<option value="${y}" ${selected}>ปี ${y + 543} (${y})</option>`;
+    for (let y = currentYear; y >= currentYear - 5; y--) {
+        html += `<option value="${y}">ปี ${y}</option>`;
     }
 
-    select.innerHTML = optionsHTML;
+    select.innerHTML = html;
 }
-
 // เรียกใช้ฟังก์ชันตอนโหลดหน้าเว็บ
 document.addEventListener('DOMContentLoaded', () => {
     initYearSelectOptions();
