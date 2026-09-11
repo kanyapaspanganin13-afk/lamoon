@@ -1539,31 +1539,21 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
 }
 // ================= แท็บที่ 1: รายงานประจำเดือน (ตารางรายวัน) =================
 function renderDailyTableReport() {
-    // 1. ดึงจาก id "histMonth" หรือ "monthlyReportPicker" (เพื่อรองรับทั้ง 2 จุด)
-    const picker = document.getElementById('histMonth') || document.getElementById('monthlyReportPicker');
-    const content = document.getElementById('monthlyContent1') || document.getElementById('monthlyIncomeContent');
-    if (!content) return;
+    // ดึง Element จากตัวเลือกเดือนในหน้านั้นก่อน
+    const picker = document.getElementById('monthlyReportPicker') || document.getElementById('histMonth');
+    const content = document.getElementById('monthlyContent1');
+    
+    if (!picker || !content) return;
 
-    if (typeof archives === 'undefined' || !Array.isArray(archives)) {
-        content.innerHTML = '<div style="text-align:center; padding: 20px; color: #64748b;">ไม่พบฐานข้อมูลหลัก (archives)</div>';
-        return;
-    }
-
-    // ตั้งค่าเริ่มต้นเป็นเดือนปัจจุบันถ้ายังไม่ได้เลือก
-    let mVal = picker ? picker.value : '';
-    if (!mVal) {
-        const now = new Date();
-        const yyyy = now.getFullYear();
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        mVal = `${yyyy}-${mm}`;
-        if (picker) picker.value = mVal;
-    }
+    // อ่านค่าเดือนที่กดเลือกอยู่ ณ ปัจจุบัน
+    const mVal = picker.value; 
+    if (!mVal) return;
 
     const [y, mNum] = mVal.split('-').map(Number);
     const targetPrefix = `${y}-${String(mNum).padStart(2, '0')}`;
-    
-    // กรองข้อมูลเดือนที่เลือก
-    const filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
+
+    // กรองข้อมูลตาม targetPrefix ของเดือนที่เลือกจริง
+    const filtered = (typeof archives !== 'undefined' ? archives : []).filter(a => a.date && a.date.startsWith(targetPrefix));
 
     const monthNames = [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -2126,7 +2116,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderDay(today);
     loadAccountStatus();
     
-       // ✅ เปิดหน้าแรกเมื่อโหลดเสร็จ
+    // ✅ เปิดหน้าแรกเมื่อโหลดเสร็จ
     goSub(1);
 
     // 🔄 อัปเดตชื่อร้านทุกจุดที่แสดง
@@ -2162,6 +2152,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const viewport = document.querySelector('meta[name="viewport"]');
     if (viewport) {
         viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
+    }
+
+    // 🔄 [เพิ่มใหม่] ผูก Event เปลี่ยนเดือนในหน้ารายงานให้คำนวณและอัปเดตตารางทันที
+    const monthlyPicker = document.getElementById('monthlyReportPicker') || document.getElementById('histMonth');
+    if (monthlyPicker) {
+        monthlyPicker.addEventListener('change', function(e) {
+            const selectedMonth = e.target.value;
+            
+            const mainPicker = document.getElementById('histMonth');
+            if (mainPicker && mainPicker !== monthlyPicker) {
+                mainPicker.value = selectedMonth;
+            }
+            
+            if (typeof loadHistMonth === 'function') loadHistMonth();
+            if (typeof renderDailyTableReport === 'function') renderDailyTableReport();
+        });
     }
 
     // ✅ ซ่อนหน้าโหลด / แสดงเนื้อหาหลัก
