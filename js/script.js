@@ -1902,10 +1902,111 @@ function exportComparisonToExcel() {
 
 /* ========= SECTION 19: GOOGLE SHEETS & COMPARISON ========= */
 function handleGoogleSheet() {
-    window.open("https://docs.google.com/spreadsheets", "_blank");
+    const picker = document.getElementById('monthlyReportPicker') || document.getElementById('histMonth');
+    let mVal = picker ? picker.value : '';
+    if (!mVal) {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        mVal = `${yyyy}-${mm}`;
+    }
+
+    const [y, mNum] = mVal.split('-').map(Number);
+    const targetPrefix = `${y}-${String(mNum).padStart(2, '0')}`;
+    
+    // ดึงข้อมูลในเดือนที่เลือก
+    const filtered = (typeof archives !== 'undefined' ? archives : []).filter(a => a.date && a.date.startsWith(targetPrefix));
+    filtered.sort((a, b) => a.date.localeCompare(b.date));
+
+    const monthNames = [
+        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    ];
+    const monthThaiName = monthNames[mNum - 1] || '';
+    const thaiDayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+    const currentShopName = (typeof conf !== 'undefined' && conf.shop) ? conf.shop : (localStorage.getItem('shopName') || 'Barber Shop');
+
+    // สร้างข้อมูลตารางสำหรับส่งออก (CSV/Excel format)
+    let csvContent = "\uFEFF"; // UTF-8 BOM รองรับภาษาไทยใน Excel
+    csvContent += `รายงานร้าน: ${currentShopName}\n`;
+    csvContent += `ประจำเดือน: ${monthThaiName} ${y + 543}\n\n`;
+    csvContent += "วันที่,วัน,ลูกค้า,ยอดช่าง,โกน,สระ,ย้อม\n";
+
+    let totalCust = 0, totalBarber = 0, totalShave = 0, totalWash = 0, totalDye = 0, workDays = 0;
+
+    filtered.forEach(day => {
+        const isOffDay = day.off === true || day.type === "HOLIDAY";
+        let dayCust = 0, shave = 0, wash = 0, dye = 0;
+
+        if (!isOffDay) {
+            workDays++;
+            if (day.details && Array.isArray(day.details)) {
+                day.details.forEach(d => {
+                    if (d.type === "SERVICE" || !d.type) {
+                        dayCust++;
+                        const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
+                        svcs.forEach(s => {
+                            if (!s) return;
+                            const cleanS = String(s).trim();
+                            if (cleanS.includes("โกน")) shave++;
+                            if (cleanS.includes("สระ")) wash++;
+                            if (cleanS.includes("ย้อม") || cleanS.includes("สี")) dye++;
+                        });
+                    }
+                });
+            } else {
+                dayCust = Number(day.count) || 0;
+            }
+        }
+
+        const barber = isOffDay ? 0 : (Number(day.barber) || 0);
+
+        totalCust += dayCust;
+        totalBarber += barber;
+        totalShave += shave;
+        totalWash += wash;
+        totalDye += dye;
+
+        let displayDayName = day.dayName || '-';
+        if (day.date) {
+            const [dYear, dMonth, dDay] = day.date.split('-').map(Number);
+            const dObj = new Date(dYear, dMonth - 1, dDay);
+            if (!isNaN(dObj.getTime())) {
+                displayDayName = thaiDayNames[dObj.getDay()];
+            }
+        }
+
+        const dayNum = day.date ? parseInt(day.date.split('-')[2], 10) : '-';
+
+        if (isOffDay) {
+            csvContent += `"${dayNum}","${displayDayName}","หยุด","หยุด","หยุด","หยุด","หยุด"\n`;
+        } else {
+            csvContent += `"${dayNum}","${displayDayName}",${dayCust},${barber},${shave},${wash},${dye}\n`;
+        }
+    });
+
+    // แถวสรุปยอด
+    csvContent += `\n"รวมยอด","เปิด ${workDays} วัน",${totalCust},${totalBarber},${totalShave},${totalWash},${totalDye}\n`;
+
+    // ดาวน์โหลดเป็นไฟล์ CSV (เปิดใน Excel และส่งขึ้น Google Sheets ได้ทันที)
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `รายงานประจำเดือน_${monthThaiName}_${y + 543}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    if (typeof notify === 'function') {
+        notify("success", "ส่งออกสำเร็จ", `ดาวน์โหลดรายงานประจำเดือน ${monthThaiName} เรียบร้อยแล้ว`);
+    }
 }
+
 function openComparisonSelector() {
-    notify("info", "กำลังพัฒนา", "ฟังก์ชันเปรียบเทียบจะเพิ่มเร็วๆ นี้");
+    if (typeof notify === 'function') {
+        notify("info", "กำลังพัฒนา", "ฟังก์ชันเปรียบเทียบจะเพิ่มเร็วๆ นี้");
+    }
 }
 
 /* ========= SECTION 20: IMPORT / EXPORT / CLEAR ========= */
