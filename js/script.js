@@ -197,41 +197,45 @@ function goSub(num) {
     }
 }
 /* =========== SECTION 4: MAIN TABS =========== */   
-function switchMainTab(pageId, tabId, evt) {
+function switchMainTab(pageId, tabId, event) {
+    if (event && event.preventDefault) event.preventDefault();
+
     const page = document.getElementById(pageId);
     if (!page) return;
 
-    const targetTab = document.getElementById(tabId);
-    if (!targetTab) return;
+    const targetPanel = document.getElementById(tabId);
+    if (!targetPanel) return;
 
-    // 1. ซ่อนทุกแท็บย่อย
+    // 1. ซ่อนทุกแท็บย่อย และลบคลาส active
     page.querySelectorAll('.tab-panel').forEach(panel => {
         panel.classList.remove('active');
         panel.style.display = 'none';
     });
 
     // 2. แสดงเฉพาะแท็บที่เลือก
-    targetTab.classList.add('active');
-    targetTab.style.display = 'block';
+    targetPanel.classList.add('active');
+    targetPanel.style.display = 'block';
 
     // 3. รีเซ็ตปุ่มกดทั้งหมด
-    page.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
+    page.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
-    // 4. ไฮไลต์ปุ่มกดที่ active
-    const activeBtn = evt ? (evt.currentTarget || evt.target?.closest('.tab-btn')) : null;
-    
+    // 4. ไฮไลต์ปุ่มกดที่เลือก (ครอบคลุมทั้งการคลิกและการเรียกผ่าน JS)
+    const activeBtn = event ? (event.currentTarget || event.target?.closest('.tab-btn')) : null;
     if (activeBtn) {
         activeBtn.classList.add('active');
     } else {
-        // ค้นหาปุ่มที่มี onclick ตรงกับ tabId
         page.querySelectorAll('.tab-btn').forEach(btn => {
             const onclickAttr = btn.getAttribute('onclick') || '';
             if (onclickAttr.includes(`'${tabId}'`) || onclickAttr.includes(`"${tabId}"`)) {
                 btn.classList.add('active');
             }
         });
+    }
+
+    // 5. โหลดข้อมูลอัตโนมัติเมื่อเปิดแท็บรายได้ย้อนหลัง
+    if (tabId === 'monthlyTab2') {
+        if (typeof initYearOptions === 'function') initYearOptions();
+        if (typeof renderYearlyIncomeSummary === 'function') renderYearlyIncomeSummary();
     }
 }
 /* =========== SECTION 5: AUTO-UPDATE =========== */  
@@ -1632,9 +1636,9 @@ function getShortThaiMonth(m) {
 }
 function renderYearlyIncomeSummary() {
     const select = document.getElementById('yearFilterSelect');
-    if (!select) return;
+    if (!select || !select.value) return;
 
-    const selectedYear = select.value || String(new Date().getFullYear());
+    const selectedYear = select.value;
     const tbody = document.getElementById('yearlyTableBody');
     if (!tbody) return;
 
@@ -1643,29 +1647,20 @@ function renderYearlyIncomeSummary() {
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
     ];
 
-    let grandCust = 0;
-    let grandBarber = 0;
-    let grandShop = 0;
-    let grandTotal = 0;
+    let grandCust = 0, grandBarber = 0, grandShop = 0, grandTotal = 0;
     let html = '';
 
     monthNames.forEach((monthName, idx) => {
         const mKey = `${selectedYear}-${String(idx + 1).padStart(2, '0')}`;
         const monthData = (window.archives || []).filter(a => a.date?.startsWith(mKey));
 
-        let mCust = 0;
-        let mBarber = 0;
-        let mShop = 0;
-        let mTotal = 0;
+        let mCust = 0, mBarber = 0, mShop = 0, mTotal = 0;
 
         monthData.forEach(a => {
             mCust += a.count || (a.details ? a.details.length : 0);
             mBarber += a.barber || 0;
-            
-            // คำนวณรายได้ร้าน (หากไม่มีฟิลด์ shop โดยตรง ให้ใช้ total - barber หรือดึงจาก a.shop)
             const shopInc = a.shop !== undefined ? a.shop : ((a.total || 0) - (a.barber || 0));
             mShop += shopInc;
-            
             mTotal += a.total || 0;
         });
 
@@ -1687,7 +1682,6 @@ function renderYearlyIncomeSummary() {
 
     tbody.innerHTML = html;
 
-    // สรุปผลรวมท้ายตาราง
     document.getElementById('yearlyTotalCust').innerText = grandCust.toLocaleString();
     document.getElementById('yearlyTotalBarber').innerText = grandBarber.toLocaleString('th-TH', { minimumFractionDigits: 2 });
     document.getElementById('yearlyTotalShop').innerText = grandShop.toLocaleString('th-TH', { minimumFractionDigits: 2 });
@@ -1706,10 +1700,13 @@ function initYearOptions() {
 
     select.innerHTML = html;
 }
-// เรียกใช้ฟังก์ชันตอนโหลดหน้าเว็บ
+
+// เรียกใช้ฟังก์ชันตอนโหลดหน้าเว็บ (แก้ไขชื่อฟังก์ชันให้ตรงกันแล้ว)
 document.addEventListener('DOMContentLoaded', () => {
-    initYearSelectOptions();
-    renderYearlyIncomeSummary();
+    initYearOptions();
+    if (typeof renderYearlyIncomeSummary === 'function') {
+        renderYearlyIncomeSummary();
+    }
 });
 // 1. ส่งออก Excel สำหรับหน้า "สรุปรายเดือน" (ดึงข้อมูลรายวันทั้งเดือน)
 function exportMonthlyExcel() {
