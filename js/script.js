@@ -1911,23 +1911,41 @@ function handleGoogleSheet() {
         mVal = `${yyyy}-${mm}`;
     }
 
-    const [y, mNum] = mVal.split('-').map(Number);
+    let [y, mNum] = mVal.split('-').map(Number);
+    
+    // ✅ แปลงปี พ.ศ. เป็น ค.ศ. หากค่าปีเกิน 2500
+    if (y > 2500) {
+        y = y - 543;
+    }
+
     const targetPrefix = `${y}-${String(mNum).padStart(2, '0')}`;
     
     // ดึงข้อมูลในเดือนที่เลือก
     const filtered = (typeof archives !== 'undefined' ? archives : []).filter(a => a.date && a.date.startsWith(targetPrefix));
-    filtered.sort((a, b) => a.date.localeCompare(b.date));
 
+    // เช็คว่ามีข้อมูลหรือไม่
     const monthNames = [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
     ];
     const monthThaiName = monthNames[mNum - 1] || '';
+
+    if (filtered.length === 0) {
+        if (typeof notify === 'function') {
+            notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthThaiName} ${y + 543}`);
+        } else {
+            alert(`ไม่มีข้อมูลของเดือน ${monthThaiName} ${y + 543}`);
+        }
+        return;
+    }
+
+    filtered.sort((a, b) => a.date.localeCompare(b.date));
+
     const thaiDayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
     const currentShopName = (typeof conf !== 'undefined' && conf.shop) ? conf.shop : (localStorage.getItem('shopName') || 'Barber Shop');
 
-    // สร้างข้อมูลตารางสำหรับส่งออก (CSV/Excel format)
-    let csvContent = "\uFEFF"; // UTF-8 BOM รองรับภาษาไทยใน Excel
+    // สร้างข้อมูลไฟล์ CSV
+    let csvContent = "\uFEFF"; // UTF-8 BOM
     csvContent += `รายงานร้าน: ${currentShopName}\n`;
     csvContent += `ประจำเดือน: ${monthThaiName} ${y + 543}\n\n`;
     csvContent += "วันที่,วัน,ลูกค้า,ยอดช่าง,โกน,สระ,ย้อม\n";
@@ -1985,10 +2003,9 @@ function handleGoogleSheet() {
         }
     });
 
-    // แถวสรุปยอด
     csvContent += `\n"รวมยอด","เปิด ${workDays} วัน",${totalCust},${totalBarber},${totalShave},${totalWash},${totalDye}\n`;
 
-    // ดาวน์โหลดเป็นไฟล์ CSV (เปิดใน Excel และส่งขึ้น Google Sheets ได้ทันที)
+    // ดาวน์โหลดไฟล์ Excel/CSV
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
