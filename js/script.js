@@ -1080,25 +1080,26 @@ function loadHistDaily() {
 function loadHistMonth() {
     const $ = (id) => document.getElementById(id);
     const picker = $("monthlyReportPicker") || $("histMonth");
-    const m = picker?.value;
+    let m = picker?.value;
 
-    // --- 1. ตรวจสอบการเลือกเดือน ---
     if (!m) {
-        if (typeof notify === 'function') notify("warning", "กรุณาเลือกเดือนก่อนครับ", "แจ้งเตือน");
-        else alert("กรุณาเลือกเดือนก่อนครับ");
-        return;
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        m = `${yyyy}-${mm}`;
+        if (picker) picker.value = m;
     }
 
     if (typeof archives === 'undefined' || !Array.isArray(archives)) {
         if (typeof notify === 'function') notify("error", "ไม่พบฐานข้อมูลหลัก (archives)", "ข้อผิดพลาด");
-        else alert("ไม่พบฐานข้อมูลหลัก (archives)");
         return;
     }
 
     let [y, mNum] = m.split('-').map(Number);
     
-    // ✅ แปลงปี พ.ศ. ให้เป็น ค.ศ. สำหรับใช้ค้นหาใน archives
+    // แปลงปี พ.ศ. (2569) ให้เป็น ค.ศ. (2026) สำหรับค้นหาใน archives
     const searchYear = y > 2500 ? y - 543 : y;
+    const targetPrefix = `${searchYear}-${String(mNum).padStart(2, '0')}`;
     
     const monthNames = [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -1108,25 +1109,21 @@ function loadHistMonth() {
     const displayYearThai = searchYear + 543;
     const monthName = `${monthThaiName} ${displayYearThai}`;
 
-    const targetPrefix = `${searchYear}-${String(mNum).padStart(2, '0')}`;
     const filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
+
+    // เรนเดอร์ตารางสรุปรายวันในแท็บที่ 1 ทุกครั้ง
+    if (typeof renderDailyTableReport === 'function') {
+        renderDailyTableReport();
+    }
 
     if (!filtered.length) {
         if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
         if (window.calcNetProfit) window.calcNetProfit();
         if (typeof notify === 'function') notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthName}`);
-        
-        const noDataHTML = `<div style="text-align:center; padding:50px; color:#94a3b8; font-size:15px;">ไม่พบข้อมูลของเดือน ${monthName}</div>`;
-        
-        // เคลียร์พื้นที่แท็บทั้ง 3 หน้าใน SECTION 3
-        if ($("monthlyIncomeContent")) $("monthlyIncomeContent").innerHTML = noDataHTML;
-        if ($("incomeAnalyticsContent")) $("incomeAnalyticsContent").innerHTML = noDataHTML;
-        if ($("servicesStatsContent")) $("servicesStatsContent").innerHTML = noDataHTML;
-        
         return;
     }
 
-    // --- 2. ตัวแปรสะสมข้อมูลรายเดือน ---
+    // ตัวแปรสะสมข้อมูล
     let countNew = 0, countRegular = 0;  
     let monthTotal = 0, monthBarber = 0, monthCount = 0, monthGuarDays = 0; 
     let hairStats = {}, serviceStats = {};
@@ -1136,7 +1133,6 @@ function loadHistMonth() {
     const haircutList = ["แฟชั่น", "สกินเฟด", "รองทรง", "ตำรวจ/ทหาร", "นักเรียน", "ทรงนักเรียน", "เปิดข้าง", "ซอยผม/เล็มผม", "แก้ผม", "โกนผม", "เด็ก"];
     const dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
 
-    // --- 3. วนลูปประมวลผลข้อมูลรายวัน ---
     filtered.forEach(day => {
         const [dYear, dMonth, dDay] = day.date.split('-').map(Number);
         const dObj = new Date(dYear, dMonth - 1, dDay);
@@ -1150,9 +1146,7 @@ function loadHistMonth() {
                 customers: 0, workDays: 0, offDays: 0, 
                 zeroDays: 0, guarDays: 0, dailyCounts: [],
                 countNew: 0, countRegular: 0, 
-                popularHair: {}, 
-                popularService: {}, 
-                income: 0 
+                popularHair: {}, popularService: {}, income: 0 
             };
         }
 
@@ -1164,12 +1158,6 @@ function loadHistMonth() {
 
         workDays++;
         weeklyData[wKey].workDays++;
-        
-        const hasInsurance = day.details && day.details.some(d => d.type === "GUARANTEE_CLAIM");
-        if (hasInsurance) {
-            monthGuarDays++;
-            weeklyData[wKey].guarDays++;
-        }
 
         const dailyIncome = Number(day.total) || 0;
         const dailyBarber = Number(day.barber) || 0; 
@@ -1202,10 +1190,8 @@ function loadHistMonth() {
                         const cleanS = s.trim();
                         if (haircutList.includes(cleanS)) {
                             hairStats[cleanS] = (hairStats[cleanS] || 0) + 1;
-                            weeklyData[wKey].popularHair[cleanS] = (weeklyData[wKey].popularHair[cleanS] || 0) + 1;
                         } else {
                             serviceStats[cleanS] = (serviceStats[cleanS] || 0) + 1;
-                            weeklyData[wKey].popularService[cleanS] = (weeklyData[wKey].popularService[cleanS] || 0) + 1;
                         }
                     });
                 }
@@ -1222,7 +1208,6 @@ function loadHistMonth() {
         });
     });
 
-    // --- 4. อัปเดตยอดสุทธิเข้า UI หน้าหลัก ---
     const realShopEarn = monthTotal - monthBarber;
     if ($("shopTotalMonth")) {
         $("shopTotalMonth").innerText = "฿" + Math.floor(realShopEarn).toLocaleString();
@@ -1231,7 +1216,6 @@ function loadHistMonth() {
 
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
 
-    // --- 5. เรียกตัวสร้างรายงาน ---
     if (typeof generateMonthlyReport === 'function') {
         generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular);
     }
@@ -1907,29 +1891,22 @@ function handleGoogleSheet() {
     }
 
     let [y, mNum] = mVal.split('-').map(Number);
+    const searchYear = y > 2500 ? y - 543 : y;
+    const targetPrefix = `${searchYear}-${String(mNum).padStart(2, '0')}`;
     
-    // ✅ แปลงปี พ.ศ. เป็น ค.ศ. หากค่าปีเกิน 2500
-    if (y > 2500) {
-        y = y - 543;
-    }
-
-    const targetPrefix = `${y}-${String(mNum).padStart(2, '0')}`;
-    
-    // ดึงข้อมูลในเดือนที่เลือก
     const filtered = (typeof archives !== 'undefined' ? archives : []).filter(a => a.date && a.date.startsWith(targetPrefix));
 
-    // เช็คว่ามีข้อมูลหรือไม่
     const monthNames = [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
     ];
     const monthThaiName = monthNames[mNum - 1] || '';
 
-    if (filtered.length === 0) {
+    if (!filtered.length) {
         if (typeof notify === 'function') {
-            notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthThaiName} ${y + 543}`);
+            notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthThaiName} ${searchYear + 543}`);
         } else {
-            alert(`ไม่มีข้อมูลของเดือน ${monthThaiName} ${y + 543}`);
+            alert(`ไม่มีข้อมูลของเดือน ${monthThaiName} ${searchYear + 543}`);
         }
         return;
     }
@@ -1939,10 +1916,9 @@ function handleGoogleSheet() {
     const thaiDayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
     const currentShopName = (typeof conf !== 'undefined' && conf.shop) ? conf.shop : (localStorage.getItem('shopName') || 'Barber Shop');
 
-    // สร้างข้อมูลไฟล์ CSV
-    let csvContent = "\uFEFF"; // UTF-8 BOM
+    let csvContent = "\uFEFF"; // BOM สำหรับภาษาไทยใน Excel
     csvContent += `รายงานร้าน: ${currentShopName}\n`;
-    csvContent += `ประจำเดือน: ${monthThaiName} ${y + 543}\n\n`;
+    csvContent += `ประจำเดือน: ${monthThaiName} ${searchYear + 543}\n\n`;
     csvContent += "วันที่,วัน,ลูกค้า,ยอดช่าง,โกน,สระ,ย้อม\n";
 
     let totalCust = 0, totalBarber = 0, totalShave = 0, totalWash = 0, totalDye = 0, workDays = 0;
@@ -2000,18 +1976,17 @@ function handleGoogleSheet() {
 
     csvContent += `\n"รวมยอด","เปิด ${workDays} วัน",${totalCust},${totalBarber},${totalShave},${totalWash},${totalDye}\n`;
 
-    // ดาวน์โหลดไฟล์ Excel/CSV
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `รายงานประจำเดือน_${monthThaiName}_${y + 543}.csv`);
+    link.setAttribute("download", `รายงานประจำเดือน_${monthThaiName}_${searchYear + 543}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
     if (typeof notify === 'function') {
-        notify("success", "ส่งออกสำเร็จ", `ดาวน์โหลดรายงานประจำเดือน ${monthThaiName} เรียบร้อยแล้ว`);
+        notify("success", "ส่งออกสำเร็จ", `ดาวน์โหลดไฟล์รายงานประจำเดือน ${monthThaiName} เรียบร้อยแล้ว`);
     }
 }
 
