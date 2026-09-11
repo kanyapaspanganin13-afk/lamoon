@@ -1630,6 +1630,91 @@ function getShortThaiMonth(m) {
     const months = ['', 'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
     return months[m];
 }
+function renderYearlyIncomeSummary() {
+    const picker = document.getElementById('yearlyReportPicker');
+    const tbody = document.getElementById('yearlyTableBody');
+    if (!tbody) return;
+
+    // ถ้ายังไม่มีการเลือก ให้กำหนดค่าเริ่มต้นเป็นปีปัจจุบัน
+    if (picker && !picker.value) {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        picker.value = `${yyyy}-${mm}`;
+    }
+
+    // ดึงเฉพาะตัวเลขปี (YYYY) จากค่าปฏิทินที่เลือก
+    const selectedYear = picker && picker.value ? picker.value.split('-')[0] : String(new Date().getFullYear());
+
+    const monthNames = [
+        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    ];
+
+    let grandCust = 0;
+    let grandBarber = 0;
+    let grandTotal = 0;
+    let html = '';
+
+    monthNames.forEach((monthName, idx) => {
+        const mKey = `${selectedYear}-${String(idx + 1).padStart(2, '0')}`;
+        
+        // กรองข้อมูล Archives ประจำเดือนนั้นๆ
+        const monthData = (window.archives || []).filter(a => a.date?.startsWith(mKey));
+        
+        let mCust = 0;
+        let mBarber = 0;
+        let mTotal = 0;
+
+        monthData.forEach(a => {
+            mCust += a.count || (a.details ? a.details.length : 0);
+            mBarber += a.barber || 0;
+            mTotal += a.total || 0;
+        });
+
+        grandCust += mCust;
+        grandBarber += mBarber;
+        grandTotal += mTotal;
+
+        html += `
+            <tr>
+                <td style="text-align: left; font-weight: 600;">${idx + 1}. ${monthName}</td>
+                <td>${mCust ? mCust.toLocaleString() : '-'}</td>
+                <td>${mBarber ? mBarber.toLocaleString('th-TH', { minimumFractionDigits: 2 }) : '-'}</td>
+                <td style="font-weight: 700;">${mTotal ? mTotal.toLocaleString('th-TH', { minimumFractionDigits: 2 }) : '-'}</td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+
+    // สรุปผลรวมท้ายตาราง
+    document.getElementById('yearlyTotalCust').innerText = grandCust.toLocaleString();
+    document.getElementById('yearlyTotalBarber').innerText = grandBarber.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+    document.getElementById('yearlyGrandTotal').innerText = grandTotal.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+}
+function initYearSelectOptions() {
+    const select = document.getElementById('yearFilterSelect');
+    if (!select) return;
+
+    const currentYear = new Date().getFullYear();
+    const startYear = currentYear - 5; // ย้อนหลัง 5 ปี
+    const endYear = currentYear + 1;   // เผื่ออนาคต 1 ปี
+
+    let optionsHTML = '';
+    for (let y = endYear; y >= startYear; y--) {
+        const selected = y === currentYear ? 'selected' : '';
+        optionsHTML += `<option value="${y}" ${selected}>ปี ${y + 543} (${y})</option>`;
+    }
+
+    select.innerHTML = optionsHTML;
+}
+
+// เรียกใช้ฟังก์ชันตอนโหลดหน้าเว็บ
+document.addEventListener('DOMContentLoaded', () => {
+    initYearSelectOptions();
+    renderYearlyIncomeSummary();
+});
 // 1. ส่งออก Excel สำหรับหน้า "สรุปรายเดือน" (ดึงข้อมูลรายวันทั้งเดือน)
 function exportMonthlyExcel() {
     const picker = document.getElementById('monthlyReportPicker');
