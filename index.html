@@ -273,65 +273,66 @@
                 <span class="top-title">📅 สรุปรายเดือน</span>
             </div>
         
-            <!-- แท็บเลือกหน้า (จัดให้อยู่บรรทัดเดียวกันแบบ Grid 2 คอลัมน์) -->
+            <!-- แท็บเลือกหน้า -->
             <div class="tab-header tab-header-2">
                 <button class="tab-btn active" onclick="switchMainTab('pageMonthlyReport', 'monthlyTab1', event)">📋 รายงานประจำเดือน</button>
                 <button class="tab-btn" onclick="switchMainTab('pageMonthlyReport', 'monthlyTab2', event)">📊 รายได้ย้อนหลัง</button>
             </div>
         
-            <div class="tab-content-wrap">
-                <!-- แท็บที่ 1: รายงานประจำเดือน -->
-                <div id="monthlyTab1" class="tab-panel active">
-                    <div class="filter-month-compact">
-                        <input type="month" id="monthlyReportPicker" class="form-control" onchange="renderDailyTableReport()">
-                        <button class="btn-export-excel" onclick="exportMonthlyExcel()">
-                            <i class="fas fa-file-excel"></i> แชร์ Excel
-                        </button>
-                    </div>
-        
-                    <div id="monthlyContent1" class="table-responsive-box">
-                        <!-- ตารางสรุปรายวันจะเรนเดอร์ตรงนี้ -->
-                    </div>
+            <!-- แท็บที่ 1: รายงานประจำเดือน -->
+            <div id="monthlyTab1" class="tab-panel active">
+                <!-- กรอบที่ 1: แถบเลือกเดือน & ปุ่มแชร์ Excel (แยกกรอบชัดเจน) -->
+                <div class="filter-card">
+                    <input type="month" id="monthlyReportPicker" class="form-control" onchange="renderDailyTableReport()">
+                    <button class="btn-export-excel" onclick="exportMonthlyExcel()">
+                        <i class="fas fa-file-excel"></i> แชร์ Excel
+                    </button>
                 </div>
         
-                <!-- แท็บที่ 2: รายได้ย้อนหลัง (เอาแชร์ Excel ออก / แสดงเฉพาะปี) -->
-                <div id="monthlyTab2" class="tab-panel" style="display: none;">
-                    <div class="filter-month-compact">
-                        <label style="font-weight: 700; font-size: 13.5px; color: var(--text);">เลือกปี:</label>
-                        <!-- เปลี่ยนเป็น select เพื่อให้แสดงเฉพาะตัวเลขปีเท่านั้น -->
-                        <select id="yearFilterSelect" class="form-control" onchange="renderYearlyIncomeSummary()">
-                            <!-- ตัวเลือกปีจะถูกสร้างอัตโนมัติผ่าน JS หรือกำหนดไว้ตรงนี้ -->
-                        </select>
-                    </div>
-        
-                    <div id="monthlyContent2" class="table-responsive-box">
-                       <table class="summary-table yearly-table">
-                            <thead>
-                                <tr style="background-color: #1b5e20; color: white;">
-                                    <th style="width: 25%;">เดือน</th>
-                                    <th style="width: 15%;">ลูกค้า</th>
-                                    <th style="width: 20%;">ยอดช่าง</th>
-                                    <th style="width: 20%;">ยอดร้าน</th>
-                                    <th style="width: 20%;">รายได้รวม</th>
-                                </tr>
-                            </thead>
-                            <tbody id="yearlyTableBody">
-                                <!-- รายการ 12 เดือนจะถูกเรนเดอร์ผ่าน JS -->
-                            </tbody>
-                            <tfoot>
-                                <tr style="background-color: #ffeb3b; font-weight: bold; color: #000;">
-                                    <td style="text-align: center;">รวมทั้งปี</td>
-                                    <td id="yearlyTotalCust">0</td>
-                                    <td id="yearlyTotalBarber">0.00</td>
-                                    <td id="yearlyTotalShop">0.00</td>
-                                    <td id="yearlyGrandTotal">0.00</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
+                <!-- กรอบที่ 2: กรอบแสดงตารางรายวัน (แยกอีกกรอบต่างหาก) -->
+                <div id="monthlyContent1" class="report-data-card">
+                    <!-- ตารางสรุปรายวันจะเรนเดอร์ตรงนี้ -->
                 </div>
             </div>
-        </section>      
+        
+            <!-- แท็บที่ 2: รายได้ย้อนหลัง -->
+            <div id="monthlyTab2" class="tab-panel" style="display: none;">
+                <!-- กรอบที่ 1: เลือกปี (แยกกรอบชัดเจน) -->
+                <div class="filter-card filter-card-center">
+                    <label class="filter-label">เลือกปี:</label>
+                    <select id="yearFilterSelect" class="form-control" onchange="renderYearlyIncomeSummary()">
+                        <!-- JS จะเติมปี 2026, 2025,... ให้อัตโนมัติ -->
+                    </select>
+                </div>
+        
+                <!-- กรอบที่ 2: แสดงตารางรายได้ย้อนหลัง 12 เดือน (แยกอีกกรอบต่างหาก) -->
+                <div id="monthlyContent2" class="report-data-card">
+                    <table class="summary-table yearly-table">
+                        <thead>
+                            <tr style="background-color: #1b5e20; color: white;">
+                                <th style="width: 25%;">เดือน</th>
+                                <th style="width: 15%;">ลูกค้า</th>
+                                <th style="width: 20%;">ยอดช่าง</th>
+                                <th style="width: 20%;">ยอดร้าน</th>
+                                <th style="width: 20%;">รายได้รวม</th>
+                            </tr>
+                        </thead>
+                        <tbody id="yearlyTableBody">
+                            <!-- รายการ 12 เดือนจะถูกเรนเดอร์ผ่าน JS -->
+                        </tbody>
+                        <tfoot>
+                            <tr style="background-color: #ffeb3b; font-weight: bold; color: #000;">
+                                <td style="text-align: center;">รวมทั้งปี</td>
+                                <td id="yearlyTotalCust">0</td>
+                                <td id="yearlyTotalBarber">0.00</td>
+                                <td id="yearlyTotalShop">0.00</td>
+                                <td id="yearlyGrandTotal">0.00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </section>  
         <!-- ================= SECTION 5: เปรียบเทียบ ================= -->
     <section id="pageComparison" class="app-page full-page" style="display: none;">
         <div class="top-bar">
