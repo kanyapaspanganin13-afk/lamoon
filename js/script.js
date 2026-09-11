@@ -1537,70 +1537,84 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         `;
     }
 }
-// ================= แท็บ 1: รายงานประจำเดือน =================
+// ================= แท็บที่ 1: รายงานประจำเดือน (ตารางรายวัน) =================
 function renderDailyTableReport() {
-    const picker = document.getElementById('monthlyReportPicker');
-    const content = document.getElementById('monthlyContent1');
-    if (!picker || !content) return;
+    // 1. ดึงจาก id "histMonth" หรือ "monthlyReportPicker" (เพื่อรองรับทั้ง 2 จุด)
+    const picker = document.getElementById('histMonth') || document.getElementById('monthlyReportPicker');
+    const content = document.getElementById('monthlyContent1') || document.getElementById('monthlyIncomeContent');
+    if (!content) return;
 
-    if (!picker.value) {
+    if (typeof archives === 'undefined' || !Array.isArray(archives)) {
+        content.innerHTML = '<div style="text-align:center; padding: 20px; color: #64748b;">ไม่พบฐานข้อมูลหลัก (archives)</div>';
+        return;
+    }
+
+    // ตั้งค่าเริ่มต้นเป็นเดือนปัจจุบันถ้ายังไม่ได้เลือก
+    let mVal = picker ? picker.value : '';
+    if (!mVal) {
         const now = new Date();
         const yyyy = now.getFullYear();
         const mm = String(now.getMonth() + 1).padStart(2, '0');
-        picker.value = `${yyyy}-${mm}`;
+        mVal = `${yyyy}-${mm}`;
+        if (picker) picker.value = mVal;
     }
 
-    const [yearStr, monthStr] = picker.value.split('-');
-    const targetYear = parseInt(yearStr, 10);
-    const targetMonth = parseInt(monthStr, 10);
+    const [y, mNum] = mVal.split('-').map(Number);
+    const targetPrefix = `${y}-${String(mNum).padStart(2, '0')}`;
+    
+    // กรองข้อมูลเดือนที่เลือก
+    const filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
 
     const monthNames = [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
     ];
-    const monthThaiName = monthNames[targetMonth - 1] || '';
-
-    // กรองข้อมูลโดยแปลงวันที่ใน Object ให้เป็น ปี/เดือน ตัวเลขจริง เพื่อป้องกันเรื่อง String Mismatch
-    const monthlyData = (window.archives || []).filter(item => {
-        if (!item.date) return false;
-        const d = new Date(item.date);
-        
-        // หากใช้วันที่รูปแบบ String "YYYY-MM-DD"
-        if (isNaN(d.getTime())) {
-            const parts = String(item.date).split('-');
-            return parseInt(parts[0], 10) === targetYear && parseInt(parts[1], 10) === targetMonth;
-        }
-        
-        return d.getFullYear() === targetYear && (d.getMonth() + 1) === targetMonth;
-    });
+    const monthThaiName = monthNames[mNum - 1] || '';
 
     let totalCust = 0, totalBarber = 0, totalShave = 0, totalWash = 0, totalDye = 0;
     let rowsHTML = '';
 
-    monthlyData.forEach(item => {
-        const cust = item.count || (item.details ? item.details.length : 0);
-        const barber = item.barber || 0;
-        const shave = item.shave || 0;
-        const wash = item.wash || 0;
-        const dye = item.dye || 0;
+    // เรียงวันที่จาก 1 -> 31
+    filtered.sort((a, b) => a.date.localeCompare(b.date));
 
-        totalCust += cust;
+    filtered.forEach(day => {
+        // นับจำนวนลูกค้า
+        let dayCust = 0;
+        let shave = 0, wash = 0, dye = 0;
+
+        if (day.details && Array.isArray(day.details)) {
+            day.details.forEach(d => {
+                if (d.type === "SERVICE" || !d.type) {
+                    dayCust++;
+                    const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
+                    svcs.forEach(s => {
+                        if (!s) return;
+                        const cleanS = String(s).trim();
+                        if (cleanS.includes("โกน")) shave++;
+                        if (cleanS.includes("สระ")) wash++;
+                        if (cleanS.includes("ย้อม") || cleanS.includes("สี")) dye++;
+                    });
+                }
+            });
+        } else {
+            dayCust = Number(day.count) || 0;
+        }
+
+        const barber = Number(day.barber) || 0;
+
+        totalCust += dayCust;
         totalBarber += barber;
         totalShave += shave;
         totalWash += wash;
         totalDye += dye;
 
-        let dayNum = '-';
-        if (item.date) {
-            const p = String(item.date).split('-');
-            dayNum = p[2] ? parseInt(p[2], 10) : item.date;
-        }
+        const dayNum = day.date ? day.date.split('-')[2] : '-';
 
         rowsHTML += `
             <tr>
-                <td>${dayNum}</td>
-                <td>${item.dayName || '-'}</td>
-                <td>${cust}</td>
+                <td>${parseInt(dayNum, 10)}</td>
+                <td>${day.dayName || '-'}</td>
+                <td>${dayCust}</td>
                 <td>${barber.toLocaleString()}</td>
                 <td>${shave}</td>
                 <td>${wash}</td>
@@ -1611,12 +1625,12 @@ function renderDailyTableReport() {
 
     content.innerHTML = `
         <div style="text-align: center; margin-bottom: 10px;">
-            <h3 style="margin: 0; color: var(--primary);">รายงานร้าน: Barber Shop</h3>
-            <p style="margin: 4px 0; font-weight: 700; color: var(--text);">ประจำเดือน: ${monthThaiName} ${targetYear + 543}</p>
+            <h3 style="margin: 0; color: var(--primary, #0284c7);">รายงานร้าน: Barber Shop</h3>
+            <p style="margin: 4px 0; font-weight: 700; color: var(--text, #334155);">ประจำเดือน: ${monthThaiName} ${y + 543}</p>
         </div>
-        <table class="summary-table">
+        <table class="summary-table" style="width:100%; border-collapse: collapse; text-align:center;">
             <thead>
-                <tr style="background-color: var(--bg);">
+                <tr style="background-color: var(--bg, #f1f5f9);">
                     <th>วันที่</th>
                     <th>วัน</th>
                     <th>ลูกค้า</th>
@@ -1627,7 +1641,7 @@ function renderDailyTableReport() {
                 </tr>
             </thead>
             <tbody>
-                ${rowsHTML || '<tr><td colspan="7" style="text-align:center; padding: 15px;">ไม่มีข้อมูลในเดือนนี้</td></tr>'}
+                ${rowsHTML || '<tr><td colspan="7" style="text-align:center; padding: 20px; color:#94a3b8;">ไม่มีข้อมูลในเดือนนี้</td></tr>'}
             </tbody>
             <tfoot>
                 <tr style="background-color: #ffeb3b; font-weight: bold; color: #000;">
@@ -1643,18 +1657,18 @@ function renderDailyTableReport() {
     `;
 }
 
-// ================= แท็บ 2: รายได้ย้อนหลัง =================
+// ================= แท็บที่ 2: รายได้ย้อนหลัง 12 เดือน =================
 function renderYearlyIncomeSummary() {
-    const select = document.getElementById('yearFilterSelect');
+    const select = document.getElementById('yearFilterSelect') || document.getElementById('histYear');
     const tbody = document.getElementById('yearlyTableBody');
     if (!tbody) return;
 
-    if (select && (!select.children.length || !select.value)) {
-        if (typeof initYearOptions === 'function') initYearOptions();
+    if (typeof archives === 'undefined' || !Array.isArray(archives)) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">ไม่พบฐานข้อมูลหลัก (archives)</td></tr>';
+        return;
     }
 
     const selectedYear = parseInt(select && select.value ? select.value : new Date().getFullYear(), 10);
-
     const monthNames = [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
@@ -1664,28 +1678,32 @@ function renderYearlyIncomeSummary() {
     let html = '';
 
     monthNames.forEach((monthName, idx) => {
-        const targetMonth = idx + 1;
+        const mNum = idx + 1;
+        const targetPrefix = `${selectedYear}-${String(mNum).padStart(2, '0')}`;
 
-        // กรองข้อมูลแยกตามเดือนของปีที่เลือก
-        const monthData = (window.archives || []).filter(item => {
-            if (!item.date) return false;
-            const d = new Date(item.date);
-            if (isNaN(d.getTime())) {
-                const parts = String(item.date).split('-');
-                return parseInt(parts[0], 10) === selectedYear && parseInt(parts[1], 10) === targetMonth;
+        // กรอง archives เฉพาะเดือนนั้นๆ
+        const monthData = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
+
+        let mCust = 0, mBarber = 0, mTotal = 0;
+
+        monthData.forEach(day => {
+            // คำนวณลูกค้า
+            if (day.details && Array.isArray(day.details)) {
+                day.details.forEach(d => {
+                    if (d.type === "SERVICE" || !d.type) mCust++;
+                });
+            } else {
+                mCust += Number(day.count) || 0;
             }
-            return d.getFullYear() === selectedYear && (d.getMonth() + 1) === targetMonth;
+
+            const dailyTotal = Number(day.total) || 0;
+            const dailyBarber = Number(day.barber) || 0;
+
+            mBarber += dailyBarber;
+            mTotal += dailyTotal;
         });
 
-        let mCust = 0, mBarber = 0, mShop = 0, mTotal = 0;
-
-        monthData.forEach(a => {
-            mCust += a.count || (a.details ? a.details.length : 0);
-            mBarber += a.barber || 0;
-            const shopInc = a.shop !== undefined ? a.shop : ((a.total || 0) - (a.barber || 0));
-            mShop += shopInc;
-            mTotal += a.total || 0;
-        });
+        const mShop = mTotal - mBarber; // ยอดร้าน = ยอดรวม - ยอดช่าง
 
         grandCust += mCust;
         grandBarber += mBarber;
@@ -1705,6 +1723,7 @@ function renderYearlyIncomeSummary() {
 
     tbody.innerHTML = html;
 
+    // แสดงผลรวมด้านล่าง
     const elemCust = document.getElementById('yearlyTotalCust');
     const elemBarber = document.getElementById('yearlyTotalBarber');
     const elemShop = document.getElementById('yearlyTotalShop');
