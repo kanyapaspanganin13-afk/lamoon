@@ -420,6 +420,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     opacity: 1; 
     box-shadow: 0 2px 4px rgba(0,0,0,0.06); 
 }
+
 /* ========= 🗓️ CUSTOM MONTH PICKER & WRAPPER ========= */
 .month-picker-wrap {
     display: flex;
