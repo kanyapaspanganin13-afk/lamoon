@@ -230,43 +230,42 @@
             </div>
         </div>
     </section>
-
-    <!-- ================= SECTION 3: สรุปยอดรวม ================= -->
-    <section id="pageSummary" class="app-page full-page" style="display: none;">
-        <div class="top-bar">
-            <span class="top-title">📊 สรุปยอดรวม</span>
-        </div>
-
-        <!-- 1. ช่องเลือกเดือน (ย้ายขึ้นมาอยู่ด้านบนสุด เหนือปุ่มแท็บ) -->
-        <div style="padding: 10px 15px 5px 15px; text-align: center;">
-            <input type="month" id="histMonth" class="form-control" style="width: 100%; text-align: center; font-weight: bold; font-size: 16px;" onchange="loadHistMonth()">
-        </div>
-
-        <!-- 2. แท็บเมนูเลือกหน้า -->
-        <div class="tab-header">
-            <button class="tab-btn active" onclick="switchMainTab('pageSummary', 'summaryTab1', event)">📊 รายได้ประจำเดือน</button>
-            <button class="tab-btn" onclick="switchMainTab('pageSummary', 'summaryTab2', event)">📈 วิเคราะห์รายได้</button>
-            <button class="tab-btn" onclick="switchMainTab('pageSummary', 'summaryTab3', event)">✂️ ทรงผม&บริการ</button>
-        </div>
-
-        <!-- 3. กรอบแสดงรายงาน (ครอบเนื้อหาของทั้ง 3 แท็บ) -->
-        <div class="tab-content-wrap" style="border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 12px; background: #0f172a; margin: 10px 15px;">
-            <!-- แท็บที่ 1: รายได้ประจำเดือน -->
-            <div id="summaryTab1" class="tab-panel active">
-                <div id="monthlyIncomeContent"></div>
+            <!-- ================= SECTION 3: สรุปยอดรวม ================= -->
+        <section id="pageSummary" class="app-page full-page" style="display: none;">
+            <div class="top-bar">
+                <span class="top-title">📊 สรุปยอดรวม</span>
             </div>
-
-            <!-- แท็บที่ 2: วิเคราะห์รายได้ -->
-            <div id="summaryTab2" class="tab-panel" style="display: none;">
-                <div id="incomeAnalyticsContent"></div>
+        
+            <!-- 1. ช่องเลือกเดือน (ย่อขนาดแล้ว) -->
+            <div class="month-picker-wrap">
+                <input type="month" id="histMonth" class="form-control" onchange="loadHistMonth()">
             </div>
-
-            <!-- แท็บที่ 3: ทรงผม & บริการ -->
-            <div id="summaryTab3" class="tab-panel" style="display: none;">
-                <div id="servicesStatsContent"></div>
+        
+            <!-- 2. แท็บเมนูเลือกหน้า -->
+            <div class="tab-header">
+                <button class="tab-btn active" onclick="switchMainTab('pageSummary', 'summaryTab1', event)">📊 รายได้ประจำเดือน</button>
+                <button class="tab-btn" onclick="switchMainTab('pageSummary', 'summaryTab2', event)">📈 วิเคราะห์รายได้</button>
+                <button class="tab-btn" onclick="switchMainTab('pageSummary', 'summaryTab3', event)">✂️ ทรงผม&บริการ</button>
             </div>
-        </div>
-    </section>
+        
+            <!-- 3. กรอบแสดงรายงาน (ขยายเต็มพื้นที่) -->
+            <div class="tab-content-wrap">
+                <!-- แท็บที่ 1: รายได้ประจำเดือน -->
+                <div id="summaryTab1" class="tab-panel active">
+                    <div id="monthlyIncomeContent"></div>
+                </div>
+        
+                <!-- แท็บที่ 2: วิเคราะห์รายได้ -->
+                <div id="summaryTab2" class="tab-panel" style="display: none;">
+                    <div id="incomeAnalyticsContent"></div>
+                </div>
+        
+                <!-- แท็บที่ 3: ทรงผม & บริการ -->
+                <div id="summaryTab3" class="tab-panel" style="display: none;">
+                    <div id="servicesStatsContent"></div>
+                </div>
+            </div>
+        </section>
 
     <!-- ================= SECTION 4: สรุปรายเดือน ================= -->
     <section id="pageMonthlyReport" class="app-page full-page" style="display: none;">
