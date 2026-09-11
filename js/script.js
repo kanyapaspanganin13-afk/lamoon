@@ -1537,29 +1537,78 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         `;
     }
 }
+// ================= แท็บที่ 1: รายงานประจำเดือน =================
 function renderDailyTableReport() {
     const picker = document.getElementById('monthlyReportPicker');
-    const container = document.getElementById('monthlyContent1');
-    if (!picker || !container) return;
+    const content = document.getElementById('monthlyContent1');
+    if (!picker || !content) return;
 
-    const [year, month] = picker.value.split('-').map(Number);
-    const daysInMonth = new Date(year, month, 0).getDate();
-    const thaiDays = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+    // ถ้ายังไม่มีการเลือกวันที่ ให้ตั้งเป็นเดือนปัจจุบัน
+    if (!picker.value) {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        picker.value = `${yyyy}-${mm}`;
+    }
 
-    let totalCustomers = 0;
-    let totalIncome = 0;
-    let totalShave = 0;
-    let totalWash = 0;
-    let totalDye = 0;
+    const [yearStr, monthStr] = picker.value.split('-');
+    const selectedYear = parseInt(yearStr, 10);
+    const selectedMonth = parseInt(monthStr, 10);
 
-    let tableHTML = `
-        <div style="text-align: center; margin-bottom: 12px;">
-            <h3 style="margin: 0; color: #1a237e;">รายงานร้าน: Barber Shop</h3>
-            <p style="margin: 4px 0; font-weight: bold;">ประจำเดือน: ${getThaiMonthName(month)} ${year + 543}</p>
+    const monthNames = [
+        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    ];
+    const monthThaiName = monthNames[selectedMonth - 1] || 'มกราคม';
+
+    // กรองข้อมูล Archives โดยแปลงเป็น Format YYYY-MM เพื่อเทียบได้ถูกต้อง
+    const searchPrefix = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}`;
+    const monthlyData = (window.archives || []).filter(item => {
+        if (!item.date) return false;
+        // ป้องกันกรณีวันที่เก็บเป็น Date Object หรือ String Format อื่น
+        const dStr = String(item.date);
+        return dStr.startsWith(searchPrefix);
+    });
+
+    let totalCust = 0, totalBarber = 0, totalShave = 0, totalWash = 0, totalDye = 0;
+
+    let rowsHTML = '';
+    monthlyData.forEach(item => {
+        const cust = item.count || (item.details ? item.details.length : 0);
+        const barber = item.barber || 0;
+        const shave = item.shave || 0;
+        const wash = item.wash || 0;
+        const dye = item.dye || 0;
+
+        totalCust += cust;
+        totalBarber += barber;
+        totalShave += shave;
+        totalWash += wash;
+        totalDye += dye;
+
+        const dayNum = item.date ? item.date.split('-')[2] : '-';
+
+        rowsHTML += `
+            <tr>
+                <td>${dayNum}</td>
+                <td>${item.dayName || '-'}</td>
+                <td>${cust}</td>
+                <td>${barber.toLocaleString()}</td>
+                <td>${shave}</td>
+                <td>${wash}</td>
+                <td>${dye}</td>
+            </tr>
+        `;
+    });
+
+    content.innerHTML = `
+        <div style="text-align: center; margin-bottom: 10px;">
+            <h3 style="margin: 0; color: var(--primary);">รายงานร้าน: Barber Shop</h3>
+            <p style="margin: 4px 0; font-weight: 700; color: var(--text);">ประจำเดือน: ${monthThaiName} ${selectedYear + 543}</p>
         </div>
         <table class="summary-table">
             <thead>
-                <tr style="background-color: #1b5e20; color: white;">
+                <tr style="background-color: var(--bg);">
                     <th>วันที่</th>
                     <th>วัน</th>
                     <th>ลูกค้า</th>
@@ -1570,49 +1619,13 @@ function renderDailyTableReport() {
                 </tr>
             </thead>
             <tbody>
-    `;
-
-    // ลูปสร้างข้อมูลรายวัน 1 ถึงสิ้นเดือน
-    for (let day = 1; day <= daysInMonth; day++) {
-        const dateObj = new Date(year, month - 1, day);
-        const dayOfWeek = thaiDays[dateObj.getDay()];
-        
-        // ดึงข้อมูลรายวันตามจริงจากระบบ
-        const dayData = getDailyData(year, month, day) || {};
-        const cust = dayData.customers || 0;
-        const income = dayData.income || 0;
-        const shave = dayData.shave || 0;
-        const wash = dayData.wash || 0;
-        const dye = dayData.dye || 0;
-
-        // สะสมผลรวมทั้งเดือน
-        totalCustomers += cust;
-        totalIncome += income;
-        totalShave += shave;
-        totalWash += wash;
-        totalDye += dye;
-
-        tableHTML += `
-            <tr>
-                <td>${day} ${getShortThaiMonth(month)} ${String(year + 543).slice(-2)}</td>
-                <td>${dayOfWeek}</td>
-                <td>${cust || '-'}</td>
-                <td>${income ? income.toLocaleString() : '-'}</td>
-                <td>${shave || '-'}</td>
-                <td>${wash || '-'}</td>
-                <td>${dye || '-'}</td>
-            </tr>
-        `;
-    }
-
-    // แถบสรุปผลรวมด้านล่างสุด (สีเหลือง)
-    tableHTML += `
+                ${rowsHTML || '<tr><td colspan="7" style="text-align:center; padding: 15px;">ไม่มีข้อมูลในเดือนนี้</td></tr>'}
             </tbody>
             <tfoot>
                 <tr style="background-color: #ffeb3b; font-weight: bold; color: #000;">
-                    <td colspan="2" style="text-align: center;">รวมยอด</td>
-                    <td>${totalCustomers.toLocaleString()}</td>
-                    <td>${totalIncome.toLocaleString()}</td>
+                    <td colspan="2">รวมยอด</td>
+                    <td>${totalCust}</td>
+                    <td>${totalBarber.toLocaleString()}</td>
                     <td>${totalShave}</td>
                     <td>${totalWash}</td>
                     <td>${totalDye}</td>
@@ -1620,27 +1633,20 @@ function renderDailyTableReport() {
             </tfoot>
         </table>
     `;
-
-    container.innerHTML = tableHTML;
 }
 
-// ฟังก์ชันช่วยแปลงชื่อเดือนภาษาไทย
-function getThaiMonthName(m) {
-    const months = ['', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
-    return months[m];
-}
-
-function getShortThaiMonth(m) {
-    const months = ['', 'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-    return months[m];
-}
+// ================= แท็บที่ 2: รายได้ย้อนหลัง 12 เดือน =================
 function renderYearlyIncomeSummary() {
     const select = document.getElementById('yearFilterSelect');
-    if (!select || !select.value) return;
-
-    const selectedYear = select.value;
     const tbody = document.getElementById('yearlyTableBody');
     if (!tbody) return;
+
+    // หากตัวเลือกปีว่าง ให้สร้างตัวเลือกใหม่ทันที
+    if (select && (!select.children.length || !select.value)) {
+        if (typeof initYearOptions === 'function') initYearOptions();
+    }
+
+    const selectedYear = select && select.value ? select.value : String(new Date().getFullYear());
 
     const monthNames = [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -1652,7 +1658,9 @@ function renderYearlyIncomeSummary() {
 
     monthNames.forEach((monthName, idx) => {
         const mKey = `${selectedYear}-${String(idx + 1).padStart(2, '0')}`;
-        const monthData = (window.archives || []).filter(a => a.date?.startsWith(mKey));
+        
+        // กรองข้อมูลโดยแปลงวันที่เป็น String ป้องกัน Error
+        const monthData = (window.archives || []).filter(a => a.date && String(a.date).startsWith(mKey));
 
         let mCust = 0, mBarber = 0, mShop = 0, mTotal = 0;
 
@@ -1682,10 +1690,26 @@ function renderYearlyIncomeSummary() {
 
     tbody.innerHTML = html;
 
-    document.getElementById('yearlyTotalCust').innerText = grandCust.toLocaleString();
-    document.getElementById('yearlyTotalBarber').innerText = grandBarber.toLocaleString('th-TH', { minimumFractionDigits: 2 });
-    document.getElementById('yearlyTotalShop').innerText = grandShop.toLocaleString('th-TH', { minimumFractionDigits: 2 });
-    document.getElementById('yearlyGrandTotal').innerText = grandTotal.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+    // อัปเดตผลรวมท้ายตาราง
+    const elemCust = document.getElementById('yearlyTotalCust');
+    const elemBarber = document.getElementById('yearlyTotalBarber');
+    const elemShop = document.getElementById('yearlyTotalShop');
+    const elemGrand = document.getElementById('yearlyGrandTotal');
+
+    if (elemCust) elemCust.innerText = grandCust.toLocaleString();
+    if (elemBarber) elemBarber.innerText = grandBarber.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+    if (elemShop) elemShop.innerText = grandShop.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+    if (elemGrand) elemGrand.innerText = grandTotal.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+}
+// ฟังก์ชันช่วยแปลงชื่อเดือนภาษาไทย
+function getThaiMonthName(m) {
+    const months = ['', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+    return months[m];
+}
+
+function getShortThaiMonth(m) {
+    const months = ['', 'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    return months[m];
 }
 function initYearOptions() {
     const select = document.getElementById('yearFilterSelect');
