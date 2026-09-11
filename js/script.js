@@ -1568,42 +1568,47 @@ function renderDailyTableReport() {
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
     ];
     const monthThaiName = monthNames[mNum - 1] || '';
-
-    // รายชื่อวันภาษาไทยสำหรับคำนวณจากวันที่
     const thaiDayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
 
-    // 1. แก้ไขจุดที่ 1: ดึงชื่อร้านจากตัวแปรตั้งค่า conf.shop หรือ localStorage
     const currentShopName = (typeof conf !== 'undefined' && conf.shop) ? conf.shop : (localStorage.getItem('shopName') || 'Barber Shop');
 
     let totalCust = 0, totalBarber = 0, totalShave = 0, totalWash = 0, totalDye = 0;
+    let workDays = 0; // ตัวแปรนับจำนวนวันเปิดทำงาน
     let rowsHTML = '';
 
     // เรียงวันที่จาก 1 -> 31
     filtered.sort((a, b) => a.date.localeCompare(b.date));
 
     filtered.forEach(day => {
+        // ตรวจสอบวันหยุด
+        const isOffDay = day.off === true || day.type === "HOLIDAY";
+
         let dayCust = 0;
         let shave = 0, wash = 0, dye = 0;
 
-        if (day.details && Array.isArray(day.details)) {
-            day.details.forEach(d => {
-                if (d.type === "SERVICE" || !d.type) {
-                    dayCust++;
-                    const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
-                    svcs.forEach(s => {
-                        if (!s) return;
-                        const cleanS = String(s).trim();
-                        if (cleanS.includes("โกน")) shave++;
-                        if (cleanS.includes("สระ")) wash++;
-                        if (cleanS.includes("ย้อม") || cleanS.includes("สี")) dye++;
-                    });
-                }
-            });
-        } else {
-            dayCust = Number(day.count) || 0;
+        if (!isOffDay) {
+            workDays++; // นับเฉพาะวันที่ไม่ใช่วันหยุด
+
+            if (day.details && Array.isArray(day.details)) {
+                day.details.forEach(d => {
+                    if (d.type === "SERVICE" || !d.type) {
+                        dayCust++;
+                        const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
+                        svcs.forEach(s => {
+                            if (!s) return;
+                            const cleanS = String(s).trim();
+                            if (cleanS.includes("โกน")) shave++;
+                            if (cleanS.includes("สระ")) wash++;
+                            if (cleanS.includes("ย้อม") || cleanS.includes("สี")) dye++;
+                        });
+                    }
+                });
+            } else {
+                dayCust = Number(day.count) || 0;
+            }
         }
 
-        const barber = Number(day.barber) || 0;
+        const barber = isOffDay ? 0 : (Number(day.barber) || 0);
 
         totalCust += dayCust;
         totalBarber += barber;
@@ -1611,7 +1616,7 @@ function renderDailyTableReport() {
         totalWash += wash;
         totalDye += dye;
 
-        // 2. แก้ไขจุดที่ 2: แปลงวันที่ (YYYY-MM-DD) เป็นชื่อวันภาษาไทยอัตโนมัติ
+        // คำนวณชื่อวัน
         let displayDayName = day.dayName || '-';
         if (day.date) {
             const [dYear, dMonth, dDay] = day.date.split('-').map(Number);
@@ -1623,17 +1628,28 @@ function renderDailyTableReport() {
 
         const dayNum = day.date ? day.date.split('-')[2] : '-';
 
-        rowsHTML += `
-            <tr>
-                <td>${parseInt(dayNum, 10)}</td>
-                <td>${displayDayName}</td>
-                <td>${dayCust}</td>
-                <td>${barber.toLocaleString()}</td>
-                <td>${shave}</td>
-                <td>${wash}</td>
-                <td>${dye}</td>
-            </tr>
-        `;
+        // ถ้าเป็นวันหยุด ให้แสดงคำว่า "หยุด" ตัวหนังสือสีแดง
+        if (isOffDay) {
+            rowsHTML += `
+                <tr style="background-color: #fef2f2;">
+                    <td>${parseInt(dayNum, 10)}</td>
+                    <td>${displayDayName}</td>
+                    <td colspan="5" style="color: #ef4444; font-weight: 700; text-align: center;">หยุด</td>
+                </tr>
+            `;
+        } else {
+            rowsHTML += `
+                <tr>
+                    <td>${parseInt(dayNum, 10)}</td>
+                    <td>${displayDayName}</td>
+                    <td>${dayCust}</td>
+                    <td>${barber.toLocaleString()}</td>
+                    <td>${shave}</td>
+                    <td>${wash}</td>
+                    <td>${dye}</td>
+                </tr>
+            `;
+        }
     });
 
     content.innerHTML = `
@@ -1658,7 +1674,8 @@ function renderDailyTableReport() {
             </tbody>
             <tfoot>
                 <tr style="background-color: #ffeb3b; font-weight: bold; color: #000;">
-                    <td colspan="2">รวมยอด</td>
+                    <td>รวมยอด</td>
+                    <td style="color: #0284c7;">เปิด ${workDays} วัน</td>
                     <td>${totalCust}</td>
                     <td>${totalBarber.toLocaleString()}</td>
                     <td>${totalShave}</td>
