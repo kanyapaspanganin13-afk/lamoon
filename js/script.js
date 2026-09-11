@@ -36,60 +36,70 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 /* =========== SECTION 2: MAIN NAVIGATION =========== */
 function switchMainView(viewName, subNum = null) {
+    // ซ่อนทุกหน้าก่อน
     document.querySelectorAll('.app-page').forEach(page => {
         page.classList.remove('active');
         page.style.display = 'none';
     });
 
-    if (viewName === 'home') {
+    // 1. หน้าแรก (เช็คเผื่อทั้ง 'home' และ 'pageHome')
+    if (viewName === 'home' || viewName === 'pageHome') {
         const homePage = document.getElementById('pageHome');
         if (homePage) {
             homePage.classList.add('active');
             homePage.style.display = 'block';
         }
-        updateNavDisplay('home');
+        if (typeof updateNavDisplay === 'function') updateNavDisplay('home');
         return;
     }
 
-    if (viewName === 'workGroup') {
+    // 2. กลุ่มหน้าทำงาน/รายงาน/บัญชี (เช็คเผื่อทั้ง 'workGroup' และ 'pageWorkGroup')
+    if (viewName === 'workGroup' || viewName === 'pageWorkGroup') {
         const workPage = document.getElementById('pageWorkGroup');
         if (!workPage) return;
         workPage.classList.add('active');
         workPage.style.display = 'block';
-        goSub(subNum || 1);
+        
+        // เรียก goSub เปลี่ยนแท็บย่อยตาม subNum ที่ส่งมา (ถ้าไม่ส่งมาให้เปิดแท็บ 1)
+        if (typeof goSub === 'function') {
+            goSub(subNum || 1);
+        }
+        if (typeof updateNavDisplay === 'function') updateNavDisplay('workGroup');
         return;
     }
 
-    if (viewName === 'summaryPage') {
+    // 3. รายงานสรุป
+    if (viewName === 'summaryPage' || viewName === 'pageSummary') {
         const summaryPage = document.getElementById('pageSummary');
         if (!summaryPage) return;
         summaryPage.classList.add('active');
         summaryPage.style.display = 'block';
-        switchMainTab('pageSummary', 'summaryTab1');
-        updateNavDisplay('summaryPage');
+        if (typeof switchMainTab === 'function') switchMainTab('pageSummary', 'summaryTab1');
+        if (typeof updateNavDisplay === 'function') updateNavDisplay('summaryPage');
         return;
     }
 
-    if (viewName === 'monthlySummary') {
+    // 4. สรุปรายเดือน
+    if (viewName === 'monthlySummary' || viewName === 'pageMonthlyReport') {
         const monthlyPage = document.getElementById('pageMonthlyReport');
         if (!monthlyPage) return;
         monthlyPage.classList.add('active');
         monthlyPage.style.display = 'block';
-        switchMainTab('pageMonthlyReport', 'monthlyTab1');
-        updateNavDisplay('monthlySummary');
+        if (typeof switchMainTab === 'function') switchMainTab('pageMonthlyReport', 'monthlyTab1');
+        if (typeof updateNavDisplay === 'function') updateNavDisplay('monthlySummary');
         return;
     }
 
-    if (viewName === 'comparePage') {
+    // 5. หน้าเปรียบเทียบ
+    if (viewName === 'comparePage' || viewName === 'pageComparison') {
         const comparisonPage = document.getElementById('pageComparison');
         if (!comparisonPage) return;
         comparisonPage.classList.add('active');
         comparisonPage.style.display = 'block';
-        updateNavDisplay('comparePage');
+        if (typeof updateNavDisplay === 'function') updateNavDisplay('comparePage');
         return;
     }
 }
-
 function go(p) {
     document.querySelectorAll('.page, .app-page').forEach(pg => {
         pg.classList.remove('active');
