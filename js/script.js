@@ -1079,7 +1079,8 @@ function loadHistDaily() {
 }
 function loadHistMonth() {
     const $ = (id) => document.getElementById(id);
-    const m = $("histMonth")?.value;
+    const picker = $("monthlyReportPicker") || $("histMonth");
+    const m = picker?.value;
 
     // --- 1. ตรวจสอบการเลือกเดือน ---
     if (!m) {
@@ -1088,21 +1089,32 @@ function loadHistMonth() {
         return;
     }
 
-    if (typeof archives === 'undefined') {
+    if (typeof archives === 'undefined' || !Array.isArray(archives)) {
         if (typeof notify === 'function') notify("error", "ไม่พบฐานข้อมูลหลัก (archives)", "ข้อผิดพลาด");
         else alert("ไม่พบฐานข้อมูลหลัก (archives)");
         return;
     }
 
-    const [y, mNum] = m.split('-').map(Number);
-    const monthName = new Date(y, mNum - 1, 1).toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
-    const targetPrefix = `${y}-${String(mNum).padStart(2, '0')}`;
+    let [y, mNum] = m.split('-').map(Number);
+    
+    // ✅ แปลงปี พ.ศ. ให้เป็น ค.ศ. สำหรับใช้ค้นหาใน archives
+    const searchYear = y > 2500 ? y - 543 : y;
+    
+    const monthNames = [
+        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    ];
+    const monthThaiName = monthNames[mNum - 1] || '';
+    const displayYearThai = searchYear + 543;
+    const monthName = `${monthThaiName} ${displayYearThai}`;
+
+    const targetPrefix = `${searchYear}-${String(mNum).padStart(2, '0')}`;
     const filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
 
     if (!filtered.length) {
         if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
         if (window.calcNetProfit) window.calcNetProfit();
-        if (typeof notify === 'function') notify("error", "ไม่พบข้อมูล", monthName);
+        if (typeof notify === 'function') notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthName}`);
         
         const noDataHTML = `<div style="text-align:center; padding:50px; color:#94a3b8; font-size:15px;">ไม่พบข้อมูลของเดือน ${monthName}</div>`;
         
@@ -1126,11 +1138,9 @@ function loadHistMonth() {
 
     // --- 3. วนลูปประมวลผลข้อมูลรายวัน ---
     filtered.forEach(day => {
-        // แก้ไขจุดที่ 1: Date Parsing ป้องกัน Error ใน Safari/iOS
         const [dYear, dMonth, dDay] = day.date.split('-').map(Number);
         const dObj = new Date(dYear, dMonth - 1, dDay);
         
-        // แก้ไขจุดที่ 2: ปรับปรุง Logic คำนวณสัปดาห์ (เริ่มใหม่ทุกวันอาทิตย์)
         const firstDayOfMonth = new Date(dYear, dMonth - 1, 1).getDay();
         let wIdx = Math.ceil((dDay + firstDayOfMonth) / 7);
         const wKey = `สัปดาห์ที่ ${wIdx}`;
@@ -1224,21 +1234,6 @@ function loadHistMonth() {
     // --- 5. เรียกตัวสร้างรายงาน ---
     if (typeof generateMonthlyReport === 'function') {
         generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular);
-    } else {
-        // Fallback แบบแสดงลงแท็บโดยตรง
-        if ($("monthlyIncomeContent")) {
-            $("monthlyIncomeContent").innerHTML = `
-                <div style="background:#1e293b; padding:20px; border-radius:16px; color:#f8fafc; text-align:center;">
-                    <div style="font-size:18px; font-weight:700; color:#38bdf8;">📊 สรุป ${monthName}</div>
-                    <div style="font-size:28px; font-weight:800; margin:12px 0;">฿${monthTotal.toLocaleString()}</div>
-                    <div style="display:flex; justify-content:space-around; margin-top:15px; font-size:14px; color:#cbd5e1;">
-                        <div>ยอดช่าง: <b>฿${monthBarber.toLocaleString()}</b></div>
-                        <div>ยอดร้าน: <b>฿${realShopEarn.toLocaleString()}</b></div>
-                        <div>ลูกค้า: <b>${monthCount} คน</b></div>
-                    </div>
-                </div>
-            `;
-        }
     }
 }
 function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular) {
