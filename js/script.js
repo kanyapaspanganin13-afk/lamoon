@@ -1539,27 +1539,41 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
 }
 // ================= แท็บที่ 1: รายงานประจำเดือน (ตารางรายวัน) =================
 function renderDailyTableReport() {
-    // ดึง Element จากตัวเลือกเดือนในหน้านั้นก่อน
     const picker = document.getElementById('monthlyReportPicker') || document.getElementById('histMonth');
-    const content = document.getElementById('monthlyContent1');
-    
-    if (!picker || !content) return;
+    const content = document.getElementById('monthlyContent1') || document.getElementById('monthlyIncomeContent');
+    if (!content) return;
 
-    // อ่านค่าเดือนที่กดเลือกอยู่ ณ ปัจจุบัน
-    const mVal = picker.value; 
-    if (!mVal) return;
+    if (typeof archives === 'undefined' || !Array.isArray(archives)) {
+        content.innerHTML = '<div style="text-align:center; padding: 20px; color: #64748b;">ไม่พบฐานข้อมูลหลัก (archives)</div>';
+        return;
+    }
+
+    let mVal = picker ? picker.value : '';
+    if (!mVal) {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        mVal = `${yyyy}-${mm}`;
+        if (picker) picker.value = mVal;
+    }
 
     const [y, mNum] = mVal.split('-').map(Number);
     const targetPrefix = `${y}-${String(mNum).padStart(2, '0')}`;
-
-    // กรองข้อมูลตาม targetPrefix ของเดือนที่เลือกจริง
-    const filtered = (typeof archives !== 'undefined' ? archives : []).filter(a => a.date && a.date.startsWith(targetPrefix));
+    
+    // กรองข้อมูลเดือนที่เลือก
+    const filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
 
     const monthNames = [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
     ];
     const monthThaiName = monthNames[mNum - 1] || '';
+
+    // รายชื่อวันภาษาไทยสำหรับคำนวณจากวันที่
+    const thaiDayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+
+    // 1. แก้ไขจุดที่ 1: ดึงชื่อร้านจากตัวแปรตั้งค่า conf.shop หรือ localStorage
+    const currentShopName = (typeof conf !== 'undefined' && conf.shop) ? conf.shop : (localStorage.getItem('shopName') || 'Barber Shop');
 
     let totalCust = 0, totalBarber = 0, totalShave = 0, totalWash = 0, totalDye = 0;
     let rowsHTML = '';
@@ -1568,7 +1582,6 @@ function renderDailyTableReport() {
     filtered.sort((a, b) => a.date.localeCompare(b.date));
 
     filtered.forEach(day => {
-        // นับจำนวนลูกค้า
         let dayCust = 0;
         let shave = 0, wash = 0, dye = 0;
 
@@ -1598,12 +1611,22 @@ function renderDailyTableReport() {
         totalWash += wash;
         totalDye += dye;
 
+        // 2. แก้ไขจุดที่ 2: แปลงวันที่ (YYYY-MM-DD) เป็นชื่อวันภาษาไทยอัตโนมัติ
+        let displayDayName = day.dayName || '-';
+        if (day.date) {
+            const [dYear, dMonth, dDay] = day.date.split('-').map(Number);
+            const dObj = new Date(dYear, dMonth - 1, dDay);
+            if (!isNaN(dObj.getTime())) {
+                displayDayName = thaiDayNames[dObj.getDay()];
+            }
+        }
+
         const dayNum = day.date ? day.date.split('-')[2] : '-';
 
         rowsHTML += `
             <tr>
                 <td>${parseInt(dayNum, 10)}</td>
-                <td>${day.dayName || '-'}</td>
+                <td>${displayDayName}</td>
                 <td>${dayCust}</td>
                 <td>${barber.toLocaleString()}</td>
                 <td>${shave}</td>
@@ -1615,7 +1638,7 @@ function renderDailyTableReport() {
 
     content.innerHTML = `
         <div style="text-align: center; margin-bottom: 10px;">
-            <h3 style="margin: 0; color: var(--primary, #0284c7);">รายงานร้าน: Barber Shop</h3>
+            <h3 style="margin: 0; color: var(--primary, #0284c7);">รายงานร้าน: <span class="shop-name-display">${currentShopName}</span></h3>
             <p style="margin: 4px 0; font-weight: 700; color: var(--text, #334155);">ประจำเดือน: ${monthThaiName} ${y + 543}</p>
         </div>
         <table class="summary-table" style="width:100%; border-collapse: collapse; text-align:center;">
@@ -1646,7 +1669,6 @@ function renderDailyTableReport() {
         </table>
     `;
 }
-
 // ================= แท็บที่ 2: รายได้ย้อนหลัง 12 เดือน =================
 function renderYearlyIncomeSummary() {
     const select = document.getElementById('yearFilterSelect') || document.getElementById('histYear');
