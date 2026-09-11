@@ -460,6 +460,56 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 }
 .filter-month-wrap label { font-size: 13px; font-weight: 700; white-space: nowrap; color: var(--text); }
 .filter-month-wrap input { height: 46px; border-radius: 10px; font-size: 14px; }
+/* แยกการ์ดค้นหาและรายงานให้เป็นคนละกรอบเด็ดขาด */
+.filter-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 12px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+
+.filter-card-center {
+    justify-content: center !important;
+}
+
+.filter-label {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+    white-space: nowrap;
+}
+
+/* กรอบแสดงตารางข้อมูลแบบแยกเดี่ยว */
+.report-data-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 12px;
+    min-height: 300px;
+    overflow-x: auto;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+
+/* ปรับ Input & Select ให้อยู่ในกรอบสวยงาม */
+.filter-card .form-control {
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-weight: 700;
+    font-size: 14px;
+    text-align: center;
+    padding: 0 10px;
+    max-width: 180px;
+    width: 100%;
+}
 .btn-export-excel { 
     height: 46px;
     background: var(--success); 
