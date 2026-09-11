@@ -1533,23 +1533,207 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
         `;
     }
 }
+function renderDailyTableReport() {
+    const picker = document.getElementById('monthlyReportPicker');
+    const container = document.getElementById('monthlyContent1');
+    if (!picker || !container) return;
 
-function exportToExcel(monthValue) {
-    if (!monthValue || typeof XLSX === 'undefined') return;
+    const [year, month] = picker.value.split('-').map(Number);
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const thaiDays = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+
+    let totalCustomers = 0;
+    let totalIncome = 0;
+    let totalShave = 0;
+    let totalWash = 0;
+    let totalDye = 0;
+
+    let tableHTML = `
+        <div style="text-align: center; margin-bottom: 12px;">
+            <h3 style="margin: 0; color: #1a237e;">รายงานร้าน: Barber Shop</h3>
+            <p style="margin: 4px 0; font-weight: bold;">ประจำเดือน: ${getThaiMonthName(month)} ${year + 543}</p>
+        </div>
+        <table class="summary-table">
+            <thead>
+                <tr style="background-color: #1b5e20; color: white;">
+                    <th>วันที่</th>
+                    <th>วัน</th>
+                    <th>ลูกค้า</th>
+                    <th>ยอดช่าง</th>
+                    <th>โกน</th>
+                    <th>สระ</th>
+                    <th>ย้อม</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    // ลูปสร้างข้อมูลรายวัน 1 ถึงสิ้นเดือน
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateObj = new Date(year, month - 1, day);
+        const dayOfWeek = thaiDays[dateObj.getDay()];
+        
+        // ดึงข้อมูลรายวันตามจริงจากระบบ
+        const dayData = getDailyData(year, month, day) || {};
+        const cust = dayData.customers || 0;
+        const income = dayData.income || 0;
+        const shave = dayData.shave || 0;
+        const wash = dayData.wash || 0;
+        const dye = dayData.dye || 0;
+
+        // สะสมผลรวมทั้งเดือน
+        totalCustomers += cust;
+        totalIncome += income;
+        totalShave += shave;
+        totalWash += wash;
+        totalDye += dye;
+
+        tableHTML += `
+            <tr>
+                <td>${day} ${getShortThaiMonth(month)} ${String(year + 543).slice(-2)}</td>
+                <td>${dayOfWeek}</td>
+                <td>${cust || '-'}</td>
+                <td>${income ? income.toLocaleString() : '-'}</td>
+                <td>${shave || '-'}</td>
+                <td>${wash || '-'}</td>
+                <td>${dye || '-'}</td>
+            </tr>
+        `;
+    }
+
+    // แถบสรุปผลรวมด้านล่างสุด (สีเหลือง)
+    tableHTML += `
+            </tbody>
+            <tfoot>
+                <tr style="background-color: #ffeb3b; font-weight: bold; color: #000;">
+                    <td colspan="2" style="text-align: center;">รวมยอด</td>
+                    <td>${totalCustomers.toLocaleString()}</td>
+                    <td>${totalIncome.toLocaleString()}</td>
+                    <td>${totalShave}</td>
+                    <td>${totalWash}</td>
+                    <td>${totalDye}</td>
+                </tr>
+            </tfoot>
+        </table>
+    `;
+
+    container.innerHTML = tableHTML;
+}
+
+// ฟังก์ชันช่วยแปลงชื่อเดือนภาษาไทย
+function getThaiMonthName(m) {
+    const months = ['', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+    return months[m];
+}
+
+function getShortThaiMonth(m) {
+    const months = ['', 'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    return months[m];
+}
+// 1. ส่งออก Excel สำหรับหน้า "สรุปรายเดือน" (ดึงข้อมูลรายวันทั้งเดือน)
+function exportMonthlyExcel() {
+    const picker = document.getElementById('monthlyReportPicker');
+    if (!picker) return notify("error", "ผิดพลาด", "ไม่พบช่องเลือกเดือน");
+    
+    const monthValue = picker.value;
+    if (!monthValue || typeof XLSX === 'undefined') {
+        return notify("error", "ผิดพลาด", "กรุณาเลือกเดือน หรือเช็คการโหลด SheetJS");
+    }
+
     const [y, m] = monthValue.split('-');
-    const name = new Date(y, m-1, 1).toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
-    const list = archives.filter(a => a.date?.startsWith(`${y}-${m.padStart(2,'0')}`));
-    if (!list.length) return notify("error", "ไม่พบข้อมูล", name);
-    const rows = [["วันที่", "ยอด", "สด", "ช่าง", "ค้าง"]];
-    list.forEach(a => rows.push([a.date, a.total, a.cash, a.barber, a.settle]));
+    const monthName = new Date(y, m - 1, 1).toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+    const list = (window.archives || []).filter(a => a.date?.startsWith(`${y}-${m.padStart(2, '0')}`));
+
+    if (!list.length) return notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthName}`);
+
+    // หัวตารางครอบคลุมข้อมูลสถิติลายละเอียด
+    const rows = [
+        [`รายงานร้าน Barber Shop - ประจำเดือน ${monthName}`],
+        ["วันที่", "ลูกค้า (คน)", "ยอดช่าง", "สด", "โอน", "โกน", "สระ", "ย้อม"]
+    ];
+
+    let totalCust = 0, totalIncome = 0, totalCash = 0, totalTrans = 0;
+    let totalShave = 0, totalWash = 0, totalDye = 0;
+
+    list.forEach(a => {
+        // นับจำนวนบริการย่อยจาก details (ถ้ามี)
+        let shave = 0, wash = 0, dye = 0;
+        if (Array.isArray(a.details)) {
+            a.details.forEach(d => {
+                const svcs = (d.svcs || []).join(' ');
+                if (svcs.includes('โกน')) shave++;
+                if (svcs.includes('สระ')) wash++;
+                if (svcs.includes('ย้อม')) dye++;
+            });
+        }
+
+        const cust = a.count || (a.details ? a.details.length : 0);
+        const income = a.barber || a.total || 0;
+
+        totalCust += cust;
+        totalIncome += income;
+        totalCash += (a.cash || 0);
+        totalTrans += (a.trans || 0);
+        totalShave += shave;
+        totalWash += wash;
+        totalDye += dye;
+
+        rows.push([a.date, cust, income, a.cash || 0, a.trans || 0, shave, wash, dye]);
+    });
+
+    // แถวสรุปยอดรวมท้ายตาราง
+    rows.push(["รวมยอดทั้งเดือน", totalCust, totalIncome, totalCash, totalTrans, totalShave, totalWash, totalDye]);
+
     const ws = XLSX.utils.aoa_to_sheet(rows);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "สรุป");
-    XLSX.writeFile(wb, `สรุป-${name}.xlsx`);
-    notify("success", "สำเร็จ", "ดาวน์โหลดเรียบร้อย");
+    XLSX.utils.book_append_sheet(wb, ws, "รายงานรายเดือน");
+    XLSX.writeFile(wb, `รายงานรายเดือน-${monthName}.xlsx`);
+
+    notify("success", "สำเร็จ", `ส่งออกข้อมูลเดือน ${monthName} เรียบร้อยแล้ว`);
 }
-function exportMonthlyExcel() {
-    notify("info", "กำลังพัฒนา", "ฟังก์ชันส่งออกตารางรายวันจะเพิ่มเร็วๆ นี้");
+
+// 2. ส่งออก Excel สำหรับหน้า "วิเคราะห์เปรียบเทียบ"
+function exportComparisonToExcel() {
+    if (typeof XLSX === 'undefined') return notify("error", "ผิดพลาด", "ไม่พบไลบรารี XLSX");
+
+    const m1 = document.getElementById('compareMonth1')?.value;
+    const m2 = document.getElementById('compareMonth2')?.value;
+
+    if (!m1 || !m2) return notify("error", "แจ้งเตือน", "กรุณาเลือกเดือนที่ต้องการเปรียบเทียบให้ครบทั้ง 2 ช่อง");
+
+    const getMonthData = (monthVal) => {
+        const [y, m] = monthVal.split('-');
+        return (window.archives || []).filter(a => a.date?.startsWith(`${y}-${m.padStart(2, '0')}`));
+    };
+
+    const data1 = getMonthData(m1);
+    const data2 = getMonthData(m2);
+
+    const calcTotal = (data) => {
+        let cust = 0, income = 0;
+        data.forEach(a => {
+            cust += a.count || (a.details ? a.details.length : 0);
+            income += a.barber || a.total || 0;
+        });
+        return { cust, income };
+    };
+
+    const res1 = calcTotal(data1);
+    const res2 = calcTotal(data2);
+
+    const rows = [
+        ["รายงานวิเคราะห์เปรียบเทียบยอดขาย"],
+        ["หัวข้อเปรียบเทียบ", `เดือน ${m1}`, `เดือน ${m2}`, "ผลต่าง (Diff)"],
+        ["จำนวนลูกค้า (คน)", res1.cust, res2.cust, res2.cust - res1.cust],
+        ["รายได้รวม (บาท)", res1.income, res2.income, res2.income - res1.income]
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "เปรียบเทียบ");
+    XLSX.writeFile(wb, `เปรียบเทียบ-${m1}-VS-${m2}.xlsx`);
+
+    notify("success", "สำเร็จ", "ส่งออกข้อมูลเปรียบเทียบเรียบร้อยแล้ว");
 }
 
 /* ========= SECTION 19: GOOGLE SHEETS & COMPARISON ========= */
