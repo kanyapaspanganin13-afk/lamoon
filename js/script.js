@@ -1902,7 +1902,7 @@ function exportMonthlyExcel() {
     setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
     notify("success", "สำเร็จ", `ส่งออกข้อมูลเดือน ${monthName} เรียบร้อยแล้ว`);
 }
-function openReportFullscreen() {
+   function openReportFullscreen() {
     const tableCard = document.getElementById('monthlyContent1');
     if (!tableCard || !tableCard.innerHTML.trim()) {
         if (typeof notify === 'function') {
@@ -1913,12 +1913,64 @@ function openReportFullscreen() {
         return;
     }
 
-    document.getElementById('fullReportContent').innerHTML = tableCard.innerHTML;
+    // โคลนเนื้อหาตารางเพื่อปรับสไตล์สำหรับแคปจอโดยเฉพาะ
+    const modalContent = document.getElementById('fullReportContent');
+    modalContent.innerHTML = tableCard.innerHTML;
+
+    // ใส่สไตล์บีบอัดพิเศษเพื่อให้ตาราง 31 วันยัดลงหน้าจอเดียวได้พอดี
+    const styleTag = document.createElement('style');
+    styleTag.id = 'compactPreviewStyle';
+    styleTag.innerHTML = `
+        #fullReportContent {
+            font-size: 11px !important;
+            padding: 2px !important;
+        }
+        #fullReportContent h1, #fullReportContent h2, 
+        #fullReportContent h3, #fullReportContent .report-title {
+            font-size: 14px !important;
+            margin: 2px 0 !important;
+            padding: 0 !important;
+        }
+        #fullReportContent table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            margin-top: 4px !important;
+        }
+        #fullReportContent th {
+            padding: 3px 2px !important;
+            font-size: 11px !important;
+            line-height: 1.1 !important;
+        }
+        #fullReportContent td {
+            padding: 1.5px 2px !important;
+            font-size: 10.5px !important;
+            line-height: 1.1 !important;
+        }
+        #fullReportContent tr {
+            height: auto !important;
+        }
+        #fullReportContent .total-row, 
+        #fullReportContent tfoot tr,
+        #fullReportContent tr:last-child {
+            font-weight: bold !important;
+        }
+        #fullReportContent .total-row td,
+        #fullReportContent tfoot td {
+            padding: 4px 2px !important;
+            font-size: 11px !important;
+        }
+    `;
+
+    // ลบสไตล์เก่าถ้ามี แล้วเพิ่มสไตล์ใหม่เข้าไป
+    const oldStyle = document.getElementById('compactPreviewStyle');
+    if (oldStyle) oldStyle.remove();
+    document.head.appendChild(styleTag);
+
     document.getElementById('fullReportModal').style.display = 'block';
     document.body.style.overflow = 'hidden';
 }
 
-function closeReportFullscreen() {
+   function closeReportFullscreen() {
     document.getElementById('fullReportModal').style.display = 'none';
     document.body.style.overflow = 'auto';
 }
