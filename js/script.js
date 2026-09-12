@@ -197,11 +197,6 @@ function goSub(num) {
     }
 }
 /* =========== SECTION 4: MAIN TABS =========== */   
-
-/* =========== SECTION 5: AUTO-UPDATE =========== */  
-(function autoUpdate() {
-    const currentStoredVersion = localStorage.getItem("app_v");
-    if (currentStoredVersion !== APP_VERSION) {
 function switchMainTab(pageId, tabId, event) {
     if (event && event.preventDefault) event.preventDefault();
 
@@ -258,13 +253,37 @@ function switchMainTab(pageId, tabId, event) {
         if (typeof initYearOptions === 'function') initYearOptions();
         if (typeof renderYearlyIncomeSummary === 'function') renderYearlyIncomeSummary();
     }
-}        localStorage.setItem("app_v", APP_VERSION);
+}
+/* =========== SECTION 5: AUTO-UPDATE =========== */  
+(function autoUpdate() {
+    // 1. กำหนดเวอร์ชันปัจจุบันของแอป (หากยังไม่มีการตั้งค่าไว้ภายนอก)
+    const APP_VERSION = typeof window.APP_VERSION !== 'undefined' ? window.APP_VERSION : '1.0.1';
+    
+    // 2. ดึงเวอร์ชันเดิมที่บันทึกไว้ในเครื่องผู้ใช้
+    const currentStoredVersion = localStorage.getItem("app_v");
+
+    // 3. ตรวจสอบว่าเวอร์ชันไม่ตรงกันหรือไม่ (มีการอัปเดตระบบ)
+    if (currentStoredVersion !== APP_VERSION) {
+        console.log(`[AutoUpdate] Updating system from ${currentStoredVersion || 'None'} to ${APP_VERSION}`);
+        
+        // บันทึกเวอร์ชันใหม่ลง localStorage
+        localStorage.setItem("app_v", APP_VERSION);
+
+        // (Optional) ล้าง Cache หรือ Service Worker เก่าออก
         if ('caches' in window) {
             caches.keys().then(names => {
                 names.forEach(name => caches.delete(name));
-            }).then(() => window.location.replace(window.location.href));
-        } else {
-            window.location.replace(window.location.href);
+            });
+        }
+
+        // แจ้งเตือนผู้ใช้แล้วทำการ Reload เพื่อโหลดไฟล์ JS/CSS ใหม่ล่าสุด
+        if (currentStoredVersion) {
+            if (typeof notify === 'function') {
+                notify("info", "อัปเดตระบบ", "กำลังโหลดเวอร์ชันใหม่ล่าสุด...");
+            }
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 1000);
         }
     }
 })();
