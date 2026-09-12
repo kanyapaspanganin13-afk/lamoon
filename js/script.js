@@ -1822,8 +1822,8 @@ function exportMonthlyExcel() {
     if (!picker) return notify("error", "ผิดพลาด", "ไม่พบช่องเลือกเดือน");
     
     const monthValue = picker.value; // รูปแบบ: "2569-09" (พ.ศ.)
-    if (!monthValue) {
-        return notify("error", "ผิดพลาด", "กรุณาเลือกเดือน");
+    if (!monthValue || typeof XLSX === 'undefined') {
+        return notify("error", "ผิดพลาด", "กรุณาเลือกเดือน หรือเช็คการโหลดไลบรารี SheetJS");
     }
     const [yearBe, month] = monthValue.split('-');
     const monthPad = String(month).padStart(2, '0');
@@ -1839,32 +1839,30 @@ function exportMonthlyExcel() {
     if (!list.length) {
         return notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthName}`);
     }
-
-    const shopName = (conf?.shop || localStorage.getItem('shopName') || 'Barber Shop');
-
+    // ✅ หัวตาราง + คอลัมน์ตรงตามต้องการ
+    const rows = [
+        [`รายงานร้าน: ${(conf?.shop || localStorage.getItem('shopName') || 'Barber Shop')}`],
+        [`ประจำเดือน: ${monthName}`],
+        ["วันที่", "วัน", "ลูกค้า", "ยอดช่าง", "โกน", "สระ", "ย้อม"]
+    ];
+    
     let totalCust = 0, totalIncome = 0, totalShave = 0, totalWash = 0, totalDye = 0;
-    const workDays = list.length;
-
-    let rowsHtml = '';
-    // เตรียมข้อมูลข้อความแบบ Tab-Separated สำหรับ Paste ลง Google Sheets ตรงๆ
-    let rawDataForSheets = `รายงานร้าน: ${shopName}\n`;
-    rawDataForSheets += `ประจำเดือน: ${monthName}\n`;
-    rawDataForSheets += `วันที่\tวัน\tลูกค้า\tยอดช่าง\tโกน\tสระ\tย้อม\n`;
-
+    const workDays = list.length; // จำนวนวันทำการ
     list.forEach(a => {
         const dateParts = a.date ? a.date.split('-') : [];
-        const dayOnly = dateParts.length === 3 ? parseInt(dateParts[2], 10) : '';
-        
+        const dayOnly = dateParts.length === 3 ? parseInt(dateParts[2], 10) : ''; // ✅ แสดงแค่ตัวเลขวันที่ 1,2,3...
+        // คำนวณชื่อวัน
         const yCe = parseInt(yearBe, 10) - 543;
         const m = parseInt(month, 10) - 1;
         const d = parseInt(dayOnly, 10);
         const dateObj = new Date(yCe, m, d);
         const dayName = dateObj.getDay() >= 0 ? dayThaiNames[dateObj.getDay()] : '';
         
+        // นับบริการ
         let shave = 0, wash = 0, dye = 0;
         if (Array.isArray(a.details)) {
-            a.details.forEach(dItem => {
-                const svcs = (dItem.svcs || []).join(' ');
+            a.details.forEach(d => {
+                const svcs = (d.svcs || []).join(' ');
                 if (svcs.includes('โกน')) shave++;
                 if (svcs.includes('สระ')) wash++;
                 if (svcs.includes('ย้อม')) dye++;
@@ -1878,120 +1876,31 @@ function exportMonthlyExcel() {
         totalShave += shave;
         totalWash += wash;
         totalDye += dye;
-
-        // HTML Row
-        rowsHtml += `
-            <tr>
-                <td>${dayOnly}</td>
-                <td>${dayName}</td>
-                <td>${cust}</td>
-                <td style="color:#0f0661; font-weight: bold;">${income.toLocaleString()}</td>
-                <td>${shave || '-'}</td>
-                <td>${wash || '-'}</td>
-                <td>${dye || '-'}</td>
-            </tr>`;
-
-        // Text Row
-        rawDataForSheets += `${dayOnly}\t${dayName}\t${cust}\t${income}\t${shave || '-'}\t${wash || '-'}\t${dye || '-'}\n`;
+        // ✅ คอลัมน์: วันที่(เลข), วัน, ลูกค้า, ยอดช่าง, โกน, สระ, ย้อม
+        rows.push([dayOnly, dayName, cust, income, shave || '-', wash || '-', dye || '-']);
     });
-
-    rawDataForSheets += `รวมยอด (เปิด ${workDays} วัน)\t\t${totalCust}\t${totalIncome}\t${totalShave}\t${totalWash}\t${totalDye}`;
-
-    // 🎨 หน้า HTML Preview พร้อมระบบคัดลอกตารางลง Clipboard อัตโนมัติ
-    const previewHTML = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>รายงานประจำเดือน ${monthName}</title>
-        <style>
-            * { box-sizing: border-box; }
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Tahoma', sans-serif; padding: 15px 10px; text-align: center; background: #fff; margin: 0; }
-            
-            .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 5px; }
-            .btn-close { background: #e74c3c; color: white; border: none; padding: 10px 16px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; }
-            .btn-gsheet { background: #0f9d58; color: white; border: none; padding: 10px 16px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
-            
-            table { border-collapse: collapse; width: 100%; margin-top: 10px; font-size: 14px; }
-            th { border: 1px solid #ccc; padding: 10px 4px; background-color: #1D6F42; color: white; font-size: 15px; white-space: nowrap; }
-            td { border: 1px solid #ccc; padding: 8px 4px; text-align: center; font-size: 14px; font-weight: 500; color: #000; }
-            tr:nth-child(even) { background-color: #f9f9f9; }
-            .total-row { background-color: #fcea23; font-weight: bold; }
-            h1 { text-align:center; font-size: 20px; margin: 10px 0 5px 0; color: #04167d; }
-            h2 { text-align:center; font-size: 15px; margin: 0 0 15px 0; color: #333; font-weight: normal; }
-        </style>
-    </head>
-    <body>
-        <div class="top-bar">
-            <!-- 1. ปุ่มปิดหน้าพรีวิว -->
-            <button class="btn-close" onclick="window.location.reload();">✕ ปิด</button>
-            
-            <!-- 2. ปุ่มคัดลอกข้อมูลแล้วเปิด Google Sheets ทันที -->
-            <button class="btn-gsheet" onclick="copyAndOpenGoogleSheets()">📊 เปิดด้วย Google Sheets</button>
-        </div>
-
-        <h1>รายงานร้าน: ${shopName}</h1>
-        <h2>ประจำเดือน: ${monthName}</h2>
-
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 12%;">วันที่</th>
-                    <th style="width: 20%;">วัน</th>
-                    <th style="width: 15%;">ลูกค้า</th>
-                    <th style="width: 20%;">ยอดช่าง</th>
-                    <th style="width: 11%;">โกน</th>
-                    <th style="width: 11%;">สระ</th>
-                    <th style="width: 11%;">ย้อม</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${rowsHtml}
-                <tr class="total-row">
-                    <td colspan="2" style="padding: 10px 4px;">รวมยอด (เปิด ${workDays} วัน)</td>
-                    <td>${totalCust.toLocaleString()}</td>
-                    <td>${totalIncome.toLocaleString()}</td>
-                    <td>${totalShave}</td>
-                    <td>${totalWash}</td>
-                    <td>${totalDye}</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <textarea id="rawClipboardData" style="display:none;">${rawDataForSheets}</textarea>
-
-        <script>
-            async function copyAndOpenGoogleSheets() {
-                const textData = document.getElementById('rawClipboardData').value;
-                
-                try {
-                    // คัดลอกตารางข้อมูลเข้า Clipboard ของมือถือ/คอมอัตโนมัติ
-                    if (navigator.clipboard && navigator.clipboard.writeText) {
-                        await navigator.clipboard.writeText(textData);
-                    } else {
-                        const textarea = document.getElementById('rawClipboardData');
-                        textarea.style.display = 'block';
-                        textarea.select();
-                        document.execCommand('copy');
-                        textarea.style.display = 'none';
-                    }
-                    
-                    alert('คัดลอกข้อมูลตารางเรียบร้อยแล้ว!\nเมื่อ Google Sheets เปิดขึ้นมา ให้เลือกช่อง A1 แล้วกด "วาง (Paste)" ได้ทันทีครับ');
-                } catch (err) {
-                    console.warn('Clipboard Error:', err);
-                }
-
-                // เปิดไปยัง Google Sheets ทันที โดยไม่ต้องดาวน์โหลดไฟล์ลงเครื่องก่อน
-                window.open('https://docs.google.com/spreadsheets/u/0/create', '_blank');
-            }
-        </script>
-    </body>
-    </html>`;
-
-    document.open();
-    document.write(previewHTML);
-    document.close();
+    // ✅ แถวรวมท้าย: "รวมยอด" + "เปิด X วัน" (ลบคำว่า "ทั้งเดือน" ออก)
+    rows.push(["รวมยอด", `เปิด ${workDays} วัน`, totalCust, totalIncome, totalShave, totalWash, totalDye]);
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "รายงานรายเดือน");
+    // ส่งออกไฟล์ รองรับทุกระบบ
+    const fileName = `รายงานรายเดือน-${monthName}.xlsx`;
+    const fileData = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([fileData], { 
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
+    });
+    const url = URL.createObjectURL(blob);
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    if (isIOS) { a.target = "_blank"; a.rel = "noopener"; }
+    
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+    notify("success", "สำเร็จ", `ส่งออกข้อมูลเดือน ${monthName} เรียบร้อยแล้ว`);
 }
    function exportComparisonToExcel() {
     if (typeof XLSX === 'undefined') return notify("error", "ผิดพลาด", "ไม่พบไลบรารี XLSX");
