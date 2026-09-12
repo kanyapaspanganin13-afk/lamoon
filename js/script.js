@@ -137,36 +137,39 @@ function go(p) {
 }
 
 /* ========= SECTION 2.1: BOTTOM NAVIGATION ========= */
-function updateNavDisplay(viewName) {
+function updateNavDisplay(viewName, subNum) {
     const nav = document.querySelector('.bottom-nav');
     if (!nav) return;
 
-    nav.style.display = 'grid';
-    nav.style.gridTemplateColumns = 'repeat(5, 1fr)';
-    nav.style.justifyContent = 'stretch';
-    nav.style.alignItems = 'stretch';
-
-    // ลบคลาส active ออกจากทุกปุ่มก่อนเสมอ
+    // 1. เคลียร์คลาส active ออกจากทุกปุ่มก่อน
     nav.querySelectorAll('.nav-item').forEach(item => {
-        item.style.display = 'flex';
-        item.style.margin = '0';
         item.classList.remove('active');
     });
 
-    // แมปชื่อ viewName / pageId ไปยัง ID ของปุ่ม Bottom Nav ให้ตรงกันทุกปุ่ม
-    if (viewName === 'home' || viewName === 'pageHome') {
-        nav.querySelector('#navHome, [data-page="home"]')?.classList.add('active');
-    } else if (viewName === 'workGroup' || viewName === 'sub1' || viewName === 'record' || viewName === 'pageRecord') {
-        nav.querySelector('#nav1, #navRecord, [data-page="record"]')?.classList.add('active');
-    } else if (viewName === 'sub2' || viewName === 'report' || viewName === 'pageReport' || viewName === 'monthly') {
-        nav.querySelector('#nav2, #navReport, [data-page="report"]')?.classList.add('active');
-    } else if (viewName === 'sub3' || viewName === 'pageAccount' || viewName === 'account') {
-        nav.querySelector('#nav3, #navAccount, [data-page="account"]')?.classList.add('active');
-    } else if (viewName === 'settings' || viewName === 'pageSettings') {
-        nav.querySelector('#navSettings, [data-page="settings"]')?.classList.add('active');
+    // 2. เช็คเงื่อนไขให้ตรงกับที่ HTML ส่งมา
+    if (viewName === 'home') {
+        nav.querySelector('#navHome')?.classList.add('active');
+    } 
+    else if (viewName === 'settings') {
+        nav.querySelector('#navSettings')?.classList.add('active');
+    } 
+    else if (viewName === 'workGroup' || viewName.startsWith('sub')) {
+        // หาเลข sub-page (รองรับทั้งการส่ง subNum=2 หรือส่ง viewName='sub2')
+        let num = subNum;
+        if (!num && typeof viewName === 'string' && viewName.startsWith('sub')) {
+            num = parseInt(viewName.replace('sub', ''), 10);
+        }
+
+        // เปิดไฟ active ตามเลขปุ่ม
+        if (num === 1) {
+            nav.querySelector('#nav1')?.classList.add('active'); // บันทึก
+        } else if (num === 2) {
+            nav.querySelector('#nav2')?.classList.add('active'); // รายงาน
+        } else if (num === 3) {
+            nav.querySelector('#nav3')?.classList.add('active'); // บัญชี
+        }
     }
 }
-
 /* =========== SECTION 3: SUB-PAGE NAVIGATION =========== */
 function goSub(num) {
     const workPage = document.getElementById('pageWorkGroup');
