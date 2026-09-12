@@ -1818,104 +1818,110 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 // 1. ส่งออก Excel สำหรับหน้า "สรุปรายเดือน" (ดึงข้อมูลรายวันทั้งเดือน)
 function exportMonthlyExcel() {
-    const picker = document.getElementById('monthlyReportPicker');
-    if (!picker) return notify("error", "ผิดพลาด", "ไม่พบช่องเลือกเดือน");
-    
-    const monthValue = picker.value; // รูปแบบ: "2569-09" (พ.ศ.)
-    if (!monthValue || typeof XLSX === 'undefined') {
-        return notify("error", "ผิดพลาด", "กรุณาเลือกเดือน หรือเช็คการโหลดไลบรารี SheetJS");
-    }
+    const picker = document.getElementById('monthlyReportPicker');
+    if (!picker) return notify("error", "ผิดพลาด", "ไม่พบช่องเลือกเดือน");
+    
+    const monthValue = picker.value; // รูปแบบ: "2569-09" (พ.ศ.)
+    if (!monthValue || typeof XLSX === 'undefined') {
+        return notify("error", "ผิดพลาด", "กรุณาเลือกเดือน หรือเช็คการโหลดไลบรารี SheetJS");
+    }
 
-    const [yearBe, month] = monthValue.split('-');
-    const monthPad = String(month).padStart(2, '0');
+    const [yearBe, month] = monthValue.split('-');
+    const monthPad = String(month).padStart(2, '0');
 
-    const monthThaiNames = [
-        '', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
-    ];
-    const dayThaiNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
-    const monthName = `${monthThaiNames[parseInt(month, 10)]} ${yearBe}`;
-    const searchPrefix = `${yearBe}-${monthPad}`;
-    
-    const list = (archives || []).filter(a => a.date?.startsWith(searchPrefix));
-    if (!list.length) {
-        return notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthName}`);
-    }
+    const monthThaiNames = [
+        '', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    ];
+    const dayThaiNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+    const monthName = `${monthThaiNames[parseInt(month, 10)]} ${yearBe}`;
+    const searchPrefix = `${yearBe}-${monthPad}`;
+    
+    const list = (archives || []).filter(a => a.date?.startsWith(searchPrefix));
+    if (!list.length) {
+        return notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthName}`);
+    }
 
-    // ✅ หัวตาราง + คอลัมน์ตรงตามต้องการ
-    const rows = [
-        [`รายงานร้าน: ${(conf?.shop || localStorage.getItem('shopName') || 'Barber Shop')}`],
-        [`ประจำเดือน: ${monthName}`],
-        ["วันที่", "วัน", "ลูกค้า", "ยอดช่าง", "โกน", "สระ", "ย้อม"]
-    ];
-    
-    let totalCust = 0, totalIncome = 0, totalShave = 0, totalWash = 0, totalDye = 0;
-    const workDays = list.length; // จำนวนวันทำการ
+    // ✅ หัวตาราง + คอลัมน์ตรงตามต้องการ
+    const rows = [
+        [`รายงานร้าน: ${(conf?.shop || localStorage.getItem('shopName') || 'Barber Shop')}`],
+        [`ประจำเดือน: ${monthName}`],
+        ["วันที่", "วัน", "ลูกค้า", "ยอดช่าง", "โกน", "สระ", "ย้อม"]
+    ];
+    
+    let totalCust = 0, totalIncome = 0, totalShave = 0, totalWash = 0, totalDye = 0;
+    const workDays = list.length; // จำนวนวันทำการ
 
-    list.forEach(a => {
-        const dateParts = a.date ? a.date.split('-') : [];
-        const dayOnly = dateParts.length === 3 ? parseInt(dateParts[2], 10) : ''; // ✅ แสดงแค่ตัวเลขวันที่ 1,2,3...
+    list.forEach(a => {
+        const dateParts = a.date ? a.date.split('-') : [];
+        const dayOnly = dateParts.length === 3 ? parseInt(dateParts[2], 10) : ''; // ✅ แสดงแค่ตัวเลขวันที่ 1,2,3...
 
-        // คำนวณชื่อวัน
-        const yCe = parseInt(yearBe, 10) - 543;
-        const m = parseInt(month, 10) - 1;
-        const d = parseInt(dayOnly, 10);
-        const dateObj = new Date(yCe, m, d);
-        const dayName = dateObj.getDay() >= 0 ? dayThaiNames[dateObj.getDay()] : '';
-        
-        // นับบริการ
-        let shave = 0, wash = 0, dye = 0;
-        if (Array.isArray(a.details)) {
-            a.details.forEach(d => {
-                const svcs = (d.svcs || []).join(' ');
-                if (svcs.includes('โกน')) shave++;
-                if (svcs.includes('สระ')) wash++;
-                if (svcs.includes('ย้อม')) dye++;
-            });
-        }
-        
-        const cust = a.count || (a.details ? a.details.length : 0);
-        const income = a.barber || a.total || 0;
+        // คำนวณชื่อวัน
+        const yCe = parseInt(yearBe, 10) - 543;
+        const m = parseInt(month, 10) - 1;
+        const d = parseInt(dayOnly, 10);
+        const dateObj = new Date(yCe, m, d);
+        const dayName = dateObj.getDay() >= 0 ? dayThaiNames[dateObj.getDay()] : '';
+        
+        // นับบริการ
+        let shave = 0, wash = 0, dye = 0;
+        if (Array.isArray(a.details)) {
+            a.details.forEach(d => {
+                const svcs = (d.svcs || []).join(' ');
+                if (svcs.includes('โกน')) shave++;
+                if (svcs.includes('สระ')) wash++;
+                if (svcs.includes('ย้อม')) dye++;
+            });
+        }
+        
+        const cust = a.count || (a.details ? a.details.length : 0);
+        const income = a.barber || a.total || 0;
 
-        totalCust += cust;
-        totalIncome += income;
-        totalShave += shave;
-        totalWash += wash;
-        totalDye += dye;
+        totalCust += cust;
+        totalIncome += income;
+        totalShave += shave;
+        totalWash += wash;
+        totalDye += dye;
 
-        // ✅ คอลัมน์: วันที่(เลข), วัน, ลูกค้า, ยอดช่าง, โกน, สระ, ย้อม
-        rows.push([dayOnly, dayName, cust, income, shave || '-', wash || '-', dye || '-']);
+        // ✅ คอลัมน์: วันที่(เลข), วัน, ลูกค้า, ยอดช่าง, โกน, สระ, ย้อม
+        rows.push([dayOnly, dayName, cust, income, shave || '-', wash || '-', dye || '-']);
+    });
+
+    // ✅ แถวรวมท้าย: "รวมยอด" + "เปิด X วัน" (ลบคำว่า "ทั้งเดือน" ออก)
+    rows.push(["รวมยอด", `เปิด ${workDays} วัน`, totalCust, totalIncome, totalShave, totalWash, totalDye]);
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "รายงานรายเดือน");
+
+   // ========== ✅ ส่งออกไฟล์แบบ Blob URL (เปิด Preview บน iOS ได้แน่นอน) ==========
+    const fileName = `รายงานรายเดือน-${monthName}.xlsx`;
+    const fileData = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([fileData], { 
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
     });
-
-    // ✅ แถวรวมท้าย: "รวมยอด" + "เปิด X วัน" (ลบคำว่า "ทั้งเดือน" ออก)
-    rows.push(["รวมยอด", `เปิด ${workDays} วัน`, totalCust, totalIncome, totalShave, totalWash, totalDye]);
-
-    const ws = XLSX.utils.aoa_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "รายงานรายเดือน");
-
-   // ✅ แปลงไฟล์ Excel เป็น Base64 Data URL เพื่อเปิด Preview ทันทีบน iOS
-    const b64Data = XLSX.write(wb, { bookType: "xlsx", type: "base64" });
-    const dataUrl = "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," + b64Data;
+    const blobUrl = URL.createObjectURL(blob);
 
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
     if (isIOS) {
-        // สำหรับ iOS: เปิดหน้า Preview ทันที ไม่ผ่าน Safari Download Manager
-        window.open(dataUrl, '_blank');
+        // สำหรับ iOS: เปิด Blob URL จะเด้งเข้าหน้า Preview รูปที่ 4 ได้ทันทีโดยไม่ติด Error
+        window.location.href = blobUrl;
     } else {
-        // สำหรับ Android / PC: ให้ดาวน์โหลดไฟล์ตามปกติ
-        const fileName = `รายงานรายเดือน-${monthName}.xlsx`;
+        // สำหรับ Android / PC: ดาวน์โหลดไฟล์ตามปกติ
         const a = document.createElement("a");
-        a.href = dataUrl;
+        a.href = blobUrl;
         a.download = fileName;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
     }
 
-    notify("success", "สำเร็จ", `ส่งออกข้อมูลเดือน ${monthName} เรียบร้อยแล้ว`);
+    // คืนค่า Memory หลังเปิดไฟล์
+    setTimeout(() => { URL.revokeObjectURL(blobUrl); }, 10000);
+
+    notify("success", "สำเร็จ", `เปิดรายงานเดือน ${monthName} เรียบร้อยแล้ว`);
 }
    function exportComparisonToExcel() {
     if (typeof XLSX === 'undefined') return notify("error", "ผิดพลาด", "ไม่พบไลบรารี XLSX");
