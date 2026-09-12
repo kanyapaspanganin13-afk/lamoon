@@ -278,21 +278,22 @@
                 <button class="tab-btn active" onclick="switchMainTab('pageMonthlyReport', 'monthlyTab1', event)">📋 รายงานประจำเดือน</button>
                 <button class="tab-btn" onclick="switchMainTab('pageMonthlyReport', 'monthlyTab2', event)">📊 รายได้ย้อนหลัง</button>
             </div>
-        
+           
             <!-- แท็บที่ 1: รายงานประจำเดือน -->
             <div id="monthlyTab1" class="tab-panel active">
-                <!-- กรอบที่ 1: แถบเลือกเดือน & ปุ่มแชร์ไฟล์ & ปุ่มพรีวิวเต็มจอ -->
-                <div class="filter-card" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                    <input type="month" id="monthlyReportPicker" class="form-control" onchange="renderDailyTableReport()" style="flex: 1; min-width: 140px;">
+                <!-- กรอบที่ 1: แถบเลือกเดือน & ปุ่มแชร์ไฟล์ & ปุ่มพรีวิว (เรียงแถวเดียวกันแบบ Compact) -->
+                <div class="filter-card" style="display: flex; gap: 6px; align-items: center; justify-content: space-between; padding: 10px;">
+                    <!-- ช่องเลือกเดือนขนาดกะทัดรัด ความสูงเท่าปุ่ม -->
+                    <input type="month" id="monthlyReportPicker" class="form-control" onchange="renderDailyTableReport()" style="flex: 1; height: 38px; padding: 4px 8px; font-size: 14px; border-radius: 8px; box-sizing: border-box;">
                     
-                    <!-- เปลี่ยนเป็นแชร์ไฟล์ -->
-                    <button class="btn-export-excel" onclick="exportMonthlyExcel()">
-                        <i class="fas fa-share-alt"></i> แชร์ไฟล์
+                    <!-- ปุ่มพรีวิวแคปจอ (ย้ายมาอยู่แถวเดียวกัน) -->
+                    <button class="btn-preview-fullscreen" onclick="openReportFullscreen()" style="height: 38px; background: #2563eb; color: #ffffff; border: none; padding: 0 10px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                        <i class="fas fa-expand"></i> พรีวิวแคปจอ
                     </button>
 
-                    <!-- ปุ่มเพิ่มใหม่สำหรับพรีวิวเต็มจอแคปภาพ -->
-                    <button class="btn-preview-fullscreen" onclick="openReportFullscreen()" style="background: #2563eb; color: #ffffff; border: none; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                        <i class="fas fa-expand"></i> พรีวิวแคปจอ
+                    <!-- ปุ่มแชร์ไฟล์ -->
+                    <button class="btn-export-excel" onclick="exportMonthlyExcel()" style="height: 38px; padding: 0 10px; font-size: 13px; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                        <i class="fas fa-share-alt"></i> แชร์ไฟล์
                     </button>
                 </div>
         
@@ -300,8 +301,7 @@
                 <div id="monthlyContent1" class="report-data-card">
                     <!-- ตารางสรุปรายวันจะเรนเดอร์ตรงนี้ -->
                 </div>
-            </div>
-        
+            </div>        
             <!-- แท็บที่ 2: รายได้ย้อนหลัง -->
             <div id="monthlyTab2" class="tab-panel" style="display: none;">
                 <!-- กรอบที่ 1: เลือกปี -->
