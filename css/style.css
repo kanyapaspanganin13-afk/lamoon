@@ -852,6 +852,82 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
   .price-box input { font-size: 34px !important; }
   select#hairStyle, select#extra1, select#extra2 { font-size: 14px !important; }
 }
+/* ====================📱 MOBILE RESPONSIVE FIX (หน้าจอมือถือ)================== */
+
+@media (max-width: 480px) {
+    /* 1. จัดแถบควบคุมในแนวนอน และบีบปุ่มให้สมดุล */
+    .filter-card-compact {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 6px !important;
+        padding: 8px !important;
+    }
+
+    /* 2. บังคับช่องเลือกเดือนให้ยืดหยุ่นตามพื้นที่ */
+    .compact-input, 
+    .filter-card .form-control {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: 38px !important;
+        font-size: 13px !important;
+        padding: 0 6px !important;
+        text-align: center !important;
+    }
+
+    /* 3. ปุ่มพรีวิวและปุ่มแชร์ขนาดกะทัดรัด ตัวหนังสือไม่ตกบรรทัด */
+    .compact-btn {
+        flex: 0 0 auto !important;
+        height: 38px !important;
+        padding: 0 10px !important;
+        font-size: 12px !important;
+        white-space: nowrap !important;
+    }
+
+    .btn-preview-fullscreen.compact-btn {
+        background-color: var(--primary, #2563eb) !important;
+        color: #ffffff !important;
+    }
+
+    .btn-export-excel.compact-btn {
+        background-color: var(--success, #10b981) !important;
+        color: #ffffff !important;
+    }
+
+    /* 4. ดึง Modal พรีวิวขึ้นมาทับเต็มจอมือถือ ไม่ให้หลุดไปกองด้านล่าง */
+    .full-report-modal {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 999999 !important;
+        padding: 12px 10px !important;
+        box-sizing: border-box !important;
+        background-color: var(--card, #ffffff) !important;
+    }
+
+    /* จัดส่วนหัว Modal ให้ปุ่มปิดกดง่ายบนมือถือ */
+    .full-report-modal-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding-bottom: 8px !important;
+        margin-bottom: 8px !important;
+        border-bottom: 1px solid var(--border, #e2e8f0) !important;
+    }
+
+    .full-report-modal-title {
+        font-size: 14px !important;
+    }
+
+    .btn-close-modal {
+        padding: 5px 12px !important;
+        font-size: 12px !important;
+    }
+}
 /* ========= 📄 REPORT & HISTORY ========= */
 #dailyList, #accHistory, #reportContent { color: var(--text); }
 #accHistory::-webkit-scrollbar, #reportContent::-webkit-scrollbar { width: 4px; }
