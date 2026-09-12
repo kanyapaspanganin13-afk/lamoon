@@ -1894,34 +1894,37 @@ function exportMonthlyExcel() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "รายงานรายเดือน");
 
-   // ========== ✅ ส่งออกไฟล์แบบ Blob URL (เปิด Preview บน iOS ได้แน่นอน) ==========
+   // ========== ✅ ใช้ Web Share API สำหรับ iOS เพื่อเปิดหน้า Preview ทันที ==========
     const fileName = `รายงานรายเดือน-${monthName}.xlsx`;
     const fileData = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([fileData], { 
+    const file = new File([fileData], fileName, { 
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
     });
-    const blobUrl = URL.createObjectURL(blob);
 
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-    if (isIOS) {
-        // สำหรับ iOS: เปิด Blob URL จะเด้งเข้าหน้า Preview รูปที่ 4 ได้ทันทีโดยไม่ติด Error
-        window.location.href = blobUrl;
+    // ตรวจสอบว่าเบราว์เซอร์รองรับการแชร์ไฟล์ (Safari บน iOS รองรับ)
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+            files: [file],
+            title: `รายงานประจำเดือน ${monthName}`,
+        }).catch((err) => {
+            // ยกเลิกการแชร์ หรือปิดหน้าต่าง
+            console.log('Share canceled or failed:', err);
+        });
     } else {
-        // สำหรับ Android / PC: ดาวน์โหลดไฟล์ตามปกติ
+        // สำหรับ Android / PC ที่ไม่รองรับ Web Share
+        const blob = new Blob([fileData], { 
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
+        });
+        const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
-        a.href = blobUrl;
+        a.href = url;
         a.download = fileName;
         document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
+        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
     }
 
-    // คืนค่า Memory หลังเปิดไฟล์
-    setTimeout(() => { URL.revokeObjectURL(blobUrl); }, 10000);
-
-    notify("success", "สำเร็จ", `เปิดรายงานเดือน ${monthName} เรียบร้อยแล้ว`);
+    notify("success", "สำเร็จ", `เตรียมไฟล์รายงานเดือน ${monthName} เรียบร้อยแล้ว`);
 }
    function exportComparisonToExcel() {
     if (typeof XLSX === 'undefined') return notify("error", "ผิดพลาด", "ไม่พบไลบรารี XLSX");
