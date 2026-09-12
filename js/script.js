@@ -1103,7 +1103,6 @@ document.addEventListener("DOMContentLoaded", () => {
 /* ========= FIX: LOAD HIST MONTH ========= */
 function loadHistMonth() {
     const $ = (id) => document.getElementById(id);
-    // ดึงค่าจาก Picker ตัวที่มีค่า หรือตัวปัจจุบัน
     const picker = $("monthlyReportPicker") || $("histMonth");
     let m = picker ? picker.value : '';
 
@@ -1129,21 +1128,18 @@ function loadHistMonth() {
     const displayYearThai = searchYear + 543;
     const monthNameFormatted = `${monthThaiName} ${displayYearThai}`;
 
-    // กรองข้อมูลใน archives ตามเดือนที่เลือก
     const filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
 
     if (!filtered.length) {
         if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
         if (typeof notify === 'function') notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthNameFormatted}`);
         
-        // เคลียร์ UI ในการ์ดสรุปยอดรวมกรณีไม่มีข้อมูล
         if (typeof generateMonthlyReport === 'function') {
             generateMonthlyReport(m, 0, 0, 0, 0, 0, 0, {}, {}, {}, 0, 0, 0);
         }
         return;
     }
 
-    // คำนวณยอดรวมรายเดือนใหม่ทั้งหมด
     let countNew = 0, countRegular = 0;  
     let monthTotal = 0, monthBarber = 0, monthCount = 0, monthGuarDays = 0; 
     let hairStats = {}, serviceStats = {};
@@ -1166,7 +1162,9 @@ function loadHistMonth() {
                 customers: 0, workDays: 0, offDays: 0, 
                 zeroDays: 0, guarDays: 0, dailyCounts: [],
                 countNew: 0, countRegular: 0, 
-                popularHair: {}, popularService: {}, income: 0 
+                popularHair: {}, 
+                popularService: {}, 
+                income: 0 
             };
         }
 
@@ -1207,11 +1205,17 @@ function loadHistMonth() {
                     const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
                     svcs.forEach(s => {
                         if (!s) return;
-                        const cleanS = s.trim();
+                        const cleanS = String(s).trim();
                         if (haircutList.includes(cleanS)) {
+                            // เก็บยอดรวมรายเดือน
                             hairStats[cleanS] = (hairStats[cleanS] || 0) + 1;
+                            // ✅ เพิ่มส่วนนับยอดสถิิติทรงผมแยกรายสัปดาห์
+                            weeklyData[wKey].popularHair[cleanS] = (weeklyData[wKey].popularHair[cleanS] || 0) + 1;
                         } else {
+                            // เก็บยอดรวมรายเดือน
                             serviceStats[cleanS] = (serviceStats[cleanS] || 0) + 1;
+                            // ✅ เพิ่มส่วนนับยอดสถิติบริการเสริมแยกรายสัปดาห์
+                            weeklyData[wKey].popularService[cleanS] = (weeklyData[wKey].popularService[cleanS] || 0) + 1;
                         }
                     });
                 }
@@ -1230,7 +1234,6 @@ function loadHistMonth() {
 
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
 
-    // เรียกฟังก์ชันเรนเดอร์การ์ดสรุปยอดรวมด้วยข้อมูลชุดใหม่
     if (typeof generateMonthlyReport === 'function') {
         generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular);
     }
