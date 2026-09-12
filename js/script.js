@@ -1894,27 +1894,30 @@ function exportMonthlyExcel() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "รายงานรายเดือน");
 
-    // ส่งออกไฟล์ รองรับทุกระบบ
-    const fileName = `รายงานรายเดือน-${monthName}.xlsx`;
-    const fileData = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([fileData], { 
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
-    });
-    const url = URL.createObjectURL(blob);
+   // ✅ แปลงไฟล์ Excel เป็น Base64 Data URL เพื่อเปิด Preview ทันทีบน iOS
+    const b64Data = XLSX.write(wb, { bookType: "xlsx", type: "base64" });
+    const dataUrl = "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," + b64Data;
 
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    if (isIOS) { a.target = "_blank"; a.rel = "noopener"; }
-    
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (isIOS) {
+        // สำหรับ iOS: เปิดหน้า Preview ทันที ไม่ผ่าน Safari Download Manager
+        window.open(dataUrl, '_blank');
+    } else {
+        // สำหรับ Android / PC: ให้ดาวน์โหลดไฟล์ตามปกติ
+        const fileName = `รายงานรายเดือน-${monthName}.xlsx`;
+        const a = document.createElement("a");
+        a.href = dataUrl;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
 
     notify("success", "สำเร็จ", `ส่งออกข้อมูลเดือน ${monthName} เรียบร้อยแล้ว`);
 }
-function exportComparisonToExcel() {
+   function exportComparisonToExcel() {
     if (typeof XLSX === 'undefined') return notify("error", "ผิดพลาด", "ไม่พบไลบรารี XLSX");
     
     const m1 = document.getElementById('compareMonth1')?.value;
