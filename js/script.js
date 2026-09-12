@@ -1826,19 +1826,27 @@ function exportMonthlyExcel() {
         return notify("error", "ผิดพลาด", "กรุณาเลือกเดือน หรือเช็คการโหลดไลบรารี SheetJS");
     }
 
-    // ✅ แยกส่วน ปีพ.ศ. + เดือน
+    // ✅ แยกปีและเดือน โดยไม่ใช้ Date Object (ป้องกันเดือนเลื่อน)
     const [yearBe, month] = monthValue.split('-');
     const yearCe = parseInt(yearBe, 10) - 543; // แปลง พ.ศ. → ค.ศ.
     const monthPad = String(month).padStart(2, '0');
 
-    // ✅ สร้างชื่อเดือนแสดงผล
-    const monthName = new Date(yearCe, parseInt(month, 10) - 1, 1)
-        .toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+    // ✅ แปลงชื่อเดือนไทยตรงๆ ไม่พึ่งระบบ Date
+    const monthThaiNames = [
+        '', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    ];
+    const monthName = `${monthThaiNames[parseInt(month, 10)]} ${yearBe}`;
 
-    // ✅ ใช้ตัวแปร archives โดยตรง (ไม่ใช่ window.archives)
-    const list = (archives || []).filter(a => 
-        a.date?.startsWith(`${yearCe}-${monthPad}`) // ค้นหาด้วย ค.ศ. ให้ตรงกับรูปแบบวันที่ในฐานข้อมูล
-    );
+    // ✅ ค้นหาข้อมูลด้วยปี ค.ศ. ตรงๆ
+    const searchPrefix = `${yearCe}-${monthPad}`;
+    console.log('[Excel] ค้นหาข้อมูล:', searchPrefix, '| แสดงชื่อ:', monthName); // ดีบั๊ก
+    
+    const list = (archives || []).filter(a => {
+        const match = a.date?.startsWith(searchPrefix);
+        console.log('[Excel] ตรวจสอบวันที่:', a.date, '→ ตรง?', match); // ดีบั๊ก
+        return match;
+    });
 
     if (!list.length) {
         return notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthName}`);
