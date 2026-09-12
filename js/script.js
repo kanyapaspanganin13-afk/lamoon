@@ -1830,7 +1830,7 @@ function exportMonthlyExcel() {
     const [yearBe, month] = monthValue.split('-');
     const monthPad = String(month).padStart(2, '0');
 
-    // ✅ ชื่อเดือนไทย
+    // ✅ ชื่อเดือนไทย และชื่อวันไทย
     const monthThaiNames = [
         '', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
@@ -1840,21 +1840,15 @@ function exportMonthlyExcel() {
     ];
     const monthName = `${monthThaiNames[parseInt(month, 10)]} ${yearBe}`;
 
-    // ✅ ค้นหาด้วยปี พ.ศ. ตรงๆ
+    // ✅ ค้นหาข้อมูล
     const searchPrefix = `${yearBe}-${monthPad}`;
-    console.log('[Excel] ค้นหาด้วย:', searchPrefix);
-    
-    const list = (archives || []).filter(a => {
-        const match = a.date?.startsWith(searchPrefix);
-        console.log('[Excel] ตรวจสอบวันที่:', a.date, '→ ตรง?', match);
-        return match;
-    });
+    const list = (archives || []).filter(a => a.date?.startsWith(searchPrefix));
 
     if (!list.length) {
         return notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthName}`);
     }
 
-    // ========== ✅ เพิ่มคอลัมน์ "วัน" ตรงกับหน้าเว็บ ==========
+    // ========== ✅ สร้างตาราง — มีคอลัมน์ครบ + มี "เปิด X วัน" ==========
     const rows = [
         [`รายงานร้าน Barber Shop - ประจำเดือน ${monthName}`],
         ["วันที่", "วัน", "ลูกค้า (คน)", "ยอดช่าง", "สด", "โอน", "โกน", "สระ", "ย้อม"]
@@ -1862,13 +1856,14 @@ function exportMonthlyExcel() {
     
     let totalCust = 0, totalIncome = 0, totalCash = 0, totalTrans = 0;
     let totalShave = 0, totalWash = 0, totalDye = 0;
+    const workDays = list.length; // ✅ จำนวนวันที่เปิดทำการ = จำนวนแถวข้อมูล
 
     list.forEach(a => {
-        // ✅ แยกเลขวันที่ และแปลงเป็นชื่อวันไทย
+        // ✅ แยกวันที่และคำนวณชื่อวัน
         const dateParts = a.date ? a.date.split('-') : [];
         const dayOnly = dateParts.length === 3 ? dateParts[2] : '';
 
-        // ✅ แปลงวันที่ พ.ศ. → ค.ศ. เพื่อคำนวณชื่อวัน
+        // แปลง พ.ศ. → ค.ศ. เพื่อคำนวณชื่อวัน
         const yCe = parseInt(yearBe, 10) - 543;
         const m = parseInt(month, 10) - 1;
         const d = parseInt(dayOnly, 10);
@@ -1899,14 +1894,13 @@ function exportMonthlyExcel() {
         totalWash += wash;
         totalDye += dye;
 
-        // ✅ เรียงคอลัมน์: วันที่, วัน, ลูกค้า, ยอดช่าง, สด, โอน, โกน, สระ, ย้อม
         rows.push([dayOnly, dayName, cust, income, cash, trans, shave, wash, dye]);
     });
 
-    // ✅ แถวรวมยอด (ข้ามคอลัมน์ "วัน")
+    // ✅ แถวรวมยอด — เพิ่ม "เปิด X วัน" ในคอลัมน์ที่ 2 เหมือนหน้าเว็บ
     rows.push([
         "รวมยอดทั้งเดือน", 
-        "", // คอลัมน์วัน ว่างไว้
+        `เปิด ${workDays} วัน`, // ✅ เพิ่มตรงนี้!
         totalCust, 
         totalIncome, 
         totalCash, 
@@ -1989,16 +1983,20 @@ async function handleGoogleSheet() {
     let mVal = picker ? picker.value : '';
     if (!mVal) {
         const now = new Date();
-        const yyyy = now.getFullYear();
+        const yyyy = now.getFullYear() + 543; // ✅ เริ่มต้นเป็น พ.ศ.
         const mm = String(now.getMonth() + 1).padStart(2, '0');
         mVal = `${yyyy}-${mm}`;
     }
 
-    let [y, mNum] = mVal.split('-').map(Number);
-    const searchYear = y > 2500 ? y - 543 : y;
-    const targetPrefix = `${searchYear}-${String(mNum).padStart(2, '0')}`;
-    
-    const filtered = (typeof archives !== 'undefined' ? archives : []).filter(a => a.date && a.date.startsWith(targetPrefix));
+    // ✅ แยกค่า ปี พ.ศ. และ เดือน → ค้นหาด้วย พ.ศ. ตรงๆ ไม่ต้องแปลง
+    const [yearBe, mNum] = mVal.split('-').map(Number);
+    const monthPad = String(mNum).padStart(2, '0');
+    const targetPrefix = `${yearBe}-${monthPad}`; // เช่น "2569-09"
+
+    // ✅ ค้นหาด้วยปี พ.ศ. ตรงกับข้อมูลในฐานข้อมูล
+    const filtered = (typeof archives !== 'undefined' ? archives : []).filter(a => 
+        a.date && a.date.startsWith(targetPrefix)
+    );
 
     const monthNames = [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -2007,10 +2005,11 @@ async function handleGoogleSheet() {
     const monthThaiName = monthNames[mNum - 1] || '';
 
     if (!filtered.length) {
+        const msg = `ไม่มีข้อมูลของเดือน ${monthThaiName} ${yearBe}`;
         if (typeof notify === 'function') {
-            notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthThaiName} ${searchYear + 543}`);
+            notify("error", "ไม่พบข้อมูล", msg);
         } else {
-            alert(`ไม่มีข้อมูลของเดือน ${monthThaiName} ${searchYear + 543}`);
+            alert(msg);
         }
         return;
     }
@@ -2018,21 +2017,29 @@ async function handleGoogleSheet() {
     filtered.sort((a, b) => a.date.localeCompare(b.date));
 
     const thaiDayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
-    const currentShopName = (typeof conf !== 'undefined' && conf.shop) ? conf.shop : (localStorage.getItem('shopName') || 'Barber Shop');
+    const currentShopName = (typeof conf !== 'undefined' && conf.shop) 
+        ? conf.shop 
+        : (localStorage.getItem('shopName') || 'Barber Shop');
 
+    // ✅ คอลัมน์ครบตรงกับ Excel: วันที่,วัน,ลูกค้า,ยอดช่าง,สด,โอน,โกน,สระ,ย้อม
     let csvContent = "\uFEFF"; // UTF-8 BOM
     csvContent += `รายงานร้าน: ${currentShopName}\n`;
-    csvContent += `ประจำเดือน: ${monthThaiName} ${searchYear + 543}\n\n`;
-    csvContent += "วันที่,วัน,ลูกค้า,ยอดช่าง,โกน,สระ,ย้อม\n";
+    csvContent += `ประจำเดือน: ${monthThaiName} ${yearBe}\n\n`;
+    csvContent += "วันที่,วัน,ลูกค้า,ยอดช่าง,สด,โอน,โกน,สระ,ย้อม\n";
 
-    let totalCust = 0, totalBarber = 0, totalShave = 0, totalWash = 0, totalDye = 0, workDays = 0;
+    let totalCust = 0, totalBarber = 0, totalCash = 0, totalTrans = 0;
+    let totalShave = 0, totalWash = 0, totalDye = 0, workDays = 0;
 
     filtered.forEach(day => {
         const isOffDay = day.off === true || day.type === "HOLIDAY";
         let dayCust = 0, shave = 0, wash = 0, dye = 0;
+        let cash = 0, trans = 0;
 
         if (!isOffDay) {
             workDays++;
+            cash = Number(day.cash) || 0;
+            trans = Number(day.trans) || 0;
+
             if (day.details && Array.isArray(day.details)) {
                 day.details.forEach(d => {
                     if (d.type === "SERVICE" || !d.type) {
@@ -2052,14 +2059,16 @@ async function handleGoogleSheet() {
             }
         }
 
-        const barber = isOffDay ? 0 : (Number(day.barber) || 0);
-
+        const barber = isOffDay ? 0 : (Number(day.barber) || Number(day.total) || 0);
         totalCust += dayCust;
         totalBarber += barber;
+        totalCash += cash;
+        totalTrans += trans;
         totalShave += shave;
         totalWash += wash;
         totalDye += dye;
 
+        // ✅ คำนวณชื่อวัน
         let displayDayName = day.dayName || '-';
         if (day.date) {
             const [dYear, dMonth, dDay] = day.date.split('-').map(Number);
@@ -2068,28 +2077,29 @@ async function handleGoogleSheet() {
                 displayDayName = thaiDayNames[dObj.getDay()];
             }
         }
-
         const dayNum = day.date ? parseInt(day.date.split('-')[2], 10) : '-';
 
+        // ✅ เขียนแถวข้อมูล คอลัมน์ตรงกันทุกช่อง
         if (isOffDay) {
-            csvContent += `"${dayNum}","${displayDayName}","หยุด","หยุด","หยุด","หยุด","หยุด"\n`;
+            csvContent += `"${dayNum}","${displayDayName}","หยุด","หยุด","หยุด","หยุด","หยุด","หยุด","หยุด"\n`;
         } else {
-            csvContent += `"${dayNum}","${displayDayName}",${dayCust},${barber},${shave},${wash},${dye}\n`;
+            csvContent += `"${dayNum}","${displayDayName}",${dayCust},${barber},${cash},${trans},${shave},${wash},${dye}\n`;
         }
     });
 
-    csvContent += `\n"รวมยอด","เปิด ${workDays} วัน",${totalCust},${totalBarber},${totalShave},${totalWash},${totalDye}\n`;
+    // ✅ แถวรวมยอด — ครบทุกคอลัมน์ + มี "เปิด X วัน"
+    csvContent += `\n"รวมยอด","เปิด ${workDays} วัน",${totalCust},${totalBarber},${totalCash},${totalTrans},${totalShave},${totalWash},${totalDye}\n`;
 
-    const fileName = `รายงานประจำเดือน_${monthThaiName}_${searchYear + 543}.csv`;
+    const fileName = `รายงานประจำเดือน_${monthThaiName}_${yearBe}.csv`;
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const file = new File([blob], fileName, { type: 'text/csv' });
 
-    // ✅ ใช้ Web Share API แชร์ไฟล์ตรงเข้าแอป Google Sheets บนมือถือ
+    // ✅ แชร์เข้า Google Sheets บนมือถือ
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
             await navigator.share({
-                title: `รายงานประจำเดือน ${monthThaiName}`,
-                text: `รายงานประจำเดือน ${monthThaiName} ${searchYear + 543} - ${currentShopName}`,
+                title: `รายงานประจำเดือน ${monthThaiName} ${yearBe}`,
+                text: `รายงานประจำเดือน ${monthThaiName} ${yearBe} - ${currentShopName}`,
                 files: [file]
             });
             if (typeof notify === 'function') {
@@ -2101,22 +2111,22 @@ async function handleGoogleSheet() {
             }
         }
     } else {
-        // Fallback กรณีเปิดบน PC หรือเบราว์เซอร์ที่ไม่รองรับ Share API
         fallbackDownload(blob, fileName, monthThaiName);
     }
 }
 
-function fallbackDownload(blob, fileName, monthThaiName) {
-    const link = document.createElement("a");
+// ✅ ฟังก์ชันดาวน์โหลดสำรอง
+function fallbackDownload(blob, fileName, monthName) {
     const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", fileName);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
     if (typeof notify === 'function') {
-        notify("success", "ส่งออกสำเร็จ", `ดาวน์โหลดไฟล์รายงานประจำเดือน ${monthThaiName} เรียบร้อยแล้ว`);
+        notify("success", "สำเร็จ", `ดาวน์โหลดไฟล์ ${monthName} เรียบร้อยแล้ว`);
     }
 }
 function openComparisonSelector() {
