@@ -64,7 +64,7 @@ function switchMainView(viewName, subNum = null) {
         if (typeof goSub === 'function') {
             goSub(subNum || 1);
         }
-        if (typeof updateNavDisplay === 'function') updateNavDisplay('workGroup');
+        if (typeof updateNavDisplay === 'function') updateNavDisplay('workGroup', subNum);
         return;
     }
 
@@ -141,33 +141,30 @@ function updateNavDisplay(viewName, subNum) {
     const nav = document.querySelector('.bottom-nav');
     if (!nav) return;
 
-    // 1. เคลียร์คลาส active ออกจากทุกปุ่มก่อน
+    // ✅ ล้าง Active ทุกปุ่มก่อน
     nav.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
     });
 
-    // 2. เช็คเงื่อนไขให้ตรงกับที่ HTML ส่งมา
-    if (viewName === 'home') {
+    // 🔹 กรณี = หน้าแรก
+    if (viewName === 'home' || viewName === 'pageHome') {
         nav.querySelector('#navHome')?.classList.add('active');
-    } 
-    else if (viewName === 'settings') {
-        nav.querySelector('#navSettings')?.classList.add('active');
-    } 
+    }
+    // 🔹 กรณี = กลุ่มงาน (บันทึก/รายงาน/บัญชี) ใช้ subNum ตัดสินใจ
     else if (viewName === 'workGroup' || viewName.startsWith('sub')) {
-        // หาเลข sub-page (รองรับทั้งการส่ง subNum=2 หรือส่ง viewName='sub2')
         let num = subNum;
+        // ถ้าไม่มีเลข ลองดึงจากชื่อ เช่น "sub2" → เลข 2
         if (!num && typeof viewName === 'string' && viewName.startsWith('sub')) {
             num = parseInt(viewName.replace('sub', ''), 10);
         }
-
-        // เปิดไฟ active ตามเลขปุ่ม
-        if (num === 1) {
-            nav.querySelector('#nav1')?.classList.add('active'); // บันทึก
-        } else if (num === 2) {
-            nav.querySelector('#nav2')?.classList.add('active'); // รายงาน
-        } else if (num === 3) {
-            nav.querySelector('#nav3')?.classList.add('active'); // บัญชี
-        }
+        // ✅ กำหนด Active ตรงๆ ตาม ID ที่มีใน HTML เลย!
+        if (num === 1) nav.querySelector('#nav1')?.classList.add('active');   // บันทึก
+        if (num === 2) nav.querySelector('#nav2')?.classList.add('active');   // รายงาน
+        if (num === 3) nav.querySelector('#nav3')?.classList.add('active');   // บัญชี
+    }
+    // 🔹 กรณี = ตั้งค่า
+    else if (viewName === 'settings') {
+        nav.querySelector('#navSettings')?.classList.add('active');
     }
 }
 /* =========== SECTION 3: SUB-PAGE NAVIGATION =========== */
