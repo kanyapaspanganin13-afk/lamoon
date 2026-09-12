@@ -281,27 +281,28 @@
            
             <!-- แท็บที่ 1: รายงานประจำเดือน -->
             <div id="monthlyTab1" class="tab-panel active">
-                <!-- กรอบที่ 1: แถบเลือกเดือน & ปุ่มแชร์ไฟล์ & ปุ่มพรีวิว (เรียงแถวเดียวกันแบบ Compact) -->
-                <div class="filter-card" style="display: flex; gap: 6px; align-items: center; justify-content: space-between; padding: 10px;">
-                    <!-- ช่องเลือกเดือนขนาดกะทัดรัด ความสูงเท่าปุ่ม -->
-                    <input type="month" id="monthlyReportPicker" class="form-control" onchange="renderDailyTableReport()" style="flex: 1; height: 38px; padding: 4px 8px; font-size: 14px; border-radius: 8px; box-sizing: border-box;">
+                <!-- กรอบที่ 1: แถบเลือกเดือน & ปุ่มพรีวิว & ปุ่มแชร์ไฟล์ -->
+                <div class="filter-card filter-card-compact">
+                    <!-- ช่องเลือกเดือน -->
+                    <input type="month" id="monthlyReportPicker" class="form-control compact-input" onchange="renderDailyTableReport()">
                     
-                    <!-- ปุ่มพรีวิวแคปจอ (ย้ายมาอยู่แถวเดียวกัน) -->
-                    <button class="btn-preview-fullscreen" onclick="openReportFullscreen()" style="height: 38px; background: #2563eb; color: #ffffff; border: none; padding: 0 10px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-                        <i class="fas fa-expand"></i> พรีวิวแคปจอ
+                    <!-- ปุ่มพรีวิว -->
+                    <button class="btn-preview-fullscreen compact-btn" onclick="openReportFullscreen()">
+                        <i class="fas fa-expand"></i> พรีวิว
                     </button>
-
+            
                     <!-- ปุ่มแชร์ไฟล์ -->
-                    <button class="btn-export-excel" onclick="exportMonthlyExcel()" style="height: 38px; padding: 0 10px; font-size: 13px; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                    <button class="btn-export-excel compact-btn" onclick="exportMonthlyExcel()">
                         <i class="fas fa-share-alt"></i> แชร์ไฟล์
                     </button>
                 </div>
-        
+            
                 <!-- กรอบที่ 2: กรอบแสดงตารางรายวัน -->
                 <div id="monthlyContent1" class="report-data-card">
                     <!-- ตารางสรุปรายวันจะเรนเดอร์ตรงนี้ -->
                 </div>
-            </div>        
+            </div>
+                       
             <!-- แท็บที่ 2: รายได้ย้อนหลัง -->
             <div id="monthlyTab2" class="tab-panel" style="display: none;">
                 <!-- กรอบที่ 1: เลือกปี -->
@@ -340,15 +341,17 @@
                 </div>
             </div>
 
-            <!-- Modal แสดงตารางพรีวิวเต็มจอสำหรับแคปภาพ -->
-            <div id="fullReportModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #ffffff; z-index: 99999; overflow-y: auto; padding: 15px 12px; box-sizing: border-box;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
-                    <span style="font-weight: bold; color: #475569; font-size: 15px;">📌 หน้ารายงานสำหรับแคปภาพ</span>
-                    <button onclick="closeReportFullscreen()" style="background: #ef4444; color: #ffffff; border: none; padding: 6px 14px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer;">
+             <!-- Modal แสดงตารางพรีวิวเต็มจอสำหรับแคปภาพ -->
+            <div id="fullReportModal" class="full-report-modal">
+                <div class="full-report-modal-header">
+                    <span class="full-report-modal-title">📌 หน้าพรีวิวรายงาน</span>
+                    <button class="btn-close-modal" onclick="closeReportFullscreen()">
                         ✕ ปิดหน้านี้
                     </button>
                 </div>
-                <div id="fullReportContent" style="max-width: 600px; margin: 0 auto; background: #ffffff;">
+                <div id="fullReportContent"></div>
+            </div>
+                 <div id="fullReportContent" style="max-width: 600px; margin: 0 auto; background: #ffffff;">
                     <!-- ตารางจะถูกดึงมาเรนเดอร์ที่นี่ -->
                 </div>
             </div>
