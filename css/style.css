@@ -547,6 +547,123 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     padding: 9px 4px; 
     border-bottom: 1px solid var(--border); 
 }
+/* ==========================================
+   📌 เพิ่มเติม: ธีมและสไตล์สำหรับพรีวิว & คอนโทรลแบบ Compact
+   ========================================== */
+
+/* การจัดวางแถบควบคุมแบบกะทัดรัด */
+.filter-card-compact {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: var(--card);
+    border-radius: 12px;
+}
+
+/* ปรับขนาดและธีมช่องเลือกเดือน */
+.compact-input {
+    flex: 1;
+    height: 38px !important;
+    padding: 4px 8px;
+    font-size: 14px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    background-color: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    outline: none;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+/* สไตล์พื้นฐานปุ่มในแถบควบคุม */
+.compact-btn {
+    height: 38px !important;
+    padding: 0 10px;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background-color 0.3s, color 0.3s, opacity 0.2s;
+}
+
+/* ปุ่มพรีวิว (อ้างอิงสีตามธีมหลัก) */
+.btn-preview-fullscreen.compact-btn {
+    background-color: var(--primary, #2563eb);
+    color: #ffffff;
+    border: none;
+}
+
+/* ปุ่มแชร์ไฟล์ (อ้างอิงสีตามธีม success) */
+.btn-export-excel.compact-btn {
+    background-color: var(--success, #10b981);
+    color: #ffffff;
+    border: none;
+}
+
+.compact-btn:hover {
+    opacity: 0.9;
+}
+
+/* ==========================================
+   📌 กรอบ Modal พรีวิวรายงานเต็มจอ (เปลี่ยนตามธีม)
+   ========================================== */
+
+.full-report-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99999;
+    overflow-y: auto;
+    padding: 15px 12px;
+    box-sizing: border-box;
+    background-color: var(--card);
+    color: var(--text);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* ส่วนหัวของ Modal */
+.full-report-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* ข้อความหัวข้อ */
+.full-report-modal-title {
+    font-weight: bold;
+    color: var(--text);
+    font-size: 15px;
+}
+
+/* ปุ่มปิดหน้านี้ */
+.btn-close-modal {
+    background-color: var(--danger, #ef4444);
+    color: #ffffff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-close-modal:hover {
+    opacity: 0.9;
+}
 
 /* ========= 💰 ACCOUNT PAGE ========= */
 .card { background: var(--card); border-radius: 20px; padding: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); border: 1px solid var(--border); margin-bottom: 12px; transition: background 0.3s, border-color 0.3s; }
