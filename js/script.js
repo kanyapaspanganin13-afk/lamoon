@@ -1902,6 +1902,26 @@ function exportMonthlyExcel() {
     setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
     notify("success", "สำเร็จ", `ส่งออกข้อมูลเดือน ${monthName} เรียบร้อยแล้ว`);
 }
+function openReportFullscreen() {
+    const tableCard = document.getElementById('monthlyContent1');
+    if (!tableCard || !tableCard.innerHTML.trim()) {
+        if (typeof notify === 'function') {
+            notify("error", "ไม่พบข้อมูล", "กรุณาเลือกเดือนที่มีข้อมูลก่อนครับ");
+        } else {
+            alert("กรุณาเลือกเดือนที่มีข้อมูลก่อนครับ");
+        }
+        return;
+    }
+
+    document.getElementById('fullReportContent').innerHTML = tableCard.innerHTML;
+    document.getElementById('fullReportModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeReportFullscreen() {
+    document.getElementById('fullReportModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
    function exportComparisonToExcel() {
     if (typeof XLSX === 'undefined') return notify("error", "ผิดพลาด", "ไม่พบไลบรารี XLSX");
     
