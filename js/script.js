@@ -1835,27 +1835,47 @@ function exportMonthlyExcel() {
         '', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
     ];
+    const dayThaiNames = [
+        'อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'
+    ];
     const monthName = `${monthThaiNames[parseInt(month, 10)]} ${yearBe}`;
 
-    // ✅ ใช้ปี พ.ศ. ค้นหาโดยตรง → ตรงกับข้อมูลในฐานข้อมูล!
-    const searchPrefix = `${yearBe}-${monthPad}`; // เช่น "2569-09"
+    // ✅ ค้นหาด้วยปี พ.ศ. ตรงๆ
+    const searchPrefix = `${yearBe}-${monthPad}`;
+    console.log('[Excel] ค้นหาด้วย:', searchPrefix);
     
-    console.log('[Excel] ค้นหาด้วยรูปแบบ:', searchPrefix);
-    const list = (archives || []).filter(a => a.date?.startsWith(searchPrefix));
+    const list = (archives || []).filter(a => {
+        const match = a.date?.startsWith(searchPrefix);
+        console.log('[Excel] ตรวจสอบวันที่:', a.date, '→ ตรง?', match);
+        return match;
+    });
 
     if (!list.length) {
         return notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthName}`);
     }
 
-    // ========== สร้างเนื้อหาตาราง ==========
+    // ========== ✅ เพิ่มคอลัมน์ "วัน" ตรงกับหน้าเว็บ ==========
     const rows = [
         [`รายงานร้าน Barber Shop - ประจำเดือน ${monthName}`],
-        ["วันที่", "ลูกค้า (คน)", "ยอดช่าง", "สด", "โอน", "โกน", "สระ", "ย้อม"]
+        ["วันที่", "วัน", "ลูกค้า (คน)", "ยอดช่าง", "สด", "โอน", "โกน", "สระ", "ย้อม"]
     ];
+    
     let totalCust = 0, totalIncome = 0, totalCash = 0, totalTrans = 0;
     let totalShave = 0, totalWash = 0, totalDye = 0;
 
     list.forEach(a => {
+        // ✅ แยกเลขวันที่ และแปลงเป็นชื่อวันไทย
+        const dateParts = a.date ? a.date.split('-') : [];
+        const dayOnly = dateParts.length === 3 ? dateParts[2] : '';
+
+        // ✅ แปลงวันที่ พ.ศ. → ค.ศ. เพื่อคำนวณชื่อวัน
+        const yCe = parseInt(yearBe, 10) - 543;
+        const m = parseInt(month, 10) - 1;
+        const d = parseInt(dayOnly, 10);
+        const dateObj = new Date(yCe, m, d);
+        const dayName = dateObj.getDay() >= 0 ? dayThaiNames[dateObj.getDay()] : '';
+        
+        // ✅ นับบริการ
         let shave = 0, wash = 0, dye = 0;
         if (Array.isArray(a.details)) {
             a.details.forEach(d => {
@@ -1865,27 +1885,42 @@ function exportMonthlyExcel() {
                 if (svcs.includes('ย้อม')) dye++;
             });
         }
+        
         const cust = a.count || (a.details ? a.details.length : 0);
         const income = a.barber || a.total || 0;
+        const cash = a.cash || 0;
+        const trans = a.trans || 0;
 
         totalCust += cust;
         totalIncome += income;
-        totalCash += (a.cash || 0);
-        totalTrans += (a.trans || 0);
+        totalCash += cash;
+        totalTrans += trans;
         totalShave += shave;
         totalWash += wash;
         totalDye += dye;
 
-        rows.push([a.date, cust, income, a.cash || 0, a.trans || 0, shave, wash, dye]);
+        // ✅ เรียงคอลัมน์: วันที่, วัน, ลูกค้า, ยอดช่าง, สด, โอน, โกน, สระ, ย้อม
+        rows.push([dayOnly, dayName, cust, income, cash, trans, shave, wash, dye]);
     });
 
-    rows.push(["รวมยอดทั้งเดือน", totalCust, totalIncome, totalCash, totalTrans, totalShave, totalWash, totalDye]);
+    // ✅ แถวรวมยอด (ข้ามคอลัมน์ "วัน")
+    rows.push([
+        "รวมยอดทั้งเดือน", 
+        "", // คอลัมน์วัน ว่างไว้
+        totalCust, 
+        totalIncome, 
+        totalCash, 
+        totalTrans, 
+        totalShave, 
+        totalWash, 
+        totalDye
+    ]);
 
     const ws = XLSX.utils.aoa_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "รายงานรายเดือน");
 
-    // ========== ✅ ส่งออกไฟล์ ใช้ได้ทั้ง iOS / Android / PC ==========
+    // ========== ✅ ส่งออกไฟล์ — ทุกระบบ ==========
     const fileName = `รายงานรายเดือน-${monthName}.xlsx`;
     const fileData = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const blob = new Blob([fileData], { 
@@ -1893,29 +1928,15 @@ function exportMonthlyExcel() {
     });
     const url = URL.createObjectURL(blob);
 
-    // ตรวจสอบระบบปฏิบัติการ
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    
-    // สร้างลิงก์ดาวน์โหลด
     const a = document.createElement("a");
     a.href = url;
     a.download = fileName;
+    if (isIOS) { a.target = "_blank"; a.rel = "noopener"; }
     
-    // ✅ iOS บังคับเปิดแท็บใหม่ → เด้งเมนูเลือกแอปเปิด
-    if (isIOS) {
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-    }
-
-    // คลิกเพื่อดาวน์โหลด
     document.body.appendChild(a);
     a.click();
-
-    // ทำความสะอาด
-    setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }, 100);
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
 
     notify("success", "สำเร็จ", `ส่งออกข้อมูลเดือน ${monthName} เรียบร้อยแล้ว`);
 }
