@@ -1817,130 +1817,133 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 // 1. ส่งออก Excel สำหรับหน้า "สรุปรายเดือน" (ดึงข้อมูลรายวันทั้งเดือน)
-function exportMonthlyExcel() {
-    const picker = document.getElementById('monthlyReportPicker');
-    if (!picker) return notify("error", "ผิดพลาด", "ไม่พบช่องเลือกเดือน");
+async function exportToExcel() {
+    try {
+        if (typeof fetchArchives === 'function') await fetchArchives(); 
+    } catch (e) {
+        console.log("Fetch error:", e);
+    }
     
-    const monthValue = picker.value;
-    if (!monthValue) return notify("error", "ผิดพลาด", "กรุณาเลือกเดือน");
+    const shopInput = document.getElementById("setShop");
+    const savedName = localStorage.getItem('shopName');
+    const displayShopName = (shopInput && shopInput.value) 
+                            ? shopInput.value 
+                            : (savedName || (typeof conf !== 'undefined' ? conf.shop : "บาร์เบอร์"));
 
-    const [yearBe, month] = monthValue.split('-');
-    const monthPad = String(month).padStart(2, '0');
-    const monthThaiNames = ['', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
-    const dayThaiNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
-    const monthName = `${monthThaiNames[parseInt(month, 10)]} ${yearBe}`;
-    const searchPrefix = `${yearBe}-${monthPad}`;
+    if (typeof archives === 'undefined' || !archives || archives.length === 0) {
+        alert("ไม่พบข้อมูลประวัติในระบบ กรุณาลองใหม่อีกครั้ง");
+        return;
+    }
     
-    const list = (archives || []).filter(a => a.date?.startsWith(searchPrefix));
-    if (!list.length) return notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthName}`);
+    const monthInput = document.getElementById("histMonth");
+    const m = monthInput ? monthInput.value : "";
+    if (!m) {
+        alert("กรุณาเลือกเดือนที่ต้องการส่งออก");
+        if (monthInput && monthInput.showPicker) monthInput.showPicker();
+        return;
+    }
 
-    const shopName = (conf?.shop || localStorage.getItem('shopName') || 'Barber Shop');
+    const filtered = archives.filter(a => a.date && a.date.startsWith(m));
+    if (!filtered.length) {
+        const [y, mm] = m.split('-');
+        alert(`ไม่พบข้อมูลของเดือน ${parseInt(mm)}/${parseInt(y)+543}`);
+        return;
+    }
 
-    // 🏗️ สร้าง HTML Table สำหรับเนื้อหารายงาน (รูปแบบเดิมของคุณ)
+    const thMonths = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+    const fullThaiMonths = ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+    
+    const [y, mm] = m.split('-');
+    const headThai = `${fullThaiMonths[parseInt(mm)]} ${parseInt(y) + 543}`;
+
     const style = `
         <style>
             body { padding: 20px; font-family: 'Tahoma', sans-serif; text-align: center; }
             table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-            th { border: 2px solid #ccc; padding: 15px 5px; background-color: #1D6F42; color: white; font-size: 24px; white-space: nowrap; }
-            td { border: 2px solid #ccc; padding: 7px 10px; text-align: center; font-size: 20px; font-weight: 500; color: #000; }
+            th { border: 2px solid #ccc; padding: 15px 5px; background-color: #1D6F42; color: white; font-size: 30px; white-space: nowrap; }
+            td { border: 2px solid #ccc; padding: 7px 10px; text-align: center; font-size: 27px; font-weight: 500; color: #000; }
             tr:nth-child(even) { background-color: #f2f2f2; }
-            h1 { text-align:center; font-size: 32px; margin-bottom: 5px; color: #04167d; }
-            h2 { text-align:center; font-size: 26px; margin-bottom: 20px; color: #333; }
+            h1 { text-align:center; font-size: 38px; margin-bottom: 5px; color: #04167d; }
+            h2 { text-align:center; font-size: 32px; margin-bottom: 20px; color: #333; }
         </style>
     `;
 
-    let tableHtml = `${style}
-        <h1>รายงานร้าน: ${shopName}</h1>
-        <h2>ประจำเดือน: ${monthName}</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>วันที่</th>
-                    <th>วัน</th>
-                    <th>ลูกค้า</th>
-                    <th>ยอดช่าง</th>
-                    <th>โกน</th>
-                    <th>สระ</th>
-                    <th>ย้อม</th>
-                </tr>
-            </thead>
-            <tbody>`;
+    let tableHtml = `<html><head><meta charset="utf-8">${style}</head><body>`; 
+    tableHtml += `<h1>รายงานร้าน: ${displayShopName}</h1>`;
+    tableHtml += `<h2>ประจำเดือน: ${headThai}</h2>`;
 
-    let totalCust = 0, totalIncome = 0, totalShave = 0, totalWash = 0, totalDye = 0;
+    tableHtml += `<table>
+        <thead>
+            <tr>
+                <th>วันที่</th>
+                <th>วัน</th>
+                <th>ลูกค้า</th>
+                <th>ยอดช่าง</th>
+                <th>โกน</th>
+                <th>สระ</th>
+                <th>ย้อม</th>
+            </tr>
+        </thead>
+        <tbody>`;
 
-    list.forEach(a => {
-        const dateParts = a.date ? a.date.split('-') : [];
-        const dayOnly = dateParts.length === 3 ? parseInt(dateParts[2], 10) : '';
-        const yCe = parseInt(yearBe, 10) - 543;
-        const dateObj = new Date(yCe, parseInt(month, 10) - 1, dayOnly);
-        const dayName = dateObj.getDay() >= 0 ? dayThaiNames[dateObj.getDay()] : '';
-        
-        let shave = 0, wash = 0, dye = 0;
-        if (Array.isArray(a.details)) {
-            a.details.forEach(d => {
-                const svcs = (d.svcs || []).join(' ');
-                if (svcs.includes('โกน')) shave++;
-                if (svcs.includes('สระ')) wash++;
-                if (svcs.includes('ย้อม')) dye++;
+    let grandTotalCust = 0, grandTotalBarber = 0, grandTotalShave = 0, grandTotalWash = 0, grandTotalDye = 0;
+
+    filtered.forEach(day => {
+        const isOff = (day.off === true || day.type === "HOLIDAY");
+        const dObj = new Date(day.date);
+        const dateThai = `${dObj.getDate()} ${thMonths[dObj.getMonth() + 1]} ${(dObj.getFullYear() + 543).toString().slice(-2)}`;
+        const dayName = dObj.toLocaleDateString('th-TH', { weekday: 'long' }).replace('วัน', '');
+        const displayDay = isOff ? `<span style="color: #e74c3c; font-weight: bold;">หยุด</span>` : dayName;
+
+        let countCust = 0, countShave = 0, countWash = 0, countDye = 0;
+        if (day.details && Array.isArray(day.details)) {
+            day.details.forEach(d => {
+                if (d.type === "SERVICE") {
+                    countCust++;
+                    const s = String(d.svcs || "").toLowerCase();
+                    if (s.includes("โกน")) countShave++;
+                    if (s.includes("สระ")) countWash++;
+                    if (s.includes("ย้อม") || s.includes("สี")) countDye++;
+                }
             });
         }
         
-        const cust = a.count || (a.details ? a.details.length : 0);
-        const income = a.barber || a.total || 0;
-
-        totalCust += cust; totalIncome += income;
-        totalShave += shave; totalWash += wash; totalDye += dye;
+        const barberEarn = Number(day.barber) || 0;
+        grandTotalCust += countCust; 
+        grandTotalBarber += barberEarn;
+        grandTotalShave += countShave; 
+        grandTotalWash += countWash; 
+        grandTotalDye += countDye;
 
         tableHtml += `
             <tr>
-                <td>${dayOnly}</td>
-                <td>${dayName}</td>
-                <td>${cust}</td>
-                <td style="color:#0f0661;">${income.toLocaleString()}</td>
-                <td>${shave || '-'}</td>
-                <td>${wash || '-'}</td>
-                <td>${dye || '-'}</td>
+                <td style="white-space:nowrap;">${dateThai}</td>
+                <td>${displayDay}</td>
+                <td>${countCust}</td>
+                <td style="color:#0f0661;">${barberEarn.toLocaleString()}</td>
+                <td>${countShave || "-"}</td>
+                <td>${countWash || "-"}</td>
+                <td>${countDye || "-"}</td>
             </tr>`;
     });
 
     tableHtml += `
-        <tr style="background-color: #fcea23; font-weight: bold; font-size: 22px;">
-            <td colspan="2">รวมยอด (เปิด ${list.length} วัน)</td>
-            <td>${totalCust.toLocaleString()}</td>
-            <td>${totalIncome.toLocaleString()}</td>
-            <td>${totalShave}</td>
-            <td>${totalWash}</td>
-            <td>${totalDye}</td>
+        <tr style="background-color: #fcea23; font-weight: bold; font-size: 28px;">
+            <td colspan="2" style="border: 2px solid #ccc; padding: 15px;">รวมยอด</td>
+            <td style="border: 2px solid #ccc;">${grandTotalCust.toLocaleString()}</td>
+            <td style="border: 2px solid #ccc;">${grandTotalBarber.toLocaleString()}</td>
+            <td style="border: 2px solid #ccc;">${grandTotalShave}</td>
+            <td style="border: 2px solid #ccc;">${grandTotalWash}</td>
+            <td style="border: 2px solid #ccc;">${grandTotalDye}</td>
         </tr>
-        </tbody></table>`;
+        </tbody></table></body></html>`;
 
-    // 📱 ตรวจสอบว่าเป็น iOS หรือไม่
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-    if (isIOS) {
-        // ✅ บน iOS: เปิด Preview ตาราง HTML บนแท็บใหม่ทันที (ไม่เซฟลงเครื่อง)
-        const newTab = window.open();
-        if (newTab) {
-            newTab.document.write(tableHtml);
-            newTab.document.close();
-        } else {
-            window.location.href = "data:text/html;charset=utf-8," + encodeURIComponent(tableHtml);
-        }
-    } else {
-        // 💻 บน Android / PC: โหลดเป็นไฟล์ Excel (.xls) ตามปกติ
-        const blob = new Blob([tableHtml], { type: 'application/vnd.ms-excel;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `รายงานรายเดือน-${monthName}.xls`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    }
-
-    notify("success", "สำเร็จ", `เปิดพรีวิวรายงานเดือน ${monthName} เรียบร้อยแล้ว`);
+    // 🎯 ส่วนสำคัญที่ทำให้เกิดหน้า Preview + ปุ่มแชร์ (ตามรูป):
+    const blob = new Blob([tableHtml], { type: 'application/vnd.ms-excel' });
+    const fileUrl = URL.createObjectURL(blob);
+    
+    // เปลี่ยน URL หน้าปัจจุบันไปยัง Blob File เพื่อให้ iOS Safari ตัดเข้าสู่หน้า Document Preview
+    window.location.href = fileUrl;
 }
    function exportComparisonToExcel() {
     if (typeof XLSX === 'undefined') return notify("error", "ผิดพลาด", "ไม่พบไลบรารี XLSX");
