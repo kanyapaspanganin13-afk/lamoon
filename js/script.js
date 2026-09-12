@@ -1660,15 +1660,16 @@ function renderDailyTableReport() {
                 </tr>
             `;
         } else {
+            // 🟢 เปลี่ยนเลข 0 ให้แสดงผลเป็น '-' ทุกคอลัมน์รายการ
             rowsHTML += `
                 <tr>
                     <td>${parseInt(dayNum, 10)}</td>
                     <td>${displayDayName}</td>
-                    <td>${dayCust}</td>
-                    <td>${barber.toLocaleString()}</td>
-                    <td>${shave}</td>
-                    <td>${wash}</td>
-                    <td>${dye}</td>
+                    <td>${dayCust || '-'}</td>
+                    <td>${barber > 0 ? barber.toLocaleString() : '-'}</td>
+                    <td>${shave || '-'}</td>
+                    <td>${wash || '-'}</td>
+                    <td>${dye || '-'}</td>
                 </tr>
             `;
         }
@@ -1698,11 +1699,11 @@ function renderDailyTableReport() {
                 <tr style="background-color: #ffeb3b; font-weight: bold; color: #000;">
                     <td>รวมยอด</td>
                     <td style="color: #0284c7;">เปิด ${workDays} วัน</td>
-                    <td>${totalCust}</td>
-                    <td>${totalBarber.toLocaleString()}</td>
-                    <td>${totalShave}</td>
-                    <td>${totalWash}</td>
-                    <td>${totalDye}</td>
+                    <td>${totalCust || '-'}</td>
+                    <td>${totalBarber > 0 ? totalBarber.toLocaleString() : '0'}</td>
+                    <td>${totalShave || '-'}</td>
+                    <td>${totalWash || '-'}</td>
+                    <td>${totalDye || '-'}</td>
                 </tr>
             </tfoot>
         </table>
