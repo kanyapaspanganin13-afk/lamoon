@@ -852,8 +852,85 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
   .price-box input { font-size: 34px !important; }
   select#hairStyle, select#extra1, select#extra2 { font-size: 14px !important; }
 }
-/* ====================📱 MOBILE RESPONSIVE FIX (หน้าจอมือถือ)================== */
+/* ==========================================
+   📸 FULL REPORT MODAL & PREVIEW TABLE STYLE (สไตล์หลัก)
+   ========================================== */
 
+/* ตัว Modal เต็มจอ เปลี่ยนสีพื้นหลังตามธีม */
+.full-report-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99999;
+    overflow-y: auto;
+    padding: 15px 12px;
+    box-sizing: border-box;
+    background: var(--card, #ffffff);
+    color: var(--text, #1e293b);
+}
+
+/* คอนเทนเนอร์เนื้อหาตารางใน Modal */
+#fullReportContent {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 20px;
+}
+
+/* หัวข้อรายงานใน Modal */
+#fullReportContent h1, 
+#fullReportContent h2, 
+#fullReportContent h3, 
+#fullReportContent .report-title {
+    font-size: 15px !important;
+    margin: 6px 0 !important;
+    color: var(--primary, #0284c7) !important;
+}
+
+/* ปรับแต่งตารางพรีวิวให้อ่านง่าย สบายตา */
+#fullReportContent table {
+    width: 100% !important;
+    min-width: 300px;
+    border-collapse: collapse !important;
+    margin-top: 8px !important;
+    font-size: 13.5px !important;
+}
+
+/* หัวตาราง */
+#fullReportContent th {
+    padding: 9px 4px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    background: var(--bg, #f8fafc) !important;
+    color: var(--text, #334155) !important;
+    border-bottom: 2px solid var(--border, #cbd5e1) !important;
+}
+
+/* แถวข้อมูลในตาราง (เพิ่มระยะห่างบรรทัดอ่านสบายตา) */
+#fullReportContent td {
+    padding: 8px 4px !important;
+    font-size: 13.5px !important;
+    border-bottom: 1px solid var(--border, #f1f5f9) !important;
+    text-align: center !important;
+    color: var(--text, #1e293b) !important;
+}
+
+/* แถบรวบยอดด้านล่าง */
+#fullReportContent tfoot tr,
+#fullReportContent tfoot td {
+    font-weight: bold !important;
+    padding: 10px 4px !important;
+    font-size: 13.5px !important;
+}
+
+/* ==========================================
+   📱 MOBILE RESPONSIVE (ย้ายมาไว้ด้านล่างสุดทั้งหมด)
+   ========================================== */
+
+/* มือถือกว้างไม่เกิน 480px */
 @media (max-width: 480px) {
     /* 1. จัดแถบควบคุมในแนวนอน และบีบปุ่มให้สมดุล */
     .filter-card-compact {
@@ -926,6 +1003,21 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
     .btn-close-modal {
         padding: 5px 12px !important;
         font-size: 12px !important;
+    }
+}
+
+/* มือถือจอเล็กพิเศษ (ต่ำกว่า 380px) */
+@media (max-width: 380px) {
+    #fullReportContent table {
+        font-size: 12.5px !important;
+    }
+    #fullReportContent th {
+        padding: 7px 2px !important;
+        font-size: 12px !important;
+    }
+    #fullReportContent td {
+        padding: 7px 2px !important;
+        font-size: 12.5px !important;
     }
 }
 /* ========= 📄 REPORT & HISTORY ========= */
