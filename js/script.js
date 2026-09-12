@@ -146,24 +146,27 @@ function updateNavDisplay(viewName) {
     nav.style.justifyContent = 'stretch';
     nav.style.alignItems = 'stretch';
 
+    // ลบคลาส active ออกจากทุกปุ่มก่อนเสมอ
     nav.querySelectorAll('.nav-item').forEach(item => {
         item.style.display = 'flex';
         item.style.margin = '0';
         item.classList.remove('active');
     });
 
-    if (viewName === 'home') {
-        nav.querySelector('#navHome')?.classList.add('active');
-    } else if (viewName === 'workGroup' || viewName === 'sub1') {
-        nav.querySelector('#nav1')?.classList.add('active');
-    } else if (viewName === 'sub2') {
-        nav.querySelector('#nav2')?.classList.add('active');
-    } else if (viewName === 'sub3' || viewName === 'pageAccount') {
-        nav.querySelector('#nav3')?.classList.add('active');
-    } else if (viewName === 'settings') {
-        nav.querySelector('#navSettings')?.classList.add('active');
+    // แมปชื่อ viewName / pageId ไปยัง ID ของปุ่ม Bottom Nav ให้ตรงกันทุกปุ่ม
+    if (viewName === 'home' || viewName === 'pageHome') {
+        nav.querySelector('#navHome, [data-page="home"]')?.classList.add('active');
+    } else if (viewName === 'workGroup' || viewName === 'sub1' || viewName === 'record' || viewName === 'pageRecord') {
+        nav.querySelector('#nav1, #navRecord, [data-page="record"]')?.classList.add('active');
+    } else if (viewName === 'sub2' || viewName === 'report' || viewName === 'pageReport' || viewName === 'monthly') {
+        nav.querySelector('#nav2, #navReport, [data-page="report"]')?.classList.add('active');
+    } else if (viewName === 'sub3' || viewName === 'pageAccount' || viewName === 'account') {
+        nav.querySelector('#nav3, #navAccount, [data-page="account"]')?.classList.add('active');
+    } else if (viewName === 'settings' || viewName === 'pageSettings') {
+        nav.querySelector('#navSettings, [data-page="settings"]')?.classList.add('active');
     }
 }
+
 /* =========== SECTION 3: SUB-PAGE NAVIGATION =========== */
 function goSub(num) {
     const workPage = document.getElementById('pageWorkGroup');
@@ -186,72 +189,59 @@ function goSub(num) {
 
     if (num === 2) {
         if (typeof renderDay === 'function') renderDay(dInp);
-        updateDateDisplay(dInp);
+        if (typeof updateDateDisplay === 'function') updateDateDisplay(dInp);
     }
     if (num === 3) {
         const accDate = document.getElementById('accDate');
         if (accDate && dateInput) accDate.value = dateInput.value;
-        if (typeof loadAccountStatus === 'function') {
-            loadAccountStatus();
-        }
+        if (typeof loadAccountStatus === 'function') loadAccountStatus();
     }
 }
+
 /* =========== SECTION 4: MAIN TABS =========== */   
 function switchMainTab(pageId, tabId, event) {
     if (event && event.preventDefault) event.preventDefault();
 
-    const page = document.getElementById(pageId);
-    if (!page) return;
-
-    const targetPanel = document.getElementById(tabId);
-    if (!targetPanel) return;
-
-    // 1. ซ่อนทุกแท็บย่อย และลบคลาส active
-    page.querySelectorAll('.tab-panel').forEach(panel => {
-        panel.classList.remove('active');
-        panel.style.display = 'none';
-    });
-
-    // 2. แสดงเฉพาะแท็บที่เลือก
-    targetPanel.classList.add('active');
-    targetPanel.style.display = 'block';
-
-    // 3. รีเซ็ตปุ่มกดภายในหน้า
-    page.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-
-    // 4. ไฮไลต์ปุ่มกดที่เลือก (รองรับทั้ง Tab ย่อย และ Bottom Nav ด้านล่าง)
-    const activeBtn = event ? (event.currentTarget || event.target?.closest('.tab-btn, .nav-item, button')) : null;
-    
-    if (activeBtn) {
-        activeBtn.classList.add('active');
-    } else {
-        // ค้นหาและไฮไลต์ปุ่มทั้งในหน้าและใน Bottom Navigation
-        document.querySelectorAll('.tab-btn, .bottom-nav .nav-item, .bottom-nav button').forEach(btn => {
-            const onclickAttr = btn.getAttribute('onclick') || '';
-            if (onclickAttr.includes(`'${tabId}'`) || onclickAttr.includes(`"${tabId}"`) || 
-                onclickAttr.includes(`'${pageId}'`) || onclickAttr.includes(`"${pageId}"`)) {
-                btn.classList.add('active');
-            }
+    // 1. จัดการสลับ "หน้าหลัก" (Main Pages/Sections)
+    const allPages = document.querySelectorAll('.page-content, section[id^="page-"], .main-page');
+    if (allPages.length > 0) {
+        allPages.forEach(p => {
+            p.style.display = 'none';
+            p.classList.remove('active');
         });
     }
 
-    // 5. ไฮไลต์ปุ่มเมนูด้านล่าง (Bottom Nav) ให้ตรงกับหน้าหลักที่เปิด
-    const bottomNavBtns = document.querySelectorAll('.bottom-nav .nav-item, .bottom-nav button');
-    if (bottomNavBtns.length > 0) {
-        bottomNavBtns.forEach(navBtn => {
-            const onclickAttr = navBtn.getAttribute('onclick') || '';
-            if (onclickAttr.includes(`'${pageId}'`) || onclickAttr.includes(`"${pageId}"`)) {
-                navBtn.classList.add('active');
-            } else if (event && navBtn.contains(event.target)) {
-                navBtn.classList.add('active');
-            }
-        });
+    const currentPage = document.getElementById(pageId);
+    if (currentPage) {
+        currentPage.style.display = 'block';
+        currentPage.classList.add('active');
     }
 
-    // 6. โหลดข้อมูลอัตโนมัติเมื่อเปิดแท็บรายได้ย้อนหลัง
+    // 2. จัดการสลับ "แท็บย่อย" ภายในหน้านั้น (ถ้ามี tabId)
+    if (tabId && currentPage) {
+        currentPage.querySelectorAll('.tab-panel').forEach(panel => {
+            panel.classList.remove('active');
+            panel.style.display = 'none';
+        });
+
+        const targetPanel = document.getElementById(tabId);
+        if (targetPanel) {
+            targetPanel.classList.add('active');
+            targetPanel.style.display = 'block';
+        }
+
+        currentPage.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    }
+
+    // 3. ✅ สั่งอัปเดต Bottom Nav ผ่าน updateNavDisplay ให้เป็นมาตรฐานเดียวกัน
+    updateNavDisplay(pageId);
+
+    // 4. โหลดข้อมูลตามเงื่อนไขแท็บ
     if (tabId === 'monthlyTab2') {
         if (typeof initYearOptions === 'function') initYearOptions();
         if (typeof renderYearlyIncomeSummary === 'function') renderYearlyIncomeSummary();
+    } else if (pageId === 'report' || pageId === 'pageReport' || tabId === 'monthlyTab1') {
+        if (typeof loadHistMonth === 'function') loadHistMonth();
     }
 }
 /* =========== SECTION 5: AUTO-UPDATE =========== */  
