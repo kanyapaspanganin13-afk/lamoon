@@ -1840,15 +1840,14 @@ function exportMonthlyExcel() {
     // ✅ ใช้ปี พ.ศ. ค้นหาโดยตรง → ตรงกับข้อมูลในฐานข้อมูล!
     const searchPrefix = `${yearBe}-${monthPad}`; // เช่น "2569-09"
     
-    console.log('[Excel] ค้นหาด้วยรูปแบบ:', searchPrefix); // ดีบั๊ก
-
+    console.log('[Excel] ค้นหาด้วยรูปแบบ:', searchPrefix);
     const list = (archives || []).filter(a => a.date?.startsWith(searchPrefix));
 
     if (!list.length) {
         return notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthName}`);
     }
 
-    // ========== ส่วนที่เหลือเหมือนเดิม ==========
+    // ========== สร้างเนื้อหาตาราง ==========
     const rows = [
         [`รายงานร้าน Barber Shop - ประจำเดือน ${monthName}`],
         ["วันที่", "ลูกค้า (คน)", "ยอดช่าง", "สด", "โอน", "โกน", "สระ", "ย้อม"]
@@ -1885,7 +1884,39 @@ function exportMonthlyExcel() {
     const ws = XLSX.utils.aoa_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "รายงานรายเดือน");
-    XLSX.writeFile(wb, `รายงานรายเดือน-${monthName}.xlsx`);
+
+    // ========== ✅ ส่งออกไฟล์ ใช้ได้ทั้ง iOS / Android / PC ==========
+    const fileName = `รายงานรายเดือน-${monthName}.xlsx`;
+    const fileData = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([fileData], { 
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
+    });
+    const url = URL.createObjectURL(blob);
+
+    // ตรวจสอบระบบปฏิบัติการ
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    
+    // สร้างลิงก์ดาวน์โหลด
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    
+    // ✅ iOS บังคับเปิดแท็บใหม่ → เด้งเมนูเลือกแอปเปิด
+    if (isIOS) {
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+    }
+
+    // คลิกเพื่อดาวน์โหลด
+    document.body.appendChild(a);
+    a.click();
+
+    // ทำความสะอาด
+    setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }, 100);
+
     notify("success", "สำเร็จ", `ส่งออกข้อมูลเดือน ${monthName} เรียบร้อยแล้ว`);
 }
 function exportComparisonToExcel() {
