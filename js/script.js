@@ -1999,99 +1999,48 @@ async function handleGoogleSheet() {
         return typeof notify === 'function' ? notify("error", "ไม่พบข้อมูล", msg) : alert(msg);
     }
 
-    filtered.sort((a, b) => a.date.localeCompare(b.date));
-    const thaiDayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
-    const currentShopName = (typeof conf !== 'undefined' && conf.shop) ? conf.shop : (localStorage.getItem('shopName') || 'Barber Shop');
+    // ========== 1. สั่งเปิด/สลับไปแอป Google Sheets โดยตรง ==========
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    
+    const playStoreUrl = "https://play.google.com/store/apps/details?id=com.google.android.apps.docs.editors.sheets";
+    const appStoreUrl = "https://apps.apple.com/th/app/google-sheets/id441411228";
 
-    // ✅ หัว + คอลัมน์ ตรงตามต้องการ
-    let csvContent = "\uFEFF";
-    csvContent += `รายงานร้าน: ${currentShopName}\n`;
-    csvContent += `ประจำเดือน: ${monthThaiName} ${yearBe}\n\n`;
-    csvContent += "วันที่,วัน,ลูกค้า,ยอดช่าง,โกน,สระ,ย้อม\n";
+    let hasSwitched = false;
+    const visibilityHandler = () => {
+        if (document.hidden) hasSwitched = true;
+    };
+    document.addEventListener("visibilitychange", visibilityHandler);
 
-    let totalCust = 0, totalBarber = 0, totalShave = 0, totalWash = 0, totalDye = 0;
-    const workDays = filtered.length;
+    // ยิง URL Scheme ตรงเพื่อสั่งเปิดแอป Google Sheets
+    window.location.href = "googlesheets://";
 
-    filtered.forEach(day => {
-        const isOffDay = day.off === true || day.type === "HOLIDAY";
-        let dayCust = 0, shave = 0, wash = 0, dye = 0;
+    // ========== 2. หน่วงเวลาตรวจเช็คว่าในเครื่องมีแอปหรือไม่ ==========
+    setTimeout(() => {
+        document.removeEventListener("visibilitychange", visibilityHandler);
 
-        if (!isOffDay && day.details && Array.isArray(day.details)) {
-            day.details.forEach(d => {
-                if (d.type === "SERVICE" || !d.type) {
-                    dayCust++;
-                    const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
-                    svcs.forEach(s => {
-                        if (!s) return;
-                        const cleanS = String(s).trim();
-                        if (cleanS.includes("โกน")) shave++;
-                        if (cleanS.includes("สระ")) wash++;
-                        if (cleanS.includes("ย้อม") || cleanS.includes("สี")) dye++;
-                    });
+        if (!hasSwitched) {
+            // กรณีไม่มีแอป Google Sheets ในเครื่อง
+            if (typeof notify === 'function') notify("warning", "ไม่พบแอปพลิเคชัน", "กำลังตรวจสอบการติดตั้ง Google Sheets...");
+
+            const userConfirm = confirm("ไม่พบแอป Google Sheets ในเครื่องของคุณ\nต้องการไปหน้าติดตั้ง (Store) เพื่อใช้งานหรือไม่?");
+            
+            if (userConfirm) {
+                if (isAndroid) {
+                    window.location.href = playStoreUrl;
+                } else if (isIOS) {
+                    window.location.href = appStoreUrl;
+                } else {
+                    window.open("https://sheets.google.com", "_blank");
                 }
-            });
-        } else if (!isOffDay) {
-            dayCust = Number(day.count) || 0;
-        }
-
-        const barber = isOffDay ? 0 : (Number(day.barber) || Number(day.total) || 0);
-        totalCust += dayCust;
-        totalBarber += barber;
-        totalShave += shave;
-        totalWash += wash;
-        totalDye += dye;
-
-        // ✅ วันที่แสดงแค่ตัวเลข 1, 2, 3...
-        const dayNum = day.date ? parseInt(day.date.split('-')[2], 10) : '-';
-
-        // ชื่อวัน
-        let displayDayName = day.dayName || '-';
-        if (day.date) {
-            const [dYear, dMonth, dDay] = day.date.split('-').map(Number);
-            const dObj = new Date(dYear, dMonth - 1, dDay);
-            if (!isNaN(dObj.getTime())) displayDayName = thaiDayNames[dObj.getDay()];
-        }
-
-        if (isOffDay) {
-            csvContent += `"${dayNum}","${displayDayName}","หยุด","หยุด","หยุด","หยุด","หยุด"\n`;
+            } else {
+                if (typeof notify === 'function') notify("info", "ยกเลิก", "คุณสามารถใช้งานผ่านเบราว์เซอร์แทนได้");
+            }
         } else {
-            csvContent += `"${dayNum}","${displayDayName}",${dayCust},${barber},${shave||'-'},${wash||'-'},${dye||'-'}\n`;
+            // กรณีเปิดแอปสำเร็จ
+            if (typeof notify === 'function') notify("success", "สำเร็จ", "เปิดแอป Google Sheets เรียบร้อยแล้ว");
         }
-    });
-
-    // ✅ แถวรวมท้าย: "รวมยอด" + "เปิด X วัน"
-    csvContent += `\n"รวมยอด","เปิด ${workDays} วัน",${totalCust},${totalBarber},${totalShave},${totalWash},${totalDye}\n`;
-
-    const fileName = `รายงานประจำเดือน_${monthThaiName}_${yearBe}.csv`;
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const file = new File([blob], fileName, { type: 'text/csv' });
-
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-            await navigator.share({
-                title: `รายงานประจำเดือน ${monthThaiName} ${yearBe}`,
-                text: `รายงานประจำเดือน ${monthThaiName} ${yearBe} - ${currentShopName}`,
-                files: [file]
-            });
-            typeof notify === 'function' && notify("success", "นำออกสำเร็จ", "ส่งข้อมูลไปยังแอปเรียบร้อยแล้ว");
-        } catch (err) {
-            if (err.name !== 'AbortError') fallbackDownload(blob, fileName, monthThaiName);
-        }
-    } else {
-        fallbackDownload(blob, fileName, monthThaiName);
-    }
-}
-
-function fallbackDownload(blob, fileName, monthName) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    typeof notify === 'function' && notify("success", "สำเร็จ", `ดาวน์โหลดไฟล์ ${monthName} เรียบร้อยแล้ว`);
+    }, 2000);
 }
 function openComparisonSelector() {
     if (typeof notify === 'function') {
