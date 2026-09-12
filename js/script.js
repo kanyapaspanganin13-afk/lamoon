@@ -1825,10 +1825,8 @@ function exportMonthlyExcel() {
     if (!monthValue || typeof XLSX === 'undefined') {
         return notify("error", "ผิดพลาด", "กรุณาเลือกเดือน หรือเช็คการโหลดไลบรารี SheetJS");
     }
-
     const [yearBe, month] = monthValue.split('-');
     const monthPad = String(month).padStart(2, '0');
-
     const monthThaiNames = [
         '', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
@@ -1850,12 +1848,12 @@ function exportMonthlyExcel() {
     ];
     
     let totalCust = 0, totalIncome = 0, totalShave = 0, totalWash = 0, totalDye = 0;
-    const workDays = list.length; // จำนวนวันทำการ
+    const workDays = list.length;
 
     list.forEach(a => {
         const dateParts = a.date ? a.date.split('-') : [];
-        const dayOnly = dateParts.length === 3 ? parseInt(dateParts[2], 10) : ''; // ✅ แสดงแค่ตัวเลขวันที่ 1,2,3...
-
+        const dayOnly = dateParts.length === 3 ? parseInt(dateParts[2], 10) : '';
+        
         // คำนวณชื่อวัน
         const yCe = parseInt(yearBe, 10) - 543;
         const m = parseInt(month, 10) - 1;
@@ -1876,43 +1874,125 @@ function exportMonthlyExcel() {
         
         const cust = a.count || (a.details ? a.details.length : 0);
         const income = a.barber || a.total || 0;
-
         totalCust += cust;
         totalIncome += income;
         totalShave += shave;
         totalWash += wash;
         totalDye += dye;
 
-        // ✅ คอลัมน์: วันที่(เลข), วัน, ลูกค้า, ยอดช่าง, โกน, สระ, ย้อม
         rows.push([dayOnly, dayName, cust, income, shave || '-', wash || '-', dye || '-']);
     });
 
-    // ✅ แถวรวมท้าย: "รวมยอด" + "เปิด X วัน" (ลบคำว่า "ทั้งเดือน" ออก)
+    // ✅ แถวรวมท้าย: "รวมยอด" + "เปิด X วัน"
     rows.push(["รวมยอด", `เปิด ${workDays} วัน`, totalCust, totalIncome, totalShave, totalWash, totalDye]);
 
     const ws = XLSX.utils.aoa_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "รายงานรายเดือน");
 
-    // ส่งออกไฟล์ รองรับทุกระบบ
+    // 📄 สร้างไฟล์
     const fileName = `รายงานรายเดือน-${monthName}.xlsx`;
     const fileData = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const blob = new Blob([fileData], { 
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
     });
+    const file = new File([blob], fileName, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+    // ==================================================
+    // ✅ บังคับเปิดด้วย Google Sheets เท่านั้น + ปุ่มปิด
+    // ==================================================
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+            await navigator.share({
+                title: `รายงานประจำเดือน ${monthName}`,
+                text: `เลือก "Google Sheets" เพื่อเปิดรายงาน — ${monthName}`,
+                files: [file]
+            });
+            notify("success", "สำเร็จ", `ส่งไฟล์แล้ว → เลือก Google Sheets เพื่อเปิด`);
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                openPreviewWithCloseButton(blob, fileName, monthName, rows);
+            }
+        }
+    } else {
+        // 💻 บน PC / เบราว์เซอร์ที่ไม่รองรับ Share API → เปิดหน้าพรีวิวพร้อมปุ่มปิด
+        openPreviewWithCloseButton(blob, fileName, monthName, rows);
+    }
+}
+
+// ✅ ฟังก์ชันเปิดหน้าพรีวิว + มีปุ่มปิด
+function openPreviewWithCloseButton(blob, fileName, monthName, rows) {
     const url = URL.createObjectURL(blob);
-
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    if (isIOS) { a.target = "_blank"; a.rel = "noopener"; }
     
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+    // สร้างหน้าพรีวิวที่มีปุ่มปิดด้านบน
+    const previewHTML = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>รายงาน - ${monthName}</title>
+        <style>
+            body { font-family: 'Tahoma', sans-serif; padding: 20px; text-align: center; }
+            .close-btn { position: fixed; top: 15px; right: 15px; background: #dc3545; color: white; border: none; padding: 10px 20px; font-size: 18px; border-radius: 6px; cursor: pointer; z-index: 9999; }
+            .close-btn:hover { background: #c82333; }
+            .hint-box { background: #e3f2fd; padding: 12px; border-radius: 8px; margin-bottom: 20px; color: #01579b; font-size: 16px; }
+            table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+            th { border: 2px solid #ccc; padding: 12px 5px; background-color: #1D6F42; color: white; font-size: 18px; }
+            td { border: 2px solid #ccc; padding: 10px; font-size: 17px; }
+            .total-row { background-color: #fcea23; font-weight: bold; }
+            h1 { color: #04167d; font-size: 26px; }
+            h2 { color: #333; font-size: 20px; margin-bottom: 20px; }
+        </style>
+    </head>
+    <body>
+        <button class="close-btn" onclick="window.close()">✕ ปิดหน้านี้</button>
+        
+        <div class="hint-box">
+            💡 หากต้องการแก้ไข → กดดาวน์โหลดแล้วเปิดด้วยแอป <strong>Google Sheets</strong>
+        </div>
 
-    notify("success", "สำเร็จ", `ส่งออกข้อมูลเดือน ${monthName} เรียบร้อยแล้ว`);
+        <h1>${rows[0][0]}</h1>
+        <h2>${rows[1][0]}</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    ${rows[2].map(h => `<th>${h}</th>`).join('')}
+                </tr>
+            </thead>
+            <tbody>
+                ${rows.slice(3, -1).map(row => `
+                    <tr>
+                        ${row.map(cell => `<td>${cell}</td>`).join('')}
+                    </tr>
+                `).join('')}
+                <tr class="total-row">
+                    ${rows[rows.length - 1].map(cell => `<td>${cell}</td>`).join('')}
+                </tr>
+            </tbody>
+        </table>
+    </body>
+    </html>`;
+
+    // เปิดแท็บใหม่พร้อมเนื้อหา
+    const previewWindow = window.open();
+    if (previewWindow) {
+        previewWindow.document.write(previewHTML);
+        previewWindow.document.close();
+        notify("success", "เปิดพรีวิว", `เปิดหน้าพรีวิวรายงานเดือน ${monthName}`);
+    } else {
+        // กรณีบล็อกป๊อปอัพ → ดาวน์โหลดไฟล์ปกติ
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        notify("success", "ดาวน์โหลดสำเร็จ", `เปิดไฟล์ด้วย Google Sheets ครับ`);
+    }
+    
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
    function exportComparisonToExcel() {
     if (typeof XLSX === 'undefined') return notify("error", "ผิดพลาด", "ไม่พบไลบรารี XLSX");
