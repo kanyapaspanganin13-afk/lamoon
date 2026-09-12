@@ -1817,7 +1817,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 // 1. ส่งออก Excel สำหรับหน้า "สรุปรายเดือน" (ดึงข้อมูลรายวันทั้งเดือน)
-function exportMonthlyExcel() {
+async function exportMonthlyExcel() {
     const picker = document.getElementById('monthlyReportPicker');
     if (!picker) return notify("error", "ผิดพลาด", "ไม่พบช่องเลือกเดือน");
     
@@ -1840,7 +1840,7 @@ function exportMonthlyExcel() {
         return notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthName}`);
     }
 
-    // ✅ หัวตาราง + คอลัมน์ตรงตามต้องการ
+    // ✅ หัวตาราง + คอลัมน์
     const rows = [
         [`รายงานร้าน: ${(conf?.shop || localStorage.getItem('shopName') || 'Barber Shop')}`],
         [`ประจำเดือน: ${monthName}`],
@@ -1883,116 +1883,58 @@ function exportMonthlyExcel() {
         rows.push([dayOnly, dayName, cust, income, shave || '-', wash || '-', dye || '-']);
     });
 
-    // ✅ แถวรวมท้าย: "รวมยอด" + "เปิด X วัน"
+    // แถวสรุปยอด
     rows.push(["รวมยอด", `เปิด ${workDays} วัน`, totalCust, totalIncome, totalShave, totalWash, totalDye]);
 
     const ws = XLSX.utils.aoa_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "รายงานรายเดือน");
 
-    // 📄 สร้างไฟล์
-    const fileName = `รายงานรายเดือน-${monthName}.xlsx`;
+    // 📄 สร้างไฟล์ Excel (.xlsx)
+    const fileName = `Report_${monthValue}.xlsx`;
+    const mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
     const fileData = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([fileData], { 
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
-    });
-    const file = new File([blob], fileName, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const blob = new Blob([fileData], { type: mimeType });
+    const file = new File([blob], fileName, { type: mimeType });
 
     // ==================================================
-    // ✅ บังคับเปิดด้วย Google Sheets เท่านั้น + ปุ่มปิด
+    // 🚀 เรียกเปิด Share Sheet บนโทรศัพท์ (iOS / Android)
     // ==================================================
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    if (navigator.share) {
         try {
-            await navigator.share({
-                title: `รายงานประจำเดือน ${monthName}`,
-                text: `เลือก "Google Sheets" เพื่อเปิดรายงาน — ${monthName}`,
-                files: [file]
-            });
-            notify("success", "สำเร็จ", `ส่งไฟล์แล้ว → เลือก Google Sheets เพื่อเปิด`);
-        } catch (err) {
-            if (err.name !== 'AbortError') {
-                openPreviewWithCloseButton(blob, fileName, monthName, rows);
+            // เช็คว่าแชร์ไฟล์ตรงๆ ได้หรือไม่
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    files: [file],
+                    title: `รายงานประจำเดือน ${monthName}`
+                });
+            } else {
+                // กรณีแชร์เป็นไฟล์ไม่ได้ ให้ส่งแชร์เป็นข้อความ/ลิงก์
+                await navigator.share({
+                    title: `รายงานประจำเดือน ${monthName}`,
+                    text: `รายงานประจำเดือน ${monthName}`
+                });
             }
+            if (typeof notify === 'function') notify("success", "สำเร็จ", "เปิดเมนูแชร์เรียบร้อย");
+            return;
+        } catch (err) {
+            // หากผู้ใช้กด "ยกเลิก" หน้าแชร์ ให้หยุดทำงานเฉยๆ
+            if (err.name === 'AbortError') return;
+            console.warn("Share API Failed, falling back...", err);
         }
-    } else {
-        // 💻 บน PC / เบราว์เซอร์ที่ไม่รองรับ Share API → เปิดหน้าพรีวิวพร้อมปุ่มปิด
-        openPreviewWithCloseButton(blob, fileName, monthName, rows);
     }
-}
 
-// ✅ ฟังก์ชันเปิดหน้าพรีวิว + มีปุ่มปิด
-function openPreviewWithCloseButton(blob, fileName, monthName, rows) {
+    // 💻 กรณีอยู่บนคอมพิวเตอร์ หรือเครื่องที่ไม่รองรับ Share API -> ดาวน์โหลดไฟล์ลงเครื่องแทน
     const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
     
-    // สร้างหน้าพรีวิวที่มีปุ่มปิดด้านบน
-    const previewHTML = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>รายงาน - ${monthName}</title>
-        <style>
-            body { font-family: 'Tahoma', sans-serif; padding: 20px; text-align: center; }
-            .close-btn { position: fixed; top: 15px; right: 15px; background: #dc3545; color: white; border: none; padding: 10px 20px; font-size: 18px; border-radius: 6px; cursor: pointer; z-index: 9999; }
-            .close-btn:hover { background: #c82333; }
-            .hint-box { background: #e3f2fd; padding: 12px; border-radius: 8px; margin-bottom: 20px; color: #01579b; font-size: 16px; }
-            table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-            th { border: 2px solid #ccc; padding: 12px 5px; background-color: #1D6F42; color: white; font-size: 18px; }
-            td { border: 2px solid #ccc; padding: 10px; font-size: 17px; }
-            .total-row { background-color: #fcea23; font-weight: bold; }
-            h1 { color: #04167d; font-size: 26px; }
-            h2 { color: #333; font-size: 20px; margin-bottom: 20px; }
-        </style>
-    </head>
-    <body>
-        <button class="close-btn" onclick="window.close()">✕ ปิดหน้านี้</button>
-        
-        <div class="hint-box">
-            💡 หากต้องการแก้ไข → กดดาวน์โหลดแล้วเปิดด้วยแอป <strong>Google Sheets</strong>
-        </div>
-
-        <h1>${rows[0][0]}</h1>
-        <h2>${rows[1][0]}</h2>
-        
-        <table>
-            <thead>
-                <tr>
-                    ${rows[2].map(h => `<th>${h}</th>`).join('')}
-                </tr>
-            </thead>
-            <tbody>
-                ${rows.slice(3, -1).map(row => `
-                    <tr>
-                        ${row.map(cell => `<td>${cell}</td>`).join('')}
-                    </tr>
-                `).join('')}
-                <tr class="total-row">
-                    ${rows[rows.length - 1].map(cell => `<td>${cell}</td>`).join('')}
-                </tr>
-            </tbody>
-        </table>
-    </body>
-    </html>`;
-
-    // เปิดแท็บใหม่พร้อมเนื้อหา
-    const previewWindow = window.open();
-    if (previewWindow) {
-        previewWindow.document.write(previewHTML);
-        previewWindow.document.close();
-        notify("success", "เปิดพรีวิว", `เปิดหน้าพรีวิวรายงานเดือน ${monthName}`);
-    } else {
-        // กรณีบล็อกป๊อปอัพ → ดาวน์โหลดไฟล์ปกติ
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        notify("success", "ดาวน์โหลดสำเร็จ", `เปิดไฟล์ด้วย Google Sheets ครับ`);
-    }
-    
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    if (typeof notify === 'function') notify("success", "ดาวน์โหลดสำเร็จ", `สร้างไฟล์ ${fileName} เรียบร้อยแล้ว`);
 }
    function exportComparisonToExcel() {
     if (typeof XLSX === 'undefined') return notify("error", "ผิดพลาด", "ไม่พบไลบรารี XLSX");
