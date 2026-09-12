@@ -1821,28 +1821,38 @@ function exportMonthlyExcel() {
     const picker = document.getElementById('monthlyReportPicker');
     if (!picker) return notify("error", "ผิดพลาด", "ไม่พบช่องเลือกเดือน");
     
-    const monthValue = picker.value;
+    const monthValue = picker.value; // รูปแบบ: "2569-09" (พ.ศ.)
     if (!monthValue || typeof XLSX === 'undefined') {
-        return notify("error", "ผิดพลาด", "กรุณาเลือกเดือน หรือเช็คการโหลด SheetJS");
+        return notify("error", "ผิดพลาด", "กรุณาเลือกเดือน หรือเช็คการโหลดไลบรารี SheetJS");
     }
 
-    const [y, m] = monthValue.split('-');
-    const monthName = new Date(y, m - 1, 1).toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
-    const list = (window.archives || []).filter(a => a.date?.startsWith(`${y}-${m.padStart(2, '0')}`));
+    // ✅ แยกส่วน ปีพ.ศ. + เดือน
+    const [yearBe, month] = monthValue.split('-');
+    const yearCe = parseInt(yearBe, 10) - 543; // แปลง พ.ศ. → ค.ศ.
+    const monthPad = String(month).padStart(2, '0');
 
-    if (!list.length) return notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthName}`);
+    // ✅ สร้างชื่อเดือนแสดงผล
+    const monthName = new Date(yearCe, parseInt(month, 10) - 1, 1)
+        .toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
 
-    // หัวตารางครอบคลุมข้อมูลสถิติลายละเอียด
+    // ✅ ใช้ตัวแปร archives โดยตรง (ไม่ใช่ window.archives)
+    const list = (archives || []).filter(a => 
+        a.date?.startsWith(`${yearCe}-${monthPad}`) // ค้นหาด้วย ค.ศ. ให้ตรงกับรูปแบบวันที่ในฐานข้อมูล
+    );
+
+    if (!list.length) {
+        return notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthName}`);
+    }
+
+    // ========== ส่วนที่เหลือเหมือนเดิม ==========
     const rows = [
         [`รายงานร้าน Barber Shop - ประจำเดือน ${monthName}`],
         ["วันที่", "ลูกค้า (คน)", "ยอดช่าง", "สด", "โอน", "โกน", "สระ", "ย้อม"]
     ];
-
     let totalCust = 0, totalIncome = 0, totalCash = 0, totalTrans = 0;
     let totalShave = 0, totalWash = 0, totalDye = 0;
 
     list.forEach(a => {
-        // นับจำนวนบริการย่อยจาก details (ถ้ามี)
         let shave = 0, wash = 0, dye = 0;
         if (Array.isArray(a.details)) {
             a.details.forEach(d => {
@@ -1852,7 +1862,6 @@ function exportMonthlyExcel() {
                 if (svcs.includes('ย้อม')) dye++;
             });
         }
-
         const cust = a.count || (a.details ? a.details.length : 0);
         const income = a.barber || a.total || 0;
 
@@ -1867,29 +1876,27 @@ function exportMonthlyExcel() {
         rows.push([a.date, cust, income, a.cash || 0, a.trans || 0, shave, wash, dye]);
     });
 
-    // แถวสรุปยอดรวมท้ายตาราง
     rows.push(["รวมยอดทั้งเดือน", totalCust, totalIncome, totalCash, totalTrans, totalShave, totalWash, totalDye]);
 
     const ws = XLSX.utils.aoa_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "รายงานรายเดือน");
     XLSX.writeFile(wb, `รายงานรายเดือน-${monthName}.xlsx`);
-
     notify("success", "สำเร็จ", `ส่งออกข้อมูลเดือน ${monthName} เรียบร้อยแล้ว`);
 }
-
-// 2. ส่งออก Excel สำหรับหน้า "วิเคราะห์เปรียบเทียบ"
 function exportComparisonToExcel() {
     if (typeof XLSX === 'undefined') return notify("error", "ผิดพลาด", "ไม่พบไลบรารี XLSX");
-
+    
     const m1 = document.getElementById('compareMonth1')?.value;
     const m2 = document.getElementById('compareMonth2')?.value;
-
     if (!m1 || !m2) return notify("error", "แจ้งเตือน", "กรุณาเลือกเดือนที่ต้องการเปรียบเทียบให้ครบทั้ง 2 ช่อง");
 
+    // ✅ ฟังก์ชันช่วยแปลงค่าเดือนและค้นหาข้อมูล
     const getMonthData = (monthVal) => {
-        const [y, m] = monthVal.split('-');
-        return (window.archives || []).filter(a => a.date?.startsWith(`${y}-${m.padStart(2, '0')}`));
+        const [yBe, m] = monthVal.split('-');
+        const yCe = parseInt(yBe, 10) - 543;
+        const mPad = String(m).padStart(2, '0');
+        return (archives || []).filter(a => a.date?.startsWith(`${yCe}-${mPad}`));
     };
 
     const data1 = getMonthData(m1);
@@ -1918,10 +1925,8 @@ function exportComparisonToExcel() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "เปรียบเทียบ");
     XLSX.writeFile(wb, `เปรียบเทียบ-${m1}-VS-${m2}.xlsx`);
-
     notify("success", "สำเร็จ", "ส่งออกข้อมูลเปรียบเทียบเรียบร้อยแล้ว");
 }
-
 /* ========= SECTION 19: GOOGLE SHEETS & SHARE ========= */
 async function handleGoogleSheet() {
     const picker = document.getElementById('monthlyReportPicker') || document.getElementById('histMonth');
