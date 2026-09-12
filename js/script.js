@@ -1077,10 +1077,35 @@ function loadHistDaily() {
         `;
     }
 }
+/* ========= FIX: BIND ALL MONTH PICKERS ========= */
+document.addEventListener("DOMContentLoaded", () => {
+    // ผูก Event ให้กับ Month Picker ทุกตัวในหน้าเว็บ
+    const pickers = ["monthlyReportPicker", "histMonth"];
+    pickers.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener("change", (e) => {
+                const selectedValue = e.target.value;
+                // Sync ค่าไปยัง Picker ตัวอื่นๆ ให้ตรงกัน
+                pickers.forEach(otherId => {
+                    const otherEl = document.getElementById(otherId);
+                    if (otherEl && otherEl !== e.target) {
+                        otherEl.value = selectedValue;
+                    }
+                });
+                // โหลดข้อมูลใหม่ทันทีที่เปลี่ยนเดือน
+                loadHistMonth();
+            });
+        }
+    });
+});
+
+/* ========= FIX: LOAD HIST MONTH ========= */
 function loadHistMonth() {
     const $ = (id) => document.getElementById(id);
+    // ดึงค่าจาก Picker ตัวที่มีค่า หรือตัวปัจจุบัน
     const picker = $("monthlyReportPicker") || $("histMonth");
-    let m = picker?.value;
+    let m = picker ? picker.value : '';
 
     if (!m) {
         const now = new Date();
@@ -1090,14 +1115,9 @@ function loadHistMonth() {
         if (picker) picker.value = m;
     }
 
-    if (typeof archives === 'undefined' || !Array.isArray(archives)) {
-        if (typeof notify === 'function') notify("error", "ไม่พบฐานข้อมูลหลัก (archives)", "ข้อผิดพลาด");
-        return;
-    }
+    if (typeof archives === 'undefined' || !Array.isArray(archives)) return;
 
     let [y, mNum] = m.split('-').map(Number);
-    
-    // แปลงปี พ.ศ. (2569) ให้เป็น ค.ศ. (2026) สำหรับค้นหาใน archives
     const searchYear = y > 2500 ? y - 543 : y;
     const targetPrefix = `${searchYear}-${String(mNum).padStart(2, '0')}`;
     
@@ -1107,23 +1127,23 @@ function loadHistMonth() {
     ];
     const monthThaiName = monthNames[mNum - 1] || '';
     const displayYearThai = searchYear + 543;
-    const monthName = `${monthThaiName} ${displayYearThai}`;
+    const monthNameFormatted = `${monthThaiName} ${displayYearThai}`;
 
+    // กรองข้อมูลใน archives ตามเดือนที่เลือก
     const filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
-
-    // เรนเดอร์ตารางสรุปรายวันในแท็บที่ 1 ทุกครั้ง
-    if (typeof renderDailyTableReport === 'function') {
-        renderDailyTableReport();
-    }
 
     if (!filtered.length) {
         if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
-        if (window.calcNetProfit) window.calcNetProfit();
-        if (typeof notify === 'function') notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthName}`);
+        if (typeof notify === 'function') notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthNameFormatted}`);
+        
+        // เคลียร์ UI ในการ์ดสรุปยอดรวมกรณีไม่มีข้อมูล
+        if (typeof generateMonthlyReport === 'function') {
+            generateMonthlyReport(m, 0, 0, 0, 0, 0, 0, {}, {}, {}, 0, 0, 0);
+        }
         return;
     }
 
-    // ตัวแปรสะสมข้อมูล
+    // คำนวณยอดรวมรายเดือนใหม่ทั้งหมด
     let countNew = 0, countRegular = 0;  
     let monthTotal = 0, monthBarber = 0, monthCount = 0, monthGuarDays = 0; 
     let hairStats = {}, serviceStats = {};
@@ -1208,14 +1228,9 @@ function loadHistMonth() {
         });
     });
 
-    const realShopEarn = monthTotal - monthBarber;
-    if ($("shopTotalMonth")) {
-        $("shopTotalMonth").innerText = "฿" + Math.floor(realShopEarn).toLocaleString();
-    }
-    if (window.calcNetProfit) window.calcNetProfit();
-
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
 
+    // เรียกฟังก์ชันเรนเดอร์การ์ดสรุปยอดรวมด้วยข้อมูลชุดใหม่
     if (typeof generateMonthlyReport === 'function') {
         generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular);
     }
