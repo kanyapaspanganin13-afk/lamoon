@@ -1879,8 +1879,8 @@ function exportComparisonToExcel() {
     notify("success", "สำเร็จ", "ส่งออกข้อมูลเปรียบเทียบเรียบร้อยแล้ว");
 }
 
-/* ========= SECTION 19: GOOGLE SHEETS & COMPARISON ========= */
-function handleGoogleSheet() {
+/* ========= SECTION 19: GOOGLE SHEETS & SHARE ========= */
+async function handleGoogleSheet() {
     const picker = document.getElementById('monthlyReportPicker') || document.getElementById('histMonth');
     let mVal = picker ? picker.value : '';
     if (!mVal) {
@@ -1916,7 +1916,7 @@ function handleGoogleSheet() {
     const thaiDayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
     const currentShopName = (typeof conf !== 'undefined' && conf.shop) ? conf.shop : (localStorage.getItem('shopName') || 'Barber Shop');
 
-    let csvContent = "\uFEFF"; // BOM สำหรับภาษาไทยใน Excel
+    let csvContent = "\uFEFF"; // UTF-8 BOM
     csvContent += `รายงานร้าน: ${currentShopName}\n`;
     csvContent += `ประจำเดือน: ${monthThaiName} ${searchYear + 543}\n\n`;
     csvContent += "วันที่,วัน,ลูกค้า,ยอดช่าง,โกน,สระ,ย้อม\n";
@@ -1976,11 +1976,37 @@ function handleGoogleSheet() {
 
     csvContent += `\n"รวมยอด","เปิด ${workDays} วัน",${totalCust},${totalBarber},${totalShave},${totalWash},${totalDye}\n`;
 
+    const fileName = `รายงานประจำเดือน_${monthThaiName}_${searchYear + 543}.csv`;
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const file = new File([blob], fileName, { type: 'text/csv' });
+
+    // ✅ ใช้ Web Share API แชร์ไฟล์ตรงเข้าแอป Google Sheets บนมือถือ
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+            await navigator.share({
+                title: `รายงานประจำเดือน ${monthThaiName}`,
+                text: `รายงานประจำเดือน ${monthThaiName} ${searchYear + 543} - ${currentShopName}`,
+                files: [file]
+            });
+            if (typeof notify === 'function') {
+                notify("success", "นำออกสำเร็จ", "ส่งข้อมูลไปยังแอปเรียบร้อยแล้ว");
+            }
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                fallbackDownload(blob, fileName, monthThaiName);
+            }
+        }
+    } else {
+        // Fallback กรณีเปิดบน PC หรือเบราว์เซอร์ที่ไม่รองรับ Share API
+        fallbackDownload(blob, fileName, monthThaiName);
+    }
+}
+
+function fallbackDownload(blob, fileName, monthThaiName) {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `รายงานประจำเดือน_${monthThaiName}_${searchYear + 543}.csv`);
+    link.setAttribute("download", fileName);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1989,7 +2015,6 @@ function handleGoogleSheet() {
         notify("success", "ส่งออกสำเร็จ", `ดาวน์โหลดไฟล์รายงานประจำเดือน ${monthThaiName} เรียบร้อยแล้ว`);
     }
 }
-
 function openComparisonSelector() {
     if (typeof notify === 'function') {
         notify("info", "กำลังพัฒนา", "ฟังก์ชันเปรียบเทียบจะเพิ่มเร็วๆ นี้");
