@@ -197,6 +197,11 @@ function goSub(num) {
     }
 }
 /* =========== SECTION 4: MAIN TABS =========== */   
+
+/* =========== SECTION 5: AUTO-UPDATE =========== */  
+(function autoUpdate() {
+    const currentStoredVersion = localStorage.getItem("app_v");
+    if (currentStoredVersion !== APP_VERSION) {
 function switchMainTab(pageId, tabId, event) {
     if (event && event.preventDefault) event.preventDefault();
 
@@ -216,33 +221,44 @@ function switchMainTab(pageId, tabId, event) {
     targetPanel.classList.add('active');
     targetPanel.style.display = 'block';
 
-    // 3. รีเซ็ตปุ่มกดทั้งหมด
+    // 3. รีเซ็ตปุ่มกดภายในหน้า
     page.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
-    // 4. ไฮไลต์ปุ่มกดที่เลือก (ครอบคลุมทั้งการคลิกและการเรียกผ่าน JS)
-    const activeBtn = event ? (event.currentTarget || event.target?.closest('.tab-btn')) : null;
+    // 4. ไฮไลต์ปุ่มกดที่เลือก (รองรับทั้ง Tab ย่อย และ Bottom Nav ด้านล่าง)
+    const activeBtn = event ? (event.currentTarget || event.target?.closest('.tab-btn, .nav-item, button')) : null;
+    
     if (activeBtn) {
         activeBtn.classList.add('active');
     } else {
-        page.querySelectorAll('.tab-btn').forEach(btn => {
+        // ค้นหาและไฮไลต์ปุ่มทั้งในหน้าและใน Bottom Navigation
+        document.querySelectorAll('.tab-btn, .bottom-nav .nav-item, .bottom-nav button').forEach(btn => {
             const onclickAttr = btn.getAttribute('onclick') || '';
-            if (onclickAttr.includes(`'${tabId}'`) || onclickAttr.includes(`"${tabId}"`)) {
+            if (onclickAttr.includes(`'${tabId}'`) || onclickAttr.includes(`"${tabId}"`) || 
+                onclickAttr.includes(`'${pageId}'`) || onclickAttr.includes(`"${pageId}"`)) {
                 btn.classList.add('active');
             }
         });
     }
 
-    // 5. โหลดข้อมูลอัตโนมัติเมื่อเปิดแท็บรายได้ย้อนหลัง
+    // 5. ไฮไลต์ปุ่มเมนูด้านล่าง (Bottom Nav) ให้ตรงกับหน้าหลักที่เปิด
+    const bottomNavBtns = document.querySelectorAll('.bottom-nav .nav-item, .bottom-nav button');
+    if (bottomNavBtns.length > 0) {
+        bottomNavBtns.forEach(navBtn => {
+            const onclickAttr = navBtn.getAttribute('onclick') || '';
+            if (onclickAttr.includes(`'${pageId}'`) || onclickAttr.includes(`"${pageId}"`)) {
+                navBtn.classList.add('active');
+            } else if (event && navBtn.contains(event.target)) {
+                navBtn.classList.add('active');
+            }
+        });
+    }
+
+    // 6. โหลดข้อมูลอัตโนมัติเมื่อเปิดแท็บรายได้ย้อนหลัง
     if (tabId === 'monthlyTab2') {
         if (typeof initYearOptions === 'function') initYearOptions();
         if (typeof renderYearlyIncomeSummary === 'function') renderYearlyIncomeSummary();
     }
-}
-/* =========== SECTION 5: AUTO-UPDATE =========== */  
-(function autoUpdate() {
-    const currentStoredVersion = localStorage.getItem("app_v");
-    if (currentStoredVersion !== APP_VERSION) {
-        localStorage.setItem("app_v", APP_VERSION);
+}        localStorage.setItem("app_v", APP_VERSION);
         if ('caches' in window) {
             caches.keys().then(names => {
                 names.forEach(name => caches.delete(name));
