@@ -387,23 +387,22 @@
                     <input type="date" id="endDate2" class="form-control fix-compact-input">
                 </div>
             </div>
-
-            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px;">
-                <div>
-                    <select id="compareTopic1" class="topic-select" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #ccc;">
+             <!-- ✅ เปลี่ยนจาก action-btn-row เป็น topic-btn-row -->
+                <div class="topic-btn-row">
+                    <select id="compareTopic1" class="topic-select">
                         <option value="cust">👥 จำนวนลูกค้า</option>
                         <option value="barber">✂️ รายได้ช่าง</option>
                         <option value="shop">💈 รายได้ร้าน</option>
                         <option value="total" selected>💰 รายได้รวม</option>
                     </select>
-                </div>
-                <div>
-                    <select id="compareTopic2" class="topic-select" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #ccc;">
+                    <select id="compareTopic2" class="topic-select">
                         <option value="cust">👥 จำนวนลูกค้า</option>
                         <option value="barber">✂️ รายได้ช่าง</option>
                         <option value="shop">💈 รายได้ร้าน</option>
                         <option value="total">💰 รายได้รวม</option>
                     </select>
+                    <button type="button" class="compact-btn btn-primary" onclick="processComparison()">📈 ประมวลผล</button>
+                    <button type="button" class="compact-btn btn-preview" onclick="openPreviewModal()">👁️ พรีวิว</button>
                 </div>
                 <button type="button" class="compact-btn btn-primary" onclick="processComparison()">📈 ประมวลผล</button>
                 <button type="button" class="compact-btn btn-preview" onclick="openPreviewModal()">👁️ พรีวิว</button>
