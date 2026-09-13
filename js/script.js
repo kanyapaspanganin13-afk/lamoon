@@ -1966,47 +1966,6 @@ async function handleGoogleSheet() {
 // ==========================================
 // 🔍 ฟังก์ชันระบบเปรียบเทียบข้อมูล (SECTION 5)
 // ==========================================
-/**
- * ฟังก์ชันประมวลผลเปรียบเทียบ
- */
-function executeComparison() {
-    const sDate1 = document.getElementById('startDate1')?.value;
-    const eDate1 = document.getElementById('endDate1')?.value;
-    const sDate2 = document.getElementById('startDate2')?.value;
-    const eDate2 = document.getElementById('endDate2')?.value;
-    
-    const topicSelect = document.getElementById('compareTopicSelect1');
-    const topic = topicSelect ? topicSelect.value : 'all';
-
-    // 1. สร้าง Dynamic Header
-    renderTableHeader(topic, sDate1, eDate1, sDate2, eDate2);
-
-    // 2. ดึงข้อมูล (หากยังไม่ได้เลือกวันที่ จะใช้ Mockup Data แสดงผลทันทีเพื่อทดสอบ)
-    let dataPeriod1 = [];
-    let dataPeriod2 = [];
-
-    if (typeof getRecordsByDateRange === 'function' && sDate1 && eDate1) {
-        dataPeriod1 = getRecordsByDateRange(sDate1, eDate1);
-        dataPeriod2 = getRecordsByDateRange(sDate2, eDate2);
-    } else {
-        // ข้อมูลตัวอย่างเพื่อตารางแสดงผลทันทีเมื่อกดปุ่ม
-        dataPeriod1 = [
-            { customers: 5, barberIncome: 1250, shopIncome: 500 },
-            { customers: 8, barberIncome: 2000, shopIncome: 800 }
-        ];
-        dataPeriod2 = [
-            { customers: 6, barberIncome: 1500, shopIncome: 600 },
-            { customers: 10, barberIncome: 2500, shopIncome: 1000 }
-        ];
-    }
-
-    // 3. แสดงข้อมูลในตาราง
-    renderTableBodyAndFoot(topic, dataPeriod1, dataPeriod2);
-}
-
-/**
- * ฟังก์ชันสลับเลือกหัวข้อให้ตรงกันทั้ง 2 ช่อง
- */
 function syncTopics(sourceIndex) {
     const t1 = document.getElementById('compareTopicSelect1');
     const t2 = document.getElementById('compareTopicSelect2');
@@ -2015,37 +1974,55 @@ function syncTopics(sourceIndex) {
     executeComparison();
 }
 
-/**
- * สร้างหัวตาราง
- */
-function renderTableHeader(topic, s1, e1, s2, e2) {
+function executeComparison() {
+    const sDate1 = document.getElementById('startDate1')?.value;
+    const eDate1 = document.getElementById('endDate1')?.value;
+    const sDate2 = document.getElementById('startDate2')?.value;
+    const eDate2 = document.getElementById('endDate2')?.value;
+    
+    const topicType = document.getElementById('compareTopicSelect1')?.value || 'total';
+
+    // 1. ดึงข้อมูลบันทึกจริง (หรือ Mockup กรณีไม่มีข้อมูล)
+    let dataP1 = (typeof getRecordsByDateRange === 'function' && sDate1 && eDate1) 
+        ? getRecordsByDateRange(sDate1, eDate1) : getMockData(sDate1, eDate1);
+    let dataP2 = (typeof getRecordsByDateRange === 'function' && sDate2 && eDate2) 
+        ? getRecordsByDateRange(sDate2, eDate2) : getMockData(sDate2, eDate2);
+
+    // 2. สร้าง Header ตาราง 3 ช่อง (วัน | ลูกค้า | รายได้)
+    renderTableHeader(topicType, sDate1, eDate1, sDate2, eDate2);
+
+    // 3. แสดงผลแถวข้อมูลและสรุปรวมท้ายตาราง
+    renderTableBodyAndFoot(topicType, dataP1, dataP2);
+}
+
+function renderTableHeader(topicType, s1, e1, s2, e2) {
     const thead = document.getElementById('compareTableHead');
     if (!thead) return;
 
     const labelP1 = (s1 && e1) ? `${formatDateTh(s1)} - ${formatDateTh(e1)}` : 'ช่วงที่ 1';
     const labelP2 = (s2 && e2) ? `${formatDateTh(s2)} - ${formatDateTh(e2)}` : 'ช่วงที่ 2';
 
-    let title = "รายได้รวม (บาท)";
-    if (topic === 'customers') title = "จำนวนลูกค้า (คน)";
-    if (topic === 'barberIncome') title = "รายได้ช่าง (บาท)";
-    if (topic === 'shopIncome') title = "รายได้ร้าน (บาท)";
+    let incomeTitle = "รายได้รวม";
+    if (topicType === 'barber') incomeTitle = "รายได้ช่าง";
+    if (topicType === 'shop') incomeTitle = "รายได้ร้าน";
 
     thead.innerHTML = `
         <tr>
-            <th style="background:#2563eb; color:#fff;">ช่วงที่ 1 (${labelP1})</th>
-            <th style="background:#0891b2; color:#fff;">ช่วงที่ 2 (${labelP2})</th>
+            <th colspan="3" style="background:#2563eb; color:#fff;">ช่วงที่ 1 (${labelP1})</th>
+            <th colspan="3" style="background:#0891b2; color:#fff;">ช่วงที่ 2 (${labelP2})</th>
         </tr>
-        <tr>
-            <th style="background:#f1f5f9; color:#334155;">${title}</th>
-            <th style="background:#f1f5f9; color:#334155;">${title}</th>
+        <tr style="background:#f8fafc; color:#334155;">
+            <th>วันที่</th>
+            <th>ลูกค้า (คน)</th>
+            <th>${incomeTitle}</th>
+            <th>วันที่</th>
+            <th>ลูกค้า (คน)</th>
+            <th>${incomeTitle}</th>
         </tr>
     `;
 }
 
-/**
- * แสดงข้อมูลแถวและท้ายตาราง
- */
-function renderTableBodyAndFoot(topic, data1, data2) {
+function renderTableBodyAndFoot(topicType, data1, data2) {
     const tbody = document.getElementById('comparisonSingleContent');
     const tfoot = document.getElementById('compareTableFoot');
     if (!tbody || !tfoot) return;
@@ -2055,28 +2032,52 @@ function renderTableBodyAndFoot(topic, data1, data2) {
 
     const maxRows = Math.max(data1.length, data2.length);
 
+    let sumCust1 = 0, sumInc1 = 0;
+    let sumCust2 = 0, sumInc2 = 0;
+
     for (let i = 0; i < maxRows; i++) {
         const item1 = data1[i] || {};
         const item2 = data2[i] || {};
+
+        const inc1 = getIncomeByTopic(item1, topicType);
+        const inc2 = getIncomeByTopic(item2, topicType);
+
+        sumCust1 += (item1.customers || 0);
+        sumInc1 += inc1;
+
+        sumCust2 += (item2.customers || 0);
+        sumInc2 += inc2;
+
         const tr = document.createElement('tr');
-
-        let val1 = '-';
-        let val2 = '-';
-
-        if (topic === 'all' || topic === 'barberIncome') {
-            val1 = item1.barberIncome ? '฿' + item1.barberIncome.toLocaleString() : '-';
-            val2 = item2.barberIncome ? '฿' + item2.barberIncome.toLocaleString() : '-';
-        } else if (topic === 'customers') {
-            val1 = item1.customers ? item1.customers + ' คน' : '-';
-            val2 = item2.customers ? item2.customers + ' คน' : '-';
-        } else if (topic === 'shopIncome') {
-            val1 = item1.shopIncome ? '฿' + item1.shopIncome.toLocaleString() : '-';
-            val2 = item2.shopIncome ? '฿' + item2.shopIncome.toLocaleString() : '-';
-        }
-
-        tr.innerHTML = `<td>${val1}</td><td style="background-color: rgba(8, 145, 178, 0.03);">${val2}</td>`;
+        tr.innerHTML = `
+            <td>${item1.date ? formatDateTh(item1.date) : '-'}</td>
+            <td>${item1.customers !== undefined ? item1.customers : '-'}</td>
+            <td>${inc1 ? '฿' + inc1.toLocaleString() : '-'}</td>
+            <td style="background-color: rgba(8, 145, 178, 0.03);">${item2.date ? formatDateTh(item2.date) : '-'}</td>
+            <td style="background-color: rgba(8, 145, 178, 0.03);">${item2.customers !== undefined ? item2.customers : '-'}</td>
+            <td style="background-color: rgba(8, 145, 178, 0.03);">${inc2 ? '฿' + inc2.toLocaleString() : '-'}</td>
+        `;
         tbody.appendChild(tr);
     }
+
+    // แถวสรุปรวมท้ายตาราง
+    tfoot.innerHTML = `
+        <tr>
+            <td>รวม</td>
+            <td>${sumCust1.toLocaleString()} คน</td>
+            <td>฿${sumInc1.toLocaleString()}</td>
+            <td>รวม</td>
+            <td>${sumCust2.toLocaleString()} คน</td>
+            <td>฿${sumInc2.toLocaleString()}</td>
+        </tr>
+    `;
+}
+
+function getIncomeByTopic(item, topicType) {
+    if (!item) return 0;
+    if (topicType === 'barber') return item.barberIncome || 0;
+    if (topicType === 'shop') return item.shopIncome || 0;
+    return item.totalIncome || item.income || (item.barberIncome || 0) + (item.shopIncome || 0);
 }
 
 function formatDateTh(dateStr) {
@@ -2089,9 +2090,24 @@ function formatDateTh(dateStr) {
     return `${day}/${month}/${year}`;
 }
 
+// ฟังก์ชันพรีวิวรายงาน Modal
 function openReportFullscreen() {
     executeComparison();
-    alert("เปิดพรีวิวรายงาน");
+    const tableHTML = document.getElementById('compareGridTable').outerHTML;
+    document.getElementById('previewModalBody').innerHTML = tableHTML;
+    document.getElementById('previewModal').style.display = 'flex';
+}
+
+function closePreviewModal() {
+    document.getElementById('previewModal').style.display = 'none';
+}
+
+// Mockup ข้อมูลตัวอย่าง
+function getMockData(sDate, eDate) {
+    return [
+        { date: sDate || '2026-08-01', customers: 5, barberIncome: 1250, shopIncome: 500, totalIncome: 1750 },
+        { date: eDate || '2026-08-12', customers: 8, barberIncome: 2000, shopIncome: 800, totalIncome: 2800 }
+    ];
 }
 /* ========= SECTION 20: IMPORT / EXPORT / CLEAR ========= */
 // 1. ฟังก์ชันส่งออกข้อมูล (Export)
