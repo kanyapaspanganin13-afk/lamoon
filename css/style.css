@@ -217,7 +217,8 @@ body > center, body > a, body > br { display: none !important; }
 .grad-red { background: linear-gradient(135deg, var(--danger), #b91c1c); }
 .grad-gray { background: linear-gradient(135deg, #94a3b8, #475569); }
 .grad-emerald { background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)); }
-
+.grad-purple { background: linear-gradient(135deg, #a855f7, #6b21a8); }
+.grad-cyan { background: linear-gradient(135deg, #06b6d4, #0e7490); }
 /* ========= 📋 GRID LAYOUTS ========= */
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; }
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 8px; }
