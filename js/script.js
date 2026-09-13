@@ -1966,39 +1966,93 @@ async function handleGoogleSheet() {
 // ==========================================
 // 🔍 ฟังก์ชันระบบเปรียบเทียบข้อมูล (SECTION 5)
 // ==========================================
-// ฟังก์ชันสร้างรายการวันที่ครบทุกวันระหว่าง Start - End
+// Helper: แปลงวันที่ YYYY-MM-DD เป็น พ.ศ. สั้น (เช่น 01/08/69)
+function formatShortDate(dateStr) {
+    if (!dateStr) return '-';
+    const [year, month, day] = dateStr.split('-');
+    const thYear = (parseInt(year) + 543).toString().slice(-2);
+    return `${day}/${month}/${thYear}`;
+}
+
+// Helper: แปลงวันที่สำหรับ Header (เช่น 01/08/2569)
+function formatTHDate(dateStr) {
+    if (!dateStr) return '-';
+    const [year, month, day] = dateStr.split('-');
+    return `${day}/${month}/${parseInt(year) + 543}`;
+}
+
+// ฟังก์ชันสร้างรายการวันที่ครบทุกวันระหว่าง Start - End (รองรับ Timezone Offset)
 function getDatesArray(startDate, endDate) {
     let dates = [];
-    let currDate = new Date(startDate);
-    let lastDate = new Date(endDate);
+    let currDate = new Date(startDate + 'T00:00:00');
+    let lastDate = new Date(endDate + 'T00:00:00');
+    
     while (currDate <= lastDate) {
-        dates.push(new Date(currDate).toISOString().split('T')[0]);
+        const y = currDate.getFullYear();
+        const m = String(currDate.getMonth() + 1).padStart(2, '0');
+        const d = String(currDate.getDate()).padStart(2, '0');
+        dates.push(`${y}-${m}-${d}`);
         currDate.setDate(currDate.getDate() + 1);
     }
     return dates;
 }
 
-// ฟังก์ชันประมวลผลเปรียบเทียบแบบเลือกหัวข้อแยกอิสระ
-function processComparison() {
-    const d1_start = document.getElementById('compareDate1Start').value;
-    const d1_end = document.getElementById('compareDate1End').value;
-    const topic1 = document.getElementById('compareTopic1').value; // เช่น 'cust', 'barber', 'shop', 'total'
+// ฟังก์ชันดึงข้อมูลแยกตามประเภทหัวข้อ
+function getValByTopic(dateStr, topic) {
+    // ตรวจสอบแหล่งเก็บข้อมูลรายวันในระบบของคุณ (ลองค้นจาก window.dbData หรือ localStorage)
+    const storeData = window.dbData || JSON.parse(localStorage.getItem('barberDailyData') || '{}');
+    const dayData = storeData[dateStr] || {};
 
-    const d2_start = document.getElementById('compareDate2Start').value;
-    const d2_end = document.getElementById('compareDate2End').value;
-    const topic2 = document.getElementById('compareTopic2').value;
+    switch (topic) {
+        case 'cust': 
+            return dayData.customers || dayData.totalCust || dayData.custCount || 0;
+        case 'barber': 
+            return dayData.barberIncome || dayData.barberTotal || dayData.barber || 0;
+        case 'shop': 
+            return dayData.shopIncome || dayData.shopTotal || dayData.shop || 0;
+        case 'total': 
+            return dayData.totalIncome || dayData.grandTotal || dayData.total || 0;
+        default: 
+            return 0;
+    }
+}
+
+// แปลงชื่อหัวข้อแสดงใน Header
+function getTopicLabel(topic) {
+    const labels = {
+        'cust': 'ลูกค้า (คน)',
+        'barber': 'รายได้ช่าง',
+        'shop': 'รายได้ร้าน',
+        'total': 'รายได้รวม'
+    };
+    return labels[topic] || topic;
+}
+
+// Format ตัวเลข
+function formatValue(val, topic) {
+    if (topic === 'cust') return `${val.toLocaleString()} คน`;
+    return `฿${val.toLocaleString()}`;
+}
+
+// ฟังก์ชันประมวลผลเปรียบเทียบ
+function processComparison() {
+    const d1_start = document.getElementById('compareDate1Start')?.value;
+    const d1_end = document.getElementById('compareDate1End')?.value;
+    const topic1 = document.getElementById('compareTopic1')?.value;
+
+    const d2_start = document.getElementById('compareDate2Start')?.value;
+    const d2_end = document.getElementById('compareDate2End')?.value;
+    const topic2 = document.getElementById('compareTopic2')?.value;
 
     if (!d1_start || !d1_end || !d2_start || !d2_end) {
-        alert("กรุณาเลือกช่วงเวลาให้ครบถ้วน");
+        alert("กรุณาเลือกช่วงเวลาให้ครบถ้วนทั้ง 2 ช่วง");
         return;
     }
 
     const range1 = getDatesArray(d1_start, d1_end);
     const range2 = getDatesArray(d2_start, d2_end);
-    
-    // หาความยาวแถวสูงสุดเพื่อเจนตารางลงมา
     const maxRows = Math.max(range1.length, range2.length);
-    
+
     let html = `
         <table class="compare-grid-table">
             <thead>
@@ -2051,51 +2105,38 @@ function processComparison() {
         </table>
     `;
 
-    document.getElementById('compareResultContainer').innerHTML = html;
-}
-
-// แปลงชื่อหัวข้อแสดงใน Header
-function getTopicLabel(topic) {
-    const labels = {
-        'cust': 'จำนวนลูกค้า (คน)',
-        'barber': 'รายได้ช่าง (บาท)',
-        'shop': 'รายได้ร้าน (บาท)',
-        'total': 'รายได้รวม (บาท)'
-    };
-    return labels[topic] || topic;
-}
-
-// ดึงข้อมูลจริงแยกตามประเภท Metric
-function getValByTopic(dateStr, topic) {
-    // สมมติฐาน: dbData คือ Object รวมข้อมูลรายวันของคุณ
-    const dayData = window.dbData ? window.dbData[dateStr] : null;
-    if (!dayData) return 0;
-
-    switch (topic) {
-        case 'cust': return dayData.customers || 0;
-        case 'barber': return dayData.barberIncome || 0;
-        case 'shop': return dayData.shopIncome || 0;
-        case 'total': return dayData.totalIncome || 0;
-        default: return 0;
+    const resultContainer = document.getElementById('compareResultContainer');
+    if (resultContainer) {
+        resultContainer.innerHTML = html;
+    } else {
+        console.error("ไม่พบ Element ID: compareResultContainer");
     }
 }
 
-// Format ตัวเลขตามประเภทหัวข้อ
-function formatValue(val, topic) {
-    if (topic === 'cust') return `${val} คน`;
-    return `฿${val.toLocaleString()}`;
-}
+// ผูก Event Listener เมื่อ DOM โหลดเสร็จเรียบร้อยแล้ว
+document.addEventListener('DOMContentLoaded', function() {
+    const btnPreview = document.getElementById('btnPreviewCompare');
+    if (btnPreview) {
+        btnPreview.addEventListener('click', function() {
+            const resultContainer = document.getElementById('compareResultContainer');
+            const content = resultContainer ? resultContainer.innerHTML.trim() : '';
 
-// ปุ่มพรีวิว
-document.getElementById('btnPreviewCompare').addEventListener('click', function() {
-    const content = document.getElementById('compareResultContainer').innerHTML;
-    if (!content) {
-        alert("กรุณากดประมวลผลข้อมูลก่อนพรีวิว");
-        return;
+            if (!content) {
+                alert("กรุณากดประมวลผลข้อมูลก่อนพรีวิว");
+                return;
+            }
+
+            const modalContent = document.getElementById('fullReportContent');
+            const modal = document.getElementById('fullReportModal');
+
+            if (modalContent && modal) {
+                modalContent.innerHTML = content;
+                modal.style.display = 'block';
+            } else {
+                alert("ไม่พบโครงสร้าง Modal พรีวิวในหน้าเว็บ");
+            }
+        });
     }
-    // แสดง Modal Preview
-    document.getElementById('fullReportContent').innerHTML = content;
-    document.getElementById('fullReportModal').style.display = 'block';
 });
 /* ========= SECTION 20: IMPORT / EXPORT / CLEAR ========= */
 // 1. ฟังก์ชันส่งออกข้อมูล (Export)
