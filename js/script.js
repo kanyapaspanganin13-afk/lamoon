@@ -2014,44 +2014,37 @@ function formatValue(val, topic) {
 
 // ดึงและคำนวณข้อมูลตามวันที่และหัวข้อที่เลือก
 function getValByTopic(dateStr, topic) {
-    // ดึงข้อมูลบันทึกรายวันจากจุดเก็บข้อมูลของแอป (รองรับทั้ง Array และ Object)
-    const rawData = window.dbData || window.dailyRecords || JSON.parse(localStorage.getItem('barberDailyData') || '[]');
-    
-    // กรณีข้อมูลเก็บเป็น Array รายการตัดผม/บริการ
-    if (Array.isArray(rawData)) {
-        const records = rawData.filter(item => item.date === dateStr);
-        if (records.length === 0) return 0;
+    const list = typeof archives !== 'undefined' ? archives : [];
+    if (!list.length) return 0;
 
-        if (topic === 'cust') return records.length; // จำนวนลูกค้า = จำนวนคิว/รายการ
+    const dayRecords = list.filter(a => a.date === dateStr);
+    if (!dayRecords.length) return 0;
 
-        return records.reduce((sum, item) => {
-            const price = Number(item.price || item.amount || item.total || 0);
-            const barberShare = Number(item.barberShare || item.barberIncome || item.barber || 0);
-            const shopShare = Number(item.shopShare || item.shopIncome || item.shop || (price - barberShare));
+    let totalCust = 0, totalBarber = 0, totalShop = 0, totalAll = 0;
 
-            if (topic === 'barber') return sum + barberShare;
-            if (topic === 'shop') return sum + shopShare;
-            if (topic === 'total') return sum + price;
-            return sum;
-        }, 0);
-    } 
+    dayRecords.forEach(a => {
+        const cust = a.count || (a.details && Array.isArray(a.details) ? a.details.length : 0);
+        totalCust += cust;
 
-    // กรณีข้อมูลเก็บเป็น Object สรุปรายวัน { "YYYY-MM-DD": { ... } }
-    const dayData = rawData[dateStr] || {};
+        // ✅ ใช้สูตรเดียวกับที่คุณใช้ในส่วนอื่นของแอป
+        const totalIncome = Number(a.barber || a.total || 0); // ยอดรวม
+        // ตัวอย่างสูตรแบ่ง: ช่างได้ 70% ร้านได้ 30% (ปรับ % ตามจริงได้เลย)
+        const barberPart = Number(a.barberShare || Math.round(totalIncome * 0.70));
+        const shopPart = Number(a.shopShare || Math.round(totalIncome * 0.30));
+
+        totalBarber += barberPart;
+        totalShop += shopPart;
+        totalAll += totalIncome;
+    });
+
     switch (topic) {
-        case 'cust': 
-            return Number(dayData.customers || dayData.totalCust || dayData.custCount || dayData.count || 0);
-        case 'barber': 
-            return Number(dayData.barberIncome || dayData.barberTotal || dayData.barberShare || dayData.barber || 0);
-        case 'shop': 
-            return Number(dayData.shopIncome || dayData.shopTotal || dayData.shopShare || dayData.shop || 0);
-        case 'total': 
-            return Number(dayData.totalIncome || dayData.grandTotal || dayData.total || dayData.amount || 0);
-        default: 
-            return 0;
+        case 'cust':    return totalCust;
+        case 'barber':  return totalBarber;   // ส่วนช่าง
+        case 'shop':    return totalShop;     // ✅ ส่วนร้าน คำนวณแล้ว ไม่คืน 0
+        case 'total':   return totalAll;      // ยอดรวม
+        default:        return 0;
     }
 }
-
 // ฟังก์ชันประมวลผลเปรียบเทียบ
 function processComparison() {
     const d1_start = document.getElementById('startDate1')?.value;
