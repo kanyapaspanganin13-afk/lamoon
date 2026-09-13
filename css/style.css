@@ -1028,10 +1028,9 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 120px); /* ดึงความสูงให้พอดีกับหน้าจอ */
+    height: calc(100vh - 120px);
 }
 
-/* กรอบการทำงานหลัก */
 .card-box {
     background: var(--card, #ffffff);
     border-radius: 14px;
@@ -1051,9 +1050,8 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
     color: var(--primary, #0284c7);
 }
 
-/* ปรับช่องอินพุตวันที่ให้อ่านง่ายและขนาดเท่าแท็บรูปที่ 1 (สูง 42px - 44px) */
 .date-group {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .group-label {
@@ -1076,43 +1074,57 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
     color: #94a3b8;
 }
 
+/* ปรับความสูงช่องวันที่และช่องดรอปดาวน์ให้เตี้ยลงแบบกระชับ (สูง 38px) เท่ากันทุกช่อง */
 .compact-input {
-    height: 44px !important; /* ปรับขนาดความสูงเท่ากับแท็บสไตล์รูปที่ 1 */
+    height: 38px !important;
+    min-height: 38px !important;
     font-size: 12px !important;
-    border-radius: 10px !important;
+    border-radius: 8px !important;
     border: 1px solid var(--border, #e2e8f0) !important;
     background-color: var(--bg, #f8fafc) !important;
     padding: 0 8px !important;
     box-shadow: none !important;
+    box-sizing: border-box !important;
 }
 
-/* บรรทัดเลือกหัวข้อ + ปุ่มการทำงานขนานกัน */
-.topic-action-row {
+/* การจัดวางช่องเลือกหัวข้อแบบ 2 ช่องขนานกัน */
+.topic-double-row {
     display: flex;
-    gap: 6px;
-    align-items: center;
-    margin-top: 10px;
+    gap: 8px;
+    margin-top: 8px;
+    margin-bottom: 10px;
+}
+
+.topic-col {
+    flex: 1;
+    min-width: 0;
 }
 
 .topic-select {
-    flex: 2; /* ขยายช่องเลือกหัวข้อให้กว้างขึ้น */
-    min-width: 0;
+    width: 100% !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* แถบปุ่มกดประมวลผล / พรีวิว */
+.action-btn-row {
+    display: flex;
+    gap: 8px;
 }
 
 .compact-btn {
     flex: 1;
-    height: 44px !important; /* ปุ่มสูงเท่ากับช่องเลือก */
-    padding: 0 6px !important;
-    font-size: 11.5px !important;
+    height: 38px !important;
+    font-size: 12px !important;
     font-weight: 700 !important;
-    border-radius: 10px !important;
+    border-radius: 8px !important;
     border: none;
     cursor: pointer;
-    white-space: nowrap;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 5px;
 }
 
 .btn-primary {
@@ -1125,12 +1137,12 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
     color: #ffffff;
 }
 
-/* ขยายกรอบแสดงผลข้อมูลล่างให้เต็มพื้นที่ส่วนที่เหลือ */
+/* กรอบแสดงผลเต็มพื้นที่ด้านล่าง */
 .full-height-card {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 250px;
+    min-height: 220px;
     overflow: hidden;
 }
 
@@ -1139,19 +1151,6 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
     overflow-y: auto;
     border-radius: 8px;
     border: 1px solid var(--border, #f1f5f9);
-}
-
-/* สไตล์ตารางคงเดิม */
-.compare-grid-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    text-align: center;
-}
-
-.compare-grid-table th, .compare-grid-table td {
-    padding: 6px 4px;
-    border: 1px solid var(--border, #e2e8f0);
 }
 /* ========= 📄 REPORT & HISTORY ========= */
 #dailyList, #accHistory, #reportContent { color: var(--text); }
