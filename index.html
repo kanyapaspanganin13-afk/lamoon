@@ -389,36 +389,32 @@
             </div>
 
             <!-- ตัวเลือกหัวข้อ 3 แบบใหม่ -->
-            <div class="topic-double-row">
-                <div class="topic-col">
-                    <label class="group-label">📊 หัวข้อช่วงที่ 1</label>
-                    <select id="compareTopicSelect1" class="form-control fix-compact-input topic-select" onchange="syncTopics(1)">
-                        <option value="barber">👥 ลูกค้า + ✂️ รายได้ช่าง</option>
-                        <option value="shop">👥 ลูกค้า + 🏠 รายได้ร้าน</option>
-                        <option value="total">👥 ลูกค้า + 📌 รายได้รวม</option>
-                    </select>
-                </div>
-                <div class="topic-col">
-                    <label class="group-label">📊 หัวข้อช่วงที่ 2</label>
-                    <select id="compareTopicSelect2" class="form-control fix-compact-input topic-select" onchange="syncTopics(2)">
-                        <option value="barber">👥 ลูกค้า + ✂️ รายได้ช่าง</option>
-                        <option value="shop">👥 ลูกค้า + 🏠 รายได้ร้าน</option>
-                        <option value="total">👥 ลูกค้า + 📌 รายได้รวม</option>
-                    </select>
-                </div>
-            </div>
+<div class="topic-double-row">
+    <div class="topic-col">
+        <label class="group-label">หัวข้อช่วงที่ 1</label>
+        <select id="compareTopic1" class="topic-select">
+            <option value="cust">👥 จำนวนลูกค้า</option>
+            <option value="barber">✂️ รายได้ช่าง</option>
+            <option value="shop">💈 รายได้ร้าน</option>
+            <option value="total">💰 รายได้รวม</option>
+        </select>
+    </div>
+    <div class="topic-col">
+        <label class="group-label">หัวข้อช่วงที่ 2</label>
+        <select id="compareTopic2" class="topic-select">
+            <option value="cust">👥 จำนวนลูกค้า</option>
+            <option value="barber">✂️ รายได้ช่าง</option>
+            <option value="shop">💈 รายได้ร้าน</option>
+            <option value="total">💰 รายได้รวม</option>
+        </select>
+    </div>
+</div>
 
-            <!-- ปุ่มประมวลผล & พรีวิว -->
-            <div class="action-btn-row">
-                <button class="btn btn-primary compact-btn" onclick="executeComparison()">
-                    <i class="fas fa-chart-line"></i> ประมวลผล
-                </button>
-                <button class="btn btn-preview compact-btn" onclick="openReportFullscreen()">
-                    <i class="fas fa-eye"></i> พรีวิว
-                </button>
-            </div>
-        </div>
-
+<!-- ปุ่มกด -->
+<div class="action-btn-row">
+    <button type="button" class="compact-btn btn-primary" onclick="processComparison()">📈 ประมวลผล</button>
+    <button type="button" class="compact-btn btn-preview" id="btnPreviewCompare">👁️ พรีวิว</button>
+</div>
         <!-- กรอบที่ 2: แสดงผลตารางเปรียบเทียบ -->
         <div class="card-box margin-top full-height-card">
             <h3 class="card-title">📊 ผลการเปรียบเทียบข้อมูล</h3>
