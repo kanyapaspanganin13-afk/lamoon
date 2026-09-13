@@ -1021,48 +1021,47 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
         font-size: 12.5px !important;
     }
 }
-/* ==========================================
-   🔍 หน้าวิเคราะห์เปรียบเทียบ (SECTION 5)
-   ========================================== */
-
 /* คอนเทนเนอร์หลัก */
 .compare-container {
-    padding: 0;
+    padding: 10px;
     max-width: 600px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 120px); /* ดึงความสูงให้พอดีกับหน้าจอ */
 }
 
-/* กรอบการทำงานแบบการ์ด (Card Box) */
+/* กรอบการทำงานหลัก */
 .card-box {
     background: var(--card, #ffffff);
-    border-radius: 12px;
-    padding: 14px;
+    border-radius: 14px;
+    padding: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     border: 1px solid var(--border, #e2e8f0);
 }
 
 .margin-top {
-    margin-top: 12px;
+    margin-top: 10px;
 }
 
 .card-title {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     color: var(--primary, #0284c7);
 }
 
-/* การจัดวางช่องอินพุตวันที่ */
-.date-group, .filter-group {
-    margin-bottom: 10px;
+/* ปรับช่องอินพุตวันที่ให้อ่านง่ายและขนาดเท่าแท็บรูปที่ 1 (สูง 42px - 44px) */
+.date-group {
+    margin-bottom: 8px;
 }
 
 .group-label {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
+    margin-bottom: 3px;
     display: block;
-    margin-bottom: 4px;
-    color: var(--text, #334155);
+    color: var(--text-muted, #64748b);
 }
 
 .date-input-row {
@@ -1071,53 +1070,53 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
     gap: 6px;
 }
 
-.date-input-row span {
-    font-size: 12px;
+.date-to {
+    font-size: 11px;
     font-weight: bold;
-    color: #64748b;
+    color: #94a3b8;
 }
 
-.date-input-row input[type="date"],
-.filter-group select {
-    flex: 1;
-    height: 38px;
-    padding: 0 8px;
-    font-size: 12px;
-    border: 1px solid var(--border, #cbd5e1);
-    border-radius: 8px;
-    background-color: var(--bg, #f8fafc);
-    color: var(--text, #1e293b);
-    outline: none;
+.compact-input {
+    height: 44px !important; /* ปรับขนาดความสูงเท่ากับแท็บสไตล์รูปที่ 1 */
+    font-size: 12px !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--border, #e2e8f0) !important;
+    background-color: var(--bg, #f8fafc) !important;
+    padding: 0 8px !important;
+    box-shadow: none !important;
 }
 
-/* ปุ่มการทำงาน */
-.btn-action-group {
+/* บรรทัดเลือกหัวข้อ + ปุ่มการทำงานขนานกัน */
+.topic-action-row {
     display: flex;
-    gap: 8px;
-    margin-top: 14px;
+    gap: 6px;
+    align-items: center;
+    margin-top: 10px;
 }
 
-.btn {
+.topic-select {
+    flex: 2; /* ขยายช่องเลือกหัวข้อให้กว้างขึ้น */
+    min-width: 0;
+}
+
+.compact-btn {
     flex: 1;
-    height: 42px;
+    height: 44px !important; /* ปุ่มสูงเท่ากับช่องเลือก */
+    padding: 0 6px !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
     border: none;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 700;
     cursor: pointer;
+    white-space: nowrap;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    transition: opacity 0.2s;
-}
-
-.btn:active {
-    opacity: 0.8;
+    gap: 4px;
 }
 
 .btn-primary {
-    background: var(--primary, #2563eb);
+    background: #2563eb;
     color: #ffffff;
 }
 
@@ -1126,64 +1125,33 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
     color: #ffffff;
 }
 
-/* ==========================================
-   📊 ตารางเปรียบเทียบข้อมูล (4 คอลัมน์ตามสเก็ตช์)
-   ========================================== */
-
-.table-responsive {
-    width: 100%;
-    overflow-x: auto;
+/* ขยายกรอบแสดงผลข้อมูลล่างให้เต็มพื้นที่ส่วนที่เหลือ */
+.full-height-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 250px;
+    overflow: hidden;
 }
 
+.full-table-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border, #f1f5f9);
+}
+
+/* สไตล์ตารางคงเดิม */
 .compare-grid-table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    font-size: 12px !important;
-    text-align: center !important;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    text-align: center;
 }
 
-/* แถบหัวข้อช่วงเวลา */
-.compare-grid-table .th-period {
-    background: var(--primary, #2563eb) !important;
-    color: #ffffff !important;
-    padding: 6px 4px !important;
-    font-size: 11.5px !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-}
-
-.compare-grid-table .th-period-2 {
-    background: #0891b2 !important; /* สีกริดฝั่งช่วงที่ 2 */
-}
-
-/* หัวข้อย่อย (ลูกค้า / รายได้) */
-.compare-grid-table .sub-th {
-    background: var(--bg, #f1f5f9) !important;
-    color: var(--text, #334155) !important;
-    padding: 5px 2px !important;
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    border: 1px solid var(--border, #cbd5e1) !important;
-}
-
-/* แถวข้อมูลรายวัน */
-.compare-grid-table td {
-    padding: 5px 2px !important;
-    font-size: 11.5px !important;
-    border: 1px solid var(--border, #e2e8f0) !important;
-    color: var(--text, #1e293b) !important;
-}
-
-.compare-grid-table td.col-p2 {
-    background-color: rgba(8, 145, 178, 0.03); /* ไฮไลต์สีจางช่วงที่ 2 */
-}
-
-/* สรุปรวมท้ายตาราง (มุมซ้ายล่างตามภาพวาด) */
-.compare-grid-table tfoot tr td {
-    font-weight: bold !important;
-    background-color: var(--bg, #f8fafc) !important;
-    border-top: 2px solid var(--border, #cbd5e1) !important;
-    color: var(--primary, #2563eb) !important;
-    padding: 7px 2px !important;
+.compare-grid-table th, .compare-grid-table td {
+    padding: 6px 4px;
+    border: 1px solid var(--border, #e2e8f0);
 }
 /* ========= 📄 REPORT & HISTORY ========= */
 #dailyList, #accHistory, #reportContent { color: var(--text); }
