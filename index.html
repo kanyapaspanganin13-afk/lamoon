@@ -413,7 +413,7 @@
 <!-- ปุ่มกด -->
 <div class="action-btn-row">
     <button type="button" class="compact-btn btn-primary" onclick="processComparison()">📈 ประมวลผล</button>
-    <button type="button" class="compact-btn btn-preview" id="btnPreviewCompare">👁️ พรีวิว</button>
+    <button type="button" class="compact-btn btn-preview" id="btnPreviewCompare" onclick="openPreviewModal()">👁️ พรีวิว</button>
 </div>
         <!-- กรอบที่ 2: แสดงผลตารางเปรียบเทียบ -->
         <div class="card-box margin-top full-height-card">
@@ -429,18 +429,6 @@
     </div>
 </section>
 
-<!-- Modal พรีวิวรายงานเต็มหน้าจอ -->
-<div id="previewModal" class="preview-modal" style="display: none;">
-    <div class="preview-modal-content">
-        <div class="preview-modal-header">
-            <h3>📊 พรีวิวรายงานวิเคราะห์เปรียบเทียบ</h3>
-            <button class="close-btn" onclick="closePreviewModal()">&times;</button>
-        </div>
-        <div class="preview-modal-body" id="previewModalBody">
-            <!-- คัดลอกตารางมาแสดงผลแบบพิมพ์/พรีวิว -->
-        </div>
-    </div>
-</div>
             <!-- ✅ แถบนำทางล่างสุด -->
             <nav class="bottom-nav">
             <div onclick="switchMainView('home')" id="navHome" class="nav-item">
