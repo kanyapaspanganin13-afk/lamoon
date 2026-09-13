@@ -2019,14 +2019,14 @@ function getDayDataFull(dateStr) {
     return { cust, barber, shop, total };
 }
 
-// ✅ ประมวลผลข้อมูล — เปลี่ยนค่าตามหัวข้อที่เลือกได้แล้ว
+// ✅ ประมวลผลข้อมูลเปรียบเทียบ (แก้ไขปัญหาหัวข้อซ้ำ + รองรับ Dynamic ทั้ง 2 ช่วง)
 function processComparison() {
     const d1_start = document.getElementById('startDate1')?.value;
     const d1_end   = document.getElementById('endDate1')?.value;
     const d2_start = document.getElementById('startDate2')?.value;
     const d2_end   = document.getElementById('endDate2')?.value;
 
-    // ✅ อ่านหัวข้อที่เลือก
+    // ✅ อ่านหัวข้อที่เลือกจาก Dropdown HTML (<select id="compareTopic1"> และ <select id="compareTopic2">)
     const topic1 = document.getElementById('compareTopic1')?.value || 'total';
     const topic2 = document.getElementById('compareTopic2')?.value || 'total';
 
@@ -2039,15 +2039,19 @@ function processComparison() {
     const range2 = getDatesArray(d2_start, d2_end);
     const maxRows = Math.max(range1.length, range2.length);
 
-    // ✅ แปลงชื่อหัวข้อ
+    // ✅ แปลงชื่อหัวข้อคอลัมน์หลัก
     const topicLabel = (t) => {
-        const map = { cust:'ลูกค้า', barber:'รายได้ช่าง', shop:'รายได้ร้าน', total:'รายได้รวม' };
+        const map = { cust: 'จำนวนลูกค้า', barber: 'รายได้ช่าง', shop: 'รายได้ร้าน', total: 'รายได้รวม' };
         return map[t] || 'รายได้';
     };
     const label1 = topicLabel(topic1);
     const label2 = topicLabel(topic2);
 
-    // ✅ หัวตาราง — แก้ไขแล้ว! ช่วงที่ 2 แสดงชื่อตามหัวข้อที่เลือก
+    // ✅ แก้ปัญหาหัวข้อซ้ำ: ถ้าเลือก 'cust' (ลูกค้า) คอลัมน์ก่อนหน้าจะเปลี่ยนเป็น 'รายการ' ถ้าเป็นเรื่องเงินจะใช้ 'ลูกค้า'
+    const col3Name1 = topic1 === 'cust' ? 'รายการ' : 'ลูกค้า';
+    const col3Name2 = topic2 === 'cust' ? 'รายการ' : 'ลูกค้า';
+
+    // ✅ หัวตาราง (Dynamic ครบถ้วนทั้งช่วงที่ 1 และช่วงที่ 2)
     const headHtml = `
         <tr>
             <th colspan="4" style="background: var(--summary-bg); color: var(--primary); border: 1px solid var(--summary-border);">📅 ช่วงที่ 1 (${formatTHDate(d1_start)} - ${formatTHDate(d1_end)})</th>
@@ -2056,11 +2060,11 @@ function processComparison() {
         <tr>
             <th style="background: var(--primary); color: #fff;">วัน</th>
             <th style="background: var(--primary); color: #fff;">วันที่</th>
-            <th style="background: var(--primary); color: #fff;">ลูกค้า</th>
+            <th style="background: var(--primary); color: #fff;">${col3Name1}</th>
             <th style="background: var(--primary); color: #fff;">${label1}</th>
             <th style="background: var(--btn-compare2); color: #fff;">วัน</th>
             <th style="background: var(--btn-compare2); color: #fff;">วันที่</th>
-            <th style="background: var(--btn-compare2); color: #fff;">ลูกค้า</th>
+            <th style="background: var(--btn-compare2); color: #fff;">${col3Name2}</th>
             <th style="background: var(--btn-compare2); color: #fff;">${label2}</th>
         </tr>
     `;
@@ -2096,7 +2100,7 @@ function processComparison() {
         const val2 = data2 ? getValueByTopic(data2, topic2) : null;
         if (data2) { sum2Cust += data2.cust; if(val2 !== null) sum2Val += val2; }
 
-        // ✅ แสดงค่า — ถ้าเป็นตัวเลขเงินใส่ ฿ ถ้าเป็นจำนวนแสดงแค่ตัวเลข
+        // ✅ ฟอร์แมตแสดงตัวเลข (ถ้าเป็นเงินใส่ ฿ ถ้าเป็นคนแสดงตัวเลขเฉยๆ)
         const fmtVal = (v, t) => {
             if(v === null || v === undefined) return '-';
             return t === 'cust' ? v.toLocaleString() : '฿' + v.toLocaleString();
@@ -2116,7 +2120,7 @@ function processComparison() {
         `;
     }
 
-    // ✅ แถวรวม
+    // ✅ แถวสรุปผลรวมท้ายตาราง
     const fmtSum = (v, t) => {
         const val = v || 0;
         return t === 'cust' ? val.toLocaleString() : '฿' + val.toLocaleString();
