@@ -1972,13 +1972,11 @@ function formatShortDate(dateStr) {
     const [year, month, day] = dateStr.split('-');
     return `${day}/${month}/${(parseInt(year) + 543).toString().slice(-2)}`;
 }
-
 function formatTHDate(dateStr) {
     if (!dateStr) return '-';
     const [year, month, day] = dateStr.split('-');
     return `${day}/${month}/${parseInt(year) + 543}`;
 }
-
 // สร้างอาร์เรย์รายการวันที่
 function getDatesArray(startDate, endDate) {
     let dates = [];
@@ -1994,7 +1992,6 @@ function getDatesArray(startDate, endDate) {
     }
     return dates;
 }
-
 // แปลงป้ายหัวข้อ
 function getTopicLabel(topic) {
     const labels = {
@@ -2005,140 +2002,128 @@ function getTopicLabel(topic) {
     };
     return labels[topic] || topic;
 }
-
 // Format แสดงผล
 function formatValue(val, topic) {
     if (topic === 'cust') return `${val.toLocaleString()} คน`;
     return `฿${val.toLocaleString()}`;
 }
-
 // ดึงและคำนวณข้อมูลตามวันที่และหัวข้อที่เลือก
 function getValByTopic(dateStr, topic) {
     const list = typeof archives !== 'undefined' ? archives : [];
     if (!list.length) return 0;
-
     const dayRecords = list.filter(a => a.date === dateStr);
     if (!dayRecords.length) return 0;
-
     let totalCust = 0, totalBarber = 0, totalShop = 0, totalAll = 0;
-
     dayRecords.forEach(a => {
         const cust = a.count || (a.details && Array.isArray(a.details) ? a.details.length : 0);
         totalCust += cust;
-
         // ✅ ใช้สูตรเดียวกับที่คุณใช้ในส่วนอื่นของแอป
         const totalIncome = Number(a.barber || a.total || 0); // ยอดรวม
-        // ตัวอย่างสูตรแบ่ง: ช่างได้ 70% ร้านได้ 30% (ปรับ % ตามจริงได้เลย)
+        // สูตรแบ่ง: ช่างได้ 70% ร้านได้ 30% (ปรับ % ตามจริงได้เลย)
         const barberPart = Number(a.barberShare || Math.round(totalIncome * 0.70));
         const shopPart = Number(a.shopShare || Math.round(totalIncome * 0.30));
-
         totalBarber += barberPart;
         totalShop += shopPart;
         totalAll += totalIncome;
     });
-
     switch (topic) {
         case 'cust':    return totalCust;
-        case 'barber':  return totalBarber;   // ส่วนช่าง
-        case 'shop':    return totalShop;     // ✅ ส่วนร้าน คำนวณแล้ว ไม่คืน 0
-        case 'total':   return totalAll;      // ยอดรวม
+        case 'barber':  return totalBarber;
+        case 'shop':    return totalShop;
+        case 'total':   return totalAll;
         default:        return 0;
     }
 }
-// ฟังก์ชันประมวลผลเปรียบเทียบ
+
+// ✅ ฟังก์ชันประมวลผล — ปรับเป็น 3 คอลัมน์ ช่วงเดียว
 function processComparison() {
+    // ✅ อ่านแค่ช่วงที่ 1 + หัวข้อที่ 1
     const d1_start = document.getElementById('startDate1')?.value;
     const d1_end   = document.getElementById('endDate1')?.value;
-    const d2_start = document.getElementById('startDate2')?.value;
-    const d2_end   = document.getElementById('endDate2')?.value;
-
     const topic1 = document.getElementById('compareTopic1')?.value;
-    const topic2 = document.getElementById('compareTopic2')?.value;
 
-    if (!d1_start || !d1_end || !d2_start || !d2_end) {
-        alert("กรุณาเลือกช่วงเวลาให้ครบถ้วนทั้ง 2 ช่วง");
+    if (!d1_start || !d1_end) {
+        alert("กรุณาเลือกช่วงเวลาให้ครบถ้วน");
         return;
     }
 
-    const range1 = getDatesArray(d1_start, d1_end);
-    const range2 = getDatesArray(d2_start, d2_end);
-    const maxRows = Math.max(range1.length, range2.length);
+    // ✅ สร้างรายการวันที่ เรียงตามลำดับ
+    const range = getDatesArray(d1_start, d1_end);
 
-    // 1. หัวตาราง
+    // ✅ หัวตาราง 3 คอลัมน์
     const headHtml = `
         <tr>
-            <th colspan="2">ช่วงที่ 1 (${formatTHDate(d1_start)} - ${formatTHDate(d1_end)})</th>
-            <th colspan="2">ช่วงที่ 2 (${formatTHDate(d2_start)} - ${formatTHDate(d2_end)})</th>
+            <th colspan="3">ช่วงเวลา: ${formatTHDate(d1_start)} - ${formatTHDate(d1_end)}</th>
         </tr>
         <tr>
             <th>วันที่</th>
             <th>${getTopicLabel(topic1)}</th>
-            <th>วันที่</th>
-            <th>${getTopicLabel(topic2)}</th>
+            <th>หมายเหตุ</th>
         </tr>
     `;
 
-    // 2. แถวข้อมูล
+    // ✅ แถวข้อมูล — ใช้วันที่เป็นคีย์ค้นหา
     let bodyHtml = '';
-    let total1 = 0, total2 = 0;
+    let totalVal = 0;
 
-    for (let i = 0; i < maxRows; i++) {
-        const date1 = range1[i] || null;
-        const date2 = range2[i] || null;
-
-        const val1 = date1 ? getValByTopic(date1, topic1) : null;
-        const val2 = date2 ? getValByTopic(date2, topic2) : null;
-
-        if (val1 !== null) total1 += val1;
-        if (val2 !== null) total2 += val2;
-
+    range.forEach(dateStr => {
+        const val = getValByTopic(dateStr, topic1);
+        totalVal += val;
         bodyHtml += `
             <tr>
-                <td>${date1 ? formatShortDate(date1) : '-'}</td>
-                <td>${val1 !== null ? formatValue(val1, topic1) : '-'}</td>
-                <td>${date2 ? formatShortDate(date2) : '-'}</td>
-                <td>${val2 !== null ? formatValue(val2, topic2) : '-'}</td>
+                <td>${formatShortDate(dateStr)}</td>
+                <td>${formatValue(val, topic1)}</td>
+                <td></td>
             </tr>
         `;
-    }
+    });
 
-    // 3. ท้ายตาราง
+    // ✅ แถวรวมท้ายตาราง พื้นเหลือง
     const footHtml = `
-        <tr style="font-weight: bold; background: var(--bg);">
-            <td>รวม</td>
-            <td>${formatValue(total1, topic1)}</td>
-            <td>รวม</td>
-            <td>${formatValue(total2, topic2)}</td>
+        <tr style="font-weight: bold; background: #fcea23;">
+            <td>รวมทั้งหมด</td>
+            <td>${formatValue(totalVal, topic1)}</td>
+            <td>${range.length} วัน</td>
         </tr>
     `;
 
+    // ✅ แสดงผลลงตาราง
     document.getElementById('compareTableHead').innerHTML = headHtml;
     document.getElementById('comparisonSingleContent').innerHTML = bodyHtml;
     document.getElementById('compareTableFoot').innerHTML = footHtml;
 }
 
-// ฟังก์ชันเปิด Modal พรีวิว
+// ✅ ฟังก์ชันเปิด Modal พรีวิว — ปรับให้ตรงกับโครงสร้างใหม่
 function openPreviewModal() {
-    const tableElement = document.getElementById('compareGridTable');
     const tbodyContent = document.getElementById('comparisonSingleContent')?.innerHTML.trim();
-
     if (!tbodyContent) {
-        alert("กรุณากดประมวลผลข้อมูลก่อนพรีวิว");
+        alert("⚠️ กรุณากดปุ่ม \"ประมวลผลข้อมูล\" ก่อนครับ");
         return;
     }
 
-    const modalBody = document.getElementById('previewModalBody');
     const modal = document.getElementById('previewModal');
-
-    if (modalBody && modal) {
-        modalBody.innerHTML = `<table class="compare-grid-table" style="width:100%; border-collapse:collapse;">${tableElement.innerHTML}</table>`;
-        modal.style.display = 'block';
-    } else {
-        alert("ไม่พบ Modal สำหรับแสดงพรีวิว");
+    const modalBody = document.getElementById('previewModalBody');
+    
+    if (!modal || !modalBody) {
+        alert("❌ ไม่พบหน้าต่างพรีวิว");
+        return;
     }
+
+    const tableHead = document.getElementById('compareTableHead')?.innerHTML || '';
+    const tableFoot = document.getElementById('compareTableFoot')?.innerHTML || '';
+
+    modalBody.innerHTML = `
+        <table style="width:100%; border-collapse:collapse; font-family:Tahoma,sans-serif; text-align:center;">
+            <thead>${tableHead}</thead>
+            <tbody>${tbodyContent}</tbody>
+            <tfoot>${tableFoot}</tfoot>
+        </table>
+    `;
+
+    modal.style.display = 'block';
 }
 
-// ฟังก์ชันปิด Modal พรีวิว
+// ✅ ฟังก์ชันปิด Modal พรีวิว
 function closePreviewModal() {
     const modal = document.getElementById('previewModal');
     if (modal) modal.style.display = 'none';
