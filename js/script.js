@@ -1966,22 +1966,20 @@ async function handleGoogleSheet() {
 // ==========================================
 // 🔍 ฟังก์ชันระบบเปรียบเทียบข้อมูล (SECTION 5)
 // ==========================================
-// Helper: แปลงวันที่ YYYY-MM-DD เป็น พ.ศ. สั้น (เช่น 01/08/69)
+// Helper: แปลงวันที่
 function formatShortDate(dateStr) {
     if (!dateStr) return '-';
     const [year, month, day] = dateStr.split('-');
-    const thYear = (parseInt(year) + 543).toString().slice(-2);
-    return `${day}/${month}/${thYear}`;
+    return `${day}/${month}/${(parseInt(year) + 543).toString().slice(-2)}`;
 }
 
-// Helper: แปลงวันที่สำหรับ Header (เช่น 01/08/2569)
 function formatTHDate(dateStr) {
     if (!dateStr) return '-';
     const [year, month, day] = dateStr.split('-');
     return `${day}/${month}/${parseInt(year) + 543}`;
 }
 
-// สร้างอาร์เรย์วันที่ครบทุกวันระหว่าง Start - End
+// สร้างอาร์เรย์รายการวันที่
 function getDatesArray(startDate, endDate) {
     let dates = [];
     let currDate = new Date(startDate + 'T00:00:00');
@@ -1997,43 +1995,64 @@ function getDatesArray(startDate, endDate) {
     return dates;
 }
 
-// แปลงชื่อหัวข้อแสดงใน Header
+// แปลงป้ายหัวข้อ
 function getTopicLabel(topic) {
     const labels = {
-        'cust': 'ลูกค้า (คน)',
-        'barber': 'รายได้ช่าง',
-        'shop': 'รายได้ร้าน',
-        'total': 'รายได้รวม'
+        'cust': 'จำนวนลูกค้า (คน)',
+        'barber': 'รายได้ช่าง (บาท)',
+        'shop': 'รายได้ร้าน (บาท)',
+        'total': 'รายได้รวม (บาท)'
     };
     return labels[topic] || topic;
 }
 
-// ดึงข้อมูลจริงแยกตามประเภทหัวข้อ
-function getValByTopic(dateStr, topic) {
-    const storeData = window.dbData || JSON.parse(localStorage.getItem('barberDailyData') || '{}');
-    const dayData = storeData[dateStr] || {};
-
-    switch (topic) {
-        case 'cust': 
-            return dayData.customers || dayData.totalCust || dayData.custCount || 0;
-        case 'barber': 
-            return dayData.barberIncome || dayData.barberTotal || dayData.barber || 0;
-        case 'shop': 
-            return dayData.shopIncome || dayData.shopTotal || dayData.shop || 0;
-        case 'total': 
-            return dayData.totalIncome || dayData.grandTotal || dayData.total || 0;
-        default: 
-            return 0;
-    }
-}
-
-// Format ตัวเลข
+// Format แสดงผล
 function formatValue(val, topic) {
     if (topic === 'cust') return `${val.toLocaleString()} คน`;
     return `฿${val.toLocaleString()}`;
 }
 
-// ฟังก์ชันประมวลผลเปรียบเทียบ (อ้างอิง ID ตรงตาม HTML ของคุณ)
+// ดึงและคำนวณข้อมูลตามวันที่และหัวข้อที่เลือก
+function getValByTopic(dateStr, topic) {
+    // ดึงข้อมูลบันทึกรายวันจากจุดเก็บข้อมูลของแอป (รองรับทั้ง Array และ Object)
+    const rawData = window.dbData || window.dailyRecords || JSON.parse(localStorage.getItem('barberDailyData') || '[]');
+    
+    // กรณีข้อมูลเก็บเป็น Array รายการตัดผม/บริการ
+    if (Array.isArray(rawData)) {
+        const records = rawData.filter(item => item.date === dateStr);
+        if (records.length === 0) return 0;
+
+        if (topic === 'cust') return records.length; // จำนวนลูกค้า = จำนวนคิว/รายการ
+
+        return records.reduce((sum, item) => {
+            const price = Number(item.price || item.amount || item.total || 0);
+            const barberShare = Number(item.barberShare || item.barberIncome || item.barber || 0);
+            const shopShare = Number(item.shopShare || item.shopIncome || item.shop || (price - barberShare));
+
+            if (topic === 'barber') return sum + barberShare;
+            if (topic === 'shop') return sum + shopShare;
+            if (topic === 'total') return sum + price;
+            return sum;
+        }, 0);
+    } 
+
+    // กรณีข้อมูลเก็บเป็น Object สรุปรายวัน { "YYYY-MM-DD": { ... } }
+    const dayData = rawData[dateStr] || {};
+    switch (topic) {
+        case 'cust': 
+            return Number(dayData.customers || dayData.totalCust || dayData.custCount || dayData.count || 0);
+        case 'barber': 
+            return Number(dayData.barberIncome || dayData.barberTotal || dayData.barberShare || dayData.barber || 0);
+        case 'shop': 
+            return Number(dayData.shopIncome || dayData.shopTotal || dayData.shopShare || dayData.shop || 0);
+        case 'total': 
+            return Number(dayData.totalIncome || dayData.grandTotal || dayData.total || dayData.amount || 0);
+        default: 
+            return 0;
+    }
+}
+
+// ฟังก์ชันประมวลผลเปรียบเทียบ
 function processComparison() {
     const d1_start = document.getElementById('startDate1')?.value;
     const d1_end   = document.getElementById('endDate1')?.value;
@@ -2052,7 +2071,7 @@ function processComparison() {
     const range2 = getDatesArray(d2_start, d2_end);
     const maxRows = Math.max(range1.length, range2.length);
 
-    // 1. สร้างส่วน Thead
+    // 1. หัวตาราง
     const headHtml = `
         <tr>
             <th colspan="2">ช่วงที่ 1 (${formatTHDate(d1_start)} - ${formatTHDate(d1_end)})</th>
@@ -2066,7 +2085,7 @@ function processComparison() {
         </tr>
     `;
 
-    // 2. สร้างส่วน Tbody (วนลูปเรียงวันที่ลงมาทุกวัน)
+    // 2. แถวข้อมูล
     let bodyHtml = '';
     let total1 = 0, total2 = 0;
 
@@ -2090,7 +2109,7 @@ function processComparison() {
         `;
     }
 
-    // 3. สร้างส่วน Tfoot
+    // 3. ท้ายตาราง
     const footHtml = `
         <tr style="font-weight: bold; background: var(--bg);">
             <td>รวม</td>
@@ -2100,10 +2119,30 @@ function processComparison() {
         </tr>
     `;
 
-    // ยัดข้อมูลลง Element ตาม ID ใน HTML
     document.getElementById('compareTableHead').innerHTML = headHtml;
     document.getElementById('comparisonSingleContent').innerHTML = bodyHtml;
     document.getElementById('compareTableFoot').innerHTML = footHtml;
+}
+
+// ฟังก์ชันเปิด Modal พรีวิว
+function openPreviewModal() {
+    const tableElement = document.getElementById('compareGridTable');
+    const tbodyContent = document.getElementById('comparisonSingleContent')?.innerHTML.trim();
+
+    if (!tbodyContent) {
+        alert("กรุณากดประมวลผลข้อมูลก่อนพรีวิว");
+        return;
+    }
+
+    const modalBody = document.getElementById('previewModalBody');
+    const modal = document.getElementById('previewModal');
+
+    if (modalBody && modal) {
+        modalBody.innerHTML = `<table class="compare-grid-table" style="width:100%; border-collapse:collapse;">${tableElement.innerHTML}</table>`;
+        modal.style.display = 'block';
+    } else {
+        alert("ไม่พบ Modal สำหรับแสดงพรีวิว");
+    }
 }
 
 // ฟังก์ชันปิด Modal พรีวิว
@@ -2111,31 +2150,6 @@ function closePreviewModal() {
     const modal = document.getElementById('previewModal');
     if (modal) modal.style.display = 'none';
 }
-
-// ผูกคำสั่งปุ่ม พรีวิว
-document.addEventListener('DOMContentLoaded', function() {
-    const btnPreview = document.getElementById('btnPreviewCompare');
-    if (btnPreview) {
-        btnPreview.addEventListener('click', function() {
-            const tableElement = document.getElementById('compareGridTable');
-            const tbodyContent = document.getElementById('comparisonSingleContent')?.innerHTML.trim();
-
-            if (!tbodyContent) {
-                alert("กรุณากดประมวลผลข้อมูลก่อนพรีวิว");
-                return;
-            }
-
-            const modalBody = document.getElementById('previewModalBody');
-            const modal = document.getElementById('previewModal');
-
-            if (modalBody && modal) {
-                // คัดลอกโครงสร้างตารางทั้งหมดไปแสดงใน Modal
-                modalBody.innerHTML = `<table class="compare-grid-table">${tableElement.innerHTML}</table>`;
-                modal.style.display = 'block';
-            }
-        });
-    }
-});
 /* ========= SECTION 20: IMPORT / EXPORT / CLEAR ========= */
 // 1. ฟังก์ชันส่งออกข้อมูล (Export)
 function exportBackup() {
