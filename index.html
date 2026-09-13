@@ -357,77 +357,72 @@
             </div>
         </section>
         <!-- ================= SECTION 5: เปรียบเทียบ ================= -->
-        <section id="pageComparison" class="app-page full-page" style="display: none;">
-            <div class="top-bar">
-                <span class="top-title">🔍 วิเคราะห์เปรียบเทียบ</span>
-            </div>
-        
-            <div class="compare-container">
-                <!-- กรอบที่ 1: เลือกช่วงเวลา & เลือกหัวข้อ -->
-                <div class="card-box">
-                    <h3 class="card-title">🔍 เลือกช่วงเวลา & ข้อมูลที่ต้องการเปรียบเทียบ</h3>
-                    
-                    <!-- เลือกช่วงวันที่ 1 -->
-                    <div class="date-group">
-                        <label class="group-label">📅 ช่วงที่ 1</label>
-                        <div class="date-input-row">
-                            <input type="date" id="startDate1" class="form-control">
-                            <span>ถึง</span>
-                            <input type="date" id="endDate1" class="form-control">
-                        </div>
-                    </div>
-        
-                    <!-- เลือกช่วงวันที่ 2 -->
-                    <div class="date-group">
-                        <label class="group-label">📅 ช่วงที่ 2</label>
-                        <div class="date-input-row">
-                            <input type="date" id="startDate2" class="form-control">
-                            <span>ถึง</span>
-                            <input type="date" id="endDate2" class="form-control">
-                        </div>
-                    </div>
-        
-                    <!-- Dropdown เลือกหัวข้อเปรียบเทียบ -->
-                    <div class="filter-group" style="margin-top: 10px;">
-                        <label class="group-label">📊 เลือกหัวข้อเปรียบเทียบ:</label>
-                        <select id="compareTopicSelect" class="form-control" onchange="executeComparison()">
-                            <option value="all">📌 ภาพรวมทั้งหมด (ลูกค้า & รายได้)</option>
-                            <option value="customers">👥 จำนวนลูกค้า</option>
-                            <option value="barberIncome">✂️ รายได้ช่าง</option>
-                            <option value="shopIncome">🏠 รายได้ร้าน</option>
-                        </select>
-                    </div>
-        
-                    <!-- ปุ่มประมวลผล + ปุ่มพรีวิว (ยกเลิกปุ่มแชร์ Excel) -->
-                    <div class="btn-action-group">
-                        <button class="btn btn-primary" onclick="executeComparison()">
-                            <i class="fas fa-chart-line"></i> ประมวลผล
-                        </button>
-                        <button class="btn btn-preview" onclick="openReportFullscreen()">
-                            <i class="fas fa-eye"></i> พรีวิวรายงาน
-                        </button>
-                    </div>
-                </div>
-        
-                <!-- กรอบที่ 2: แสดงผลลัพธ์เปรียบเทียบ -->
-                <div class="card-box margin-top">
-                    <h3 class="card-title">📊 ผลการเปรียบเทียบข้อมูล</h3>
-                    <div class="table-responsive">
-                        <table class="compare-grid-table" id="compareGridTable">
-                            <thead id="compareTableHead">
-                                <!-- หัวตารางจะถูกปรับเปลี่ยน dynamic ผ่าน JavaScript ตามหัวข้อที่เลือก -->
-                            </thead>
-                            <tbody id="comparisonSingleContent">
-                                <!-- ข้อมูลรายวันจะถูกเรนเดอร์ในนี้ -->
-                            </tbody>
-                            <tfoot id="compareTableFoot">
-                                <!-- ยอดรวมท้ายตาราง -->
-                            </tfoot>
-                        </table>
-                    </div>
+<section id="pageComparison" class="app-page full-page" style="display: none;">
+    <div class="top-bar">
+        <span class="top-title">🔍 วิเคราะห์เปรียบเทียบ</span>
+    </div>
+
+    <div class="compare-container">
+        <!-- กรอบที่ 1: เลือกช่วงเวลา & เลือกหัวข้อ + ปุ่มกด (Compact Control Box) -->
+        <div class="card-box">
+            <h3 class="card-title">🔍 เลือกช่วงเวลา & ข้อมูลที่ต้องการเปรียบเทียบ</h3>
+            
+            <!-- ช่วงที่ 1 -->
+            <div class="date-group">
+                <label class="group-label">📅 ช่วงที่ 1</label>
+                <div class="date-input-row">
+                    <input type="date" id="startDate1" class="form-control compact-input">
+                    <span class="date-to">ถึง</span>
+                    <input type="date" id="endDate1" class="form-control compact-input">
                 </div>
             </div>
-        </section>
+
+            <!-- ช่วงที่ 2 -->
+            <div class="date-group">
+                <label class="group-label">📅 ช่วงที่ 2</label>
+                <div class="date-input-row">
+                    <input type="date" id="startDate2" class="form-control compact-input">
+                    <span class="date-to">ถึง</span>
+                    <input type="date" id="endDate2" class="form-control compact-input">
+                </div>
+            </div>
+
+            <!-- บรรทัดเลือกหัวข้อ + ปุ่มประมวลผล + ปุ่มพรีวิว (รวมในแถวเดียวกัน) -->
+            <div class="topic-action-row">
+                <select id="compareTopicSelect" class="form-control compact-input topic-select" onchange="executeComparison()">
+                    <option value="all">📌 ภาพรวมทั้งหมด (ลูกค้า & รายได้)</option>
+                    <option value="customers">👥 จำนวนลูกค้า</option>
+                    <option value="barberIncome">✂️ รายได้ช่าง</option>
+                    <option value="shopIncome">🏠 รายได้ร้าน</option>
+                </select>
+                <button class="btn btn-primary compact-btn" onclick="executeComparison()">
+                    <i class="fas fa-chart-line"></i> ประมวลผล
+                </button>
+                <button class="btn btn-preview compact-btn" onclick="openReportFullscreen()">
+                    <i class="fas fa-eye"></i> พรีวิว
+                </button>
+            </div>
+        </div>
+
+        <!-- กรอบที่ 2: แสดงผลลัพธ์ (ขยายเต็มพื้นที่ตามภาพที่ 1) -->
+        <div class="card-box margin-top full-height-card">
+            <h3 class="card-title">📊 ผลการเปรียบเทียบข้อมูล</h3>
+            <div class="table-responsive full-table-wrapper">
+                <table class="compare-grid-table" id="compareGridTable">
+                    <thead id="compareTableHead">
+                        <!-- Dynamic Header -->
+                    </thead>
+                    <tbody id="comparisonSingleContent">
+                        <!-- Data Rows -->
+                    </tbody>
+                    <tfoot id="compareTableFoot">
+                        <!-- Summary Footer -->
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
 
             <!-- ✅ แถบนำทางล่างสุด -->
             <nav class="bottom-nav">
