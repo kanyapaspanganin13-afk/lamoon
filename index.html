@@ -357,13 +357,14 @@
             </div>
         </section>
 <!-- ================= SECTION 5: เปรียบเทียบ ================= -->
-<section id="pageComparison" class="app-page full-page" style="display: none;">
-    <div class="top-bar">
-        <span class="top-title">🔍 วิเคราะห์เปรียบเทียบ</span>
+<section id="pageComparison" class="app-page full-page" style="display: block;">
+    <!-- ชื่อหน้า (ไม่มีกรอบลอย) -->
+    <div class="top-title-wrap">
+        <h2 class="top-title">🔍 วิเคราะห์เปรียบเทียบ</h2>
     </div>
 
     <div class="compare-container">
-        <!-- กรอบที่ 1: เลือกช่วงเวลา & เลือกหัวข้อ + ปุ่มกด -->
+        <!-- กรอบที่ 1: เลือกช่วงเวลา & เลือกหัวข้อ -->
         <div class="card-box">
             <h3 class="card-title">🔍 เลือกช่วงเวลา & ข้อมูลที่ต้องการเปรียบเทียบ</h3>
             
@@ -371,9 +372,9 @@
             <div class="date-group">
                 <label class="group-label">📅 ช่วงที่ 1</label>
                 <div class="date-input-row">
-                    <input type="date" id="startDate1" class="form-control compact-input">
+                    <input type="date" id="startDate1" class="form-control fix-compact-input">
                     <span class="date-to">ถึง</span>
-                    <input type="date" id="endDate1" class="form-control compact-input">
+                    <input type="date" id="endDate1" class="form-control fix-compact-input">
                 </div>
             </div>
 
@@ -381,17 +382,17 @@
             <div class="date-group">
                 <label class="group-label">📅 ช่วงที่ 2</label>
                 <div class="date-input-row">
-                    <input type="date" id="startDate2" class="form-control compact-input">
+                    <input type="date" id="startDate2" class="form-control fix-compact-input">
                     <span class="date-to">ถึง</span>
-                    <input type="date" id="endDate2" class="form-control compact-input">
+                    <input type="date" id="endDate2" class="form-control fix-compact-input">
                 </div>
             </div>
 
-            <!-- ช่องเลือกหัวข้อ 2 ช่อง (ช่วงที่ 1 และ ช่วงที่ 2) -->
+            <!-- ช่องเลือกหัวข้อ 2 ช่อง -->
             <div class="topic-double-row">
                 <div class="topic-col">
                     <label class="group-label">📊 หัวข้อช่วงที่ 1</label>
-                    <select id="compareTopicSelect1" class="form-control compact-input topic-select" onchange="syncTopics(1)">
+                    <select id="compareTopicSelect1" class="form-control fix-compact-input topic-select" onchange="syncTopics(1)">
                         <option value="all">📌 รายได้รวม</option>
                         <option value="customers">👥 จำนวนลูกค้า</option>
                         <option value="barberIncome">✂️ รายได้ช่าง</option>
@@ -400,7 +401,7 @@
                 </div>
                 <div class="topic-col">
                     <label class="group-label">📊 หัวข้อช่วงที่ 2</label>
-                    <select id="compareTopicSelect2" class="form-control compact-input topic-select" onchange="syncTopics(2)">
+                    <select id="compareTopicSelect2" class="form-control fix-compact-input topic-select" onchange="syncTopics(2)">
                         <option value="all">📌 รายได้รวม</option>
                         <option value="customers">👥 จำนวนลูกค้า</option>
                         <option value="barberIncome">✂️ รายได้ช่าง</option>
@@ -409,7 +410,7 @@
                 </div>
             </div>
 
-            <!-- บรรทัดปุ่มกด ประมวลผล / พรีวิว -->
+            <!-- แถบปุ่มกด -->
             <div class="action-btn-row">
                 <button class="btn btn-primary compact-btn" onclick="executeComparison()">
                     <i class="fas fa-chart-line"></i> ประมวลผล
@@ -433,7 +434,6 @@
         </div>
     </div>
 </section>
-
             <!-- ✅ แถบนำทางล่างสุด -->
             <nav class="bottom-nav">
             <div onclick="switchMainView('home')" id="navHome" class="nav-item">
