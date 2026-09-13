@@ -210,15 +210,15 @@ body > center, body > a, body > br { display: none !important; }
     line-height: 1.3 !important;
     white-space: nowrap !important;
 }
-/* กราเดียนต์ปุ่มเมนูรองรับ Dynamic Colors */
-.grad-blue { background: linear-gradient(135deg, var(--trans1), var(--trans2)); }
-.grad-green { background: linear-gradient(135deg, var(--cash1), var(--cash2)); }
-.grad-yellow { background: linear-gradient(135deg, var(--btn-his1), var(--btn-his2)); }
-.grad-red { background: linear-gradient(135deg, var(--danger), #b91c1c); }
-.grad-gray { background: linear-gradient(135deg, #94a3b8, #475569); }
-.grad-emerald { background: linear-gradient(135deg, var(--btn-clear1), var(--btn-clear2)); }
-.grad-purple { background: linear-gradient(135deg, #a855f7, #6b21a8); }
-.grad-cyan { background: linear-gradient(135deg, #06b6d4, #0e7490); }
+/* กราเดียนต์ปุ่มเมนูรองรับ Dynamic Colors (เพิ่ม !important เพื่อบังคับเปลี่ยนสี 100%) */
+.grad-yellow  { background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: #ffffff !important; } /* ส้มเหลือง */
+.grad-red     { background: linear-gradient(135deg, #ef4444, #b91c1c) !important; color: #ffffff !important; } /* แดง */
+.grad-blue    { background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important; color: #ffffff !important; } /* ฟ้า/น้ำเงิน */
+.grad-green   { background: linear-gradient(135deg, #10b981, #047857) !important; color: #ffffff !important; } /* เขียวสด */
+.grad-emerald { background: linear-gradient(135deg, #059669, #064e3b) !important; color: #ffffff !important; } /* เขียวมรกตเข้ม */
+.grad-gray    { background: linear-gradient(135deg, #64748b, #334155) !important; color: #ffffff !important; } /* เทาสเลท */
+.grad-purple  { background: linear-gradient(135deg, #a855f7, #6b21a8) !important; color: #ffffff !important; } /* ม่วง */
+.grad-cyan    { background: linear-gradient(135deg, #06b6d4, #0e7490) !important; color: #ffffff !important; } /* ฟ้าอมเขียว */
 /* ========= 📋 GRID LAYOUTS ========= */
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; }
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 8px; }
