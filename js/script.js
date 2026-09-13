@@ -1966,6 +1966,15 @@ async function handleGoogleSheet() {
 // ==========================================
 // 🔍 ฟังก์ชันระบบเปรียบเทียบข้อมูล (SECTION 5)
 // ==========================================
+// Helper: แปลงวันที่เป็นชื่อวันแบบย่อ ภาษาไทย
+function getDayName(dateStr) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const dateObj = new Date(y, m - 1, d);
+    // ✅ ใช้ตัวย่อ: อา., จ., อ., พ., พฤ., ศ., ส.
+    const dayNames = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+    return dayNames[dateObj.getDay()];
+}
+
 // Helper: แปลงวันที่
 function formatShortDate(dateStr) {
     if (!dateStr) return '-';
@@ -1977,12 +1986,11 @@ function formatTHDate(dateStr) {
     const [year, month, day] = dateStr.split('-');
     return `${day}/${month}/${parseInt(year) + 543}`;
 }
-// สร้างอาร์เรย์รายการวันที่
+// สร้างรายการวันที่
 function getDatesArray(startDate, endDate) {
     let dates = [];
     let currDate = new Date(startDate + 'T00:00:00');
     let lastDate = new Date(endDate + 'T00:00:00');
-    
     while (currDate <= lastDate) {
         const y = currDate.getFullYear();
         const m = String(currDate.getMonth() + 1).padStart(2, '0');
@@ -1992,138 +2000,130 @@ function getDatesArray(startDate, endDate) {
     }
     return dates;
 }
-// แปลงป้ายหัวข้อ
-function getTopicLabel(topic) {
-    const labels = {
-        'cust': 'จำนวนลูกค้า (คน)',
-        'barber': 'รายได้ช่าง (บาท)',
-        'shop': 'รายได้ร้าน (บาท)',
-        'total': 'รายได้รวม (บาท)'
-    };
-    return labels[topic] || topic;
-}
-// Format แสดงผล
-function formatValue(val, topic) {
-    if (topic === 'cust') return `${val.toLocaleString()} คน`;
-    return `฿${val.toLocaleString()}`;
-}
-// ดึงและคำนวณข้อมูลตามวันที่และหัวข้อที่เลือก
-function getValByTopic(dateStr, topic) {
+// ดึงข้อมูลลูกค้าและรายได้แยกตามวันที่
+function getDayData(dateStr) {
     const list = typeof archives !== 'undefined' ? archives : [];
-    if (!list.length) return 0;
+    if (!list.length) return { cust: 0, income: 0 };
     const dayRecords = list.filter(a => a.date === dateStr);
-    if (!dayRecords.length) return 0;
-    let totalCust = 0, totalBarber = 0, totalShop = 0, totalAll = 0;
+    if (!dayRecords.length) return { cust: 0, income: 0 };
+
+    let totalCust = 0, totalIncome = 0;
     dayRecords.forEach(a => {
-        const cust = a.count || (a.details && Array.isArray(a.details) ? a.details.length : 0);
-        totalCust += cust;
-        // ✅ ใช้สูตรเดียวกับที่คุณใช้ในส่วนอื่นของแอป
-        const totalIncome = Number(a.barber || a.total || 0); // ยอดรวม
-        // สูตรแบ่ง: ช่างได้ 70% ร้านได้ 30% (ปรับ % ตามจริงได้เลย)
-        const barberPart = Number(a.barberShare || Math.round(totalIncome * 0.70));
-        const shopPart = Number(a.shopShare || Math.round(totalIncome * 0.30));
-        totalBarber += barberPart;
-        totalShop += shopPart;
-        totalAll += totalIncome;
+        totalCust += a.count || (a.details && Array.isArray(a.details) ? a.details.length : 0);
+        totalIncome += Number(a.barber || a.total || 0);
     });
-    switch (topic) {
-        case 'cust':    return totalCust;
-        case 'barber':  return totalBarber;
-        case 'shop':    return totalShop;
-        case 'total':   return totalAll;
-        default:        return 0;
-    }
+    return { cust: totalCust, income: totalIncome };
 }
 
-// ✅ ฟังก์ชันประมวลผล — ปรับเป็น 3 คอลัมน์ ช่วงเดียว
+// ✅ ฟังก์ชันประมวลผล — เพิ่มคอลัมน์ "วัน"
 function processComparison() {
-    // ✅ อ่านแค่ช่วงที่ 1 + หัวข้อที่ 1
     const d1_start = document.getElementById('startDate1')?.value;
     const d1_end   = document.getElementById('endDate1')?.value;
-    const topic1 = document.getElementById('compareTopic1')?.value;
+    const d2_start = document.getElementById('startDate2')?.value;
+    const d2_end   = document.getElementById('endDate2')?.value;
 
-    if (!d1_start || !d1_end) {
-        alert("กรุณาเลือกช่วงเวลาให้ครบถ้วน");
+    if (!d1_start || !d1_end || !d2_start || !d2_end) {
+        alert("กรุณาเลือกช่วงเวลาให้ครบถ้วนทั้ง 2 ช่วง");
         return;
     }
 
-    // ✅ สร้างรายการวันที่ เรียงตามลำดับ
-    const range = getDatesArray(d1_start, d1_end);
+    // ดึงรายการวันที่แต่ละช่วง
+    const range1 = getDatesArray(d1_start, d1_end);
+    const range2 = getDatesArray(d2_start, d2_end);
+    const maxRows = Math.max(range1.length, range2.length);
 
-    // ✅ หัวตาราง 3 คอลัมน์
+    // ✅ หัวตาราง 8 คอลัมน์ (4+4) มีคอลัมน์ "วัน" ข้างหน้าวันที่
     const headHtml = `
         <tr>
-            <th colspan="3">ช่วงเวลา: ${formatTHDate(d1_start)} - ${formatTHDate(d1_end)}</th>
+            <th colspan="4">📅 ช่วงที่ 1 (${formatTHDate(d1_start)} - ${formatTHDate(d1_end)})</th>
+            <th colspan="4">📅 ช่วงที่ 2 (${formatTHDate(d2_start)} - ${formatTHDate(d2_end)})</th>
         </tr>
         <tr>
+            <th>วัน</th>
             <th>วันที่</th>
-            <th>${getTopicLabel(topic1)}</th>
-            <th>หมายเหตุ</th>
+            <th>ลูกค้า</th>
+            <th>รายได้</th>
+            <th>วัน</th>
+            <th>วันที่</th>
+            <th>ลูกค้า</th>
+            <th>รายได้</th>
         </tr>
     `;
 
-    // ✅ แถวข้อมูล — ใช้วันที่เป็นคีย์ค้นหา
+    // ✅ แถวข้อมูล — แสดงชื่อวัน + วันที่ + ลูกค้า + รายได้
     let bodyHtml = '';
-    let totalVal = 0;
+    let sum1Cust = 0, sum1Income = 0;
+    let sum2Cust = 0, sum2Income = 0;
 
-    range.forEach(dateStr => {
-        const val = getValByTopic(dateStr, topic1);
-        totalVal += val;
+    for (let i = 0; i < maxRows; i++) {
+        // ข้อมูลช่วงที่ 1
+        const date1 = range1[i] || null;
+        const dayName1 = date1 ? getDayName(date1) : '-';
+        const data1 = date1 ? getDayData(date1) : { cust: null, income: null };
+        if (data1.cust !== null) { sum1Cust += data1.cust; sum1Income += data1.income; }
+
+        // ข้อมูลช่วงที่ 2
+        const date2 = range2[i] || null;
+        const dayName2 = date2 ? getDayName(date2) : '-';
+        const data2 = date2 ? getDayData(date2) : { cust: null, income: null };
+        if (data2.cust !== null) { sum2Cust += data2.cust; sum2Income += data2.income; }
+
         bodyHtml += `
             <tr>
-                <td>${formatShortDate(dateStr)}</td>
-                <td>${formatValue(val, topic1)}</td>
-                <td></td>
+                <td>${dayName1}</td>
+                <td>${date1 ? formatShortDate(date1) : '-'}</td>
+                <td>${data1.cust !== null ? data1.cust.toLocaleString() + ' คน' : '-'}</td>
+                <td>${data1.income !== null ? '฿' + data1.income.toLocaleString() : '-'}</td>
+                <td>${dayName2}</td>
+                <td>${date2 ? formatShortDate(date2) : '-'}</td>
+                <td>${data2.cust !== null ? data2.cust.toLocaleString() + ' คน' : '-'}</td>
+                <td>${data2.income !== null ? '฿' + data2.income.toLocaleString() : '-'}</td>
             </tr>
         `;
-    });
+    }
 
-    // ✅ แถวรวมท้ายตาราง พื้นเหลือง
+    // ✅ แถวรวมท้ายตาราง — พื้นเหลือง ทั้ง 2 ฝั่ง
     const footHtml = `
         <tr style="font-weight: bold; background: #fcea23;">
-            <td>รวมทั้งหมด</td>
-            <td>${formatValue(totalVal, topic1)}</td>
-            <td>${range.length} วัน</td>
+            <td colspan="2">รวม</td>
+            <td>${sum1Cust.toLocaleString()} คน</td>
+            <td>฿${sum1Income.toLocaleString()}</td>
+            <td colspan="2">รวม</td>
+            <td>${sum2Cust.toLocaleString()} คน</td>
+            <td>฿${sum2Income.toLocaleString()}</td>
         </tr>
     `;
 
-    // ✅ แสดงผลลงตาราง
+    // แสดงผล
     document.getElementById('compareTableHead').innerHTML = headHtml;
     document.getElementById('comparisonSingleContent').innerHTML = bodyHtml;
     document.getElementById('compareTableFoot').innerHTML = footHtml;
 }
 
-// ✅ ฟังก์ชันเปิด Modal พรีวิว — ปรับให้ตรงกับโครงสร้างใหม่
+// ✅ พรีวิว — แสดงตรงกับตาราง 8 คอลัมน์
 function openPreviewModal() {
     const tbodyContent = document.getElementById('comparisonSingleContent')?.innerHTML.trim();
     if (!tbodyContent) {
         alert("⚠️ กรุณากดปุ่ม \"ประมวลผลข้อมูล\" ก่อนครับ");
         return;
     }
-
     const modal = document.getElementById('previewModal');
     const modalBody = document.getElementById('previewModalBody');
-    
-    if (!modal || !modalBody) {
-        alert("❌ ไม่พบหน้าต่างพรีวิว");
-        return;
-    }
+    if (!modal || !modalBody) { alert("❌ ไม่พบหน้าต่างพรีวิว"); return; }
 
     const tableHead = document.getElementById('compareTableHead')?.innerHTML || '';
     const tableFoot = document.getElementById('compareTableFoot')?.innerHTML || '';
 
     modalBody.innerHTML = `
-        <table style="width:100%; border-collapse:collapse; font-family:Tahoma,sans-serif; text-align:center;">
+        <table style="width:100%; border-collapse:collapse; font-family:Tahoma,sans-serif; text-align:center; font-size:11px;">
             <thead>${tableHead}</thead>
             <tbody>${tbodyContent}</tbody>
             <tfoot>${tableFoot}</tfoot>
         </table>
     `;
-
     modal.style.display = 'block';
 }
 
-// ✅ ฟังก์ชันปิด Modal พรีวิว
 function closePreviewModal() {
     const modal = document.getElementById('previewModal');
     if (modal) modal.style.display = 'none';
