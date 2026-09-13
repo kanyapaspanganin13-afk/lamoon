@@ -1981,7 +1981,7 @@ function formatTHDate(dateStr) {
     return `${day}/${month}/${parseInt(year) + 543}`;
 }
 
-// ฟังก์ชันสร้างรายการวันที่ครบทุกวันระหว่าง Start - End (รองรับ Timezone Offset)
+// สร้างอาร์เรย์วันที่ครบทุกวันระหว่าง Start - End
 function getDatesArray(startDate, endDate) {
     let dates = [];
     let currDate = new Date(startDate + 'T00:00:00');
@@ -1997,9 +1997,19 @@ function getDatesArray(startDate, endDate) {
     return dates;
 }
 
-// ฟังก์ชันดึงข้อมูลแยกตามประเภทหัวข้อ
+// แปลงชื่อหัวข้อแสดงใน Header
+function getTopicLabel(topic) {
+    const labels = {
+        'cust': 'ลูกค้า (คน)',
+        'barber': 'รายได้ช่าง',
+        'shop': 'รายได้ร้าน',
+        'total': 'รายได้รวม'
+    };
+    return labels[topic] || topic;
+}
+
+// ดึงข้อมูลจริงแยกตามประเภทหัวข้อ
 function getValByTopic(dateStr, topic) {
-    // ตรวจสอบแหล่งเก็บข้อมูลรายวันในระบบของคุณ (ลองค้นจาก window.dbData หรือ localStorage)
     const storeData = window.dbData || JSON.parse(localStorage.getItem('barberDailyData') || '{}');
     const dayData = storeData[dateStr] || {};
 
@@ -2017,31 +2027,20 @@ function getValByTopic(dateStr, topic) {
     }
 }
 
-// แปลงชื่อหัวข้อแสดงใน Header
-function getTopicLabel(topic) {
-    const labels = {
-        'cust': 'ลูกค้า (คน)',
-        'barber': 'รายได้ช่าง',
-        'shop': 'รายได้ร้าน',
-        'total': 'รายได้รวม'
-    };
-    return labels[topic] || topic;
-}
-
 // Format ตัวเลข
 function formatValue(val, topic) {
     if (topic === 'cust') return `${val.toLocaleString()} คน`;
     return `฿${val.toLocaleString()}`;
 }
 
-// ฟังก์ชันประมวลผลเปรียบเทียบ
+// ฟังก์ชันประมวลผลเปรียบเทียบ (อ้างอิง ID ตรงตาม HTML ของคุณ)
 function processComparison() {
-    const d1_start = document.getElementById('compareDate1Start')?.value;
-    const d1_end = document.getElementById('compareDate1End')?.value;
-    const topic1 = document.getElementById('compareTopic1')?.value;
+    const d1_start = document.getElementById('startDate1')?.value;
+    const d1_end   = document.getElementById('endDate1')?.value;
+    const d2_start = document.getElementById('startDate2')?.value;
+    const d2_end   = document.getElementById('endDate2')?.value;
 
-    const d2_start = document.getElementById('compareDate2Start')?.value;
-    const d2_end = document.getElementById('compareDate2End')?.value;
+    const topic1 = document.getElementById('compareTopic1')?.value;
     const topic2 = document.getElementById('compareTopic2')?.value;
 
     if (!d1_start || !d1_end || !d2_start || !d2_end) {
@@ -2053,23 +2052,22 @@ function processComparison() {
     const range2 = getDatesArray(d2_start, d2_end);
     const maxRows = Math.max(range1.length, range2.length);
 
-    let html = `
-        <table class="compare-grid-table">
-            <thead>
-                <tr>
-                    <th colspan="2">ช่วงที่ 1 (${formatTHDate(d1_start)} - ${formatTHDate(d1_end)})</th>
-                    <th colspan="2">ช่วงที่ 2 (${formatTHDate(d2_start)} - ${formatTHDate(d2_end)})</th>
-                </tr>
-                <tr>
-                    <th>วันที่</th>
-                    <th>${getTopicLabel(topic1)}</th>
-                    <th>วันที่</th>
-                    <th>${getTopicLabel(topic2)}</th>
-                </tr>
-            </thead>
-            <tbody>
+    // 1. สร้างส่วน Thead
+    const headHtml = `
+        <tr>
+            <th colspan="2">ช่วงที่ 1 (${formatTHDate(d1_start)} - ${formatTHDate(d1_end)})</th>
+            <th colspan="2">ช่วงที่ 2 (${formatTHDate(d2_start)} - ${formatTHDate(d2_end)})</th>
+        </tr>
+        <tr>
+            <th>วันที่</th>
+            <th>${getTopicLabel(topic1)}</th>
+            <th>วันที่</th>
+            <th>${getTopicLabel(topic2)}</th>
+        </tr>
     `;
 
+    // 2. สร้างส่วน Tbody (วนลูปเรียงวันที่ลงมาทุกวัน)
+    let bodyHtml = '';
     let total1 = 0, total2 = 0;
 
     for (let i = 0; i < maxRows; i++) {
@@ -2082,7 +2080,7 @@ function processComparison() {
         if (val1 !== null) total1 += val1;
         if (val2 !== null) total2 += val2;
 
-        html += `
+        bodyHtml += `
             <tr>
                 <td>${date1 ? formatShortDate(date1) : '-'}</td>
                 <td>${val1 !== null ? formatValue(val1, topic1) : '-'}</td>
@@ -2092,48 +2090,48 @@ function processComparison() {
         `;
     }
 
-    html += `
-            </tbody>
-            <tfoot>
-                <tr style="font-weight: bold; background: var(--bg);">
-                    <td>รวม</td>
-                    <td>${formatValue(total1, topic1)}</td>
-                    <td>รวม</td>
-                    <td>${formatValue(total2, topic2)}</td>
-                </tr>
-            </tfoot>
-        </table>
+    // 3. สร้างส่วน Tfoot
+    const footHtml = `
+        <tr style="font-weight: bold; background: var(--bg);">
+            <td>รวม</td>
+            <td>${formatValue(total1, topic1)}</td>
+            <td>รวม</td>
+            <td>${formatValue(total2, topic2)}</td>
+        </tr>
     `;
 
-    const resultContainer = document.getElementById('compareResultContainer');
-    if (resultContainer) {
-        resultContainer.innerHTML = html;
-    } else {
-        console.error("ไม่พบ Element ID: compareResultContainer");
-    }
+    // ยัดข้อมูลลง Element ตาม ID ใน HTML
+    document.getElementById('compareTableHead').innerHTML = headHtml;
+    document.getElementById('comparisonSingleContent').innerHTML = bodyHtml;
+    document.getElementById('compareTableFoot').innerHTML = footHtml;
 }
 
-// ผูก Event Listener เมื่อ DOM โหลดเสร็จเรียบร้อยแล้ว
+// ฟังก์ชันปิด Modal พรีวิว
+function closePreviewModal() {
+    const modal = document.getElementById('previewModal');
+    if (modal) modal.style.display = 'none';
+}
+
+// ผูกคำสั่งปุ่ม พรีวิว
 document.addEventListener('DOMContentLoaded', function() {
     const btnPreview = document.getElementById('btnPreviewCompare');
     if (btnPreview) {
         btnPreview.addEventListener('click', function() {
-            const resultContainer = document.getElementById('compareResultContainer');
-            const content = resultContainer ? resultContainer.innerHTML.trim() : '';
+            const tableElement = document.getElementById('compareGridTable');
+            const tbodyContent = document.getElementById('comparisonSingleContent')?.innerHTML.trim();
 
-            if (!content) {
+            if (!tbodyContent) {
                 alert("กรุณากดประมวลผลข้อมูลก่อนพรีวิว");
                 return;
             }
 
-            const modalContent = document.getElementById('fullReportContent');
-            const modal = document.getElementById('fullReportModal');
+            const modalBody = document.getElementById('previewModalBody');
+            const modal = document.getElementById('previewModal');
 
-            if (modalContent && modal) {
-                modalContent.innerHTML = content;
+            if (modalBody && modal) {
+                // คัดลอกโครงสร้างตารางทั้งหมดไปแสดงใน Modal
+                modalBody.innerHTML = `<table class="compare-grid-table">${tableElement.innerHTML}</table>`;
                 modal.style.display = 'block';
-            } else {
-                alert("ไม่พบโครงสร้าง Modal พรีวิวในหน้าเว็บ");
             }
         });
     }
