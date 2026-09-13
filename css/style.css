@@ -74,7 +74,6 @@ body > center, body > a, body > br { display: none !important; }
 .page.active, .sub-page.active, .app-page.active, .tab-panel.active { display: block !important; }
 
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
 /* ✅ แถบด้านบน */
 .top-bar {
     display: flex;
@@ -90,6 +89,22 @@ body > center, body > a, body > br { display: none !important; }
     font-weight: 800 !important;
     letter-spacing: 0.3px;
     color: var(--text);
+}
+/* ✅ หัวเรื่องแบบไม่มีกรอบ (สำหรับหน้าเปรียบเทียบ) */
+.top-title-wrap {
+    text-align: center;
+    padding: 4px 0 8px 0;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 0 16px 0 !important;
+}
+.top-title-wrap .top-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+    padding: 0;
 }
 .home-btn-wrapper, .btn-back-small { display: none !important; }
 
@@ -142,7 +157,6 @@ body > center, body > a, body > br { display: none !important; }
     white-space: nowrap;
     line-height: 1.1;
 }
-
 .app-page.full-page,
 #pageWorkGroup,
 #pageHome {
@@ -158,8 +172,8 @@ body > center, body > a, body > br { display: none !important; }
     width: 100% !important;
 }
 .menu-card {
-    background: var(--card) !important; /* ✅ อัปเดตพื้นหลังตามธีม */
-    border: 1px solid var(--border) !important; /* ✅ อัปเดตขอบตามธีม */
+    background: var(--card) !important;
+    border: 1px solid var(--border) !important;
     border-radius: 16px !important;
     padding: 18px 12px !important;
     min-height: 100px !important;
@@ -197,7 +211,6 @@ body > center, body > a, body > br { display: none !important; }
     line-height: 1.3 !important;
     white-space: nowrap !important;
 }
-
 /* กราเดียนต์ปุ่มเมนูรองรับ Dynamic Colors */
 .grad-blue { background: linear-gradient(135deg, var(--trans1), var(--trans2)); }
 .grad-green { background: linear-gradient(135deg, var(--cash1), var(--cash2)); }
@@ -228,7 +241,6 @@ body > center, body > a, body > br { display: none !important; }
 .grid-summary { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; margin-bottom: 10px; align-items: stretch; }
 
 /* ========= 🧩 CARDS & BOXES ========= */
-/* ✅ 1. ชื่อร้านขยับขึ้นสูงขึ้น + ปรับขนาดให้พอดี */
 h2, .top-bar, .top-title { 
     text-align: center; 
     color: var(--text); 
@@ -239,8 +251,6 @@ h2, .top-bar, .top-title {
     text-transform: uppercase; 
     font-size: 26px !important; 
 }
-
-/* ✅ 2. อินพุตและ Dropdown ขยายใหญ่ สัมผัสง่าย */
 select, input[type="text"], input[type="number"], input[type="date"], input[type="time"], input[type="month"] {
     width: 100%; 
     height: 76px !important; 
@@ -258,8 +268,6 @@ select, input[type="text"], input[type="number"], input[type="date"], input[type
     box-sizing: border-box;
     transition: background 0.3s, color 0.3s, border-color 0.3s;
 }
-
-/* ✅ 3. ช่องเลือกวันที่ */
 .input-date-wrap { 
     position: relative; 
     background: var(--bg); 
@@ -273,8 +281,6 @@ select, input[type="text"], input[type="number"], input[type="date"], input[type
 }
 .input-date-wrap span { font-weight: 800; color: var(--text); font-size: 20px !important; }
 .input-date-wrap input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
-
-/* ✅ 4. ช่องทรงผม / บริการ / ประเภทลูกค้า (ปรับแก้ตัวหนังสือล้น) */
 select#custType, select#hairStyle, select#extra1, select#extra2 { 
     height: 76px !important; 
     font-size: 18px !important; 
@@ -285,14 +291,10 @@ select#custType, select#hairStyle, select#extra1, select#extra2 {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
-/* ✅ 5. ช่องเวลาเริ่ม-เสร็จ */
 .time-box { position: relative; }
 .time-box label { position: absolute; top: 6px; left: 14px; font-size: 14px !important; font-weight: 800; color: var(--text); opacity: 0.8; z-index: 1; }
 .time-input-custom { padding-top: 18px !important; font-size: 28px !important; font-weight: 900; }
 input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
-
-/* ✅ 6. ช่องราคาสินค้า */
 .price-box { 
     position: relative; 
     background: var(--bg); 
@@ -307,8 +309,6 @@ input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
 }
 .baht { font-size: 42px !important; color: var(--accent); font-weight: 900; padding-left: 4px; }
 .price-box input { border: none; background: transparent; font-size: 50px !important; font-weight: 900; color: var(--text); text-align: right; padding-right: 6px; outline: none; width: 100%; }
-
-/* ✅ 7. ช่องทิป */
 .tip-box { 
     height: 82px !important; 
     background: var(--bg); 
@@ -324,8 +324,6 @@ input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
     justify-content: center;
     transition: background 0.3s, border-color 0.3s, color 0.3s;
 }
-
-/* ✅ 8. ช่องเลือกวิธีชำระเงิน */
 .select-wrap { 
     position: relative; 
     width: 100%; 
@@ -343,8 +341,6 @@ input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
     white-space: nowrap !important;
 }
 .select-wrap .arrow { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 14px; pointer-events: none; }
-
-/* ✅ 9. ปุ่มบันทึกข้อมูล */
 .btn-pay { 
     width: 100%; 
     height: 78px !important; 
@@ -365,12 +361,12 @@ input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
     transition: background 0.3s, color 0.3s;
 }
 .btn-pay i { font-size: 26px !important; }
-
 #mixPanel { display: none; background: var(--input-bg); padding: 14px; border-radius: 16px; border: 2px dashed var(--accent); margin: 12px 0; }
 #mixPanel label { display: block; font-size: 14px; font-weight: 700; text-align: center; margin-bottom: 6px; }
 #mixPanel label:first-of-type { color: var(--cash2); }
 #mixPanel label:last-of-type { color: var(--trans2); }
 #mixPanel input { height: 58px; border-radius: 14px; font-size: 18px; }
+
 /* ========= 📊 SUMMARY & REPORT ========= */
 .card-total { background: linear-gradient(135deg, var(--primary), var(--accent)); padding: 12px 10px; border-radius: 18px; text-align: center; box-shadow: 0 8px 12px -3px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; }
 .card-total small { font-weight: 700; color: #fff; opacity: 0.8; text-transform: uppercase; font-size: 13px; }
@@ -421,13 +417,12 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     box-shadow: 0 2px 4px rgba(0,0,0,0.06); 
 }
 
-/* ========= 🗓️ CUSTOM MONTH PICKER & WRAPPER ========= */
+/* ========= 🗓️ CUSTOM MONTH PICKER & REPORT ========= */
 .month-picker-wrap {
     display: flex;
     justify-content: center;
     padding: 8px 15px;
 }
-
 .month-picker-wrap input[type="month"] {
     max-width: 220px;
     height: 40px;
@@ -440,7 +435,6 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     color: var(--text);
     padding: 0 10px;
 }
-
 .tab-content-wrap {
     width: 100%;
     box-sizing: border-box;
@@ -460,7 +454,6 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 }
 .filter-month-wrap label { font-size: 13px; font-weight: 700; white-space: nowrap; color: var(--text); }
 .filter-month-wrap input { height: 46px; border-radius: 10px; font-size: 14px; }
-/* แยกการ์ดค้นหาและรายงานให้เป็นคนละกรอบเด็ดขาด */
 .filter-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -473,19 +466,15 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     gap: 10px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.03);
 }
-
 .filter-card-center {
     justify-content: center !important;
 }
-
 .filter-label {
     font-weight: 700;
     font-size: 14px;
     color: var(--text);
     white-space: nowrap;
 }
-
-/* กรอบแสดงตารางข้อมูลแบบแยกเดี่ยว */
 .report-data-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -495,8 +484,6 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     overflow-x: auto;
     box-shadow: 0 2px 6px rgba(0,0,0,0.03);
 }
-
-/* ปรับ Input & Select ให้อยู่ในกรอบสวยงาม */
 .filter-card .form-control {
     height: 42px;
     border-radius: 10px;
@@ -547,11 +534,143 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     padding: 9px 4px; 
     border-bottom: 1px solid var(--border); 
 }
-/* ==========================================
-   📌 เพิ่มเติม: ธีมและสไตล์สำหรับพรีวิว & คอนโทรลแบบ Compact
-   ========================================== */
 
-/* การจัดวางแถบควบคุมแบบกะทัดรัด */
+/* ========= 🔍 COMPARISON PAGE (หน้าเปรียบเทียบ) ========= */
+.compare-container {
+    padding: 0 4px 10px 4px;
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+.card-box {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border);
+    transition: background 0.3s, border-color 0.3s;
+}
+.compare-container,
+.card-box {
+    background: var(--card) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: none !important;
+    border-radius: 16px;
+}
+.margin-top {
+    margin-top: 10px;
+}
+.card-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--accent);
+}
+.date-group {
+    margin-bottom: 6px;
+}
+.group-label {
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 3px;
+    display: block;
+    color: var(--text);
+    opacity: 0.75;
+}
+.date-input-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.date-to {
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--text);
+    opacity: 0.5;
+}
+.fix-compact-input,
+.date-input-row input[type="date"],
+.topic-select {
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    font-size: 12px !important;
+    border-radius: 8px !important;
+    border: 1px solid var(--border) !important;
+    background-color: var(--bg) !important;
+    color: var(--text) !important;
+    padding: 0 8px !important;
+    box-sizing: border-box !important;
+    line-height: 38px !important;
+    width: 100% !important;
+    outline: none;
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+    flex: 1;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    filter: var(--calendar-icon-filter, none);
+}
+.topic-btn-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin-top: 8px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+.compact-btn {
+    flex: 1;
+    height: 38px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+}
+.btn-primary {
+    background: var(--primary, #2563eb);
+    color: #ffffff;
+}
+.btn-preview {
+    background: var(--accent, #0ea5e9);
+    color: #ffffff;
+}
+.full-height-card {
+    min-height: 220px;
+}
+.full-table-wrapper {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+}
+.compare-grid-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    text-align: center;
+    color: var(--text);
+}
+.compare-grid-table th,
+.compare-grid-table td {
+    padding: 6px 4px;
+    border: 1px solid var(--border);
+}
+.compare-grid-table th {
+    background: var(--bg);
+    font-weight: 700;
+}
+
+/* ========= 📸 PREVIEW MODAL (เต็มจอสำหรับแคปจอ) ========= */
 .filter-card-compact {
     display: flex;
     gap: 6px;
@@ -561,8 +680,6 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     background-color: var(--card);
     border-radius: 12px;
 }
-
-/* ปรับขนาดและธีมช่องเลือกเดือน */
 .compact-input {
     flex: 1;
     height: 38px !important;
@@ -576,45 +693,19 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     outline: none;
     transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
-
-/* สไตล์พื้นฐานปุ่มในแถบควบคุม */
-.compact-btn {
-    height: 38px !important;
-    padding: 0 10px;
-    font-size: 13px;
-    font-weight: bold;
-    border-radius: 8px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    white-space: nowrap;
-    cursor: pointer;
-    box-sizing: border-box;
-    transition: background-color 0.3s, color 0.3s, opacity 0.2s;
-}
-
-/* ปุ่มพรีวิว (อ้างอิงสีตามธีมหลัก) */
 .btn-preview-fullscreen.compact-btn {
     background-color: var(--primary, #2563eb);
     color: #ffffff;
     border: none;
 }
-
-/* ปุ่มแชร์ไฟล์ (อ้างอิงสีตามธีม success) */
 .btn-export-excel.compact-btn {
     background-color: var(--success, #10b981);
     color: #ffffff;
     border: none;
 }
-
 .compact-btn:hover {
     opacity: 0.9;
 }
-
-/* ==========================================
-   📌 กรอบ Modal พรีวิวรายงานเต็มจอ (เปลี่ยนตามธีม)
-   ========================================== */
-
 .full-report-modal {
     display: none;
     position: fixed;
@@ -623,15 +714,12 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     width: 100vw;
     height: 100vh;
     z-index: 99999;
-    overflow-y: auto;
-    padding: 15px 12px;
+    padding: 8px 6px !important;
     box-sizing: border-box;
-    background-color: var(--card);
-    color: var(--text);
-    transition: background-color 0.3s, color 0.3s;
+    background: var(--card, #ffffff);
+    color: var(--text, #1e293b);
+    overflow: hidden !important;
 }
-
-/* ส่วนหัวของ Modal */
 .full-report-modal-header {
     display: flex;
     justify-content: space-between;
@@ -640,15 +728,11 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     padding-bottom: 8px;
     border-bottom: 1px solid var(--border);
 }
-
-/* ข้อความหัวข้อ */
 .full-report-modal-title {
     font-weight: bold;
     color: var(--text);
     font-size: 15px;
 }
-
-/* ปุ่มปิดหน้านี้ */
 .btn-close-modal {
     background-color: var(--danger, #ef4444);
     color: #ffffff;
@@ -660,12 +744,54 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     cursor: pointer;
     transition: opacity 0.2s;
 }
-
 .btn-close-modal:hover {
     opacity: 0.9;
 }
+#fullReportContent {
+    width: 100%;
+    padding: 0 !important;
+}
+#fullReportContent h1, 
+#fullReportContent h2, 
+#fullReportContent h3, 
+#fullReportContent .report-title {
+    font-size: 13px !important;
+    margin: 2px 0 !important;
+    padding: 0 !important;
+    line-height: 1.1 !important;
+    color: var(--primary, #0284c7) !important;
+}
+#fullReportContent table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-top: 2px !important;
+}
+#fullReportContent th {
+    padding: 2.5px 2px !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    line-height: 1.0 !important;
+    background: var(--bg, #f8fafc) !important;
+    color: var(--text, #334155) !important;
+    border-bottom: 1.5px solid var(--border, #cbd5e1) !important;
+}
+#fullReportContent td {
+    padding: 1px 2px !important;
+    font-size: 10px !important;
+    line-height: 1.05 !important;
+    border-bottom: 1px solid var(--border, #f1f5f9) !important;
+    text-align: center !important;
+    color: var(--text, #1e293b) !important;
+}
+#fullReportContent tfoot tr,
+#fullReportContent tfoot td,
+#fullReportContent tr:last-child td {
+    font-weight: bold !important;
+    padding: 3px 2px !important;
+    font-size: 10.5px !important;
+}
 
-/* ========= 💰 ACCOUNT PAGE ========= */
+/* ========= 💰 ACCOUNT & SETTINGS ========= */
 .card { background: var(--card); border-radius: 20px; padding: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); border: 1px solid var(--border); margin-bottom: 12px; transition: background 0.3s, border-color 0.3s; }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .card-header b { font-size: 20px; color: var(--accent); }
@@ -703,7 +829,6 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 .btn-save { background: var(--success); color: #fff; box-shadow: 0 3px 8px rgba(34,197,94,0.25); }
 .btn-close { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
 textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); font-family: 'Kanit', sans-serif; font-size: 13px; line-height: 1.5; outline: none; resize: none; transition: background 0.3s, color 0.3s; }
-
 .settings-modal {
   max-width: 400px;
   width: 94%;
@@ -831,109 +956,9 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
   margin-top: 12px;
   color: var(--text);
 }
-/* ========= 📱 RESPONSIVE (ปรับสเกลอัตโนมัติ ไม่ให้ล้นจอมือถือเล็ก) ========= */
-@media (max-width: 395px) {
-  .main-wrap { padding: 8px; margin: 4px auto; border-radius: 18px; }
-  select, input, .input-date-wrap { height: 70px !important; font-size: 17px !important; }
-  select#custType, select#hairStyle, select#extra1, select#extra2 { font-size: 16px !important; }
-  .price-box, .tip-box { height: 74px !important; }
-  .price-box input { font-size: 42px !important; }
-  .baht { font-size: 34px !important; }
-  .select-wrap, .btn-pay { height: 72px !important; font-size: 18px !important; }
-  .btn-pay i { font-size: 22px !important; }
-}
 
-@media (max-width: 360px) {
-  .grid-svc { grid-template-columns: 1.1fr 1fr 1fr; gap: 6px; }
-  .grid-price { gap: 6px; }
-  .price-box { min-height: 68px; }
-  .tip-box { min-height: 68px !important; font-size: 22px !important; }
-  .baht { font-size: 28px !important; }
-  .price-box input { font-size: 34px !important; }
-  select#hairStyle, select#extra1, select#extra2 { font-size: 14px !important; }
-}
-/* ==========================================
-   📸 บีบอัดตารางให้อยู่ในหน้าจอเดียวสำหรับพรีวิว/แคปจอ
-   ========================================== */
-
-/* ล็อกความสูง Modal ไม่ให้มีส่วนเกิน */
-.full-report-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 99999;
-    padding: 8px 6px !important;
-    box-sizing: border-box;
-    background: var(--card, #ffffff);
-    color: var(--text, #1e293b);
-    overflow: hidden !important; /* ซ่อนสโครลบาร์บีบให้อยู่หน้าเดียว */
-}
-
-/* คอนเทนเนอร์ลด Padding ให้ชิดขอบมากขึ้น */
-#fullReportContent {
-    width: 100%;
-    padding: 0 !important;
-}
-
-/* บีบส่วนหัวข้อให้กระชับ */
-#fullReportContent h1, 
-#fullReportContent h2, 
-#fullReportContent h3, 
-#fullReportContent .report-title {
-    font-size: 13px !important;
-    margin: 2px 0 !important;
-    padding: 0 !important;
-    line-height: 1.1 !important;
-    color: var(--primary, #0284c7) !important;
-}
-
-/* บีบตารางให้พอดี 31 วันในหน้าเดียว */
-#fullReportContent table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    margin-top: 2px !important;
-}
-
-/* บีบความสูงของหัวตาราง */
-#fullReportContent th {
-    padding: 2.5px 2px !important;
-    font-size: 10.5px !important;
-    font-weight: 700 !important;
-    line-height: 1.0 !important;
-    background: var(--bg, #f8fafc) !important;
-    color: var(--text, #334155) !important;
-    border-bottom: 1.5px solid var(--border, #cbd5e1) !important;
-}
-
-/* บีบระยะห่างระหว่างบรรทัด (Padding) ของแถวข้อมูล */
-#fullReportContent td {
-    padding: 1px 2px !important; /* ลดระยะห่างแถวเหลือ 1px เพื่อให้ยัด 31 วันลงหน้าจอได้ */
-    font-size: 10px !important;
-    line-height: 1.05 !important;
-    border-bottom: 1px solid var(--border, #f1f5f9) !important;
-    text-align: center !important;
-    color: var(--text, #1e293b) !important;
-}
-
-/* แถบรวบยอดท้ายตาราง */
-#fullReportContent tfoot tr,
-#fullReportContent tfoot td,
-#fullReportContent tr:last-child td {
-    font-weight: bold !important;
-    padding: 3px 2px !important;
-    font-size: 10.5px !important;
-}
-
-/* ==========================================
-   📱 MOBILE RESPONSIVE (ย้ายมาไว้ด้านล่างสุดทั้งหมด)
-   ========================================== */
-
-/* มือถือกว้างไม่เกิน 480px */
+/* ========= 📱 RESPONSIVE ========= */
 @media (max-width: 480px) {
-    /* 1. จัดแถบควบคุมในแนวนอน และบีบปุ่มให้สมดุล */
     .filter-card-compact {
         display: flex !important;
         flex-direction: row !important;
@@ -942,8 +967,6 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
         gap: 6px !important;
         padding: 8px !important;
     }
-
-    /* 2. บังคับช่องเลือกเดือนให้ยืดหยุ่นตามพื้นที่ */
     .compact-input, 
     .filter-card .form-control {
         flex: 1 1 auto !important;
@@ -954,8 +977,6 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
         padding: 0 6px !important;
         text-align: center !important;
     }
-
-    /* 3. ปุ่มพรีวิวและปุ่มแชร์ขนาดกะทัดรัด ตัวหนังสือไม่ตกบรรทัด */
     .compact-btn {
         flex: 0 0 auto !important;
         height: 38px !important;
@@ -963,18 +984,14 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
         font-size: 12px !important;
         white-space: nowrap !important;
     }
-
     .btn-preview-fullscreen.compact-btn {
         background-color: var(--primary, #2563eb) !important;
         color: #ffffff !important;
     }
-
     .btn-export-excel.compact-btn {
         background-color: var(--success, #10b981) !important;
         color: #ffffff !important;
     }
-
-    /* 4. ดึง Modal พรีวิวขึ้นมาทับเต็มจอมือถือ ไม่ให้หลุดไปกองด้านล่าง */
     .full-report-modal {
         position: fixed !important;
         top: 0 !important;
@@ -983,11 +1000,7 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
         height: 100vh !important;
         z-index: 999999 !important;
         padding: 12px 10px !important;
-        box-sizing: border-box !important;
-        background-color: var(--card, #ffffff) !important;
     }
-
-    /* จัดส่วนหัว Modal ให้ปุ่มปิดกดง่ายบนมือถือ */
     .full-report-modal-header {
         display: flex !important;
         justify-content: space-between !important;
@@ -996,213 +1009,44 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
         margin-bottom: 8px !important;
         border-bottom: 1px solid var(--border, #e2e8f0) !important;
     }
-
-    .full-report-modal-title {
-        font-size: 14px !important;
-    }
-
-    .btn-close-modal {
-        padding: 5px 12px !important;
-        font-size: 12px !important;
-    }
+    .full-report-modal-title { font-size: 14px !important; }
+    .btn-close-modal { padding: 5px 12px !important; font-size: 12px !important; }
 }
-
-/* มือถือจอเล็กพิเศษ (ต่ำกว่า 380px) */
+@media (max-width: 395px) {
+    .main-wrap { padding: 8px; margin: 4px auto; border-radius: 18px; }
+    select, input, .input-date-wrap { height: 70px !important; font-size: 17px !important; }
+    select#custType, select#hairStyle, select#extra1, select#extra2 { font-size: 16px !important; }
+    .price-box, .tip-box { height: 74px !important; }
+    .price-box input { font-size: 42px !important; }
+    .baht { font-size: 34px !important; }
+    .select-wrap, .btn-pay { height: 72px !important; font-size: 18px !important; }
+    .btn-pay i { font-size: 22px !important; }
+}
+@media (max-width: 360px) {
+    .grid-svc { grid-template-columns: 1.1fr 1fr 1fr; gap: 6px; }
+    .grid-price { gap: 6px; }
+    .price-box { min-height: 68px; }
+    .tip-box { min-height: 68px !important; font-size: 22px !important; }
+    .baht { font-size: 28px !important; }
+    .price-box input { font-size: 34px !important; }
+    select#hairStyle, select#extra1, select#extra2 { font-size: 14px !important; }
+}
 @media (max-width: 380px) {
-    #fullReportContent table {
-        font-size: 12.5px !important;
-    }
-    #fullReportContent th {
-        padding: 7px 2px !important;
-        font-size: 12px !important;
-    }
-    #fullReportContent td {
-        padding: 7px 2px !important;
-        font-size: 12.5px !important;
-    }
-}
-/* ลบกรอบลอยด้านบน และจัดหัวข้อหน้าให้อยู่ตรงกลาง */
-.top-title-wrap {
-    text-align: center;
-    padding: 4px 0 8px 0;
-}
-.top-title-wrap .top-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-    margin: 0;
+    #fullReportContent table { font-size: 12.5px !important; }
+    #fullReportContent th { padding: 7px 2px !important; font-size: 12px !important; }
+    #fullReportContent td { padding: 7px 2px !important; font-size: 12.5px !important; }
 }
 
-/* คอนเทนเนอร์หลัก */
-.compare-container {
-    padding: 0 4px 10px 4px;
-    max-width: 600px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-}
-
-.card-box {
-    background: var(--card);
-    border-radius: 16px;
-    padding: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    border: 1px solid var(--border);
-    transition: background 0.3s, border-color 0.3s;
-}
-
-.margin-top {
-    margin-top: 10px;
-}
-
-.card-title {
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: var(--accent);
-}
-
-.date-group {
-    margin-bottom: 6px;
-}
-
-.group-label {
-    font-size: 11px;
-    font-weight: 600;
-    margin-bottom: 3px;
-    display: block;
-    color: var(--text);
-    opacity: 0.75;
-}
-
-.date-input-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.date-to {
-    font-size: 11px;
-    font-weight: bold;
-    color: var(--text);
-    opacity: 0.5;
-}
-
-/* ✅ บังคับทุกช่องสูง 38px เท่ากันเป๊ะ */
-.fix-compact-input,
-.date-input-row input[type="date"],
-.topic-select {
-    height: 38px !important;
-    min-height: 38px !important;
-    max-height: 38px !important;
-    font-size: 12px !important;
-    border-radius: 8px !important;
-    border: 1px solid var(--border) !important;
-    background-color: var(--bg) !important;
-    color: var(--text) !important;
-    padding: 0 8px !important;
-    box-sizing: border-box !important;
-    line-height: 38px !important;
-    width: 100% !important;
-    outline: none;
-    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
-    flex: 1;
-}
-
-/* ปรับไอคอนปฏิทินมือถือ */
-input[type="date"]::-webkit-calendar-picker-indicator {
-    padding: 0;
-    margin: 0;
-    cursor: pointer;
-    filter: var(--calendar-icon-filter, none);
-}
-
-/* ✅ หัวข้อ + ปุ่ม เรียงแถวเดียวกัน */
-.topic-btn-row {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 8px;
-    margin-top: 8px;
-    margin-bottom: 10px;
-    align-items: center;
-}
-
-/* ✅ ปุ่ม */
-.compact-btn {
-    flex: 1;
-    height: 38px !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    border-radius: 8px !important;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    transition: opacity 0.2s;
-    white-space: nowrap;
-}
-
-.btn-primary {
-    background: var(--primary, #2563eb);
-    color: #ffffff;
-}
-
-.btn-preview {
-    background: var(--accent, #0ea5e9);
-    color: #ffffff;
-}
-
-/* กรอบตารางด้านล่าง */
-.full-height-card {
-    min-height: 220px;
-}
-
-.full-table-wrapper {
-    overflow-x: auto;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-}
-
-.compare-grid-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    text-align: center;
-    color: var(--text);
-}
-
-.compare-grid-table th,
-.compare-grid-table td {
-    padding: 6px 4px;
-    border: 1px solid var(--border);
-}
-
-.compare-grid-table th {
-    background: var(--bg);
-    font-weight: 700;
-}
-
-/* ปรับพื้นหลังให้กลมกลืนกับระบบ */
-.compare-container,
-.card-box {
-    background: var(--card) !important;
-    border: 1px solid var(--border) !important;
-    box-shadow: none !important;
-    border-radius: 16px;
-}
-
-body {
-    background-color: var(--bg);
-}
-/* ========= 📄 REPORT & HISTORY ========= */
-#dailyList, #accHistory, #reportContent { color: var(--text); }
-#accHistory::-webkit-scrollbar, #reportContent::-webkit-scrollbar { width: 4px; }
-#accHistory::-webkit-scrollbar-thumb, #reportContent::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-
-/* ========= ✨ SweetAlert2 THEME ========= */
+/* ========= ✨ SWEETALERT2 THEME ========= */
 .swal2-popup { font-family: 'Kanit', sans-serif !important; border-radius: 16px !important; background: var(--card) !important; color: var(--text) !important; }
 .swal2-title, .swal2-content { color: var(--text) !important; }
 .swal2-container { z-index: 99999 !important; }
 .swal2-input { border-radius: 10px !important; border: 1px solid var(--border) !important; background: var(--bg) !important; color: var(--text) !important; font-size: 13px !important; height: 44px !important; }
+
+/* ========= GLOBAL BODY ========= */
+body {
+    background-color: var(--bg);
+}
+#dailyList, #accHistory, #reportContent { color: var(--text); }
+#accHistory::-webkit-scrollbar, #reportContent::-webkit-scrollbar { width: 4px; }
+#accHistory::-webkit-scrollbar-thumb, #reportContent::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
