@@ -358,11 +358,13 @@
         </section>
 <!-- ================= SECTION 5: เปรียบเทียบ ================= -->
 <section id="pageComparison" class="app-page full-page" style="display: none;">
+    <!-- ชื่อหน้า (ไม่มีกรอบลอยด้านบน) -->
     <div class="top-title-wrap">
         <h2 class="top-title">🔍 วิเคราะห์เปรียบเทียบ</h2>
     </div>
+
     <div class="compare-container">
-        <!-- กรอบที่ 1: เลือกช่วงเวลา & เลือกหัวข้อ -->
+        <!-- กรอบที่ 1: เลือกช่วงเวลา & ข้อมูล -->
         <div class="card-box">
             <h3 class="card-title">🔍 เลือกช่วงเวลา & ข้อมูลที่ต้องการเปรียบเทียบ</h3>
             
@@ -386,29 +388,27 @@
                 </div>
             </div>
 
-            <!-- ช่องเลือกหัวข้อ 2 ช่อง -->
+            <!-- ตัวเลือกหัวข้อ 3 แบบใหม่ -->
             <div class="topic-double-row">
                 <div class="topic-col">
                     <label class="group-label">📊 หัวข้อช่วงที่ 1</label>
                     <select id="compareTopicSelect1" class="form-control fix-compact-input topic-select" onchange="syncTopics(1)">
-                        <option value="all">📌 รายได้รวม</option>
-                        <option value="customers">👥 จำนวนลูกค้า</option>
-                        <option value="barberIncome">✂️ รายได้ช่าง</option>
-                        <option value="shopIncome">🏠 รายได้ร้าน</option>
+                        <option value="barber">👥 ลูกค้า + ✂️ รายได้ช่าง</option>
+                        <option value="shop">👥 ลูกค้า + 🏠 รายได้ร้าน</option>
+                        <option value="total">👥 ลูกค้า + 📌 รายได้รวม</option>
                     </select>
                 </div>
                 <div class="topic-col">
                     <label class="group-label">📊 หัวข้อช่วงที่ 2</label>
                     <select id="compareTopicSelect2" class="form-control fix-compact-input topic-select" onchange="syncTopics(2)">
-                        <option value="all">📌 รายได้รวม</option>
-                        <option value="customers">👥 จำนวนลูกค้า</option>
-                        <option value="barberIncome">✂️ รายได้ช่าง</option>
-                        <option value="shopIncome">🏠 รายได้ร้าน</option>
+                        <option value="barber">👥 ลูกค้า + ✂️ รายได้ช่าง</option>
+                        <option value="shop">👥 ลูกค้า + 🏠 รายได้ร้าน</option>
+                        <option value="total">👥 ลูกค้า + 📌 รายได้รวม</option>
                     </select>
                 </div>
             </div>
 
-            <!-- แถบปุ่มกด -->
+            <!-- ปุ่มประมวลผล & พรีวิว -->
             <div class="action-btn-row">
                 <button class="btn btn-primary compact-btn" onclick="executeComparison()">
                     <i class="fas fa-chart-line"></i> ประมวลผล
@@ -419,7 +419,7 @@
             </div>
         </div>
 
-        <!-- กรอบที่ 2: แสดงผลลัพธ์ -->
+        <!-- กรอบที่ 2: แสดงผลตารางเปรียบเทียบ -->
         <div class="card-box margin-top full-height-card">
             <h3 class="card-title">📊 ผลการเปรียบเทียบข้อมูล</h3>
             <div class="table-responsive full-table-wrapper">
@@ -432,6 +432,19 @@
         </div>
     </div>
 </section>
+
+<!-- Modal พรีวิวรายงานเต็มหน้าจอ -->
+<div id="previewModal" class="preview-modal" style="display: none;">
+    <div class="preview-modal-content">
+        <div class="preview-modal-header">
+            <h3>📊 พรีวิวรายงานวิเคราะห์เปรียบเทียบ</h3>
+            <button class="close-btn" onclick="closePreviewModal()">&times;</button>
+        </div>
+        <div class="preview-modal-body" id="previewModalBody">
+            <!-- คัดลอกตารางมาแสดงผลแบบพิมพ์/พรีวิว -->
+        </div>
+    </div>
+</div>
             <!-- ✅ แถบนำทางล่างสุด -->
             <nav class="bottom-nav">
             <div onclick="switchMainView('home')" id="navHome" class="nav-item">
