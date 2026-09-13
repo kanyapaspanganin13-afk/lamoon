@@ -1189,6 +1189,17 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background: var(--bg);
     font-weight: 700;
 }
+/* ลบ Background ขาวกระด้าง และจัดกลมกลืนกับตัวแประระบบ */
+.compare-container, .card-box {
+    background: var(--card) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: none !important; /* ลบ Shadow ลอยออก */
+    border-radius: 16px;
+}
+
+body {
+    background-color: var(--bg); /* ให้กรอบรอบนอกเป็นสีพื้นหลังหลัก */
+}
 /* ========= 📄 REPORT & HISTORY ========= */
 #dailyList, #accHistory, #reportContent { color: var(--text); }
 #accHistory::-webkit-scrollbar, #reportContent::-webkit-scrollbar { width: 4px; }
