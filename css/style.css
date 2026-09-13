@@ -1021,22 +1021,34 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
         font-size: 12.5px !important;
     }
 }
+/* ลบกรอบลอยด้านบน และจัดหัวข้อหน้าให้อยู่ตรงกลาง */
+.top-title-wrap {
+    text-align: center;
+    padding: 10px 0;
+}
+
+.top-title-wrap .top-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
 /* คอนเทนเนอร์หลัก */
 .compare-container {
-    padding: 10px;
+    padding: 0 10px 10px 10px;
     max-width: 600px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 120px);
 }
 
 .card-box {
-    background: var(--card, #ffffff);
+    background: #ffffff;
     border-radius: 14px;
     padding: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    border: 1px solid var(--border, #e2e8f0);
+    border: 1px solid #e2e8f0;
 }
 
 .margin-top {
@@ -1047,7 +1059,7 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
     font-size: 13px;
     font-weight: 700;
     margin-bottom: 8px;
-    color: var(--primary, #0284c7);
+    color: #0284c7;
 }
 
 .date-group {
@@ -1059,7 +1071,7 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
     font-weight: 600;
     margin-bottom: 3px;
     display: block;
-    color: var(--text-muted, #64748b);
+    color: #64748b;
 }
 
 .date-input-row {
@@ -1074,24 +1086,35 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
     color: #94a3b8;
 }
 
-/* ปรับความสูงช่องวันที่และช่องดรอปดาวน์ให้เตี้ยลงแบบกระชับ (สูง 38px) เท่ากันทุกช่อง */
-.compact-input {
+/* บังคับช่อง input date และ select ให้มีขนาดแบนกะทัดรัดเท่ากันเป๊ะ (สูง 38px) */
+.fix-compact-input,
+.date-input-row input[type="date"],
+.topic-select {
     height: 38px !important;
     min-height: 38px !important;
+    max-height: 38px !important;
     font-size: 12px !important;
     border-radius: 8px !important;
-    border: 1px solid var(--border, #e2e8f0) !important;
-    background-color: var(--bg, #f8fafc) !important;
+    border: 1px solid #cbd5e1 !important;
+    background-color: #f8fafc !important;
     padding: 0 8px !important;
-    box-shadow: none !important;
     box-sizing: border-box !important;
+    line-height: 38px !important;
+    width: 100% !important;
 }
 
-/* การจัดวางช่องเลือกหัวข้อแบบ 2 ช่องขนานกัน */
+/* ปรับช่องวันที่ในเบราว์เซอร์มือถือ/iOS ไม่ให้ยืดขยายสูงเกิน */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+}
+
+/* ช่องเลือกหัวข้อขนานกัน */
 .topic-double-row {
     display: flex;
     gap: 8px;
-    margin-top: 8px;
+    margin-top: 6px;
     margin-bottom: 10px;
 }
 
@@ -1100,14 +1123,7 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
     min-width: 0;
 }
 
-.topic-select {
-    width: 100% !important;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-/* แถบปุ่มกดประมวลผล / พรีวิว */
+/* ปุ่มกด */
 .action-btn-row {
     display: flex;
     gap: 8px;
@@ -1137,20 +1153,27 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
     color: #ffffff;
 }
 
-/* กรอบแสดงผลเต็มพื้นที่ด้านล่าง */
+/* กรอบตารางด้านล่าง */
 .full-height-card {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
     min-height: 220px;
-    overflow: hidden;
 }
 
 .full-table-wrapper {
-    flex: 1;
-    overflow-y: auto;
+    overflow-x: auto;
     border-radius: 8px;
-    border: 1px solid var(--border, #f1f5f9);
+    border: 1px solid #f1f5f9;
+}
+
+.compare-grid-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    text-align: center;
+}
+
+.compare-grid-table th, .compare-grid-table td {
+    padding: 6px 4px;
+    border: 1px solid #e2e8f0;
 }
 /* ========= 📄 REPORT & HISTORY ========= */
 #dailyList, #accHistory, #reportContent { color: var(--text); }
