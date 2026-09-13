@@ -2014,7 +2014,6 @@ function getDayData(dateStr) {
     });
     return { cust: totalCust, income: totalIncome };
 }
-// ✅ ประมวลผลข้อมูลและแสดงตาราง — สีเปลี่ยนตามธีมอัตโนมัติ
 // ✅ ประมวลผลข้อมูล — เปลี่ยนค่าตามหัวข้อที่เลือกได้แล้ว
 function processComparison() {
     const d1_start = document.getElementById('startDate1')?.value;
@@ -2043,23 +2042,23 @@ function processComparison() {
     const label1 = topicLabel(topic1);
     const label2 = topicLabel(topic2);
 
-    // ✅ หัวตาราง — เปลี่ยนชื่อตามหัวข้อ
-    const headHtml = `
-        <tr>
-            <th colspan="4" style="background: var(--summary-bg); color: var(--primary); border: 1px solid var(--summary-border);">📅 ช่วงที่ 1 (${formatTHDate(d1_start)} - ${formatTHDate(d1_end)})</th>
-            <th colspan="4" style="background: var(--btn-compare1); color: var(--btn-text);">📅 ช่วงที่ 2 (${formatTHDate(d2_start)} - ${formatTHDate(d2_end)})</th>
-        </tr>
-        <tr>
-            <th style="background: var(--primary); color: #fff;">วัน</th>
-            <th style="background: var(--primary); color: #fff;">วันที่</th>
-            <th style="background: var(--primary); color: #fff;">ลูกค้า</th>
-            <th style="background: var(--primary); color: #fff;">${label1}</th>
-            <th style="background: var(--btn-compare2); color: #fff;">วัน</th>
-            <th style="background: var(--btn-compare2); color: #fff;">วันที่</th>
-            <th style="background: var(--btn-compare2); color: #fff;">ลูกค้า</th>
-            <th style="background: var(--btn-compare2); color: #fff;">${label2}</th>
-        </tr>
-    `;
+   // ✅ หัวตาราง — เปลี่ยนชื่อตามหัวข้อให้ถูกต้อง
+         const headHtml = `
+             <tr>
+                 <th colspan="4" style="background: var(--summary-bg); color: var(--primary); border: 1px solid var(--summary-border);">📅 ช่วงที่ 1 (${formatTHDate(d1_start)} - ${formatTHDate(d1_end)})</th>
+                 <th colspan="4" style="background: var(--btn-compare1); color: var(--btn-text);">📅 ช่วงที่ 2 (${formatTHDate(d2_start)} - ${formatTHDate(d2_end)})</th>
+             </tr>
+             <tr>
+                 <th style="background: var(--primary); color: #fff;">วัน</th>
+                 <th style="background: var(--primary); color: #fff;">วันที่</th>
+                 <th style="background: var(--primary); color: #fff;">ลูกค้า</th>
+                 <th style="background: var(--primary); color: #fff;">${label1}</th>       {/* ✅ แสดงชื่อตามหัวข้อที่เลือกช่วงที่ 1 */}
+                 <th style="background: var(--btn-compare2); color: #fff;">วัน</th>
+                 <th style="background: var(--btn-compare2); color: #fff;">วันที่</th>
+                 <th style="background: var(--btn-compare2); color: #fff;">ลูกค้า</th>
+                 <th style="background: var(--btn-compare2); color: #fff;">${label2}</th>       {/* ✅ แสดงชื่อตามหัวข้อที่เลือกช่วงที่ 2 */}
+             </tr>
+         `;
 
     // ✅ ฟังก์ชันดึงค่าตามหัวข้อ
     function getValueByTopic(dayData, topic) {
