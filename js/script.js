@@ -2015,11 +2015,16 @@ function getDayData(dateStr) {
     return { cust: totalCust, income: totalIncome };
 }
 // ✅ ประมวลผลข้อมูลและแสดงตาราง — สีเปลี่ยนตามธีมอัตโนมัติ
+// ✅ ประมวลผลข้อมูล — เปลี่ยนค่าตามหัวข้อที่เลือกได้แล้ว
 function processComparison() {
     const d1_start = document.getElementById('startDate1')?.value;
     const d1_end   = document.getElementById('endDate1')?.value;
     const d2_start = document.getElementById('startDate2')?.value;
     const d2_end   = document.getElementById('endDate2')?.value;
+
+    // ✅ อ่านหัวข้อที่เลือก
+    const topic1 = document.getElementById('compareTopic1')?.value || 'total';
+    const topic2 = document.getElementById('compareTopic2')?.value || 'total';
 
     if (!d1_start || !d1_end || !d2_start || !d2_end) {
         alert("กรุณาเลือกช่วงเวลาให้ครบถ้วนทั้ง 2 ช่วง");
@@ -2030,7 +2035,15 @@ function processComparison() {
     const range2 = getDatesArray(d2_start, d2_end);
     const maxRows = Math.max(range1.length, range2.length);
 
-    // ✅ หัวตาราง — ใช้สีจากตัวแปรธีม
+    // ✅ แปลงชื่อหัวข้อ
+    const topicLabel = (t) => {
+        const map = { cust:'ลูกค้า', barber:'รายได้ช่าง', shop:'รายได้ร้าน', total:'รายได้รวม' };
+        return map[t] || 'รายได้';
+    };
+    const label1 = topicLabel(topic1);
+    const label2 = topicLabel(topic2);
+
+    // ✅ หัวตาราง — เปลี่ยนชื่อตามหัวข้อ
     const headHtml = `
         <tr>
             <th colspan="4" style="background: var(--summary-bg); color: var(--primary); border: 1px solid var(--summary-border);">📅 ช่วงที่ 1 (${formatTHDate(d1_start)} - ${formatTHDate(d1_end)})</th>
@@ -2040,64 +2053,98 @@ function processComparison() {
             <th style="background: var(--primary); color: #fff;">วัน</th>
             <th style="background: var(--primary); color: #fff;">วันที่</th>
             <th style="background: var(--primary); color: #fff;">ลูกค้า</th>
-            <th style="background: var(--primary); color: #fff;">รายได้</th>
+            <th style="background: var(--primary); color: #fff;">${label1}</th>
             <th style="background: var(--btn-compare2); color: #fff;">วัน</th>
             <th style="background: var(--btn-compare2); color: #fff;">วันที่</th>
             <th style="background: var(--btn-compare2); color: #fff;">ลูกค้า</th>
-            <th style="background: var(--btn-compare2); color: #fff;">รายได้</th>
+            <th style="background: var(--btn-compare2); color: #fff;">${label2}</th>
         </tr>
     `;
 
-    // ✅ แสดงข้อมูลแต่ละแถว — สลับสีตามธีม
+    // ✅ ฟังก์ชันดึงค่าตามหัวข้อ
+    function getValueByTopic(dayData, topic) {
+        // dayData มี: { cust, barber, shop, total }
+        switch(topic) {
+            case 'cust': return dayData.cust;
+            case 'barber': return dayData.barber;
+            case 'shop': return dayData.shop;
+            case 'total': default: return dayData.total;
+        }
+    }
+
+    // ✅ ปรับ getDayData ให้คืนค่าครบทุกหัวข้อ
+    function getDayDataFull(dateStr) {
+        const list = typeof archives !== 'undefined' ? archives : [];
+        if (!list.length) return { cust: 0, barber: 0, shop: 0, total: 0 };
+        const dayRecords = list.filter(a => a.date === dateStr);
+        if (!dayRecords.length) return { cust: 0, barber: 0, shop: 0, total: 0 };
+
+        let cust = 0, barber = 0, shop = 0, total = 0;
+        dayRecords.forEach(a => {
+            cust += a.count || (a.details && Array.isArray(a.details) ? a.details.length : 0);
+            barber += Number(a.barber || 0);
+            shop += Number(a.shop || 0);
+            total += Number(a.total || a.barber || 0);
+        });
+        return { cust, barber, shop, total };
+    }
+
     let bodyHtml = '';
-    let sum1Cust = 0, sum1Income = 0;
-    let sum2Cust = 0, sum2Income = 0;
+    let sum1Cust = 0, sum1Val = 0;
+    let sum2Cust = 0, sum2Val = 0;
 
     for (let i = 0; i < maxRows; i++) {
-        // สลับสีพื้น: สีอ่อนกับสีพื้นหลังธีม
         const rowBg1 = i % 2 === 0 ? 'var(--summary-bg)' : 'var(--card)';
         const rowBg2 = i % 2 === 0 ? 'rgba(147, 142, 245, 0.08)' : 'var(--card)';
         const border = '1px solid var(--border)';
 
         const date1 = range1[i] || null;
         const dayName1 = date1 ? getDayName(date1) : '-';
-        const data1 = date1 ? getDayData(date1) : { cust: null, income: null };
-        if (data1.cust !== null) { sum1Cust += data1.cust; sum1Income += data1.income; }
+        const data1 = date1 ? getDayDataFull(date1) : null;
+        const val1 = data1 ? getValueByTopic(data1, topic1) : null;
+        if (data1) { sum1Cust += data1.cust; if(val1 !== null) sum1Val += val1; }
 
         const date2 = range2[i] || null;
         const dayName2 = date2 ? getDayName(date2) : '-';
-        const data2 = date2 ? getDayData(date2) : { cust: null, income: null };
-        if (data2.cust !== null) { sum2Cust += data2.cust; sum2Income += data2.income; }
+        const data2 = date2 ? getDayDataFull(date2) : null;
+        const val2 = data2 ? getValueByTopic(data2, topic2) : null;
+        if (data2) { sum2Cust += data2.cust; if(val2 !== null) sum2Val += val2; }
+
+        // ✅ แสดงค่า — ถ้าเป็นตัวเลขเงินใส่ ฿ ถ้าเป็นจำนวนแสดงแค่ตัวเลข
+        const fmtVal = (v, t) => {
+            if(v === null || v === undefined) return '-';
+            return t === 'cust' ? v.toLocaleString() : '฿' + v.toLocaleString();
+        };
 
         bodyHtml += `
             <tr>
                 <td style="background: ${rowBg1}; color: var(--primary); border: ${border}; font-weight:500;">${dayName1}</td>
                 <td style="background: ${rowBg1}; color: var(--text); border: ${border};">${date1 ? formatShortDate(date1) : '-'}</td>
-                <td style="background: ${rowBg1}; color: var(--text); border: ${border}; font-weight:500;">${data1.cust !== null ? data1.cust.toLocaleString() : '-'}</td>
-                <td style="background: ${rowBg1}; color: var(--success); border: ${border}; font-weight:600;">${data1.income !== null ? '฿' + data1.income.toLocaleString() : '-'}</td>
+                <td style="background: ${rowBg1}; color: var(--text); border: ${border}; font-weight:500;">${data1 ? data1.cust.toLocaleString() : '-'}</td>
+                <td style="background: ${rowBg1}; color: var(--success); border: ${border}; font-weight:600;">${fmtVal(val1, topic1)}</td>
                 <td style="background: ${rowBg2}; color: var(--btn-compare1); border: ${border}; font-weight:500;">${dayName2}</td>
                 <td style="background: ${rowBg2}; color: var(--text); border: ${border};">${date2 ? formatShortDate(date2) : '-'}</td>
-                <td style="background: ${rowBg2}; color: var(--text); border: ${border}; font-weight:500;">${data2.cust !== null ? data2.cust.toLocaleString() : '-'}</td>
-                <td style="background: ${rowBg2}; color: var(--success); border: ${border}; font-weight:600;">${data2.income !== null ? '฿' + data2.income.toLocaleString() : '-'}</td>
+                <td style="background: ${rowBg2}; color: var(--text); border: ${border}; font-weight:500;">${data2 ? data2.cust.toLocaleString() : '-'}</td>
+                <td style="background: ${rowBg2}; color: var(--success); border: ${border}; font-weight:600;">${fmtVal(val2, topic2)}</td>
             </tr>
         `;
     }
 
-    // ✅ แถวรวม — ใช้สีเตือน/เหลืองจากธีม
+    // ✅ แถวรวม
+    const fmtSum = (v, t) => t === 'cust' ? v.toLocaleString() : '฿' + v.toLocaleString();
     const footHtml = `
         <tr style="font-weight: bold;">
             <td style="background: var(--warning); color: #000; border: 2px solid var(--btn-his2);">รวม</td>
             <td style="background: var(--summary-bg); color: var(--warning); border: 2px solid var(--btn-his2);">${range1.length} วัน</td>
             <td style="background: var(--summary-bg); color: var(--text); border: 2px solid var(--btn-his2); font-size: 1.05em;">${sum1Cust.toLocaleString()}</td>
-            <td style="background: var(--summary-bg); color: var(--success); border: 2px solid var(--btn-his2); font-size: 1.05em;">฿${sum1Income.toLocaleString()}</td>
+            <td style="background: var(--summary-bg); color: var(--success); border: 2px solid var(--btn-his2); font-size: 1.05em;">${fmtSum(sum1Val, topic1)}</td>
             <td style="background: var(--warning); color: #000; border: 2px solid var(--btn-his2);">รวม</td>
             <td style="background: rgba(147, 142, 245, 0.15); color: var(--btn-compare1); border: 2px solid var(--btn-his2);">${range2.length} วัน</td>
             <td style="background: rgba(147, 142, 245, 0.15); color: var(--text); border: 2px solid var(--btn-his2); font-size: 1.05em;">${sum2Cust.toLocaleString()}</td>
-            <td style="background: rgba(147, 142, 245, 0.15); color: var(--success); border: 2px solid var(--btn-his2); font-size: 1.05em;">฿${sum2Income.toLocaleString()}</td>
+            <td style="background: rgba(147, 142, 245, 0.15); color: var(--success); border: 2px solid var(--btn-his2); font-size: 1.05em;">${fmtSum(sum2Val, topic2)}</td>
         </tr>
     `;
 
-    // แสดงผลลงหน้าเว็บ
     document.getElementById('compareTableHead').innerHTML = headHtml;
     document.getElementById('comparisonSingleContent').innerHTML = bodyHtml;
     document.getElementById('compareTableFoot').innerHTML = footHtml;
