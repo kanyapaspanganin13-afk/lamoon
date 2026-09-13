@@ -2016,6 +2016,7 @@ function getDayData(dateStr) {
 }
 
 // ✅ ฟังก์ชันประมวลผล — เพิ่มคอลัมน์ "วัน"
+// ✅ ฟังก์ชันประมวลผล — ช่องวัน="รวม" | ช่องวันที่="X วัน"
 function processComparison() {
     const d1_start = document.getElementById('startDate1')?.value;
     const d1_end   = document.getElementById('endDate1')?.value;
@@ -2027,12 +2028,10 @@ function processComparison() {
         return;
     }
 
-    // ดึงรายการวันที่แต่ละช่วง
     const range1 = getDatesArray(d1_start, d1_end);
     const range2 = getDatesArray(d2_start, d2_end);
     const maxRows = Math.max(range1.length, range2.length);
 
-    // ✅ หัวตาราง 8 คอลัมน์ (4+4) มีคอลัมน์ "วัน" ข้างหน้าวันที่
     const headHtml = `
         <tr>
             <th colspan="4">📅 ช่วงที่ 1 (${formatTHDate(d1_start)} - ${formatTHDate(d1_end)})</th>
@@ -2050,19 +2049,16 @@ function processComparison() {
         </tr>
     `;
 
-    // ✅ แถวข้อมูล — แสดงชื่อวัน + วันที่ + ลูกค้า + รายได้
     let bodyHtml = '';
     let sum1Cust = 0, sum1Income = 0;
     let sum2Cust = 0, sum2Income = 0;
 
     for (let i = 0; i < maxRows; i++) {
-        // ข้อมูลช่วงที่ 1
         const date1 = range1[i] || null;
         const dayName1 = date1 ? getDayName(date1) : '-';
         const data1 = date1 ? getDayData(date1) : { cust: null, income: null };
         if (data1.cust !== null) { sum1Cust += data1.cust; sum1Income += data1.income; }
 
-        // ข้อมูลช่วงที่ 2
         const date2 = range2[i] || null;
         const dayName2 = date2 ? getDayName(date2) : '-';
         const data2 = date2 ? getDayData(date2) : { cust: null, income: null };
@@ -2072,62 +2068,65 @@ function processComparison() {
             <tr>
                 <td>${dayName1}</td>
                 <td>${date1 ? formatShortDate(date1) : '-'}</td>
-                <td>${data1.cust !== null ? data1.cust.toLocaleString() + ' คน' : '-'}</td>
+                <td>${data1.cust !== null ? data1.cust.toLocaleString() : '-'}</td>
                 <td>${data1.income !== null ? '฿' + data1.income.toLocaleString() : '-'}</td>
                 <td>${dayName2}</td>
                 <td>${date2 ? formatShortDate(date2) : '-'}</td>
-                <td>${data2.cust !== null ? data2.cust.toLocaleString() + ' คน' : '-'}</td>
+                <td>${data2.cust !== null ? data2.cust.toLocaleString() : '-'}</td>
                 <td>${data2.income !== null ? '฿' + data2.income.toLocaleString() : '-'}</td>
             </tr>
         `;
     }
 
-    // ✅ แถวรวมท้ายตาราง — พื้นเหลือง ทั้ง 2 ฝั่ง
+    // ✅ แถวรวม: ช่องวัน="รวม" | ช่องวันที่="X วัน" | ลูกค้า | รายได้
     const footHtml = `
         <tr style="font-weight: bold; background: #fcea23;">
-            <td colspan="2">รวม</td>
-            <td>${sum1Cust.toLocaleString()} คน</td>
+            <td>รวม</td>
+            <td>${range1.length} วัน</td>
+            <td>${sum1Cust.toLocaleString()}</td>
             <td>฿${sum1Income.toLocaleString()}</td>
-            <td colspan="2">รวม</td>
-            <td>${sum2Cust.toLocaleString()} คน</td>
+            <td>รวม</td>
+            <td>${range2.length} วัน</td>
+            <td>${sum2Cust.toLocaleString()}</td>
             <td>฿${sum2Income.toLocaleString()}</td>
         </tr>
     `;
 
-    // แสดงผล
     document.getElementById('compareTableHead').innerHTML = headHtml;
     document.getElementById('comparisonSingleContent').innerHTML = bodyHtml;
     document.getElementById('compareTableFoot').innerHTML = footHtml;
 }
-
-// ✅ พรีวิว — แสดงตรงกับตาราง 8 คอลัมน์
+// ✅ เปิดพรีวิวเปรียบเทียบ — ใช้ร่วมกับ openReportFullscreen() ได้เลย
 function openPreviewModal() {
-    const tbodyContent = document.getElementById('comparisonSingleContent')?.innerHTML.trim();
-    if (!tbodyContent) {
-        alert("⚠️ กรุณากดปุ่ม \"ประมวลผลข้อมูล\" ก่อนครับ");
+    // เปลี่ยนจาก "monthlyContent1" → เป็นส่วนตารางเปรียบเทียบ
+    const tableHead = document.getElementById('compareTableHead');
+    const tableBody = document.getElementById('comparisonSingleContent');
+    const tableFoot = document.getElementById('compareTableFoot');
+
+    if (!tableBody || !tableBody.innerHTML.trim()) {
+        if (typeof notify === 'function') {
+            notify("error", "ไม่พบข้อมูล", "กรุณากดประมวลผลข้อมูลก่อนครับ");
+        } else {
+            alert("กรุณากดประมวลผลข้อมูลก่อนครับ");
+        }
         return;
     }
-    const modal = document.getElementById('previewModal');
-    const modalBody = document.getElementById('previewModalBody');
-    if (!modal || !modalBody) { alert("❌ ไม่พบหน้าต่างพรีวิว"); return; }
 
-    const tableHead = document.getElementById('compareTableHead')?.innerHTML || '';
-    const tableFoot = document.getElementById('compareTableFoot')?.innerHTML || '';
-
-    modalBody.innerHTML = `
+    // ✅ รวมหัว + เนื้อหา + ท้ายตาราง เหมือนรูปแบบรายงานเดิม
+    const modalContent = document.getElementById('fullReportContent');
+    modalContent.innerHTML = `
         <table style="width:100%; border-collapse:collapse; font-family:Tahoma,sans-serif; text-align:center; font-size:11px;">
-            <thead>${tableHead}</thead>
-            <tbody>${tbodyContent}</tbody>
-            <tfoot>${tableFoot}</tfoot>
+            <thead>${tableHead?.innerHTML || ''}</thead>
+            <tbody>${tableBody.innerHTML}</tbody>
+            <tfoot>${tableFoot?.innerHTML || ''}</tfoot>
         </table>
     `;
-    modal.style.display = 'block';
+
+    // ✅ ใช้คำสั่งเดียวกันทุกประการ
+    document.getElementById('fullReportModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
 }
 
-function closePreviewModal() {
-    const modal = document.getElementById('previewModal');
-    if (modal) modal.style.display = 'none';
-}
 /* ========= SECTION 20: IMPORT / EXPORT / CLEAR ========= */
 // 1. ฟังก์ชันส่งออกข้อมูล (Export)
 function exportBackup() {
