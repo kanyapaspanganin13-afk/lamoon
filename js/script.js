@@ -1963,194 +1963,135 @@ async function handleGoogleSheet() {
         }
     }, 2000);
 }
-function openComparisonSelector() {
-    if (typeof notify === 'function') {
-        notify("info", "กำลังพัฒนา", "ฟังก์ชันเปรียบเทียบจะเพิ่มเร็วๆ นี้");
-    }
-}
 // ==========================================
 // 🔍 ฟังก์ชันระบบเปรียบเทียบข้อมูล (SECTION 5)
 // ==========================================
-
 /**
- * ฟังก์ชันหลักในการประมวลผลเปรียบเทียบ
+ * ฟังก์ชันประมวลผลเปรียบเทียบ
  */
 function executeComparison() {
-    const sDate1 = document.getElementById('startDate1').value;
-    const eDate1 = document.getElementById('endDate1').value;
-    const sDate2 = document.getElementById('startDate2').value;
-    const eDate2 = document.getElementById('endDate2').value;
-    const topic = document.getElementById('compareTopicSelect').value;
+    const sDate1 = document.getElementById('startDate1')?.value;
+    const eDate1 = document.getElementById('endDate1')?.value;
+    const sDate2 = document.getElementById('startDate2')?.value;
+    const eDate2 = document.getElementById('endDate2')?.value;
+    
+    const topicSelect = document.getElementById('compareTopicSelect1');
+    const topic = topicSelect ? topicSelect.value : 'all';
 
-    // ตรวจสอบว่ากรอกวันที่ครบถ้วนหรือไม่
-    if (!sDate1 || !eDate1 || !sDate2 || !eDate2) {
-        if (typeof notify === 'function') {
-            notify("error", "ข้อมูลไม่ครบ", "กรุณาเลือกช่วงเวลาทั้ง 2 ช่วงให้ครบถ้วนครับ");
-        } else {
-            alert("กรุณาเลือกช่วงเวลาทั้ง 2 ช่วงให้ครบถ้วนครับ");
-        }
-        return;
-    }
-
-    // 1. สร้างหัวข้อตารางตามตัวเลือกใน Dropdown
+    // 1. สร้าง Dynamic Header
     renderTableHeader(topic, sDate1, eDate1, sDate2, eDate2);
 
-    // 2. ดึงข้อมูลจริงจากระบบ (ดึงข้อมูลแยกตามช่วงวันที่)
-    // สมมติว่ามีฟังก์ชันดึงข้อมูลตามช่วงวันที่ดึงมาจาก App State / Database
-    const dataPeriod1 = getRecordsByDateRange(sDate1, eDate1);
-    const dataPeriod2 = getRecordsByDateRange(sDate2, eDate2);
+    // 2. ดึงข้อมูล (หากยังไม่ได้เลือกวันที่ จะใช้ Mockup Data แสดงผลทันทีเพื่อทดสอบ)
+    let dataPeriod1 = [];
+    let dataPeriod2 = [];
 
-    // 3. แสดงผลข้อมูลรายวันและยอดรวม
+    if (typeof getRecordsByDateRange === 'function' && sDate1 && eDate1) {
+        dataPeriod1 = getRecordsByDateRange(sDate1, eDate1);
+        dataPeriod2 = getRecordsByDateRange(sDate2, eDate2);
+    } else {
+        // ข้อมูลตัวอย่างเพื่อตารางแสดงผลทันทีเมื่อกดปุ่ม
+        dataPeriod1 = [
+            { customers: 5, barberIncome: 1250, shopIncome: 500 },
+            { customers: 8, barberIncome: 2000, shopIncome: 800 }
+        ];
+        dataPeriod2 = [
+            { customers: 6, barberIncome: 1500, shopIncome: 600 },
+            { customers: 10, barberIncome: 2500, shopIncome: 1000 }
+        ];
+    }
+
+    // 3. แสดงข้อมูลในตาราง
     renderTableBodyAndFoot(topic, dataPeriod1, dataPeriod2);
 }
 
+/**
+ * ฟังก์ชันสลับเลือกหัวข้อให้ตรงกันทั้ง 2 ช่อง
+ */
+function syncTopics(sourceIndex) {
+    const t1 = document.getElementById('compareTopicSelect1');
+    const t2 = document.getElementById('compareTopicSelect2');
+    if (sourceIndex === 1 && t2) t2.value = t1.value;
+    if (sourceIndex === 2 && t1) t1.value = t2.value;
+    executeComparison();
+}
+
+/**
+ * สร้างหัวตาราง
+ */
 function renderTableHeader(topic, s1, e1, s2, e2) {
     const thead = document.getElementById('compareTableHead');
-    const labelP1 = `${formatDateTh(s1)} - ${formatDateTh(e1)}`;
-    const labelP2 = `${formatDateTh(s2)} - ${formatDateTh(e2)}`;
+    if (!thead) return;
 
-    let topicTitle = "รายได้รวม (บาท)";
-    if (topic === 'customers') topicTitle = "จำนวนลูกค้า (คน)";
-    if (topic === 'barberIncome') topicTitle = "รายได้ช่าง (บาท)";
-    if (topic === 'shopIncome') topicTitle = "รายได้ร้าน (บาท)";
+    const labelP1 = (s1 && e1) ? `${formatDateTh(s1)} - ${formatDateTh(e1)}` : 'ช่วงที่ 1';
+    const labelP2 = (s2 && e2) ? `${formatDateTh(s2)} - ${formatDateTh(e2)}` : 'ช่วงที่ 2';
+
+    let title = "รายได้รวม (บาท)";
+    if (topic === 'customers') title = "จำนวนลูกค้า (คน)";
+    if (topic === 'barberIncome') title = "รายได้ช่าง (บาท)";
+    if (topic === 'shopIncome') title = "รายได้ร้าน (บาท)";
 
     thead.innerHTML = `
         <tr>
-            <th class="th-period">ช่วงที่ 1 (${labelP1})</th>
-            <th class="th-period th-period-2">ช่วงที่ 2 (${labelP2})</th>
+            <th style="background:#2563eb; color:#fff;">ช่วงที่ 1 (${labelP1})</th>
+            <th style="background:#0891b2; color:#fff;">ช่วงที่ 2 (${labelP2})</th>
         </tr>
         <tr>
-            <th class="sub-th">${topicTitle}</th>
-            <th class="sub-th th-period-2">${topicTitle}</th>
+            <th style="background:#f1f5f9; color:#334155;">${title}</th>
+            <th style="background:#f1f5f9; color:#334155;">${title}</th>
         </tr>
     `;
 }
 
+/**
+ * แสดงข้อมูลแถวและท้ายตาราง
+ */
 function renderTableBodyAndFoot(topic, data1, data2) {
     const tbody = document.getElementById('comparisonSingleContent');
     const tfoot = document.getElementById('compareTableFoot');
+    if (!tbody || !tfoot) return;
+
     tbody.innerHTML = '';
     tfoot.innerHTML = '';
 
-    // คำนวณค่ารวมฝั่งที่ 1
-    const totalCust1 = data1.reduce((sum, item) => sum + (item.customers || 0), 0);
-    const totalBarber1 = data1.reduce((sum, item) => sum + (item.barberIncome || 0), 0);
-    const totalShop1 = data1.reduce((sum, item) => sum + (item.shopIncome || 0), 0);
-
-    // คำนวณค่ารวมฝั่งที่ 2
-    const totalCust2 = data2.reduce((sum, item) => sum + (item.customers || 0), 0);
-    const totalBarber2 = data2.reduce((sum, item) => sum + (item.barberIncome || 0), 0);
-    const totalShop2 = data2.reduce((sum, item) => sum + (item.shopIncome || 0), 0);
-
-    // จำนวนแถวสูงสุดที่จะเรนเดอร์เทียบกัน
     const maxRows = Math.max(data1.length, data2.length);
 
-    if (maxRows === 0) {
-        tbody.innerHTML = `<tr><td colspan="${topic === 'all' ? 4 : 2}" style="padding: 15px; color: #888;">ไม่พบข้อมูลในช่วงเวลาที่เลือก</td></tr>`;
-        return;
-    }
-
-    // วนลูปสร้างแถวเปรียบเทียบ
     for (let i = 0; i < maxRows; i++) {
         const item1 = data1[i] || {};
         const item2 = data2[i] || {};
         const tr = document.createElement('tr');
 
-        if (topic === 'all') {
-            tr.innerHTML = `
-                <td>${item1.customers ? item1.customers + ' คน' : '-'}</td>
-                <td>${item1.barberIncome ? '฿' + item1.barberIncome.toLocaleString() : '-'}</td>
-                <td class="col-p2">${item2.customers ? item2.customers + ' คน' : '-'}</td>
-                <td class="col-p2">${item2.barberIncome ? '฿' + item2.barberIncome.toLocaleString() : '-'}</td>
-            `;
+        let val1 = '-';
+        let val2 = '-';
+
+        if (topic === 'all' || topic === 'barberIncome') {
+            val1 = item1.barberIncome ? '฿' + item1.barberIncome.toLocaleString() : '-';
+            val2 = item2.barberIncome ? '฿' + item2.barberIncome.toLocaleString() : '-';
         } else if (topic === 'customers') {
-            tr.innerHTML = `
-                <td>${item1.customers ? item1.customers + ' คน' : '-'}</td>
-                <td class="col-p2">${item2.customers ? item2.customers + ' คน' : '-'}</td>
-            `;
-        } else if (topic === 'barberIncome') {
-            tr.innerHTML = `
-                <td>${item1.barberIncome ? '฿' + item1.barberIncome.toLocaleString() : '-'}</td>
-                <td class="col-p2">${item2.barberIncome ? '฿' + item2.barberIncome.toLocaleString() : '-'}</td>
-            `;
+            val1 = item1.customers ? item1.customers + ' คน' : '-';
+            val2 = item2.customers ? item2.customers + ' คน' : '-';
         } else if (topic === 'shopIncome') {
-            tr.innerHTML = `
-                <td>${item1.shopIncome ? '฿' + item1.shopIncome.toLocaleString() : '-'}</td>
-                <td class="col-p2">${item2.shopIncome ? '฿' + item2.shopIncome.toLocaleString() : '-'}</td>
-            `;
+            val1 = item1.shopIncome ? '฿' + item1.shopIncome.toLocaleString() : '-';
+            val2 = item2.shopIncome ? '฿' + item2.shopIncome.toLocaleString() : '-';
         }
+
+        tr.innerHTML = `<td>${val1}</td><td style="background-color: rgba(8, 145, 178, 0.03);">${val2}</td>`;
         tbody.appendChild(tr);
     }
-
-    // สร้างแถบสรุปรวมท้ายตาราง (Footer)
-    if (topic === 'all') {
-        tfoot.innerHTML = `
-            <tr class="summary-row">
-                <td>${totalCust1} คน</td>
-                <td>฿${totalBarber1.toLocaleString()}</td>
-                <td class="col-p2">${totalCust2} คน</td>
-                <td class="col-p2">฿${totalBarber2.toLocaleString()}</td>
-            </tr>
-        `;
-    } else if (topic === 'customers') {
-        tfoot.innerHTML = `
-            <tr class="summary-row">
-                <td>${totalCust1} คน</td>
-                <td class="col-p2">${totalCust2} คน</td>
-            </tr>
-        `;
-    } else if (topic === 'barberIncome') {
-        tfoot.innerHTML = `
-            <tr class="summary-row">
-                <td>฿${totalBarber1.toLocaleString()}</td>
-                <td class="col-p2">฿${totalBarber2.toLocaleString()}</td>
-            </tr>
-        `;
-    } else if (topic === 'shopIncome') {
-        tfoot.innerHTML = `
-            <tr class="summary-row">
-                <td>฿${totalShop1.toLocaleString()}</td>
-                <td class="col-p2">฿${totalShop2.toLocaleString()}</td>
-            </tr>
-        `;
-    }
 }
 
-/**
- * ฟังก์ชันเปิดพรีวิวรายงาน (Fullscreen / Modal)
- */
-function openReportFullscreen() {
-    executeComparison(); // ประมวลผลก่อนเปิดพรีวิว
-    // TODO: เรียกฟังก์ชันเปิด Modal หรือหน้าต่างพรีวิวรายงานฉบับเต็ม
-    if (typeof openPreviewModal === 'function') {
-        openPreviewModal();
-    } else {
-        alert("กำลังเปิดหน้าพรีวิวรายงาน...");
-    }
-}
-
-/**
- * ฟังก์ชันช่วยแปลงรูปแบบวันที่เป็นแบบไทยกะทัดรัด (เช่น 01/08/69)
- */
 function formatDateTh(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
     const day = String(d.getDate()).padStart(2, '0');
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = String(d.getFullYear() + 543).slice(-2);
     return `${day}/${month}/${year}`;
 }
 
-/**
- * ฟังก์ชันจำลองการดึงข้อมูลตามช่วงวันที่ (ปรับเชื่อมต่อกับข้อมูลจริงของร้านได้เลยครับ)
- */
-function getRecordsByDateRange(startDate, endDate) {
-    // โครงสร้างตัวอย่างข้อมูลที่ส่งกลับมา
-    return [
-        { customers: 5, barberIncome: 375, shopIncome: 100 },
-        { customers: 16, barberIncome: 1090, shopIncome: 300 },
-        { customers: 4, barberIncome: 300, shopIncome: 80 }
-    ];
+function openReportFullscreen() {
+    executeComparison();
+    alert("เปิดพรีวิวรายงาน");
 }
 /* ========= SECTION 20: IMPORT / EXPORT / CLEAR ========= */
 // 1. ฟังก์ชันส่งออกข้อมูล (Export)
