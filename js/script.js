@@ -2014,9 +2014,7 @@ function getDayData(dateStr) {
     });
     return { cust: totalCust, income: totalIncome };
 }
-
-// ✅ ฟังก์ชันประมวลผล — เพิ่มคอลัมน์ "วัน"
-// ✅ ฟังก์ชันประมวลผล — ช่องวัน="รวม" | ช่องวันที่="X วัน"
+// ✅ ประมวลผลข้อมูลและแสดงตาราง — สีเปลี่ยนตามธีมอัตโนมัติ
 function processComparison() {
     const d1_start = document.getElementById('startDate1')?.value;
     const d1_end   = document.getElementById('endDate1')?.value;
@@ -2032,28 +2030,35 @@ function processComparison() {
     const range2 = getDatesArray(d2_start, d2_end);
     const maxRows = Math.max(range1.length, range2.length);
 
+    // ✅ หัวตาราง — ใช้สีจากตัวแปรธีม
     const headHtml = `
         <tr>
-            <th colspan="4">📅 ช่วงที่ 1 (${formatTHDate(d1_start)} - ${formatTHDate(d1_end)})</th>
-            <th colspan="4">📅 ช่วงที่ 2 (${formatTHDate(d2_start)} - ${formatTHDate(d2_end)})</th>
+            <th colspan="4" style="background: var(--summary-bg); color: var(--primary); border: 1px solid var(--summary-border);">📅 ช่วงที่ 1 (${formatTHDate(d1_start)} - ${formatTHDate(d1_end)})</th>
+            <th colspan="4" style="background: var(--btn-compare1); color: var(--btn-text);">📅 ช่วงที่ 2 (${formatTHDate(d2_start)} - ${formatTHDate(d2_end)})</th>
         </tr>
         <tr>
-            <th>วัน</th>
-            <th>วันที่</th>
-            <th>ลูกค้า</th>
-            <th>รายได้</th>
-            <th>วัน</th>
-            <th>วันที่</th>
-            <th>ลูกค้า</th>
-            <th>รายได้</th>
+            <th style="background: var(--primary); color: #fff;">วัน</th>
+            <th style="background: var(--primary); color: #fff;">วันที่</th>
+            <th style="background: var(--primary); color: #fff;">ลูกค้า</th>
+            <th style="background: var(--primary); color: #fff;">รายได้</th>
+            <th style="background: var(--btn-compare2); color: #fff;">วัน</th>
+            <th style="background: var(--btn-compare2); color: #fff;">วันที่</th>
+            <th style="background: var(--btn-compare2); color: #fff;">ลูกค้า</th>
+            <th style="background: var(--btn-compare2); color: #fff;">รายได้</th>
         </tr>
     `;
 
+    // ✅ แสดงข้อมูลแต่ละแถว — สลับสีตามธีม
     let bodyHtml = '';
     let sum1Cust = 0, sum1Income = 0;
     let sum2Cust = 0, sum2Income = 0;
 
     for (let i = 0; i < maxRows; i++) {
+        // สลับสีพื้น: สีอ่อนกับสีพื้นหลังธีม
+        const rowBg1 = i % 2 === 0 ? 'var(--summary-bg)' : 'var(--card)';
+        const rowBg2 = i % 2 === 0 ? 'rgba(147, 142, 245, 0.08)' : 'var(--card)';
+        const border = '1px solid var(--border)';
+
         const date1 = range1[i] || null;
         const dayName1 = date1 ? getDayName(date1) : '-';
         const data1 = date1 ? getDayData(date1) : { cust: null, income: null };
@@ -2066,36 +2071,38 @@ function processComparison() {
 
         bodyHtml += `
             <tr>
-                <td>${dayName1}</td>
-                <td>${date1 ? formatShortDate(date1) : '-'}</td>
-                <td>${data1.cust !== null ? data1.cust.toLocaleString() : '-'}</td>
-                <td>${data1.income !== null ? '฿' + data1.income.toLocaleString() : '-'}</td>
-                <td>${dayName2}</td>
-                <td>${date2 ? formatShortDate(date2) : '-'}</td>
-                <td>${data2.cust !== null ? data2.cust.toLocaleString() : '-'}</td>
-                <td>${data2.income !== null ? '฿' + data2.income.toLocaleString() : '-'}</td>
+                <td style="background: ${rowBg1}; color: var(--primary); border: ${border}; font-weight:500;">${dayName1}</td>
+                <td style="background: ${rowBg1}; color: var(--text); border: ${border};">${date1 ? formatShortDate(date1) : '-'}</td>
+                <td style="background: ${rowBg1}; color: var(--text); border: ${border}; font-weight:500;">${data1.cust !== null ? data1.cust.toLocaleString() : '-'}</td>
+                <td style="background: ${rowBg1}; color: var(--success); border: ${border}; font-weight:600;">${data1.income !== null ? '฿' + data1.income.toLocaleString() : '-'}</td>
+                <td style="background: ${rowBg2}; color: var(--btn-compare1); border: ${border}; font-weight:500;">${dayName2}</td>
+                <td style="background: ${rowBg2}; color: var(--text); border: ${border};">${date2 ? formatShortDate(date2) : '-'}</td>
+                <td style="background: ${rowBg2}; color: var(--text); border: ${border}; font-weight:500;">${data2.cust !== null ? data2.cust.toLocaleString() : '-'}</td>
+                <td style="background: ${rowBg2}; color: var(--success); border: ${border}; font-weight:600;">${data2.income !== null ? '฿' + data2.income.toLocaleString() : '-'}</td>
             </tr>
         `;
     }
 
-    // ✅ แถวรวม: ช่องวัน="รวม" | ช่องวันที่="X วัน" | ลูกค้า | รายได้
+    // ✅ แถวรวม — ใช้สีเตือน/เหลืองจากธีม
     const footHtml = `
-        <tr style="font-weight: bold; background: #fcea23;">
-            <td>รวม</td>
-            <td>${range1.length} วัน</td>
-            <td>${sum1Cust.toLocaleString()}</td>
-            <td>฿${sum1Income.toLocaleString()}</td>
-            <td>รวม</td>
-            <td>${range2.length} วัน</td>
-            <td>${sum2Cust.toLocaleString()}</td>
-            <td>฿${sum2Income.toLocaleString()}</td>
+        <tr style="font-weight: bold;">
+            <td style="background: var(--warning); color: #000; border: 2px solid var(--btn-his2);">รวม</td>
+            <td style="background: var(--summary-bg); color: var(--warning); border: 2px solid var(--btn-his2);">${range1.length} วัน</td>
+            <td style="background: var(--summary-bg); color: var(--text); border: 2px solid var(--btn-his2); font-size: 1.05em;">${sum1Cust.toLocaleString()}</td>
+            <td style="background: var(--summary-bg); color: var(--success); border: 2px solid var(--btn-his2); font-size: 1.05em;">฿${sum1Income.toLocaleString()}</td>
+            <td style="background: var(--warning); color: #000; border: 2px solid var(--btn-his2);">รวม</td>
+            <td style="background: rgba(147, 142, 245, 0.15); color: var(--btn-compare1); border: 2px solid var(--btn-his2);">${range2.length} วัน</td>
+            <td style="background: rgba(147, 142, 245, 0.15); color: var(--text); border: 2px solid var(--btn-his2); font-size: 1.05em;">${sum2Cust.toLocaleString()}</td>
+            <td style="background: rgba(147, 142, 245, 0.15); color: var(--success); border: 2px solid var(--btn-his2); font-size: 1.05em;">฿${sum2Income.toLocaleString()}</td>
         </tr>
     `;
 
+    // แสดงผลลงหน้าเว็บ
     document.getElementById('compareTableHead').innerHTML = headHtml;
     document.getElementById('comparisonSingleContent').innerHTML = bodyHtml;
     document.getElementById('compareTableFoot').innerHTML = footHtml;
 }
+
 // ✅ เปิดพรีวิวเปรียบเทียบ — ใช้ร่วมกับ openReportFullscreen() ได้เลย
 function openPreviewModal() {
     // เปลี่ยนจาก "monthlyContent1" → เป็นส่วนตารางเปรียบเทียบ
