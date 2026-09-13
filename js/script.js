@@ -2004,50 +2004,28 @@ function executeComparison() {
     renderTableBodyAndFoot(topic, dataPeriod1, dataPeriod2);
 }
 
-/**
- * ฟังก์ชัน Render หัวตาราง (Dynamic Header)
- */
 function renderTableHeader(topic, s1, e1, s2, e2) {
     const thead = document.getElementById('compareTableHead');
     const labelP1 = `${formatDateTh(s1)} - ${formatDateTh(e1)}`;
     const labelP2 = `${formatDateTh(s2)} - ${formatDateTh(e2)}`;
 
-    if (topic === 'all') {
-        // รูปแบบ 4 คอลัมน์ ตามภาพวาด (ช่วงที่ 1 vs ช่วงที่ 2)
-        thead.innerHTML = `
-            <tr>
-                <th colspan="2" class="th-period">ช่วงที่ 1 (${labelP1})</th>
-                <th colspan="2" class="th-period th-period-2">ช่วงที่ 2 (${labelP2})</th>
-            </tr>
-            <tr>
-                <th class="sub-th">ลูกค้า</th>
-                <th class="sub-th">รายได้</th>
-                <th class="sub-th th-period-2">ลูกค้า</th>
-                <th class="sub-th th-period-2">รายได้</th>
-            </tr>
-        `;
-    } else {
-        // รูปแบบ 2 คอลัมน์ (แสดงเฉพาะหัวข้อที่เลือก)
-        let topicTitle = "จำนวนลูกค้า (คน)";
-        if (topic === 'barberIncome') topicTitle = "รายได้ช่าง (บาท)";
-        if (topic === 'shopIncome') topicTitle = "รายได้ร้าน (บาท)";
+    let topicTitle = "รายได้รวม (บาท)";
+    if (topic === 'customers') topicTitle = "จำนวนลูกค้า (คน)";
+    if (topic === 'barberIncome') topicTitle = "รายได้ช่าง (บาท)";
+    if (topic === 'shopIncome') topicTitle = "รายได้ร้าน (บาท)";
 
-        thead.innerHTML = `
-            <tr>
-                <th class="th-period">ช่วงที่ 1 (${labelP1})</th>
-                <th class="th-period th-period-2">ช่วงที่ 2 (${labelP2})</th>
-            </tr>
-            <tr>
-                <th class="sub-th">${topicTitle}</th>
-                <th class="sub-th th-period-2">${topicTitle}</th>
-            </tr>
-        `;
-    }
+    thead.innerHTML = `
+        <tr>
+            <th class="th-period">ช่วงที่ 1 (${labelP1})</th>
+            <th class="th-period th-period-2">ช่วงที่ 2 (${labelP2})</th>
+        </tr>
+        <tr>
+            <th class="sub-th">${topicTitle}</th>
+            <th class="sub-th th-period-2">${topicTitle}</th>
+        </tr>
+    `;
 }
 
-/**
- * ฟังก์ชัน Render ข้อมูลในตารางและแถบสรุปรวมท้ายตาราง
- */
 function renderTableBodyAndFoot(topic, data1, data2) {
     const tbody = document.getElementById('comparisonSingleContent');
     const tfoot = document.getElementById('compareTableFoot');
