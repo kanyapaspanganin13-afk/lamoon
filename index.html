@@ -388,33 +388,26 @@
                 </div>
             </div>
 
-            <!-- ตัวเลือกหัวข้อ 3 แบบใหม่ -->
-<div class="topic-double-row">
-    <div class="topic-col">
-        <label class="group-label">หัวข้อช่วงที่ 1</label>
-        <select id="compareTopic1" class="topic-select">
-            <option value="cust">👥 จำนวนลูกค้า</option>
-            <option value="barber">✂️ รายได้ช่าง</option>
-            <option value="shop">💈 รายได้ร้าน</option>
-            <option value="total">💰 รายได้รวม</option>
-        </select>
-    </div>
-    <div class="topic-col">
-        <label class="group-label">หัวข้อช่วงที่ 2</label>
-        <select id="compareTopic2" class="topic-select">
-            <option value="cust">👥 จำนวนลูกค้า</option>
-            <option value="barber">✂️ รายได้ช่าง</option>
-            <option value="shop">💈 รายได้ร้าน</option>
-            <option value="total">💰 รายได้รวม</option>
-        </select>
-    </div>
-</div>
-
-<!-- ปุ่มกด -->
-<div class="action-btn-row">
-    <button type="button" class="compact-btn btn-primary" onclick="processComparison()">📈 ประมวลผล</button>
-    <button type="button" class="compact-btn btn-preview" id="btnPreviewCompare" onclick="openPreviewModal()">👁️ พรีวิว</button>
-</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px;">
+                <div>
+                    <select id="compareTopic1" class="topic-select" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #ccc;">
+                        <option value="cust">👥 จำนวนลูกค้า</option>
+                        <option value="barber">✂️ รายได้ช่าง</option>
+                        <option value="shop">💈 รายได้ร้าน</option>
+                        <option value="total" selected>💰 รายได้รวม</option>
+                    </select>
+                </div>
+                <div>
+                    <select id="compareTopic2" class="topic-select" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #ccc;">
+                        <option value="cust">👥 จำนวนลูกค้า</option>
+                        <option value="barber">✂️ รายได้ช่าง</option>
+                        <option value="shop">💈 รายได้ร้าน</option>
+                        <option value="total">💰 รายได้รวม</option>
+                    </select>
+                </div>
+                <button type="button" class="compact-btn btn-primary" onclick="processComparison()">📈 ประมวลผล</button>
+                <button type="button" class="compact-btn btn-preview" onclick="openPreviewModal()">👁️ พรีวิว</button>
+            </div>
         <!-- กรอบที่ 2: แสดงผลตารางเปรียบเทียบ -->
         <div class="card-box margin-top full-height-card">
             <h3 class="card-title">📊 ผลการเปรียบเทียบข้อมูล</h3>
