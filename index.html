@@ -356,14 +356,14 @@
                 </div>
             </div>
         </section>
-        <!-- ================= SECTION 5: เปรียบเทียบ ================= -->
+<!-- ================= SECTION 5: เปรียบเทียบ ================= -->
 <section id="pageComparison" class="app-page full-page" style="display: none;">
     <div class="top-bar">
         <span class="top-title">🔍 วิเคราะห์เปรียบเทียบ</span>
     </div>
 
     <div class="compare-container">
-        <!-- กรอบที่ 1: เลือกช่วงเวลา & เลือกหัวข้อ + ปุ่มกด (Compact Control Box) -->
+        <!-- กรอบที่ 1: เลือกช่วงเวลา & เลือกหัวข้อ + ปุ่มกด -->
         <div class="card-box">
             <h3 class="card-title">🔍 เลือกช่วงเวลา & ข้อมูลที่ต้องการเปรียบเทียบ</h3>
             
@@ -387,14 +387,30 @@
                 </div>
             </div>
 
-            <!-- บรรทัดเลือกหัวข้อ + ปุ่มประมวลผล + ปุ่มพรีวิว (รวมในแถวเดียวกัน) -->
-            <div class="topic-action-row">
-                <select id="compareTopicSelect" class="form-control compact-input topic-select" onchange="executeComparison()">
-                    <option value="all">📌 ภาพรวมทั้งหมด (ลูกค้า & รายได้)</option>
-                    <option value="customers">👥 จำนวนลูกค้า</option>
-                    <option value="barberIncome">✂️ รายได้ช่าง</option>
-                    <option value="shopIncome">🏠 รายได้ร้าน</option>
-                </select>
+            <!-- ช่องเลือกหัวข้อ 2 ช่อง (ช่วงที่ 1 และ ช่วงที่ 2) -->
+            <div class="topic-double-row">
+                <div class="topic-col">
+                    <label class="group-label">📊 หัวข้อช่วงที่ 1</label>
+                    <select id="compareTopicSelect1" class="form-control compact-input topic-select" onchange="syncTopics(1)">
+                        <option value="all">📌 รายได้รวม</option>
+                        <option value="customers">👥 จำนวนลูกค้า</option>
+                        <option value="barberIncome">✂️ รายได้ช่าง</option>
+                        <option value="shopIncome">🏠 รายได้ร้าน</option>
+                    </select>
+                </div>
+                <div class="topic-col">
+                    <label class="group-label">📊 หัวข้อช่วงที่ 2</label>
+                    <select id="compareTopicSelect2" class="form-control compact-input topic-select" onchange="syncTopics(2)">
+                        <option value="all">📌 รายได้รวม</option>
+                        <option value="customers">👥 จำนวนลูกค้า</option>
+                        <option value="barberIncome">✂️ รายได้ช่าง</option>
+                        <option value="shopIncome">🏠 รายได้ร้าน</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- บรรทัดปุ่มกด ประมวลผล / พรีวิว -->
+            <div class="action-btn-row">
                 <button class="btn btn-primary compact-btn" onclick="executeComparison()">
                     <i class="fas fa-chart-line"></i> ประมวลผล
                 </button>
@@ -404,20 +420,14 @@
             </div>
         </div>
 
-        <!-- กรอบที่ 2: แสดงผลลัพธ์ (ขยายเต็มพื้นที่ตามภาพที่ 1) -->
+        <!-- กรอบที่ 2: แสดงผลลัพธ์ -->
         <div class="card-box margin-top full-height-card">
             <h3 class="card-title">📊 ผลการเปรียบเทียบข้อมูล</h3>
             <div class="table-responsive full-table-wrapper">
                 <table class="compare-grid-table" id="compareGridTable">
-                    <thead id="compareTableHead">
-                        <!-- Dynamic Header -->
-                    </thead>
-                    <tbody id="comparisonSingleContent">
-                        <!-- Data Rows -->
-                    </tbody>
-                    <tfoot id="compareTableFoot">
-                        <!-- Summary Footer -->
-                    </tfoot>
+                    <thead id="compareTableHead"></thead>
+                    <tbody id="comparisonSingleContent"></tbody>
+                    <tfoot id="compareTableFoot"></tfoot>
                 </table>
             </div>
         </div>
