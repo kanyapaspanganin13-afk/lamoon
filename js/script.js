@@ -2345,7 +2345,7 @@ function exportBackup() {
         }
     }
 }
-// 2. ฟังก์ชันนำเข้าข้อมูล (Import)
+// 2. ฟังก์ชันนำเข้าข้อมูล (Import) - แก้ไขให้ปลอดภัย ป้องกันข้อมูลเดิมสูญหาย
 function importBackup(input) {
     const file = input.files?.[0];
     if (!file) return;
@@ -2354,21 +2354,22 @@ function importBackup(input) {
     reader.onload = function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            // ตรวจสอบโครงสร้างไฟล์
-            if (!data.db && !data.archives) throw new Error("Wrong format");
+            if (!data.db && !data.archives && !data.account && !data.conf) {
+                throw new Error("Wrong format");
+            }
 
             const processImport = () => {
-                // เขียนทับ LocalStorage
-                localStorage.setItem("barber_db", JSON.stringify(data.db || []));
-                localStorage.setItem("barber_archives", JSON.stringify(data.archives || []));
-                localStorage.setItem("barber_account", JSON.stringify(data.account || { balance: 0, logs: [] }));
-                localStorage.setItem("barber_conf", JSON.stringify(data.conf || {}));
+                // ✅ เขียนทับเฉพาะ Key ที่มีในไฟล์ Backup หากไม่มีให้ใช้ค่าเดิมในเครื่อง
+                if (data.db !== undefined) localStorage.setItem("barber_db", JSON.stringify(data.db));
+                if (data.archives !== undefined) localStorage.setItem("barber_archives", JSON.stringify(data.archives));
+                if (data.account !== undefined) localStorage.setItem("barber_account", JSON.stringify(data.account));
+                if (data.conf !== undefined) localStorage.setItem("barber_conf", JSON.stringify(data.conf));
 
-                // อัปเดตตัวแปร Global ใน App (ถ้ามี)
-                if (typeof db !== 'undefined') db = data.db || [];
-                if (typeof archives !== 'undefined') archives = data.archives || [];
-                if (typeof account !== 'undefined') account = data.account || { balance: 0, logs: [] };
-                if (typeof conf !== 'undefined') conf = data.conf || {};
+                // อัปเดตตัวแปร Global
+                if (typeof db !== 'undefined' && data.db) db = data.db;
+                if (typeof archives !== 'undefined' && data.archives) archives = data.archives;
+                if (typeof account !== 'undefined' && data.account) account = data.account;
+                if (typeof conf !== 'undefined' && data.conf) conf = data.conf;
 
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({ title: 'สำเร็จ', text: 'กำลังรีโหลดข้อมูล...', icon: 'success', showConfirmButton: false, timer: 1500 });
@@ -2397,14 +2398,13 @@ function importBackup(input) {
         } catch(err) { 
             if (typeof Swal !== 'undefined') {
                 Swal.fire({ title: 'ไฟล์ไม่ถูกต้อง', text: 'กรุณาใช้ไฟล์ .json ที่สำรองจากแอปนี้เท่านั้น', icon: 'error' });
-            } else if (typeof notify === 'function') {
-                notify("error", "กรุณาใช้ไฟล์ .json ที่สำรองจากแอปนี้เท่านั้น", "ไฟล์ไม่ถูกต้อง");
+            } else {
+                alert("กรุณาใช้ไฟล์ .json ที่สำรองจากแอปนี้เท่านั้น");
             }
         }
     };
     reader.readAsText(file);
 }
-
 // 3. ฟังก์ชันล้างข้อมูล (Clear Data)
 function clearData() {
     const executeClear = () => {
