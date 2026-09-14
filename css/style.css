@@ -162,30 +162,29 @@ body > center, body > a, body > br { display: none !important; }
 #pageHome {
     padding-bottom: 85px !important;
 }
-/* ============= ปรับแต่งเฉพาะหน้าแรก (#pageHome) - (Glassmorphism Light Cyan) ============= */
+/* ============= ปรับแต่งเฉพาะหน้าแรก (#pageHome) - (Deep Navy & Neon) ============= */
 /* 1. คุมสีพื้นหลังและกรอบของหน้าแรก */
 #pageHome {
-    background: rgba(235, 248, 255, 0.75) !important;
-    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+    background: linear-gradient(145deg, #1e293b, #0f172a) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
     border-radius: 24px !important;
     padding: 24px 18px !important;
     max-width: 480px !important;
     margin: 16px auto !important;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 16px 32px rgba(14, 165, 233, 0.1) !important;
+    box-shadow: 0 20px 30px rgba(15, 23, 42, 0.4) !important;
 }
 
-#pageHome .home-header h2 span:first-child { color: #0369a1 !important; font-size: 22px !important; font-weight: 800 !important; }
-#pageHome .home-header h2 span:last-child { color: #0284c7 !important; }
+#pageHome .home-header h2 span:first-child { color: #ffffff !important; font-size: 22px !important; font-weight: 800 !important; }
+#pageHome .home-header h2 span:last-child { color: #94a3b8 !important; }
 
 /* การ์ดเมนู */
 #pageHome .menu-card {
-    background: #ffffff !important;
-    border: 1px solid #e0f2fe !important;
-    box-shadow: 0 4px 12px rgba(3, 105, 161, 0.05) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(8px);
 }
-#pageHome .menu-card:active { background: #f0f9ff !important; }
-#pageHome .menu-card span { color: #0c4a6e !important; font-weight: 700 !important; }
+#pageHome .menu-card:active { background: rgba(255, 255, 255, 0.12) !important; }
+#pageHome .menu-card span { color: #f8fafc !important; font-weight: 700 !important; }
 /* ========= 📋 MENU GRID & CARDS (โครงสร้างเดิม) ========= */
 .menu-grid {
     display: grid !important;
