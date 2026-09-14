@@ -580,16 +580,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* ========== SECTION 10: BUSINESS LOGIC & COMMISSION CALCULATION ========== */
 // 1. ฟังก์ชันคุมการเลือกประเภทลูกค้า (ล็อก/ปลดล็อกราคา)
-function handleCustType(value) {
-  const priceInp = document.getElementById('priceInp');
-  if (!priceInp) return;
+function handleCustTypeChange(value) {
+    const priceInp = document.getElementById('priceInp');
+    if (!priceInp) return;
 
-  if (value === 'offsite') {
-    priceInp.value = 300;
-    priceInp.readOnly = true;
-  } else {
-    priceInp.readOnly = false;
-  }
+    if (value === 'offsite') {
+        priceInp.value = 300;       // กรอกราคา 300 อัตโนมัติ
+        priceInp.readOnly = true;    // ล็อกช่องไม่ให้แก้ไขราคา
+    } else {
+        // กรณีเลือกประเภทอื่น ถ้าเดิมเป็น 300 ให้ล้างค่าออกแล้วปลดล็อก
+        if (priceInp.value == 300) {
+            priceInp.value = '';
+        }
+        priceInp.readOnly = false;   // ปลดล็อกให้กรอกราคาได้ตามปกติ
+    }
 }
 
 // 2. ฟังก์ชันคำนวณส่วนแบ่งช่าง/ร้าน (สำหรับใช้ตอนบันทึกหรือทำรายงาน)
