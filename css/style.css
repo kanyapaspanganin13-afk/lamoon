@@ -818,7 +818,100 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     padding: 3px 2px !important;
     font-size: 10.5px !important;
 }
+/* 1. ฉากหลังมืดเต็มจอ (Overlay) */
+.modal#linePreview {
+    display: none; /* ซ่อนไว้ก่อน ให้ JS สลับเป็น flex ตอนเรียกใช้ */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px); /* เพิ่มเอฟเฟกต์เบลอฉากหลัง */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 16px;
+    box-sizing: border-box;
+}
 
+/* 2. กล่องเนื้อหา Modal */
+#linePreview .modal-content {
+    background: #0f172a; /* โทนเข้มเข้ากับธีมแอป */
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 20px;
+    width: 100%;
+    max-width: 450px; /* ขนาดกำลังพอดีสำหรับมือถือและคอม */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-sizing: border-box;
+}
+
+/* 3. หัวข้อ */
+#linePreview h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #f8fafc;
+    text-align: center;
+}
+
+/* 4. กล่องข้อความแสดงรายงาน (แก้ปัญหาตัวเล็กลง) */
+#linePreview #msgEdit {
+    width: 100%;
+    height: 320px; /* เพิ่มความสูงให้อ่านง่าย */
+    background: #1e293b;
+    color: #f8fafc;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    font-family: inherit;
+    resize: vertical; /* ยืดหดความสูงได้ */
+    outline: none;
+    box-sizing: border-box;
+}
+
+#linePreview #msgEdit:focus {
+    border-color: #38bdf8; /* สีขอบเมื่อกดพิมพ์ */
+}
+
+/* 5. ปุ่มกดด้านล่าง */
+#linePreview .modal-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+#linePreview .btn-close,
+#linePreview .btn-save {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+#linePreview .btn-close {
+    background: rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+}
+
+#linePreview .btn-save {
+    background: #22c55e; /* สีเขียวสไตล์ LINE */
+    color: #ffffff;
+}
+
+#linePreview .btn-close:active,
+#linePreview .btn-save:active {
+    opacity: 0.8;
+}
 /* ========= 💰 ACCOUNT & SETTINGS ========= */
 .card { background: var(--card); border-radius: 20px; padding: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); border: 1px solid var(--border); margin-bottom: 12px; transition: background 0.3s, border-color 0.3s; }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
