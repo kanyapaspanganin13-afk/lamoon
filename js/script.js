@@ -726,23 +726,45 @@ function loadAccountStatus() {
 
     if (typeof archives === "undefined") return;
 
-    // 2. ดึงยอดค้างของ "วันนี้"
+    // 2. ดึงยอดค้างของ "วันนี้" (ติดลบคือช่างค้างร้าน / บวกคือร้านค้างช่าง)
     const todayData = archives.find(a => a.date === todayKey);
-    // ค่า settle: ติดลบคือช่างค้างร้าน / เป็นบวกคือร้านค้างช่าง
-    let todaySettle = todayData ? Number(todayData.settle) || 0 : 0;
+    let todaySettle = todayData ? (Number(-todayData.settle) || 0) : 0;
 
-    // 3. ดึงยอด "ค้างเดิม" จาก account.balance (ไม่ไปยุ่งกับ archives อดีต)
-    let oldSettle = Number(account?.balance) || 0;
+    // 🎯 3. คำนวณ "ค้างเดิม" จริง (ยอด archives อดีต + ยอดที่เคยเคลียร์ไปแล้วใน logs)
+    // 3.1 ดึงยอดค้างจาก archives ทุกวันที่เกิดขึ้นก่อนหน้า todayKey
+    let pastArchivesSettle = archives.reduce((sum, day) => {
+        if (day.date < todayKey && day.settle !== 0) {
+            return sum + (Number(-day.settle) || 0);
+        }
+        return sum;
+    }, 0);
+
+    // 3.2 ดึงยอดเงินที่มีการเคลียร์/หักลบไปแล้วจาก account.logs จนถึงปัจจุบัน
+    let pastLogsAmount = 0;
+    if (typeof account !== "undefined" && Array.isArray(account.logs)) {
+        pastLogsAmount = account.logs.reduce((sum, log) => {
+            if (log.date <= todayKey) {
+                return sum + (Number(log.amount) || 0);
+            }
+            return sum;
+        }, 0);
+    }
+
+    // รวมเป็นยอดค้างเดิมที่ถูกหักลบจริงแล้ว
+    let oldSettle = pastArchivesSettle + pastLogsAmount;
 
     // 4. คำนวณยอดสุทธิรวมทั้งหมด
     let totalBalance = oldSettle + todaySettle;
+    if (typeof account !== "undefined") {
+        account.balance = totalBalance;
+    }
 
     // 5. แสดงผลยอดค้างวันนี้
     if (getEl("accTodayVal")) {
         getEl("accTodayVal").innerText = `฿${Math.abs(todaySettle).toLocaleString()}`;
     }
 
-    // 6. แสดงผลยอดค้างเดิม (รูปที่ 1: ค้างเดิม ช่างค้าง: ฿20)
+    // 6. แสดงผลยอดค้างเดิม (พร้อมป้ายกำกับ)
     const oldValEl = getEl("accOldVal");
     if (oldValEl) {
         if (oldSettle < 0) {
