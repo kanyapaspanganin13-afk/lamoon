@@ -1,6 +1,6 @@
 {
   "name": "Barber Note - ระบบจัดการร้านตัดผม",
-  "short_name": "Barber Note",
+  "short_name": "Barber Manager",
   "description": "แอปบันทึกรายรับ รายงานประจำวัน และคำนวณส่วนแบ่งรายได้ร้านตัดผม",
   "start_url": "./index.html",
   "display": "standalone",
