@@ -659,12 +659,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     font-size: 12px;
     text-align: center;
     color: var(--text);
+    table-layout: fixed; /* 👈 สำคัญมาก: บังคับคำนวณขนาดคอลัมน์ตาม % ที่กำหนดใน JS */
 }
+
 .compare-grid-table th,
 .compare-grid-table td {
     padding: 6px 4px;
     border: 1px solid var(--border);
+    vertical-align: middle; /* จัดข้อความให้อยู่ตรงกลางแนวตั้ง */
+    white-space: nowrap;    /* ป้องกันตัวเลขหรือวันที่ตัดขึ้นบรรทัดใหม่ */
+    overflow: hidden;       /* ป้องกันเนื้อหาล้นกรอบ */
+    text-overflow: ellipsis;/* หากข้อความยาวเกินจะขึ้น ... แทน */
 }
+
 .compare-grid-table th {
     background: var(--bg);
     font-weight: 700;
