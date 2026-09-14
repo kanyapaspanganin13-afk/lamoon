@@ -79,50 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if ($("shopTitleDisplay")) $("shopTitleDisplay").innerText = savedShopName;
     document.querySelectorAll('.shop-title-text').forEach(el => el.innerText = savedShopName);
 });
-// ========== ตัวแปรหลักของระบบ — ส่วนเดิมต่อไปเลย ==========
-let db = JSON.parse(localStorage.getItem("barber_db")) || [];
-let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
-let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
-let conf = JSON.parse(localStorage.getItem("barber_conf")) || { 
-    shop: localStorage.getItem("shopName") || "Barber Shop", 
-    perc: parseFloat(localStorage.getItem("shopPerc")) || 50, 
-    guar: parseFloat(localStorage.getItem("shopGuar")) || 0,
-    theme: localStorage.getItem("shopTheme") || "light",
-    voice: localStorage.getItem("shopVoice") || "female",
-    sound: localStorage.getItem("shopSound") || "on"
-};
-let payMethod = "";
-
-// ✅ แสดงผลตรงกับช่องใน HTML ของคุณ
-document.addEventListener("DOMContentLoaded", () => {
-    const elVer = document.getElementById("appVersionDisplay");
-    if (elVer) {
-        const [d, m, y] = LAST_UPDATED.split('/');
-        const yrBE = (parseInt(y) + 543).toString().slice(-2);
-        elVer.innerText = `V${APP_VERSION} | Update ${d}/${m}/${yrBE}`;
-    }
-});
-
-// ========== ส่วนตัวแปรอื่นๆ เดิมต่อไปเลย ==========
-let db = JSON.parse(localStorage.getItem("barber_db")) || [];
-let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
-let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
-let conf = JSON.parse(localStorage.getItem("barber_conf")) || { 
-    shop: localStorage.getItem("shopName") || "Barber Shop", 
-    perc: parseFloat(localStorage.getItem("shopPerc")) || 50, 
-    guar: parseFloat(localStorage.getItem("shopGuar")) || 0,
-    theme: localStorage.getItem("shopTheme") || "light",
-    voice: localStorage.getItem("shopVoice") || "female",
-    sound: localStorage.getItem("shopSound") || "on"
-};
-let payMethod = "";
-
-// ✅ ส่วนแสดงชื่อร้านคงไว้เหมือนเดิม
-document.addEventListener("DOMContentLoaded", () => {
-    const savedShopName = localStorage.getItem("shopName") || conf.shop || "BARBER SHOP";
-    if ($("shopTitleDisplay")) $("shopTitleDisplay").innerText = savedShopName;
-    document.querySelectorAll('.shop-title-text').forEach(el => el.innerText = savedShopName);
-});
 /* =========== SECTION 2: MAIN NAVIGATION =========== */
 function switchMainView(viewName, subNum = null) {
     // ซ่อนทุกหน้าก่อน
