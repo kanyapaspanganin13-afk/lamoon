@@ -726,51 +726,57 @@ function loadAccountStatus() {
 
     if (typeof archives === "undefined") return;
 
-    // 2. ดึงยอดค้างของ "วันนี้" (ติดลบคือช่างค้างร้าน / บวกคือร้านค้างช่าง)
+    // 2. ดึงยอดค้างของ "วันนี้" (อ้างอิงค่า settle ตรงๆ)
     const todayData = archives.find(a => a.date === todayKey);
-    let todaySettle = todayData ? (Number(-todayData.settle) || 0) : 0;
+    let todaySettle = todayData ? (Number(todayData.settle) || 0) : 0;
 
-    // 🎯 3. คำนวณ "ค้างเดิม" จริง (ยอด archives อดีต + ยอดที่เคยเคลียร์ไปแล้วใน logs)
-    // 3.1 ดึงยอดค้างจาก archives ทุกวันที่เกิดขึ้นก่อนหน้า todayKey
+    // 🎯 3. คำนวณ "ยอดค้างเดิมยกมา" (คลังอดีตหักลบล็อกการจ่าย)
+    // 3.1 ผลรวมยอด settle จาก archives ก่อนหน้าวันนี้
     let pastArchivesSettle = archives.reduce((sum, day) => {
-        if (day.date < todayKey && day.settle !== 0) {
-            return sum + (Number(-day.settle) || 0);
+        if (day.date < todayKey) {
+            return sum + (Number(day.settle) || 0);
         }
         return sum;
     }, 0);
 
-    // 3.2 ดึงยอดเงินที่มีการเคลียร์/หักลบไปแล้วจาก account.logs จนถึงปัจจุบัน
-    let pastLogsAmount = 0;
+    // 3.2 ผลรวมการชำระเงินคืนจาก account.logs ก่อนหน้าวันนี้
+    let pastPaidAmount = 0;
     if (typeof account !== "undefined" && Array.isArray(account.logs)) {
-        pastLogsAmount = account.logs.reduce((sum, log) => {
+        pastPaidAmount = account.logs.reduce((sum, log) => {
             if (log.date <= todayKey) {
-                return sum + (Number(log.amount) || 0);
+                // แปลงค่าให้เป็นยอดบวกเพื่อนำมาหักล้างยอดค้าง
+                return sum + Math.abs(Number(log.amount) || 0);
             }
             return sum;
         }, 0);
     }
 
-    // รวมเป็นยอดค้างเดิมที่ถูกหักลบจริงแล้ว
-    let oldSettle = pastArchivesSettle + pastLogsAmount;
+    // ยอดค้างเดิมที่เหลือจริง = (ยอดค้างสะสมอดีต - ยอดที่เคลียร์แล้ว)
+    // ถ้ารวมแล้ว > 0 คือช่างค้างร้าน / ถ้า < 0 คือร้านค้างช่าง
+    let rawOldSettle = pastArchivesSettle - pastPaidAmount;
+    
+    // แปลงเข้าตรรกะระบบ (ติดลบ = ช่างค้างร้าน)
+    let oldSettle = -rawOldSettle; 
+    let todaySettleFormatted = -todaySettle;
 
     // 4. คำนวณยอดสุทธิรวมทั้งหมด
-    let totalBalance = oldSettle + todaySettle;
+    let totalBalance = oldSettle + todaySettleFormatted;
     if (typeof account !== "undefined") {
         account.balance = totalBalance;
     }
 
     // 5. แสดงผลยอดค้างวันนี้
     if (getEl("accTodayVal")) {
-        getEl("accTodayVal").innerText = `฿${Math.abs(todaySettle).toLocaleString()}`;
+        getEl("accTodayVal").innerText = `฿${Math.abs(todaySettleFormatted).toLocaleString()}`;
     }
 
-    // 6. แสดงผลยอดค้างเดิม (พร้อมป้ายกำกับ)
+    // 6. แสดงผลยอดค้างเดิม
     const oldValEl = getEl("accOldVal");
     if (oldValEl) {
         if (oldSettle < 0) {
             oldValEl.innerHTML = `<small style="color:#dc2626; font-weight:bold;">ช่างค้าง:</small> ฿${Math.abs(oldSettle).toLocaleString()}`;
         } else if (oldSettle > 0) {
-            oldValEl.innerHTML = `<small style="color:#16a34a; font-weight:bold;">ร้านค้าง:</small> ฿${oldSettle.toLocaleString()}`;
+            oldValEl.innerHTML = `<small style="color:#16a34a; font-weight:bold;">ร้านค้าง:</small> ฿${Math.abs(oldSettle).toLocaleString()}`;
         } else {
             oldValEl.innerText = `฿0`;
         }
@@ -789,7 +795,9 @@ function loadAccountStatus() {
     }
 
     // 9. อัปเดต UI ป้าย Badge และไฟแสดงสถานะ
-    updateStatusUI(totalBalance);
+    if (typeof updateStatusUI === 'function') {
+        updateStatusUI(totalBalance);
+    }
 }
 
 function updateStatusUI(net) {
