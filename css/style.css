@@ -845,7 +845,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .btn-monthly i, .btn-excel i, .btn-sheets i { font-size: 18px; margin-bottom: 4px; }
 .btn-compare { border-radius: 18px; padding: 12px; text-align: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, var(--btn-compare1), var(--btn-compare2)); color: var(--btn-text); font-weight: 600; margin-top: 12px; }
 .btn-compare i { font-size: 20px; }
-
 /* ========= 🪟 FIX MODAL SETTINGS (COMPACT & MATCH ALL CLASSES) ========= */
 .modal {
   display: none;
@@ -912,21 +911,25 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   min-width: 0;
 }
 
-/* 🎯 ปรับความสูงช่อง Input (ชื่อร้าน/ส่วนแบ่ง/ประกัน) ให้เท่ากับ Select (ธีม/เสียง) */
+/* 🎯 ปรับความสูงและขนาดตัวหนังสือของ Input/Select ทั้งหมดใน Modal */
+.modal-content.settings-modal input[type="text"],
+.modal-content.settings-modal input[type="number"],
+.modal-content.settings-modal select,
+.settings-card-container input[type="text"],
+.settings-card-container input[type="number"],
+.settings-card-container select,
 .settings-input-field,
 .settings-select-field,
 .settings-input,
-.settings-select,
-input[type="text"].settings-input,
-input[type="number"].settings-input {
+.settings-select {
   width: 100%;
-  height: 38px !important; /* กำหนดความสูงเท่ากันทุกช่อง */
+  height: 38px !important;
   min-height: 38px !important;
   max-height: 38px !important;
   padding: 0 10px;
   border-radius: 12px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 14px !important; /* ✅ ปรับขนาดตัวอักษรเป็น 14px */
+  font-weight: 600 !important; /* ✅ ปรับความหนาให้สมดุลพอดีช่อง */
   box-sizing: border-box;
   background: var(--bg) !important;
   color: var(--text) !important;
@@ -939,17 +942,22 @@ input[type="number"].settings-input {
 
 /* ลบ margin-bottom ออกเมื่ออยู่ใน row เดียวกัน */
 .settings-row .settings-input,
-.settings-row .settings-select {
+.settings-row .settings-select,
+.settings-grid-2 input,
+.settings-grid-2 select {
   margin-bottom: 0 !important;
 }
+
 .settings-input:focus,
 .settings-select:focus,
 .settings-input-field:focus,
-.settings-select-field:focus {
+.settings-select-field:focus,
+.modal-content.settings-modal input:focus,
+.modal-content.settings-modal select:focus {
   border-color: var(--accent) !important;
 }
 
-/* 📍 จัดไอคอนให้อยู่ในช่อง Select */
+/* 📍 จัดไอคอนให้อยู่ในช่อง Select และป้องกันตัวหนังสือทับไอคอน */
 .settings-icon-wrap,
 .settings-input-icon-wrap {
   position: relative;
@@ -962,7 +970,7 @@ input[type="number"].settings-input {
 .settings-input-icon-wrap select {
   appearance: none;
   -webkit-appearance: none;
-  padding-left: 28px !important;
+  padding-left: 32px !important; /* ✅ เว้นระยะซ้ายไม่ให้ตัวหนังสือทับไอคอน */
   text-align-last: center;
   margin-bottom: 0;
 }
@@ -976,6 +984,7 @@ input[type="number"].settings-input {
   opacity: 0.6;
   pointer-events: none;
   font-size: 13px;
+  z-index: 2;
 }
 
 /* 🚫 ซ่อน Input File ของระบบเบราว์เซอร์ */
@@ -985,7 +994,7 @@ input[type="file"]#fileInput,
   display: none !important;
 }
 
-/* 📐 แถวปุ่ม 3 ปุ่ม */
+/* 📐 แถวปุ่ม 3 ปุ่ม (สำรองข้อมูล / นำเข้าข้อมูล / ล้างข้อมูล) */
 .settings-grid-3,
 .settings-btn-row-3 {
   display: grid !important;
@@ -995,7 +1004,7 @@ input[type="file"]#fileInput,
   width: 100%;
 }
 
-/* 📐 แถวปุ่มหลัก */
+/* 📐 แถวปุ่มหลัก (บันทึก / ปิด) */
 .settings-grid-main,
 .settings-btn-row-2 {
   display: grid !important;
@@ -1080,6 +1089,7 @@ input[type="file"]#fileInput,
   font-size: 9px;
   font-weight: 400;
 }
+
 /* ========= 📱 RESPONSIVE ========= */
 @media (max-width: 480px) {
     .filter-card-compact {
