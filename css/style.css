@@ -279,7 +279,7 @@ select, input[type="text"], input[type="number"], input[type="date"], input[type
     justify-content: center; 
     transition: background 0.3s, border-color 0.3s;
 }
-.input-date-wrap span { font-weight: 800; color: var(--text); font-size: 20px !important; }
+.input-date-wrap span { font-weight: 800; color: var(--text); font-size: 22px !important; }
 .input-date-wrap input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 select#custType, select#hairStyle, select#extra1, select#extra2 { 
     height: 76px !important; 
@@ -314,7 +314,7 @@ input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
     background: var(--bg); 
     border: 2px solid var(--border); 
     border-radius: 22px; 
-    font-size: 26px !important; 
+    font-size: 35px !important; 
     font-weight: 800; 
     color: var(--text); 
     opacity: 0.9;
@@ -365,7 +365,7 @@ input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
 #mixPanel label { display: block; font-size: 14px; font-weight: 700; text-align: center; margin-bottom: 6px; }
 #mixPanel label:first-of-type { color: var(--cash2); }
 #mixPanel label:last-of-type { color: var(--trans2); }
-#mixPanel input { height: 58px; border-radius: 14px; font-size: 18px; }
+#mixPanel input { height: 58px; border-radius: 14px; font-size: 22px; }
 
 /* ========= 📊 SUMMARY & REPORT ========= */
 .card-total { background: linear-gradient(135deg, var(--primary), var(--accent)); padding: 12px 10px; border-radius: 18px; text-align: center; box-shadow: 0 8px 12px -3px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; }
