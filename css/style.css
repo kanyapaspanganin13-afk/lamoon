@@ -255,15 +255,15 @@ body > center, body > a, body > br { display: none !important; }
     white-space: nowrap !important;
 }
 
-/* กราเดียนต์ปุ่มเมนูรองรับ Dynamic Colors */
-.grad-yellow  { background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: #ffffff !important; }
-.grad-red     { background: linear-gradient(135deg, #ef4444, #b91c1c) !important; color: #ffffff !important; }
-.grad-blue    { background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important; color: #ffffff !important; }
-.grad-green   { background: linear-gradient(135deg, #10b981, #047857) !important; color: #ffffff !important; }
-.grad-emerald { background: linear-gradient(135deg, #059669, #064e3b) !important; color: #ffffff !important; }
-.grad-gray    { background: linear-gradient(135deg, #64748b, #334155) !important; color: #ffffff !important; }
-.grad-purple  { background: linear-gradient(135deg, #a855f7, #6b21a8) !important; color: #ffffff !important; }
-.grad-cyan    { background: linear-gradient(135deg, #06b6d4, #0e7490) !important; color: #ffffff !important; }
+/* กราเดียนต์ปุ่มเมนูรองรับ Vibrant Neon Gradients */
+.grad-yellow  { background: linear-gradient(135deg, #ffb703 0%, #fb8500 100%) !important; color: #ffffff !important; box-shadow: 0 4px 15px rgba(251, 133, 0, 0.4) !important; }
+.grad-red     { background: linear-gradient(135deg, #ff0054 0%, #ff5400 100%) !important; color: #ffffff !important; box-shadow: 0 4px 15px rgba(255, 0, 84, 0.4) !important; }
+.grad-blue    { background: linear-gradient(135deg, #00f5d4 0%, #00bbf9 100%) !important; color: #0f172a !important; box-shadow: 0 4px 15px rgba(0, 245, 212, 0.4) !important; }
+.grad-green   { background: linear-gradient(135deg, #38ef7d 0%, #11998e 100%) !important; color: #ffffff !important; box-shadow: 0 4px 15px rgba(56, 239, 125, 0.4) !important; }
+.grad-emerald { background: linear-gradient(135deg, #00f5d4 0%, #0bbf64 100%) !important; color: #0f172a !important; box-shadow: 0 4px 15px rgba(0, 245, 212, 0.4) !important; }
+.grad-cyan    { background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%) !important; color: #ffffff !important; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4) !important; }
+.grad-purple  { background: linear-gradient(135deg, #f72585 0%, #7209b7 100%) !important; color: #ffffff !important; box-shadow: 0 4px 15px rgba(247, 37, 133, 0.4) !important; }
+.grad-gray    { background: linear-gradient(135deg, #94a3b8 0%, #475569 100%) !important; color: #ffffff !important; }
 
 /* ========= 📋 GRID LAYOUTS ========= */
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; }
