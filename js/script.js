@@ -2929,6 +2929,7 @@ function shareLine() {
     const guar = Number(conf.guar) || 0;
 
     let tot = 0, cash = 0, trans = 0, tips = 0;
+    let bEarnBase = 0; // ยอดส่วนแบ่งช่าง (ไม่รวมทิป)
     let stats = {}, realCustomerCount = 0, newCount = 0, regCount = 0, offsiteCount = 0, giftCount = 0;
 
     // 📝 ประมวลผลรายการลูกค้า
@@ -2964,9 +2965,17 @@ function shareLine() {
             realCustomerCount++;
             const cType = String(r.custType || r.type || "").toLowerCase();
             
-            if (cType === 'new' || cType === 'ใหม่') newCount++; 
-            else if (cType === 'regular' || cType === 'ประจำ') regCount++;
-            else if (cType === 'offsite' || cType.includes('นอกสถานที่')) offsiteCount++; // 🚗 นับนอกสถานที่
+            // 🎯 คำนวณส่วนแบ่งช่างแยกตามประเภทลูกค้า
+            if (cType === 'offsite' || cType.includes('นอกสถานที่')) {
+                offsiteCount++;
+                bEarnBase += 200; // 🚗 นอกสถานที่: ล็อกช่างได้ 200 บาท
+            } else if (cType === 'new' || cType === 'ใหม่') {
+                newCount++;
+                bEarnBase += p * (perc / 100); // 🌟 ลูกค้าใหม่: คิด % ตามตั้งค่า
+            } else {
+                regCount++;
+                bEarnBase += p * (perc / 100); // 📌 ลูกค้าประจำ/ทั่วไป: คิด % ตามตั้งค่า
+            }
             
             if (r.hair && r.hair.includes("เด็ก")) stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
             (r.svcs||[]).forEach(s=>{if(s) stats[s]=(stats[s]||0)+1;});
@@ -2984,10 +2993,10 @@ function shareLine() {
         .filter(([k]) => allowed.some(a => k.includes(a)))
         .map(([k, v]) => `${icons[Object.keys(icons).find(i => k.includes(i))] || '🔹'} ${k}: ${v}`).join('\n');
 
-    // 💰 คำนวณรายได้ช่าง/ร้าน
-    let bEarn = Math.max(tot*(perc/100), guar) + tips;
+    // 💰 คำนวณรายได้รวมช่าง/ร้าน
+    let bEarn = Math.max(bEarnBase, guar) + tips;
     let shopEarn = tot - (bEarn - tips);
-    let settle = cash - bEarn;
+    let settle = cash - (bEarn - tips); // คิดยอดเคลียร์เงินสด (หักทิปออก)
 
     // 🔄 ยอดค้างสะสม
     let oldBalance = 0, periodText = "", hasOldBalance = false;
@@ -3014,11 +3023,10 @@ function shareLine() {
     msg += `-------------------------\n`;
     msg += `👤 ลูกค้าทั้งหมด: ${realCustomerCount} คน`;
 
-    // 🔍 ปรับปรุงจุดนี้: เช็คประเภทลูกค้า + ซ่อน "นอกสถานที่" ถ้าไม่มี
     const custTypeParts = [];
     if (newCount > 0) custTypeParts.push(`ใหม่:${newCount}`);
     if (regCount > 0) custTypeParts.push(`ประจำ:${regCount}`);
-    if (offsiteCount > 0) custTypeParts.push(`นอกสถานที่:${offsiteCount}`); // 🚗 จะแสดงเฉพาะเมื่อมากกว่า 0
+    if (offsiteCount > 0) custTypeParts.push(`นอกสถานที่:${offsiteCount}`);
 
     if (custTypeParts.length > 0) {
         msg += `\n ${custTypeParts.join(' | ')}`;
@@ -3042,16 +3050,25 @@ function shareLine() {
         msg += settle>0?`🟧 ช่างคืนร้าน: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท`:(settle<0?`🟦 ร้านคืนช่าง: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท`:`✅ ยอดลงตัวพอดี`);
     }
 
-    // แสดง Preview หรือส่งเลย
+    // แสดง Preview พร้อมจัดสไตล์
     const msgEdit = $("msgEdit"), previewArea = $("linePreview");
     if (msgEdit && previewArea) { 
         msgEdit.value = msg; 
+        
+        msgEdit.style.width = "100%";
+        msgEdit.style.height = "320px";
+        msgEdit.style.padding = "12px";
+        msgEdit.style.fontSize = "14px";
+        msgEdit.style.borderRadius = "12px";
+        msgEdit.style.background = "#1e293b";
+        msgEdit.style.color = "#ffffff";
+        msgEdit.style.boxSizing = "border-box";
+        
         previewArea.style.display = "flex"; 
     } else { 
         window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`, '_blank'); 
     }
 }
-
 function sendToLineFinal() {
     const $ = (id) => document.getElementById(id);
     const msgEdit = $("msgEdit"), previewArea = $("linePreview");
