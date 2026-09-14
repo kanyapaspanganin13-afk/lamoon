@@ -2018,12 +2018,14 @@ function getDayDataFull(dateStr) {
     });
     return { cust, barber, shop, total };
 }
+// ✅ ประมวลผลข้อมูลเปรียบเทียบ (แก้ไขปัญหาหัวข้อซ้ำ + รองรับ Dynamic ทั้ง 2 ช่วง)
 function processComparison() {
     const d1_start = document.getElementById('startDate1')?.value;
     const d1_end   = document.getElementById('endDate1')?.value;
     const d2_start = document.getElementById('startDate2')?.value;
     const d2_end   = document.getElementById('endDate2')?.value;
 
+    // ✅ อ่านหัวข้อที่เลือกจาก Dropdown HTML (<select id="compareTopic1"> และ <select id="compareTopic2">)
     const topic1 = document.getElementById('compareTopic1')?.value || 'total';
     const topic2 = document.getElementById('compareTopic2')?.value || 'total';
 
@@ -2044,32 +2046,29 @@ function processComparison() {
     const label1 = topicLabel(topic1);
     const label2 = topicLabel(topic2);
 
-    // ✅ ป้องกันหัวข้อซ้ำ: ถ้าเลือก 'cust' ให้แสดงคอลัมน์เดียวเพื่อไม่ให้คำว่า "ลูกค้า" ขึ้นซ้ำกัน
-    const showCustCol1 = topic1 !== 'cust';
-    const showCustCol2 = topic2 !== 'cust';
+    // ✅ แก้ปัญหาหัวข้อซ้ำ: ถ้าเลือก 'cust' (ลูกค้า) คอลัมน์ก่อนหน้าจะเปลี่ยนเป็น 'รายการ' ถ้าเป็นเรื่องเงินจะใช้ 'ลูกค้า'
+    const col3Name1 = topic1 === 'cust' ? 'รายการ' : 'ลูกค้า';
+    const col3Name2 = topic2 === 'cust' ? 'รายการ' : 'ลูกค้า';
 
-    const span1 = showCustCol1 ? 4 : 3;
-    const span2 = showCustCol2 ? 4 : 3;
-
-    // ✅ หัวตาราง (Dynamic Spanning & Auto Width)
+    // ✅ หัวตาราง (Dynamic ครบถ้วนทั้งช่วงที่ 1 และช่วงที่ 2)
     const headHtml = `
         <tr>
-            <th colspan="${span1}" style="background: var(--summary-bg); color: var(--primary); border: 1px solid var(--summary-border); padding: 8px;">📅 ช่วงที่ 1 (${formatTHDate(d1_start)} - ${formatTHDate(d1_end)})</th>
-            <th colspan="${span2}" style="background: var(--btn-compare1); color: var(--btn-text); border: 1px solid var(--border); padding: 8px;">📅 ช่วงที่ 2 (${formatTHDate(d2_start)} - ${formatTHDate(d2_end)})</th>
+            <th colspan="4" style="background: var(--summary-bg); color: var(--primary); border: 1px solid var(--summary-border);">📅 ช่วงที่ 1 (${formatTHDate(d1_start)} - ${formatTHDate(d1_end)})</th>
+            <th colspan="4" style="background: var(--btn-compare1); color: var(--btn-text);">📅 ช่วงที่ 2 (${formatTHDate(d2_start)} - ${formatTHDate(d2_end)})</th>
         </tr>
         <tr>
-            <th style="background: var(--primary); color: #fff; width: 10%;">วัน</th>
-            <th style="background: var(--primary); color: #fff; width: 15%;">วันที่</th>
-            ${showCustCol1 ? '<th style="background: var(--primary); color: #fff; width: 12%;">ลูกค้า</th>' : ''}
+            <th style="background: var(--primary); color: #fff;">วัน</th>
+            <th style="background: var(--primary); color: #fff;">วันที่</th>
+            <th style="background: var(--primary); color: #fff;">${col3Name1}</th>
             <th style="background: var(--primary); color: #fff;">${label1}</th>
-            
-            <th style="background: var(--btn-compare2); color: #fff; width: 10%;">วัน</th>
-            <th style="background: var(--btn-compare2); color: #fff; width: 15%;">วันที่</th>
-            ${showCustCol2 ? '<th style="background: var(--btn-compare2); color: #fff; width: 12%;">ลูกค้า</th>' : ''}
+            <th style="background: var(--btn-compare2); color: #fff;">วัน</th>
+            <th style="background: var(--btn-compare2); color: #fff;">วันที่</th>
+            <th style="background: var(--btn-compare2); color: #fff;">${col3Name2}</th>
             <th style="background: var(--btn-compare2); color: #fff;">${label2}</th>
         </tr>
     `;
 
+    // ✅ ฟังก์ชันดึงค่าตามหัวข้อ
     function getValueByTopic(dayData, topic) {
         switch(topic) {
             case 'cust': return dayData.cust;
@@ -2100,22 +2099,22 @@ function processComparison() {
         const val2 = data2 ? getValueByTopic(data2, topic2) : null;
         if (data2) { sum2Cust += data2.cust; if(val2 !== null) sum2Val += val2; }
 
+        // ✅ ฟอร์แมตแสดงตัวเลข (ถ้าเป็นเงินใส่ ฿ ถ้าเป็นคนแสดงตัวเลขเฉยๆ)
         const fmtVal = (v, t) => {
             if(v === null || v === undefined) return '-';
-            return t === 'cust' ? v.toLocaleString() + ' คน' : '฿' + v.toLocaleString();
+            return t === 'cust' ? v.toLocaleString() : '฿' + v.toLocaleString();
         };
 
         bodyHtml += `
             <tr>
-                <td style="background: ${rowBg1}; color: var(--primary); border: ${border}; font-weight:500; text-align:center;">${dayName1}</td>
-                <td style="background: ${rowBg1}; color: var(--text); border: ${border}; text-align:center;">${date1 ? formatShortDate(date1) : '-'}</td>
-                ${showCustCol1 ? `<td style="background: ${rowBg1}; color: var(--text); border: ${border}; text-align:center; font-weight:500;">${data1 ? data1.cust.toLocaleString() : '0'}</td>` : ''}
-                <td style="background: ${rowBg1}; color: var(--success); border: ${border}; text-align:right; font-weight:600; padding-right:8px;">${fmtVal(val1, topic1)}</td>
-                
-                <td style="background: ${rowBg2}; color: var(--btn-compare1); border: ${border}; font-weight:500; text-align:center;">${dayName2}</td>
-                <td style="background: ${rowBg2}; color: var(--text); border: ${border}; text-align:center;">${date2 ? formatShortDate(date2) : '-'}</td>
-                ${showCustCol2 ? `<td style="background: ${rowBg2}; color: var(--text); border: ${border}; text-align:center; font-weight:500;">${data2 ? data2.cust.toLocaleString() : '0'}</td>` : ''}
-                <td style="background: ${rowBg2}; color: var(--success); border: ${border}; text-align:right; font-weight:600; padding-right:8px;">${fmtVal(val2, topic2)}</td>
+                <td style="background: ${rowBg1}; color: var(--primary); border: ${border}; font-weight:500;">${dayName1}</td>
+                <td style="background: ${rowBg1}; color: var(--text); border: ${border};">${date1 ? formatShortDate(date1) : '-'}</td>
+                <td style="background: ${rowBg1}; color: var(--text); border: ${border}; font-weight:500;">${data1 ? data1.cust.toLocaleString() : '0'}</td>
+                <td style="background: ${rowBg1}; color: var(--success); border: ${border}; font-weight:600;">${fmtVal(val1, topic1)}</td>
+                <td style="background: ${rowBg2}; color: var(--btn-compare1); border: ${border}; font-weight:500;">${dayName2}</td>
+                <td style="background: ${rowBg2}; color: var(--text); border: ${border};">${date2 ? formatShortDate(date2) : '-'}</td>
+                <td style="background: ${rowBg2}; color: var(--text); border: ${border}; font-weight:500;">${data2 ? data2.cust.toLocaleString() : '0'}</td>
+                <td style="background: ${rowBg2}; color: var(--success); border: ${border}; font-weight:600;">${fmtVal(val2, topic2)}</td>
             </tr>
         `;
     }
@@ -2123,20 +2122,19 @@ function processComparison() {
     // ✅ แถวสรุปผลรวมท้ายตาราง
     const fmtSum = (v, t) => {
         const val = v || 0;
-        return t === 'cust' ? val.toLocaleString() + ' คน' : '฿' + val.toLocaleString();
+        return t === 'cust' ? val.toLocaleString() : '฿' + val.toLocaleString();
     };
 
     const footHtml = `
         <tr style="font-weight: bold;">
-            <td style="background: var(--warning); color: #000; border: 2px solid var(--btn-his2); text-align:center;">รวม</td>
-            <td style="background: var(--summary-bg); color: var(--warning); border: 2px solid var(--btn-his2); text-align:center;">${range1.length} วัน</td>
-            ${showCustCol1 ? `<td style="background: var(--summary-bg); color: var(--text); border: 2px solid var(--btn-his2); text-align:center; font-size: 1.05em;">${(sum1Cust || 0).toLocaleString()}</td>` : ''}
-            <td style="background: var(--summary-bg); color: var(--success); border: 2px solid var(--btn-his2); text-align:right; font-size: 1.05em; padding-right:8px;">${fmtSum(sum1Val, topic1)}</td>
-            
-            <td style="background: var(--warning); color: #000; border: 2px solid var(--btn-his2); text-align:center;">รวม</td>
-            <td style="background: rgba(147, 142, 245, 0.15); color: var(--btn-compare1); border: 2px solid var(--btn-his2); text-align:center;">${range2.length} วัน</td>
-            ${showCustCol2 ? `<td style="background: rgba(147, 142, 245, 0.15); color: var(--text); border: 2px solid var(--btn-his2); text-align:center; font-size: 1.05em;">${(sum2Cust || 0).toLocaleString()}</td>` : ''}
-            <td style="background: rgba(147, 142, 245, 0.15); color: var(--success); border: 2px solid var(--btn-his2); text-align:right; font-size: 1.05em; padding-right:8px;">${fmtSum(sum2Val, topic2)}</td>
+            <td style="background: var(--warning); color: #000; border: 2px solid var(--btn-his2);">รวม</td>
+            <td style="background: var(--summary-bg); color: var(--warning); border: 2px solid var(--btn-his2);">${range1.length} วัน</td>
+            <td style="background: var(--summary-bg); color: var(--text); border: 2px solid var(--btn-his2); font-size: 1.05em;">${(sum1Cust || 0).toLocaleString()}</td>
+            <td style="background: var(--summary-bg); color: var(--success); border: 2px solid var(--btn-his2); font-size: 1.05em;">${fmtSum(sum1Val, topic1)}</td>
+            <td style="background: var(--warning); color: #000; border: 2px solid var(--btn-his2);">รวม</td>
+            <td style="background: rgba(147, 142, 245, 0.15); color: var(--btn-compare1); border: 2px solid var(--btn-his2);">${range2.length} วัน</td>
+            <td style="background: rgba(147, 142, 245, 0.15); color: var(--text); border: 2px solid var(--btn-his2); font-size: 1.05em;">${(sum2Cust || 0).toLocaleString()}</td>
+            <td style="background: rgba(147, 142, 245, 0.15); color: var(--success); border: 2px solid var(--btn-his2); font-size: 1.05em;">${fmtSum(sum2Val, topic2)}</td>
         </tr>
     `;
 
