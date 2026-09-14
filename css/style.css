@@ -163,7 +163,7 @@ body > center, body > a, body > br { display: none !important; }
     padding-bottom: 85px !important;
 }
 /* ============= ปรับแต่งเฉพาะหน้าแรก (#pageHome) - (Bright Cyberpunk Gradient) ============= */
-/* 1. คุมสีพื้นหลังและกรอบของหน้าแรก */
+/* 1. พื้นหลังใหญ่หน้าแรก */
 #pageHome {
     background: linear-gradient(160deg, #090d16 0%, #0d122b 50%, #150a21 100%) !important;
     border: 1px solid rgba(139, 92, 246, 0.2) !important;
@@ -179,7 +179,7 @@ body > center, body > a, body > br { display: none !important; }
 #pageHome .home-header h2 span:first-child { color: #ffffff !important; font-size: 22px !important; font-weight: 800 !important; }
 #pageHome .home-header h2 span:last-child { color: #a5b4fc !important; }
 
-/* 3. ตัวการ์ดเมนู (ไล่เฉดสีน้ำเงิน-ม่วงสดใส แบบในรูป) */
+/* 3. ตัวการ์ดเมนูไล่เฉดน้ำเงิน-ม่วง */
 #pageHome .menu-card {
     background: linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%) !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -196,6 +196,16 @@ body > center, body > a, body > br { display: none !important; }
     color: #ffffff !important;
     font-weight: 700 !important;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 4. เปลี่ยนกล่องไอคอนเป็นแบบกระจกใส โปร่งแสง ไม่แย่งซีนตัวการ์ด */
+#pageHome .menu-card .menu-icon,
+#pageHome .menu-card .icon {
+    background: rgba(0, 0, 0, 0.25) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    backdrop-filter: blur(4px);
 }
 
 /* 4. กราเดียนต์ปุ่มไอคอนด้านใน (จำเป็นต้องมีเพื่อแยกสีไอคอน) */
