@@ -5,24 +5,73 @@
 const $ = id => document.getElementById(id);
 
 // ✅ ตั้งค่า — แก้แค่ 2 บรรทัดนี้
-const VERSION_MAJOR = "1.1.";
+const VERSION_MAJOR = "1.0."; // รูปแบบ: "X.Y."
 const LAST_UPDATED = "14/09/2026";
 
-// ✅ เพิ่มเลขเวอร์ชันอัตโนมัติ
+// ✅ เพิ่มเลขเวอร์ชันอัตโนมัติ — ครบ 10 ขยับหลักเอง
 let APP_VERSION = "";
 (function autoIncrementVersion() {
-    const storedPrefix = localStorage.getItem("ver_prefix");
-    const storedBuild = parseInt(localStorage.getItem("ver_build") || "0");
-    let newBuild = storedBuild;
-    if (storedPrefix !== VERSION_MAJOR) {
-        newBuild = 1;
-        localStorage.setItem("ver_prefix", VERSION_MAJOR);
-    } else {
-        newBuild = storedBuild + 1;
+    // แยกส่วน: major.minor.
+    const [verMajorBase, verMinorBase] = VERSION_MAJOR.split('.').map(Number);
+
+    const storedMajor = parseInt(localStorage.getItem("ver_x") || String(verMajorBase));
+    const storedMinor = parseInt(localStorage.getItem("ver_y") || String(verMinorBase));
+    const storedPatch = parseInt(localStorage.getItem("ver_z") || "0");
+
+    let x = storedMajor;
+    let y = storedMinor;
+    let z = storedPatch + 1; // เพิ่มตัวท้าย +1 ทุกครั้ง
+
+    // ✅ ถ้าตัวท้ายครบ 10 → รีเซ็ตเป็น 0 และเพิ่มตัวกลาง +1
+    if (z >= 10) {
+        z = 0;
+        y += 1;
     }
-    localStorage.setItem("ver_build", String(newBuild));
-    APP_VERSION = VERSION_MAJOR + newBuild;
+
+    // ✅ ถ้าตัวกลางครบ 10 → รีเซ็ตเป็น 0 และเพิ่มตัวหน้า +1
+    if (y >= 10) {
+        y = 0;
+        x += 1;
+    }
+
+    // ✅ ถ้าเปลี่ยนสายหลักที่ตั้งไว้ → เริ่มนับใหม่จาก VERSION_MAJOR
+    if (verMajorBase !== storedMajor || verMinorBase !== storedMinor) {
+        x = verMajorBase;
+        y = verMinorBase;
+        z = 1;
+    }
+
+    // บันทึกค่าใหม่
+    localStorage.setItem("ver_x", String(x));
+    localStorage.setItem("ver_y", String(y));
+    localStorage.setItem("ver_z", String(z));
+
+    // ประกอบเป็นเลขเวอร์ชัน: X.Y.Z
+    APP_VERSION = `${x}.${y}.${z}`;
 })();
+
+// ✅ แสดงเลขเวอร์ชัน + วันที่แปลงเป็น พ.ศ. ที่หน้าตั้งค่า
+document.addEventListener("DOMContentLoaded", () => {
+    const el = document.getElementById("appVersionDisplay");
+    if (!el) return;
+    const [d, m, y] = LAST_UPDATED.split('/');
+    const yrBE = (parseInt(y) + 543).toString().slice(-2);
+    el.innerText = `V${APP_VERSION} | Update ${d}/${m}/${yrBE}`;
+});
+
+// ========== ตัวแปรหลักของระบบ — ส่วนเดิมต่อไปเลย ==========
+let db = JSON.parse(localStorage.getItem("barber_db")) || [];
+let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
+let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
+let conf = JSON.parse(localStorage.getItem("barber_conf")) || { 
+    shop: localStorage.getItem("shopName") || "Barber Shop", 
+    perc: parseFloat(localStorage.getItem("shopPerc")) || 50, 
+    guar: parseFloat(localStorage.getItem("shopGuar")) || 0,
+    theme: localStorage.getItem("shopTheme") || "light",
+    voice: localStorage.getItem("shopVoice") || "female",
+    sound: localStorage.getItem("shopSound") || "on"
+};
+let payMethod = "";
 
 // ✅ แสดงผลตรงกับช่องใน HTML ของคุณ
 document.addEventListener("DOMContentLoaded", () => {
