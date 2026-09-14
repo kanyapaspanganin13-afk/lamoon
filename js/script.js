@@ -3055,18 +3055,24 @@ function shareLine() {
 function sendToLineFinal() {
     const $ = (id) => document.getElementById(id);
     const msgEdit = $("msgEdit"), previewArea = $("linePreview");
+    
     if (!msgEdit || !msgEdit.value.trim()) {
-        if (typeof Swal !== 'undefined') Swal.fire({ title:'ไม่พบข้อความ', text:'กรุณาตรวจสอบข้อความก่อนส่ง', icon:'warning' });
+        if (typeof Swal !== 'undefined') Swal.fire({ title: 'ไม่พบข้อความ', text: 'กรุณาตรวจสอบข้อความก่อนส่ง', icon: 'warning' });
         return;
     }
+    
+    // เปิดแอป LINE เพื่อส่งข้อความ
     window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msgEdit.value)}`, '_blank');
+    
+    // ปิดหน้าจอ Preview
     if (previewArea) previewArea.style.display = "none";
 }
 
+// 🔴 ฟังก์ชันปิด Modal (แก้ไข ID ให้ตรงกับ linePreview)
 function closeLineModal() { 
     const $ = (id) => document.getElementById(id);
-    const m = $("lineModal"); 
-    if(m) m.style.display="none"; 
+    const previewArea = $("linePreview"); 
+    if (previewArea) previewArea.style.display = "none"; 
 }
 /* ========= ✅ INITIALIZE — โหลดค่าเริ่มต้นเมื่อเปิดหน้า ========= */
 document.addEventListener("DOMContentLoaded", () => {
