@@ -1913,7 +1913,6 @@ function openReportFullscreen() {
     const hasComparisonData = tableBody && tableBody.innerHTML.trim();
 
     if (hasComparisonData) {
-        // ✅ อยู่หน้าเปรียบเทียบ
         const modalContent = document.getElementById('fullReportContent');
         modalContent.innerHTML = `
             <table style="width:100%; border-collapse:collapse; font-family:Tahoma,sans-serif; text-align:center; font-size:11px;">
@@ -1923,7 +1922,6 @@ function openReportFullscreen() {
             </table>
         `;
     } else {
-        // ✅ อยู่หน้ารายงานประจำเดือน
         const tableCard = document.getElementById('monthlyContent1');
         if (!tableCard || !tableCard.innerHTML.trim()) {
             const msg = "กรุณาเลือกข้อมูลแล้วกดประมวลผลก่อนครับ";
