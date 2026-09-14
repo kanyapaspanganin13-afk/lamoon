@@ -577,7 +577,40 @@ document.addEventListener("DOMContentLoaded", () => {
     $("priceInp")?.addEventListener("input", () => { if (payMethod === 'Mix') updateMixValues('cash'); });
     $("tipInp")?.addEventListener("input", () => { if (payMethod === 'Mix') updateMixValues('cash'); });
 });
-/* ========= SECTION 10: SAVE RECORD ========= */
+
+/* ========== SECTION 10: BUSINESS LOGIC & COMMISSION CALCULATION ========== */
+// 1. ฟังก์ชันคุมการเลือกประเภทลูกค้า (ล็อก/ปลดล็อกราคา)
+function handleCustType(value) {
+  const priceInp = document.getElementById('priceInp');
+  if (!priceInp) return;
+
+  if (value === 'offsite') {
+    priceInp.value = 300;
+    priceInp.readOnly = true;
+  } else {
+    priceInp.readOnly = false;
+  }
+}
+
+// 2. ฟังก์ชันคำนวณส่วนแบ่งช่าง/ร้าน (สำหรับใช้ตอนบันทึกหรือทำรายงาน)
+function calculateShares(custType, price, defaultRate = 0.50) {
+  let barberEarn = 0;
+  let shopEarn = 0;
+
+  if (custType === 'offsite') {
+    // นอกสถานที่: ค่าคงที่ ช่าง 200 / ร้าน 100
+    barberEarn = 200;
+    shopEarn = 100;
+  } else {
+    // ในร้านปกติ: คิด % ตามที่ตั้งค่าไว้
+    const numericPrice = Number(price) || 0;
+    barberEarn = numericPrice * defaultRate;
+    shopEarn = numericPrice - barberEarn;
+  }
+
+  return { barberEarn, shopEarn };
+}
+/* ========= SECTION 11: SAVE RECORD ========= */
 async function handleSave(event) {
     const $ = (id) => document.getElementById(id);
     
@@ -723,7 +756,7 @@ async function handleSave(event) {
     
     if ($("custType")) $("custType").focus();
 }
-/* ========= SECTION 11: RENDER DAILY REPORT ========= */
+/* ========= SECTION 12: RENDER DAILY REPORT ========= */
 function renderDay(selectedDate) {
     let dInp = selectedDate || ($("dateInp") ? $("dateInp").value : new Date().toISOString().split('T')[0]);
     if ($("dateInp")) $("dateInp").value = dInp;
@@ -882,7 +915,7 @@ function renderDay(selectedDate) {
     } 
 }
 
-/* ========= SECTION 12: DELETE RECORD ========= */
+/* ========= SECTION 13: DELETE RECORD ========= */
 function delRec(id) {
     if (confirm("ลบรายการนี้?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); }
 }
@@ -895,7 +928,7 @@ function deleteArchiveDate(date) {
     }
 }
 
-/* ========= SECTION 13: SAVE & CLOSE DAY ========= */
+/* ========= SECTION 14: SAVE & CLOSE DAY ========= */
 async function saveAndGo(date, total) {
     if (typeof db === 'undefined' || typeof archives === 'undefined') return;
     const btn = document.getElementById("btnSubmitSend");
@@ -1004,7 +1037,7 @@ async function saveAndGo(date, total) {
         if (window.notify) notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถส่งข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
     }
 }
-/* ========= SECTION 14: ACCOUNT STATUS ========= */
+/* ========= SECTION 15: ACCOUNT STATUS ========= */
 function loadAccountStatus() {
     const getEl = (id) => document.getElementById(id);
     
@@ -1090,7 +1123,7 @@ function updateStatusUI(net) {
         light.style.boxShadow = `0 0 12px ${color}`;
     }
 }
-/* ========= SECTION 15: CLEAR ACCOUNT & HISTORY ========= */
+/* ========= SECTION 16: CLEAR ACCOUNT & HISTORY ========= */
 async function clearAccount() {
     const getEl = (id) => document.getElementById(id);
     
@@ -1178,7 +1211,7 @@ function loadAccountHistory() {
 
     historyContainer.innerHTML = historyHtml;
 }
-/* ========= ลบรายการประวัติ ========= */
+
 async function deleteAccountLog(index) {
     const result = await Swal.fire({
         title: 'ยืนยันการลบประวัติบัญชี',
@@ -1229,7 +1262,7 @@ function closeHistoryModal() {
     if ($("historyModal")) $("historyModal").style.display = "none"; 
 }
 
-/* ========= SECTION 16: INSURANCE & HOLIDAY========= */
+/* ========= SECTION 17: INSURANCE & HOLIDAY========= */
 async function handleInsurance() {
     const d = $("dateInp")?.value || new Date().toISOString().split('T')[0];
     const g = parseInt(conf.guar) || 0;
@@ -1318,7 +1351,7 @@ async function handleHoliday() {
     }
 }
 
-/* ========= SECTION 17: SETTINGS & THEME ========= */
+/* ========= SECTION 18: SETTINGS & THEME ========= */
 // ✅ เปิดหน้าต่างตั้งค่า
 function openSettings() {
     if ($("setShop")) $("setShop").value = conf.shop;
@@ -1377,7 +1410,7 @@ function switchSummaryTab(tabId, evt) {
         if (navWrap) navWrap.style.gridTemplateColumns = "repeat(4, 1fr)";
     }
 }
-/* ========= SECTION 18: MONTHLY SUMMARY & EXCEL EXPORT ========= */
+/* ========= SECTION 19: MONTHLY SUMMARY & EXCEL EXPORT ========= */
 function loadHistDaily() {
     // Helper Selector ป้องกัน Error กรณีไม่ได้ประกาศ $ ไว้ใน Scope หลัก
     const $ = id => typeof window.$ === 'function' ? window.$(id) : document.getElementById(id);
@@ -2384,7 +2417,7 @@ function closeReportFullscreen() {
 function openPreviewModal() {
     openReportFullscreen();
 }
-/* ========= SECTION 19: GOOGLE SHEETS & SHARE ========= */
+/* ========= SECTION 20: GOOGLE SHEETS & SHARE ========= */
 async function handleGoogleSheet() {
     const playStoreUrl = "https://play.google.com/store/apps/details?id=com.google.android.apps.docs.editors.sheets";
     const appStoreUrl = "https://apps.apple.com/th/app/google-sheets/id441411228";
@@ -2601,7 +2634,7 @@ function processComparison() {
     document.getElementById('compareTableFoot').innerHTML = footHtml;
 }
 
-/* ========= SECTION 20: IMPORT / EXPORT / CLEAR ========= */
+/* ========= SECTION 21: IMPORT / EXPORT / CLEAR ========= */
 // 1. ฟังก์ชันส่งออกข้อมูล (Export)
 function exportBackup() {
     try {
@@ -2738,13 +2771,13 @@ function clearData() {
         }
     }
 }
-/* ========= SECTION 21: MODAL HELPERS ========= */
+/* ========= SECTION 22: MODAL HELPERS ========= */
 window.onclick = e => {
     if (e.target.classList.contains("modal")) e.target.style.display = "none";
 };
 function closeReportModal() { $("reportModal").style.display = "none"; }
 
-/* ========= SECTION 22: SHARE LINE ========= */
+/* ========= SECTION 23: SHARE LINE ========= */
 function shareLine() {
     // ✅ เพิ่มบรรทัดนี้! ขาดไป → ทำให้ $() ใช้งานไม่ได้
     const $ = (id) => document.getElementById(id);
