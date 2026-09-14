@@ -1905,31 +1905,55 @@ function exportMonthlyExcel() {
     setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
     notify("success", "สำเร็จ", `ส่งออกข้อมูลเดือน ${monthName} เรียบร้อยแล้ว`);
 }
+// ✅ เปิดพรีวิว — ใช้ร่วมกันได้ทั้ง 2 หน้า
 function openReportFullscreen() {
-    const tableCard = document.getElementById('monthlyContent1');
-    if (!tableCard || !tableCard.innerHTML.trim()) {
-        if (typeof notify === 'function') {
-            notify("error", "ไม่พบข้อมูล", "กรุณาเลือกเดือนที่มีข้อมูลก่อนครับ");
-        } else {
-            alert("กรุณาเลือกเดือนที่มีข้อมูลก่อนครับ");
+    const tableHead = document.getElementById('compareTableHead');
+    const tableBody = document.getElementById('comparisonSingleContent');
+    const tableFoot = document.getElementById('compareTableFoot');
+    const hasComparisonData = tableBody && tableBody.innerHTML.trim();
+
+    if (hasComparisonData) {
+        // ✅ อยู่หน้าเปรียบเทียบ
+        const modalContent = document.getElementById('fullReportContent');
+        modalContent.innerHTML = `
+            <table style="width:100%; border-collapse:collapse; font-family:Tahoma,sans-serif; text-align:center; font-size:11px;">
+                <thead>${tableHead?.innerHTML || ''}</thead>
+                <tbody>${tableBody.innerHTML}</tbody>
+                <tfoot>${tableFoot?.innerHTML || ''}</tfoot>
+            </table>
+        `;
+    } else {
+        // ✅ อยู่หน้ารายงานประจำเดือน
+        const tableCard = document.getElementById('monthlyContent1');
+        if (!tableCard || !tableCard.innerHTML.trim()) {
+            const msg = "กรุณาเลือกข้อมูลแล้วกดประมวลผลก่อนครับ";
+            if (typeof notify === 'function') notify("error", "ไม่พบข้อมูล", msg);
+            else alert(msg);
+            return;
         }
-        return;
+        document.getElementById('fullReportContent').innerHTML = tableCard.innerHTML;
     }
 
-    // โคลนเนื้อหาตารางไปแสดงใน Modal
-    const modalContent = document.getElementById('fullReportContent');
-    modalContent.innerHTML = tableCard.innerHTML;
-
-    // แสดง Modal และสั่งล็อกสกอร์หน้าเว็บ
-    document.getElementById('fullReportModal').style.display = 'block';
-    document.body.style.overflow = 'hidden';
+    const modal = document.getElementById('fullReportModal');
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
 }
 
+// ✅ ปิดพรีวิว
 function closeReportFullscreen() {
-    document.getElementById('fullReportModal').style.display = 'none';
-    document.body.style.overflow = 'auto';
+    const modal = document.getElementById('fullReportModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
 }
- 
+
+// ✅ เรียกใช้จากปุ่ม "พรีวิว" ในหน้าเปรียบเทียบ
+function openPreviewModal() {
+    openReportFullscreen();
+}
 /* ========= SECTION 19: GOOGLE SHEETS & SHARE ========= */
 async function handleGoogleSheet() {
     const playStoreUrl = "https://play.google.com/store/apps/details?id=com.google.android.apps.docs.editors.sheets";
@@ -2003,21 +2027,6 @@ function getDatesArray(startDate, endDate) {
     return dates;
 }
 
-// ดึงข้อมูลแยกตามวันที่ — ครบทุกหัวข้อ
-function getDayDataFull(dateStr) {
-    const list = typeof archives !== 'undefined' ? archives : [];
-    if (!list.length) return { cust: 0, barber: 0, shop: 0, total: 0 };
-    const dayRecords = list.filter(a => a.date === dateStr);
-    if (!dayRecords.length) return { cust: 0, barber: 0, shop: 0, total: 0 };
-    let cust = 0, barber = 0, shop = 0, total = 0;
-    dayRecords.forEach(a => {
-        cust += a.count || (a.details && Array.isArray(a.details) ? a.details.length : 0);
-        barber += Number(a.barber || 0);
-        shop += Number(a.shop || 0);
-        total += Number(a.total || a.barber || a.shop || 0);
-    });
-    return { cust, barber, shop, total };
-}
 function processComparison() {
     const d1_start = document.getElementById('startDate1')?.value;
     const d1_end   = document.getElementById('endDate1')?.value;
@@ -2162,36 +2171,6 @@ function processComparison() {
     document.getElementById('compareTableFoot').innerHTML = footHtml;
 }
 
-// ✅ ปุ่มพรีวิว — คงเดิม
-function openPreviewModal() {
-    const tableHead = document.getElementById('compareTableHead');
-    const tableBody = document.getElementById('comparisonSingleContent');
-    const tableFoot = document.getElementById('compareTableFoot');
-    const modal = document.getElementById('fullReportModal');
-    const modalContent = document.getElementById('fullReportContent');
-
-    if (!tableBody || !tableBody.innerHTML.trim()) {
-        const msg = "กรุณากดปุ่ม 'ประมวลผล' ก่อนครับ";
-        if (typeof notify === 'function') notify("error", "ไม่พบข้อมูล", msg);
-        else alert(msg);
-        return;
-    }
-    if (!modal || !modalContent) {
-        alert("ไม่พบหน้าต่างพรีวิว (ตรวจสอบ HTML: id=fullReportModal, fullReportContent)");
-        return;
-    }
-
-    modalContent.innerHTML = `
-        <table style="width:100%; border-collapse:collapse; font-family:Tahoma,sans-serif; text-align:center; font-size:11px;">
-            <thead>${tableHead?.innerHTML || ''}</thead>
-            <tbody>${tableBody.innerHTML}</tbody>
-            <tfoot>${tableFoot?.innerHTML || ''}</tfoot>
-        </table>
-    `;
-
-    modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-}
 /* ========= SECTION 20: IMPORT / EXPORT / CLEAR ========= */
 // 1. ฟังก์ชันส่งออกข้อมูล (Export)
 function exportBackup() {
