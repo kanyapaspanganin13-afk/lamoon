@@ -2018,14 +2018,14 @@ function getDayDataFull(dateStr) {
     });
     return { cust, barber, shop, total };
 }
-// ✅ ประมวลผลข้อมูลเปรียบเทียบ (แก้ไขปัญหาหัวข้อซ้ำ + รองรับ Dynamic ทั้ง 2 ช่วง)
+// ✅ ประมวลผลข้อมูล — เปลี่ยนค่าตามหัวข้อที่เลือกได้แล้ว
 function processComparison() {
     const d1_start = document.getElementById('startDate1')?.value;
     const d1_end   = document.getElementById('endDate1')?.value;
     const d2_start = document.getElementById('startDate2')?.value;
     const d2_end   = document.getElementById('endDate2')?.value;
 
-    // ✅ อ่านหัวข้อที่เลือกจาก Dropdown HTML (<select id="compareTopic1"> และ <select id="compareTopic2">)
+    // ✅ อ่านหัวข้อที่เลือก
     const topic1 = document.getElementById('compareTopic1')?.value || 'total';
     const topic2 = document.getElementById('compareTopic2')?.value || 'total';
 
@@ -2038,19 +2038,15 @@ function processComparison() {
     const range2 = getDatesArray(d2_start, d2_end);
     const maxRows = Math.max(range1.length, range2.length);
 
-    // ✅ แปลงชื่อหัวข้อคอลัมน์หลัก
+    // ✅ แปลงชื่อหัวข้อ
     const topicLabel = (t) => {
-        const map = { cust: 'จำนวนลูกค้า', barber: 'รายได้ช่าง', shop: 'รายได้ร้าน', total: 'รายได้รวม' };
+        const map = { cust:'ลูกค้า', barber:'รายได้ช่าง', shop:'รายได้ร้าน', total:'รายได้รวม' };
         return map[t] || 'รายได้';
     };
     const label1 = topicLabel(topic1);
     const label2 = topicLabel(topic2);
 
-    // ✅ แก้ปัญหาหัวข้อซ้ำ: ถ้าเลือก 'cust' (ลูกค้า) คอลัมน์ก่อนหน้าจะเปลี่ยนเป็น 'รายการ' ถ้าเป็นเรื่องเงินจะใช้ 'ลูกค้า'
-    const col3Name1 = topic1 === 'cust' ? 'รายการ' : 'ลูกค้า';
-    const col3Name2 = topic2 === 'cust' ? 'รายการ' : 'ลูกค้า';
-
-    // ✅ หัวตาราง (Dynamic ครบถ้วนทั้งช่วงที่ 1 และช่วงที่ 2)
+    // ✅ หัวตาราง — เปลี่ยนชื่อตามหัวข้อ
     const headHtml = `
         <tr>
             <th colspan="4" style="background: var(--summary-bg); color: var(--primary); border: 1px solid var(--summary-border);">📅 ช่วงที่ 1 (${formatTHDate(d1_start)} - ${formatTHDate(d1_end)})</th>
@@ -2059,23 +2055,41 @@ function processComparison() {
         <tr>
             <th style="background: var(--primary); color: #fff;">วัน</th>
             <th style="background: var(--primary); color: #fff;">วันที่</th>
-            <th style="background: var(--primary); color: #fff;">${col3Name1}</th>
+            <th style="background: var(--primary); color: #fff;">ลูกค้า</th>
             <th style="background: var(--primary); color: #fff;">${label1}</th>
             <th style="background: var(--btn-compare2); color: #fff;">วัน</th>
             <th style="background: var(--btn-compare2); color: #fff;">วันที่</th>
-            <th style="background: var(--btn-compare2); color: #fff;">${col3Name2}</th>
+            <th style="background: var(--btn-compare2); color: #fff;">ลูกค้า</th>
             <th style="background: var(--btn-compare2); color: #fff;">${label2}</th>
         </tr>
     `;
 
     // ✅ ฟังก์ชันดึงค่าตามหัวข้อ
     function getValueByTopic(dayData, topic) {
+        // dayData มี: { cust, barber, shop, total }
         switch(topic) {
             case 'cust': return dayData.cust;
             case 'barber': return dayData.barber;
             case 'shop': return dayData.shop;
             case 'total': default: return dayData.total;
         }
+    }
+
+    // ✅ ปรับ getDayData ให้คืนค่าครบทุกหัวข้อ
+    function getDayDataFull(dateStr) {
+        const list = typeof archives !== 'undefined' ? archives : [];
+        if (!list.length) return { cust: 0, barber: 0, shop: 0, total: 0 };
+        const dayRecords = list.filter(a => a.date === dateStr);
+        if (!dayRecords.length) return { cust: 0, barber: 0, shop: 0, total: 0 };
+
+        let cust = 0, barber = 0, shop = 0, total = 0;
+        dayRecords.forEach(a => {
+            cust += a.count || (a.details && Array.isArray(a.details) ? a.details.length : 0);
+            barber += Number(a.barber || 0);
+            shop += Number(a.shop || 0);
+            total += Number(a.total || a.barber || 0);
+        });
+        return { cust, barber, shop, total };
     }
 
     let bodyHtml = '';
@@ -2099,7 +2113,7 @@ function processComparison() {
         const val2 = data2 ? getValueByTopic(data2, topic2) : null;
         if (data2) { sum2Cust += data2.cust; if(val2 !== null) sum2Val += val2; }
 
-        // ✅ ฟอร์แมตแสดงตัวเลข (ถ้าเป็นเงินใส่ ฿ ถ้าเป็นคนแสดงตัวเลขเฉยๆ)
+        // ✅ แสดงค่า — ถ้าเป็นตัวเลขเงินใส่ ฿ ถ้าเป็นจำนวนแสดงแค่ตัวเลข
         const fmtVal = (v, t) => {
             if(v === null || v === undefined) return '-';
             return t === 'cust' ? v.toLocaleString() : '฿' + v.toLocaleString();
@@ -2109,31 +2123,27 @@ function processComparison() {
             <tr>
                 <td style="background: ${rowBg1}; color: var(--primary); border: ${border}; font-weight:500;">${dayName1}</td>
                 <td style="background: ${rowBg1}; color: var(--text); border: ${border};">${date1 ? formatShortDate(date1) : '-'}</td>
-                <td style="background: ${rowBg1}; color: var(--text); border: ${border}; font-weight:500;">${data1 ? data1.cust.toLocaleString() : '0'}</td>
+                <td style="background: ${rowBg1}; color: var(--text); border: ${border}; font-weight:500;">${data1 ? data1.cust.toLocaleString() : '-'}</td>
                 <td style="background: ${rowBg1}; color: var(--success); border: ${border}; font-weight:600;">${fmtVal(val1, topic1)}</td>
                 <td style="background: ${rowBg2}; color: var(--btn-compare1); border: ${border}; font-weight:500;">${dayName2}</td>
                 <td style="background: ${rowBg2}; color: var(--text); border: ${border};">${date2 ? formatShortDate(date2) : '-'}</td>
-                <td style="background: ${rowBg2}; color: var(--text); border: ${border}; font-weight:500;">${data2 ? data2.cust.toLocaleString() : '0'}</td>
+                <td style="background: ${rowBg2}; color: var(--text); border: ${border}; font-weight:500;">${data2 ? data2.cust.toLocaleString() : '-'}</td>
                 <td style="background: ${rowBg2}; color: var(--success); border: ${border}; font-weight:600;">${fmtVal(val2, topic2)}</td>
             </tr>
         `;
     }
 
-    // ✅ แถวสรุปผลรวมท้ายตาราง
-    const fmtSum = (v, t) => {
-        const val = v || 0;
-        return t === 'cust' ? val.toLocaleString() : '฿' + val.toLocaleString();
-    };
-
+    // ✅ แถวรวม
+    const fmtSum = (v, t) => t === 'cust' ? v.toLocaleString() : '฿' + v.toLocaleString();
     const footHtml = `
         <tr style="font-weight: bold;">
             <td style="background: var(--warning); color: #000; border: 2px solid var(--btn-his2);">รวม</td>
             <td style="background: var(--summary-bg); color: var(--warning); border: 2px solid var(--btn-his2);">${range1.length} วัน</td>
-            <td style="background: var(--summary-bg); color: var(--text); border: 2px solid var(--btn-his2); font-size: 1.05em;">${(sum1Cust || 0).toLocaleString()}</td>
+            <td style="background: var(--summary-bg); color: var(--text); border: 2px solid var(--btn-his2); font-size: 1.05em;">${sum1Cust.toLocaleString()}</td>
             <td style="background: var(--summary-bg); color: var(--success); border: 2px solid var(--btn-his2); font-size: 1.05em;">${fmtSum(sum1Val, topic1)}</td>
             <td style="background: var(--warning); color: #000; border: 2px solid var(--btn-his2);">รวม</td>
             <td style="background: rgba(147, 142, 245, 0.15); color: var(--btn-compare1); border: 2px solid var(--btn-his2);">${range2.length} วัน</td>
-            <td style="background: rgba(147, 142, 245, 0.15); color: var(--text); border: 2px solid var(--btn-his2); font-size: 1.05em;">${(sum2Cust || 0).toLocaleString()}</td>
+            <td style="background: rgba(147, 142, 245, 0.15); color: var(--text); border: 2px solid var(--btn-his2); font-size: 1.05em;">${sum2Cust.toLocaleString()}</td>
             <td style="background: rgba(147, 142, 245, 0.15); color: var(--success); border: 2px solid var(--btn-his2); font-size: 1.05em;">${fmtSum(sum2Val, topic2)}</td>
         </tr>
     `;
