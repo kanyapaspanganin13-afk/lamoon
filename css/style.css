@@ -420,22 +420,24 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 .month-picker-wrap {
     display: flex;
     justify-content: center;
-    padding: 8px 15px;
+    padding: 4px 15px; /* ลด padding บน-ล่าง ให้กระชับ */
 }
+
 .month-picker-wrap input[type="month"] {
-    /* ✅ เปลี่ยนจาก max-width:220px → width:100% ให้เต็มความกว้าง */
-    width: 100%;
-    height: 40px;
-    font-size: 14px;
+    /* 🎯 ปรับความกว้างและความสูงให้เล็กลง สมดุลตรงกลาง */
+    width: 200px; /* จาก 100% ปรับให้แคบลงสวยงาม */
+    height: 36px; /* จาก 40px/46px ลดความสูงลง */
+    font-size: 13.5px;
     font-weight: 700;
     text-align: center;
-    border-radius: 12px;
+    border-radius: 10px;
     border: 1px solid var(--border);
     background: var(--bg);
     color: var(--text);
     padding: 0 10px;
-    box-sizing: border-box; /* ✅ เพิ่มบรรทัดนี้ ป้องกันกล่องล้น */
+    box-sizing: border-box;
 }
+
 .tab-content-wrap {
     width: 100%;
     box-sizing: border-box;
@@ -446,36 +448,48 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     border: 1px solid var(--border);
     min-height: 250px;
 }
+
 .filter-month-wrap { 
-    display: grid !important;
-    grid-template-columns: auto 1fr auto !important;
+    display: flex !important;
+    justify-content: center !important;
     gap: 8px; 
     align-items: center; 
     margin-bottom: 12px; 
 }
+
 .filter-month-wrap label { font-size: 13px; font-weight: 700; white-space: nowrap; color: var(--text); }
-.filter-month-wrap input { height: 46px; border-radius: 10px; font-size: 14px; }
+
+.filter-month-wrap input { 
+    height: 36px; /* ปรับลดความสูงให้เท่ากัน */
+    max-width: 200px; /* จำกัดความกว้างไม่ให้ล้น */
+    border-radius: 10px; 
+    font-size: 13.5px; 
+}
+
 .filter-card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 12px;
+    padding: 8px 12px; /* ลด padding กรอบนอก */
     margin-bottom: 12px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center; /* จัดกึ่งกลาง */
     gap: 10px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.03);
 }
+
 .filter-card-center {
     justify-content: center !important;
 }
+
 .filter-label {
     font-weight: 700;
-    font-size: 14px;
+    font-size: 13.5px;
     color: var(--text);
     white-space: nowrap;
 }
+
 .report-data-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -485,32 +499,35 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     overflow-x: auto;
     box-shadow: 0 2px 6px rgba(0,0,0,0.03);
 }
+
 .filter-card .form-control {
-    /* ✅ เปลี่ยนจาก max-width:180px → width:100% ให้เต็มความกว้างในกรอบ filter-card ด้วย */
-    width: 100%;
-    height: 42px;
+    /* 🎯 ปรับขนาดช่องเลือกใน filter-card ให้พอดีตัว */
+    width: 190px;
+    height: 36px;
     border-radius: 10px;
     border: 1px solid var(--border);
     background: var(--bg);
     color: var(--text);
     font-weight: 700;
-    font-size: 14px;
+    font-size: 13.5px;
     text-align: center;
     padding: 0 10px;
     box-sizing: border-box;
 }
+
 .btn-export-excel { 
-    height: 46px;
+    height: 36px; /* ปรับความสูงปุ่มให้เท่ากับช่องเลือก */
     background: var(--success); 
     color: #fff; 
     border: none; 
-    border-radius: 12px; 
-    padding: 0 10px; 
+    border-radius: 10px; 
+    padding: 0 12px; 
     font-weight: 700; 
     font-size: 12.5px !important;
     cursor: pointer; 
     white-space: nowrap; 
 }
+
 .table-responsive { 
     width: 100%; 
     overflow-x: auto; 
@@ -518,6 +535,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     border-radius: 14px; 
     border: 1px solid var(--border); 
 }
+
 .summary-table { 
     width: 100%; 
     border-collapse: collapse; 
@@ -525,6 +543,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     text-align: center; 
     color: var(--text);
 }
+
 .summary-table th { 
     background: var(--bg); 
     padding: 9px 4px; 
@@ -532,6 +551,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     border-bottom: 1px solid var(--border); 
     color: var(--text);
 }
+
 .summary-table td { 
     padding: 9px 4px; 
     border-bottom: 1px solid var(--border); 
