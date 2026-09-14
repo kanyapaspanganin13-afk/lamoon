@@ -4,15 +4,42 @@
 /* =========== SECTION 1: INITIALIZATION & GLOBAL VARIABLES =========== */
 const $ = id => document.getElementById(id);
 
-// 1. ตั้งค่าเลขเวอร์ชันและวันที่อัปเดตล่าสุด
-const APP_VERSION = "1.1.0";
-const LAST_UPDATED = "07/09/2026";
+// ✅ ========== ส่วนตั้งค่า — แก้แค่ 2 บรรทัดนี้ ==========
+const VERSION_MAJOR = "1.1.";       // เปลี่ยนเฉพาะตัวเลขชุดหลัก
+const LAST_UPDATED = "14/09/2026";  // วันที่อัปเดตล่าสุด
 
-// 2. ตัวแปรหลักของระบบ
+// ✅ ========== ส่วนทำงานอัตโนมัติ — ไม่ต้องแก้เลย ==========
+let APP_VERSION = "";
+(function autoIncrementVersion() {
+    const storedPrefix = localStorage.getItem("ver_prefix");
+    const storedBuild = parseInt(localStorage.getItem("ver_build") || "0");
+    let newBuild = storedBuild;
+    if (storedPrefix !== VERSION_MAJOR) {
+        newBuild = 1;
+        localStorage.setItem("ver_prefix", VERSION_MAJOR);
+    } else {
+        newBuild = storedBuild + 1;
+    }
+    localStorage.setItem("ver_build", String(newBuild));
+    APP_VERSION = VERSION_MAJOR + newBuild;
+})();
+
+// ✅ แสดงผลวันที่แปลงเป็น พ.ศ. ย่อ 2 หลัก
+(function autoShowVersion() {
+    const elVer = document.getElementById("display-version");
+    const elDate = document.getElementById("display-date");
+    if (elVer) elVer.innerText = APP_VERSION;
+    if (elDate) {
+        const [d, m, y] = LAST_UPDATED.split('/');
+        const yrBE = (parseInt(y) + 543).toString().slice(-2);
+        elDate.innerText = `${d}/${m}/${yrBE}`;
+    }
+})();
+
+// 2. ตัวแปรหลักของระบบ — ===> ส่วนเดิมต่อไปเลย <===
 let db = JSON.parse(localStorage.getItem("barber_db")) || [];
 let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
 let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
-
 let conf = JSON.parse(localStorage.getItem("barber_conf")) || { 
     shop: localStorage.getItem("shopName") || "Barber Shop", 
     perc: parseFloat(localStorage.getItem("shopPerc")) || 50, 
@@ -21,15 +48,10 @@ let conf = JSON.parse(localStorage.getItem("barber_conf")) || {
     voice: localStorage.getItem("shopVoice") || "female",
     sound: localStorage.getItem("shopSound") || "on"
 };
-
 let payMethod = "";
 
-// 3. แสดงผลเลขเวอร์ชัน วันที่ และชื่อร้านเฉพาะจุดเมื่อ DOM พร้อม
+// ✅ ส่วนแสดงชื่อร้านคงไว้เหมือนเดิม
 document.addEventListener("DOMContentLoaded", () => {
-    if ($("display-version")) $("display-version").innerText = APP_VERSION;
-    if ($("display-date")) $("display-date").innerText = LAST_UPDATED;
-
-    // ✅ แก้ไข: แสดงชื่อร้านเฉพาะจุดที่มี ID หรือ Class สำหรับชื่อร้านเท่านั้น (ไม่ทับหน้าแรก)
     const savedShopName = localStorage.getItem("shopName") || conf.shop || "BARBER SHOP";
     if ($("shopTitleDisplay")) $("shopTitleDisplay").innerText = savedShopName;
     document.querySelectorAll('.shop-title-text').forEach(el => el.innerText = savedShopName);
