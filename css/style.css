@@ -164,51 +164,49 @@ body > center, body > a, body > br { display: none !important; }
 }
 /* ============= ปรับแต่งเฉพาะหน้าแรก (#pageHome) -(Geometric Deep Blue) ============= */
 /* 1. พื้นหลังใหญ่หน้าแรก */
-#pageHome {
-    background: linear-gradient(160deg, #090d16 0%, #0d122b 50%, #150a21 100%) !important;
-    border: 1px solid rgba(139, 92, 246, 0.2) !important;
-    border-radius: 24px !important;
-    padding: 24px 18px !important;
-    max-width: 480px !important;
-    margin: 16px auto !important;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
-    box-sizing: border-box !important;
-}
+/* ==================================================
+   🎨 ปรับปรุงการ์ดน้ำเงิน-ฟ้า ให้คมชัด มีมิติพุ่งออกมา
+   ================================================== */
 
-/* 2. หัวข้อ */
-#pageHome .home-header h2 span:first-child { color: #ffffff !important; font-size: 22px !important; font-weight: 800 !important; }
-#pageHome .home-header h2 span:last-child { color: #a5b4fc !important; }
-
-/* 3. ตัวการ์ดเมนู (ปรับเป็นโทนน้ำเงินเข้มไล่เฉดไปฟ้าสว่างตามภาพตัวอย่าง) */
+/* 1. ตัวการ์ดเมนู (เน้นเส้นขอบเรืองแสงและเงาด้านล่าง) */
 #pageHome .menu-card {
     background: linear-gradient(135deg, #020538 0%, #001292 40%, #0052d4 75%, #007bff 100%) !important;
-    border: 1px solid rgba(0, 123, 255, 0.3) !important;
+    border: 1px solid rgba(0, 191, 255, 0.4) !important;
     border-radius: 20px !important;
-    box-shadow: 0 8px 20px rgba(0, 82, 212, 0.3) !important;
+    box-shadow: 0 8px 24px rgba(0, 82, 212, 0.45), 
+                inset 0 1px 1px rgba(255, 255, 255, 0.3) !important; /* เงาด้านนอก + ขอบสะท้อนแสงด้านใน */
 }
 
 #pageHome .menu-card:active {
     transform: scale(0.96) !important;
-    filter: brightness(1.15);
+    filter: brightness(1.2);
 }
 
+/* 2. ตัวหนังสือบนการ์ด (ใส่เงาฉากหลังให้อ่านง่าย คมชัดขึ้น) */
 #pageHome .menu-card span {
     color: #ffffff !important;
     font-weight: 700 !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8) !important;
+    letter-spacing: 0.5px;
 }
 
-/* 4. กล่องไอคอนแบบกระจกใสโปร่งแสง ไม่แย่งซีนตัวการ์ด */
+/* 3. กล่องไอคอนกระจกใส (ปรับให้สว่างขึ้นเพื่อดันไอคอนสีขาวให้พุ่งออกมา) */
 #pageHome .menu-card .menu-icon,
 #pageHome .menu-card .icon {
-    background: rgba(255, 255, 255, 0.12) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    background: rgba(255, 255, 255, 0.18) !important; /* เพิ่มความสว่างของพื้นหลังกระจก */
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-    backdrop-filter: blur(6px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3),
+                0 0 12px rgba(255, 255, 255, 0.2) !important; /* แสงเรืองรอบกล่องไอคอน */
+    backdrop-filter: blur(8px);
 }
 
-/* 5. กราเดียนต์ปุ่มไอคอนด้านใน (จำเป็นต้องมีเพื่อแยกสีไอคอน) */
+#pageHome .menu-card .menu-icon i,
+#pageHome .menu-card .icon i {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5)) !important;
+}
+
+/* 4. กราเดียนต์ปุ่มไอคอนด้านใน (จำเป็นต้องมีเพื่อแยกสีไอคอน) */
 .grad-yellow  { background: linear-gradient(135deg, #ffb703 0%, #fb8500 100%) !important; color: #ffffff !important; box-shadow: 0 4px 15px rgba(251, 133, 0, 0.4) !important; }
 .grad-red     { background: linear-gradient(135deg, #ff0054 0%, #ff5400 100%) !important; color: #ffffff !important; box-shadow: 0 4px 15px rgba(255, 0, 84, 0.4) !important; }
 .grad-blue    { background: linear-gradient(135deg, #00f5d4 0%, #00bbf9 100%) !important; color: #0f172a !important; box-shadow: 0 4px 15px rgba(0, 245, 212, 0.4) !important; }
