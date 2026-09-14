@@ -5,79 +5,37 @@
 const $ = id => document.getElementById(id);
 
 // ✅ ตั้งค่า — แก้แค่ 2 บรรทัดนี้
-const VERSION_MAJOR = "1.0."; // รูปแบบ: "X.Y."
+const VERSION_MAJOR = "1.0.";
 const LAST_UPDATED = "14/09/2026";
 
 // ✅ เพิ่มเลขเวอร์ชันอัตโนมัติ — ครบ 10 ขยับหลักเอง
-let APP_VERSION = "";
+window.APP_VERSION = ""; // ✅ ใช้ window. เพื่อให้ส่วนอื่นอ่านได้
 (function autoIncrementVersion() {
-    // แยกส่วน: major.minor.
     const [verMajorBase, verMinorBase] = VERSION_MAJOR.split('.').map(Number);
-
     const storedMajor = parseInt(localStorage.getItem("ver_x") || String(verMajorBase));
     const storedMinor = parseInt(localStorage.getItem("ver_y") || String(verMinorBase));
     const storedPatch = parseInt(localStorage.getItem("ver_z") || "0");
 
-    let x = storedMajor;
-    let y = storedMinor;
-    let z = storedPatch + 1; // เพิ่มตัวท้าย +1 ทุกครั้ง
-
-    // ✅ ถ้าตัวท้ายครบ 10 → รีเซ็ตเป็น 0 และเพิ่มตัวกลาง +1
-    if (z >= 10) {
-        z = 0;
-        y += 1;
-    }
-
-    // ✅ ถ้าตัวกลางครบ 10 → รีเซ็ตเป็น 0 และเพิ่มตัวหน้า +1
-    if (y >= 10) {
-        y = 0;
-        x += 1;
-    }
-
-    // ✅ ถ้าเปลี่ยนสายหลักที่ตั้งไว้ → เริ่มนับใหม่จาก VERSION_MAJOR
+    let x = storedMajor, y = storedMinor, z = storedPatch + 1;
+    if (z >= 10) { z = 0; y += 1; }
+    if (y >= 10) { y = 0; x += 1; }
     if (verMajorBase !== storedMajor || verMinorBase !== storedMinor) {
-        x = verMajorBase;
-        y = verMinorBase;
-        z = 1;
+        x = verMajorBase; y = verMinorBase; z = 1;
     }
 
-    // บันทึกค่าใหม่
     localStorage.setItem("ver_x", String(x));
     localStorage.setItem("ver_y", String(y));
     localStorage.setItem("ver_z", String(z));
-
-    // ประกอบเป็นเลขเวอร์ชัน: X.Y.Z
-    APP_VERSION = `${x}.${y}.${z}`;
+    window.APP_VERSION = `${x}.${y}.${z}`; // ✅ เก็บที่ window.
 })();
 
-// ========== ตัวแปรหลักของระบบ ==========
-let db = JSON.parse(localStorage.getItem("barber_db")) || [];
-let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
-let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
-let conf = JSON.parse(localStorage.getItem("barber_conf")) || { 
-    shop: localStorage.getItem("shopName") || "Barber Shop", 
-    perc: parseFloat(localStorage.getItem("shopPerc")) || 50, 
-    guar: parseFloat(localStorage.getItem("shopGuar")) || 0,
-    theme: localStorage.getItem("shopTheme") || "light",
-    voice: localStorage.getItem("shopVoice") || "female",
-    sound: localStorage.getItem("shopSound") || "on"
-};
-let payMethod = "";
-
-// ✅ รวมการทำงานเมื่อโหลด DOM เสร็จให้อยู่ใน EventListener เดียว
+// ✅ แสดงเลขเวอร์ชันที่หน้าตั้งค่า
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. แสดงเลขเวอร์ชัน + วันที่แปลงเป็น พ.ศ.
-    const elVer = document.getElementById("appVersionDisplay");
-    if (elVer) {
-        const [d, m, y] = LAST_UPDATED.split('/');
-        const yrBE = (parseInt(y) + 543).toString().slice(-2);
-        elVer.innerText = `V${APP_VERSION} | Update ${d}/${m}/${yrBE}`;
-    }
-
-    // 2. แสดงชื่อร้าน
-    const savedShopName = localStorage.getItem("shopName") || conf.shop || "BARBER SHOP";
-    if ($("shopTitleDisplay")) $("shopTitleDisplay").innerText = savedShopName;
-    document.querySelectorAll('.shop-title-text').forEach(el => el.innerText = savedShopName);
+    const el = document.getElementById("appVersionDisplay");
+    if (!el) return;
+    const [d, m, y] = LAST_UPDATED.split('/');
+    const yrBE = (parseInt(y) + 543).toString().slice(-2);
+    el.innerText = `V${window.APP_VERSION} | Update ${d}/${m}/${yrBE}`;
 });
 /* =========== SECTION 2: MAIN NAVIGATION =========== */
 function switchMainView(viewName, subNum = null) {
@@ -289,36 +247,30 @@ function switchMainTab(pageId, tabId, event) {
         if (typeof loadHistMonth === 'function') loadHistMonth();
     }
 }
-/* =========== SECTION 5: AUTO-UPDATE =========== */  
+/* =========== SECTION 5: AUTO-UPDATE SYSTEM =========== */  
 (function autoUpdate() {
-    // 1. กำหนดเวอร์ชันปัจจุบันของแอป (หากยังไม่มีการตั้งค่าไว้ภายนอก)
-    const APP_VERSION = typeof window.APP_VERSION !== 'undefined' ? window.APP_VERSION : '1.0.1';
-    
-    // 2. ดึงเวอร์ชันเดิมที่บันทึกไว้ในเครื่องผู้ใช้
+    // ✅ อ่านค่าเวอร์ชันจากระบบข้างต้นโดยตรง
+    const APP_VERSION = window.APP_VERSION || '1.0.1';
     const currentStoredVersion = localStorage.getItem("app_v");
 
-    // 3. ตรวจสอบว่าเวอร์ชันไม่ตรงกันหรือไม่ (มีการอัปเดตระบบ)
+    // ✅ ตรวจพบการเปลี่ยนเวอร์ชัน → อัปเดต
     if (currentStoredVersion !== APP_VERSION) {
-        console.log(`[AutoUpdate] Updating system from ${currentStoredVersion || 'None'} to ${APP_VERSION}`);
-        
-        // บันทึกเวอร์ชันใหม่ลง localStorage
+        console.log(`[AutoUpdate] อัปเดตจาก ${currentStoredVersion || '---'} → ${APP_VERSION}`);
         localStorage.setItem("app_v", APP_VERSION);
 
-        // (Optional) ล้าง Cache หรือ Service Worker เก่าออก
+        // ล้างแคชเบราว์เซอร์
         if ('caches' in window) {
             caches.keys().then(names => {
                 names.forEach(name => caches.delete(name));
             });
         }
 
-        // แจ้งเตือนผู้ใช้แล้วทำการ Reload เพื่อโหลดไฟล์ JS/CSS ใหม่ล่าสุด
+        // แจ้งเตือน + รีโหลด (ข้ามครั้งแรกที่ติดตั้ง)
         if (currentStoredVersion) {
             if (typeof notify === 'function') {
-                notify("info", "อัปเดตระบบ", "กำลังโหลดเวอร์ชันใหม่ล่าสุด...");
+                notify("info", "✨ อัปเดตระบบ", `กำลังโหลดเวอร์ชัน ${APP_VERSION} ...`);
             }
-            setTimeout(() => {
-                window.location.reload(true);
-            }, 1000);
+            setTimeout(() => window.location.reload(true), 1200);
         }
     }
 })();
