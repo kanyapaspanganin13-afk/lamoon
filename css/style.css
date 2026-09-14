@@ -845,22 +845,22 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .btn-monthly i, .btn-excel i, .btn-sheets i { font-size: 18px; margin-bottom: 4px; }
 .btn-compare { border-radius: 18px; padding: 12px; text-align: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, var(--btn-compare1), var(--btn-compare2)); color: var(--btn-text); font-weight: 600; margin-top: 12px; }
 .btn-compare i { font-size: 20px; }
-
-/* ========= 🪟 MODALS & SETTINGS ========= */
+/* ========= 🪟 MODALS & SETTINGS (COMPACT VERSION) ========= */
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); z-index: 10000; align-items: center; justify-content: center; padding: 12px; }
 .modal-content { background: var(--card); width: 100%; max-width: 400px; border-radius: 20px; padding: 16px; border: 1px solid var(--border); max-height: 92vh; overflow-y: auto; animation: slideUp 0.25s ease-out; color: var(--text); transition: background 0.3s; }
 .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.modal-head h3 { margin: 0; color: var(--accent); font-size: 17px; }
-.btn-close-sm { background: var(--danger); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; opacity: 0.85; }
+.modal-head h3 { margin: 0; color: var(--accent); font-size: 16px; }
+.btn-close-sm { background: var(--danger); color: #fff; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 15px; cursor: pointer; opacity: 0.85; }
 .modal-buttons { display: flex; gap: 8px; margin-top: 12px; }
-.btn-save, .btn-close { flex: 1; padding: 10px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 15px; }
+.btn-save, .btn-close { flex: 1; padding: 8px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 14px; }
 .btn-save { background: var(--success); color: #fff; box-shadow: 0 3px 8px rgba(34,197,94,0.25); }
 .btn-close { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
-textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); font-family: 'Kanit', sans-serif; font-size: 13px; line-height: 1.5; outline: none; resize: none; transition: background 0.3s, color 0.3s; }
+textarea { width: 100%; height: 200px; padding: 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); font-family: 'Kanit', sans-serif; font-size: 13px; line-height: 1.5; outline: none; resize: none; transition: background 0.3s, color 0.3s; }
+
 .settings-modal {
-  max-width: 400px;
+  max-width: 380px;
   width: 94%;
-  padding: 20px 16px;
+  padding: 16px;
   margin: 0 auto;
   border-radius: 20px;
   box-sizing: border-box;
@@ -874,19 +874,19 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
 }
 .settings-title {
   text-align: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
-  margin: 0 0 16px 0;
+  margin: 0 0 12px 0;
   color: var(--text);
 }
 .settings-group {
   width: 100%;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 .settings-label {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
-  margin: 0 0 5px 0;
+  margin: 0 0 4px 0;
   display: block;
   opacity: 0.85;
   color: var(--text);
@@ -894,22 +894,24 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
 .settings-row {
   display: flex !important;
   flex-direction: row !important;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   box-sizing: border-box;
 }
 .settings-col {
   flex: 1;
   min-width: 0;
 }
+
+/* 🎯 ปรับลดความสูงช่อง Input & Select ลงเหลือ 38px ให้พอดีสวยงาม */
 .settings-input,
 .settings-select {
   width: 100%;
-  height: 46px;
-  padding: 0 12px;
+  height: 38px;
+  padding: 0 10px;
   border-radius: 10px;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
   box-sizing: border-box;
   background: var(--bg) !important;
@@ -924,11 +926,12 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
 .settings-select:focus {
   border-color: var(--accent) !important;
 }
+
 .settings-btn-row-3 {
   display: flex !important;
   flex-direction: row !important;
   gap: 6px;
-  margin: 16px 0 10px;
+  margin: 12px 0 8px;
   width: 100%;
 }
 .settings-btn-row-2 {
@@ -938,12 +941,14 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
   margin-top: 6px;
   width: 100%;
 }
+
+/* 🎯 ปรับลดความสูงของปุ่มการทำงานให้อยู่ระดับ 38px - 40px */
 .settings-btn {
   flex: 1;
-  height: 46px;
-  font-size: 12px;
+  height: 36px;
+  font-size: 11.5px;
   font-weight: 700;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid var(--border);
   cursor: pointer;
   display: flex;
@@ -957,8 +962,8 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
   background: var(--accent);
   color: #ffffff;
   border: none;
-  font-size: 15px;
-  height: 48px;
+  font-size: 13.5px;
+  height: 40px;
 }
 .secondary-btn {
   background: var(--bg);
@@ -973,18 +978,17 @@ textarea { width: 100%; height: 260px; padding: 12px; border: 1px solid var(--bo
   background: var(--bg);
   color: var(--text);
   border: 1px solid var(--border);
-  font-size: 14px;
-  height: 48px;
+  font-size: 13.5px;
+  height: 40px;
 }
 .file-btn input { display: none; }
 .settings-version {
   text-align: center;
   font-size: 10px;
   opacity: 0.45;
-  margin-top: 12px;
+  margin-top: 10px;
   color: var(--text);
 }
-
 /* ========= 📱 RESPONSIVE ========= */
 @media (max-width: 480px) {
     .filter-card-compact {
