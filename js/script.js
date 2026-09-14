@@ -4,11 +4,11 @@
 /* =========== SECTION 1: INITIALIZATION & GLOBAL VARIABLES =========== */
 const $ = id => document.getElementById(id);
 
-// ✅ ========== ส่วนตั้งค่า — แก้แค่ 2 บรรทัดนี้ ==========
-const VERSION_MAJOR = "1.1.";       // เปลี่ยนเฉพาะตัวเลขชุดหลัก
-const LAST_UPDATED = "14/09/2026";  // วันที่อัปเดตล่าสุด
+// ✅ ตั้งค่า — แก้แค่ 2 บรรทัดนี้
+const VERSION_MAJOR = "1.1.";
+const LAST_UPDATED = "14/09/2026";
 
-// ✅ ========== ส่วนทำงานอัตโนมัติ — ไม่ต้องแก้เลย ==========
+// ✅ เพิ่มเลขเวอร์ชันอัตโนมัติ
 let APP_VERSION = "";
 (function autoIncrementVersion() {
     const storedPrefix = localStorage.getItem("ver_prefix");
@@ -24,19 +24,17 @@ let APP_VERSION = "";
     APP_VERSION = VERSION_MAJOR + newBuild;
 })();
 
-// ✅ แสดงผลวันที่แปลงเป็น พ.ศ. ย่อ 2 หลัก
-(function autoShowVersion() {
-    const elVer = document.getElementById("display-version");
-    const elDate = document.getElementById("display-date");
-    if (elVer) elVer.innerText = APP_VERSION;
-    if (elDate) {
+// ✅ แสดงผลตรงกับช่องใน HTML ของคุณ
+document.addEventListener("DOMContentLoaded", () => {
+    const elVer = document.getElementById("appVersionDisplay");
+    if (elVer) {
         const [d, m, y] = LAST_UPDATED.split('/');
         const yrBE = (parseInt(y) + 543).toString().slice(-2);
-        elDate.innerText = `${d}/${m}/${yrBE}`;
+        elVer.innerText = `V${APP_VERSION} | อัปเดต ${d}/${m}/${yrBE}`;
     }
-})();
+});
 
-// 2. ตัวแปรหลักของระบบ — ===> ส่วนเดิมต่อไปเลย <===
+// ========== ส่วนตัวแปรอื่นๆ เดิมต่อไปเลย ==========
 let db = JSON.parse(localStorage.getItem("barber_db")) || [];
 let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
 let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
