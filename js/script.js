@@ -711,72 +711,208 @@ async function saveAndGo(date, total) {
 
 /* ========= SECTION 14: ACCOUNT STATUS ========= */
 function loadAccountStatus() {
-    const today = $("dateInp")?.value || new Date().toISOString().split('T')[0];
-    if ($("accDate")) $("accDate").value = today;
+    const getEl = (id) => document.getElementById(id);
+    
+    // 1. ดึงวันที่ปัจจุบัน
+    let todayKey = getEl("accDate")?.value || getEl("dateInp")?.value;
+    if (!todayKey) {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        todayKey = `${y}-${m}-${d}`;
+    }
+    if (getEl("accDate")) getEl("accDate").value = todayKey;
 
-    // ดึงข้อมูล Archive ล่าสุด และ Archive ของวันนี้
-    const lastArchive = archives.slice().sort((a, b) => b.date.localeCompare(a.date))[0];
-    const todayArchive = archives.find(a => a.date === today);
+    if (typeof archives === "undefined") return;
 
-    // คำนวณยอดเงินรวมคงเหลือตาม Logic เดิม
-    const bal = account.balance || 0;
-    const todaySettle = todayArchive ? todayArchive.settle : 0;
-    const totalBal = bal + todaySettle;
+    // 2. ดึงยอดค้างของ "วันนี้"
+    const todayData = archives.find(a => a.date === todayKey);
+    // ค่า settle: ติดลบคือช่างค้างร้าน / เป็นบวกคือร้านค้างช่าง
+    let todaySettle = todayData ? Number(todayData.settle) || 0 : 0;
 
-    // อัปเดต UI ตาม Element ของเดิม
-    if ($("accOldVal")) $("accOldVal").innerText = `฿${bal.toLocaleString()}`;
-    if ($("accDateLabel")) $("accDateLabel").innerText = lastArchive ? lastArchive.date : "ยังไม่มีข้อมูล";
-    if ($("accTodayVal")) $("accTodayVal").innerText = `฿${todaySettle.toLocaleString()}`;
-    if ($("accTotalVal")) $("accTotalVal").innerText = `฿${totalBal.toLocaleString()}`;
-    if ($("accLight")) $("accLight").style.background = totalBal >= 0 ? "#22c55e" : "#ef4444";
+    // 3. ดึงยอด "ค้างเดิม" จาก account.balance (ไม่ไปยุ่งกับ archives อดีต)
+    let oldSettle = Number(account?.balance) || 0;
 
-    // อัปเดต Badge แสดงสถานะ
-    if ($("statusBadge")) {
-        if (totalBal > 0) { 
-            $("statusBadge").innerText = "ร้านคืนช่าง"; 
-            $("statusBadge").style.background = "#dbeafe"; 
-            $("statusBadge").style.color = "#1d4ed8"; 
-        } else if (totalBal < 0) { 
-            $("statusBadge").innerText = "ช่างคืนร้าน"; 
-            $("statusBadge").style.background = "#fee2e2"; 
-            $("statusBadge").style.color = "#dc2626"; 
-        } else { 
-            $("statusBadge").innerText = "ยอดพอดี"; 
-            $("statusBadge").style.background = "#dcfce7"; 
-            $("statusBadge").style.color = "#16a34a"; 
+    // 4. คำนวณยอดสุทธิรวมทั้งหมด
+    let totalBalance = oldSettle + todaySettle;
+
+    // 5. แสดงผลยอดค้างวันนี้
+    if (getEl("accTodayVal")) {
+        getEl("accTodayVal").innerText = `฿${Math.abs(todaySettle).toLocaleString()}`;
+    }
+
+    // 6. แสดงผลยอดค้างเดิม (รูปที่ 1: ค้างเดิม ช่างค้าง: ฿20)
+    const oldValEl = getEl("accOldVal");
+    if (oldValEl) {
+        if (oldSettle < 0) {
+            oldValEl.innerHTML = `<small style="color:#dc2626; font-weight:bold;">ช่างค้าง:</small> ฿${Math.abs(oldSettle).toLocaleString()}`;
+        } else if (oldSettle > 0) {
+            oldValEl.innerHTML = `<small style="color:#16a34a; font-weight:bold;">ร้านค้าง:</small> ฿${oldSettle.toLocaleString()}`;
+        } else {
+            oldValEl.innerText = `฿0`;
         }
+    }
+
+    // 7. แสดงผลยอดสุทธิตรงกลาง (การ์ดใหญ่)
+    if (getEl("accTotalVal")) {
+        getEl("accTotalVal").innerText = `฿${Math.abs(totalBalance).toLocaleString()}`;
+    }
+
+    // 8. แสดงวันที่หัวข้อ
+    if (getEl("accDateLabel")) {
+        getEl("accDateLabel").innerText = new Date(todayKey).toLocaleDateString('th-TH', { 
+            day: 'numeric', month: 'short', year: 'numeric' 
+        });
+    }
+
+    // 9. อัปเดต UI ป้าย Badge และไฟแสดงสถานะ
+    updateStatusUI(totalBalance);
+}
+
+function updateStatusUI(net) {
+    const getEl = (id) => document.getElementById(id);
+    const badge = getEl("statusBadge");
+    const light = getEl("accLight"); 
+
+    // net < 0 = ช่างคืนร้าน | net > 0 = ร้านคืนช่าง | net === 0 = ยอดพอดี
+    let isDebt = net < 0;
+    let isZero = net === 0;
+
+    let txt = isDebt ? "🥷 ช่างคืนร้าน" : (isZero ? "✅ ยอดพอดี" : "🏠 ร้านคืนช่าง");
+    let color = isDebt ? "#dc2626" : (isZero ? "#16a34a" : "#1d4ed8");
+    let bg = isDebt ? "#fee2e2" : (isZero ? "#dcfce7" : "#dbeafe");
+
+    if (badge) {
+        badge.innerText = txt;
+        badge.style.background = bg;
+        badge.style.color = color;
+    }
+    if (light) {
+        light.style.background = color;
+        light.style.boxShadow = `0 0 12px ${color}`;
     }
 }
 
 /* ========= SECTION 15: CLEAR ACCOUNT & HISTORY ========= */
 async function clearAccount() {
-    const date = $("accDate")?.value || new Date().toISOString().split('T')[0];
-    const note = $("accNote")?.value || "เคลียร์ยอด";
+    const getEl = (id) => document.getElementById(id);
+    
+    // ดึงยอดรวมสุทธิปัจจุบัน
+    const todayKey = getEl("accDate")?.value || new Date().toISOString().split('T')[0];
+    const todayData = (typeof archives !== "undefined") ? archives.find(a => a.date === todayKey) : null;
+    const todaySettle = todayData ? Number(todayData.settle) || 0 : 0;
+    const oldSettle = Number(account?.balance) || 0;
+    const net = oldSettle + todaySettle;
 
-    const { isConfirmed } = await Swal.fire({
-        title: "ยืนยันเคลียร์เงิน", 
-        text: `ยืนยัน ณ วันที่ ${date} ?`, 
-        icon: "question",
-        showCancelButton: true, 
-        confirmButtonText: "ยืนยัน", 
-        cancelButtonText: "ยกเลิก"
+    if (net === 0) {
+        if (typeof notify === "function") notify("error", "แจ้งเตือน", "ขณะนี้ยอดคงค้างเป็นศูนย์เรียบร้อยแล้ว");
+        return;
+    }
+
+    const accNoteEl = getEl("accNote");
+    const note = (accNoteEl && accNoteEl.value.trim()) || "สรุปยอดบัญชีค้างชำระ";
+
+    const result = await Swal.fire({
+        title: 'ยืนยันการสรุปยอดบัญชี',
+        text: `ต้องการดำเนินการเคลียร์ยอดค้างจำนวน ${Math.abs(net).toLocaleString()} บาท ใช่หรือไม่?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#22c55e',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'ยืนยันดำเนินการ',
+        cancelButtonText: 'ยกเลิก'
     });
 
-    if (!isConfirmed) return;
+    if (!result.isConfirmed) return;
 
-    // เพิ่มรายการลงด้านหน้าสุด (unshift) และ reset balance เป็น 0 ตามของเดิม
-    account.logs.unshift({ date, balance: account.balance, note });
+    // บันทึก Log ลงด้านหน้าสุด
+    if (!account.logs) account.logs = [];
+    account.logs.unshift({
+        date: todayKey,
+        amount: net,
+        note: note
+    });
+
+    // Reset ยอด balance บัญชีค้างเดิมเป็น 0 (ไม่ไปแก้ไข archives ประวัติย้อนหลัง)
     account.balance = 0;
+    if (todayData) todayData.settle = 0;
+
+    // บันทึกข้อมูล
+    if (typeof saveDB === "function") saveDB();
+    else if (typeof save === "function") save();
+
+    if (typeof notify === "function") notify("success", "ดำเนินการสำเร็จ", "ระบบได้ดำเนินการเคลียร์ยอดบัญชีเรียบร้อยแล้ว");
+    if (accNoteEl) accNoteEl.value = "";
+
+    if (typeof loadAccountHistory === 'function') loadAccountHistory();
+    loadAccountStatus(); 
+}
+function loadAccountHistory() {
+    const getEl = (id) => document.getElementById(id);
+    const historyContainer = getEl("accHistory");
+    if (!historyContainer) return;
+
+    if (!account.logs || account.logs.length === 0) {
+        historyContainer.innerHTML = '<center style="padding:30px; color:#94a3b8; font-size:13px;">ไม่มีประวัติการบันทึกบัญชี</center>';
+        return;
+    }
+
+    const historyHtml = account.logs.map((l, index) => {
+        const isBarberDebt = l.amount < 0; 
+        const color = isBarberDebt ? '#dc2626' : '#1e3a8a';
+        const sign = l.amount > 0 ? '+' : (l.amount < 0 ? '-' : '');
+
+        return `
+        <div class="log-item" style="padding:12px 15px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; background:#fff;">
+            <div style="flex:1;">
+                <b style="font-size:12px; color:#64748b;">${l.date}</b><br>
+                <span style="font-size:13.5px; font-weight:700; color:#1e293b;">${l.note}</span>
+            </div>
+            <div style="text-align:right; flex-shrink:0;">
+                <b style="font-size:14px; color:${color}; display:block; margin-bottom:4px;">
+                    ${sign}฿${Math.abs(l.amount).toLocaleString()}
+                </b>
+                <div style="display:flex; gap:10px; justify-content:flex-end;">
+                    <small style="color:#ef4444; font-weight:700; cursor:pointer;" onclick="deleteAccountLog(${index})">ลบ</small>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+
+    historyContainer.innerHTML = historyHtml;
+}
+/* ========= ลบรายการประวัติ ========= */
+async function deleteAccountLog(index) {
+    const result = await Swal.fire({
+        title: 'ยืนยันการลบประวัติบัญชี',
+        text: "ต้องการดำเนินการลบรายการนี้ใช่หรือไม่?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'ยืนยันการลบ',
+        cancelButtonText: 'ยกเลิก'
+    });
+
+    if (!result.isConfirmed) return;
+
+    // คืนค่ายอดเงินกลับเข้า account.balance
+    const removedLog = account.logs[index];
+    if (removedLog) {
+        account.balance = (account.balance || 0) + removedLog.amount;
+    }
+
+    account.logs.splice(index, 1);
 
     if (typeof saveDB === "function") saveDB();
-    notify("success", "สำเร็จ", "เคลียร์ยอดเรียบร้อย");
+    else if (typeof save === "function") save();
 
-    // ล้างช่องกรอกหมายเหตุ
-    if ($("accNote")) $("accNote").value = "";
+    if (typeof notify === "function") notify("success", "ดำเนินการสำเร็จ", "ลบประวัติและคืนค่ายอดเงินเรียบร้อยแล้ว");
 
+    loadAccountHistory();
     loadAccountStatus();
 }
-
 function openHistoryModal() {
     const list = $("accHistory");
     if (!list) return;
