@@ -713,8 +713,8 @@ async function saveAndGo(date, total) {
 function loadAccountStatus() {
     const getEl = (id) => document.getElementById(id);
     
-    // 1. ดึงวันที่ที่เลือก
-    let todayKey = getEl("accDate")?.value || getEl("dateInp")?.value;
+    let todayKey = getEl("accDate")?.value;
+    
     if (!todayKey) {
         const now = new Date();
         const y = now.getFullYear();
@@ -722,92 +722,72 @@ function loadAccountStatus() {
         const d = String(now.getDate()).padStart(2, '0');
         todayKey = `${y}-${m}-${d}`;
     }
-    if (getEl("accDate")) getEl("accDate").value = todayKey;
     if (typeof archives === "undefined") return;
-
-    // ✅ 2. เรียงวันที่จากเก่าไปใหม่ เพื่อคำนวณทีละวัน
-    const sortedArchives = [...archives].sort((a, b) => a.date.localeCompare(b.date));
-
-    // ✅ 3. คำนวณสะสมทีละวัน ตามลำดับ
-    let runningBalance = Number(account?.balance) || 0; // ยอดยกมาเริ่มต้น
-    let balanceUpToPrevDay = runningBalance;  // ยอดสุทธิของวันก่อนวันนี้
-    let todaySettle = 0;                       // ผลต่างของวันที่เลือก
-    let foundTarget = false;
-
-    sortedArchives.forEach(a => {
-        const s = Number(a.settle) || 0;
-
-        if (a.date < todayKey) {
-            // ✅ วันก่อนวันที่เลือก → สะสมต่อ
-            runningBalance += s;
-            balanceUpToPrevDay = runningBalance; // บันทึกยอดสุทธิ ณ วันนั้น
-        } 
-        else if (a.date === todayKey) {
-            // ✅ เจอวันที่เลือก → บันทึกยอดก่อน + ผลต่างวันนี้
-            todaySettle = s;
-            runningBalance += s;
-            foundTarget = true;
+    // 🎯 1. ดึงยอด "ค้างวันนี้"
+    const todayData = archives.find(a => a.date === todayKey);
+    let todaySettle = todayData ? -todayData.settle : 0;
+    // 🎯 2. ดึงยอด "ค้างเดิม"
+    let oldSettle = archives.reduce((sum, day) => {
+        // เงื่อนไข: ไม่ใช่วันนี้ และ ยอดยังไม่เป็น 0 (ยังค้างอยู่)
+        if (day.date !== todayKey && day.settle !== 0) {
+            return sum + (Number(-day.settle) || 0);
         }
-        // วันที่หลังจากนั้น → ไม่ต้องสนใจ
-    });
-
-    // ✅ กรณี "ไม่มีข้อมูลวันที่เลือก" → ยอดสุทธิ = ยอดสุทธิของวันล่าสุดก่อนหน้า
-    if (!foundTarget) {
-        balanceUpToPrevDay = runningBalance; // ยอดสุทธิของวันก่อนหน้า
-        todaySettle = 0; // ไม่มีผลต่าง
+        return sum;
+    }, 0);
+    // 🎯 3. คำนวณ "ยอดต้องเคลียร์รวม"
+    let totalBalance = oldSettle + todaySettle;
+    if (typeof account !== "undefined") {
+        account.balance = totalBalance;
     }
-
-    // ✅ ค่าที่จะใช้แสดง
-    const oldSettle = balanceUpToPrevDay;   // ยอดค้างเดิม = ยอดสุทธิของวันก่อน
-    const totalBalance = runningBalance;     // ยอดสุทธิ = ยอดสะสมถึงวันนี้
-
-    // ✅ แสดงผลยอดค้างวันนี้ (ผลต่างเฉพาะวันนี้)
-    if (getEl("accTodayVal")) {
-        getEl("accTodayVal").innerText = `฿${Math.abs(todaySettle).toLocaleString()}`;
-    }
-
-    // ✅ แสดงผลยอดค้างเดิม (ยอดสุทธิของวันก่อนหน้า)
+    // แสดงยอดวันนี้
+    if (getEl("accTodayVal")) getEl("accTodayVal").innerText = `฿${todaySettle.toLocaleString()}`;
+    // 🟢 แก้ไขจุดนี้: แสดงยอดค้างเดิมพร้อมข้อความว่าใครค้าง
     const oldValEl = getEl("accOldVal");
     if (oldValEl) {
         if (oldSettle < 0) {
-            oldValEl.innerHTML = `<small style="color:#dc2626; font-weight:bold;">ค้างเดิม:</small> ฿${Math.abs(oldSettle).toLocaleString()}`;
+            oldValEl.innerHTML = `<small style="color:#991b1b">ช่างค้าง:</small> ฿${Math.abs(oldSettle).toLocaleString()}`;
         } else if (oldSettle > 0) {
-            oldValEl.innerHTML = `<small style="color:#16a34a; font-weight:bold;">ร้านค้าง:</small> ฿${oldSettle.toLocaleString()}`;
+            oldValEl.innerHTML = `<small style="color:#166534">ร้านค้าง:</small> ฿${oldSettle.toLocaleString()}`;
         } else {
             oldValEl.innerText = `฿0`;
         }
     }
-
-    // ✅ แสดงผลยอดสุทธิตรงกลาง
+        // ยอดรวมทั้งหมด
     if (getEl("accTotalVal")) {
         getEl("accTotalVal").innerText = `฿${Math.abs(totalBalance).toLocaleString()}`;
     }
-
-    // ✅ แสดงวันที่หัวข้อ
+    // ส่วนหัววันที่
     if (getEl("accDateLabel")) {
         getEl("accDateLabel").innerText = new Date(todayKey).toLocaleDateString('th-TH', { 
             day: 'numeric', month: 'short', year: 'numeric' 
         });
     }
-
-    // ✅ อัปเดตสถานะ
-    updateStatusUI(totalBalance);
+    // อัปเดตสถานะป้าย Badge (ยอดรวมสรุป)
+    const badge = getEl("statusBadge");
+    if (badge) {
+        if (totalBalance < 0) {
+            badge.innerText = "🥷 ช่างคืนร้าน";
+            badge.style.backgroundColor = "#fee2e2"; badge.style.color = "#991b1b";
+        } else if (totalBalance > 0) {
+            badge.innerText = "🏠 ร้านคืนช่าง";
+            badge.style.backgroundColor = "#dcfce7"; badge.style.color = "#166534";
+        } else {
+            badge.innerText = "✅ ยอดลงตัว";
+            badge.style.backgroundColor = "#f1f5f9"; badge.style.color = "#64748b";
+        }
+    }
+    if (typeof updateStatusUI === 'function') updateStatusUI(totalBalance);
 }
-
 function updateStatusUI(net) {
     const getEl = (id) => document.getElementById(id);
     const badge = getEl("statusBadge");
     const light = getEl("accLight"); 
-
-    let isDebt = net < 0;
-    let isZero = net === 0;
-    let txt = isDebt ? "🥷 ช่างคืนร้าน" : (isZero ? "✅ ยอดพอดี" : "🏠 ร้านคืนช่าง");
-    let color = isDebt ? "#dc2626" : (isZero ? "#16a34a" : "#1d4ed8");
-    let bg = isDebt ? "#fee2e2" : (isZero ? "#dcfce7" : "#dbeafe");
-
+    // ✅ ปรับตรรกะสี: ลบ=แดง (ช่างคืนร้าน) | บวก=น้ำเงิน (ร้านคืนช่าง)
+    let color = net < 0 ? "#dc2626" : (net > 0 ? "#1e3a8a" : "#16a34a");
+    let txt = net < 0 ? "🥷 ช่างคืนร้าน" : (net > 0 ? "🏠 ร้านคืนช่าง" : "✅ ยอดลงตัว");
     if (badge) {
         badge.innerText = txt;
-        badge.style.background = bg;
+        badge.style.background = net < 0 ? "#fef2f2" : (net > 0 ? "#eff6ff" : "#f0fdf4");
         badge.style.color = color;
     }
     if (light) {
