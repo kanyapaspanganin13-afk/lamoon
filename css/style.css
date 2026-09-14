@@ -423,42 +423,35 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     padding: 8px 15px;
 }
 .month-picker-wrap input[type="month"] {
+    /* ✅ เปลี่ยนจาก max-width:220px → width:100% ให้เต็มความกว้าง */
     width: 100%;
-    /* ✅ ลดความสูงลง */
-    height: 36px;
-    /* ✅ ลดขนาดตัวอักษรลงเล็กน้อย */
-    font-size: 13px;
+    height: 40px;
+    font-size: 14px;
     font-weight: 700;
     text-align: center;
-    /* ✅ ลดรัศมีมุมให้เข้ากับแท็บ */
-    border-radius: 10px;
+    border-radius: 12px;
     border: 1px solid var(--border);
     background: var(--bg);
     color: var(--text);
     padding: 0 10px;
-    box-sizing: border-box;
+    box-sizing: border-box; /* ✅ เพิ่มบรรทัดนี้ ป้องกันกล่องล้น */
 }
-
-.filter-card .form-control {
+.tab-content-wrap {
     width: 100%;
-    /* ✅ ลดความสูงให้เท่ากันด้วย */
-    height: 36px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
-    font-weight: 700;
-    font-size: 13px;
-    text-align: center;
-    padding: 0 10px;
     box-sizing: border-box;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    min-height: 250px;
 }
-
-/* ✅ ลดระยะห่างภายนอกเล็กน้อยให้ดูเรียบต่อกัน */
-.month-picker-wrap {
-    display: flex;
-    justify-content: center;
-    padding: 4px 15px; /* ลดจาก 8px → 4px */
+.filter-month-wrap { 
+    display: grid !important;
+    grid-template-columns: auto 1fr auto !important;
+    gap: 8px; 
+    align-items: center; 
+    margin-bottom: 12px; 
 }
 .filter-month-wrap label { font-size: 13px; font-weight: 700; white-space: nowrap; color: var(--text); }
 .filter-month-wrap input { height: 46px; border-radius: 10px; font-size: 14px; }
@@ -543,7 +536,6 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     padding: 9px 4px; 
     border-bottom: 1px solid var(--border); 
 }
-
 /* ========= 🔍 COMPARISON PAGE (หน้าเปรียบเทียบ) ========= */
 .compare-container {
     padding: 0 4px 10px 4px;
