@@ -845,6 +845,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .btn-monthly i, .btn-excel i, .btn-sheets i { font-size: 18px; margin-bottom: 4px; }
 .btn-compare { border-radius: 18px; padding: 12px; text-align: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, var(--btn-compare1), var(--btn-compare2)); color: var(--btn-text); font-weight: 600; margin-top: 12px; }
 .btn-compare i { font-size: 20px; }
+
 /* ========= 🪟 MODALS & SETTINGS (COMPACT VERSION) ========= */
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); z-index: 10000; align-items: center; justify-content: center; padding: 12px; }
 .modal-content { background: var(--card); width: 100%; max-width: 400px; border-radius: 20px; padding: 16px; border: 1px solid var(--border); max-height: 92vh; overflow-y: auto; animation: slideUp 0.25s ease-out; color: var(--text); transition: background 0.3s; }
@@ -857,137 +858,192 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .btn-close { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
 textarea { width: 100%; height: 200px; padding: 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); font-family: 'Kanit', sans-serif; font-size: 13px; line-height: 1.5; outline: none; resize: none; transition: background 0.3s, color 0.3s; }
 
-.settings-modal {
-  max-width: 380px;
-  width: 94%;
-  padding: 16px;
-  margin: 0 auto;
-  border-radius: 20px;
-  box-sizing: border-box;
+/* ⚙️ OVERLAY & CARD STRUCTURE */
+.settings-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+}
+.settings-card-container {
   background: var(--card);
-  color: var(--text);
+  width: 95%;
+  max-width: 380px;
+  border-radius: 28px;
   border: 1px solid var(--border);
-  position: relative;
-  top: auto;
-  transform: none;
-  transition: background 0.3s, color 0.3s;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.3s ease-out;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
-.settings-title {
+.settings-header {
+  padding: 16px 16px 4px;
   text-align: center;
-  font-size: 16px;
-  font-weight: 800;
-  margin: 0 0 12px 0;
+}
+.settings-header h3 {
+  margin: 0;
+  font-size: 18px;
   color: var(--text);
+  font-weight: 900;
 }
-.settings-group {
-  width: 100%;
-  margin-bottom: 8px;
-}
-.settings-label {
-  font-size: 11.5px;
-  font-weight: 700;
-  margin: 0 0 4px 0;
-  display: block;
-  opacity: 0.85;
-  color: var(--text);
-}
-.settings-row {
-  display: flex !important;
-  flex-direction: row !important;
-  gap: 8px;
-  width: 100%;
-  margin-bottom: 8px;
-  box-sizing: border-box;
-}
-.settings-col {
-  flex: 1;
-  min-width: 0;
+.settings-body {
+  padding: 8px 16px 18px;
 }
 
-/* 🎯 ปรับลดความสูงช่อง Input & Select ลงเหลือ 38px ให้พอดีสวยงาม */
+/* 🎯 INPUTS & SELECTS (ขนาดพอดี 38px) */
+.settings-input-field,
+.settings-select-field,
 .settings-input,
 .settings-select {
   width: 100%;
   height: 38px;
   padding: 0 10px;
-  border-radius: 10px;
-  font-size: 13.5px;
-  font-weight: 600;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
   box-sizing: border-box;
   background: var(--bg) !important;
   color: var(--text) !important;
   border: 1px solid var(--border) !important;
   outline: none;
-  margin: 0 !important;
-  text-align: left !important;
-  text-align-last: left !important;
+  margin-bottom: 8px;
+  text-align: center;
 }
+.settings-select-field,
+.settings-select {
+  font-size: 13.5px;
+}
+.settings-input-field:focus,
+.settings-select-field:focus,
 .settings-input:focus,
 .settings-select:focus {
   border-color: var(--accent) !important;
 }
 
-.settings-btn-row-3 {
-  display: flex !important;
-  flex-direction: row !important;
-  gap: 6px;
-  margin: 12px 0 8px;
+/* 🎯 ICON IN SELECT WRAPPER */
+.settings-input-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
   width: 100%;
 }
+.settings-input-icon-wrap select {
+  appearance: none;
+  padding-left: 32px;
+  text-align-last: center;
+  margin-bottom: 0;
+}
+.settings-input-icon-wrap i {
+  position: absolute;
+  left: 12px;
+  color: var(--text);
+  opacity: 0.6;
+  pointer-events: none;
+  font-size: 13px;
+}
+
+/* 📐 LAYOUT GRIDS */
+.settings-grid-2,
+.settings-row {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+}
+.settings-grid-3,
+.settings-btn-row-3 {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr 1fr !important;
+  gap: 6px;
+  margin: 10px 0 12px;
+  width: 100%;
+}
+.settings-grid-main,
 .settings-btn-row-2 {
-  display: flex !important;
-  flex-direction: row !important;
+  display: grid !important;
+  grid-template-columns: 2fr 1.2fr !important;
   gap: 8px;
   margin-top: 6px;
   width: 100%;
 }
 
-/* 🎯 ปรับลดความสูงของปุ่มการทำงานให้อยู่ระดับ 38px - 40px */
+/* 🔘 BUTTONS (ย่อขนาดให้กระชับเข้าคู่กัน) */
+.settings-btn-sub,
 .settings-btn {
   flex: 1;
-  height: 36px;
-  font-size: 11.5px;
-  font-weight: 700;
+  height: 38px;
+  font-size: 11px;
+  font-weight: 800;
   border-radius: 10px;
   border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
+  gap: 4px;
   box-sizing: border-box;
   white-space: nowrap;
 }
+.settings-btn-sub.danger,
+.danger-btn {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: var(--danger, rgba(239, 68, 68, 0.25));
+}
+
+.settings-btn-save,
 .primary-btn {
   background: var(--accent);
-  color: #ffffff;
+  color: var(--btn-text, #ffffff);
   border: none;
-  font-size: 13.5px;
-  height: 40px;
+  font-size: 15px;
+  font-weight: 800;
+  height: 42px;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
-.secondary-btn {
-  background: var(--bg);
-  color: var(--text);
-}
-.danger-btn {
-  background: rgba(239, 68, 68, 0.12);
-  color: #ef4444;
-  border-color: rgba(239, 68, 68, 0.25);
-}
+
+.settings-btn-close,
 .cancel-btn {
   background: var(--bg);
   color: var(--text);
   border: 1px solid var(--border);
-  font-size: 13.5px;
-  height: 40px;
+  font-size: 14px;
+  font-weight: 800;
+  height: 42px;
+  border-radius: 14px;
+  opacity: 0.8;
+  cursor: pointer;
 }
-.file-btn input { display: none; }
+
+/* 📄 FOOTER VERSION */
+.settings-footer,
 .settings-version {
   text-align: center;
-  font-size: 10px;
-  opacity: 0.45;
+  line-height: 1.3;
+  opacity: 0.5;
   margin-top: 10px;
   color: var(--text);
+}
+.settings-footer .version {
+  font-size: 10px;
+  font-weight: 600;
+}
+.settings-footer .update-date {
+  font-size: 9px;
+  font-weight: 400;
 }
 /* ========= 📱 RESPONSIVE ========= */
 @media (max-width: 480px) {
