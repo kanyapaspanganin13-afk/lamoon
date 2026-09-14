@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (elVer) {
         const [d, m, y] = LAST_UPDATED.split('/');
         const yrBE = (parseInt(y) + 543).toString().slice(-2);
-        elVer.innerText = `V${APP_VERSION} | อัปเดต ${d}/${m}/${yrBE}`;
+        elVer.innerText = `V${APP_VERSION} | Update ${d}/${m}/${yrBE}`;
     }
 });
 
