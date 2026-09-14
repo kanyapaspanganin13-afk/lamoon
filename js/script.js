@@ -1701,12 +1701,12 @@ function loadHistMonth() {
         if (typeof notify === 'function') notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthNameFormatted}`);
         
         if (typeof generateMonthlyReport === 'function') {
-            generateMonthlyReport(m, 0, 0, 0, 0, 0, 0, {}, {}, {}, 0, 0, 0);
+            generateMonthlyReport(m, 0, 0, 0, 0, 0, 0, {}, {}, {}, 0, 0, 0, 0);
         }
         return;
     }
 
-    let countNew = 0, countRegular = 0;  
+    let countNew = 0, countRegular = 0, countOffsite = 0;  
     let monthTotal = 0, monthBarber = 0, monthCount = 0, monthGuarDays = 0; 
     let hairStats = {}, serviceStats = {};
     let offDays = 0, workDays = 0;
@@ -1719,15 +1719,15 @@ function loadHistMonth() {
         const [dYear, dMonth, dDay] = day.date.split('-').map(Number);
         const dObj = new Date(dYear, dMonth - 1, dDay);
         
-        const firstDayOfMonth = new Date(dYear, dMonth - 1, 1).getDay();
-        let wIdx = Math.ceil((dDay + firstDayOfMonth) / 7);
+        let wIdx = Math.ceil(dDay / 7);
+        if (wIdx > 5) wIdx = 5;
         const wKey = `สัปดาห์ที่ ${wIdx}`;
 
         if (!weeklyData[wKey]) {
             weeklyData[wKey] = { 
                 customers: 0, workDays: 0, offDays: 0, 
                 zeroDays: 0, guarDays: 0, dailyCounts: [],
-                countNew: 0, countRegular: 0, 
+                countNew: 0, countRegular: 0, countOffsite: 0,
                 popularHair: {}, 
                 popularService: {}, 
                 income: 0 
@@ -1742,6 +1742,11 @@ function loadHistMonth() {
 
         workDays++;
         weeklyData[wKey].workDays++;
+
+        if (day.isGuarantee || day.guarantee) {
+            monthGuarDays++;
+            weeklyData[wKey].guarDays++;
+        }
 
         const dailyIncome = Number(day.total) || 0;
         const dailyBarber = Number(day.barber) || 0; 
@@ -1766,21 +1771,21 @@ function loadHistMonth() {
                     } else if (type === "regular") {
                         countRegular++;
                         weeklyData[wKey].countRegular++;
+                    } else if (type === "offsite") {
+                        countOffsite++;
+                        weeklyData[wKey].countOffsite++;
                     }
 
+                    // อ่านข้อมูลบริการโดยตรงเนื่องจากระบบบังคับกรอกเสมอ
                     const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
                     svcs.forEach(s => {
                         if (!s) return;
                         const cleanS = String(s).trim();
                         if (haircutList.includes(cleanS)) {
-                            // เก็บยอดรวมรายเดือน
                             hairStats[cleanS] = (hairStats[cleanS] || 0) + 1;
-                            // ✅ เพิ่มส่วนนับยอดสถิิติทรงผมแยกรายสัปดาห์
                             weeklyData[wKey].popularHair[cleanS] = (weeklyData[wKey].popularHair[cleanS] || 0) + 1;
                         } else {
-                            // เก็บยอดรวมรายเดือน
                             serviceStats[cleanS] = (serviceStats[cleanS] || 0) + 1;
-                            // ✅ เพิ่มส่วนนับยอดสถิติบริการเสริมแยกรายสัปดาห์
                             weeklyData[wKey].popularService[cleanS] = (weeklyData[wKey].popularService[cleanS] || 0) + 1;
                         }
                     });
@@ -1801,24 +1806,41 @@ function loadHistMonth() {
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
 
     if (typeof generateMonthlyReport === 'function') {
-        generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular);
+        generateMonthlyReport(
+            m, 
+            monthTotal, 
+            monthBarber, 
+            monthCount, 
+            workDays, 
+            offDays, 
+            avgCustomerPerDay, 
+            weeklyData, 
+            hairStats, 
+            serviceStats, 
+            monthGuarDays, 
+            countNew, 
+            countRegular, 
+            countOffsite
+        );
     }
 }
-function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular) {
+function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular, countOffsite) {
     // Helper Selector กัน Error เรื่อง $
     const $ = id => document.getElementById(id);
 
-    // --- 1. เตรียมข้อมูลพื้นฐาน & นับยอดลูกค้าใหม่/ประจำใหม่ป้องกันค่าเป็น 0 ---
+    // --- 1. เตรียมข้อมูลพื้นฐาน & นับยอดลูกค้าแยกตามกลุ่มป้องกันค่าเป็น 0 ---
     const weekEntries = Object.entries(weeklyData || {});
     const weekKeys = Object.keys(weeklyData || {}); 
     const dayStats = {};
     
     let totalNew = 0;
     let totalRegular = 0;
+    let totalOffsite = 0;
 
     weekEntries.forEach(([wk, data]) => {
         totalNew += (data.countNew || 0);
         totalRegular += (data.countRegular || 0);
+        totalOffsite += (data.countOffsite || 0);
 
         if (data.dailyCounts) {
             data.dailyCounts.forEach(d => {
@@ -1836,12 +1858,11 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
 
     const dayAverages = Object.entries(dayStats).filter(([name, data]) => data.count > 0).map(([name, data]) => ({ name, avg: data.total / data.count }));
     
-    // แก้ไขจุดที่ 1: Copy Array ก่อน Sort ป้องกันข้อมูลตีกัน
     const busiestDay = [...dayAverages].sort((a, b) => b.avg - a.avg)[0];
     const quietestDay = [...dayAverages].sort((a, b) => a.avg - b.avg)[0];
     
     const topIncomeWeek = weekEntries.length > 0 ? weekEntries.reduce((p, c) => ((c[1].income || 0) > (p[1].income || 0) ? c : p)) : null;
-    const topCountWeek = weekEntries.length > 0 ? weekEntries.reduce((p, c) => (((c[1].countNew || 0) + (c[1].countRegular || 0)) > ((p[1].countNew || 0) + (p[1].countRegular || 0)) ? c : p)) : null;
+    const topCountWeek = weekEntries.length > 0 ? weekEntries.reduce((p, c) => (((c[1].countNew || 0) + (c[1].countRegular || 0) + (c[1].countOffsite || 0)) > ((p[1].countNew || 0) + (p[1].countRegular || 0) + (p[1].countOffsite || 0)) ? c : p)) : null;
 
     const topHair = Object.entries(hairStats || {}).sort((a, b) => b[1] - a[1])[0];
     const topService = Object.entries(serviceStats || {}).sort((a, b) => b[1] - a[1])[0];
@@ -1849,29 +1870,25 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
     // --- 2. วิเคราะห์ลูกค้า (รายสัปดาห์ & รายเดือน) ---
     let maxNewWeek = "-"; 
     let maxRegWeek = "-";
-    let nUp = 0, nDown = 0, rUp = 0, rDown = 0;
+    let maxOffsiteWeek = "-";
 
-    weekKeys.forEach((wk, idx) => {
+    weekKeys.forEach((wk) => {
         const curr = weeklyData[wk];
         const n = curr.countNew || 0;
         const r = curr.countRegular || 0;
+        const o = curr.countOffsite || 0;
         
         curr.newAnalysis = (n > r) ? "กลุ่มหลักอาทิตย์นี้" : (n < r) ? "น้อยกว่าลูกค้าประจำ" : "เท่ากับลูกค้าประจำ";
         curr.regAnalysis = (r > n) ? "กลุ่มหลักอาทิตย์นี้" : (r < n) ? "น้อยกว่าลูกค้าใหม่" : "เท่ากับลูกค้าใหม่";
 
-        if (n > r && (maxNewWeek === "-" || n > (weeklyData[maxNewWeek]?.countNew || 0))) {
+        if (n > 0 && (maxNewWeek === "-" || n > (weeklyData[maxNewWeek]?.countNew || 0))) {
             maxNewWeek = wk;
         }
-        if (r > n && (maxRegWeek === "-" || r > (weeklyData[maxRegWeek]?.countRegular || 0))) {
+        if (r > 0 && (maxRegWeek === "-" || r > (weeklyData[maxRegWeek]?.countRegular || 0))) {
             maxRegWeek = wk;
         }
-
-        if (idx > 0) {
-            const prev = weeklyData[weekKeys[idx - 1]];
-            const pN = prev.countNew || 0;
-            const pR = prev.countRegular || 0;
-            if (n > pN) nUp++; else if (n < pN) nDown++;
-            if (r > pR) rUp++; else if (r < pR) rDown++;
+        if (o > 0 && (maxOffsiteWeek === "-" || o > (weeklyData[maxOffsiteWeek]?.countOffsite || 0))) {
+            maxOffsiteWeek = wk;
         }
     });
 
@@ -1910,18 +1927,22 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
             : `สัปดาห์ที่มีรายได้สูงสุด: <b>-</b>`
     ];
     
-    if (totalNew > 0 || totalRegular > 0) {
+    if (totalNew > 0 || totalRegular > 0 || totalOffsite > 0) {
         const newColor = "#38bdf8"; 
         const regColor = "#c084fc"; 
-        const newText = `<span style="color: ${newColor}; font-weight: bold;">ใหม่ ${totalNew > 0 ? totalNew : "-"}</span>`;
-        const regText = `<span style="color: ${regColor}; font-weight: bold;">ประจำ ${totalRegular > 0 ? totalRegular : "-"}</span>`;
+        const offsiteColor = "#f97316";
+
+        const newText = `<span style="color: ${newColor}; font-weight: bold;">ใหม่ ${totalNew || 0}</span>`;
+        const regText = `<span style="color: ${regColor}; font-weight: bold;">ประจำ ${totalRegular || 0}</span>`;
+        const offsiteText = `<span style="color: ${offsiteColor}; font-weight: bold;">นอกสถานที่ ${totalOffsite || 0}</span>`;
         
-        insights.push(`โครงสร้างลูกค้าเดือนนี้: <b>${totalRegular > totalNew ? "ลูกค้าประจำเป็นฐานหลัก" : totalNew > totalRegular ? "ลูกค้าใหม่เพิ่มมากขึ้น" : "สัดส่วนลูกค้าพอๆ กัน"} (${regText} / ${newText})</b>`);
-             
-        const maxNewText = `<span style="color: ${newColor};">ใหม่ (<b>${maxNewWeek !== "-" ? maxNewWeek : "-"}</b>)</span>`;
-        const maxRegText = `<span style="color: ${regColor};">ประจำ (<b>${maxRegWeek !== "-" ? maxRegWeek : "-"}</b>)</span>`;
+        insights.push(`โครงสร้างลูกค้าเดือนนี้: <b>(${regText} / ${newText} / ${offsiteText})</b>`);
+            
+        const maxNewText = `<span style="color: ${newColor};">ใหม่ (<b>${maxNewWeek}</b>)</span>`;
+        const maxRegText = `<span style="color: ${regColor};">ประจำ (<b>${maxRegWeek}</b>)</span>`;
+        const maxOffsiteText = `<span style="color: ${offsiteColor};">นอกสถานที่ (<b>${maxOffsiteWeek}</b>)</span>`;
         
-        insights.push(`สถิติลูกค้าเยอะสุดแยกกลุ่ม: ${maxNewText} | ${maxRegText}`);
+        insights.push(`สถิติลูกค้าเยอะสุดแยกกลุ่ม: ${maxNewText} | ${maxRegText} | ${maxOffsiteText}`);
     } 
 
     if (busiestDay && busiestDay.avg > 0) {
@@ -1981,24 +2002,29 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                 </div>
             </div>
             
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px;">
-                <div style="background: rgba(255,255,255,0.02); padding: 6px 4px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 10px;">
+                <div style="background: rgba(255,255,255,0.02); padding: 6px 2px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
                     <div style="font-size: 8px; color: #64748b; margin-bottom: 2px;">👤 รวม</div>
-                    <div style="font-size: 12px; font-weight: 700; color: #38bdf8;">${data.customers || 0}</div>
+                    <div style="font-size: 11px; font-weight: 700; color: #38bdf8;">${data.customers || 0}</div>
                 </div>
-                <div style="background: rgba(34,197,94,0.05); padding: 6px 4px; border-radius: 12px; text-align: center; border: 1px solid rgba(34,197,94,0.1);">
+                <div style="background: rgba(34,197,94,0.05); padding: 6px 2px; border-radius: 10px; text-align: center; border: 1px solid rgba(34,197,94,0.1);">
                     <div style="font-size: 8px; color: #4ade80; margin-bottom: 2px;">🌟 ใหม่</div>
-                    <div style="font-size: 12px; font-weight: 700; color: #4ade80;">${data.countNew || 0}</div>
+                    <div style="font-size: 11px; font-weight: 700; color: #4ade80;">${data.countNew || 0}</div>
                 </div>
-                <div style="background: rgba(168,85,247,0.05); padding: 6px 4px; border-radius: 12px; text-align: center; border: 1px solid rgba(168,85,247,0.1);">
+                <div style="background: rgba(168,85,247,0.05); padding: 6px 2px; border-radius: 10px; text-align: center; border: 1px solid rgba(168,85,247,0.1);">
                     <div style="font-size: 8px; color: #c084fc; margin-bottom: 2px;">📌 ประจำ</div>
-                    <div style="font-size: 12px; font-weight: 700; color: #c084fc;">${data.countRegular || 0}</div>
+                    <div style="font-size: 11px; font-weight: 700; color: #c084fc;">${data.countRegular || 0}</div>
+                </div>
+                <div style="background: rgba(249,115,22,0.05); padding: 6px 2px; border-radius: 10px; text-align: center; border: 1px solid rgba(249,115,22,0.1);">
+                    <div style="font-size: 8px; color: #f97316; margin-bottom: 2px;">🚗 นอกสถานที่</div>
+                    <div style="font-size: 11px; font-weight: 700; color: #f97316;">${data.countOffsite || 0}</div>
                 </div>
             </div>
 
             <div style="font-size: 11px; color: #94a3b8; line-height: 1.7; padding: 0 4px 10px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
                 ${data.countNew > 0 ? `<div>🌟 ลูกค้าใหม่: <span style="color: #4ade80; font-weight: 800;">${data.newAnalysis} (${data.countNew})</span></div>` : ''}
                 ${data.countRegular > 0 ? `<div>📌 ลูกค้าประจำ: <span style="color: #facc15; font-weight: 800;">${data.regAnalysis} (${data.countRegular})</span></div>` : ''}
+                ${data.countOffsite > 0 ? `<div>🚗 นอกสถานที่: <span style="color: #f97316; font-weight: 800;">${data.countOffsite} ราย</span></div>` : ''}
                 <div style="margin-top: 2px;">📈 ลูกค้าเยอะที่สุด: <span style="color: #f1f5f9; font-weight: 600;">${bestDay}</span></div>
                 <div>📉 ลูกค้าน้อยที่สุด: <span style="color: #f1f5f9; font-weight: 600;">${worstDay}</span></div>
             </div>      
@@ -2034,15 +2060,18 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthCount, workDays,
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px;">
-                    <div style="background: rgba(56,189,248,0.15); padding: 8px 4px; border-radius: 12px; font-size: 12px; font-weight: 700; color: #38bdf8; text-align: center; border: 1px solid rgba(56,189,248,0.2);">
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 12px;">
+                    <div style="background: rgba(56,189,248,0.15); padding: 8px 2px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #38bdf8; text-align: center; border: 1px solid rgba(56,189,248,0.2);">
                         👤 ลูกค้า ${monthCount}
                     </div>
-                    <div style="background: rgba(34,197,94,0.15); padding: 8px 4px; border-radius: 12px; font-size: 12px; font-weight: 700; color: #4ade80; text-align: center; border: 1px solid rgba(34,197,94,0.2);">
+                    <div style="background: rgba(34,197,94,0.15); padding: 8px 2px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #4ade80; text-align: center; border: 1px solid rgba(34,197,94,0.2);">
                         🌟 ใหม่ ${countNew || 0}
                     </div>
-                    <div style="background: rgba(168,85,247,0.15); padding: 8px 4px; border-radius: 12px; font-size: 12px; font-weight: 700; color: #c084fc; text-align: center; border: 1px solid rgba(168,85,247,0.2);">
+                    <div style="background: rgba(168,85,247,0.15); padding: 8px 2px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #c084fc; text-align: center; border: 1px solid rgba(168,85,247,0.2);">
                         📌 ประจำ ${countRegular || 0}
+                    </div>
+                    <div style="background: rgba(249,115,22,0.15); padding: 8px 2px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #f97316; text-align: center; border: 1px solid rgba(249,115,22,0.2);">
+                        🚗 นอก ${countOffsite || 0}
                     </div>
                 </div>
 
@@ -2855,7 +2884,7 @@ function closeReportModal() { $("reportModal").style.display = "none"; }
 
 /* ========= SECTION 23: SHARE LINE ========= */
 function shareLine() {
-    // ✅ เพิ่มบรรทัดนี้! ขาดไป → ทำให้ $() ใช้งานไม่ได้
+    // Helper Selector กัน Error
     const $ = (id) => document.getElementById(id);
 
     const dateEl = $("dateInp");
@@ -2883,7 +2912,7 @@ function shareLine() {
     const guar = Number(conf.guar) || 0;
 
     let tot = 0, cash = 0, trans = 0, tips = 0;
-    let stats = {}, realCustomerCount = 0, newCount = 0, regCount = 0, giftCount = 0;
+    let stats = {}, realCustomerCount = 0, newCount = 0, regCount = 0, offsiteCount = 0, giftCount = 0;
 
     // 📝 ประมวลผลรายการลูกค้า
     const clientList = today.slice().sort((a,b)=>(a.time||'').localeCompare(b.time||'')).map((r,i)=>{
@@ -2916,9 +2945,12 @@ function shareLine() {
 
         if (!['GUARANTEE','HOLIDAY'].includes(String(r.type||'').toUpperCase())) {
             realCustomerCount++;
-            const cType = String(r.custType||"").toLowerCase();
-            if (cType==='new') newCount++; 
-            else if (cType==='regular') regCount++;
+            const cType = String(r.custType || r.type || "").toLowerCase();
+            
+            if (cType === 'new' || cType === 'ใหม่') newCount++; 
+            else if (cType === 'regular' || cType === 'ประจำ') regCount++;
+            else if (cType === 'offsite' || cType.includes('นอกสถานที่')) offsiteCount++; // 🚗 นับนอกสถานที่
+            
             if (r.hair && r.hair.includes("เด็ก")) stats["เด็ก"] = (stats["เด็ก"] || 0) + 1;
             (r.svcs||[]).forEach(s=>{if(s) stats[s]=(stats[s]||0)+1;});
         }
@@ -2928,7 +2960,7 @@ function shareLine() {
         return `${i+1}. [${tShow}] ${svcsText} = ${displayPrice}${t?` (+ทิป ${t})`:''}${detailText} ${pIcon}`;
     }).join('\n');
 
-    // ✅ 📊 ส่วนสรุปงาน — เพิ่มกลับมา (ขาดไปในเวอร์ชันใหม่)
+    // 📊 ส่วนสรุปงาน
     const allowed = ["เด็ก", "สระผม", "โกนหนวด", "ย้อมผม", "ย้อมสี"];
     const icons = { "เด็ก": "🧒", "สระ": "🧼", "โกน": "🪒", "ย้อม": "🎨" };
     let statText = Object.entries(stats)
@@ -2964,7 +2996,17 @@ function shareLine() {
     msg += `📅 วันที่: ${fDate}\n`;
     msg += `-------------------------\n`;
     msg += `👤 ลูกค้าทั้งหมด: ${realCustomerCount} คน`;
-    if (newCount||regCount) msg += `\n ใหม่:${newCount} | ประจำ:${regCount}`;
+
+    // 🔍 ปรับปรุงจุดนี้: เช็คประเภทลูกค้า + ซ่อน "นอกสถานที่" ถ้าไม่มี
+    const custTypeParts = [];
+    if (newCount > 0) custTypeParts.push(`ใหม่:${newCount}`);
+    if (regCount > 0) custTypeParts.push(`ประจำ:${regCount}`);
+    if (offsiteCount > 0) custTypeParts.push(`นอกสถานที่:${offsiteCount}`); // 🚗 จะแสดงเฉพาะเมื่อมากกว่า 0
+
+    if (custTypeParts.length > 0) {
+        msg += `\n ${custTypeParts.join(' | ')}`;
+    }
+
     msg += `\n-------------------------\n${clientList}\n`;
     msg += `-------------------------\n🏷️ สรุปงาน:\n${statText || '(ไม่มีรายการ)'}\n`;
     msg += `-------------------------\n`;
