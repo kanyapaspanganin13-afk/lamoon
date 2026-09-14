@@ -50,15 +50,35 @@ let APP_VERSION = "";
     APP_VERSION = `${x}.${y}.${z}`;
 })();
 
-// ✅ แสดงเลขเวอร์ชัน + วันที่แปลงเป็น พ.ศ. ที่หน้าตั้งค่า
-document.addEventListener("DOMContentLoaded", () => {
-    const el = document.getElementById("appVersionDisplay");
-    if (!el) return;
-    const [d, m, y] = LAST_UPDATED.split('/');
-    const yrBE = (parseInt(y) + 543).toString().slice(-2);
-    el.innerText = `V${APP_VERSION} | Update ${d}/${m}/${yrBE}`;
-});
+// ========== ตัวแปรหลักของระบบ ==========
+let db = JSON.parse(localStorage.getItem("barber_db")) || [];
+let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
+let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
+let conf = JSON.parse(localStorage.getItem("barber_conf")) || { 
+    shop: localStorage.getItem("shopName") || "Barber Shop", 
+    perc: parseFloat(localStorage.getItem("shopPerc")) || 50, 
+    guar: parseFloat(localStorage.getItem("shopGuar")) || 0,
+    theme: localStorage.getItem("shopTheme") || "light",
+    voice: localStorage.getItem("shopVoice") || "female",
+    sound: localStorage.getItem("shopSound") || "on"
+};
+let payMethod = "";
 
+// ✅ รวมการทำงานเมื่อโหลด DOM เสร็จให้อยู่ใน EventListener เดียว
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. แสดงเลขเวอร์ชัน + วันที่แปลงเป็น พ.ศ.
+    const elVer = document.getElementById("appVersionDisplay");
+    if (elVer) {
+        const [d, m, y] = LAST_UPDATED.split('/');
+        const yrBE = (parseInt(y) + 543).toString().slice(-2);
+        elVer.innerText = `V${APP_VERSION} | Update ${d}/${m}/${yrBE}`;
+    }
+
+    // 2. แสดงชื่อร้าน
+    const savedShopName = localStorage.getItem("shopName") || conf.shop || "BARBER SHOP";
+    if ($("shopTitleDisplay")) $("shopTitleDisplay").innerText = savedShopName;
+    document.querySelectorAll('.shop-title-text').forEach(el => el.innerText = savedShopName);
+});
 // ========== ตัวแปรหลักของระบบ — ส่วนเดิมต่อไปเลย ==========
 let db = JSON.parse(localStorage.getItem("barber_db")) || [];
 let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
