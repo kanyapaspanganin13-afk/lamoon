@@ -2072,22 +2072,31 @@ function processComparison() {
         }
     }
 
-    // ✅ ดึงข้อมูลรายวัน
-    function getDayDataFull(dateStr) {
-        const list = typeof archives !== 'undefined' ? archives : [];
-        if (!list.length) return { cust: 0, barber: 0, shop: 0, total: 0 };
-        const dayRecords = list.filter(a => a.date === dateStr);
-        if (!dayRecords.length) return { cust: 0, barber: 0, shop: 0, total: 0 };
-
-        let cust = 0, barber = 0, shop = 0, total = 0;
-        dayRecords.forEach(a => {
-            cust  += a.count || (a.details && Array.isArray(a.details) ? a.details.length : 0);
-            barber += Number(a.barber || 0);
-            shop   += Number(a.shop || 0);
-            total  += Number(a.total || (a.barber + a.shop) || 0);
-        });
-        return { cust, barber, shop, total };
-    }
+      // ดึงข้อมูลรายวัน ครบทุกหัวข้อ — คำนวณรายได้ร้านอัตโนมัติ
+      function getDayDataFull(dateStr) {
+          const list = typeof archives !== 'undefined' ? archives : [];
+          if (!list.length) return { cust: 0, barber: 0, shop: 0, total: 0 };
+          const dayRecords = list.filter(a => a.date === dateStr);
+          if (!dayRecords.length) return { cust: 0, barber: 0, shop: 0, total: 0 };
+      
+          let cust = 0, barber = 0, shop = 0, total = 0;
+          dayRecords.forEach(a => {
+              cust  += a.count || (a.details && Array.isArray(a.details) ? a.details.length : 0);
+              barber += Number(a.barber || 0);
+              total  += Number(a.total || 0); // ✅ อ่านค่า total โดยตรงก่อน
+              
+              // ✅ สำคัญ: ถ้ามีฟิลด์ shop → ใช้ค่าจากข้อมูล / ถ้าไม่มี → คำนวณเองจาก total - barber
+              if (typeof a.shop !== 'undefined' && a.shop !== null && a.shop !== '') {
+                  shop += Number(a.shop);
+              } else {
+                  const recTotal = Number(a.total || 0);
+                  const recBarber = Number(a.barber || 0);
+                  shop += Math.max(0, recTotal - recBarber); // ✅ ป้องกันค่าติดลบ
+              }
+          });
+      
+          return { cust, barber, shop, total };
+      }
 
     let bodyHtml = '';
     let sum1Cust = 0, sum1Val = 0;
