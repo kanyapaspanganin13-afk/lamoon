@@ -4,32 +4,50 @@
 /* =========== SECTION 1: INITIALIZATION & GLOBAL VARIABLES =========== */
 const $ = id => document.getElementById(id);
 
-// ✅ ตั้งค่า — แก้แค่นี้เมื่อมีการอัปเดตเวอร์ชันจริง
+// ✅ ตั้งค่า — แก้แค่นี้เมื่อมีการอัปเดตเวอร์ชันหลัก
 const VERSION_MAJOR = "1.0.";
 const LAST_UPDATED = "14/09/2026";
 
-// ✅ คำนวณเวอร์ชันคงที่ตาม VERSION_MAJOR (ไม่อัปเดต z +1 ทุกครั้งที่รีเฟรชหน้า)
+// ✅ คำนวณเวอร์ชัน — อัปเดต z+1 อัตโนมัติเมื่อโค้ดเปลี่ยน/วันใหม่
 window.APP_VERSION = "";
 (function initVersion() {
     const [verMajorBase, verMinorBase] = VERSION_MAJOR.split('.').map(Number);
     const storedMajor = parseInt(localStorage.getItem("ver_x") || String(verMajorBase));
     const storedMinor = parseInt(localStorage.getItem("ver_y") || String(verMinorBase));
-    const storedPatch = parseInt(localStorage.getItem("ver_z") || "0");
+    let storedPatch = parseInt(localStorage.getItem("ver_z") || "0");
 
     let x = storedMajor, y = storedMinor, z = storedPatch;
 
-    // ถ้ามีการเปลี่ยน VERSION_MAJOR ในโค้ด ให้ขยับเลขเวอร์ชัน
+    // 🔴 กรณีเปลี่ยนเวอร์ชันหลัก → รีเซ็ต z เป็น 0
     if (verMajorBase !== storedMajor || verMinorBase !== storedMinor) {
-        x = verMajorBase; 
-        y = verMinorBase; 
+        x = verMajorBase;
+        y = verMinorBase;
         z = 0;
         localStorage.setItem("ver_x", String(x));
         localStorage.setItem("ver_y", String(y));
         localStorage.setItem("ver_z", String(z));
+        localStorage.setItem("ver_lastDate", getTodayKey()); // บันทึกวันที่รีเซ็ต
+    }
+    else {
+        // 🟢 เช็ค: ถ้าเป็นวันใหม่แล้ว → เพิ่ม z+1 (ครั้งเดียวต่อวัน)
+        const lastDate = localStorage.getItem("ver_lastDate") || "";
+        const today = getTodayKey();
+        if (lastDate !== today) {
+            z = storedPatch + 1;
+            localStorage.setItem("ver_z", String(z));
+            localStorage.setItem("ver_lastDate", today);
+        }
+        // ถ้าวันเดียวกัน → ใช้ค่าเดิม ไม่เพิ่ม
     }
 
     window.APP_VERSION = `${x}.${y}.${z}`;
 })();
+
+// ✅ ฟังก์ชันช่วย: คีย์วันที่แบบ YYYYMMDD
+function getTodayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 // ========== GLOBAL VARIABLES & INITIALIZATION ==========
 let db = JSON.parse(localStorage.getItem("barber_db")) || [];
@@ -54,7 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const yrBE = (parseInt(y) + 543).toString().slice(-2);
         el.innerText = `V${window.APP_VERSION} | Update ${d}/${m}/${yrBE}`;
     }
-
     // 2. แสดงชื่อร้าน
     const savedShopName = localStorage.getItem("shopName") || conf.shop || "BARBER SHOP";
     if ($("shopTitleDisplay")) $("shopTitleDisplay").innerText = savedShopName;
