@@ -4,38 +4,61 @@
 /* =========== SECTION 1: INITIALIZATION & GLOBAL VARIABLES =========== */
 const $ = id => document.getElementById(id);
 
-// ✅ ตั้งค่า — แก้แค่ 2 บรรทัดนี้
+// ✅ ตั้งค่า — แก้แค่นี้เมื่อมีการอัปเดตเวอร์ชันจริง
 const VERSION_MAJOR = "1.0.";
 const LAST_UPDATED = "14/09/2026";
 
-// ✅ เพิ่มเลขเวอร์ชันอัตโนมัติ — ครบ 10 ขยับหลักเอง
-window.APP_VERSION = ""; // ✅ ใช้ window. เพื่อให้ส่วนอื่นอ่านได้
-(function autoIncrementVersion() {
+// ✅ คำนวณเวอร์ชันคงที่ตาม VERSION_MAJOR (ไม่อัปเดต z +1 ทุกครั้งที่รีเฟรชหน้า)
+window.APP_VERSION = "";
+(function initVersion() {
     const [verMajorBase, verMinorBase] = VERSION_MAJOR.split('.').map(Number);
     const storedMajor = parseInt(localStorage.getItem("ver_x") || String(verMajorBase));
     const storedMinor = parseInt(localStorage.getItem("ver_y") || String(verMinorBase));
     const storedPatch = parseInt(localStorage.getItem("ver_z") || "0");
 
-    let x = storedMajor, y = storedMinor, z = storedPatch + 1;
-    if (z >= 10) { z = 0; y += 1; }
-    if (y >= 10) { y = 0; x += 1; }
+    let x = storedMajor, y = storedMinor, z = storedPatch;
+
+    // ถ้ามีการเปลี่ยน VERSION_MAJOR ในโค้ด ให้ขยับเลขเวอร์ชัน
     if (verMajorBase !== storedMajor || verMinorBase !== storedMinor) {
-        x = verMajorBase; y = verMinorBase; z = 1;
+        x = verMajorBase; 
+        y = verMinorBase; 
+        z = 0;
+        localStorage.setItem("ver_x", String(x));
+        localStorage.setItem("ver_y", String(y));
+        localStorage.setItem("ver_z", String(z));
     }
 
-    localStorage.setItem("ver_x", String(x));
-    localStorage.setItem("ver_y", String(y));
-    localStorage.setItem("ver_z", String(z));
-    window.APP_VERSION = `${x}.${y}.${z}`; // ✅ เก็บที่ window.
+    window.APP_VERSION = `${x}.${y}.${z}`;
 })();
 
-// ✅ แสดงเลขเวอร์ชันที่หน้าตั้งค่า
+// ========== GLOBAL VARIABLES & INITIALIZATION ==========
+let db = JSON.parse(localStorage.getItem("barber_db")) || [];
+let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
+let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
+let conf = JSON.parse(localStorage.getItem("barber_conf")) || { 
+    shop: localStorage.getItem("shopName") || "Barber Shop", 
+    perc: parseFloat(localStorage.getItem("shopPerc")) || 50, 
+    guar: parseFloat(localStorage.getItem("shopGuar")) || 0,
+    theme: localStorage.getItem("shopTheme") || "light",
+    voice: localStorage.getItem("shopVoice") || "female",
+    sound: localStorage.getItem("shopSound") || "on"
+};
+let payMethod = "";
+
+// ✅ แสดงผลหน้าจอเมื่อโหลด DOM เสร็จ
 document.addEventListener("DOMContentLoaded", () => {
+    // 1. แสดงเลขเวอร์ชัน
     const el = document.getElementById("appVersionDisplay");
-    if (!el) return;
-    const [d, m, y] = LAST_UPDATED.split('/');
-    const yrBE = (parseInt(y) + 543).toString().slice(-2);
-    el.innerText = `V${window.APP_VERSION} | Update ${d}/${m}/${yrBE}`;
+    if (el) {
+        const [d, m, y] = LAST_UPDATED.split('/');
+        const yrBE = (parseInt(y) + 543).toString().slice(-2);
+        el.innerText = `V${window.APP_VERSION} | Update ${d}/${m}/${yrBE}`;
+    }
+
+    // 2. แสดงชื่อร้าน
+    const savedShopName = localStorage.getItem("shopName") || conf.shop || "BARBER SHOP";
+    if ($("shopTitleDisplay")) $("shopTitleDisplay").innerText = savedShopName;
+    document.querySelectorAll('.shop-title-text').forEach(el => el.innerText = savedShopName);
 });
 /* =========== SECTION 2: MAIN NAVIGATION =========== */
 function switchMainView(viewName, subNum = null) {
@@ -249,23 +272,20 @@ function switchMainTab(pageId, tabId, event) {
 }
 /* =========== SECTION 5: AUTO-UPDATE SYSTEM =========== */  
 (function autoUpdate() {
-    // ✅ อ่านค่าเวอร์ชันจากระบบข้างต้นโดยตรง
-    const APP_VERSION = window.APP_VERSION || '1.0.1';
+    const APP_VERSION = window.APP_VERSION || '1.0.0';
     const currentStoredVersion = localStorage.getItem("app_v");
 
-    // ✅ ตรวจพบการเปลี่ยนเวอร์ชัน → อัปเดต
+    // ตรวจพบเวอร์ชันใหม่เฉพาะเมื่อมีการเปลี่ยน VERSION_MAJOR จริง
     if (currentStoredVersion !== APP_VERSION) {
         console.log(`[AutoUpdate] อัปเดตจาก ${currentStoredVersion || '---'} → ${APP_VERSION}`);
         localStorage.setItem("app_v", APP_VERSION);
 
-        // ล้างแคชเบราว์เซอร์
         if ('caches' in window) {
             caches.keys().then(names => {
                 names.forEach(name => caches.delete(name));
             });
         }
 
-        // แจ้งเตือน + รีโหลด (ข้ามครั้งแรกที่ติดตั้ง)
         if (currentStoredVersion) {
             if (typeof notify === 'function') {
                 notify("info", "✨ อัปเดตระบบ", `กำลังโหลดเวอร์ชัน ${APP_VERSION} ...`);
@@ -274,6 +294,7 @@ function switchMainTab(pageId, tabId, event) {
         }
     }
 })();
+
 /* ===========  SECTION 6: DATE DISPLAY =========== */  
 function updateDateDisplay(v) {
     if (!v) return;
