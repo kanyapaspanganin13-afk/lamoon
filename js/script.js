@@ -460,28 +460,48 @@ function notify(type, title, text = "") {
 }
 
 /* ========= SECTION 9: PAYMENT TYPE ========= */
+function editTime(id) {
+    const rec = db.find(r => r.id === id);
+    if (!rec) return;
+    
+    const newStart = prompt("⏱️ แก้เวลาเริ่ม (HH:MM)", rec.time);
+    if (!newStart) return;
+    
+    const newEnd = prompt("⏱️ แก้เวลาเสร็จ (HH:MM)", rec.endTime || "");
+    
+    rec.time = newStart;
+    // ถ้าไม่มีเวลาเสร็จ ให้บวกไป 30 นาทีอัตโนมัติ (ถ้ามีฟังก์ชัน addMinutes)
+    rec.endTime = newEnd || (typeof addMinutes === 'function' ? addMinutes(newStart, 30) : "");
+    
+    saveDB();
+    renderDay();
+}
+
+// 💳 ตั้งค่าประเภทการชำระเงิน
 function setPaymentType(m) {
     payMethod = m;
+
     const priceInp = $("priceInp");
     const mixPanel = $("mixPanel");
     const payTypeSelect = $("payTypeSelect");
 
-    // 🎯 จัดการช่องเลือกประเภทจ่ายเงิน
+    // 🎯 จัดการ Dropdown เลือกประเภทจ่ายเงิน
     if (payTypeSelect) {
         if (m === "") {
             payTypeSelect.value = "";
             payTypeSelect.selectedIndex = 0;
-            // 🔥 บังคับวาดหน้าจอใหม่ แก้ปัญหาไอคอนทับข้อความ
+            
+            // 🔥 รีเฟรช Element แก้ปัญหา UI ไอคอนทับข้อความ
             const originalDisplay = payTypeSelect.style.display;
             payTypeSelect.style.display = 'none';
-            payTypeSelect.offsetHeight;
+            payTypeSelect.offsetHeight; // Trigger reflow
             payTypeSelect.style.display = originalDisplay;
         } else {
             payTypeSelect.value = m;
         }
     }
 
-    // 🧹 รีเซ็ตเมื่อส่งค่าว่าง
+    // 🧹 เคลียร์ค่าเมื่อรีเซ็ต
     if (m === "") {
         if ($("mixCash")) $("mixCash").value = "";
         if ($("mixTrans")) $("mixTrans").value = "";
@@ -489,32 +509,18 @@ function setPaymentType(m) {
         return;
     }
 
-    // 🎟️ เลือกประเภทสิทธิ์ฟรี
-    if (m === 'Free' || m === 'Free-Cash' || m === 'Free-Trans') {
-        if (priceInp) {
-            priceInp.readOnly = false;
-            priceInp.style.opacity = '1';
-        }
-        if ($("mixCash")) $("mixCash").value = "";
-        if ($("mixTrans")) $("mixTrans").value = "";
-    } 
-    // 💵 เลือกจ่ายปกติ
-    else {
-        if (priceInp) {
-            priceInp.readOnly = false;
-            priceInp.style.opacity = '1';
-        }
+    // 🔓 ปลดล็อกช่องราคา
+    if (priceInp) {
+        priceInp.readOnly = false;
+        priceInp.style.opacity = '1';
     }
 
-    // 🧮 แผงจ่ายแบบผสม
+    // 🧮 จัดการแผงการชำระแบบผสม (Mix Panel)
     if (mixPanel) {
         if (m === 'Mix') {
             mixPanel.style.display = 'block';
-            const price = parseFloat(priceInp?.value) || 0;
-            const tip = parseFloat($("tipInp")?.value) || 0;
-            const total = price + tip;
             if ($("mixCash")) $("mixCash").value = ""; 
-            if ($("mixTrans")) $("mixTrans").value = total > 0 ? total : "";
+            updateMixValues(); // คำนวณยอดโอนเริ่มต้นให้อัตโนมัติ
             mixPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } else {
             mixPanel.style.display = 'none';
@@ -522,59 +528,62 @@ function setPaymentType(m) {
     }
 }
 
-// --- 🔄 คำนวณเงินสด-โอน อัตโนมัติ ---
-// กรอกสด → โอนลดลง
-if ($("mixCash")) {
-    $("mixCash").addEventListener("input", function() {
-        if (payMethod === 'Free' || payMethod === '') {
-            this.value = "";
-            if ($("mixTrans")) $("mixTrans").value = "";
-            return;
-        }
-        const price = parseFloat($("priceInp").value) || 0;
-        const tip = parseFloat($("tipInp").value) || 0;
-        const total = price + tip;
-        const cash = parseFloat(this.value) || 0;
+// 🔄 คำนวณยอดเงินสด/เงินโอนอัตโนมัติ
+function updateMixValues(fromField = 'cash') {
+    const price = parseFloat($("priceInp")?.value) || 0;
+    const tip = parseFloat($("tipInp")?.value) || 0;
+    const total = price + tip;
+
+    if (fromField === 'cash') {
+        const cash = parseFloat($("mixCash")?.value) || 0;
         const remain = total - cash;
         if ($("mixTrans")) {
             $("mixTrans").value = remain >= 0 ? remain : 0;
         }
-    });
-}
-
-// กรอกโอน → สดลดลง
-if ($("mixTrans")) {
-    $("mixTrans").addEventListener("input", function() {
-        if (payMethod === 'Free' || payMethod === '') {
-            this.value = "";
-            if ($("mixCash")) $("mixCash").value = "";
-            return;
-        }
-        const total = (parseFloat($("priceInp").value) || 0) + (parseFloat($("tipInp").value) || 0);
-        const trans = parseFloat(this.value) || 0;
+    } else if (fromField === 'trans') {
+        const trans = parseFloat($("mixTrans")?.value) || 0;
         const remain = total - trans;
         if ($("mixCash")) {
             $("mixCash").value = remain >= 0 ? remain : 0;
         }
-    });
-}
-
-function updateMixValues() {
-    const price = parseFloat($("priceInp")?.value) || 0;
-    const tip = parseFloat($("tipInp")?.value) || 0;
-    const total = price + tip;
-    const cash = parseFloat($("mixCash")?.value) || 0;
-    const trans = total - cash;
-    if ($("mixTrans")) {
-        $("mixTrans").value = trans > 0 ? trans.toFixed(2).replace(/\.00$/, '') : 0;
     }
 }
+
+// 📌 ผูก Event Listeners ปลอดภัยเมื่อ DOM โหลดเรียบร้อย
+document.addEventListener("DOMContentLoaded", () => {
+    if ($("mixCash")) {
+        $("mixCash").addEventListener("input", function() {
+            if (payMethod === 'Free' || payMethod === '') {
+                this.value = "";
+                if ($("mixTrans")) $("mixTrans").value = "";
+                return;
+            }
+            updateMixValues('cash');
+        });
+    }
+
+    if ($("mixTrans")) {
+        $("mixTrans").addEventListener("input", function() {
+            if (payMethod === 'Free' || payMethod === '') {
+                this.value = "";
+                if ($("mixCash")) $("mixCash").value = "";
+                return;
+            }
+            updateMixValues('trans');
+        });
+    }
+
+    // อัปเดตยอด Mix ทันทีเมื่อมีการเปลี่ยนราคาหรือทิป
+    $("priceInp")?.addEventListener("input", () => { if (payMethod === 'Mix') updateMixValues('cash'); });
+    $("tipInp")?.addEventListener("input", () => { if (payMethod === 'Mix') updateMixValues('cash'); });
+});
 /* ========= SECTION 10: SAVE RECORD ========= */
 async function handleSave(event) {
     const $ = (id) => document.getElementById(id);
     
-    // ✅ 1. ดึงค่าพื้นฐาน (ตรงกับเดิม)
-    const dInp = $("dateInp")?.value || "";
+    // ✅ 1. ดึงค่าพื้นฐาน
+    const todayStr = new Date().toISOString().split('T')[0];
+    const dInp = $("dateInp")?.value || todayStr;
     const tStart = $("tStart")?.value || "";
     const tEnd = $("tEnd")?.value || "";
     const price = parseFloat($("priceInp")?.value) || 0;
@@ -583,18 +592,18 @@ async function handleSave(event) {
     const hairStyleSelect = $("hairStyle");
     const currentPay = payMethod;
 
-    // ✅ 2. ตรวจสอบความครบถ้วน (ตรรกะเดิม สำคัญมาก!)
+    // ✅ 2. ตรวจสอบความครบถ้วน
     if (!currentPay) {
         if (navigator.vibrate) navigator.vibrate(100);
         return notify("error", "ระบุข้อมูลไม่ครบ", "กรุณาเลือกวิธีชำระเงิน");
     }
-    // ✅ ยกเว้นกรณีฟรี → ต้องระบุราคา
+    // ยกเว้นกรณีฟรี -> ต้องระบุราคา
     if (price === 0 && !["Free","Free-Cash","Free-Trans","Holiday","Guarantee"].includes(currentPay)) {
         if (navigator.vibrate) navigator.vibrate(100);
         $("priceInp")?.focus();
         return notify("error", "ระบุข้อมูลไม่ครบ", "กรุณาระบุจำนวนเงิน");
     }
-    // ✅ ยกเว้นกรณีฟรี → ต้องเลือกทรงผม
+    // ยกเว้นกรณีฟรี -> ต้องเลือกทรงผม
     if (hairStyleSelect && !/^Free/.test(currentPay)) {
         const val = hairStyleSelect.value;
         if (!val || val === "" || val === "เลือกทรงผม") {
@@ -604,7 +613,7 @@ async function handleSave(event) {
         }
     }
 
-    // ✅ 3. จัดการยอดเงินตามประเภทจ่าย (ตรรกะเดิม 100%)
+    // ✅ 3. จัดการยอดเงินตามประเภทจ่าย
     let finalCash = 0, finalTrans = 0;
     switch (currentPay) {
         case "Free": 
@@ -625,7 +634,7 @@ async function handleSave(event) {
         case "Mix":
             finalCash = parseFloat($("mixCash")?.value) || 0;
             finalTrans = parseFloat($("mixTrans")?.value) || 0;
-            // ✅ ตรวจสอบยอดไม่เท่ากัน → ถามยืนยัน (ส่วนเพิ่มใหม่)
+            
             if (finalCash + finalTrans !== price + tip) {
                 const result = await Swal.fire({
                     title: 'ยืนยันยอดเงิน',
@@ -649,12 +658,12 @@ async function handleSave(event) {
     if ($("extra1")?.value) svcs.push($("extra1").value);
     if ($("extra2")?.value) svcs.push($("extra2").value);
 
-    // ✅ 5. บันทึกข้อมูล
+    // ✅ 5. บันทึกข้อมูล (แก้ไขจุด endTime -> tEnd แล้ว)
     db.push({
         id: Date.now(), 
         date: dInp, 
         time: tStart, 
-        endTime: endTime || (typeof addMinutes === 'function' ? addMinutes(tStart, 30) : tStart),
+        endTime: tEnd || (typeof addMinutes === 'function' ? addMinutes(tStart, 30) : tStart),
         price, 
         tip, 
         pay: currentPay, 
@@ -687,35 +696,31 @@ async function handleSave(event) {
         }, 1200);
     }
 
-    // ✅ 8. รีเซ็ตฟอร์ม (ตรงกับเดิม + ปรับปรุง)
+    // ✅ 8. รีเซ็ตฟอร์ม
     payMethod = ""; 
-    setPaymentType(""); // ✅ สำคัญ! รีเซ็ตปุ่มจ่ายเงิน
+    if (typeof setPaymentType === 'function') setPaymentType("");
     
-    // ✅ รีเซ็ตเวลาเป็นปัจจุบัน (เหมือนเดิม)
     const now = new Date();
     const curTime = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
     $("tStart") && ($("tStart").value = curTime);
     $("tEnd") && ($("tEnd").value = curTime);
     
-    // ✅ รีเซ็ตช่องกรอก
     $("priceInp") && ($("priceInp").value = "");
     $("tipInp") && ($("tipInp").value = "0");
     $("mixCash") && ($("mixCash").value = "");
     $("mixTrans") && ($("mixTrans").value = "");
     
-    // ✅ รีเซ็ตตัวเลือก
     if (hairStyleSelect) hairStyleSelect.selectedIndex = 0;
     $("extra1") && ($("extra1").selectedIndex = 0);
     $("extra2") && ($("extra2").selectedIndex = 0);
+    $("custType") && ($("custType").selectedIndex = 0);
     
-    // ✅ ซ่อนแผงจ่ายผสม
     if ($("mixPanel")) $("mixPanel").style.display = 'none';
     
     // ✅ โหลดข้อมูลใหม่
-    renderDay(dInp);
-    loadAccountStatus();
+    if (typeof renderDay === 'function') renderDay(dInp);
+    if (typeof loadAccountStatus === 'function') loadAccountStatus();
     
-    // ✅ โฟกัสไปที่เลือกประเภทลูกค้า รอรับคนถัดไป
     if ($("custType")) $("custType").focus();
 }
 /* ========= SECTION 11: RENDER DAILY REPORT ========= */
