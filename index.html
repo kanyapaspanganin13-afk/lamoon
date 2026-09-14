@@ -421,57 +421,72 @@
                 <i class="fas fa-cog"></i><span>ตั้งค่า</span>
             </div>
         </nav>
-
-    <!-- ================= MODALS ต่างๆ ================= -->
-    <div id="modalSet" class="modal">
-        <div class="modal-content settings-modal">
-            <h3 class="settings-title">⚙️ ตั้งค่าระบบ</h3>
-            <label class="settings-label" for="setShop">ชื่อร้าน</label>
-            <input type="text" id="setShop" class="settings-input" value="Barber Shop">
-            <div class="settings-row flex-row">
-                <div class="settings-col flex-col">
-                    <label class="settings-label sm-label" for="setPerc">ส่วนแบ่งช่าง (%)</label>
-                    <input type="number" id="setPerc" class="settings-input border-box" value="50">
-                </div>
-                <div class="settings-col flex-col">
-                    <label class="settings-label sm-label" for="setGuar">ประกันรายได้ (฿)</label>
-                    <input type="number" id="setGuar" class="settings-input border-box" value="0">
-                </div>
+<!-- ================= MODAL ตั้งค่าระบบ ================= -->
+<div id="modalSet" class="modal">
+    <div class="modal-content settings-modal">
+        <h3 class="settings-title">⚙️ ตั้งค่าระบบ</h3>
+        
+        <label class="settings-label" for="setShop">ชื่อร้าน</label>
+        <input type="text" id="setShop" class="settings-input" value="Barber Shop" placeholder="ชื่อร้าน">
+        
+        <div class="settings-row">
+            <div class="settings-col">
+                <label class="settings-label sm-label" for="setPerc">ส่วนแบ่งช่าง (%)</label>
+                <input type="number" id="setPerc" class="settings-input" value="50" placeholder="% ช่าง">
             </div>
-            <label class="settings-label" for="setTheme">ธีม</label>
-            <select id="setTheme" class="settings-select">
-                <option value="light">ธีมสว่าง</option>
-                <option value="navy">ธีมสีน้ำเงิน</option>
-                <option value="vintage">ธีมวินเทจ</option>
-            </select>
-            <div class="settings-row">
-                <div class="settings-col">
-                    <label class="settings-label" for="setSound">เสียงแจ้งเตือน</label>
-                    <select id="setSound" class="settings-select">
+            <div class="settings-col">
+                <label class="settings-label sm-label" for="setGuar">ประกันรายได้ (฿)</label>
+                <input type="number" id="setGuar" class="settings-input" value="0" placeholder="ประกัน">
+            </div>
+        </div>
+        
+        <label class="settings-label" for="setTheme">ธีม</label>
+        <select id="setTheme" class="settings-select" onchange="applyTheme(this.value)">
+            <option value="light">⛅ ธีมสว่าง</option>
+            <option value="navy">🌌 ธีมน้ำเงิน</option>
+            <option value="vintage">🌑 ธีมดำ-ทอง</option>
+        </select>
+        
+        <div class="settings-row">
+            <div class="settings-col">
+                <label class="settings-label" for="setSound">เสียงแจ้งเตือน</label>
+                <div class="settings-icon-wrap">
+                    <select id="setSound" class="settings-select icon-select">
                         <option value="on" selected>เปิดเสียง</option>
                         <option value="off">ปิดเสียง</option>
                     </select>
+                    <i class="fas fa-volume-up"></i>
                 </div>
-                <div class="settings-col">
-                    <label class="settings-label" for="setVoice">เสียงพูด</label>
-                    <select id="setVoice" class="settings-select">
+            </div>
+            <div class="settings-col">
+                <label class="settings-label" for="setVoice">เสียงพูด</label>
+                <div class="settings-icon-wrap">
+                    <select id="setVoice" class="settings-select icon-select">
                         <option value="female" selected>เสียงหญิง</option>
                         <option value="male">เสียงชาย</option>
                     </select>
+                    <i class="fas fa-user-friends"></i>
                 </div>
             </div>
-            <div class="settings-btn-row-3">
-                <button type="button" class="settings-btn secondary-btn" onclick="exportBackup()">📤 สำรองข้อมูล</button>
-                <label class="settings-btn secondary-btn file-btn">
-                    📥 คืนค่า
-                    <input type="file" accept=".json" onchange="importBackup(this)">
-                </label>
-                <button type="button" class="settings-btn danger-btn" onclick="clearData()">🗑️ ล้างข้อมูล</button>
-            </div>
-            <div class="settings-btn-row-2">
-                <button class="settings-btn primary-btn" onclick="saveSettings()">บันทึก</button>
-                <button class="settings-btn cancel-btn" onclick="closeSettings()">ปิด</button>
-            </div>
+        </div>
+        
+        <div class="settings-btn-row-3">
+            <button type="button" class="settings-btn secondary-btn" onclick="exportBackup()">
+                <i class="fas fa-file-download"></i> สำรองข้อมูล
+            </button>
+            <button type="button" class="settings-btn secondary-btn" onclick="document.getElementById('fileInput').click()">
+                <i class="fas fa-file-upload"></i> นำเข้าข้อมูล
+            </button>
+            <input type="file" id="fileInput" class="hidden-file-input" accept=".json" onchange="importBackup(this)">
+            <button type="button" class="settings-btn danger-btn" onclick="clearData()">
+                <i class="fas fa-trash-alt"></i> ล้างข้อมูล
+            </button>
+        </div>
+        
+        <div class="settings-btn-row-2">
+            <button class="settings-btn primary-btn" onclick="saveSettings()">บันทึก</button>
+            <button class="settings-btn cancel-btn" onclick="closeSettings()">ปิด</button>
+        </div>
             <div class="settings-version" id="appVersionDisplay"></div>
         </div>
     </div>
