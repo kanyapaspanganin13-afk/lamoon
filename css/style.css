@@ -925,7 +925,7 @@ input[type="number"].settings-input {
   max-height: 38px !important;
   padding: 0 10px;
   border-radius: 12px;
-  font-size: 13.5px;
+  font-size: 12px;
   font-weight: 700;
   box-sizing: border-box;
   background: var(--bg) !important;
