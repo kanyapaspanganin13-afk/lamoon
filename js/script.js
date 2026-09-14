@@ -874,32 +874,113 @@ function deleteArchiveDate(date) {
 
 /* ========= SECTION 13: SAVE & CLOSE DAY ========= */
 async function saveAndGo(date, total) {
+    if (typeof db === 'undefined' || typeof archives === 'undefined') return;
+    const btn = document.getElementById("btnSubmitSend");
+    const icon = document.getElementById("btnIcon");
+
+    // 🎯 1. ดักจับข้อมูลซ้ำ
     const alreadySent = archives.some(a => a.date === date);
-    if (alreadySent) return notify("error", "แจ้งเตือน", `วันที่ ${date} ส่งข้อมูลแล้ว`);
+    if (alreadySent) {
+        if (window.notify) notify("error", "แจ้งเตือน", `วันที่ ${date} ส่งข้อมูลแล้ว`);
+        if (btn) {
+            btn.disabled = true; 
+            btn.style.background = "#94a3b8";
+            if (icon) icon.className = "fas fa-paper-plane";
+            btn.style.cursor = "default";
+        }
+        return;
+    }
+
+    // 🎯 2. ยืนยันก่อนส่ง
     const { isConfirmed } = await Swal.fire({
-        title: "ยืนยันส่งข้อมูล", text: `วันที่ ${date} ?`, icon: "question",
-        showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก"
+        title: "ยืนยันส่งข้อมูล", 
+        text: `วันที่ ${date} ?`, 
+        icon: "question",
+        showCancelButton: true, 
+        confirmButtonText: "ยืนยัน", 
+        cancelButtonText: "ยกเลิก",
+        confirmButtonColor: 'var(--success)',
+        cancelButtonColor: '#6b7280',
+        background: 'var(--card)',
+        color: 'var(--text)'
     });
     if (!isConfirmed) return;
+
+    // 🎯 3. เปลี่ยนสถานะปุ่มระหว่างส่ง
+    if (btn) {
+        if (btn.disabled) return; 
+        btn.disabled = true;              
+        btn.style.background = "var(--success)"; 
+        if (icon) icon.className = "fas fa-spinner fa-spin"; 
+    }
+
+    // 🎯 4. คำนวณยอดเงิน (ตรรกะเดิม 100% ป้องกันตกเคส)
     const allToday = db.filter(r => r.date === date);
+    const todayData = allToday.filter(r => r.type === 'SERVICE');
     const isHoliday = allToday.some(r => r.type === "HOLIDAY");
+
     let cash = 0;
-    allToday.forEach(r => {
-        if (/Cash/i.test(r.pay)) cash += (r.price||0) + (r.tip||0);
-        else if (/Mix/i.test(r.pay)) cash += Number(r.payCash)||0;
+    todayData.forEach(r => {
+        // ✅ ใช้ Regex เหมือนเดิม ครอบคลุมทุกแบบ: Cash / เงินสด / cash
+        if (/Cash/i.test(r.pay)) { 
+            cash += (Number(r.price) || 0) + (Number(r.tip) || 0); 
+        } else if (/Mix/i.test(r.pay)) { 
+            cash += Number(r.payCash) || 0; 
+        }
     });
-    const commission = total * (conf.perc/100);
-    const baseEarn = Math.max(commission, conf.guar);
-    const bEarn = isHoliday ? 0 : baseEarn + allToday.reduce((s,r)=>s+(r.tip||0),0);
+
+    // 🟢 ล็อคค่าคอมมิชชันและค่าประกัน ณ วันที่ส่ง
+    const currentPerc = Number(conf.perc) || 0;
+    const currentGuar = Number(conf.guar) || 0;
+    const commission = total * (currentPerc / 100);
+    const baseEarn = Math.max(commission, currentGuar);
+    const totalTips = todayData.reduce((s, r) => s + (Number(r.tip) || 0), 0);
+    const bEarn = isHoliday ? 0 : baseEarn + totalTips;
     const settle = isHoliday ? 0 : cash - bEarn;
-    archives.push({ date, total, cash, barber: Math.floor(bEarn), settle, type: isHoliday?"HOLIDAY":"WORK", details: allToday });
+
+    // 🎯 5. บันทึกลง archives พร้อมฟิลด์ย้อนหลัง
+    const data = { 
+        date, 
+        total, 
+        cash, 
+        barber: Math.floor(bEarn), 
+        settle, 
+        type: isHoliday ? "HOLIDAY" : "WORK", 
+        details: allToday,
+        guar_used: currentGuar,
+        perc_used: currentPerc
+    };
+
+    const idx = archives.findIndex(a => a.date === date);
+    if (idx > -1) { archives[idx] = data; } else { archives.push(data); }
+
     if (!isHoliday) account.balance = -settle;
     db = db.filter(r => r.date !== date);
-    saveDB();
-    notify("success", "สำเร็จ", "ส่งข้อมูลเรียบร้อย");
-    renderDay(date); loadAccountStatus();
-}
 
+    // 🎯 6. บันทึกข้อมูล + จัดการสถานะปุ่ม
+    try {
+        if (typeof saveDB === "function") { await saveDB(); } else { await save(); }
+        
+        if (btn) {
+            btn.style.background = "#94a3b8";
+            if (icon) icon.className = "fas fa-paper-plane";
+            btn.disabled = true;              
+            btn.style.cursor = "default";
+        }
+        
+        notify("success", "สำเร็จ", "ส่งข้อมูลเรียบร้อย");
+        // ✅ เพิ่ม renderDay(date) ที่ขาดไป!
+        renderDay(date);
+        loadAccountStatus();
+    } catch (e) {
+        if (btn) {
+            btn.disabled = false;
+            btn.style.background = "var(--danger)";
+            if (icon) icon.className = "fas fa-paper-plane";
+        }
+        if (window.notify) notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถส่งข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+    }
+}
 /* ========= SECTION 14: ACCOUNT STATUS ========= */
 function loadAccountStatus() {
     const getEl = (id) => document.getElementById(id);
