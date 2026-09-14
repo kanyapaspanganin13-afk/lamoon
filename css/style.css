@@ -480,22 +480,45 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 .month-picker-wrap {
     display: flex;
     justify-content: center;
-    padding: 4px 15px; /* ลด padding บน-ล่าง ให้กระชับ */
+    padding: 0; /* ถอด padding ออกเพื่อไม่ให้ดันความสูงเพิ่ม */
+    margin-bottom: 12px;
 }
 
-.month-picker-wrap input[type="month"] {
-    /* 🎯 ปรับความกว้างและความสูงให้เล็กลง สมดุลตรงกลาง */
-    width: 200px; /* จาก 100% ปรับให้แคบลงสวยงาม */
-    height: 36px; /* จาก 40px/46px ลดความสูงลง */
-    font-size: 13.5px;
+/* 🎯 ปรับแต่งกรอบครอบช่องเลือกเดือน (filter-card) ให้เพรียวเท่าแท็บ */
+.filter-card {
+    background: var(--card, #f1f5f9);
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 12px;
+    padding: 3px 6px !important; /* ปรับลด padding ให้เท่ากับกรอบแท็บ */
+    margin-bottom: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.filter-card-center {
+    justify-content: center !important;
+}
+
+/* 🎯 ปรับแต่งตัว input[type="month"] และ .form-control ให้เตี้ยและกระชับ */
+.month-picker-wrap input[type="month"],
+.filter-card .form-control,
+.filter-month-wrap input {
+    width: 180px;
+    height: 32px !important; /* ปรับลดความสูงลงมาที่ 32px เท่ากับปุ่มแท็บ */
+    line-height: 32px !important;
+    font-size: 13px !important;
     font-weight: 700;
     text-align: center;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
-    padding: 0 10px;
-    box-sizing: border-box;
+    border-radius: 8px !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    background: #ffffff !important;
+    color: var(--text, #0f172a);
+    padding: 0 8px !important;
+    box-sizing: border-box !important;
+    outline: none;
 }
 
 .tab-content-wrap {
@@ -519,33 +542,9 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 
 .filter-month-wrap label { font-size: 13px; font-weight: 700; white-space: nowrap; color: var(--text); }
 
-.filter-month-wrap input { 
-    height: 36px; /* ปรับลดความสูงให้เท่ากัน */
-    max-width: 200px; /* จำกัดความกว้างไม่ให้ล้น */
-    border-radius: 10px; 
-    font-size: 13.5px; 
-}
-
-.filter-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 8px 12px; /* ลด padding กรอบนอก */
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center; /* จัดกึ่งกลาง */
-    gap: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-}
-
-.filter-card-center {
-    justify-content: center !important;
-}
-
 .filter-label {
     font-weight: 700;
-    font-size: 13.5px;
+    font-size: 13px;
     color: var(--text);
     white-space: nowrap;
 }
@@ -560,27 +559,12 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     box-shadow: 0 2px 6px rgba(0,0,0,0.03);
 }
 
-.filter-card .form-control {
-    /* 🎯 ปรับขนาดช่องเลือกใน filter-card ให้พอดีตัว */
-    width: 190px;
-    height: 36px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
-    font-weight: 700;
-    font-size: 13.5px;
-    text-align: center;
-    padding: 0 10px;
-    box-sizing: border-box;
-}
-
 .btn-export-excel { 
-    height: 36px; /* ปรับความสูงปุ่มให้เท่ากับช่องเลือก */
+    height: 32px !important; /* ปรับความสูงปุ่มให้เท่ากับช่องเลือก 32px */
     background: var(--success); 
     color: #fff; 
     border: none; 
-    border-radius: 10px; 
+    border-radius: 8px; 
     padding: 0 12px; 
     font-weight: 700; 
     font-size: 12.5px !important;
