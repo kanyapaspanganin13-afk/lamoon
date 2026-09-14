@@ -162,29 +162,49 @@ body > center, body > a, body > br { display: none !important; }
 #pageHome {
     padding-bottom: 85px !important;
 }
-/* ============= ปรับแต่งเฉพาะหน้าแรก (#pageHome) - (Deep Navy & Neon) ============= */
+/* ============= ปรับแต่งเฉพาะหน้าแรก (#pageHome) - (Bright Cyberpunk Gradient) ============= */
 /* 1. คุมสีพื้นหลังและกรอบของหน้าแรก */
 #pageHome {
-    background: linear-gradient(145deg, #1e293b, #0f172a) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #d946ef 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
     border-radius: 24px !important;
     padding: 24px 18px !important;
     max-width: 480px !important;
     margin: 16px auto !important;
-    box-shadow: 0 20px 30px rgba(15, 23, 42, 0.4) !important;
+    box-shadow: 0 15px 35px rgba(124, 58, 237, 0.35) !important;
+    box-sizing: border-box !important;
 }
 
-#pageHome .home-header h2 span:first-child { color: #ffffff !important; font-size: 22px !important; font-weight: 800 !important; }
-#pageHome .home-header h2 span:last-child { color: #94a3b8 !important; }
+/* 2. ข้อความหัวข้อหน้าแรก */
+#pageHome .home-header h2 span:first-child {
+    color: #ffffff !important;
+    font-size: 22px !important;
+    font-weight: 800 !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
 
-/* การ์ดเมนู */
+#pageHome .home-header h2 span:last-child {
+    color: #f1f5f9 !important;
+    opacity: 0.9 !important;
+}
+
+/* 3. การ์ดเมนูปุ่มกด (โทนขาวโปร่งแสง Frosted Glass ตัดกับพื้นหลัง) */
 #pageHome .menu-card {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.92) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
 }
-#pageHome .menu-card:active { background: rgba(255, 255, 255, 0.12) !important; }
-#pageHome .menu-card span { color: #f8fafc !important; font-weight: 700 !important; }
+
+#pageHome .menu-card:active {
+    background: #ffffff !important;
+    transform: scale(0.96) !important;
+}
+
+#pageHome .menu-card span {
+    color: #0f172a !important; /* ข้อความบนการ์ดสีเข้ม ชัดเจน */
+    font-weight: 700 !important;
+}
 /* ========= 📋 MENU GRID & CARDS (โครงสร้างเดิม) ========= */
 .menu-grid {
     display: grid !important;
