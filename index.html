@@ -67,19 +67,19 @@
         </div>
 
         <!-- Sub-page 1: ✍️ บันทึกงาน -->
-        <div id="p1" class="sub-page active">
-            <div class="grid-2">
-                <div class="input-date-wrap">
-                    <span id="dateDisplay">📅 วันที่</span>
-                    <input type="date" id="dateInp" onchange="updateDateDisplay(this.value)">
+            <div id="p1" class="sub-page active">
+                <div class="grid-2">
+                    <div class="input-date-wrap">
+                        <span id="dateDisplay">📅 วันที่</span>
+                        <input type="date" id="dateInp" onchange="updateDateDisplay(this.value)">
+                    </div>
+                    <select id="custType" onchange="handleCustTypeChange(this.value)">
+                        <option value="none">✳️ ประเภทลูกค้า</option>
+                        <option value="new">🌟 ลูกค้าใหม่</option>
+                        <option value="regular">📌 ลูกค้าประจำ</option>
+                        <option value="offsite">🚗 นอกสถานที่</option>
+                    </select>
                 </div>
-                <select id="custType">
-                    <option value="none">✳️ ประเภทลูกค้า</option>
-                    <option value="new">🌟 ลูกค้าใหม่</option>
-                    <option value="regular">📌 ลูกค้าประจำ</option>
-                    <option value="offsite">🚗 นอกสถานที่</option>
-                </select>
-            </div>
             <div class="grid-time">
                 <div class="time-box">
                     <label for="tStart">เริ่ม</label>
