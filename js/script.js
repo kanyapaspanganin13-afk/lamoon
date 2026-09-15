@@ -335,69 +335,86 @@ function updateDateDisplay(v) {
 /* ========= SECTION 7: SAVE DATA ========= */
 function saveDB() {
     try {
-        localStorage.setItem("barber_db", JSON.stringify(db));
-        localStorage.setItem("barber_archives", JSON.stringify(archives));
-        localStorage.setItem("barber_account", JSON.stringify(account));
-        localStorage.setItem("barber_conf", JSON.stringify(conf));
+        localStorage.setItem("barber_db", JSON.stringify(typeof db !== "undefined" ? db : []));
+        localStorage.setItem("barber_archives", JSON.stringify(typeof archives !== "undefined" ? archives : []));
+        localStorage.setItem("barber_account", JSON.stringify(typeof account !== "undefined" ? account : {}));
+        localStorage.setItem("barber_conf", JSON.stringify(typeof conf !== "undefined" ? conf : {}));
         return true;
-    } catch (e) { console.error("❌ บันทึกไม่ได้:", e); return false; }
+    } catch (e) { 
+        console.error("❌ บันทึกไม่ได้:", e); 
+        return false; 
+    }
 }
+
 function saveSettings() {
+    // Helper Selector กัน Error
+    const $ = (id) => document.getElementById(id);
+
     try {
-        // 1. ดึงค่าจากฟอร์ม
+        // 1. ดึงค่าจากฟอร์ม (เพิ่ม offsiteRate ตามการตั้งค่า)
         const settings = {
-            shop:  $("setShop")?.value || "",
-            perc:  parseFloat($("setPerc")?.value) || 0,
-            guar:  parseFloat($("setGuar")?.value) || 0,
-            theme: $("setTheme")?.value || "light",
-            voice: $("setVoice")?.value || "default.mp3",
-            sound: $("setSound")?.value || "on"
+            shop:        $("setShop")?.value?.trim() || "Barber Shop",
+            perc:        parseFloat($("setPerc")?.value) || 0,
+            guar:        parseFloat($("setGuar")?.value) || 0,
+            offsiteRate: parseFloat($("setOffsite")?.value) || 200, // 🚗 ค่าบริการนอกสถานที่
+            theme:       $("setTheme")?.value || "light",
+            voice:       $("setVoice")?.value || "default.mp3",
+            sound:       $("setSound")?.value || "on"
         };
 
-        // 2. อัปเดตตัวแปรกลาง (conf) ทันที
+        // 2. อัปเดตตัวแปรกลาง (conf)
         if (typeof conf !== "undefined") {
             Object.assign(conf, settings);
+        } else {
+            window.conf = { ...settings };
         }
 
-        // 3. บันทึกลง LocalStorage และ DB
-        if (typeof conf !== "undefined") {
-            localStorage.setItem('barber_conf', JSON.stringify(conf));
-        }
-        localStorage.setItem('shopName',  settings.shop);
-        localStorage.setItem('shopPerc',  settings.perc);
-        localStorage.setItem('shopGuar',  settings.guar);
-        localStorage.setItem('shopTheme', settings.theme);
-        localStorage.setItem('shopVoice', settings.voice);
-        localStorage.setItem('shopSound', settings.sound);
+        // 3. บันทึกลง LocalStorage ให้เป็นมาตรฐานเดียวกัน
+        const confJSON = JSON.stringify(window.conf);
+        localStorage.setItem('barber_conf', confJSON);
+        localStorage.setItem('barberConf', confJSON); // บันทึกไว้กันกรณีฟังก์ชันอื่นสะกดแบบ camelCase
 
+        // บันทึกแยกคีย์สำหรับใช้ดึงด่วน
+        localStorage.setItem('shopName',        settings.shop);
+        localStorage.setItem('shopPerc',        settings.perc);
+        localStorage.setItem('shopGuar',        settings.guar);
+        localStorage.setItem('shopOffsiteRate', settings.offsiteRate);
+        localStorage.setItem('shopTheme',       settings.theme);
+        localStorage.setItem('shopVoice',       settings.voice);
+        localStorage.setItem('shopSound',       settings.sound);
+
+        // บันทึกเข้า DB หลัก
         if (typeof saveDB === "function") saveDB();
 
-        // 4. อัปเดตการแสดงผลชื่อร้าน
+        // 4. อัปเดตการแสดงผลชื่อร้านบนหน้าจอ
         const nameDisp = $("shopNameDisp") || $("shopNameDisplay");
         if (nameDisp) {
             nameDisp.innerText = settings.shop.toUpperCase();
         } 
 
-        // 5. เรียกฟังก์ชันอัปเดต UI 
+        // 5. อัปเดต UI และคำนวณยอดเงินใหม่ตามการตั้งค่าทันที
         if (typeof applyTheme === "function") applyTheme(settings.theme);
         if (typeof calculateMoney === "function") calculateMoney(); 
         
-        // ดึงวันที่จาก dateInp เพื่อป้องกันการส่งค่า undefined ให้ renderDay
         const currentDate = $("dateInp")?.value || new Date().toISOString().split('T')[0];
         if (typeof renderDay === "function") renderDay(currentDate); 
 
-        // 6. ปิด Modal
+        // 6. ปิด Modal การตั้งค่า
         if ($("modalSet")) $("modalSet").style.display = 'none';
         
         // 7. แจ้งเตือนความสำเร็จ
         if (typeof notify === "function") {
             notify("success", "บันทึกสำเร็จ", "ระบบได้ดำเนินการบันทึกการตั้งค่าเรียบร้อยแล้ว");
+        } else if (typeof Swal !== 'undefined') {
+            Swal.fire({ title: 'บันทึกสำเร็จ', icon: 'success', timer: 1500, showConfirmButton: false });
         }
 
     } catch (e) {
         console.error("saveSettings error:", e);
         if (typeof notify === "function") {
             notify("error", "เกิดข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลตั้งค่าได้");
+        } else if (typeof Swal !== 'undefined') {
+            Swal.fire({ title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถบันทึกข้อมูลตั้งค่าได้', icon: 'error' });
         }
     }
 }
@@ -440,25 +457,42 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 /* ========= SECTION 8: NOTIFY & SOUND ========= */
 function speak(type, message = "") {
-    if (conf.sound === "off") return;
-    const isMan = conf.voice === "male";
+    // 🎯 ดึงค่าจากการตั้งค่าพร้อม Fallback กัน undefined
+    const currentConf = (typeof conf !== 'undefined' && conf) ? conf : JSON.parse(localStorage.getItem('barber_conf') || '{}');
+    
+    // 1. ตรวจสอบสถานะการเปิด/ปิดเสียง
+    const soundSetting = currentConf.sound || localStorage.getItem('shopSound') || "on";
+    if (soundSetting === "off") return;
+
+    // 2. ตรวจสอบประเภทเสียง (รองรับทั้งการตั้งค่าเพศ male/female หรือชื่อไฟล์)
+    const voiceSetting = String(currentConf.voice || localStorage.getItem('shopVoice') || "").toLowerCase();
+    const isMan = voiceSetting === "male" || voiceSetting.includes("man") || voiceSetting.includes("male");
+
+    // 3. เลือกระบุ Element เสียงตามการตั้งค่า
     const audioId = (type === "success") 
         ? (isMan ? "successSoundMan" : "successSoundWoman")
         : (isMan ? "errorSoundMan" : "errorSoundWoman");
     
-    const audio = $(audioId);
+    const $ = (id) => document.getElementById(id);
+    const audio = $(audioId) || $(type === "success" ? "successSound" : "errorSound"); // ถอยไปใช้ ID หลักหากไม่แยกชาย/หญิง
+    
     if (audio) { 
         audio.pause(); 
         audio.currentTime = 0; 
         audio.play().catch(e => console.warn("Audio autoplay prevented:", e)); 
     }
+
+    // 4. อ่านข้อความเสียง (Text-to-Speech)
     if (message && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(message);
         utterance.lang = 'th-TH';
+        utterance.rate = 1.0; // ความเร็วปกติ
         window.speechSynthesis.speak(utterance);
     }
 }
+
+// 🔓 ปลดล็อกการเล่นเสียง Autoplay บนเบราว์เซอร์
 document.addEventListener('click', function unlockAudio() {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
@@ -467,15 +501,28 @@ document.addEventListener('click', function unlockAudio() {
 }, { once: true });
 
 function notify(type, title, text = "") {
-    speak(type);
-    if (typeof Swal === 'undefined') { alert(`${title}\n${text}`); return; }
+    // 📢 ส่งข้อความ title/text ให้อ่านเสียง TTS ตามการตั้งค่า
+    const speechMsg = text || title;
+    speak(type, speechMsg);
+
+    // แสดงแจ้งเตือน SweetAlert2 หรือ alert ปกติ
+    if (typeof Swal === 'undefined') { 
+        alert(`${title}\n${text}`); 
+        return; 
+    }
+
     Swal.fire({ 
-        icon: type, title, text, timer: 2200, showConfirmButton: false,
-        timerProgressBar: true, background: 'var(--card)', color: 'var(--text)',
-        iconColor: type === 'success' ? 'var(--success)' : 'var(--danger)'
+        icon: type, 
+        title: title, 
+        text: text, 
+        timer: 2200, 
+        showConfirmButton: false,
+        timerProgressBar: true, 
+        background: 'var(--card, #1e293b)', 
+        color: 'var(--text, #ffffff)',
+        iconColor: type === 'success' ? 'var(--success, #10b981)' : 'var(--danger, #ef4444)'
     });
 }
-
 /* ========= SECTION 9: PAYMENT TYPE ========= */
 function editTime(id) {
     const rec = db.find(r => r.id === id);
