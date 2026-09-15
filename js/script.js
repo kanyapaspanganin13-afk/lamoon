@@ -3139,16 +3139,17 @@ function shareLine() {
         return;
     }
 
-    // 🗓️ จัดการวันที่และดึงข้อมูลจากการตั้งค่า (conf / localStorage)
+    // 🗓️ จัดการวันที่และดึงข้อมูลจาก การตั้งค่า (conf / localStorage)
     const [y, m, d] = dInp.split('-');
     const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-    const fDate = `${parseInt(d)} ${months[parseInt(m)-1]}${(parseInt(y)+543).toString().slice(-2)}`;
+    const fDate = `${parseInt(d)} ${months[parseInt(m)-1]} ${(parseInt(y)+543).toString().slice(-2)}`;
     
     // 🎯 ดึงค่าจากการตั้งค่าพร้อม Fallback กัน undefined
     const currentConf = (typeof conf !== 'undefined' && conf) ? conf : JSON.parse(localStorage.getItem('barberConf') || '{}');
     const shopName = currentConf.shop || "Barber Shop";
-    const perc = Number(currentConf.perc) || 50; // default % ส่วนแบ่ง
-    const guar = Number(currentConf.guar) || 0;  // ค่าประกันรายได้
+    const perc = Number(currentConf.perc) || 50; // default 50%
+    const guar = Number(currentConf.guar) || 0;
+    const offsiteRate = Number(currentConf.offsiteRate) || 200; // ค่าฟิกนอกสถานที่ (ถ้ามีตั้งไว้)
 
     let tot = 0, cash = 0, trans = 0, tips = 0;
     let bEarnBase = 0; // ยอดส่วนแบ่งช่าง (ไม่รวมทิป)
@@ -3187,10 +3188,10 @@ function shareLine() {
             realCustomerCount++;
             const cType = String(r.custType || r.type || "").toLowerCase();
             
-            // 🎯 คำนวณส่วนแบ่งช่างตาม % ในการตั้งค่า (perc) สำหรับทุกประเภทลูกค้า
+            // 🎯 คำนวณส่วนแบ่งช่างแยกตามประเภทลูกค้าและการตั้งค่า
             if (cType === 'offsite' || cType.includes('นอกสถานที่')) {
                 offsiteCount++;
-                bEarnBase += p * (perc / 100);
+                bEarnBase += offsiteRate; // 🚗 คิดตามค่าบริการนอกสถานที่ที่กำหนดไว้
             } else if (cType === 'new' || cType === 'ใหม่') {
                 newCount++;
                 bEarnBase += p * (perc / 100);
@@ -3205,7 +3206,7 @@ function shareLine() {
 
         const tShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
         const svcsText = Array.isArray(r.svcs) ? r.svcs.join('+') : '';
-        return `${i+1}. [${tShow}]${svcsText} = ${displayPrice}${t?` (+ทิป ${t})`:''}${detailText}${pIcon}`;
+        return `${i+1}. [${tShow}] ${svcsText} = ${displayPrice}${t?` (+ทิป ${t})`:''}${detailText} ${pIcon}`;
     }).join('\n');
 
     // 📊 ส่วนสรุปงาน
@@ -3213,12 +3214,12 @@ function shareLine() {
     const icons = { "เด็ก": "🧒", "สระ": "🧼", "โกน": "🪒", "ย้อม": "🎨" };
     let statText = Object.entries(stats)
         .filter(([k]) => allowed.some(a => k.includes(a)))
-        .map(([k, v]) => `${icons[Object.keys(icons).find(i => k.includes(i))] || '🔹'} ${k}:${v}`).join('\n');
+        .map(([k, v]) => `${icons[Object.keys(icons).find(i => k.includes(i))] || '🔹'} ${k}: ${v}`).join('\n');
 
-    // 💰 คำนวณรายได้รวมช่าง/ร้าน
+    // 💰 คำนวณรายได้รวมช่าง/ร้าน (การันตีรายได้ช่างตามตั้งค่า)
     let bEarn = Math.max(bEarnBase, guar) + tips;
-    let shopEarn = Math.max(0, tot - (bEarn - tips));
-    let settle = cash - (bEarn - tips);
+    let shopEarn = Math.max(0, tot - (bEarn - tips)); // ป้องกันร้านติดลบกรณีมีประกันรายได้
+    let settle = cash - (bEarn - tips); // ยอดเคลียร์เงินสด (หักทิปออก)
 
     // 🔄 ยอดค้างสะสม
     let oldBalance = 0, periodText = "", hasOldBalance = false;
@@ -3239,7 +3240,7 @@ function shareLine() {
     }
     let todayDiff = -settle, finalNet = oldBalance + todayDiff;
 
-    // ✉️ ประกอบข้อความ
+    // ✉️ ประกอบข้อความส่ง LINE
     let msg = `💈 รายงานร้าน: ${shopName}\n`;
     msg += `📅 วันที่: ${fDate}\n`;
     msg += `-------------------------\n`;
@@ -3257,20 +3258,39 @@ function shareLine() {
     msg += `\n-------------------------\n${clientList}\n`;
     msg += `-------------------------\n🏷️ สรุปงาน:\n${statText || '(ไม่มีรายการ)'}\n`;
     msg += `-------------------------\n`;
-    msg += `💰 ยอด: ${tot.toLocaleString()} | ข้อสรุปจากการตรวจสอบเงื่อนไขธุรกิจ:
+    msg += `💰 ยอด: ${tot.toLocaleString()} | 🧧 ทิปโอน: ${tips.toLocaleString()}\n`;
+    msg += `📱 โอน: ${trans.toLocaleString()} | 💵 เงินสด: ${cash.toLocaleString()}`;
+    if (giftCount) msg += ` | 🎁: ${giftCount}`;
+    msg += `\n🤵 ช่าง: ${Math.floor(bEarn).toLocaleString()}\n🏠 ร้าน: ${Math.floor(shopEarn).toLocaleString()}\n`;
+    msg += `-------------------------\n`;
 
-* **งานนอกสถานที่ (`offsite`):** ปรับการคำนวณส่วนแบ่งให้ยืดหยุ่นตามค่าบริการที่บันทึกจริง โดยจะแบ่งให้ **ช่างได้ 200 บาท** และส่วนที่เหลือเข้า **ร้าน** (ตามโครงสร้างราคาบริการนอกสถานที่มาตรฐานของระบบ) 
-* **กรณีราคาบริการนอกสถานที่สูงกว่าปกติ:** สามารถดึงค่าคอมมิชชั่นตาม % ใน `conf.perc` มาคิดคำนวณแทนค่าฟิกได้อัตโนมัติ 
+    if (hasOldBalance && oldBalance !== 0) {
+        msg += settle>0?`🟧 ช่างคืนร้าน: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท\n`:`🟦 ร้านคืนช่าง: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท\n`;
+        msg += `-------------------------\n🚨 สถานะบัญชี\nวันที่ ${periodText}: ${oldBalance>0?'ร้านค้าง':'ช่างค้าง'} ${Math.abs(oldBalance).toLocaleString()} บาท\n`;
+        msg += `(${Math.abs(oldBalance)} ${todayDiff>=0?'+':'-'} ${Math.abs(Math.floor(todayDiff)).toLocaleString()}) = ${Math.abs(Math.floor(finalNet)).toLocaleString()}\n\n`;
+        msg += finalNet>0?`📌 🟦 ยอดสุทธิ: ร้านคืนช่าง ${Math.abs(Math.floor(finalNet)).toLocaleString()} บาท`:`📌 🟧 ยอดสุทธิ: ช่างคืนร้าน ${Math.abs(Math.floor(finalNet)).toLocaleString()} บาท`;
+    } else {
+        msg += settle>0?`🟧 ช่างคืนร้าน: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท`:(settle<0?`🟦 ร้านคืนช่าง: ${Math.abs(Math.floor(settle)).toLocaleString()} บาท`:`✅ ยอดลงตัวพอดี`);
+    }
 
-หากต้องการให้ล็อกยอดช่างไว้ที่ 200 บาทต่อเคสอย่างถูกต้องโดยไม่ต้องใช้ค่าคงที่ ให้ใช้ท่อนการคำนวณส่วนนี้ได้เลยครับ:
-
-```javascript
-if (cType === 'offsite' || cType.includes('นอกสถานที่')) {
-    offsiteCount++;
-    // ดึงค่าบริการนอกสถานที่จากตั้งค่า currentConf.offsiteRate 
-    // หากไม่มีการตั้งค่าไว้จะคิดจากสัดส่วน 200 บาทสำหรับช่าง
-    const customOffsite = Number(currentConf.offsiteRate);
-    bEarnBase += !isNaN(customOffsite) && customOffsite > 0 ? customOffsite : Math.min(p, 200);
+    // แสดง Preview
+    const msgEdit = $("msgEdit"), previewArea = $("linePreview");
+    if (msgEdit && previewArea) { 
+        msgEdit.value = msg; 
+        
+        msgEdit.style.width = "100%";
+        msgEdit.style.height = "320px";
+        msgEdit.style.padding = "12px";
+        msgEdit.style.fontSize = "14px";
+        msgEdit.style.borderRadius = "12px";
+        msgEdit.style.background = "#1e293b";
+        msgEdit.style.color = "#ffffff";
+        msgEdit.style.boxSizing = "border-box";
+        
+        previewArea.style.display = "flex"; 
+    } else { 
+        window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`, '_blank'); 
+    }
 }
 function sendToLineFinal() {
     const $ = (id) => document.getElementById(id);
