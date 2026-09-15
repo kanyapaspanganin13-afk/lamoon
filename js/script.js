@@ -3294,7 +3294,7 @@ function shareLine() {
 }
 function sendToLineFinal() {
     const $ = (id) => document.getElementById(id);
-    const msgEdit = $("msgEdit"), previewArea = $("linePreview");
+    const msgEdit = $("msgEdit"), previewArea = $("linePreview"); // ✅ เพิ่มบรรทัดนี้เข้าไป
     
     if (!msgEdit || !msgEdit.value.trim()) {
         if (typeof Swal !== 'undefined') Swal.fire({ title: 'ไม่พบข้อความ', text: 'กรุณาตรวจสอบข้อความก่อนส่ง', icon: 'warning' });
@@ -3307,7 +3307,6 @@ function sendToLineFinal() {
     // ปิดหน้าจอ Preview
     if (previewArea) previewArea.style.display = "none";
 }
-
 // 🔴 ฟังก์ชันปิด Modal (แก้ไข ID ให้ตรงกับ linePreview)
 function closeLineModal() { 
     const $ = (id) => document.getElementById(id);
