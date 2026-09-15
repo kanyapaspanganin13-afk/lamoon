@@ -982,6 +982,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .btn-monthly i, .btn-excel i, .btn-sheets i { font-size: 18px; margin-bottom: 4px; }
 .btn-compare { border-radius: 18px; padding: 12px; text-align: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, var(--btn-compare1), var(--btn-compare2)); color: var(--btn-text); font-weight: 600; margin-top: 12px; }
 .btn-compare i { font-size: 20px; }
+
 /* ========= 🪟 FIX MODAL SETTINGS (COMPACT & MATCH ALL CLASSES) ========= */
 .modal {
   display: none;
@@ -1034,6 +1035,51 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   font-size: 11px;
 }
 
+/* ✂️ DIVIDER & RADIO GROUP (เพิ่มใหม่) */
+.settings-divider {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--accent, #2563eb);
+  border-bottom: 1px dashed var(--border);
+  padding-bottom: 4px;
+  margin: 14px 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.settings-radio-group {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 10px;
+  margin: 6px 0 10px 0;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.radio-option input[type="radio"] {
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.radio-option label {
+  cursor: pointer;
+  line-height: 1.2;
+}
+
 /* 📐 GRIDS & ROWS */
 .settings-grid-2,
 .settings-row {
@@ -1065,8 +1111,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   max-height: 38px !important;
   padding: 0 10px;
   border-radius: 12px;
-  font-size: 14px !important; /* ✅ ปรับขนาดตัวอักษรเป็น 14px */
-  font-weight: 600 !important; /* ✅ ปรับความหนาให้สมดุลพอดีช่อง */
+  font-size: 14px !important;
+  font-weight: 600 !important;
   box-sizing: border-box;
   background: var(--bg) !important;
   color: var(--text) !important;
@@ -1107,7 +1153,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .settings-input-icon-wrap select {
   appearance: none;
   -webkit-appearance: none;
-  padding-left: 32px !important; /* ✅ เว้นระยะซ้ายไม่ให้ตัวหนังสือทับไอคอน */
+  padding-left: 32px !important;
   text-align-last: center;
   margin-bottom: 0;
 }
@@ -1137,7 +1183,7 @@ input[type="file"]#fileInput,
   display: grid !important;
   grid-template-columns: 1fr 1fr 1fr !important;
   gap: 6px;
-  margin: 10px 0 10px;
+  margin: 12px 0 10px;
   width: 100%;
 }
 
@@ -1226,7 +1272,6 @@ input[type="file"]#fileInput,
   font-size: 9px;
   font-weight: 400;
 }
-
 /* ========= 📱 RESPONSIVE ========= */
 @media (max-width: 480px) {
     .filter-card-compact {
