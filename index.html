@@ -422,25 +422,69 @@
                 <i class="fas fa-cog"></i><span>ตั้งค่า</span>
             </div>
         </nav>
-<!-- ================= MODAL ตั้งค่าระบบ ================= -->
+    <!-- ================= MODAL ตั้งค่าระบบ ================= -->
 <div id="modalSet" class="modal">
     <div class="modal-content settings-modal">
         <h3 class="settings-title">⚙️ ตั้งค่าระบบ</h3>
         
+        <!-- ข้อมูลทั่วไป -->
         <label class="settings-label" for="setShop">ชื่อร้าน</label>
-        <input type="text" id="setShop" class="settings-input" value="Barber Shop" placeholder="ชื่อร้าน">
+        <input type="text" id="setShop" class="settings-input" placeholder="ชื่อร้าน">
         
+        <!-- 💰 ส่วนแบ่งทั่วไป -->
+        <div class="settings-divider">💰 ส่วนแบ่งทั่วไป</div>
         <div class="settings-row">
             <div class="settings-col">
                 <label class="settings-label sm-label" for="setPerc">ส่วนแบ่งช่าง (%)</label>
-                <input type="number" id="setPerc" class="settings-input" value="50" placeholder="% ช่าง">
+                <input type="number" id="setPerc" class="settings-input" placeholder="% ช่าง">
             </div>
             <div class="settings-col">
                 <label class="settings-label sm-label" for="setGuar">ประกันรายได้ (฿)</label>
-                <input type="number" id="setGuar" class="settings-input" value="0" placeholder="ประกัน">
+                <input type="number" id="setGuar" class="settings-input" placeholder="ประกัน">
+            </div>
+        </div>
+
+        <!-- 🚗 เงื่อนไขนอกสถานที่ -->
+        <div class="settings-divider">🚗 เงื่อนไขนอกสถานที่</div>
+        <div class="settings-row">
+            <div class="settings-col">
+                <label class="settings-label sm-label" for="setOutBarber">ส่วนแบ่งช่างนอกสถานที่ (฿)</label>
+                <input type="number" id="setOutBarber" class="settings-input" placeholder="ช่างได้ (฿)">
+            </div>
+            <div class="settings-col">
+                <label class="settings-label sm-label" for="setOutShop">ส่วนแบ่งร้านนอกสถานที่ (฿)</label>
+                <input type="number" id="setOutShop" class="settings-input" placeholder="ร้านได้ (฿)">
+            </div>
+        </div>
+
+        <!-- 🎁 เงื่อนไขโปรโมชั่น / สิทธิ์ฟรี -->
+        <div class="settings-divider">🎁 เงื่อนไขโปรโมชั่น</div>
+        <div class="settings-row">
+            <div class="settings-col">
+                <label class="settings-label sm-label" for="setPromoBarber">ชดเชยโปรโมชั่น: ช่างได้ (฿)</label>
+                <input type="number" id="setPromoBarber" class="settings-input" placeholder="ช่างได้ (฿)">
+            </div>
+            <div class="settings-col">
+                <label class="settings-label sm-label" for="setPromoShop">ชดเชยโปรโมชั่น: ร้านได้ (฿)</label>
+                <input type="number" id="setPromoShop" class="settings-input" placeholder="ร้านได้ (฿)">
+            </div>
+        </div>
+
+        <!-- การแบ่งเงินส่วนเกิน -->
+        <div class="settings-radio-group">
+            <label class="settings-label sm-label">การแบ่งเงินส่วนเกิน (กรณีมีค่าบริการเพิ่ม / นอกสถานที่)</label>
+            <div class="radio-option">
+                <input type="radio" id="extraSplitNormal" name="extraSplitRule" value="normal" checked>
+                <label for="extraSplitNormal">แบ่งตาม % ปกติ (คำนวณเข้าประกันรายได้ท้ายวัน)</label>
+            </div>
+            <div class="radio-option">
+                <input type="radio" id="extraSplitBarber" name="extraSplitRule" value="barber">
+                <label for="extraSplitBarber">ให้ช่างทั้งหมด</label>
             </div>
         </div>
         
+        <!-- 🎨 การแสดงผลและระบบ -->
+        <div class="settings-divider">🎨 การแสดงผลและระบบ</div>
         <label class="settings-label" for="setTheme">ธีม</label>
         <select id="setTheme" class="settings-select" onchange="applyTheme(this.value)">
             <option value="light">⛅ ธีมสว่าง</option>
@@ -489,7 +533,7 @@
             <button class="settings-btn cancel-btn" onclick="closeSettings()">ปิด</button>
         </div>
         
-        <!-- ✅ แสดงเลขเวอร์ชันตรงนี้ -->
+        <!-- ✅ แสดงเลขเวอร์ชัน -->
         <div class="settings-version" id="appVersionDisplay"></div>
     </div>
 </div>
