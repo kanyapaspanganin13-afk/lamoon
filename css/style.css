@@ -1035,51 +1035,63 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   font-size: 11px;
 }
 
-/* ✂️ DIVIDER & RADIO GROUP (เพิ่มใหม่) */
+/* ปรับสไตล์หัวข้อกั้นโซน */
 .settings-divider {
-  font-size: 12px;
-  font-weight: 800;
+  font-size: 11.5px !important;
+  font-weight: 800 !important;
   color: var(--accent, #2563eb);
   border-bottom: 1px dashed var(--border);
-  padding-bottom: 4px;
-  margin: 14px 0 8px 0;
+  padding-bottom: 2px;
+  margin: 10px 0 6px 0 !important;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
+/* ปรับ Label หัวข้อช่องกรอก ให้สั้นกระชับ ไม่ตกบรรทัด */
+.settings-label {
+  font-size: 11px !important;
+  font-weight: 700;
+  margin: 0 0 3px 0;
+  display: block;
+  opacity: 0.85;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.settings-label.sm-label {
+  font-size: 10.5px !important;
+}
+
+/* ปรับ Radio Option ให้กะทัดรัด */
 .settings-radio-group {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 8px 10px;
-  margin: 6px 0 10px 0;
+  border-radius: 10px;
+  padding: 6px 8px;
+  margin: 4px 0 8px 0;
 }
 
 .radio-option {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 5px;
-  font-size: 11px;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 10.5px !important;
   font-weight: 600;
   color: var(--text);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .radio-option input[type="radio"] {
   accent-color: var(--accent);
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   cursor: pointer;
   margin: 0;
 }
-
-.radio-option label {
-  cursor: pointer;
-  line-height: 1.2;
-}
-
 /* 📐 GRIDS & ROWS */
 .settings-grid-2,
 .settings-row {
