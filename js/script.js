@@ -2175,7 +2175,13 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
     // ✅ สูตรหลักที่ถูกต้อง: ร้าน = รวม − ช่าง
     const finalShopEarn = Math.max(0, finalTotalIncome - finalBarberEarn);
     
-    const displayGuarDays = (monthGuarDays !== undefined && monthGuarDays !== null) ? monthGuarDays : calculatedGuarDays;
+    // ✅ แสดง 0 เมื่อไม่มีค่าหรือไม่มีการใช้ประกัน
+    let displayGuarDays;
+      if (monthGuarDays !== undefined && monthGuarDays !== null && monthGuarDays !== "") {
+          displayGuarDays = Number(monthGuarDays) || 0;
+      } else {
+          displayGuarDays = calculatedGuarDays > 0 ? calculatedGuarDays : 0;
+      }
 
     // --- 2. สถิติรายวัน ---
     const dayAverages = Object.entries(dayStats).filter(([_, d]) => d.count > 0).map(([name, d]) => ({ name, avg: d.total / d.count }));
