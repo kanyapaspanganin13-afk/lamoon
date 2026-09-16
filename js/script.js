@@ -2726,43 +2726,43 @@ function openReportFullscreen() {
     const modalContent = document.getElementById('fullReportContent');
     if (!modalContent) return;
 
-    // 1. ตรวจสอบว่าหน้าเปรียบเทียบเปิดใช้งานอยู่หรือไม่ (เช็คความสูงหรือการซ่อน Display ของ Card เปรียบเทียบ)
-    const compareCard = document.getElementById('comparisonCard') || document.getElementById('compareSection');
-    const isCompareActive = compareCard && compareCard.offsetWidth > 0 && compareCard.offsetHeight > 0;
+    // 1. ดึง Element ของทั้งสองหน้า
+    const compareBody = document.getElementById('comparisonSingleContent');
+    const compareHead = document.getElementById('compareTableHead');
+    const compareFoot = document.getElementById('compareTableFoot');
+    const monthlyCard = document.getElementById('monthlyContent1');
 
-    const tableHead = document.getElementById('compareTableHead');
-    const tableBody = document.getElementById('comparisonSingleContent');
-    const tableFoot = document.getElementById('compareTableFoot');
-    const hasComparisonData = tableBody && tableBody.innerHTML.trim() !== '';
+    // 2. เช็คว่ามีข้อมูลในหน้าเปรียบเทียบหรือไม่
+    const hasCompareData = compareBody && compareBody.innerHTML.trim() !== '';
+    // 3. เช็คว่ามีข้อมูลในหน้ารายงานปกติหรือไม่
+    const hasMonthlyData = monthlyCard && monthlyCard.innerHTML.trim() !== '';
 
-    // 2. Render เนื้อหาตามโหมดที่เปิดใช้งานจริง
-    if (isCompareActive && hasComparisonData) {
+    // 4. แสดงผลตามข้อมูลที่มีอยู่จริง
+    if (hasCompareData) {
         modalContent.innerHTML = `
             <table style="width:100%; border-collapse:collapse; font-family:Tahoma,sans-serif; text-align:center; font-size:11px;">
-                <thead>${tableHead?.innerHTML || ''}</thead>
-                <tbody>${tableBody.innerHTML}</tbody>
-                <tfoot>${tableFoot?.innerHTML || ''}</tfoot>
+                <thead>${compareHead?.innerHTML || ''}</thead>
+                <tbody>${compareBody.innerHTML}</tbody>
+                <tfoot>${compareFoot?.innerHTML || ''}</tfoot>
             </table>
         `;
+    } else if (hasMonthlyData) {
+        modalContent.innerHTML = monthlyCard.innerHTML;
     } else {
-        const tableCard = document.getElementById('monthlyContent1');
-        if (!tableCard || !tableCard.innerHTML.trim()) {
-            const msg = "กรุณาเลือกข้อมูลแล้วกดประมวลผลก่อนครับ";
-            if (typeof notify === 'function') notify("error", "ไม่พบข้อมูล", msg);
-            else alert(msg);
-            return;
-        }
-        modalContent.innerHTML = tableCard.innerHTML;
+        // หากไม่มีข้อมูลทั้ง 2 หน้า ให้แจ้งเตือน
+        const msg = "กรุณาเลือกข้อมูลแล้วกดประมวลผลก่อนครับ";
+        if (typeof notify === 'function') notify("error", "ไม่พบข้อมูล", msg);
+        else alert(msg);
+        return;
     }
 
-    // 3. แสดง Modal และล็อค Scroll
+    // 5. แสดง Modal
     const modal = document.getElementById('fullReportModal');
     if (modal) {
         modal.style.display = 'block';
         document.body.style.overflow = 'hidden';
     }
 }
-
 // ✅ ปิดพรีวิว และล้าง HTML ป้องกันข้อมูลตกค้าง
 function closeReportFullscreen() {
     const modal = document.getElementById('fullReportModal');
