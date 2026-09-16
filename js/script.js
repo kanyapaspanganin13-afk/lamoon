@@ -1020,7 +1020,10 @@ function renderDay(selectedDate) {
     // 5. สรุปยอดเงินและส่วนแบ่ง
     const guarAmt = (typeof conf !== 'undefined' && conf && conf.guar) ? conf.guar : 0;
     const bEarn = isHoliday ? 0 : Math.max(calcBarberShare, guarAmt) + tips;
-    const sEarn = isHoliday ? 0 : calcShopShare;
+    
+    // ✅ แก้ไข: ยอดร้าน = ยอดรวมทั้งหมด - ค่าแรงช่าง (ไม่รวมทิป)
+    const sEarn = isHoliday ? 0 : (tot - (bEarn - tips)); 
+    
     const settle = isHoliday ? 0 : cash - bEarn;
 
     if ($("dTotal")) $("dTotal").innerText = tot.toLocaleString();
