@@ -890,8 +890,10 @@ function renderDay(selectedDate) {
     let dInp = selectedDate || ($("dateInp") ? $("dateInp").value : new Date().toISOString().split('T')[0]);
     if ($("dateInp")) $("dateInp").value = dInp;
     let allRec = db.filter(r => r.date === dInp);
+
     const days = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
     const dayName = days[new Date(dInp).getDay()];
+
     if (allRec.length === 0 && typeof archives !== 'undefined') {
         const archivedDay = archives.find(a => a.date === dInp);
         if (archivedDay && archivedDay.details) {
@@ -900,15 +902,13 @@ function renderDay(selectedDate) {
     }
     const isHoliday = allRec.some(r => r.type && r.type.toUpperCase() === 'HOLIDAY');
     const stats = {};
-    const extraSvcs = ["โกนหนวด", "กันหน้า", "สระผม", "กันจอน", "ย้อมแฟชั่น", "ดัดผม"];
-    let tot = 0, trans = 0, cash = 0, tips = 0;
+    const extraSvcs = ["โกนหนวด", "กันหน้า", "สระผม", "กันจอน", "ย้อมแฟชั่น", "ดัดผม", "แคะหู"];
     
-    // ⚡ ตัวแปรคำนวณส่วนแบ่งสะสมช่าง-ร้าน
+    let tot = 0, trans = 0, cash = 0, tips = 0;
     let calcBarberShare = 0;
     let calcShopShare = 0;
 
-    // 🎯 ดึงการตั้งค่าจาก LocalStorage สำหรับเรคคอร์ดเก่าที่ไม่ได้เซฟ barberShare/shopShare ลง DB
-    const shopRate = parseFloat(localStorage.getItem('shopCommissionRate')) || ((conf && conf.perc) ? (conf.perc / 100) : 0.50);
+    const shopRate = parseFloat(localStorage.getItem('shopCommissionRate')) || ((typeof conf !== 'undefined' && conf && conf.perc) ? (conf.perc / 100) : 0.50);
     const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || 200;
     const offsiteShopFee = parseFloat(localStorage.getItem('offsiteShopFee')) || 100;
     const freeBarberComp = parseFloat(localStorage.getItem('freeBarberComp')) || 100;
@@ -927,11 +927,25 @@ function renderDay(selectedDate) {
         const currentSvcs = Array.isArray(r.svcs) ? r.svcs : [];
         const cType = r.custType || 'none';
         const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
-        const isFree = /^Free/.test(r.pay);
-        
-        tot += p; tips += t;
+        const payStr = r.pay ? String(r.pay).trim() : 'เงินสด';
 
-        // ⚡ [แก้ไข] แยกคำนวณส่วนแบ่งช่าง/ร้าน (ถ้ามีค่าที่คำนวณบันทึกไว้ใน DB ให้ใช้อนันก่อน ถ้าไม่มีให้คำนวณตามการตั้งค่า)
+        const isFree = payStr.includes('ฟรี') || payStr.toLowerCase().includes('free');
+        const isPureFree = isFree && !(payStr.includes('สด') || payStr.toLowerCase().includes('cash') || payStr.includes('โอน') || payStr.toLowerCase().includes('trans'));
+
+        // 1. คำนวณยอดเงินรวม (Total / Cash / Trans / Tip)
+        if (payStr.includes('Mix') || payStr.includes('ผสม')) {
+            const pCash = parseFloat(r.payCash) || 0;
+            const pTrans = parseFloat(r.payTrans) || 0;
+            tot += p; trans += pTrans; cash += (pCash - t);
+        } else if (payStr.includes('Trans') || payStr.includes('โอน') || payStr.includes('📱')) {
+            tot += p; trans += (p + t);
+        } else if (!isPureFree) {
+            tot += p; cash += p;
+        }
+
+        if (!isPureFree) tips += t;
+
+        // 2. คำนวณส่วนแบ่ง ช่าง / ร้าน (Barber / Shop Share)
         if (r.barberShare !== undefined && r.shopShare !== undefined) {
             calcBarberShare += r.barberShare;
             calcShopShare += r.shopShare;
@@ -945,24 +959,13 @@ function renderDay(selectedDate) {
             calcBarberShare += freeBarberComp;
             calcShopShare += freeShopComp;
         } else {
-            // ในร้านปกติ คิดตาม % ในตั้งค่า
             const bPart = Math.round(p * (1 - shopRate));
             calcBarberShare += bPart;
             calcShopShare += (p - bPart);
         }
 
-        if (r.pay === 'Mix') {
-            const pCash = parseFloat(r.payCash) || 0;
-            const pTrans = parseFloat(r.payTrans) || 0;
-            trans += pTrans; cash += (pCash - t);
-        } else if (r.pay === 'Trans' || r.pay === 'โอน') {
-            trans += (p + t);
-        } else {
-            cash += p;
-        }
-
-        if (rType === 'HOLIDAY' || rType === 'GUARANTEE' || p === 0) {
-        } else {
+        // 3. สถิติจำนวนลูกค้าและบริการ
+        if (!(rType === 'HOLIDAY' || rType === 'GUARANTEE' || (p === 0 && isPureFree))) {
             if (currentSvcs.length > 0 || cType === 'offsite') {
                 realCustomerCount++;
                 if (cType === 'new') countNew++;
@@ -972,50 +975,62 @@ function renderDay(selectedDate) {
             currentSvcs.forEach(s => { if (s) stats[s] = (stats[s] || 0) + 1; });
         }
 
-        // Tag แสดงประเภทลูกค้า
-        let custTag = ""; 
-        if (cType === 'offsite') {
-            custTag = ` <span style="background:#ef4444; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🚗 นอกสถานที่</span>`;
-        } else if (cType === 'new') {
-            custTag = ` <span style="background:#22c55e; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px;">🌟 ใหม่</span>`;
-        } else if (cType === 'regular') {
-            custTag = ` <span style="background:#f59e0b; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px;">📌 ประจำ</span>`;
+        // 4. การแสดงผล UI รายการ
+        let payIcon = '💵';
+        let moneyDetailText = `฿${p}`;
+
+        if (isFree) {
+            if (payStr.includes('สด') || payStr.toLowerCase().includes('cash')) {
+                payIcon = '🎁 + 💵';
+            } else if (payStr.includes('โอน') || payStr.includes('Trans') || payStr.toLowerCase().includes('trans')) {
+                payIcon = '🎁 + 📱';
+            } else {
+                payIcon = '🎁 ใช้สิทธิ์ฟรี';
+                moneyDetailText = `<span style="color:#64748b; font-size:13px; font-weight:normal;">฿0</span>`;
+            }
+        } else if (payStr.includes('Mix') || payStr.includes('ผสม')) {
+            payIcon = '🌓';
+            const pCash = parseFloat(r.payCash) || 0;
+            const pTrans = parseFloat(r.payTrans) || 0;
+            moneyDetailText = `฿${p} <br><small style="color:#64748b; font-size:10px; font-weight:normal;">(สด:${pCash}/โอน:${pTrans})</small>`;
+        } else if (payStr.includes('Trans') || payStr.includes('โอน') || payStr.includes('📱')) {
+            payIcon = '📱';
         }
 
-        let payIcon = r.pay === 'Trans' ? '📱' : '💶';
-        let mixText = "";
-        if (r.pay === 'Mix') {
-            payIcon = '🌓';
-            mixText = `<br><small style="color:#64748b; font-size:10px;">(สด:${r.payCash}/โอน:${r.payTrans})</small>`;
-        } 
+        let custTag = ""; 
+        if (cType === 'offsite') custTag = ` <span style="background:#ef4444; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🚗 นอกสถานที่</span>`;
+        else if (cType === 'new') custTag = ` <span style="color:#22c55e; font-size:11px; font-weight:bold;">[🌟]</span>`;
+        else if (cType === 'regular') custTag = ` <span style="color:#eab308; font-size:11px; font-weight:bold;">[📌]</span>`;
 
         listHtml += `
         <div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div style="display:flex; align-items:center; gap:12px;">
-                    <div style="width:28px; height:28px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#64748b;">${i+1}</div>
+                    <div style="width:28px; height:28px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#64748b; flex-shrink:0;">
+                        ${i+1}
+                    </div>
                     <div style="display:flex; flex-direction:column;">
-                        <div style="font-weight:800; font-size:14px; color:#1e293b;">
-                            <span style="color:#64748b;">[${timeShow}]</span> ${currentSvcs.join(' + ') || 'ตัดนอกสถานที่'}${custTag}
+                        <div style="font-weight:800; font-size:14px; color:#1e293b; margin-bottom:2px;">
+                            <span style="color:#64748b; font-weight:500;">[${timeShow}]</span> ${currentSvcs.join(' + ') || 'ตัดนอกสถานที่'}${custTag}
                         </div>
-                        <div style="display:flex; gap:8px; margin-top:2px;">
-                            ${t ? `<small style="color:#be185d; font-weight:700;">🔹 ทิป: ฿${t}</small>` : ''}
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            ${t ? `<small style="color:#be185d; font-weight:700; font-size:11px;">🔹 ทิป: ฿${t}</small>` : '<small style="color:#94a3b8; font-size:11px;">(ไม่มีทิป)</small>'}
                         </div>
                     </div>
                 </div>
                 <div style="text-align:right;">
-                    <b style="font-size:16px; color:#1e293b;">${payIcon} ฿${p}${t ? ` <span style="color:#be185d;">(+${t})</span>` : ''}</b>
-                    ${mixText}
-                    <div style="margin-top:4px;">
-                        <span style="font-size:11px; font-weight:700; color:#ef4444; cursor:pointer;" onclick="delRec(${r.id})">ลบ</span>
-                    </div>
+                    <b style="font-size:15px; display:block; color:#1e293b; line-height:1.2;">
+                        <span style="font-size:13px; font-weight:bold;">${payIcon}</span> ${moneyDetailText}${t ? ` <span style="color:#be185d;">(+${t})</span>` : ''}
+                    </b>
+                    <span style="font-size:11px; font-weight:700; color:#ef4444; cursor:pointer;" onclick="delRec(${r.id})">ลบ</span>
                 </div>
             </div>
         </div>`;
     });
 
-    // รวมยอดส่วนแบ่งช่าง (บวกทิป) และส่วนแบ่งร้าน
-    const bEarn = isHoliday ? 0 : Math.max(calcBarberShare, (conf ? conf.guar : 0)) + tips;
+    // 5. สรุปยอดเงินและส่วนแบ่ง
+    const guarAmt = (typeof conf !== 'undefined' && conf && conf.guar) ? conf.guar : 0;
+    const bEarn = isHoliday ? 0 : Math.max(calcBarberShare, guarAmt) + tips;
     const sEarn = isHoliday ? 0 : calcShopShare;
     const settle = isHoliday ? 0 : cash - bEarn;
 
@@ -1033,23 +1048,35 @@ function renderDay(selectedDate) {
         } else {
             let detail = "";
             if (countNew > 0 || countRegular > 0 || countOffsite > 0) {
-                detail = `<div style="margin-top:4px; padding-top:4px; border-top:1px dashed #e2e8f0; font-size:12px;">
-                    <span style="color:#22c55e;">🌟 ใหม่: ${countNew}</span> <span style="opacity:0.3;">|</span> 
-                    <span style="color:#f59e0b;">📌 ประจำ: ${countRegular}</span> <span style="opacity:0.3;">|</span> 
-                    <span style="color:#ef4444;">🚗 นอกสถานที่: ${countOffsite}</span>
+                detail = `
+                <div style="font-size: 12px; font-weight: 700; margin-top: 4px; border-top: 1px dashed #e2e8f0; padding-top: 4px;">
+                    <span style="color: #22c55e;">🌟 ใหม่: ${countNew}</span> 
+                    <span style="opacity: 0.3;">|</span> 
+                    <span style="color: #f59e0b;">📌 ประจำ: ${countRegular}</span>
+                    <span style="opacity: 0.3;">|</span> 
+                    <span style="color: #ef4444;">🚗 นอกสถานที่: ${countOffsite}</span>
                 </div>`;
             }
-            $("dCounts").innerHTML = `<b style="font-size:16px;">ลูกค้า: ${realCustomerCount} คน</b>${detail}`;
+            $("dCounts").innerHTML = `
+                <div style="line-height: 1.2;">
+                    <b style="font-size: 16px;">ลูกค้า: ${realCustomerCount} คน</b>
+                    ${detail}
+                </div>`;
         }
     }
 
-    let sH = `<div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px;">`;
+    let sH = `<div style="display:flex; flex-wrap:wrap; gap:4px; justify-content:center; margin-bottom:8px;">`;
     const cleanExtras = extraSvcs.map(s => s.trim().toLowerCase());
     const allStatsKeys = Object.keys(stats);
     const haircutGroup = allStatsKeys.filter(k => !cleanExtras.includes(k.trim().toLowerCase()));
     const extraGroup = allStatsKeys.filter(k => cleanExtras.includes(k.trim().toLowerCase()));
-    haircutGroup.forEach(k => { sH += `<span style="background:#4338ca;color:#fff;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:800;">${k}: ${stats[k]}</span>`; });
-    extraGroup.forEach(k => { sH += `<span style="background:#e0f2fe;color:#0369a1;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;">${k}: ${stats[k]}</span>`; });
+
+    haircutGroup.forEach(k => {
+        sH += `<span style="background:#4338ca;color:#fff;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:800;">${k}: ${stats[k]}</span>`;
+    });
+    extraGroup.forEach(k => {
+        sH += `<span style="background:#e0f2fe;color:#0369a1;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;border:1px solid #bae6fd;">${k}: ${stats[k]}</span>`;
+    });
     if ($("dServiceStats")) $("dServiceStats").innerHTML = sH + `</div>`;
 
     let txt = "", statusColor = "", icon = "";
@@ -1065,12 +1092,12 @@ function renderDay(selectedDate) {
         actionBox.style.display = "flex";
         actionBox.style.gap = "10px";
         actionBox.innerHTML = `
-            <div id="settleBar" style="flex:8; height:55px; background:#fff; display:flex; align-items:center; justify-content:center; border-radius:18px; font-weight:800; font-size:15px; color:${statusColor}; border:1px solid #e2e8f0;">
+            <div id="settleBar" style="flex:8; height:55px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; border-radius:18px; font-weight:800; font-size:14px; color:${statusColor}; border:1px solid #e2e8f0;">
                 <span style="margin-right:8px; font-size:18px;">${icon}</span> ${txt}
             </div>
             <button id="btnSubmitSend" onclick="saveAndGo('${dInp}', ${tot})" 
-                style="flex:2.2; height:55px; background:#ff6f00; color:#fff; border-radius:18px; border:none; font-size:20px; cursor:pointer;">
-                <i class="fas fa-paper-plane"></i>
+                style="flex:2.2; height:55px; background:#ff6f00; color:#fff; border-radius:18px; border:none; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                <i id="btnIcon" class="fas fa-paper-plane"></i>
             </button>`;
     }
 
@@ -1082,30 +1109,36 @@ function renderDay(selectedDate) {
             const d = dateParts[2];
             const m = dateParts[1];
             const yBE = parseInt(dateParts[0]) + 543;
-            displayDateBE = `${d}/${m}/${yBE.toString().slice(-2)}`;
+            displayDateBE = `${d}/${m}/${yBE}`;
         }
+
         dList.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#fff; border-radius:16px; border-bottom:2px solid #f1f5f9; margin-bottom:10px;">           
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <b style="font-size:14px; color:#1e293b;">รายงานวันที่</b>             
-                    <div style="position:relative; background:#eef2ff; padding:6px 12px; border-radius:10px; border:1px solid #e0e7ff; min-width:140px; height:36px;"> 
-                        <span style="font-size:14px; font-weight:700; color:#4338ca;">${dayName} ${displayDateBE}</span>                   
-                        <input type="date" id="reportDateSelector" value="${dInp}" onchange="renderDay(this.value)" style="position:absolute; opacity:0; left:0; top:0; width:100%; height:100%; cursor:pointer;">
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 8px 12px; border-radius: 12px; border-bottom: 2px solid #f1f5f9; margin-bottom: 10px;">           
+                <div style="display: flex; align-items: center; gap: 10px; margin-right: 15px;">
+                    <b style="font-size: 13px; color: #1e293b;">รายงานวันที่</b>            
+                    <div style="position: relative; background: #f1f5f9; padding: 5px 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; cursor: pointer; width: 140px; height: 34px;"> 
+                        <span style="font-size: 14px; font-weight: 700; color: #6366f1; width: 100%; text-align: center;">
+                            ${dayName} ${displayDateBE}
+                        </span>                                    
+                        <input type="date" id="reportDateSelector" value="${dInp}" 
+                               onchange="renderDay(this.value)" 
+                               style="position: absolute; opacity: 0; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer;">
                     </div>
-                    <button onclick="deleteArchiveDate('${dInp}')" title="ลบข้อมูลของวันนี้" style="background:#fde8e8; color:#e11d48; border:none; width:44px; height:44px; border-radius:12px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-size:18px;">
-                      <i class="fas fa-trash-alt"></i>
-                  </button>
+                    <button onclick="deleteArchiveDate('${dInp}')" 
+                            title="ลบข้อมูลของวันนี้"
+                            style="background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; width: 34px; height: 34px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
+                        <i class="fas fa-trash-alt" style="font-size: 18px;"></i>
+                    </button>
                 </div>
-                <div style="display:flex; align-items:center;">
-                    <i class="fab fa-line" style="color:#06c755; font-size:36px; cursor:pointer;" onclick="shareLine()"></i>
+                <div style="display: flex; align-items: center;">
+                    <i class="fab fa-line" style="color: #22c55e; font-size: 34px; cursor: pointer;" onclick="shareLine()"></i>
                 </div>
             </div>
-            <div style="padding:0 5px;">
+            <div style="padding: 0 5px;">
                 ${isHoliday ? `<center style='padding:30px; color:#64748b;'>🏖️ วันหยุด (${displayDateBE})</center>` : (listHtml || "<center style='padding:30px; color:#94a3b8;'>ไม่มีข้อมูล</center>")}
             </div>`;
     } 
 }
-
 /* ========= SECTION 13: DELETE RECORD ========= */
 function delRec(id) {
     if (confirm("ลบรายการนี้?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); }
