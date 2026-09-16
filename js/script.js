@@ -4,42 +4,40 @@
 /* =========== SECTION 1: INITIALIZATION & GLOBAL VARIABLES =========== */
 const $ = id => document.getElementById(id);
 
-// ✅ ตั้งค่า — เปลี่ยนเลขหลักนี้เมื่ออัปเดตเวอร์ชันใหญ่
-const VERSION_MAJOR = "1.0.";
+// ==============================================
+// ✅ ทุกครั้งที่แก้โค้ด — แก้เลขนี้ 1 ตัวก็พอ
+// ==============================================
+const BUILD_MARK = "1.0.0-20260916-1820"; 
+// แก้ตัวท้ายทุกครั้งที่อัปเดตจริง เช่น:
+// ครั้งถัดไป → "1.0.0-20260916-1821"
+// ครั้งต่อไป → "1.0.0-20260916-1822"
+
 const LAST_UPDATED = "16/09/2026";
 
-// ✅ คำนวณเวอร์ชัน — เพิ่มอัตโนมัติทุกครั้งที่โหลดหน้า
+// ✅ คำนวณเวอร์ชัน — เพิ่มเฉพาะเมื่อแก้โค้ดจริง
 window.APP_VERSION = "";
+window.BUILD_NUMBER = "";
+
 (function initVersion() {
-    const [verMajorBase, verMinorBase] = VERSION_MAJOR.split('.').map(Number);
-    
-    // อ่านค่าเดิมจาก localStorage
-    let storedMajor = parseInt(localStorage.getItem("ver_x") || String(verMajorBase));
-    let storedMinor = parseInt(localStorage.getItem("ver_y") || String(verMinorBase));
-    let storedPatch = parseInt(localStorage.getItem("ver_z") || "0");
+    // อ่านค่าเดิม
+    const storedMark = localStorage.getItem("build_mark") || "";
+    let storedBuild = parseInt(localStorage.getItem("build_num") || "0");
 
-    let x = storedMajor, y = storedMinor, z = storedPatch;
-
-    // 🔴 ถ้าเปลี่ยนเวอร์ชันหลัก → รีเซ็ตเป็นเวอร์ชันใหม่
-    if (verMajorBase !== storedMajor || verMinorBase !== storedMinor) {
-        x = verMajorBase;
-        y = verMinorBase;
-        z = 0;
-    } else {
-        // 🟢 ถ้าเป็นเวอร์ชันเดิม → เพิ่มเลขรองทุกครั้งที่โหลด
-        z = storedPatch + 1;
+    // ถ้า BUILD_MARK เปลี่ยน = แก้โค้ดจริง → เพิ่มเลข
+    if (BUILD_MARK !== storedMark) {
+        storedBuild = storedBuild + 1;
+        // บันทึกค่าใหม่
+        localStorage.setItem("build_mark", BUILD_MARK);
+        localStorage.setItem("build_num", String(storedBuild));
+        console.log(`🔄 พบการเปลี่ยนแปลงโค้ด — อัปเดตบิลด์ #${storedBuild}`);
     }
 
-    // บันทึกค่าลง localStorage
-    localStorage.setItem("ver_x", String(x));
-    localStorage.setItem("ver_y", String(y));
-    localStorage.setItem("ver_z", String(z));
+    // ตั้งค่าเวอร์ชัน
+    window.BUILD_NUMBER = storedBuild;
+    window.APP_VERSION = BUILD_MARK.split('-')[0] + `.${storedBuild}`;
 
-    // ตั้งค่าเวอร์ชันให้ใช้งาน
-    window.APP_VERSION = `${x}.${y}.${z}`;
-    console.log(`✅ เวอร์ชันปัจจุบัน: v${window.APP_VERSION}`);
+    console.log(`✅ เวอร์ชันปัจจุบัน: v${window.APP_VERSION} (บิลด์ #${storedBuild})`);
 })();
-
 // ========== GLOBAL VARIABLES & INITIALIZATION ==========
 let db = JSON.parse(localStorage.getItem("barber_db")) || [];
 let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
