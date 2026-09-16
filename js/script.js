@@ -813,24 +813,24 @@ async function handleSave(event) {
     }
 
     // ✅ 5. บันทึกข้อมูล
-    db.push({
+      db.push({
         id: Date.now(), 
         date: dInp, 
-        time: tStart, 
+        startTime: tStart || "", // 👈 เพิ่มจุดนี้เพื่อป้องกัน Error reading 'startTime' ถาวร
+        time: tStart || "", 
         endTime: tEnd || (typeof addMinutes === 'function' ? addMinutes(tStart, 30) : tStart),
-        price, 
-        tip, 
-        pay: currentPay, 
-        svcs,
-        payCash: finalCash, 
-        payTrans: finalTrans,
-        custType: custTypeVal,
-        barberShare, // 👈 บันทึกยอดส่วนแบ่งช่างตามการตั้งค่า
-        shopShare,   // 👈 บันทึกยอดส่วนแบ่งร้านตามการตั้งค่า
+        price: price || 0, 
+        tip: tip || 0, 
+        pay: currentPay || curPay || "", 
+        svcs: svcs || [],
+        payCash: typeof finalCash !== 'undefined' ? finalCash : (fCash || 0), 
+        payTrans: typeof finalTrans !== 'undefined' ? finalTrans : (fTrans || 0),
+        custType: custTypeVal || 'none',
+        barberShare: typeof barberShare !== 'undefined' ? barberShare : (shares?.b ?? 0), 
+        shopShare: typeof shopShare !== 'undefined' ? shopShare : (shares?.s ?? 0), 
         type: 'SERVICE'
     });
     saveDB();
-
     // ✅ 6. แจ้งผลสำเร็จ
     notify("success", "บันทึกสำเร็จ", "จัดเก็บข้อมูลเรียบร้อยแล้ว");
     const sfx = document.getElementById("successSound");
