@@ -11,11 +11,14 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="assets/icon.png">
     <link rel="icon" type="image/png" href="assets/icon.png">
+    
     <!-- ไลบรารีภายนอก -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap">
+    
     <!-- CSS หลัก -->
     <link rel="stylesheet" href="css/style.css">
+    
     <!-- JS ภายนอก และ JS หลัก -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js" defer></script>
@@ -46,11 +49,11 @@
                 <span>สรุปยอดรวม</span>
             </button>
             <button class="menu-card" onclick="switchMainView('pageMonthlyReport')">
-                <div class="menu-icon grad-green"><i class="fas fa-calendar-alt"></i></div>    
+                <div class="menu-icon grad-green"><i class="fas fa-calendar-alt"></i></div>     
                 <span>สรุปรายเดือน</span>
             </button>
             <button class="menu-card" onclick="handleGoogleSheet()">
-                <div class="menu-icon grad-emerald"><i class="fas fa-table"></i></div>              
+                <div class="menu-icon grad-emerald"><i class="fas fa-table"></i></div>               
                 <span>เปิด Sheet</span>
             </button>
             <button class="menu-card" onclick="switchMainView('pageComparison')">
@@ -67,19 +70,19 @@
         </div>
 
         <!-- Sub-page 1: ✍️ บันทึกงาน -->
-            <div id="p1" class="sub-page active">
-                <div class="grid-2">
-                    <div class="input-date-wrap">
-                        <span id="dateDisplay">📅 วันที่</span>
-                        <input type="date" id="dateInp" onchange="updateDateDisplay(this.value)">
-                    </div>
-                    <select id="custType" onchange="handleCustTypeChange(this.value)">
-                        <option value="none">✳️ ประเภทลูกค้า</option>
-                        <option value="new">🌟 ลูกค้าใหม่</option>
-                        <option value="regular">📌 ลูกค้าประจำ</option>
-                        <option value="offsite">🚗 นอกสถานที่</option>
-                    </select>
+        <div id="p1" class="sub-page active">
+            <div class="grid-2">
+                <div class="input-date-wrap">
+                    <span id="dateDisplay">📅 วันที่</span>
+                    <input type="date" id="dateInp" onchange="updateDateDisplay(this.value)">
                 </div>
+                <select id="custType" onchange="handleCustTypeChange(this.value)">
+                    <option value="none">✳️ ประเภทลูกค้า</option>
+                    <option value="new">🌟 ลูกค้าใหม่</option>
+                    <option value="regular">📌 ลูกค้าประจำ</option>
+                    <option value="offsite">🚗 นอกสถานที่</option>
+                </select>
+            </div>
             <div class="grid-time">
                 <div class="time-box">
                     <label for="tStart">เริ่ม</label>
@@ -230,314 +233,283 @@
             </div>
         </div>
     </section>
-            <!-- ================= SECTION 3: สรุปยอดรวม ================= -->
-        <section id="pageSummary" class="app-page full-page" style="display: none;">
-            <div class="top-bar">
-                <span class="top-title">📊 สรุปยอดรวม</span>
-            </div>
-        
-            <!-- 1. ช่องเลือกเดือน (ย่อขนาดแล้ว) -->
-            <div class="month-picker-wrap">
-                <input type="month" id="histMonth" class="form-control" onchange="loadHistMonth()">
-            </div>
-        
-            <!-- 2. แท็บเมนูเลือกหน้า -->
-            <div class="tab-header">
-                <button class="tab-btn active" onclick="switchMainTab('pageSummary', 'summaryTab1', event)">📊 รายได้ประจำเดือน</button>
-                <button class="tab-btn" onclick="switchMainTab('pageSummary', 'summaryTab2', event)">📈 วิเคราะห์รายได้</button>
-                <button class="tab-btn" onclick="switchMainTab('pageSummary', 'summaryTab3', event)">✂️ ทรงผม&บริการ</button>
-            </div>
-        
-            <!-- 3. กรอบแสดงรายงาน (ขยายเต็มพื้นที่) -->
-            <div class="tab-content-wrap">
-                <!-- แท็บที่ 1: รายได้ประจำเดือน -->
-                <div id="summaryTab1" class="tab-panel active">
-                    <div id="monthlyIncomeContent"></div>
-                </div>
-        
-                <!-- แท็บที่ 2: วิเคราะห์รายได้ -->
-                <div id="summaryTab2" class="tab-panel" style="display: none;">
-                    <div id="incomeAnalyticsContent"></div>
-                </div>
-        
-                <!-- แท็บที่ 3: ทรงผม & บริการ -->
-                <div id="summaryTab3" class="tab-panel" style="display: none;">
-                    <div id="servicesStatsContent"></div>
-                </div>
-            </div>
-        </section>
 
-     <!-- ================= SECTION 4: สรุปรายเดือน ================= -->
-        <section id="pageMonthlyReport" class="app-page full-page" style="display: none;">
-            <div class="top-bar">
-                <span class="top-title">📅 สรุปรายเดือน</span>
-            </div>
+    <!-- ================= SECTION 3: สรุปยอดรวม ================= -->
+    <section id="pageSummary" class="app-page full-page" style="display: none;">
+        <div class="top-bar">
+            <span class="top-title">📊 สรุปยอดรวม</span>
+        </div>
         
-            <!-- แท็บเลือกหน้า -->
-            <div class="tab-header tab-header-2">
-                <button class="tab-btn active" onclick="switchMainTab('pageMonthlyReport', 'monthlyTab1', event)">📋 รายงานประจำเดือน</button>
-                <button class="tab-btn" onclick="switchMainTab('pageMonthlyReport', 'monthlyTab2', event)">📊 รายได้ย้อนหลัง</button>
-            </div>
-           
-            <!-- แท็บที่ 1: รายงานประจำเดือน -->
-            <div id="monthlyTab1" class="tab-panel active">
-                <!-- กรอบที่ 1: แถบเลือกเดือน & ปุ่มพรีวิว & ปุ่มแชร์ไฟล์ -->
-                <div class="filter-card filter-card-compact">
-                    <!-- ช่องเลือกเดือน -->
-                    <input type="month" id="monthlyReportPicker" class="form-control compact-input" onchange="renderDailyTableReport()">
-                    
-                    <!-- ปุ่มพรีวิว -->
-                    <button class="btn-preview-fullscreen compact-btn" onclick="openReportFullscreen()">
-                        <i class="fas fa-expand"></i> พรีวิว
-                    </button>
-            
-                    <!-- ปุ่มแชร์ไฟล์ -->
-                    <button class="btn-export-excel compact-btn" onclick="exportMonthlyExcel()">
-                        <i class="fas fa-share-alt"></i> แชร์ไฟล์
-                    </button>
-                </div>
-            
-                <!-- กรอบที่ 2: กรอบแสดงตารางรายวัน -->
-                <div id="monthlyContent1" class="report-data-card">
-                    <!-- ตารางสรุปรายวันจะเรนเดอร์ตรงนี้ -->
-                </div>
-            </div>
-                       
-            <!-- แท็บที่ 2: รายได้ย้อนหลัง -->
-            <div id="monthlyTab2" class="tab-panel" style="display: none;">
-                <!-- กรอบที่ 1: เลือกปี -->
-                <div class="filter-card filter-card-center">
-                    <label class="filter-label">เลือกปี:</label>
-                    <select id="yearFilterSelect" class="form-control" onchange="renderYearlyIncomeSummary()">
-                        <!-- JS จะเติมปี 2026, 2025,... ให้อัตโนมัติ -->
-                    </select>
-                </div>
+        <div class="month-picker-wrap">
+            <input type="month" id="histMonth" class="form-control" onchange="loadHistMonth()">
+        </div>
         
-                <!-- กรอบที่ 2: แสดงตารางรายได้ย้อนหลัง 12 เดือน -->
-                <div id="monthlyContent2" class="report-data-card">
-                    <table class="summary-table yearly-table">
-                        <thead>
-                            <tr style="background-color: #1b5e20; color: white;">
-                                <th style="width: 25%;">เดือน</th>
-                                <th style="width: 15%;">ลูกค้า</th>
-                                <th style="width: 20%;">ยอดช่าง</th>
-                                <th style="width: 20%;">ยอดร้าน</th>
-                                <th style="width: 20%;">รายได้รวม</th>
-                            </tr>
-                        </thead>
-                        <tbody id="yearlyTableBody">
-                            <!-- รายการ 12 เดือนจะถูกเรนเดอร์ผ่าน JS -->
-                        </tbody>
-                        <tfoot>
-                            <tr style="background-color: #ffeb3b; font-weight: bold; color: #000;">
-                                <td style="text-align: center;">รวมทั้งปี</td>
-                                <td id="yearlyTotalCust">0</td>
-                                <td id="yearlyTotalBarber">0.00</td>
-                                <td id="yearlyTotalShop">0.00</td>
-                                <td id="yearlyGrandTotal">0.00</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
+        <div class="tab-header">
+            <button class="tab-btn active" onclick="switchMainTab('pageSummary', 'summaryTab1', event)">📊 รายได้ประจำเดือน</button>
+            <button class="tab-btn" onclick="switchMainTab('pageSummary', 'summaryTab2', event)">📈 วิเคราะห์รายได้</button>
+            <button class="tab-btn" onclick="switchMainTab('pageSummary', 'summaryTab3', event)">✂️ ทรงผม&บริการ</button>
+        </div>
+        
+        <div class="tab-content-wrap">
+            <div id="summaryTab1" class="tab-panel active">
+                <div id="monthlyIncomeContent"></div>
             </div>
-        </section>
-<!-- ================= SECTION 5: เปรียบเทียบ ================= -->
-<section id="pageComparison" class="app-page full-page" style="display: none;">
-    <div class="top-bar">
-        <span class="top-title">🔍 วิเคราะห์เปรียบเทียบ</span>
-    </div>
-    <div class="compare-container">
-        <div class="card-box">
-            <h3 class="card-title">🔍 เลือกช่วงเวลา & ข้อมูลที่ต้องการเปรียบเทียบ</h3>
-            
-            <div class="date-group">
-                <label class="group-label">📅 ช่วงที่ 1</label>
-                <div class="date-input-row">
-                    <input type="date" id="startDate1" class="form-control fix-compact-input">
-                    <span class="date-to">ถึง</span>
-                    <input type="date" id="endDate1" class="form-control fix-compact-input">
-                </div>
+            <div id="summaryTab2" class="tab-panel" style="display: none;">
+                <div id="incomeAnalyticsContent"></div>
             </div>
-            <div class="date-group">
-                <label class="group-label">📅 ช่วงที่ 2</label>
-                <div class="date-input-row">
-                    <input type="date" id="startDate2" class="form-control fix-compact-input">
-                    <span class="date-to">ถึง</span>
-                    <input type="date" id="endDate2" class="form-control fix-compact-input">
-                </div>
+            <div id="summaryTab3" class="tab-panel" style="display: none;">
+                <div id="servicesStatsContent"></div>
             </div>
+        </div>
+    </section>
 
-            <div class="topic-btn-row">
-                <select id="compareTopic" class="topic-select">
-                    <option value="barber">✂️ รายได้ช่าง</option>
-                    <option value="shop">💈 รายได้ร้าน</option>
-                    <option value="total" selected>💰 รายได้รวม</option>
-                </select>
-                <button type="button" class="compact-btn btn-primary" onclick="processComparison()">
-                    <i class="fas fa-chart-line"></i> ประมวลผล
+    <!-- ================= SECTION 4: สรุปรายเดือน ================= -->
+    <section id="pageMonthlyReport" class="app-page full-page" style="display: none;">
+        <div class="top-bar">
+            <span class="top-title">📅 สรุปรายเดือน</span>
+        </div>
+        
+        <div class="tab-header tab-header-2">
+            <button class="tab-btn active" onclick="switchMainTab('pageMonthlyReport', 'monthlyTab1', event)">📋 รายงานประจำเดือน</button>
+            <button class="tab-btn" onclick="switchMainTab('pageMonthlyReport', 'monthlyTab2', event)">📊 รายได้ย้อนหลัง</button>
+        </div>
+        
+        <div id="monthlyTab1" class="tab-panel active">
+            <div class="filter-card filter-card-compact">
+                <input type="month" id="monthlyReportPicker" class="form-control compact-input" onchange="renderDailyTableReport()">
+                <button class="btn-preview-fullscreen compact-btn" onclick="openReportFullscreen()">
+                    <i class="fas fa-expand"></i> พรีวิว
                 </button>
-                <button type="button" class="compact-btn btn-preview" onclick="openPreviewModal()">
-                    <i class="fas fa-eye"></i> พรีวิว
+                <button class="btn-export-excel compact-btn" onclick="exportMonthlyExcel()">
+                    <i class="fas fa-share-alt"></i> แชร์ไฟล์
                 </button>
             </div>
-        <div class="card-box margin-top full-height-card">
-            <h3 class="card-title">📊 ผลการเปรียบเทียบข้อมูล</h3>
-            <div class="table-responsive full-table-wrapper">
-                <table class="compare-grid-table" id="compareGridTable">
-                    <thead id="compareTableHead"></thead>
-                    <tbody id="comparisonSingleContent"></tbody>
-                    <tfoot id="compareTableFoot"></tfoot>
+            <div id="monthlyContent1" class="report-data-card"></div>
+        </div>
+                   
+        <div id="monthlyTab2" class="tab-panel" style="display: none;">
+            <div class="filter-card filter-card-center">
+                <label class="filter-label">เลือกปี:</label>
+                <select id="yearFilterSelect" class="form-control" onchange="renderYearlyIncomeSummary()"></select>
+            </div>
+            <div id="monthlyContent2" class="report-data-card">
+                <table class="summary-table yearly-table">
+                    <thead>
+                        <tr style="background-color: #1b5e20; color: white;">
+                            <th style="width: 25%;">เดือน</th>
+                            <th style="width: 15%;">ลูกค้า</th>
+                            <th style="width: 20%;">ยอดช่าง</th>
+                            <th style="width: 20%;">ยอดร้าน</th>
+                            <th style="width: 20%;">รายได้รวม</th>
+                        </tr>
+                    </thead>
+                    <tbody id="yearlyTableBody"></tbody>
+                    <tfoot>
+                        <tr style="background-color: #ffeb3b; font-weight: bold; color: #000;">
+                            <td style="text-align: center;">รวมทั้งปี</td>
+                            <td id="yearlyTotalCust">0</td>
+                            <td id="yearlyTotalBarber">0.00</td>
+                            <td id="yearlyTotalShop">0.00</td>
+                            <td id="yearlyGrandTotal">0.00</td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- ✅ Modal แสดงตารางพรีวิวเต็มจอ — วางล่างสุด ก่อนปิด </body> -->
-<div id="fullReportModal" class="full-report-modal" style="display: none;">
-    <div class="full-report-modal-header">
-        <span class="full-report-modal-title"></span>
-        <button class="btn-close-modal" onclick="closeReportFullscreen()">
-            ✕ ปิดหน้านี้
-        </button>
-    </div>
-    <div id="fullReportContent" class="full-report-modal-content"></div>
-</div>
-
-            <!-- ✅ แถบนำทางล่างสุด -->
-            <nav class="bottom-nav">
-            <div onclick="switchMainView('home')" id="navHome" class="nav-item">
-                <i class="fas fa-home"></i><span>หน้าแรก</span>
-            </div>
-            <div onclick="switchMainView('workGroup', 1)" id="nav1" class="nav-item">
-                <i class="fas fa-edit"></i><span>บันทึก</span>
-            </div>
-            <div onclick="switchMainView('workGroup', 2)" id="nav2" class="nav-item">
-                <i class="fas fa-chart-bar"></i><span>รายงาน</span>
-            </div>
-            <div onclick="switchMainView('workGroup', 3)" id="nav3" class="nav-item">
-                <i class="fas fa-wallet"></i><span>บัญชี</span>
-            </div>
-            <div onclick="openSettings()" id="navSettings" class="nav-item">
-                <i class="fas fa-cog"></i><span>ตั้งค่า</span>
-            </div>
-        </nav>
-
-        <!-- ================= MODAL ตั้งค่าระบบ ================= -->
-<div id="modalSet" class="modal">
-    <div class="modal-content settings-modal">
-        <h3 class="settings-title">⚙️ ตั้งค่าระบบ</h3>
-        
-        <!-- ข้อมูลทั่วไป -->
-        <label class="settings-label" for="setShop">ชื่อร้าน</label>
-        <input type="text" id="setShop" class="settings-input" placeholder="ชื่อร้าน">
-        
-        <!-- 💰 ส่วนแบ่งทั่วไป -->
-        <div class="settings-divider">💰 ส่วนแบ่งปกติ</div>
-        <div class="settings-row">
-            <div class="settings-col">
-                <label class="settings-label sm-label" for="setPerc">ส่วนแบ่งช่าง (%)</label>
-                <input type="number" id="setPerc" class="settings-input" placeholder="% ช่าง">
-            </div>
-            <div class="settings-col">
-                <label class="settings-label sm-label" for="setGuar">ประกันรายได้ (฿)</label>
-                <input type="number" id="setGuar" class="settings-input" placeholder="ประกัน">
-            </div>
+    <!-- ================= SECTION 5: เปรียบเทียบ ================= -->
+    <section id="pageComparison" class="app-page full-page" style="display: none;">
+        <div class="top-bar">
+            <span class="top-title">🔍 วิเคราะห์เปรียบเทียบ</span>
         </div>
-
-        <!-- 🚗 เงื่อนไขนอกสถานที่ -->
-        <div class="settings-divider">🚗 งานนอกสถานที่</div>
-        <div class="settings-row">
-            <div class="settings-col">
-                <label class="settings-label sm-label" for="setOutBarber">ช่างได้ (฿)</label>
-                <input type="number" id="setOutBarber" class="settings-input" placeholder=" (฿)">
-            </div>
-            <div class="settings-col">
-                <label class="settings-label sm-label" for="setOutShop">ร้านได้ (฿)</label>
-                <input type="number" id="setOutShop" class="settings-input" placeholder=" (฿)">
-            </div>
-        </div>
-
-        <!-- 🎁 เงื่อนไขโปรโมชั่น -->
-        <div class="settings-divider">🎁 โปรโมชั่น </div>
-        <div class="settings-row">
-            <div class="settings-col">
-                <label class="settings-label sm-label" for="setPromoBarber">ชดเชยช่าง (฿)</label>
-                <input type="number" id="setPromoBarber" class="settings-input" placeholder="(฿)">
-            </div>
-            <div class="settings-col">
-                <label class="settings-label sm-label" for="setPromoShop">ชดเชยร้าน (฿)</label>
-                <input type="number" id="setPromoShop" class="settings-input" placeholder="(฿)">
-            </div>
-        </div>
-
-        <!-- การแบ่งเงินส่วนเกิน -->
-        <div class="settings-radio-group">
-            <label class="settings-label sm-label">ส่วนเกิน (บริการเพิ่ม/นอกสถานที่)</label>
-            <div class="radio-option">
-                <input type="radio" id="extraSplitNormal" name="extraSplitRule" value="normal" checked>
-                <label for="extraSplitNormal">แบ่งตามส่วนแบ่งปกติ</label>
-            </div>
-            <div class="radio-option">
-                <input type="radio" id="extraSplitBarber" name="extraSplitRule" value="barber">
-                <label for="extraSplitBarber">ให้ช่างทั้งหมด</label>
-            </div>
-        </div>
-        
-        <!-- 🎨 การแสดงผลและระบบ -->
-        <div class="settings-divider">🎨 การแสดงผล</div>
-        <label class="settings-label" for="setTheme">ธีม</label>
-        <select id="setTheme" class="settings-select" onchange="applyTheme(this.value)">
-            <option value="light">⛅ ธีมสว่าง</option>
-            <option value="navy">🌌 ธีมน้ำเงิน</option>
-            <option value="vintage">🌑 ธีมดำ-ทอง</option>
-        </select>
-        
-        <div class="settings-row">
-            <div class="settings-col">
-                <label class="settings-label" for="setSound">เสียงแจ้งเตือน</label>
-                <div class="settings-icon-wrap">
-                    <select id="setSound" class="settings-select icon-select">
-                        <option value="on" selected>เปิดเสียง</option>
-                        <option value="off">ปิดเสียง</option>
-                    </select>
-                    <i class="fas fa-volume-up"></i>
+        <div class="compare-container">
+            <div class="card-box">
+                <h3 class="card-title">🔍 เลือกช่วงเวลา & ข้อมูลที่ต้องการเปรียบเทียบ</h3>
+                
+                <div class="date-group">
+                    <label class="group-label">📅 ช่วงที่ 1</label>
+                    <div class="date-input-row">
+                        <input type="date" id="startDate1" class="form-control fix-compact-input">
+                        <span class="date-to">ถึง</span>
+                        <input type="date" id="endDate1" class="form-control fix-compact-input">
+                    </div>
                 </div>
-            </div>
-            <div class="settings-col">
-                <label class="settings-label" for="setVoice">เสียงพูด</label>
-                <div class="settings-icon-wrap">
-                    <select id="setVoice" class="settings-select icon-select">
-                        <option value="female" selected>เสียงหญิง</option>
-                        <option value="male">เสียงชาย</option>
+                <div class="date-group">
+                    <label class="group-label">📅 ช่วงที่ 2</label>
+                    <div class="date-input-row">
+                        <input type="date" id="startDate2" class="form-control fix-compact-input">
+                        <span class="date-to">ถึง</span>
+                        <input type="date" id="endDate2" class="form-control fix-compact-input">
+                    </div>
+                </div>
+
+                <div class="topic-btn-row">
+                    <select id="compareTopic" class="topic-select">
+                        <option value="barber">✂️ รายได้ช่าง</option>
+                        <option value="shop">💈 รายได้ร้าน</option>
+                        <option value="total" selected>💰 รายได้รวม</option>
                     </select>
-                    <i class="fas fa-user-friends"></i>
+                    <button type="button" class="compact-btn btn-primary" onclick="processComparison()">
+                        <i class="fas fa-chart-line"></i> ประมวลผล
+                    </button>
+                    <button type="button" class="compact-btn btn-preview" onclick="openPreviewModal()">
+                        <i class="fas fa-eye"></i> พรีวิว
+                    </button>
+                </div>
+            </div> <!-- ปิด card-box -->
+
+            <div class="card-box margin-top full-height-card">
+                <h3 class="card-title">📊 ผลการเปรียบเทียบข้อมูล</h3>
+                <div class="table-responsive full-table-wrapper">
+                    <table class="compare-grid-table" id="compareGridTable">
+                        <thead id="compareTableHead"></thead>
+                        <tbody id="comparisonSingleContent"></tbody>
+                        <tfoot id="compareTableFoot"></tfoot>
+                    </table>
                 </div>
             </div>
         </div>
-        
-        <div class="settings-btn-row-3">
-            <button type="button" class="settings-btn secondary-btn" onclick="exportBackup()">
-                <i class="fas fa-file-download"></i> สำรองข้อมูล
-            </button>
-            <button type="button" class="settings-btn secondary-btn" onclick="document.getElementById('fileInput').click()">
-                <i class="fas fa-file-upload"></i> นำเข้าข้อมูล
-            </button>
-            <input type="file" id="fileInput" class="hidden-file-input" accept=".json" onchange="importBackup(this)">
-            <button type="button" class="settings-btn danger-btn" onclick="clearData()">
-                <i class="fas fa-trash-alt"></i> ล้างข้อมูล
-            </button>
+    </section>
+
+    <!-- Modal พรีวิวเต็มจอ -->
+    <div id="fullReportModal" class="full-report-modal" style="display: none;">
+        <div class="full-report-modal-header">
+            <span class="full-report-modal-title"></span>
+            <button class="btn-close-modal" onclick="closeReportFullscreen()">✕ ปิดหน้านี้</button>
         </div>
-        
-        <div class="settings-btn-row-2">
-            <button class="settings-btn primary-btn" onclick="saveSettings()">บันทึก</button>
-            <button class="settings-btn cancel-btn" onclick="closeSettings()">ปิด</button>
-        </div>
-        
-        <!-- ✅ แสดงเลขเวอร์ชัน -->
-        <div class="settings-version" id="appVersionDisplay"></div>
+        <div id="fullReportContent" class="full-report-modal-content"></div>
     </div>
-</div>
+
+    <!-- แถบนำทางล่างสุด -->
+    <nav class="bottom-nav">
+        <div onclick="switchMainView('home')" id="navHome" class="nav-item">
+            <i class="fas fa-home"></i><span>หน้าแรก</span>
+        </div>
+        <div onclick="switchMainView('workGroup', 1)" id="nav1" class="nav-item">
+            <i class="fas fa-edit"></i><span>บันทึก</span>
+        </div>
+        <div onclick="switchMainView('workGroup', 2)" id="nav2" class="nav-item">
+            <i class="fas fa-chart-bar"></i><span>รายงาน</span>
+        </div>
+        <div onclick="switchMainView('workGroup', 3)" id="nav3" class="nav-item">
+            <i class="fas fa-wallet"></i><span>บัญชี</span>
+        </div>
+        <div onclick="openSettings()" id="navSettings" class="nav-item">
+            <i class="fas fa-cog"></i><span>ตั้งค่า</span>
+        </div>
+    </nav>
+
+    <!-- MODAL ตั้งค่าระบบ -->
+    <div id="modalSet" class="modal">
+        <div class="modal-content settings-modal">
+            <h3 class="settings-title">⚙️ ตั้งค่าระบบ</h3>
+            
+            <label class="settings-label" for="setShop">ชื่อร้าน</label>
+            <input type="text" id="setShop" class="settings-input" placeholder="ชื่อร้าน">
+            
+            <div class="settings-divider">💰 ส่วนแบ่งปกติ</div>
+            <div class="settings-row">
+                <div class="settings-col">
+                    <label class="settings-label sm-label" for="setPerc">ส่วนแบ่งช่าง (%)</label>
+                    <input type="number" id="setPerc" class="settings-input" placeholder="% ช่าง">
+                </div>
+                <div class="settings-col">
+                    <label class="settings-label sm-label" for="setGuar">ประกันรายได้ (฿)</label>
+                    <input type="number" id="setGuar" class="settings-input" placeholder="ประกัน">
+                </div>
+            </div>
+
+            <div class="settings-divider">🚗 งานนอกสถานที่</div>
+            <div class="settings-row">
+                <div class="settings-col">
+                    <label class="settings-label sm-label" for="setOutBarber">ช่างได้ (฿)</label>
+                    <input type="number" id="setOutBarber" class="settings-input" placeholder=" (฿)">
+                </div>
+                <div class="settings-col">
+                    <label class="settings-label sm-label" for="setOutShop">ร้านได้ (฿)</label>
+                    <input type="number" id="setOutShop" class="settings-input" placeholder=" (฿)">
+                </div>
+            </div>
+
+            <div class="settings-divider">🎁 โปรโมชั่น </div>
+            <div class="settings-row">
+                <div class="settings-col">
+                    <label class="settings-label sm-label" for="setPromoBarber">ชดเชยช่าง (฿)</label>
+                    <input type="number" id="setPromoBarber" class="settings-input" placeholder="(฿)">
+                </div>
+                <div class="settings-col">
+                    <label class="settings-label sm-label" for="setPromoShop">ชดเชยร้าน (฿)</label>
+                    <input type="number" id="setPromoShop" class="settings-input" placeholder="(฿)">
+                </div>
+            </div>
+
+            <div class="settings-radio-group">
+                <label class="settings-label sm-label">ส่วนเกิน (บริการเพิ่ม/นอกสถานที่)</label>
+                <div class="radio-option">
+                    <input type="radio" id="extraSplitNormal" name="extraSplitRule" value="normal" checked>
+                    <label for="extraSplitNormal">แบ่งตามส่วนแบ่งปกติ</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" id="extraSplitBarber" name="extraSplitRule" value="barber">
+                    <label for="extraSplitBarber">ให้ช่างทั้งหมด</label>
+                </div>
+            </div>
+            
+            <div class="settings-divider">🎨 การแสดงผล</div>
+            <label class="settings-label" for="setTheme">ธีม</label>
+            <select id="setTheme" class="settings-select" onchange="applyTheme(this.value)">
+                <option value="light">⛅ ธีมสว่าง</option>
+                <option value="navy">🌌 ธีมน้ำเงิน</option>
+                <option value="vintage">🌑 ธีมดำ-ทอง</option>
+            </select>
+            
+            <div class="settings-row">
+                <div class="settings-col">
+                    <label class="settings-label" for="setSound">เสียงแจ้งเตือน</label>
+                    <div class="settings-icon-wrap">
+                        <select id="setSound" class="settings-select icon-select">
+                            <option value="on" selected>เปิดเสียง</option>
+                            <option value="off">ปิดเสียง</option>
+                        </select>
+                        <i class="fas fa-volume-up"></i>
+                    </div>
+                </div>
+                <div class="settings-col">
+                    <label class="settings-label" for="setVoice">เสียงพูด</label>
+                    <div class="settings-icon-wrap">
+                        <select id="setVoice" class="settings-select icon-select">
+                            <option value="female" selected>เสียงหญิง</option>
+                            <option value="male">เสียงชาย</option>
+                        </select>
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-btn-row-3">
+                <button type="button" class="settings-btn secondary-btn" onclick="exportBackup()">
+                    <i class="fas fa-file-download"></i> สำรองข้อมูล
+                </button>
+                <button type="button" class="settings-btn secondary-btn" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-file-upload"></i> นำเข้าข้อมูล
+                </button>
+                <input type="file" id="fileInput" class="hidden-file-input" accept=".json" onchange="importBackup(this)">
+                <button type="button" class="settings-btn danger-btn" onclick="clearData()">
+                    <i class="fas fa-trash-alt"></i> ล้างข้อมูล
+                </button>
+            </div>
+            
+            <div class="settings-btn-row-2">
+                <button class="settings-btn primary-btn" onclick="saveSettings()">บันทึก</button>
+                <button class="settings-btn cancel-btn" onclick="closeSettings()">ปิด</button>
+            </div>
+            
+            <div class="settings-version" id="appVersionDisplay"></div>
+        </div>
+    </div>
+
+    <!-- Modals อื่นๆ -->
     <div id="reportModal" class="modal">
         <div class="modal-content">
             <div class="modal-head">
