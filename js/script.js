@@ -2166,20 +2166,23 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         calculatedMonthShop += wShopEarn;
     });
 
-    // ✅ ใช้ค่าที่ส่งมาหรือคำนวณสำรอง
+    // ✅ ใช้ค่าที่ส่งมาหรือคำนวณสำรอง — แสดง 0 เมื่อไม่มีข้อมูล
     const finalTotalIncome = monthTotal !== undefined ? Number(monthTotal) : (calculatedMonthBarber + calculatedMonthShop);
     const finalBarberEarn = monthBarber !== undefined ? Number(monthBarber) : calculatedMonthBarber;
     
     // ✅ สูตรหลักที่ถูกต้อง: ร้าน = รวม − ช่าง
     const finalShopEarn = Math.max(0, finalTotalIncome - finalBarberEarn);
     
-    // ✅ แสดง 0 เมื่อไม่มีค่าหรือไม่มีการใช้ประกัน
+    // ✅ แก้ไข: บังคับตรงกับหน้าแรก + แสดง 0 เมื่อไม่มี/ผิดพลาด
     let displayGuarDays;
-      if (monthGuarDays !== undefined && monthGuarDays !== null && monthGuarDays !== "") {
-          displayGuarDays = Number(monthGuarDays) || 0;
-      } else {
-          displayGuarDays = calculatedGuarDays > 0 ? calculatedGuarDays : 0;
-      }
+    if (monthGuarDays !== undefined && monthGuarDays !== null && monthGuarDays !== "") {
+        const parsed = Number(monthGuarDays);
+        displayGuarDays = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+    } else {
+        displayGuarDays = calculatedGuarDays > 0 ? calculatedGuarDays : 0;
+    }
+    // ป้องกันค่าว่าง/ผิดพลาด
+    if (!displayGuarDays || displayGuarDays < 0) displayGuarDays = 0;
 
     // --- 2. สถิติรายวัน ---
     const dayAverages = Object.entries(dayStats).filter(([_, d]) => d.count > 0).map(([name, d]) => ({ name, avg: d.total / d.count }));
@@ -2232,7 +2235,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
             ? `สัปดาห์ที่มีรายได้สูงสุด: <b>${topIncomeWeek[0]}</b> (฿${topIncomeWeek[1].income.toLocaleString()})` 
             : `สัปดาห์ที่มีรายได้สูงสุด: <b>-</b>`
     ];
-
     if (totalNew || totalRegular || totalOffsite) {
         const newColor = "#38bdf8", regColor = "#c084fc", offsiteColor = "#f97316";
         insights.push(`โครงสร้างลูกค้าเดือนนี้: <b>(ประจำ ${totalRegular || 0} / ใหม่ ${totalNew || 0} / นอกสถานที่ ${totalOffsite || 0})</b>`);
