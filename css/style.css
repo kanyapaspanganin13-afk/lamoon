@@ -260,12 +260,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{padding:0;margin:0;cursor:
 /* ---------- Modal ตั้งค่า ---------- */
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:10000;align-items:center;justify-content:center;padding:12px;}
 .modal-content.settings-modal,.settings-card-container{background:var(--card);width:100%;max-width:380px;border-radius:24px;padding:16px;border:1px solid var(--border);max-height:90vh;overflow-y:auto;overflow-x:hidden;color:var(--text);box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,.5);transition:background .3s,color .3s;}
-.settings-title,.settings-header h3{text-align:center;font-size:18px;font-weight:900;margin:0 0 10px;color:var(--text);}
-.settings-divider{font-size:11.5px !important;font-weight:800 !important;color:var(--accent);border-bottom:1px dashed var(--border);padding-bottom:2px;margin:10px 0 6px !important;display:flex;align-items:center;gap:4px;}
-.settings-label{font-size:11px !important;font-weight:700;margin:0 0 3px;display:block;opacity:.85;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.settings-label.sm-label{font-size:10.5px !important;}
+.settings-title,.settings-header h3{text-align:center;font-size:18px;font-weight:900;margin:0 0 10px;color:var(--text) !important;}
+.settings-divider{font-size:11.5px !important;font-weight:800 !important;color:var(--accent) !important;border-bottom:1px dashed var(--border);padding-bottom:2px;margin:10px 0 6px !important;display:flex;align-items:center;gap:4px;}
+.settings-label{font-size:11px !important;font-weight:700;margin:0 0 3px;display:block;color:var(--text) !important;opacity:1 !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.settings-label.sm-label{font-size:10.5px !important;color:var(--text) !important;opacity:1 !important;}
 .settings-radio-group{background:var(--bg) !important;border:1px solid var(--border) !important;border-radius:14px !important;padding:8px 12px !important;margin:4px 0 10px !important;display:flex !important;flex-direction:column !important;gap:6px !important;height:auto !important;min-height:unset !important;max-height:none !important;box-sizing:border-box !important;}
 .radio-option{display:flex !important;align-items:center !important;gap:8px !important;margin:0 !important;padding:4px 0 !important;font-size:12px !important;font-weight:700 !important;color:var(--text) !important;cursor:pointer;line-height:1.2 !important;height:auto !important;min-height:unset !important;}
+.radio-option label{color:var(--text) !important;opacity:1 !important;cursor:pointer;}
 .radio-option input[type="radio"]{accent-color:var(--accent);width:16px !important;height:16px !important;min-width:16px !important;min-height:16px !important;cursor:pointer;margin:0 !important;}
 .settings-grid-2,.settings-row{display:grid !important;grid-template-columns:1fr 1fr !important;gap:8px;width:100%;margin-bottom:8px;box-sizing:border-box;}
 .settings-col{min-width:0;}
@@ -278,14 +279,14 @@ input[type="date"]::-webkit-calendar-picker-indicator{padding:0;margin:0;cursor:
 .hidden-file-input,input[type="file"]#fileInput,.settings-btn-row-3 input[type="file"]{display:none !important;}
 .settings-grid-3,.settings-btn-row-3{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:6px;margin:12px 0 10px;width:100%;}
 .settings-grid-main,.settings-btn-row-2{display:grid !important;grid-template-columns:2fr 1.2fr !important;gap:8px;margin-top:6px;width:100%;}
-.settings-btn-sub,.settings-btn{flex:1;height:38px;font-size:11px;font-weight:800;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;box-sizing:border-box;white-space:nowrap;}
-.secondary-btn{background:var(--bg);color:var(--text);}
-.settings-btn-sub.danger,.danger-btn{background:rgba(239,68,68,.1);color:#ef4444;border-color:rgba(239,68,68,.25);}
-.settings-btn-save,.primary-btn{background:var(--accent);color:var(--btn-text,#fff);border:none;font-size:15px;font-weight:800;height:42px;border-radius:14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.15);}
-.settings-btn-close,.cancel-btn{background:var(--bg);color:var(--text);border:1px solid var(--border);font-size:14px;font-weight:800;height:42px;border-radius:14px;opacity:.8;cursor:pointer;}
-.settings-footer,.settings-version{text-align:center;line-height:1.3;opacity:.5;margin-top:8px;color:var(--text);}
-.settings-footer .version,.settings-version{font-size:10px;font-weight:600;}
-.settings-footer .update-date{font-size:9px;font-weight:400;}
+.settings-btn-sub,.settings-btn{flex:1;height:38px;font-size:11px;font-weight:800;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text) !important;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;box-sizing:border-box;white-space:nowrap;}
+.secondary-btn{background:var(--bg);color:var(--text) !important;}
+.settings-btn-sub.danger,.danger-btn{background:rgba(239,68,68,.1);color:#ef4444 !important;border-color:rgba(239,68,68,.25);}
+.settings-btn-save,.primary-btn{background:var(--accent);color:var(--btn-text,#fff) !important;border:none;font-size:15px;font-weight:800;height:42px;border-radius:14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.15);}
+.settings-btn-close,.cancel-btn{background:var(--bg);color:var(--text) !important;border:1px solid var(--border);font-size:14px;font-weight:800;height:42px;border-radius:14px;opacity:1 !important;cursor:pointer;}
+.settings-footer,.settings-version{text-align:center;line-height:1.3;opacity:.8;margin-top:8px;color:var(--text) !important;}
+.settings-footer .version,.settings-version{font-size:10px;font-weight:600;color:var(--text) !important;}
+.settings-footer .update-date{font-size:9px;font-weight:400;color:var(--text) !important;}
 
 /* =====================================================
    ✨ ปรับแต่ง SweetAlert2
