@@ -2726,12 +2726,15 @@ function openReportFullscreen() {
     const modalContent = document.getElementById('fullReportContent');
     if (!modalContent) return;
 
-    // ========= เพิ่ม: ตรวจสอบหน้าที่กำลังใช้งานอยู่จริง =========
-    // 1. หาแท็บที่เปิดใช้งานอยู่
-    const activeTab = document.querySelector('.tab-btn.active');
-    const activeTabId = activeTab?.dataset.tab || activeTab?.id || '';
+    // ===== ตรวจสอบหน้าหลักที่กำลังเปิดอยู่ =====
+    const pageMonthly = document.getElementById('pageMonthlyReport');
+    const pageCompare = document.getElementById('pageComparison');
     
-    // 2. ดึงข้อมูลทั้งสองส่วน
+    // ตรวจสอบว่าหน้าไหนกำลังแสดงอยู่
+    const isMonthlyPage = pageMonthly && (pageMonthly.style.display !== 'none');
+    const isComparePage = pageCompare && (pageCompare.style.display !== 'none');
+
+    // ดึงข้อมูล
     const compareBody = document.getElementById('comparisonSingleContent');
     const compareHead = document.getElementById('compareTableHead');
     const compareFoot = document.getElementById('compareTableFoot');
@@ -2740,62 +2743,63 @@ function openReportFullscreen() {
     const hasCompareData = compareBody && compareBody.innerHTML.trim() !== '';
     const hasMonthlyData = monthlyCard && monthlyCard.innerHTML.trim() !== '';
 
-    // 3. ตัดสินใจเลือกข้อมูลตามหน้าที่กำลังเปิดอยู่
     let contentToShow = '';
     let sourceType = '';
 
-    // ✅ ถ้าอยู่หน้าเปรียบเทียบ หรือมีคลาส/ตัวบอกว่าเป็นหน้าเปรียบเทียบ
-    const isComparePage = 
-        activeTabId.includes('compare') || 
-        document.getElementById('pageCompare')?.classList.contains('active') ||
-        document.querySelector('#pageCompare.active') !== null;
-
-    // ✅ ถ้าอยู่หน้าสรุปรายเดือน
-    const isMonthlyPage = 
-        activeTabId.includes('monthly') || activeTabId.includes('report') ||
-        document.getElementById('pageMonthly')?.classList.contains('active') ||
-        document.querySelector('#pageMonthly.active') !== null;
-
-    // ลำดับสำคัญ: เลือกตามหน้าที่เปิดอยู่ก่อน
-    if (isMonthlyPage && hasMonthlyData) {
-        // กำลังดูรายเดือน → แสดงรายเดือน
-        contentToShow = monthlyCard.innerHTML;
-        sourceType = 'monthly';
+    // ===== เลือกข้อมูลตามหน้าที่กำลังเปิดอยู่ =====
+    if (isMonthlyPage) {
+        // ✅ อยู่หน้าสรุปรายเดือน → แสดงข้อมูลรายเดือน
+        if (hasMonthlyData) {
+            contentToShow = monthlyCard.innerHTML;
+            sourceType = 'monthly';
+        } else {
+            const msg = "กรุณาเลือกเดือนก่อนครับ";
+            if (typeof notify === 'function') notify("info", "ยังไม่มีข้อมูล", msg);
+            else alert(msg);
+            return;
+        }
     }
-    else if (isComparePage && hasCompareData) {
-        // กำลังดูเปรียบเทียบ → แสดงเปรียบเทียบ
-        contentToShow = `
-            <table style="width:100%; border-collapse:collapse; font-family:Tahoma,sans-serif; text-align:center; font-size:11px;">
-                <thead>${compareHead?.innerHTML || ''}</thead>
-                <tbody>${compareBody.innerHTML}</tbody>
-                <tfoot>${compareFoot?.innerHTML || ''}</tfoot>
-            </table>
-        `;
-        sourceType = 'compare';
-    }
-    // ถ้าไม่รู้ว่าอยู่หน้าไหน → ใช้ข้อมูลที่มีอยู่สำรอง
-    else if (hasMonthlyData) {
-        contentToShow = monthlyCard.innerHTML;
-        sourceType = 'monthly';
-    }
-    else if (hasCompareData) {
-        contentToShow = `
-            <table style="width:100%; border-collapse:collapse; font-family:Tahoma,sans-serif; text-align:center; font-size:11px;">
-                <thead>${compareHead?.innerHTML || ''}</thead>
-                <tbody>${compareBody.innerHTML}</tbody>
-                <tfoot>${compareFoot?.innerHTML || ''}</tfoot>
-            </table>
-        `;
-        sourceType = 'compare';
+    else if (isComparePage) {
+        // ✅ อยู่หน้าเปรียบเทียบ → แสดงข้อมูลเปรียบเทียบ
+        if (hasCompareData) {
+            contentToShow = `
+                <table style="width:100%; border-collapse:collapse; font-family:Tahoma,sans-serif; text-align:center; font-size:11px;">
+                    <thead>${compareHead?.innerHTML || ''}</thead>
+                    <tbody>${compareBody.innerHTML}</tbody>
+                    <tfoot>${compareFoot?.innerHTML || ''}</tfoot>
+                </table>
+            `;
+            sourceType = 'compare';
+        } else {
+            const msg = "กรุณากดปุ่ม 'ประมวลผล' ก่อนครับ";
+            if (typeof notify === 'function') notify("info", "ยังไม่มีข้อมูล", msg);
+            else alert(msg);
+            return;
+        }
     }
     else {
-        const msg = "กรุณาเลือกข้อมูลแล้วกดประมวลผลก่อนครับ";
-        if (typeof notify === 'function') notify("error", "ไม่พบข้อมูล", msg);
-        else alert(msg);
-        return;
+        // ไม่รู้อยู่หน้าไหน → ใช้ข้อมูลที่มี
+        if (hasMonthlyData) {
+            contentToShow = monthlyCard.innerHTML;
+            sourceType = 'monthly';
+        } else if (hasCompareData) {
+            contentToShow = `
+                <table style="width:100%; border-collapse:collapse; font-family:Tahoma,sans-serif; text-align:center; font-size:11px;">
+                    <thead>${compareHead?.innerHTML || ''}</thead>
+                    <tbody>${compareBody.innerHTML}</tbody>
+                    <tfoot>${compareFoot?.innerHTML || ''}</tfoot>
+                </table>
+            `;
+            sourceType = 'compare';
+        } else {
+            const msg = "กรุณาเลือกข้อมูลแล้วกดประมวลผลก่อนครับ";
+            if (typeof notify === 'function') notify("error", "ไม่พบข้อมูล", msg);
+            else alert(msg);
+            return;
+        }
     }
 
-    // แสดงผล
+    // แสดงเนื้อหา
     modalContent.innerHTML = contentToShow;
 
     // แสดง Modal
@@ -2805,8 +2809,7 @@ function openReportFullscreen() {
         document.body.style.overflow = 'hidden';
     }
 
-    // ช่วยดีบัก — ดูที่ Console F12
-    console.log(`📄 แสดงรายงานประเภท: ${sourceType}`);
+    console.log(`📄 พรีวิว: ${sourceType === 'monthly' ? 'สรุปรายเดือน' : 'เปรียบเทียบข้อมูล'}`);
 }
 // ✅ ปิดพรีวิว และล้าง HTML ป้องกันข้อมูลตกค้าง
 function closeReportFullscreen() {
