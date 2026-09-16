@@ -655,9 +655,11 @@ async function handleSave(event) {
     const isFree = /^Free/.test(curPay);
     const shares = typeof calcShares === 'function' ? calcShares(price, custTypeVal, isFree) : { b: 0, s: price };
     
+    // บันทึกข้อมูลลงฐานข้อมูล (ใส่ทั้ง startTime และ time)
     db.push({
         id: Date.now(), 
         date: dInp, 
+        startTime: tStart, // 👈 เพิ่มไว้ป้องกัน Error reading 'startTime'
         time: tStart,
         endTime: tEnd || tStart, 
         price, 
@@ -675,7 +677,7 @@ async function handleSave(event) {
     saveDB();
     notify("success", "บันทึกสำเร็จ", "จัดเก็บข้อมูลเรียบร้อย");
     
-    const btn = event?.currentTarget || document.querySelector(".btn-save");
+    const btn = event?.currentTarget || document.querySelector(".btn-pay");
     if (btn) {
         const oc = btn.innerHTML, ob = btn.style.background;
         btn.style.background = "var(--success)";
