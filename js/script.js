@@ -652,6 +652,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* ========== SECTION 10: BUSINESS LOGIC & COMMISSION CALCULATION ========== */
 // 1. ฟังก์ชันคุมการเลือกประเภทลูกค้า (ล็อก/ปลดล็อกราคา)
+// 1. ฟังก์ชันจัดการเมื่อเปลี่ยนประเภทลูกค้า
 function handleCustTypeChange(value) {
     const priceInp = document.getElementById('priceInp');
     if (!priceInp) return;
@@ -659,27 +660,36 @@ function handleCustTypeChange(value) {
     if (value === 'offsite') {
         priceInp.value = 300;
         priceInp.readOnly = true;
-        priceInp.style.backgroundColor = '#e9ecef';
+        priceInp.style.opacity = '0.7'; // ใช้ opacity แทนเพื่อรองรับทุกธีมสี
     } else {
         if (priceInp.value == 300) priceInp.value = '';
         priceInp.readOnly = false;
-        priceInp.style.backgroundColor = '';
+        priceInp.style.opacity = '1';
     }
 }
-// 2. ฟังก์ชันคำนวณส่วนแบ่งช่าง/ร้าน (สำหรับใช้ตอนบันทึกหรือทำรายงาน)
-function calculateShares(custType, price, shopCommissionRate = 0.50) {
+
+// 2. ฟังก์ชันคำนวณส่วนแบ่งช่าง/ร้าน (ปรับ Return key ให้รองรับ handleSave)
+function calcShares(price, custType, isFree = false, shopCommissionRate = 0.50) {
     const numericPrice = parseFloat(price) || 0;
     
+    // หากเป็นรายการฟรี
+    if (isFree) {
+        return { b: 0, s: 0, barberShare: 0, shopShare: 0 };
+    }
+    
     if (custType === 'offsite') {
-        // 🚗 นอกสถานที่: ค่าคงที่ ช่าง 200 / ร้าน 100 ไม่คิด %
-        return { barberShare: 200, shopShare: 100 };
+        // 🚗 นอกสถานที่: ค่าคงที่ ช่าง 200 / ร้าน 100
+        return { b: 200, s: 100, barberShare: 200, shopShare: 100 };
     } else {
-        // ✂️ ในร้านปกติ: คำนวณตาม % ที่ตั้งค่าไว้
+        // ✂️ ในร้านปกติ: คำนวณตาม % ที่กำหนด
         const barber = Math.round(numericPrice * shopCommissionRate);
         const shop = numericPrice - barber;
-        return { barberShare: barber, shopShare: shop };
+        return { b: barber, s: shop, barberShare: barber, shopShare: shop };
     }
 }
+
+// สร้าง Alias ไว้รองรับกรณีที่มีฟังก์ชันอื่นเรียกใช้ชื่อเต็ม
+const calculateShares = calcShares;
 /* ========= SECTION 11: SAVE RECORD ========= */
 async function handleSave(event) {
     const $ = (id) => document.getElementById(id);
