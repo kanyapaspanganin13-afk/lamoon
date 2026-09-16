@@ -1722,7 +1722,7 @@ function loadHistDaily() {
             
             let payText = "";
             if (r.pay === 'Mix') {
-                payText = `🌓 ผสม (สด:${Number(r.payCash \vert{}\vert{} 0).toLocaleString()}/โอน:${Number(r.payTrans || 0).toLocaleString()})`;
+                payText = `🌓 ผสม (สด:${Number(r.payCash || 0).toLocaleString()}/โอน:${Number(r.payTrans || 0).toLocaleString()})`;
             } else {
                 payText = (r.pay === 'Trans' || r.pay === 'โอน') ? '📱 โอน' : '💶 เงินสด';
             }
@@ -1744,7 +1744,7 @@ function loadHistDaily() {
                     <div style="width:28px; height:28px; background:rgba(255,255,255,0.08); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:#94a3b8;">${index + 1}</div>
                     <div>
                         <div style="font-weight:700; font-size:14px; color:#f8fafc;">${serviceText}${custTag}</div>
-                        <div style="font-size:13px; color:#94a3b8; font-weight:500; margin-top:2px;">⏱ ${fullTime} •${payText}</div>
+                        <div style="font-size:13px; color:#94a3b8; font-weight:500; margin-top:2px;">⏱ ${fullTime} • ${payText}</div>
                     </div>
                 </div>
                 <div style="text-align:right;">
@@ -1764,7 +1764,7 @@ function loadHistDaily() {
         const dayIdx = dateObj.getDay();
         const shortYear = (y + 543).toString().slice(-2);
         
-        displayTitleDate = `${dayNum}${months[m - 1]} ${shortYear} (${days[dayIdx]})`;
+        displayTitleDate = `${dayNum} ${months[m - 1]} ${shortYear} (${days[dayIdx]})`;
     } catch (e) {
         displayTitleDate = d;
     }
