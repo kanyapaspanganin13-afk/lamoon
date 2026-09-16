@@ -659,9 +659,9 @@ async function handleSave(event) {
     db.push({
         id: Date.now(), 
         date: dInp, 
-        startTime: tStart, // 👈 เพิ่มไว้ป้องกัน Error reading 'startTime'
-        time: tStart,
-        endTime: tEnd || tStart, 
+        startTime: tStart || "", // 👈 ใส่ || "" กันกรณี tStart เป็น undefined/null
+        time: tStart || "",
+        endTime: tEnd || tStart || "", 
         price, 
         tip, 
         pay: curPay, 
