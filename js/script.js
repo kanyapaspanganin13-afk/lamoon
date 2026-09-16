@@ -2145,6 +2145,9 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
     let calculatedMonthBarber = 0;
     let calculatedMonthShop = 0;
 
+    // 🟢 [แก้ไขจุดที่ 1] เพิ่มตัวแปรคำนวณวันประกันจากรายการ dailyCounts
+    let calculatedGuarDays = 0;
+
     weekEntries.forEach(([wk, data]) => {
         totalNew += (data.countNew || 0);
         totalRegular += (data.countRegular || 0);
@@ -2155,6 +2158,11 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         if (data.dailyCounts) {
             data.dailyCounts.forEach(d => {
                 wBarberEarn += Number(d.barberEarn || 0);
+
+                // 🟢 [แก้ไขจุดที่ 1] เช็กนับวันที่มีการใช้ประกันรายได้จริง
+                if (d.isGuar || d.useGuar || (d.guarPay && d.guarPay > 0)) {
+                    calculatedGuarDays++;
+                }
 
                 const dayName = d.dayName ? d.dayName.split(' ')[0] : '';
                 if (dayName) {
@@ -2173,6 +2181,9 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         calculatedMonthBarber += wBarberEarn;
         calculatedMonthShop += wShopEarn;
     });
+
+    // 🟢 [แก้ไขจุดที่ 1] กำหนดค่าวันประกันที่จะแสดงผล (หากส่ง monthGuarDays มาตรงๆ ให้ใช้อนนั้น ถ้าไม่มีให้ใช้ค่าที่คำนวณ)
+    const displayGuarDays = (monthGuarDays !== undefined && monthGuarDays !== null) ? monthGuarDays : calculatedGuarDays;
 
     const dayAverages = Object.entries(dayStats).filter(([name, data]) => data.count > 0).map(([name, data]) => ({ name, avg: data.total / data.count }));
     
@@ -2365,8 +2376,10 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
     if ($("monthlyIncomeContent")) {
         // ⚡ สรุปยอดรายได้ระดับเดือนแบบปลอดภัย
         const finalBarberEarn = monthBarber !== undefined ? Number(monthBarber) : calculatedMonthBarber;
-        const finalShopEarn = monthShop !== undefined ? Number(monthShop) : (monthTotal !== undefined ? Math.max(0, Number(monthTotal) - finalBarberEarn) : calculatedMonthShop);
-        const finalTotalIncome = monthTotal !== undefined ? Number(monthTotal) : (finalBarberEarn + finalShopEarn);
+        const finalTotalIncome = monthTotal !== undefined ? Number(monthTotal) : (finalBarberEarn + calculatedMonthShop);
+        
+        // 🟢 [แก้ไขจุดที่ 2] คำนวณรายได้ร้านโดยลบส่วนของช่างออกจากยอดรวมเพื่อความแม่นยำ (10,058 - 5,784 = 4,274)
+        const finalShopEarn = Math.max(0, finalTotalIncome - finalBarberEarn);
 
         $("monthlyIncomeContent").innerHTML = `
             <div style="background:#0f172a; padding:20px; color:#f1f5f9; border-radius:20px; font-family: system-ui, sans-serif;">
@@ -2409,7 +2422,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                         ⛱️ หยุด ${offDays} วัน
                     </div>
                     <div style="background: rgba(250,204,21,0.15); padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 600; color: #facc15;">
-                        🛡️ ประกัน ${monthGuarDays || 0} วัน
+                        🛡️ ประกัน ${displayGuarDays} วัน
                     </div>
                     <div style="background: rgba(147,51,234,0.15); padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 600; color: #a855f7;">
                         📊 เฉลี่ย ${(avgCustomerPerDay || 0).toFixed(2)} คน/วัน
