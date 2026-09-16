@@ -3325,88 +3325,100 @@ function closeLineModal() {
 }
 /* ========= ✅ INITIALIZE — โหลดค่าเริ่มต้นเมื่อเปิดหน้า ========= */
 document.addEventListener("DOMContentLoaded", () => {
+    // 1. ฟังก์ชันตัวช่วยดึง Element เพื่อป้องกัน Error
+    const $ = id => document.getElementById(id);
     const today = new Date().toISOString().split('T')[0];
-    
+
+    // 2. ดึงค่า conf แบบปลอดภัย (มี Fallback กัน Crash)
+    const safeConf = (typeof conf !== 'undefined' && conf) 
+        ? conf 
+        : JSON.parse(localStorage.getItem('barberConf') || '{}');
+
     // ตั้งค่าวันที่ปัจจุบัน
-    if ($("dateInp")) { $("dateInp").value = today; updateDateDisplay(today); }
+    if ($("dateInp")) { 
+        $("dateInp").value = today; 
+        if (typeof updateDateDisplay === 'function') updateDateDisplay(today); 
+    }
     if ($("accDate")) $("accDate").value = today;
+
+    // ตั้งค่าชื่อร้านและธีมแบบ ปลอดภัย
+    if (typeof applyTheme === 'function' && safeConf.theme) {
+        applyTheme(safeConf.theme);
+    }
     
-    // ตั้งค่าชื่อร้านและธีม
-    applyTheme(conf.theme);
     const entryShop = $("entryShopName");
-    if (entryShop) entryShop.innerText = conf.shop;
-    
+    if (entryShop) entryShop.innerText = safeConf.shop || 'Barber Shop';
+
     // ตั้งค่าเวลาปัจจุบัน
     const now = new Date();
     const curTime = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
     if ($("tStart")) $("tStart").value = curTime;
     if ($("tEnd")) $("tEnd").value = curTime;
-    
-    // โหลดข้อมูลหน้าแรก
-    renderDay(today);
-    loadAccountStatus();
-    
-    // ✅ เปิดหน้าแรกเมื่อโหลดเสร็จ
-    goSub(1);
 
-    // 🔄 อัปเดตชื่อร้านทุกจุดที่แสดง
+    // โหลดข้อมูลหน้าแรกแบบปลอดภัย
+    if (typeof renderDay === 'function') renderDay(today);
+    if (typeof loadAccountStatus === 'function') loadAccountStatus();
+
+    // เปิดหน้าแรกเมื่อโหลดเสร็จ
+    if (typeof goSub === 'function') goSub(1);
+
+    // อัปเดตชื่อร้านทุกจุดที่แสดง
     const shopNameElements = document.querySelectorAll('.shop-name-display');
     shopNameElements.forEach(el => {
-        el.innerText = conf.shop;
+        el.innerText = safeConf.shop || 'Barber Shop';
     });
 
-    // 📅 ตั้งค่าช่วงเดือนเริ่มต้นสำหรับรายงาน
+    // ตั้งค่าช่วงเดือนเริ่มต้นสำหรับรายงาน
     const nowDate = new Date();
     const currentMonth = `${nowDate.getFullYear()}-${(nowDate.getMonth() + 1).toString().padStart(2, '0')}`;
-    if ($("histMonth")) {
-        $("histMonth").value = currentMonth;
-    }
+    if ($("histMonth")) $("histMonth").value = currentMonth;
+    if ($("monthlyReportPicker")) $("monthlyReportPicker").value = currentMonth;
 
-    // 🎯 ตั้งค่าปี-เดือนเริ่มต้นสำหรับเปรียบเทียบ
+    // ตั้งค่าปี-เดือนเริ่มต้นสำหรับเปรียบเทียบ (คำนวณเดือนก่อนหน้าแบบปลอดภัย)
     if ($("compMonth1")) {
-        const lastMonth = new Date(nowDate.getFullYear(), nowDate.getMonth() - 1, 1);
-        $("compMonth1").value = `${lastMonth.getFullYear()}-${(lastMonth.getMonth() + 1).toString().padStart(2, '0')}`;
+        const prevMonthDate = new Date(nowDate.getFullYear(), nowDate.getMonth() - 1, 1);
+        const prevMonth = `${prevMonthDate.getFullYear()}-${(prevMonthDate.getMonth() + 1).toString().padStart(2, '0')}`;
+        $("compMonth1").value = prevMonth;
     }
     if ($("compMonth2")) {
         $("compMonth2").value = currentMonth;
     }
 
-    // 🔊 ตั้งค่าสถานะเสียงตามค่าที่บันทึกไว้
-    if (conf.sound === "off") {
+    // ตั้งค่าสถานะเสียงตามค่าที่บันทึกไว้
+    if (safeConf.sound === "off") {
         document.body.classList.add("muted");
     } else {
         document.body.classList.remove("muted");
     }
 
-    // 📱 ปรับการแสดงผลบนมือถือ
+    // ปรับการแสดงผลบนมือถือ
     const viewport = document.querySelector('meta[name="viewport"]');
     if (viewport) {
         viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
     }
 
-    // 🔄 [เพิ่มใหม่] ผูก Event เปลี่ยนเดือนในหน้ารายงานให้คำนวณและอัปเดตตารางทันที
-    const monthlyPicker = document.getElementById('monthlyReportPicker') || document.getElementById('histMonth');
-    if (monthlyPicker) {
-        monthlyPicker.addEventListener('change', function(e) {
-            const selectedMonth = e.target.value;
-            
-            const mainPicker = document.getElementById('histMonth');
-            if (mainPicker && mainPicker !== monthlyPicker) {
-                mainPicker.value = selectedMonth;
-            }
-            
-            if (typeof loadHistMonth === 'function') loadHistMonth();
-            if (typeof renderDailyTableReport === 'function') renderDailyTableReport();
-        });
-    }
+    // ผูก Event เปลี่ยนเดือนให้ครอบคลุมทุก Picker
+    const handleMonthChange = (e) => {
+        const selectedMonth = e.target.value;
+        if ($("histMonth")) $("histMonth").value = selectedMonth;
+        if ($("monthlyReportPicker")) $("monthlyReportPicker").value = selectedMonth;
 
-    // ✅ ซ่อนหน้าโหลด / แสดงเนื้อหาหลัก
-    const loadingScreen = document.getElementById("loadingScreen");
+        if (typeof loadHistMonth === 'function') loadHistMonth();
+        if (typeof renderDailyTableReport === 'function') renderDailyTableReport();
+    };
+
+    if ($("monthlyReportPicker")) $("monthlyReportPicker").addEventListener('change', handleMonthChange);
+    if ($("histMonth")) $("histMonth").addEventListener('change', handleMonthChange);
+
+    // ซ่อนหน้าโหลด / แสดงเนื้อหาหลัก
+    const loadingScreen = $("loadingScreen");
     if (loadingScreen) {
         loadingScreen.style.display = "none";
     }
 
-    // ✅ แจ้งเวอร์ชันและเวลาอัปเดต
-    console.log(`✅ Barber-Note v${APP_VERSION} โหลดสมบูรณ์ — ${LAST_UPDATED}`);
+    // แจ้งเวอร์ชันและเวลาอัปเดตแบบกัน Crash
+    const ver = typeof APP_VERSION !== 'undefined' ? APP_VERSION : '1.0.0';
+    const upd = typeof LAST_UPDATED !== 'undefined' ? LAST_UPDATED : '-';
+    console.log(`✅ Barber-Note v${ver} โหลดสมบูรณ์ — ${upd}`);
 });
 /* ========= END OF SCRIPT — สิ้นสุดโค้ดทั้งหมด ========= */
