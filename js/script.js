@@ -2723,13 +2723,20 @@ function exportMonthlyExcel() {
 }
 // ✅ เปิดพรีวิว — ใช้ร่วมกันได้ทั้ง 2 หน้า
 function openReportFullscreen() {
+    const modalContent = document.getElementById('fullReportContent');
+    if (!modalContent) return;
+
+    // 1. ตรวจสอบว่าหน้าเปรียบเทียบเปิดใช้งานอยู่หรือไม่ (เช็คความสูงหรือการซ่อน Display ของ Card เปรียบเทียบ)
+    const compareCard = document.getElementById('comparisonCard') || document.getElementById('compareSection');
+    const isCompareActive = compareCard && compareCard.offsetWidth > 0 && compareCard.offsetHeight > 0;
+
     const tableHead = document.getElementById('compareTableHead');
     const tableBody = document.getElementById('comparisonSingleContent');
     const tableFoot = document.getElementById('compareTableFoot');
-    const hasComparisonData = tableBody && tableBody.innerHTML.trim();
+    const hasComparisonData = tableBody && tableBody.innerHTML.trim() !== '';
 
-    if (hasComparisonData) {
-        const modalContent = document.getElementById('fullReportContent');
+    // 2. Render เนื้อหาตามโหมดที่เปิดใช้งานจริง
+    if (isCompareActive && hasComparisonData) {
         modalContent.innerHTML = `
             <table style="width:100%; border-collapse:collapse; font-family:Tahoma,sans-serif; text-align:center; font-size:11px;">
                 <thead>${tableHead?.innerHTML || ''}</thead>
@@ -2745,9 +2752,10 @@ function openReportFullscreen() {
             else alert(msg);
             return;
         }
-        document.getElementById('fullReportContent').innerHTML = tableCard.innerHTML;
+        modalContent.innerHTML = tableCard.innerHTML;
     }
 
+    // 3. แสดง Modal และล็อค Scroll
     const modal = document.getElementById('fullReportModal');
     if (modal) {
         modal.style.display = 'block';
@@ -2755,12 +2763,17 @@ function openReportFullscreen() {
     }
 }
 
-// ✅ ปิดพรีวิว
+// ✅ ปิดพรีวิว และล้าง HTML ป้องกันข้อมูลตกค้าง
 function closeReportFullscreen() {
     const modal = document.getElementById('fullReportModal');
+    const modalContent = document.getElementById('fullReportContent');
+    
     if (modal) {
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
+    }
+    if (modalContent) {
+        modalContent.innerHTML = ''; // ล้างข้อมูลพรีวิวเมื่อปิด
     }
 }
 
@@ -2801,9 +2814,8 @@ async function handleGoogleSheet() {
         }
     }, 2000);
 }
-// ==========================================
-// 🔍 ฟังก์ชันระบบเปรียบเทียบข้อมูล (SECTION 5)
-// ==========================================
+
+/* ========= SECTION 21: COMPARISON REPORT & DATE UTILS ========= */
 // Helper: แปลงวันที่เป็นชื่อวันแบบย่อ ภาษาไทย
 function getDayName(dateStr) {
     const [y, m, d] = dateStr.split('-').map(Number);
@@ -2985,7 +2997,7 @@ function processComparison() {
     document.getElementById('compareTableFoot').innerHTML = footHtml;
 }
 
-/* ========= SECTION 21: IMPORT / EXPORT / CLEAR ========= */
+/* ========= SECTION 22: IMPORT / EXPORT / CLEAR ========= */
 // 1. ฟังก์ชันส่งออกข้อมูล (Export)
 function exportBackup() {
     try {
@@ -3122,13 +3134,13 @@ function clearData() {
         }
     }
 }
-/* ========= SECTION 22: MODAL HELPERS ========= */
+/* ========= SECTION 23: MODAL HELPERS ========= */
 window.onclick = e => {
     if (e.target.classList.contains("modal")) e.target.style.display = "none";
 };
 function closeReportModal() { $("reportModal").style.display = "none"; }
 
-/* ========= SECTION 23: SHARE LINE ========= */
+/* ========= SECTION 24: SHARE LINE ========= */
 function shareLine() {
     // Helper Selector กัน Error
     const $ = (id) => document.getElementById(id);
