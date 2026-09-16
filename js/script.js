@@ -3,15 +3,8 @@
    ========================================================== */
 /* =========== SECTION 1: INITIALIZATION & GLOBAL VARIABLES =========== */
 const $ = id => document.getElementById(id);
-
-// ==============================================
 // ✅ ทุกครั้งที่แก้โค้ด — แก้เลขนี้ 1 ตัวก็พอ
-// ==============================================
-const BUILD_MARK = "1.0.0-20260916-1820"; 
-// แก้ตัวท้ายทุกครั้งที่อัปเดตจริง เช่น:
-// ครั้งถัดไป → "1.0.0-20260916-1821"
-// ครั้งต่อไป → "1.0.0-20260916-1822"
-
+const BUILD_MARK = "1.0.0-20260916-1821"; // ✅ เปลี่ยนเป็นชุดใหม่ทุกครั้งที่แก้ไข
 const LAST_UPDATED = "16/09/2026";
 
 // ✅ คำนวณเวอร์ชัน — เพิ่มเฉพาะเมื่อแก้โค้ดจริง
@@ -19,22 +12,27 @@ window.APP_VERSION = "";
 window.BUILD_NUMBER = "";
 
 (function initVersion() {
-    // อ่านค่าเดิม
+    // อ่านค่าเดิมจากเครื่องผู้ใช้
     const storedMark = localStorage.getItem("build_mark") || "";
     let storedBuild = parseInt(localStorage.getItem("build_num") || "0");
 
-    // ถ้า BUILD_MARK เปลี่ยน = แก้โค้ดจริง → เพิ่มเลข
+    // ถ้า BUILD_MARK เปลี่ยน = แก้โค้ดจริง → เพิ่มเลขบิลด์
     if (BUILD_MARK !== storedMark) {
         storedBuild = storedBuild + 1;
-        // บันทึกค่าใหม่
         localStorage.setItem("build_mark", BUILD_MARK);
         localStorage.setItem("build_num", String(storedBuild));
         console.log(`🔄 พบการเปลี่ยนแปลงโค้ด — อัปเดตบิลด์ #${storedBuild}`);
     }
 
-    // ตั้งค่าเวอร์ชัน
+    // ตั้งค่าตัวแปรส่วนกลาง
     window.BUILD_NUMBER = storedBuild;
     window.APP_VERSION = BUILD_MARK.split('-')[0] + `.${storedBuild}`;
+
+    // ✅ แสดงผลที่หน้าเว็บ
+    const verEl = document.getElementById("appVersionDisplay");
+    if (verEl) {
+        verEl.innerHTML = `v${window.APP_VERSION} · ${LAST_UPDATED}`;
+    }
 
     console.log(`✅ เวอร์ชันปัจจุบัน: v${window.APP_VERSION} (บิลด์ #${storedBuild})`);
 })();
