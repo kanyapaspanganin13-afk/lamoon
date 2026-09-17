@@ -802,21 +802,15 @@ async function handleSave(event) {
     const offsiteShopFee = parseFloat(localStorage.getItem('offsiteShopFee')) || 100;     // ส่วนร้านงานนอกสถานที่
     const freeBarberComp = parseFloat(localStorage.getItem('freeBarberComp')) || 100;     // ค่าชดเชยสิทธิ์ฟรีส่วนช่าง
     const freeShopComp = parseFloat(localStorage.getItem('freeShopComp')) || 0;         // ค่าชดเชยสิทธิ์ฟรีส่วนร้าน
-    const extraMode = localStorage.getItem('extraSplitMode') || 'split';                  // 'split' หรือ 'barber'
 
     if (isOffsite && isFree) {
         // 📌 นอกสถานที่ + สิทธิ์ฟรี
         barberShare = freeBarberComp;
         shopShare = freeShopComp;
     } else if (isOffsite) {
-        // 📌 นอกสถานที่ปกติ (คำนวณตามราคาที่กรอกจริง)
-        if (extraMode === 'barber') {
-            barberShare = price;
-            shopShare = 0;
-        } else {
-            shopShare = Math.min(price, offsiteShopFee);
-            barberShare = Math.max(0, price - shopShare);
-        }
+        // 🚗 นอกสถานที่ปกติ: หักเข้าส่วนร้านก่อนตาม offsiteShopFee (100) ส่วนที่เหลือยกให้ช่าง
+        shopShare = Math.min(price, offsiteShopFee);
+        barberShare = Math.max(0, price - shopShare);
     } else if (isFree) {
         // 📌 สิทธิ์ฟรีในร้านปกติ
         barberShare = freeBarberComp;
@@ -960,7 +954,7 @@ function renderDay(selectedDate) {
 
         if (!isPureFree) tips += t;
 
-        // 2. คำนวณส่วนแบ่ง ช่าง / ร้าน (Barber / Shop Share)
+        // 🟢 2. คำนวณส่วนแบ่ง ช่าง / ร้าน (Barber / Shop Share) - แก้ไขจุดนี้
         if (r.barberShare !== undefined && r.shopShare !== undefined) {
             calcBarberShare += r.barberShare;
             calcShopShare += r.shopShare;
@@ -968,8 +962,12 @@ function renderDay(selectedDate) {
             calcBarberShare += freeBarberComp;
             calcShopShare += freeShopComp;
         } else if (cType === 'offsite') {
-            calcBarberShare += offsiteBarberFee;
-            calcShopShare += (p > 0 ? (p - offsiteBarberFee) : offsiteShopFee);
+            // 🚗 นอกสถานที่ปกติ: ยึดการหักเข้าส่วนร้านตาม offsiteShopFee (100) ส่วนที่เหลือเป็นของช่าง
+            const sPart = Math.min(p, offsiteShopFee); // ร้านได้ 100
+            const bPart = Math.max(0, p - sPart);      // ช่างได้ส่วนที่เหลือ (เช่น 300 - 100 = 200)
+            
+            calcBarberShare += bPart;
+            calcShopShare += sPart;
         } else if (isFree) {
             calcBarberShare += freeBarberComp;
             calcShopShare += freeShopComp;
@@ -1047,7 +1045,7 @@ function renderDay(selectedDate) {
     const guarAmt = (typeof conf !== 'undefined' && conf && conf.guar) ? conf.guar : 0;
     const bEarn = isHoliday ? 0 : Math.max(calcBarberShare, guarAmt) + tips;
     
-    // ✅ แก้ไข: ยอดร้าน = ยอดรวมทั้งหมด - ค่าแรงช่าง (ไม่รวมทิป)
+    // ยอดร้าน = ยอดรวมทั้งหมด - ค่าแรงช่าง (ไม่รวมทิป)
     const sEarn = isHoliday ? 0 : (tot - (bEarn - tips)); 
     
     const settle = isHoliday ? 0 : cash - bEarn;
@@ -1137,7 +1135,7 @@ function renderDay(selectedDate) {
                     <div style="position: relative; background: #f1f5f9; padding: 5px 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; cursor: pointer; width: 140px; height: 34px;"> 
                         <span style="font-size: 14px; font-weight: 700; color: #6366f1; width: 100%; text-align: center;">
                             ${dayName} ${displayDateBE}
-                        </span>                                    
+                        </span>                                     
                         <input type="date" id="reportDateSelector" value="${dInp}" 
                                onchange="renderDay(this.value)" 
                                style="position: absolute; opacity: 0; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer;">
