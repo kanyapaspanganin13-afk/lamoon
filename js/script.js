@@ -1433,13 +1433,17 @@ async function saveAndGo(date, total) {
 
     let cash = 0;
     todayData.forEach(r => {
-        // ✅ ใช้ Regex เหมือนเดิม ครอบคลุมทุกแบบ: Cash / เงินสด / cash
         if (/Cash/i.test(r.pay)) { 
             cash += (Number(r.price) || 0) + (Number(r.tip) || 0); 
         } else if (/Mix/i.test(r.pay)) { 
             cash += Number(r.payCash) || 0; 
         }
     });
+
+    // 🟢 ดึงชื่อสาขาปัจจุบัน (เช็คทั้งจาก conf และ localStorage)
+    const currentBranch = (typeof conf !== "undefined" && conf.shop) 
+        ? conf.shop 
+        : (localStorage.getItem("active_branch_name") || localStorage.getItem("shopName") || "สาขาไม่ระบุ");
 
     // 🟢 ล็อคค่าคอมมิชชันและค่าประกัน ณ วันที่ส่ง
     const currentPerc = Number(conf.perc) || 0;
@@ -1450,9 +1454,17 @@ async function saveAndGo(date, total) {
     const bEarn = isHoliday ? 0 : baseEarn + totalTips;
     const settle = isHoliday ? 0 : cash - bEarn;
 
-    // 🎯 5. บันทึกลง archives พร้อมฟิลด์ย้อนหลัง
+    // ✅ ปรับรายละเอียดใน allToday ให้มี branch กำกับทุกตัว
+    allToday.forEach(r => {
+        if (!r.branch || r.branch === "สาขาไม่ระบุ" || r.branch === "undefined") {
+            r.branch = currentBranch;
+        }
+    });
+
+    // 🎯 5. บันทึกลง archives พร้อมฟิลด์ branch
     const data = { 
         date, 
+        branch: currentBranch, // ✅ เพิ่มฟิลด์นี้เข้าไปแก้ปัญหาสาขาไม่ระบุ!
         total, 
         cash, 
         barber: Math.floor(bEarn), 
@@ -1481,7 +1493,6 @@ async function saveAndGo(date, total) {
         }
         
         notify("success", "สำเร็จ", "ส่งข้อมูลเรียบร้อย");
-        // ✅ เพิ่ม renderDay(date) ที่ขาดไป!
         renderDay(date);
         loadAccountStatus();
     } catch (e) {
