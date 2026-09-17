@@ -66,7 +66,58 @@ document.addEventListener("DOMContentLoaded", () => {
     const savedShopName = localStorage.getItem("shopName") || conf.shop || "BARBER SHOP";
     if ($("shopTitleDisplay")) $("shopTitleDisplay").innerText = savedShopName;
     document.querySelectorAll('.shop-title-text').forEach(el => el.innerText = savedShopName);
-});
+    initBranchSystem();
+   });
+
+/* =========== SECTION 1A: BRANCH SYSTEM =========== */
+const ACTIVE_BRANCH_KEY = "active_branch_name";
+const VIEW_SCOPE_KEY = "view_data_scope";
+
+function getActiveBranch() {
+  return localStorage.getItem(ACTIVE_BRANCH_KEY) || "สาขาไม่ระบุ";
+}
+
+function setActiveBranch(name) {
+  name = (name || "").trim();
+  if (!name) return;
+  localStorage.setItem(ACTIVE_BRANCH_KEY, name);
+  renderBranchUI();
+  if (typeof renderDay === "function") renderDay();
+  if (typeof renderMonthReport === "function") renderMonthReport();
+}
+
+function promptSetupBranch() {
+  const current = getActiveBranch();
+  const newName = prompt("ตั้งชื่อสาขาที่ท่านกำลังทำงาน", current);
+  if (newName && newName.trim()) {
+    setActiveBranch(newName.trim());
+    if (typeof notify === "function") notify("success", "สำเร็จ", `ทำงานที่: ${newName}`);
+  }
+}
+
+function getViewScope() {
+  return localStorage.getItem(VIEW_SCOPE_KEY) || "all";
+}
+
+function setViewScope(mode) {
+  localStorage.setItem(VIEW_SCOPE_KEY, mode);
+  if (typeof renderDay === "function") renderDay();
+  if (typeof renderMonthReport === "function") renderMonthReport();
+}
+
+function renderBranchUI() {
+  const el = document.getElementById("currentBranchDisplay");
+  if (el) el.textContent = getActiveBranch();
+}
+
+function initBranchSystem() {
+  if (!localStorage.getItem(ACTIVE_BRANCH_KEY)) {
+    const name = prompt("กรุณาตั้งชื่อสาขาที่ทำงาน", "");
+    if (name && name.trim()) setActiveBranch(name.trim());
+    else setActiveBranch("สาขาไม่ระบุ");
+  }
+  renderBranchUI();
+}
 /* =========== SECTION 2: MAIN NAVIGATION =========== */
 function switchMainView(viewName, subNum = null) {
     // ซ่อนทุกหน้าก่อน
@@ -846,6 +897,7 @@ async function handleSave(event) {
     db.push({
         id: Date.now(), 
         date: dInp, 
+        branch: getActiveBranch(), // ✅ เพิ่มตรงนี้  
         startTime: tStart || "", 
         time: tStart || "", 
         endTime: tEnd || (typeof addMinutes === 'function' ? addMinutes(tStart, 30) : tStart),
@@ -2416,12 +2468,10 @@ function renderDailyTableReport() {
     const picker = document.getElementById('monthlyReportPicker') || document.getElementById('histMonth');
     const content = document.getElementById('monthlyContent1') || document.getElementById('monthlyIncomeContent');
     if (!content) return;
-
     if (typeof archives === 'undefined' || !Array.isArray(archives)) {
         content.innerHTML = '<div style="text-align:center; padding: 20px; color: #64748b;">ไม่พบฐานข้อมูลหลัก (archives)</div>';
         return;
     }
-
     let mVal = picker ? picker.value : '';
     if (!mVal) {
         const now = new Date();
@@ -2430,39 +2480,49 @@ function renderDailyTableReport() {
         mVal = `${yyyy}-${mm}`;
         if (picker) picker.value = mVal;
     }
-
     const [y, mNum] = mVal.split('-').map(Number);
     const targetPrefix = `${y}-${String(mNum).padStart(2, '0')}`;
     
-    // กรองข้อมูลเดือนที่เลือก
-    const filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
-
+    // ✅ ดึงโหมดการแสดงผล + สาขาปัจจุบัน
+    const viewAll = (localStorage.getItem("view_data_scope") || "all") === "all";
+    const activeBranch = localStorage.getItem("active_branch_name") || "สาขาไม่ระบุ";
+    
+    // กรองข้อมูลเดือนที่เลือก + ตามโหมดที่เลือก
+    let filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
+    if (!viewAll) {
+        filtered = filtered.filter(a => a.branch === activeBranch);
+    }
+    
     const monthNames = [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
     ];
     const monthThaiName = monthNames[mNum - 1] || '';
     const thaiDayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
-
-    const currentShopName = (typeof conf !== 'undefined' && conf.shop) ? conf.shop : (localStorage.getItem('shopName') || 'Barber Shop');
-
+    
+    // ✅ ปรับชื่อหัวรายงาน
+    let reportTitle = "";
+    if (viewAll) {
+        reportTitle = `รายงานทุกสาขา · ประจำเดือน: ${monthThaiName} ${y + 543}`;
+    } else {
+        reportTitle = `รายงาน: ${activeBranch} · ประจำเดือน: ${monthThaiName} ${y + 543}`;
+    }
+    
     let totalCust = 0, totalBarber = 0, totalShave = 0, totalWash = 0, totalDye = 0;
-    let workDays = 0; // ตัวแปรนับจำนวนวันเปิดทำงาน
+    let workDays = 0;
     let rowsHTML = '';
-
+    
     // เรียงวันที่จาก 1 -> 31
     filtered.sort((a, b) => a.date.localeCompare(b.date));
-
+    
     filtered.forEach(day => {
-        // ตรวจสอบวันหยุด
         const isOffDay = day.off === true || day.type === "HOLIDAY";
-
         let dayCust = 0;
         let shave = 0, wash = 0, dye = 0;
-
+        let branchName = day.branch || "ไม่ระบุ"; // ✅ อ่านชื่อสาขาจากข้อมูลโดยตรง
+        
         if (!isOffDay) {
-            workDays++; // นับเฉพาะวันที่ไม่ใช่วันหยุด
-
+            workDays++;
             if (day.details && Array.isArray(day.details)) {
                 day.details.forEach(d => {
                     if (d.type === "SERVICE" || !d.type) {
@@ -2481,15 +2541,14 @@ function renderDailyTableReport() {
                 dayCust = Number(day.count) || 0;
             }
         }
-
+        
         const barber = isOffDay ? 0 : (Number(day.barber) || 0);
-
         totalCust += dayCust;
         totalBarber += barber;
         totalShave += shave;
         totalWash += wash;
         totalDye += dye;
-
+        
         // คำนวณชื่อวัน
         let displayDayName = day.dayName || '-';
         if (day.date) {
@@ -2499,24 +2558,23 @@ function renderDailyTableReport() {
                 displayDayName = thaiDayNames[dObj.getDay()];
             }
         }
-
         const dayNum = day.date ? day.date.split('-')[2] : '-';
-
-        // ถ้าเป็นวันหยุด ให้แสดงคำว่า "หยุด" ตัวหนังสือสีแดง
+        
         if (isOffDay) {
             rowsHTML += `
                 <tr style="background-color: #fef2f2;">
                     <td>${parseInt(dayNum, 10)}</td>
                     <td>${displayDayName}</td>
+                    <td>${branchName}</td> <!-- ✅ แสดงสาขา -->
                     <td colspan="5" style="color: #ef4444; font-weight: 700; text-align: center;">หยุด</td>
                 </tr>
             `;
         } else {
-            // 🟢 เปลี่ยนเลข 0 ให้แสดงผลเป็น '-' ทุกคอลัมน์รายการ
             rowsHTML += `
                 <tr>
                     <td>${parseInt(dayNum, 10)}</td>
                     <td>${displayDayName}</td>
+                    <td>${branchName}</td> <!-- ✅ แสดงสาขา -->
                     <td>${dayCust || '-'}</td>
                     <td>${barber > 0 ? barber.toLocaleString() : '-'}</td>
                     <td>${shave || '-'}</td>
@@ -2526,17 +2584,17 @@ function renderDailyTableReport() {
             `;
         }
     });
-
+    
     content.innerHTML = `
         <div style="text-align: center; margin-bottom: 10px;">
-            <h3 style="margin: 0; color: var(--primary, #0284c7);">รายงานร้าน: <span class="shop-name-display">${currentShopName}</span></h3>
-            <p style="margin: 4px 0; font-weight: 700; color: var(--text, #334155);">ประจำเดือน: ${monthThaiName} ${y + 543}</p>
+            <h3 style="margin: 0; color: var(--primary, #0284c7);">${reportTitle}</h3>
         </div>
         <table class="summary-table" style="width:100%; border-collapse: collapse; text-align:center;">
             <thead>
                 <tr style="background-color: var(--bg, #f1f5f9);">
                     <th>วันที่</th>
                     <th>วัน</th>
+                    <th>สาขา</th> <!-- ✅ เพิ่มหัวคอลัมน์ -->
                     <th>ลูกค้า</th>
                     <th>ยอดช่าง</th>
                     <th>โกน</th>
@@ -2545,12 +2603,13 @@ function renderDailyTableReport() {
                 </tr>
             </thead>
             <tbody>
-                ${rowsHTML || '<tr><td colspan="7" style="text-align:center; padding: 20px; color:#94a3b8;">ไม่มีข้อมูลในเดือนนี้</td></tr>'}
+                ${rowsHTML || '<tr><td colspan="8" style="text-align:center; padding: 20px; color:#94a3b8;">ไม่มีข้อมูลในเดือนนี้</td></tr>'}
             </tbody>
             <tfoot>
                 <tr style="background-color: #ffeb3b; font-weight: bold; color: #000;">
                     <td>รวมยอด</td>
                     <td style="color: #0284c7;">เปิด ${workDays} วัน</td>
+                    <td>-</td>
                     <td>${totalCust || '-'}</td>
                     <td>${totalBarber > 0 ? totalBarber.toLocaleString() : '0'}</td>
                     <td>${totalShave || '-'}</td>
