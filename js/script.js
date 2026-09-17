@@ -2574,7 +2574,11 @@ function renderDailyTableReport() {
         const isOffDay = day.off === true || day.type === "HOLIDAY";
         let dayCust = 0;
         let shave = 0, wash = 0, dye = 0;
-        let branchName = day.branch || "ไม่ระบุ"; // ✅ อ่านชื่อสาขาจากข้อมูลโดยตรง
+        
+        // ✅ แก้ตรงนี้ — ถ้าไม่มีชื่อสาขาให้ใช้ชื่อปัจจุบันแทน
+        const branchName = day.branch 
+                        || localStorage.getItem("active_branch_name") 
+                        || "สาขาไม่ระบุ";
         
         if (!isOffDay) {
             workDays++;
@@ -2620,7 +2624,7 @@ function renderDailyTableReport() {
                 <tr style="background-color: #fef2f2;">
                     <td>${parseInt(dayNum, 10)}</td>
                     <td>${displayDayName}</td>
-                    <td>${branchName}</td> <!-- ✅ แสดงสาขา -->
+                    <td>${branchName}</td>
                     <td colspan="5" style="color: #ef4444; font-weight: 700; text-align: center;">หยุด</td>
                 </tr>
             `;
@@ -2629,7 +2633,7 @@ function renderDailyTableReport() {
                 <tr>
                     <td>${parseInt(dayNum, 10)}</td>
                     <td>${displayDayName}</td>
-                    <td>${branchName}</td> <!-- ✅ แสดงสาขา -->
+                    <td>${branchName}</td>
                     <td>${dayCust || '-'}</td>
                     <td>${barber > 0 ? barber.toLocaleString() : '-'}</td>
                     <td>${shave || '-'}</td>
@@ -2649,7 +2653,7 @@ function renderDailyTableReport() {
                 <tr style="background-color: var(--bg, #f1f5f9);">
                     <th>วันที่</th>
                     <th>วัน</th>
-                    <th>สาขา</th> <!-- ✅ เพิ่มหัวคอลัมน์ -->
+                    <th>สาขา</th>
                     <th>ลูกค้า</th>
                     <th>ยอดช่าง</th>
                     <th>โกน</th>
@@ -2675,7 +2679,6 @@ function renderDailyTableReport() {
         </table>
     `;
 }
-
 // ================= แท็บที่ 2: รายได้ย้อนหลัง 12 เดือน =================
 function renderYearlyIncomeSummary() {
     const select = document.getElementById('yearFilterSelect') || document.getElementById('histYear');
