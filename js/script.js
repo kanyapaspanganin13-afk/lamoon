@@ -3,7 +3,7 @@
    ========================================================== */
 /* =========== SECTION 1: INITIALIZATION & GLOBAL VARIABLES =========== */
 const $ = id => document.getElementById(id);
-const BUILD_MARK = "1.0.0-20260917-1045"; // 👈 เปลี่ยนชุดตัวเลขนี้
+const BUILD_MARK = "1.0.0-20260917-1715";
 const LAST_UPDATED = "17/09/2026";
 window.APP_VERSION = "";
 window.BUILD_NUMBER = "";
@@ -11,34 +11,109 @@ window.BUILD_NUMBER = "";
 (function initVersion() {
     const storedMark = localStorage.getItem("build_mark") || "";
     let storedBuild = parseInt(localStorage.getItem("build_num") || "0");
-
-    // ถ้ายังไม่มีบิลด์สะสม หรือเปลี่ยน BUILD_MARK ใหม่ → ให้เพิ่มเลขบิลด์
     if (BUILD_MARK !== storedMark) {
-        storedBuild = storedBuild <= 0 ? 1 : storedBuild + 1; // 🟢 ถ้าเริ่มต้นใหม่ให้เป็น 1
+        storedBuild = storedBuild <= 0 ? 1 : storedBuild + 1;
         localStorage.setItem("build_mark", BUILD_MARK);
         localStorage.setItem("build_num", String(storedBuild));
         console.log(`🔄 พบการเปลี่ยนแปลงโค้ด — อัปเดตบิลด์ #${storedBuild}`);
     }
-    // กำหนดค่าไว้ใช้งานทั่วทั้งแอป
     window.BUILD_NUMBER = storedBuild;
     window.APP_VERSION = BUILD_MARK.split('-')[0] + `.${storedBuild}`;
-
-    // แสดงผลบนหน้าเว็บ (พร้อมป้องการเรียกใช้องค์ประกอบ HTML ก่อนโหลดเสร็จ)
+    
     const renderVersion = () => {
         const verEl = document.getElementById("appVersionDisplay");
         if (verEl) {
             verEl.innerHTML = `v${window.APP_VERSION} · ${LAST_UPDATED}`;
         }
     };
-
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", renderVersion);
     } else {
         renderVersion();
     }
-
     console.log(`✅ เวอร์ชันปัจจุบัน: v${window.APP_VERSION} (บิลด์ #${storedBuild})`);
 })();
+
+// ==================================================
+// ✅ ตามด้วยชุดที่ 1 — ข้างใน DOMContentLoaded
+// ==================================================
+document.addEventListener("DOMContentLoaded", () => {
+    const $ = id => document.getElementById(id);
+    const today = new Date().toISOString().split('T')[0];
+    
+    const safeConf = (typeof conf !== 'undefined' && conf) 
+        ? conf 
+        : JSON.parse(localStorage.getItem('barberConf') || '{}');
+    
+    if ($("dateInp")) { 
+        $("dateInp").value = today; 
+        if (typeof updateDateDisplay === 'function') updateDateDisplay(today); 
+    }
+    if ($("accDate")) $("accDate").value = today;
+    
+    if (typeof applyTheme === 'function' && safeConf.theme) {
+        applyTheme(safeConf.theme);
+    }
+    
+    const entryShop = $("entryShopName");
+    if (entryShop) entryShop.innerText = safeConf.shop || 'Barber Shop';
+    
+    const now = new Date();
+    const curTime = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+    if ($("tStart")) $("tStart").value = curTime;
+    if ($("tEnd")) $("tEnd").value = curTime;
+    
+    if (typeof renderDay === 'function') renderDay(today);
+    if (typeof loadAccountStatus === 'function') loadAccountStatus();
+    if (typeof goSub === 'function') goSub(1);
+    
+    const shopNameElements = document.querySelectorAll('.shop-name-display');
+    shopNameElements.forEach(el => {
+        el.innerText = safeConf.shop || 'Barber Shop';
+    });
+    
+    const nowDate = new Date();
+    const currentMonth = `${nowDate.getFullYear()}-${(nowDate.getMonth() + 1).toString().padStart(2, '0')}`;
+    if ($("histMonth")) $("histMonth").value = currentMonth;
+    if ($("monthlyReportPicker")) $("monthlyReportPicker").value = currentMonth;
+    
+    if ($("compMonth1")) {
+        const prevMonthDate = new Date(nowDate.getFullYear(), nowDate.getMonth() - 1, 1);
+        const prevMonth = `${prevMonthDate.getFullYear()}-${(prevMonthDate.getMonth() + 1).toString().padStart(2, '0')}`;
+        $("compMonth1").value = prevMonth;
+    }
+    if ($("compMonth2")) $("compMonth2").value = currentMonth;
+    
+    if (safeConf.sound === "off") {
+        document.body.classList.add("muted");
+    } else {
+        document.body.classList.remove("muted");
+    }
+    
+    const viewport = document.querySelector('meta[name="viewport"]');
+    if (viewport) {
+        viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
+    }
+    
+    const handleMonthChange = (e) => {
+        const selectedMonth = e.target.value;
+        if ($("histMonth")) $("histMonth").value = selectedMonth;
+        if ($("monthlyReportPicker")) $("monthlyReportPicker").value = selectedMonth;
+        if (typeof loadHistMonth === 'function') loadHistMonth();
+        if (typeof renderDailyTableReport === 'function') renderDailyTableReport();
+    };
+    if ($("monthlyReportPicker")) $("monthlyReportPicker").addEventListener('change', handleMonthChange);
+    if ($("histMonth")) $("histMonth").addEventListener('change', handleMonthChange);
+    
+    const loadingScreen = $("loadingScreen");
+    if (loadingScreen) {
+        loadingScreen.style.display = "none";
+    }
+    
+    const ver = typeof APP_VERSION !== 'undefined' ? APP_VERSION : '1.0.0';
+    const upd = typeof LAST_UPDATED !== 'undefined' ? LAST_UPDATED : '-';
+    console.log(`✅ Barber-Note v${ver} โหลดสมบูรณ์ — ${upd}`);
+});
 // ========== GLOBAL VARIABLES & INITIALIZATION ==========
 let db = JSON.parse(localStorage.getItem("barber_db")) || [];
 let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
@@ -376,49 +451,39 @@ function switchMainTab(pageId, tabId, event) {
         if (typeof loadHistMonth === 'function') loadHistMonth();
     }
 }
-/* =========== SECTION 5: AUTO-UPDATE SYSTEM =========== */  
+/* =========== SECTION 5: AUTO-UPDATE SYSTEM =========== */
 (function autoUpdate() {
-    // 🟢 ใช้ BUILD_MARK หรือ APP_VERSION ร่วมกับ Timestamp
-    const APP_VERSION = window.APP_VERSION || '1.0.0';
-    // สร้าง Build Signature จากเวอร์ชัน + เลขบิลด์อัปเดตล่าสุด
-    const BUILD_SIGNATURE = (typeof BUILD_MARK !== 'undefined') 
-                            ? `${APP_VERSION}_${BUILD_MARK}` 
-                            : APP_VERSION;
-
+    // สร้างลายเซ็นจาก BUILD_MARK โดยตรง — แม่นยำที่สุด
+    const BUILD_SIGNATURE = BUILD_MARK;
     const currentStoredVersion = localStorage.getItem("app_v");
 
-    // ตรวจพบเวอร์ชันใหม่หรือโค้ดมีการอัปเดต
+    // ตรวจพบเวอร์ชันใหม่
     if (currentStoredVersion !== BUILD_SIGNATURE) {
-        console.log(`[AutoUpdate] ตรวจพบไฟล์ใหม่: ${currentStoredVersion || '---'} → ${BUILD_SIGNATURE}`);
+        console.log(`[AutoUpdate] พบเวอร์ชันใหม่: ${currentStoredVersion || '---'} → ${BUILD_SIGNATURE}`);
 
-        // 1. ล้าง Cache API ทั้งหมดในเบราว์เซอร์
-        if ('caches' in window) {
-            caches.keys().then(names => {
-                Promise.all(names.map(name => caches.delete(name))).then(() => {
-                    // 2. บันทึกเวอร์ชันใหม่เมื่อล้าง Cache สำเร็จ
-                    localStorage.setItem("app_v", BUILD_SIGNATURE);
-                    
-                    if (currentStoredVersion) {
-                        if (typeof notify === 'function') {
-                            notify("info", "✨ อัปเดตระบบ", `กำลังรีโหลดเวอร์ชันใหม่...`);
-                        }
-                        setTimeout(() => {
-                            window.location.reload(true);
-                        }, 800);
-                    } else {
-                        localStorage.setItem("app_v", BUILD_SIGNATURE);
-                    }
-                });
-            });
-        } else {
+        // ล้างแคช + บันทึก + รีโหลด
+        const finishUpdate = () => {
             localStorage.setItem("app_v", BUILD_SIGNATURE);
             if (currentStoredVersion) {
-                window.location.reload(true);
+                if (typeof notify === 'function') {
+                    notify("info", "✨ มีอัปเดตใหม่", "กำลังโหลดเวอร์ชันล่าสุด...");
+                }
+                // บังคับรีโหลดข้ามแคช
+                setTimeout(() => window.location.reload(true), 600);
             }
+        };
+
+        // ล้าง Cache API ถ้ามี
+        if ('caches' in window) {
+            caches.keys()
+                .then(names => Promise.all(names.map(name => caches.delete(name))))
+                .then(finishUpdate)
+                .catch(finishUpdate);
+        } else {
+            finishUpdate();
         }
     }
 })();
-
 /* ===========  SECTION 6: DATE DISPLAY =========== */  
 function updateDateDisplay(v) {
     if (!v) return;
@@ -3540,102 +3605,5 @@ function closeLineModal() {
     const previewArea = $("linePreview"); 
     if (previewArea) previewArea.style.display = "none"; 
 }
-/* ========= ✅ INITIALIZE — โหลดค่าเริ่มต้นเมื่อเปิดหน้า ========= */
-document.addEventListener("DOMContentLoaded", () => {
-    // 1. ฟังก์ชันตัวช่วยดึง Element เพื่อป้องกัน Error
-    const $ = id => document.getElementById(id);
-    const today = new Date().toISOString().split('T')[0];
 
-    // 2. ดึงค่า conf แบบปลอดภัย (มี Fallback กัน Crash)
-    const safeConf = (typeof conf !== 'undefined' && conf) 
-        ? conf 
-        : JSON.parse(localStorage.getItem('barberConf') || '{}');
-
-    // ตั้งค่าวันที่ปัจจุบัน
-    if ($("dateInp")) { 
-        $("dateInp").value = today; 
-        if (typeof updateDateDisplay === 'function') updateDateDisplay(today); 
-    }
-    if ($("accDate")) $("accDate").value = today;
-
-    // ตั้งค่าชื่อร้านและธีมแบบ ปลอดภัย
-    if (typeof applyTheme === 'function' && safeConf.theme) {
-        applyTheme(safeConf.theme);
-    }
-    
-    const entryShop = $("entryShopName");
-    if (entryShop) entryShop.innerText = safeConf.shop || 'Barber Shop';
-
-    // ตั้งค่าเวลาปัจจุบัน
-    const now = new Date();
-    const curTime = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
-    if ($("tStart")) $("tStart").value = curTime;
-    if ($("tEnd")) $("tEnd").value = curTime;
-
-    // โหลดข้อมูลหน้าแรกแบบปลอดภัย
-    if (typeof renderDay === 'function') renderDay(today);
-    if (typeof loadAccountStatus === 'function') loadAccountStatus();
-
-    // เปิดหน้าแรกเมื่อโหลดเสร็จ
-    if (typeof goSub === 'function') goSub(1);
-
-    // อัปเดตชื่อร้านทุกจุดที่แสดง
-    const shopNameElements = document.querySelectorAll('.shop-name-display');
-    shopNameElements.forEach(el => {
-        el.innerText = safeConf.shop || 'Barber Shop';
-    });
-
-    // ตั้งค่าช่วงเดือนเริ่มต้นสำหรับรายงาน
-    const nowDate = new Date();
-    const currentMonth = `${nowDate.getFullYear()}-${(nowDate.getMonth() + 1).toString().padStart(2, '0')}`;
-    if ($("histMonth")) $("histMonth").value = currentMonth;
-    if ($("monthlyReportPicker")) $("monthlyReportPicker").value = currentMonth;
-
-    // ตั้งค่าปี-เดือนเริ่มต้นสำหรับเปรียบเทียบ (คำนวณเดือนก่อนหน้าแบบปลอดภัย)
-    if ($("compMonth1")) {
-        const prevMonthDate = new Date(nowDate.getFullYear(), nowDate.getMonth() - 1, 1);
-        const prevMonth = `${prevMonthDate.getFullYear()}-${(prevMonthDate.getMonth() + 1).toString().padStart(2, '0')}`;
-        $("compMonth1").value = prevMonth;
-    }
-    if ($("compMonth2")) {
-        $("compMonth2").value = currentMonth;
-    }
-
-    // ตั้งค่าสถานะเสียงตามค่าที่บันทึกไว้
-    if (safeConf.sound === "off") {
-        document.body.classList.add("muted");
-    } else {
-        document.body.classList.remove("muted");
-    }
-
-    // ปรับการแสดงผลบนมือถือ
-    const viewport = document.querySelector('meta[name="viewport"]');
-    if (viewport) {
-        viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
-    }
-
-    // ผูก Event เปลี่ยนเดือนให้ครอบคลุมทุก Picker
-    const handleMonthChange = (e) => {
-        const selectedMonth = e.target.value;
-        if ($("histMonth")) $("histMonth").value = selectedMonth;
-        if ($("monthlyReportPicker")) $("monthlyReportPicker").value = selectedMonth;
-
-        if (typeof loadHistMonth === 'function') loadHistMonth();
-        if (typeof renderDailyTableReport === 'function') renderDailyTableReport();
-    };
-
-    if ($("monthlyReportPicker")) $("monthlyReportPicker").addEventListener('change', handleMonthChange);
-    if ($("histMonth")) $("histMonth").addEventListener('change', handleMonthChange);
-
-    // ซ่อนหน้าโหลด / แสดงเนื้อหาหลัก
-    const loadingScreen = $("loadingScreen");
-    if (loadingScreen) {
-        loadingScreen.style.display = "none";
-    }
-
-    // แจ้งเวอร์ชันและเวลาอัปเดตแบบกัน Crash
-    const ver = typeof APP_VERSION !== 'undefined' ? APP_VERSION : '1.0.0';
-    const upd = typeof LAST_UPDATED !== 'undefined' ? LAST_UPDATED : '-';
-    console.log(`✅ Barber-Note v${ver} โหลดสมบูรณ์ — ${upd}`);
-});
 /* ========= END OF SCRIPT — สิ้นสุดโค้ดทั้งหมด ========= */
