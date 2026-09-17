@@ -3266,6 +3266,7 @@ function processComparison() {
     document.getElementById('compareTableFoot').innerHTML = footHtml;
 }
 /* ========= SECTION 22: IMPORT / EXPORT / CLEAR ========= */
+/* ========= SECTION 22: IMPORT / EXPORT / CLEAR ========= */
 // 1. ฟังก์ชันส่งออกข้อมูล (Export)
 function exportBackup() {
     try {
@@ -3274,8 +3275,8 @@ function exportBackup() {
             archives: typeof archives !== 'undefined' ? archives : JSON.parse(localStorage.getItem("barber_archives") || "[]"),
             account: typeof account !== 'undefined' ? account : JSON.parse(localStorage.getItem("barber_account") || '{"balance":0,"logs":[]}'), 
             conf: typeof conf !== 'undefined' ? conf : JSON.parse(localStorage.getItem("barber_conf") || "{}"),
-            activeBranch: localStorage.getItem("active_branch_name") || null, // ✅ สำรองชื่อสาขาด้วย
-            viewScope: localStorage.getItem("view_data_scope") || null,       // ✅ สำรองโหมดการแสดงผลด้วย
+            activeBranch: localStorage.getItem("active_branch_name") || null,
+            viewScope: localStorage.getItem("view_data_scope") || null,
             exported: new Date().toISOString()
         };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -3316,26 +3317,66 @@ function importBackup(input) {
             if (!data.db && !data.archives && !data.account && !data.conf) {
                 throw new Error("Wrong format");
             }
+            
             const processImport = () => {
+                // ✅ กำหนดชื่อสาขาปัจจุบันก่อน — สำคัญมาก
+                const targetBranch = data.activeBranch 
+                    || localStorage.getItem("active_branch_name")
+                    || "สาขาไม่ระบุ";
+                
+                // ✅ เติมชื่อสาขาให้ข้อมูลที่นำเข้าแต่ยังไม่มี
+                if (data.archives && Array.isArray(data.archives)) {
+                    data.archives.forEach(day => {
+                        if (!day.branch || day.branch === "undefined" || day.branch === "") {
+                            day.branch = targetBranch;
+                        }
+                        if (day.details && Array.isArray(day.details)) {
+                            day.details.forEach(d => {
+                                if (!d.branch || d.branch === "undefined" || d.branch === "") {
+                                    d.branch = targetBranch;
+                                }
+                            });
+                        }
+                    });
+                }
+                if (data.db && Array.isArray(data.db)) {
+                    data.db.forEach(item => {
+                        if (!item.branch || item.branch === "undefined" || item.branch === "") {
+                            item.branch = targetBranch;
+                        }
+                    });
+                }
+                
+                // ✅ บันทึกข้อมูล
                 if (data.db !== undefined) localStorage.setItem("barber_db", JSON.stringify(data.db));
                 if (data.archives !== undefined) localStorage.setItem("barber_archives", JSON.stringify(data.archives));
                 if (data.account !== undefined) localStorage.setItem("barber_account", JSON.stringify(data.account));
                 if (data.conf !== undefined) localStorage.setItem("barber_conf", JSON.stringify(data.conf));
                 
-                // ✅ คืนค่าชื่อสาขาและโหมดการแสดงผล (ถ้ามีในไฟล์)
-                if (data.activeBranch !== null) localStorage.setItem("active_branch_name", data.activeBranch);
-                if (data.viewScope !== null) localStorage.setItem("view_data_scope", data.viewScope);
+                // ✅ คืนค่าชื่อสาขาและโหมด (ถ้ามีในไฟล์)
+                if (data.activeBranch !== null) {
+                    localStorage.setItem("active_branch_name", data.activeBranch);
+                } else {
+                    localStorage.setItem("active_branch_name", targetBranch);
+                }
+                if (data.viewScope !== null) {
+                    localStorage.setItem("view_data_scope", data.viewScope);
+                }
                 
+                // ✅ อัปเดตตัวแปรในหน้า
                 if (typeof db !== 'undefined' && data.db) db = data.db;
                 if (typeof archives !== 'undefined' && data.archives) archives = data.archives;
                 if (typeof account !== 'undefined' && data.account) account = data.account;
                 if (typeof conf !== 'undefined' && data.conf) conf = data.conf;
+                
+                console.log(`✅ นำเข้าสำเร็จ · เติมชื่อสาขา: ${targetBranch}`);
                 
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({ title: 'สำเร็จ', text: 'กำลังรีโหลดข้อมูล...', icon: 'success', showConfirmButton: false, timer: 1500 });
                 }
                 setTimeout(() => location.reload(), 1500);
             };
+            
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     title: 'ยืนยันการนำเข้าข้อมูล',
