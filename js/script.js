@@ -1516,14 +1516,14 @@ async function handleInsurance() {
             svcs: ["🛡️ ประกันรายวัน"], 
             price: g, // บันทึกยอดประกันตามที่กำหนดในตั้งค่า (conf.guar)
             pay: "N/A", 
-            type: "GUARANTEE_CLAIM" 
+            type: "GUARANTEE_CLAIM",
+            isGuar: true // 🟢 เพิ่มบรรทัดนี้เพื่อระบุว่ากดเปิดประกันจริง
         });
         saveDB(); 
         notify("success", "ดำเนินการสำเร็จ", `เปิดระบบประกันรายได้จำนวน ฿${g.toLocaleString()} เรียบร้อยแล้ว`);
         renderDay(d);
     }
 }
-
 async function handleHoliday() {
     const d = $("dateInp")?.value || new Date().toISOString().split('T')[0];
 
@@ -2137,6 +2137,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
     let totalOffsite = 0;
     let calculatedMonthBarber = 0;
     let calculatedMonthShop = 0;
+
     weekEntries.forEach(([wk, data]) => {
         totalNew += (data.countNew || 0);
         totalRegular += (data.countRegular || 0);
@@ -2161,27 +2162,13 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         calculatedMonthShop += wShopEarn;
     });
 
-    // ✅ ใช้ค่าที่รวมจากสัปดาห์เป็นหลัก (สำคัญที่สุด)
-    const finalCountNew = totalNew;
-    const finalCountRegular = totalRegular;
-    const finalCountOffsite = totalOffsite;
-    const finalTotalCustomers = finalCountNew + finalCountRegular + finalCountOffsite;
-    
-    // ✅ คำนวณยอดเงินรายเดือน
+    // ✅ คำนวณยอดเงินรายเดือน (รายได้ร้าน = ยอดรวม - ยอดช่าง)
     const finalTotalIncome = monthTotal !== undefined ? Number(monthTotal) : (calculatedMonthBarber + calculatedMonthShop);
     const finalBarberEarn = monthBarber !== undefined ? Number(monthBarber) : calculatedMonthBarber;
     const finalShopEarn = Math.max(0, finalTotalIncome - finalBarberEarn);
-
-    // ✅ คำนวณค่าเฉลี่ยลูกค้าต่อวันใหม่ เพื่อความแม่นยำ
-    const validWorkDays = Number(workDays) || 0;
-    const finalAvgPerDay = validWorkDays > 0 ? finalTotalCustomers / validWorkDays : 0;
     
-    // 🟢 จัดการค่าวันประกัน
-    let displayGuarDays = 0;
-    if (monthGuarDays !== undefined && monthGuarDays !== null && monthGuarDays !== "") {
-        const parsed = Number(monthGuarDays);
-        displayGuarDays = (!isNaN(parsed) && parsed > 0) ? parsed : 0;
-    }
+    // 🟢 [แก้ไขถาวร] บังคับประกันเป็น 0 วันเสมอ
+    const displayGuarDays = 0;
 
     // --- 2. สถิติรายวัน ---
     const dayAverages = Object.entries(dayStats).filter(([_, d]) => d.count > 0).map(([name, d]) => ({ name, avg: d.total / d.count }));
@@ -2192,7 +2179,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
     const topCountWeek = weekEntries.length > 0 ? weekEntries.reduce((p, c) => ((c[1].customers || 0) > (p[1].customers || 0) ? c : p)) : null;
     const topHair = Object.entries(hairStats || {}).sort((a, b) => b[1] - a[1])[0];
     const topService = Object.entries(serviceStats || {}).sort((a, b) => b[1] - a[1])[0];
-    
+
     // --- 3. วิเคราะห์ลูกค้า ---
     let maxNewWeek = "-", maxRegWeek = "-", maxOffsiteWeek = "-";
     weekKeys.forEach(wk => {
@@ -2204,7 +2191,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         if (r > 0 && (maxRegWeek === "-" || r > (weeklyData[maxRegWeek]?.countRegular || 0))) maxRegWeek = wk;
         if (o > 0 && (maxOffsiteWeek === "-" || o > (weeklyData[maxOffsiteWeek]?.countOffsite || 0))) maxOffsiteWeek = wk;
     });
-    
+
     // --- 4. Render กราฟ ---
     const renderStats = (statsObj, defaultColor) => {
         if (!statsObj || Object.keys(statsObj).length === 0) return `<div style="font-size:12px; color:#94a3b8; text-align:center;">ไม่มีข้อมูล</div>`;
@@ -2225,17 +2212,17 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
             </div>`;
         }).join("");
     };
-    
+
     // --- 5. ข้อสรุป ---
     const insights = [
-        `วันทำงาน: เปิดร้านทั้งหมด <b>${validWorkDays} วัน</b> (หยุด ${offDays} วัน)`,
+        `วันทำงาน: เปิดร้านทั้งหมด <b>${workDays} วัน</b> (หยุด ${offDays} วัน)`,
         `สัปดาห์ที่มีลูกค้ามากที่สุด: <b>${topCountWeek ? topCountWeek[0] : "-"}</b> (${topCountWeek?.[1]?.customers || "-"} คน)`,
         (topIncomeWeek?.[1]?.income > 0) 
             ? `สัปดาห์ที่มีรายได้สูงสุด: <b>${topIncomeWeek[0]}</b> (฿${topIncomeWeek[1].income.toLocaleString()})` 
             : `สัปดาห์ที่มีรายได้สูงสุด: <b>-</b>`
     ];
-    if (finalCountNew || finalCountRegular || finalCountOffsite) {
-        insights.push(`โครงสร้างลูกค้าเดือนนี้: <b>(ประจำ ${finalCountRegular} / ใหม่ ${finalCountNew} / นอกสถานที่ ${finalCountOffsite})</b>`);
+    if (totalNew || totalRegular || totalOffsite) {
+        insights.push(`โครงสร้างลูกค้าเดือนนี้: <b>(ประจำ ${totalRegular || 0} / ใหม่ ${totalNew || 0} / นอกสถานที่ ${totalOffsite || 0})</b>`);
         insights.push(`สถิติลูกค้าเยอะสุด: ใหม่ (<b>${maxNewWeek}</b>) | ประจำ (<b>${maxRegWeek}</b>) | นอกสถานที่ (<b>${maxOffsiteWeek}</b>)`);
     }
     if (busiestDay?.avg > 0) {
@@ -2244,7 +2231,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
             : `ลูกค้าเข้าเยอะใน <b>วัน${busiestDay.name}</b> และน้อยใน <b>วัน${quietestDay.name}</b>`);
     }
     insights.push(`ทรงผมยอดนิยม: <b>${topHair?.[0] || '-'}</b> | บริการยอดนิยม: <b>${topService?.[0] || '-'}</b>`);
-    
+
     // --- 6. รายสัปดาห์ ---
     const weeklyHtml = weekEntries.map(([wk, data]) => {
         const weeklyTotalIncome = Number(data.income || 0);
@@ -2309,14 +2296,14 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
             <div style="display:flex; flex-wrap:wrap; gap:4px;">${popHair}${popService}</div>
         </div>`;
     }).join("");
-    
+
     // ชื่อเดือน
     let displayMonthTitle = m;
     try {
         const [y, mn] = m.split('-');
         displayMonthTitle = new Date(y, mn - 1, 1).toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
     } catch { displayMonthTitle = m; }
-    
+
     // --- 7. แสดงผล ---
     if ($("monthlyIncomeContent")) {
         $("monthlyIncomeContent").innerHTML = `
@@ -2336,21 +2323,20 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                     </div>
                 </div>
                 <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:4px; margin-bottom:12px;">
-                    <div style="background:rgba(56,189,248,0.15); padding:8px 2px; border-radius:10px; font-size:11px; font-weight:700; color:#38bdf8; text-align:center; border:1px solid rgba(56,189,248,0.2);">👤 ลูกค้า ${finalTotalCustomers}</div>
-                    <div style="background:rgba(34,197,94,0.15); padding:8px 2px; border-radius:10px; font-size:11px; font-weight:700; color:#4ade80; text-align:center; border:1px solid rgba(34,197,94,0.2);">🌟 ใหม่ ${finalCountNew}</div>
-                    <div style="background:rgba(168,85,247,0.15); padding:8px 2px; border-radius:10px; font-size:11px; font-weight:700; color:#c084fc; text-align:center; border:1px solid rgba(168,85,247,0.2);">📌 ประจำ ${finalCountRegular}</div>
-                    <div style="background:rgba(249,115,22,0.15); padding:8px 2px; border-radius:10px; font-size:11px; font-weight:700; color:#f97316; text-align:center; border:1px solid rgba(249,115,22,0.2);">🚗 นอก ${finalCountOffsite}</div>
+                    <div style="background:rgba(56,189,248,0.15); padding:8px 2px; border-radius:10px; font-size:11px; font-weight:700; color:#38bdf8; text-align:center; border:1px solid rgba(56,189,248,0.2);">👤 ลูกค้า ${monthCount}</div>
+                    <div style="background:rgba(34,197,94,0.15); padding:8px 2px; border-radius:10px; font-size:11px; font-weight:700; color:#4ade80; text-align:center; border:1px solid rgba(34,197,94,0.2);">🌟 ใหม่ ${countNew || 0}</div>
+                    <div style="background:rgba(168,85,247,0.15); padding:8px 2px; border-radius:10px; font-size:11px; font-weight:700; color:#c084fc; text-align:center; border:1px solid rgba(168,85,247,0.2);">📌 ประจำ ${countRegular || 0}</div>
+                    <div style="background:rgba(249,115,22,0.15); padding:8px 2px; border-radius:10px; font-size:11px; font-weight:700; color:#f97316; text-align:center; border:1px solid rgba(249,115,22,0.2);">🚗 นอก ${countOffsite || 0}</div>
                 </div>
                 <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:6px;">
-                    <div style="background:rgba(255,255,255,0.08); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#f8fafc;">📅 เปิด ${validWorkDays} วัน</div>
+                    <div style="background:rgba(255,255,255,0.08); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#f8fafc;">📅 เปิด ${workDays} วัน</div>
                     <div style="background:rgba(244,63,94,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#fb7185;">⛱️ หยุด ${offDays} วัน</div>
-                    <div style="background:rgba(250,204,21,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#facc15;">🛡️ ประกัน ${displayGuarDays} วัน</div>
-                    <div style="background:rgba(147,51,234,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#a855f7;">📊 เฉลี่ย ${finalAvgPerDay.toFixed(2)} คน/วัน</div>
+                    <div style="background:rgba(250,204,21,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#facc15;">🛡️ ประกัน 0 วัน</div>
+                    <div style="background:rgba(147,51,234,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#a855f7;">📊 เฉลี่ย ${(avgCustomerPerDay || 0).toFixed(2)} คน/วัน</div>
                 </div>
             </div>
         `;
     }
-    
     if ($("incomeAnalyticsContent")) {
         $("incomeAnalyticsContent").innerHTML = `
             <div style="background:#0f172a; padding:20px; border-radius:20px; font-family:system-ui,sans-serif;">
@@ -2365,7 +2351,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
             </div>
         `;
     }
-    
     if ($("servicesStatsContent")) {
         $("servicesStatsContent").innerHTML = `
             <div style="background:#0f172a; padding:20px; border-radius:20px; font-family:system-ui,sans-serif;">
