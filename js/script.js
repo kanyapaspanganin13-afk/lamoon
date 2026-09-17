@@ -236,7 +236,7 @@ function switchMainTab(pageId, tabId, event) {
     if (event && event.preventDefault) event.preventDefault();
 
     // 1. จัดการสลับ "หน้าหลัก" (Main Pages/Sections)
-    const allPages = document.querySelectorAll('.page-content, section[id^="page-"], .main-page');
+    const allPages = document.querySelectorAll('.page-content, section[id^="page-"], .main-page, .app-page');
     if (allPages.length > 0) {
         allPages.forEach(p => {
             p.style.display = 'none';
@@ -264,16 +264,27 @@ function switchMainTab(pageId, tabId, event) {
         }
 
         currentPage.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        
+        // Active ปุ่มแท็บที่ถูกกด
+        if (event && event.currentTarget) {
+            event.currentTarget.classList.add('active');
+        }
     }
 
-    // 3. ✅ สั่งอัปเดต Bottom Nav ผ่าน updateNavDisplay ให้เป็นมาตรฐานเดียวกัน
-    updateNavDisplay(pageId);
+    // 3. สั่งอัปเดต Bottom Nav
+    if (typeof updateNavDisplay === 'function') {
+        updateNavDisplay(pageId);
+    }
 
-    // 4. โหลดข้อมูลตามเงื่อนไขแท็บ
+    // 🟢 4. โหลดข้อมูลตามเงื่อนไขแท็บ (แก้ไขจุดนี้)
     if (tabId === 'monthlyTab2') {
         if (typeof initYearOptions === 'function') initYearOptions();
         if (typeof renderYearlyIncomeSummary === 'function') renderYearlyIncomeSummary();
-    } else if (pageId === 'report' || pageId === 'pageReport' || tabId === 'monthlyTab1') {
+    } else if (tabId === 'monthlyTab1' || pageId === 'pageMonthlyReport') {
+        // เรียก renderDailyTableReport() เพื่อวาดตารางสรุปประจำเดือน
+        if (typeof renderDailyTableReport === 'function') renderDailyTableReport();
+        if (typeof loadHistMonth === 'function') loadHistMonth();
+    } else if (pageId === 'report' || pageId === 'pageReport') {
         if (typeof loadHistMonth === 'function') loadHistMonth();
     }
 }
