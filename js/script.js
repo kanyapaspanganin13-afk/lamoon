@@ -378,25 +378,43 @@ function switchMainTab(pageId, tabId, event) {
 }
 /* =========== SECTION 5: AUTO-UPDATE SYSTEM =========== */  
 (function autoUpdate() {
+    // 🟢 ใช้ BUILD_MARK หรือ APP_VERSION ร่วมกับ Timestamp
     const APP_VERSION = window.APP_VERSION || '1.0.0';
+    // สร้าง Build Signature จากเวอร์ชัน + เลขบิลด์อัปเดตล่าสุด
+    const BUILD_SIGNATURE = (typeof BUILD_MARK !== 'undefined') 
+                            ? `${APP_VERSION}_${BUILD_MARK}` 
+                            : APP_VERSION;
+
     const currentStoredVersion = localStorage.getItem("app_v");
 
-    // ตรวจพบเวอร์ชันใหม่เฉพาะเมื่อมีการเปลี่ยน VERSION_MAJOR จริง
-    if (currentStoredVersion !== APP_VERSION) {
-        console.log(`[AutoUpdate] อัปเดตจาก ${currentStoredVersion || '---'} → ${APP_VERSION}`);
-        localStorage.setItem("app_v", APP_VERSION);
+    // ตรวจพบเวอร์ชันใหม่หรือโค้ดมีการอัปเดต
+    if (currentStoredVersion !== BUILD_SIGNATURE) {
+        console.log(`[AutoUpdate] ตรวจพบไฟล์ใหม่: ${currentStoredVersion || '---'} → ${BUILD_SIGNATURE}`);
 
+        // 1. ล้าง Cache API ทั้งหมดในเบราว์เซอร์
         if ('caches' in window) {
             caches.keys().then(names => {
-                names.forEach(name => caches.delete(name));
+                Promise.all(names.map(name => caches.delete(name))).then(() => {
+                    // 2. บันทึกเวอร์ชันใหม่เมื่อล้าง Cache สำเร็จ
+                    localStorage.setItem("app_v", BUILD_SIGNATURE);
+                    
+                    if (currentStoredVersion) {
+                        if (typeof notify === 'function') {
+                            notify("info", "✨ อัปเดตระบบ", `กำลังรีโหลดเวอร์ชันใหม่...`);
+                        }
+                        setTimeout(() => {
+                            window.location.reload(true);
+                        }, 800);
+                    } else {
+                        localStorage.setItem("app_v", BUILD_SIGNATURE);
+                    }
+                });
             });
-        }
-
-        if (currentStoredVersion) {
-            if (typeof notify === 'function') {
-                notify("info", "✨ อัปเดตระบบ", `กำลังโหลดเวอร์ชัน ${APP_VERSION} ...`);
+        } else {
+            localStorage.setItem("app_v", BUILD_SIGNATURE);
+            if (currentStoredVersion) {
+                window.location.reload(true);
             }
-            setTimeout(() => window.location.reload(true), 1200);
         }
     }
 })();
