@@ -3,35 +3,38 @@
    ========================================================== */
 /* =========== SECTION 1: INITIALIZATION & GLOBAL VARIABLES =========== */
 const $ = id => document.getElementById(id);
-// ✅ ทุกครั้งที่แก้โค้ด — แก้เลขนี้ 1 ตัวก็พอ
-const BUILD_MARK = "1.0.0-20260916-1821"; // ✅ เปลี่ยนเป็นชุดใหม่ทุกครั้งที่แก้ไข
-const LAST_UPDATED = "16/09/2026";
-
-// ✅ คำนวณเวอร์ชัน — เพิ่มเฉพาะเมื่อแก้โค้ดจริง
+const BUILD_MARK = "1.0.0-20260917-1045"; // 👈 เปลี่ยนชุดตัวเลขนี้
+const LAST_UPDATED = "17/09/2026";
 window.APP_VERSION = "";
 window.BUILD_NUMBER = "";
 
 (function initVersion() {
-    // อ่านค่าเดิมจากเครื่องผู้ใช้
     const storedMark = localStorage.getItem("build_mark") || "";
     let storedBuild = parseInt(localStorage.getItem("build_num") || "0");
 
-    // ถ้า BUILD_MARK เปลี่ยน = แก้โค้ดจริง → เพิ่มเลขบิลด์
+    // ถ้ายังไม่มีบิลด์สะสม หรือเปลี่ยน BUILD_MARK ใหม่ → ให้เพิ่มเลขบิลด์
     if (BUILD_MARK !== storedMark) {
-        storedBuild = storedBuild + 1;
+        storedBuild = storedBuild <= 0 ? 1 : storedBuild + 1; // 🟢 ถ้าเริ่มต้นใหม่ให้เป็น 1
         localStorage.setItem("build_mark", BUILD_MARK);
         localStorage.setItem("build_num", String(storedBuild));
         console.log(`🔄 พบการเปลี่ยนแปลงโค้ด — อัปเดตบิลด์ #${storedBuild}`);
     }
-
-    // ตั้งค่าตัวแปรส่วนกลาง
+    // กำหนดค่าไว้ใช้งานทั่วทั้งแอป
     window.BUILD_NUMBER = storedBuild;
     window.APP_VERSION = BUILD_MARK.split('-')[0] + `.${storedBuild}`;
 
-    // ✅ แสดงผลที่หน้าเว็บ
-    const verEl = document.getElementById("appVersionDisplay");
-    if (verEl) {
-        verEl.innerHTML = `v${window.APP_VERSION} · ${LAST_UPDATED}`;
+    // แสดงผลบนหน้าเว็บ (พร้อมป้องการเรียกใช้องค์ประกอบ HTML ก่อนโหลดเสร็จ)
+    const renderVersion = () => {
+        const verEl = document.getElementById("appVersionDisplay");
+        if (verEl) {
+            verEl.innerHTML = `v${window.APP_VERSION} · ${LAST_UPDATED}`;
+        }
+    };
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", renderVersion);
+    } else {
+        renderVersion();
     }
 
     console.log(`✅ เวอร์ชันปัจจุบัน: v${window.APP_VERSION} (บิลด์ #${storedBuild})`);
