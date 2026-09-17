@@ -66,9 +66,50 @@ document.addEventListener("DOMContentLoaded", () => {
     const savedShopName = localStorage.getItem("shopName") || conf.shop || "BARBER SHOP";
     if ($("shopTitleDisplay")) $("shopTitleDisplay").innerText = savedShopName;
     document.querySelectorAll('.shop-title-text').forEach(el => el.innerText = savedShopName);
+    
+    // 3. เริ่มระบบสาขา
     initBranchSystem();
-   });
+    
+    // ✅ วางตรงนี้ — ข้างใน DOMContentLoaded เหมือนกัน
+    // อัปเดตข้อมูลเก่าให้มีชื่อสาขา — รันครั้งเดียว
+    (function migrateOldData() {
+        const currentBranch = localStorage.getItem("active_branch_name")
+                           || localStorage.getItem("shopName")
+                           || "สาขาไม่ระบุ";
+        let changed = false;
 
+        // อัปเดต db
+        if (Array.isArray(db)) {
+            db.forEach(item => {
+                if (!item.branch) {
+                    item.branch = currentBranch;
+                    changed = true;
+                }
+            });
+        }
+
+        // อัปเดต archives
+        if (Array.isArray(archives)) {
+            archives.forEach(day => {
+                if (!day.branch) {
+                    day.branch = currentBranch;
+                    changed = true;
+                }
+                // อัปเดตใน details ด้วยถ้ามี
+                if (day.details && Array.isArray(day.details)) {
+                    day.details.forEach(d => {
+                        if (!d.branch) d.branch = currentBranch;
+                    });
+                }
+            });
+        }
+
+        if (changed && typeof saveDB === "function") {
+            saveDB();
+            console.log("✅ อัปเดตข้อมูลเก่าเรียบร้อย:", currentBranch);
+        }
+    })();
+}); // ✅ ปิด DOMContentLoaded ทีเดียวท้ายสุด 
 /* =========== SECTION 1A: BRANCH SYSTEM =========== */
 const ACTIVE_BRANCH_KEY = "active_branch_name";
 const VIEW_SCOPE_KEY = "view_data_scope";
@@ -397,67 +438,66 @@ function saveDB() {
 function saveSettings() {
     // Helper Selector กัน Error
     const $ = (id) => document.getElementById(id);
-
     try {
-        // 1. ดึงค่าจากฟอร์ม (เพิ่ม offsiteRate ตามการตั้งค่า)
-         const settings = {
-          shop:        $("setShop")?.value?.trim() || "สาขาไม่ระบุ", // ✅ ใช้ช่องเดิม เก็บเป็นชื่อสาขา
-          branch:      $("setShop")?.value?.trim() || "สาขาไม่ระบุ", // ✅ ดึงค่าเดิมซ้ำ เก็บลงคีย์สาขาด้วย
-          perc:        parseFloat($("setPerc")?.value) || 0,
-          guar:        parseFloat($("setGuar")?.value) || 0,
-          offsiteRate: parseFloat($("setOffsite")?.value) || 0,
-          theme:       $("setTheme")?.value || "light",
-          voice:       $("setVoice")?.value || "default.mp3",
-          sound:       $("setSound")?.value || "on"
-      };
+        // 1. ดึงค่าจากฟอร์ม (ใช้ช่องชื่อร้านเป็นชื่อสาขา)
+        const settings = {
+            shop:        $("setShop")?.value?.trim() || "สาขาไม่ระบุ",
+            branch:      $("setShop")?.value?.trim() || "สาขาไม่ระบุ", // ✅ ใช้ค่าเดิมร่วมกัน
+            perc:        parseFloat($("setPerc")?.value) || 0,
+            guar:        parseFloat($("setGuar")?.value) || 0,
+            offsiteRate: parseFloat($("setOffsite")?.value) || 0,
+            theme:       $("setTheme")?.value || "light",
+            voice:       $("setVoice")?.value || "default.mp3",
+            sound:       $("setSound")?.value || "on"
+        };
 
-        // 2. อัปเดตตัวแปรกลาง (conf)
+        // 2. อัปเดตตัวแปรกลาง
         if (typeof conf !== "undefined") {
             Object.assign(conf, settings);
         } else {
             window.conf = { ...settings };
         }
 
-        // 3. บันทึกลง LocalStorage ให้เป็นมาตรฐานเดียวกัน
+        // 3. บันทึกลง LocalStorage
         const confJSON = JSON.stringify(window.conf);
         localStorage.setItem('barber_conf', confJSON);
-        localStorage.setItem('barberConf', confJSON); // บันทึกไว้กันกรณีฟังก์ชันอื่นสะกดแบบ camelCase
+        localStorage.setItem('barberConf', confJSON);
 
-        // บันทึกแยกคีย์สำหรับใช้ดึงด่วน
-        localStorage.setItem('shopName',        settings.shop);
-        localStorage.setItem('shopPerc',        settings.perc);
-        localStorage.setItem('shopGuar',        settings.guar);
-        localStorage.setItem('shopOffsiteRate', settings.offsiteRate);
-        localStorage.setItem('shopTheme',       settings.theme);
-        localStorage.setItem('shopVoice',       settings.voice);
-        localStorage.setItem('shopSound',       settings.sound);
+        // บันทึกแยกคีย์ — ✅ เพิ่มบรรทัด active_branch_name
+        localStorage.setItem('shopName',          settings.shop);
+        localStorage.setItem('active_branch_name', settings.branch); // ← ขาดจุดนี้! เพิ่มแล้วทำงานครบ ✅
+        localStorage.setItem('shopPerc',          settings.perc);
+        localStorage.setItem('shopGuar',          settings.guar);
+        localStorage.setItem('shopOffsiteRate',   settings.offsiteRate);
+        localStorage.setItem('shopTheme',         settings.theme);
+        localStorage.setItem('shopVoice',         settings.voice);
+        localStorage.setItem('shopSound',         settings.sound);
 
-        // บันทึกเข้า DB หลัก
         if (typeof saveDB === "function") saveDB();
 
-        // 4. อัปเดตการแสดงผลชื่อร้านบนหน้าจอ
+        // 4. อัปเดตการแสดงผล
         const nameDisp = $("shopNameDisp") || $("shopNameDisplay");
         if (nameDisp) {
             nameDisp.innerText = settings.shop.toUpperCase();
-        } 
-
-        // 5. อัปเดต UI และคำนวณยอดเงินใหม่ตามการตั้งค่าทันที
-        if (typeof applyTheme === "function") applyTheme(settings.theme);
-        if (typeof calculateMoney === "function") calculateMoney(); 
-        
-        const currentDate = $("dateInp")?.value || new Date().toISOString().split('T')[0];
-        if (typeof renderDay === "function") renderDay(currentDate); 
-
-        // 6. ปิด Modal การตั้งค่า
-        if ($("modalSet")) $("modalSet").style.display = 'none';
-        
-        // 7. แจ้งเตือนความสำเร็จ
-        if (typeof notify === "function") {
-            notify("success", "บันทึกสำเร็จ", "ระบบได้ดำเนินการบันทึกการตั้งค่าเรียบร้อยแล้ว");
-        } else if (typeof Swal !== 'undefined') {
-            Swal.fire({ title: 'บันทึกสำเร็จ', icon: 'success', timer: 1500, showConfirmButton: false });
         }
 
+        // ✅ รีเฟรชส่วนที่แสดงชื่อสาขา + รายงาน
+        if (typeof renderBranchUI === "function") renderBranchUI();
+        if (typeof applyTheme === "function") applyTheme(settings.theme);
+        if (typeof calculateMoney === "function") calculateMoney();
+
+        const currentDate = $("dateInp")?.value || new Date().toISOString().split('T')[0];
+        if (typeof renderDay === "function") renderDay(currentDate);
+        if (typeof renderDailyTableReport === "function") renderDailyTableReport(); // รีเฟรชรายงานทันที
+
+        if ($("modalSet")) $("modalSet").style.display = 'none';
+
+        // แจ้งผล
+        if (typeof notify === "function") {
+            notify("success", "บันทึกสำเร็จ", `สาขา: ${settings.branch}`);
+        } else if (typeof Swal !== 'undefined') {
+            Swal.fire({ title: 'บันทึกสำเร็จ', text: `สาขา: ${settings.branch}`, icon: 'success', timer: 1500, showConfirmButton: false });
+        }
     } catch (e) {
         console.error("saveSettings error:", e);
         if (typeof notify === "function") {
