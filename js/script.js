@@ -3191,9 +3191,10 @@ function exportBackup() {
             archives: typeof archives !== 'undefined' ? archives : JSON.parse(localStorage.getItem("barber_archives") || "[]"),
             account: typeof account !== 'undefined' ? account : JSON.parse(localStorage.getItem("barber_account") || '{"balance":0,"logs":[]}'), 
             conf: typeof conf !== 'undefined' ? conf : JSON.parse(localStorage.getItem("barber_conf") || "{}"),
+            activeBranch: localStorage.getItem("active_branch_name") || null, // ✅ สำรองชื่อสาขาด้วย
+            viewScope: localStorage.getItem("view_data_scope") || null,       // ✅ สำรองโหมดการแสดงผลด้วย
             exported: new Date().toISOString()
         };
-
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -3201,9 +3202,7 @@ function exportBackup() {
         a.download = `Barber-Backup-${new Date().toLocaleDateString('th-TH').replace(/\//g, '-')}.json`;
         a.click();
         
-        // คืนค่า Memory
         URL.revokeObjectURL(url);
-
         if (typeof Swal !== 'undefined') {
             Swal.fire({
                 title: 'สำรองข้อมูลสำเร็จ',
@@ -3222,11 +3221,11 @@ function exportBackup() {
         }
     }
 }
-// 2. ฟังก์ชันนำเข้าข้อมูล (Import) - แก้ไขให้ปลอดภัย ป้องกันข้อมูลเดิมสูญหาย
+
+// 2. ฟังก์ชันนำเข้าข้อมูล (Import)
 function importBackup(input) {
     const file = input.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
@@ -3234,26 +3233,26 @@ function importBackup(input) {
             if (!data.db && !data.archives && !data.account && !data.conf) {
                 throw new Error("Wrong format");
             }
-
             const processImport = () => {
-                // ✅ เขียนทับเฉพาะ Key ที่มีในไฟล์ Backup หากไม่มีให้ใช้ค่าเดิมในเครื่อง
                 if (data.db !== undefined) localStorage.setItem("barber_db", JSON.stringify(data.db));
                 if (data.archives !== undefined) localStorage.setItem("barber_archives", JSON.stringify(data.archives));
                 if (data.account !== undefined) localStorage.setItem("barber_account", JSON.stringify(data.account));
                 if (data.conf !== undefined) localStorage.setItem("barber_conf", JSON.stringify(data.conf));
-
-                // อัปเดตตัวแปร Global
+                
+                // ✅ คืนค่าชื่อสาขาและโหมดการแสดงผล (ถ้ามีในไฟล์)
+                if (data.activeBranch !== null) localStorage.setItem("active_branch_name", data.activeBranch);
+                if (data.viewScope !== null) localStorage.setItem("view_data_scope", data.viewScope);
+                
                 if (typeof db !== 'undefined' && data.db) db = data.db;
                 if (typeof archives !== 'undefined' && data.archives) archives = data.archives;
                 if (typeof account !== 'undefined' && data.account) account = data.account;
                 if (typeof conf !== 'undefined' && data.conf) conf = data.conf;
-
+                
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({ title: 'สำเร็จ', text: 'กำลังรีโหลดข้อมูล...', icon: 'success', showConfirmButton: false, timer: 1500 });
                 }
                 setTimeout(() => location.reload(), 1500);
             };
-
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     title: 'ยืนยันการนำเข้าข้อมูล',
