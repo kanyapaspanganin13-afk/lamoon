@@ -2627,8 +2627,15 @@ function renderDailyTableReport() {
     
     // กรองข้อมูลเดือนที่เลือก + ตามโหมดที่เลือก
     let filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
+    
+    // ✅ แก้เงื่อนไข — ยอมรับข้อมูลที่ยังไม่มีชื่อสาขาด้วย
     if (!viewAll) {
-        filtered = filtered.filter(a => a.branch === activeBranch);
+        filtered = filtered.filter(a => {
+            // มีชื่อตรงกัน หรือ ยังไม่มีชื่อสาขาเลย → ให้แสดง
+            const hasNoBranch = !a.branch || a.branch === "undefined" || a.branch === "";
+            const matchesBranch = a.branch === activeBranch;
+            return hasNoBranch || matchesBranch;
+        });
     }
     
     const monthNames = [
@@ -2638,12 +2645,16 @@ function renderDailyTableReport() {
     const monthThaiName = monthNames[mNum - 1] || '';
     const thaiDayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
     
-    // ✅ ปรับชื่อหัวรายงาน
+    // ✅ ปรับชื่อหัวรายงาน — ป้องกัน undefined
+    const displayTitleBranch = (activeBranch && activeBranch !== "undefined" && activeBranch !== "")
+        ? activeBranch
+        : "สาขาไม่ระบุ";
+    
     let reportTitle = "";
     if (viewAll) {
         reportTitle = `รายงานทุกสาขา · ประจำเดือน: ${monthThaiName} ${y + 543}`;
     } else {
-        reportTitle = `รายงาน: ${activeBranch} · ประจำเดือน: ${monthThaiName} ${y + 543}`;
+        reportTitle = `รายงาน: ${displayTitleBranch} · ประจำเดือน: ${monthThaiName} ${y + 543}`;
     }
     
     let totalCust = 0, totalBarber = 0, totalShave = 0, totalWash = 0, totalDye = 0;
@@ -2658,10 +2669,10 @@ function renderDailyTableReport() {
         let dayCust = 0;
         let shave = 0, wash = 0, dye = 0;
         
-        // ✅ แก้ตรงนี้ — ถ้าไม่มีชื่อสาขาให้ใช้ชื่อปัจจุบันแทน
-        const branchName = day.branch 
-                        || localStorage.getItem("active_branch_name") 
-                        || "สาขาไม่ระบุ";
+        // ✅ แก้ตรงนี้ — ป้องกัน undefined อย่างเข้มงวด
+        const branchName = (day.branch && day.branch !== "undefined" && day.branch !== "")
+                        ? day.branch
+                        : activeBranch;
         
         if (!isOffDay) {
             workDays++;
