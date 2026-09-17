@@ -111,11 +111,7 @@ function renderBranchUI() {
 }
 
 function initBranchSystem() {
-  if (!localStorage.getItem(ACTIVE_BRANCH_KEY)) {
-    const name = prompt("กรุณาตั้งชื่อสาขาที่ทำงาน", "");
-    if (name && name.trim()) setActiveBranch(name.trim());
-    else setActiveBranch("สาขาไม่ระบุ");
-  }
+  // ❌ ไม่ถามอัตโนมัติ — ไปตั้งค่าที่หน้าตั้งค่าแทน
   renderBranchUI();
 }
 /* =========== SECTION 2: MAIN NAVIGATION =========== */
@@ -404,15 +400,16 @@ function saveSettings() {
 
     try {
         // 1. ดึงค่าจากฟอร์ม (เพิ่ม offsiteRate ตามการตั้งค่า)
-        const settings = {
-            shop:        $("setShop")?.value?.trim() || "Barber Shop",
-            perc:        parseFloat($("setPerc")?.value) || 0,
-            guar:        parseFloat($("setGuar")?.value) || 0,
-            offsiteRate: parseFloat($("setOffsite")?.value) || 200, // 🚗 ค่าบริการนอกสถานที่
-            theme:       $("setTheme")?.value || "light",
-            voice:       $("setVoice")?.value || "default.mp3",
-            sound:       $("setSound")?.value || "on"
-        };
+         const settings = {
+          shop:        $("setShop")?.value?.trim() || "สาขาไม่ระบุ", // ✅ ใช้ช่องเดิม เก็บเป็นชื่อสาขา
+          branch:      $("setShop")?.value?.trim() || "สาขาไม่ระบุ", // ✅ ดึงค่าเดิมซ้ำ เก็บลงคีย์สาขาด้วย
+          perc:        parseFloat($("setPerc")?.value) || 0,
+          guar:        parseFloat($("setGuar")?.value) || 0,
+          offsiteRate: parseFloat($("setOffsite")?.value) || 0,
+          theme:       $("setTheme")?.value || "light",
+          voice:       $("setVoice")?.value || "default.mp3",
+          sound:       $("setSound")?.value || "on"
+      };
 
         // 2. อัปเดตตัวแปรกลาง (conf)
         if (typeof conf !== "undefined") {
