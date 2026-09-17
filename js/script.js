@@ -2,12 +2,28 @@
    Barber-Note v1.1.0 — FULL VERSION + NEW NAVIGATION
    ========================================================== */
 /* =========== SECTION 1: INITIALIZATION & GLOBAL VARIABLES =========== */
+// 1️⃣ กำหนดตัวแปร GLOBAL ก่อนเสมอ
+
 const $ = id => document.getElementById(id);
 const BUILD_MARK = "1.0.0-20260917-1715";
 const LAST_UPDATED = "17/09/2026";
 window.APP_VERSION = "";
 window.BUILD_NUMBER = "";
 
+let db = JSON.parse(localStorage.getItem("barber_db")) || [];
+let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
+let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
+let conf = JSON.parse(localStorage.getItem("barber_conf")) || { 
+    shop: localStorage.getItem("shopName") || "Barber Shop", 
+    perc: parseFloat(localStorage.getItem("shopPerc")) || 50, 
+    guar: parseFloat(localStorage.getItem("shopGuar")) || 0,
+    theme: localStorage.getItem("shopTheme") || "light",
+    voice: localStorage.getItem("shopVoice") || "female",
+    sound: localStorage.getItem("shopSound") || "on"
+};
+let payMethod = "";
+
+// 2️⃣ ระบบเวอร์ชัน — รันทันที
 (function initVersion() {
     const storedMark = localStorage.getItem("build_mark") || "";
     let storedBuild = parseInt(localStorage.getItem("build_num") || "0");
@@ -23,7 +39,9 @@ window.BUILD_NUMBER = "";
     const renderVersion = () => {
         const verEl = document.getElementById("appVersionDisplay");
         if (verEl) {
-            verEl.innerHTML = `v${window.APP_VERSION} · ${LAST_UPDATED}`;
+            const [d, m, y] = LAST_UPDATED.split('/');
+            const yrBE = (parseInt(y) + 543).toString().slice(-2);
+            verEl.innerHTML = `v${window.APP_VERSION} | Update ${d}/${m}/${yrBE}`;
         }
     };
     if (document.readyState === "loading") {
@@ -34,67 +52,103 @@ window.BUILD_NUMBER = "";
     console.log(`✅ เวอร์ชันปัจจุบัน: v${window.APP_VERSION} (บิลด์ #${storedBuild})`);
 })();
 
-// ==================================================
-// ✅ ตามด้วยชุดที่ 1 — ข้างใน DOMContentLoaded
-// ==================================================
+// 3️⃣ เริ่มทำงานหลัก — DOMContentLoaded ชุดเดียว
 document.addEventListener("DOMContentLoaded", () => {
-    const $ = id => document.getElementById(id);
     const today = new Date().toISOString().split('T')[0];
     
-    const safeConf = (typeof conf !== 'undefined' && conf) 
-        ? conf 
-        : JSON.parse(localStorage.getItem('barberConf') || '{}');
-    
+    // --- ตั้งค่าวันที่ ---
     if ($("dateInp")) { 
         $("dateInp").value = today; 
         if (typeof updateDateDisplay === 'function') updateDateDisplay(today); 
     }
     if ($("accDate")) $("accDate").value = today;
     
-    if (typeof applyTheme === 'function' && safeConf.theme) {
-        applyTheme(safeConf.theme);
+    // --- ตั้งค่าธีม ---
+    if (typeof applyTheme === 'function' && conf.theme) {
+        applyTheme(conf.theme);
     }
     
-    const entryShop = $("entryShopName");
-    if (entryShop) entryShop.innerText = safeConf.shop || 'Barber Shop';
+    // --- แสดงชื่อร้าน ---
+    const savedShopName = localStorage.getItem("shopName") || conf.shop || "BARBER SHOP";
+    if ($("shopTitleDisplay")) $("shopTitleDisplay").innerText = savedShopName;
+    document.querySelectorAll('.shop-title-text, .shop-name-display').forEach(el => {
+        el.innerText = savedShopName;
+    });
     
+    // --- ตั้งค่าเวลา ---
     const now = new Date();
     const curTime = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
     if ($("tStart")) $("tStart").value = curTime;
     if ($("tEnd")) $("tEnd").value = curTime;
     
+    // --- เริ่มระบบสาขา ---
+    initBranchSystem();
+    
+    // --- อัปเดตข้อมูลเก่าให้มีชื่อสาขา ---
+    (function migrateOldData() {
+        const currentBranch = localStorage.getItem("active_branch_name")
+                           || localStorage.getItem("shopName")
+                           || "สาขาไม่ระบุ";
+        let changed = false;
+        if (Array.isArray(db)) {
+            db.forEach(item => {
+                if (!item.branch || item.branch === "undefined") {
+                    item.branch = currentBranch;
+                    changed = true;
+                }
+            });
+        }
+        if (Array.isArray(archives)) {
+            archives.forEach(day => {
+                if (!day.branch || day.branch === "undefined") {
+                    day.branch = currentBranch;
+                    changed = true;
+                }
+                if (day.details && Array.isArray(day.details)) {
+                    day.details.forEach(d => {
+                        if (!d.branch || d.branch === "undefined") d.branch = currentBranch;
+                    });
+                }
+            });
+        }
+        if (changed && typeof saveDB === "function") {
+            saveDB();
+            console.log("✅ อัปเดตข้อมูลเก่าเรียบร้อย:", currentBranch);
+        }
+    })();
+    
+    // --- โหลดข้อมูลหน้าแรก ---
     if (typeof renderDay === 'function') renderDay(today);
     if (typeof loadAccountStatus === 'function') loadAccountStatus();
     if (typeof goSub === 'function') goSub(1);
     
-    const shopNameElements = document.querySelectorAll('.shop-name-display');
-    shopNameElements.forEach(el => {
-        el.innerText = safeConf.shop || 'Barber Shop';
-    });
-    
+    // --- ตั้งค่าเดือนเริ่มต้น ---
     const nowDate = new Date();
-    const currentMonth = `${nowDate.getFullYear()}-${(nowDate.getMonth() + 1).toString().padStart(2, '0')}`;
+    const currentMonth = `${nowDate.getFullYear()}-${String(nowDate.getMonth() + 1).padStart(2,'0')}`;
     if ($("histMonth")) $("histMonth").value = currentMonth;
     if ($("monthlyReportPicker")) $("monthlyReportPicker").value = currentMonth;
     
     if ($("compMonth1")) {
         const prevMonthDate = new Date(nowDate.getFullYear(), nowDate.getMonth() - 1, 1);
-        const prevMonth = `${prevMonthDate.getFullYear()}-${(prevMonthDate.getMonth() + 1).toString().padStart(2, '0')}`;
+        const prevMonth = `${prevMonthDate.getFullYear()}-${String(prevMonthDate.getMonth() + 1).padStart(2,'0')}`;
         $("compMonth1").value = prevMonth;
     }
     if ($("compMonth2")) $("compMonth2").value = currentMonth;
     
-    if (safeConf.sound === "off") {
+    // --- ตั้งค่าเสียง ---
+    if (conf.sound === "off") {
         document.body.classList.add("muted");
     } else {
         document.body.classList.remove("muted");
     }
     
+    // --- มือถือ ---
     const viewport = document.querySelector('meta[name="viewport"]');
     if (viewport) {
         viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
     }
     
+    // --- ผูกเหตุการณ์เปลี่ยนเดือน ---
     const handleMonthChange = (e) => {
         const selectedMonth = e.target.value;
         if ($("histMonth")) $("histMonth").value = selectedMonth;
@@ -105,101 +159,35 @@ document.addEventListener("DOMContentLoaded", () => {
     if ($("monthlyReportPicker")) $("monthlyReportPicker").addEventListener('change', handleMonthChange);
     if ($("histMonth")) $("histMonth").addEventListener('change', handleMonthChange);
     
+    // --- ซ่อนหน้าโหลด ---
     const loadingScreen = $("loadingScreen");
-    if (loadingScreen) {
-        loadingScreen.style.display = "none";
-    }
+    if (loadingScreen) loadingScreen.style.display = "none";
     
-    const ver = typeof APP_VERSION !== 'undefined' ? APP_VERSION : '1.0.0';
-    const upd = typeof LAST_UPDATED !== 'undefined' ? LAST_UPDATED : '-';
-    console.log(`✅ Barber-Note v${ver} โหลดสมบูรณ์ — ${upd}`);
+    console.log(`✅ โหลดสมบูรณ์ — เวอร์ชัน: v${window.APP_VERSION}`);
 });
-// ========== GLOBAL VARIABLES & INITIALIZATION ==========
-let db = JSON.parse(localStorage.getItem("barber_db")) || [];
-let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
-let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
-let conf = JSON.parse(localStorage.getItem("barber_conf")) || { 
-    shop: localStorage.getItem("shopName") || "Barber Shop", 
-    perc: parseFloat(localStorage.getItem("shopPerc")) || 50, 
-    guar: parseFloat(localStorage.getItem("shopGuar")) || 0,
-    theme: localStorage.getItem("shopTheme") || "light",
-    voice: localStorage.getItem("shopVoice") || "female",
-    sound: localStorage.getItem("shopSound") || "on"
-};
-let payMethod = "";
-
-// ✅ แสดงผลหน้าจอเมื่อโหลด DOM เสร็จ
-document.addEventListener("DOMContentLoaded", () => {
-    // 1. แสดงเลขเวอร์ชัน
-    const el = document.getElementById("appVersionDisplay");
-    if (el) {
-        const [d, m, y] = LAST_UPDATED.split('/');
-        const yrBE = (parseInt(y) + 543).toString().slice(-2);
-        el.innerText = `V${window.APP_VERSION} | Update ${d}/${m}/${yrBE}`;
-    }
-    // 2. แสดงชื่อร้าน
-    const savedShopName = localStorage.getItem("shopName") || conf.shop || "BARBER SHOP";
-    if ($("shopTitleDisplay")) $("shopTitleDisplay").innerText = savedShopName;
-    document.querySelectorAll('.shop-title-text').forEach(el => el.innerText = savedShopName);
-    
-    // 3. เริ่มระบบสาขา
-    initBranchSystem();
-    
-    // ✅ วางตรงนี้ — ข้างใน DOMContentLoaded เหมือนกัน
-    // อัปเดตข้อมูลเก่าให้มีชื่อสาขา — รันครั้งเดียว
-    (function migrateOldData() {
-        const currentBranch = localStorage.getItem("active_branch_name")
-                           || localStorage.getItem("shopName")
-                           || "สาขาไม่ระบุ";
-        let changed = false;
-
-        // อัปเดต db
-        if (Array.isArray(db)) {
-            db.forEach(item => {
-                if (!item.branch) {
-                    item.branch = currentBranch;
-                    changed = true;
-                }
-            });
-        }
-
-        // อัปเดต archives
-        if (Array.isArray(archives)) {
-            archives.forEach(day => {
-                if (!day.branch) {
-                    day.branch = currentBranch;
-                    changed = true;
-                }
-                // อัปเดตใน details ด้วยถ้ามี
-                if (day.details && Array.isArray(day.details)) {
-                    day.details.forEach(d => {
-                        if (!d.branch) d.branch = currentBranch;
-                    });
-                }
-            });
-        }
-
-        if (changed && typeof saveDB === "function") {
-            saveDB();
-            console.log("✅ อัปเดตข้อมูลเก่าเรียบร้อย:", currentBranch);
-        }
-    })();
-}); // ✅ ปิด DOMContentLoaded ทีเดียวท้ายสุด 
 /* =========== SECTION 1A: BRANCH SYSTEM =========== */
 const ACTIVE_BRANCH_KEY = "active_branch_name";
 const VIEW_SCOPE_KEY = "view_data_scope";
 
 function getActiveBranch() {
-  return localStorage.getItem(ACTIVE_BRANCH_KEY) || "สาขาไม่ระบุ";
+  return localStorage.getItem(ACTIVE_BRANCH_KEY) 
+      || localStorage.getItem("shopName")  // ✅ สำรองค่าจากชื่อร้านเดิม
+      || "สาขาไม่ระบุ";
 }
 
 function setActiveBranch(name) {
   name = (name || "").trim();
   if (!name) return;
+  
   localStorage.setItem(ACTIVE_BRANCH_KEY, name);
+  
+  // ✅ อัปเดตทุกส่วนที่เกี่ยวข้อง
   renderBranchUI();
   if (typeof renderDay === "function") renderDay();
+  if (typeof renderDailyTableReport === "function") renderDailyTableReport();
   if (typeof renderMonthReport === "function") renderMonthReport();
+  
+  console.log(`✅ เปลี่ยนสาขา → ${name}`);
 }
 
 function promptSetupBranch() {
@@ -207,7 +195,9 @@ function promptSetupBranch() {
   const newName = prompt("ตั้งชื่อสาขาที่ท่านกำลังทำงาน", current);
   if (newName && newName.trim()) {
     setActiveBranch(newName.trim());
-    if (typeof notify === "function") notify("success", "สำเร็จ", `ทำงานที่: ${newName}`);
+    if (typeof notify === "function") {
+      notify("success", "สำเร็จ", `ทำงานที่: ${newName}`);
+    }
   }
 }
 
@@ -217,17 +207,24 @@ function getViewScope() {
 
 function setViewScope(mode) {
   localStorage.setItem(VIEW_SCOPE_KEY, mode);
+  
+  // ✅ รีเฟรชทุกส่วนที่แสดงผล
   if (typeof renderDay === "function") renderDay();
+  if (typeof renderDailyTableReport === "function") renderDailyTableReport();
   if (typeof renderMonthReport === "function") renderMonthReport();
 }
 
 function renderBranchUI() {
   const el = document.getElementById("currentBranchDisplay");
   if (el) el.textContent = getActiveBranch();
+  
+  // ✅ อัปเดตจุดแสดงชื่อสาขาอื่นด้วย
+  document.querySelectorAll('.branch-name-display').forEach(span => {
+    span.textContent = getActiveBranch();
+  });
 }
 
 function initBranchSystem() {
-  // ❌ ไม่ถามอัตโนมัติ — ไปตั้งค่าที่หน้าตั้งค่าแทน
   renderBranchUI();
 }
 /* =========== SECTION 2: MAIN NAVIGATION =========== */
