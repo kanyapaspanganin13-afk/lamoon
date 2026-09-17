@@ -3335,7 +3335,7 @@ function exportBackup() {
     }
 }
 
-// 2. ฟังก์ชันนำเข้าข้อมูล (Import) - แก้ไขระบบจัดการชื่อสาขาแล้ว
+// 2. ฟังก์ชันนำเข้าข้อมูล (Import)
 function importBackup(input) {
     const file = input.files?.[0];
     if (!file) return;
@@ -3348,19 +3348,26 @@ function importBackup(input) {
             }
             
             const processImport = () => {
-                // ✅ 1. กำหนดค่า Standard สำหรับข้อมูลที่ไม่มีสาขาให้เป็น "สาขาไม่ระบุ"
-                const defaultBranchLabel = "สาขาไม่ระบุ";
-
-                // ✅ 2. ตรวจสอบข้อมูล archives โดยไม่บังคับเปลี่ยนสาขาเก่าเป็นสาขาใหม่
+                // ✅ 1. ดึงชื่อสาขาเป้าหมาย: ใช้ชื่อสาขาจากไฟล์ -> ถ้าไม่มีให้ใช้ชื่อสาขาปัจจุบันในเครื่อง
+                const currentActiveBranch = localStorage.getItem("active_branch_name");
+                const targetBranch = (data.activeBranch && data.activeBranch !== "undefined" && data.activeBranch !== "null")
+                    ? data.activeBranch
+                    : ((currentActiveBranch && currentActiveBranch !== "undefined" && currentActiveBranch !== "null") 
+                        ? currentActiveBranch 
+                        : "สาขาหลัก");
+                
+                // ✅ 2. เติมชื่อสาขาให้ข้อมูลย้อนหลังถ้าข้อมูลเดิมไม่มี
                 if (data.archives && Array.isArray(data.archives)) {
                     data.archives.forEach(day => {
-                        if (!day.branch || day.branch === "undefined" || day.branch === "null" || day.branch === "") {
-                            day.branch = defaultBranchLabel;
+                        const hasBranch = day.branch && day.branch !== "undefined" && day.branch !== "null" && day.branch !== "สาขาไม่ระบุ" && day.branch.trim() !== "";
+                        if (!hasBranch) {
+                            day.branch = targetBranch;
                         }
                         if (day.details && Array.isArray(day.details)) {
                             day.details.forEach(d => {
-                                if (!d.branch || d.branch === "undefined" || d.branch === "null" || d.branch === "") {
-                                    d.branch = defaultBranchLabel;
+                                const dHasBranch = d.branch && d.branch !== "undefined" && d.branch !== "null" && d.branch !== "สาขาไม่ระบุ" && d.branch.trim() !== "";
+                                if (!dHasBranch) {
+                                    d.branch = targetBranch;
                                 }
                             });
                         }
@@ -3369,41 +3376,36 @@ function importBackup(input) {
 
                 if (data.db && Array.isArray(data.db)) {
                     data.db.forEach(item => {
-                        if (!item.branch || item.branch === "undefined" || item.branch === "null" || item.branch === "") {
-                            item.branch = defaultBranchLabel;
+                        const itemHasBranch = item.branch && item.branch !== "undefined" && item.branch !== "null" && item.branch !== "สาขาไม่ระบุ" && item.branch.trim() !== "";
+                        if (!itemHasBranch) {
+                            item.branch = targetBranch;
                         }
                     });
                 }
                 
-                // ✅ 3. บันทึกข้อมูลหลักเข้า LocalStorage
+                // ✅ 3. บันทึกข้อมูลลง LocalStorage
                 if (data.db !== undefined) localStorage.setItem("barber_db", JSON.stringify(data.db));
                 if (data.archives !== undefined) localStorage.setItem("barber_archives", JSON.stringify(data.archives));
                 if (data.account !== undefined) localStorage.setItem("barber_account", JSON.stringify(data.account));
                 if (data.conf !== undefined) localStorage.setItem("barber_conf", JSON.stringify(data.conf));
                 
-                // ✅ 4. จัดการชื่อสาขาปัจจุบันอย่างปลอดภัย (คลีนค่า undefined/null ออก)
-                let activeBranchToSet = data.activeBranch;
-                if (!activeBranchToSet || activeBranchToSet === "undefined" || activeBranchToSet === "null") {
-                    activeBranchToSet = localStorage.getItem("active_branch_name") || defaultBranchLabel;
-                }
-                localStorage.setItem("active_branch_name", activeBranchToSet);
+                // ✅ 4. ตั้งค่าชื่อสาขาใช้งานปัจจุบันให้ตรงกัน
+                localStorage.setItem("active_branch_name", targetBranch);
 
                 if (data.viewScope !== null && data.viewScope !== undefined) {
                     localStorage.setItem("view_data_scope", data.viewScope);
                 } else {
-                    localStorage.setItem("view_data_scope", "all"); // ค่าเริ่มต้นให้มองเห็นทุกข้อมูล
+                    localStorage.setItem("view_data_scope", "all");
                 }
                 
-                // ✅ 5. อัปเดตตัวแปรในหน่วยความจำ
+                // ✅ 5. อัปเดตตัวแปร Global
                 if (typeof db !== 'undefined' && data.db) db = data.db;
                 if (typeof archives !== 'undefined' && data.archives) archives = data.archives;
                 if (typeof account !== 'undefined' && data.account) account = data.account;
                 if (typeof conf !== 'undefined' && data.conf) conf = data.conf;
                 
-                console.log(`✅ นำเข้าข้อมูลสำเร็จเรียบร้อย`);
-                
                 if (typeof Swal !== 'undefined') {
-                    Swal.fire({ title: 'สำเร็จ', text: 'นำเข้าข้อมูลและรีโหลดเรียบร้อยแล้ว', icon: 'success', showConfirmButton: false, timer: 1500 });
+                    Swal.fire({ title: 'นำเข้าสำเร็จ', text: `บันทึกข้อมูลเข้า ${targetBranch} เรียบร้อยแล้ว`, icon: 'success', showConfirmButton: false, timer: 1500 });
                 }
                 setTimeout(() => location.reload(), 1500);
             };
