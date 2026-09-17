@@ -436,15 +436,30 @@ function switchMainTab(pageId, tabId, event) {
         updateNavDisplay(pageId);
     }
 
-    // 🟢 4. โหลดข้อมูลตามเงื่อนไขแท็บ (แก้ไขจุดนี้)
-    if (tabId === 'monthlyTab2') {
-        if (typeof initYearOptions === 'function') initYearOptions();
-        if (typeof renderYearlyIncomeSummary === 'function') renderYearlyIncomeSummary();
-    } else if (tabId === 'monthlyTab1' || pageId === 'pageMonthlyReport') {
-        // เรียก renderDailyTableReport() เพื่อวาดตารางสรุปประจำเดือน
-        if (typeof renderDailyTableReport === 'function') renderDailyTableReport();
-        if (typeof loadHistMonth === 'function') loadHistMonth();
-    } else if (pageId === 'report' || pageId === 'pageReport') {
+    // 🟢 4. โหลดข้อมูลแยกตามหน้าและแท็บแบบเด็ดขาด (แก้ไขปัญหายอดเป็น 0 และเดือนตีกัน)
+    const todayYm = new Date().toISOString().slice(0, 7); // เดือนปัจจุบัน YYYY-MM
+
+    // CASE A: หน้า "สรุปรายเดือน" (ตารางประจำเดือน / รายได้ย้อนหลัง)
+    if (pageId === 'pageMonthlyReport' || pageId === 'monthlyReport') {
+        if (tabId === 'monthlyTab2') {
+            // แท็บรายได้ย้อนหลัง/รายปี
+            if (typeof initYearOptions === 'function') initYearOptions();
+            if (typeof renderYearlyIncomeSummary === 'function') renderYearlyIncomeSummary();
+        } else {
+            // แท็บรายงานประจำเดือน (ตารางรายวัน) -> ใช้ monthlyReportPicker
+            if ($("monthlyReportPicker") && !$("monthlyReportPicker").value) {
+                $("monthlyReportPicker").value = todayYm;
+            }
+            if (typeof renderDailyTableReport === 'function') renderDailyTableReport();
+        }
+    } 
+    
+    // CASE B: หน้า "สรุปยอดรวม / วิเคราะห์รายได้" (หน้า Report หลัก)
+    else if (pageId === 'report' || pageId === 'pageReport' || pageId === 'pageSummary') {
+        // ใช้ histMonth
+        if ($("histMonth") && !$("histMonth").value) {
+            $("histMonth").value = todayYm;
+        }
         if (typeof loadHistMonth === 'function') loadHistMonth();
     }
 }
