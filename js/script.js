@@ -2601,7 +2601,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         `;
     }
 }
-// ================= แท็บที่ 1: รายงานประจำเดือน (ตารางรายวัน) =================
 function renderDailyTableReport() {
     const picker = document.getElementById('monthlyReportPicker') || document.getElementById('histMonth');
     const content = document.getElementById('monthlyContent1') || document.getElementById('monthlyIncomeContent');
@@ -2610,6 +2609,7 @@ function renderDailyTableReport() {
         content.innerHTML = '<div style="text-align:center; padding: 20px; color: #64748b;">ไม่พบฐานข้อมูลหลัก (archives)</div>';
         return;
     }
+    
     let mVal = picker ? picker.value : '';
     if (!mVal) {
         const now = new Date();
@@ -2621,23 +2621,35 @@ function renderDailyTableReport() {
     const [y, mNum] = mVal.split('-').map(Number);
     const targetPrefix = `${y}-${String(mNum).padStart(2, '0')}`;
     
-    // ✅ ดึงโหมดการแสดงผล + สาขาปัจจุบัน
-    const viewAll = (localStorage.getItem("view_data_scope") || "all") === "all";
+    // ✅ ดึงค่า
+    const viewScope = localStorage.getItem("view_data_scope") || "all";
+    const viewAll = viewScope === "all";
     const activeBranch = localStorage.getItem("active_branch_name") || "สาขาไม่ระบุ";
     
-    // กรองข้อมูลเดือนที่เลือก + ตามโหมดที่เลือก
-    let filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
-    
-    // ✅ แก้เงื่อนไข — ยอมรับข้อมูลที่ยังไม่มีชื่อสาขาด้วย
+    // ✅ DEBUG — เช็คค่าที่ใช้กรอง
+    console.log("🔍 กรองด้วย:", { targetPrefix, viewScope, activeBranch, totalArchives: archives.length });
+
+    // ✅ ขั้นที่ 1: กรองเดือนก่อน
+    let filtered = archives.filter(a => {
+        const hasDate = a.date && String(a.date).startsWith(targetPrefix);
+        if (!hasDate) return false;
+        return true;
+    });
+    console.log("📋 หลังกรองเดือน:", filtered.length, "รายการ");
+
+    // ✅ ขั้นที่ 2: กรองสาขา — ยอมรับทั้งตรงกันและยังไม่มีชื่อ
     if (!viewAll) {
         filtered = filtered.filter(a => {
-            // มีชื่อตรงกัน หรือ ยังไม่มีชื่อสาขาเลย → ให้แสดง
-            const hasNoBranch = !a.branch || a.branch === "undefined" || a.branch === "";
-            const matchesBranch = a.branch === activeBranch;
-            return hasNoBranch || matchesBranch;
+            const b = a.branch;
+            // ยอมรับ: ไม่มีค่า / เป็น undefined / ว่าง / ตรงกับชื่อปัจจุบัน
+            const ok = !b || b === "undefined" || b === "" || b === activeBranch;
+            if (!ok) console.log("❌ ตัดทิ้ง:", a.date, "branch=", b);
+            return ok;
         });
+        console.log("📋 หลังกรองสาขา:", filtered.length, "รายการ");
     }
-    
+
+    // ✅ ส่วนที่เหลือเหมือนเดิม
     const monthNames = [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
@@ -2645,34 +2657,28 @@ function renderDailyTableReport() {
     const monthThaiName = monthNames[mNum - 1] || '';
     const thaiDayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
     
-    // ✅ ปรับชื่อหัวรายงาน — ป้องกัน undefined
     const displayTitleBranch = (activeBranch && activeBranch !== "undefined" && activeBranch !== "")
         ? activeBranch
         : "สาขาไม่ระบุ";
     
-    let reportTitle = "";
-    if (viewAll) {
-        reportTitle = `รายงานทุกสาขา · ประจำเดือน: ${monthThaiName} ${y + 543}`;
-    } else {
-        reportTitle = `รายงาน: ${displayTitleBranch} · ประจำเดือน: ${monthThaiName} ${y + 543}`;
-    }
+    const reportTitle = viewAll
+        ? `รายงานทุกสาขา · ประจำเดือน: ${monthThaiName} ${y + 543}`
+        : `รายงาน: ${displayTitleBranch} · ประจำเดือน: ${monthThaiName} ${y + 543}`;
     
     let totalCust = 0, totalBarber = 0, totalShave = 0, totalWash = 0, totalDye = 0;
     let workDays = 0;
     let rowsHTML = '';
     
-    // เรียงวันที่จาก 1 -> 31
-    filtered.sort((a, b) => a.date.localeCompare(b.date));
+    filtered.sort((a, b) => String(a.date).localeCompare(String(b.date)));
     
     filtered.forEach(day => {
         const isOffDay = day.off === true || day.type === "HOLIDAY";
         let dayCust = 0;
         let shave = 0, wash = 0, dye = 0;
         
-        // ✅ แก้ตรงนี้ — ป้องกัน undefined อย่างเข้มงวด
         const branchName = (day.branch && day.branch !== "undefined" && day.branch !== "")
-                        ? day.branch
-                        : activeBranch;
+            ? day.branch
+            : activeBranch;
         
         if (!isOffDay) {
             workDays++;
@@ -2691,7 +2697,7 @@ function renderDailyTableReport() {
                     }
                 });
             } else {
-                dayCust = Number(day.count) || 0;
+                dayCust = Number(day.count) || Number(day.customers) || 0;
             }
         }
         
@@ -2702,16 +2708,15 @@ function renderDailyTableReport() {
         totalWash += wash;
         totalDye += dye;
         
-        // คำนวณชื่อวัน
         let displayDayName = day.dayName || '-';
         if (day.date) {
-            const [dYear, dMonth, dDay] = day.date.split('-').map(Number);
+            const [dYear, dMonth, dDay] = String(day.date).split('-').map(Number);
             const dObj = new Date(dYear, dMonth - 1, dDay);
             if (!isNaN(dObj.getTime())) {
                 displayDayName = thaiDayNames[dObj.getDay()];
             }
         }
-        const dayNum = day.date ? day.date.split('-')[2] : '-';
+        const dayNum = day.date ? String(day.date).split('-')[2] : '-';
         
         if (isOffDay) {
             rowsHTML += `
