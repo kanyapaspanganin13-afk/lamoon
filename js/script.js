@@ -641,24 +641,30 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* ========== SECTION 10: BUSINESS LOGIC & COMMISSION CALCULATION ========== */
-// 1. ฟังก์ชันคุมการเลือกประเภทลูกค้า (ล็อก/ปลดล็อกราคา)
-// 1. ฟังก์ชันจัดการเมื่อเปลี่ยนประเภทลูกค้า
+// 🟢 1. ฟังก์ชันจัดการเมื่อเปลี่ยนประเภทลูกค้า (ปลดล็อก readOnly ให้แก้ไขราคาได้)
 function handleCustTypeChange(value) {
     const priceInp = document.getElementById('priceInp');
     if (!priceInp) return;
 
     if (value === 'offsite') {
-        priceInp.value = 300;
-        priceInp.readOnly = true;
-        priceInp.style.opacity = '0.7'; // ใช้ opacity แทนเพื่อรองรับทุกธีมสี
+        // ดึงค่าตั้งต้นจากตั้งค่า หรือใช้ 300 หากไม่ได้ตั้งไว้
+        const defaultRate = (typeof conf !== 'undefined' && conf.offsiteRate) 
+                            ? conf.offsiteRate 
+                            : (parseFloat(localStorage.getItem('offsiteRate')) || 300);
+
+        priceInp.value = defaultRate;
+        priceInp.readOnly = false; // 🔓 ปลดล็อกให้แก้ไขราคาได้อิสระ
+        priceInp.style.opacity = '1';
+        priceInp.focus(); // โฟกัสให้ผู้ใช้พิมพ์เปลี่ยนราคาได้เลย
+        priceInp.select();
     } else {
-        if (priceInp.value == 300) priceInp.value = '';
+        if (priceInp.value == 300 || priceInp.value == 200) priceInp.value = '';
         priceInp.readOnly = false;
         priceInp.style.opacity = '1';
     }
 }
 
-// 2. ฟังก์ชันคำนวณส่วนแบ่งช่าง/ร้าน (ปรับ Return key ให้รองรับ handleSave)
+// 🟢 2. ฟังก์ชันคำนวณส่วนแบ่งช่าง/ร้าน (คำนวณตามราคาที่กรอกจริง ไม่ฮาร์ดโค้ด)
 function calcShares(price, custType, isFree = false, shopCommissionRate = 0.50) {
     const numericPrice = parseFloat(price) || 0;
     
@@ -668,8 +674,12 @@ function calcShares(price, custType, isFree = false, shopCommissionRate = 0.50) 
     }
     
     if (custType === 'offsite') {
-        // 🚗 นอกสถานที่: ค่าคงที่ ช่าง 200 / ร้าน 100
-        return { b: 200, s: 100, barberShare: 200, shopShare: 100 };
+        // 🚗 นอกสถานที่: คำนวณจากราคาที่กรอกจริง (ร้านเก็บค่าบริการคงที่ 100 ส่วนที่เหลือเป็นของช่าง)
+        const offsiteShopFee = parseFloat(localStorage.getItem('offsiteShopFee')) || 100;
+        const shop = Math.min(numericPrice, offsiteShopFee); // ร้านได้ตามค่าธรรมเนียม (ไม่เกินราคางาน)
+        const barber = Math.max(0, numericPrice - shop);     // ช่างได้ส่วนที่เหลือทั้งหมด
+        
+        return { b: barber, s: shop, barberShare: barber, shopShare: shop };
     } else {
         // ✂️ ในร้านปกติ: คำนวณตาม % ที่กำหนด
         const barber = Math.round(numericPrice * shopCommissionRate);
@@ -680,6 +690,7 @@ function calcShares(price, custType, isFree = false, shopCommissionRate = 0.50) 
 
 // สร้าง Alias ไว้รองรับกรณีที่มีฟังก์ชันอื่นเรียกใช้ชื่อเต็ม
 const calculateShares = calcShares;
+
 /* ========= SECTION 11: SAVE RECORD ========= */
 async function handleSave(event) {
     const $ = (id) => document.getElementById(id);
@@ -764,49 +775,47 @@ async function handleSave(event) {
     if ($("extra1")?.value) svcs.push($("extra1").value);
     if ($("extra2")?.value) svcs.push($("extra2").value);
 
-    // ⚡ [แก้ไข] 4.1 คำนวณส่วนแบ่ง ช่าง / ร้าน ยึดตามค่าที่ตั้งไว้ใน LocalStorage
+    // 🟢 4.1 คำนวณส่วนแบ่ง ช่าง / ร้าน ปรับตามราคาที่กรอกจริง
     let barberShare = 0;
     let shopShare = 0;
 
     const isOffsite = (custTypeVal === 'offsite');
     const isFree = /^Free/.test(currentPay);
 
-    // 🎯 ดึงการตั้งค่าทั้งหมดที่ผู้ใช้บันทึกไว้จากหน้า Settings
     const shopRate = parseFloat(localStorage.getItem('shopCommissionRate')) || 0.50;      // % ร้าน
-    const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || 200; // ส่วนช่างงานนอกสถานที่
     const offsiteShopFee = parseFloat(localStorage.getItem('offsiteShopFee')) || 100;     // ส่วนร้านงานนอกสถานที่
     const freeBarberComp = parseFloat(localStorage.getItem('freeBarberComp')) || 100;     // ค่าชดเชยสิทธิ์ฟรีส่วนช่าง
     const freeShopComp = parseFloat(localStorage.getItem('freeShopComp')) || 0;         // ค่าชดเชยสิทธิ์ฟรีส่วนร้าน
     const extraMode = localStorage.getItem('extraSplitMode') || 'split';                  // 'split' หรือ 'barber'
 
     if (isOffsite && isFree) {
-        // 📌 นอกสถานที่ + สิทธิ์ฟรี (ยึดตามค่าตั้งค่าชดเชยสิทธิ์ฟรี/นอกสถานที่)
+        // 📌 นอกสถานที่ + สิทธิ์ฟรี
         barberShare = freeBarberComp;
         shopShare = freeShopComp;
     } else if (isOffsite) {
-        // 📌 นอกสถานที่ปกติ
+        // 📌 นอกสถานที่ปกติ (คำนวณตามราคาที่กรอกจริง)
         if (extraMode === 'barber') {
             barberShare = price;
             shopShare = 0;
         } else {
-            barberShare = offsiteBarberFee;
-            shopShare = offsiteShopFee;
+            shopShare = Math.min(price, offsiteShopFee);
+            barberShare = Math.max(0, price - shopShare);
         }
     } else if (isFree) {
         // 📌 สิทธิ์ฟรีในร้านปกติ
         barberShare = freeBarberComp;
         shopShare = freeShopComp;
     } else {
-        // 📌 งานในร้านปกติ (คำนวณตาม % ส่วนแบ่งที่ตั้งไว้)
+        // 📌 งานในร้านปกติ
         shopShare = Math.round(price * shopRate);
         barberShare = price - shopShare;
     }
 
     // ✅ 5. บันทึกข้อมูล
-      db.push({
+    db.push({
         id: Date.now(), 
         date: dInp, 
-        startTime: tStart || "", // 👈 เพิ่มจุดนี้เพื่อป้องกัน Error reading 'startTime' ถาวร
+        startTime: tStart || "", 
         time: tStart || "", 
         endTime: tEnd || (typeof addMinutes === 'function' ? addMinutes(tStart, 30) : tStart),
         price: price || 0, 
@@ -816,11 +825,12 @@ async function handleSave(event) {
         payCash: typeof finalCash !== 'undefined' ? finalCash : (fCash || 0), 
         payTrans: typeof finalTrans !== 'undefined' ? finalTrans : (fTrans || 0),
         custType: custTypeVal || 'none',
-        barberShare: typeof barberShare !== 'undefined' ? barberShare : (shares?.b ?? 0), 
-        shopShare: typeof shopShare !== 'undefined' ? shopShare : (shares?.s ?? 0), 
+        barberShare: barberShare, 
+        shopShare: shopShare, 
         type: 'SERVICE'
     });
     saveDB();
+
     // ✅ 6. แจ้งผลสำเร็จ
     notify("success", "บันทึกสำเร็จ", "จัดเก็บข้อมูลเรียบร้อยแล้ว");
     const sfx = document.getElementById("successSound");
@@ -851,7 +861,6 @@ async function handleSave(event) {
     $("tStart") && ($("tStart").value = curTime);
     $("tEnd") && ($("tEnd").value = curTime);
     
-    // ⚡ ปลดล็อกช่องราคาและคืนค่า style เดิม
     if ($("priceInp")) {
         $("priceInp").value = "";
         $("priceInp").readOnly = false;
