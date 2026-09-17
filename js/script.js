@@ -721,22 +721,18 @@ async function handleSave(event) {
     const custTypeVal = $("custType")?.value || 'none';
     const hairStyleSelect = $("hairStyle");
     const currentPay = payMethod;
-
+    
     // ✅ 2. ตรวจสอบความครบถ้วน
     if (!currentPay) {
         if (navigator.vibrate) navigator.vibrate(100);
         return notify("error", "ระบุข้อมูลไม่ครบ", "กรุณาเลือกวิธีชำระเงิน");
     }
-
     const isFreePay = /^Free/.test(currentPay) || ["Holiday", "Guarantee"].includes(currentPay);
-
-    // ยกเว้นกรณีฟรี -> ต้องระบุราคา
     if (price === 0 && !isFreePay) {
         if (navigator.vibrate) navigator.vibrate(100);
         $("priceInp")?.focus();
         return notify("error", "ระบุข้อมูลไม่ครบ", "กรุณาระบุจำนวนเงิน");
     }
-    // ยกเว้นกรณีฟรี -> ต้องเลือกทรงผม
     if (hairStyleSelect && !isFreePay) {
         const val = hairStyleSelect.value;
         if (!val || val === "" || val === "เลือกทรงผม") {
@@ -745,7 +741,7 @@ async function handleSave(event) {
             return notify("error", "ระบุข้อมูลไม่ครบ", "กรุณาเลือกทรงผม");
         }
     }
-
+    
     // ✅ 3. จัดการยอดเงินตามประเภทจ่าย
     let finalCash = 0, finalTrans = 0;
     switch (currentPay) {
@@ -784,43 +780,57 @@ async function handleSave(event) {
             }
             break;
     }
-
+    
     // ✅ 4. รวบรวมรายการบริการ
     const svcs = [];
     if (hairStyleSelect?.value) svcs.push(hairStyleSelect.value);
     if ($("extra1")?.value) svcs.push($("extra1").value);
     if ($("extra2")?.value) svcs.push($("extra2").value);
-
-    // 🟢 4.1 คำนวณส่วนแบ่ง ช่าง / ร้าน ปรับตามราคาที่กรอกจริง
+    
+    // 🟢 4.1 คำนวณส่วนแบ่ง — ปรับให้ตรงหน้าตั้งค่า 100%
     let barberShare = 0;
     let shopShare = 0;
-
     const isOffsite = (custTypeVal === 'offsite');
     const isFree = /^Free/.test(currentPay);
-
-    const shopRate = parseFloat(localStorage.getItem('shopCommissionRate')) || 0.50;      // % ร้าน
-    const offsiteShopFee = parseFloat(localStorage.getItem('offsiteShopFee')) || 100;     // ส่วนร้านงานนอกสถานที่
-    const freeBarberComp = parseFloat(localStorage.getItem('freeBarberComp')) || 100;     // ค่าชดเชยสิทธิ์ฟรีส่วนช่าง
-    const freeShopComp = parseFloat(localStorage.getItem('freeShopComp')) || 0;         // ค่าชดเชยสิทธิ์ฟรีส่วนร้าน
-
+    
+    // ดึงค่าการตั้งค่า — ตรงกับ renderDay ทุกประการ
+    const shopRate = parseFloat(localStorage.getItem('shopCommissionRate')) || 
+        ((typeof conf !== 'undefined' && conf && conf.perc) ? (conf.perc / 100) : 0.50);
+    
+    // ✅ นอกสถานที่ — ดึงทั้งค่าช่างและร้าน
+    const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || 
+        ((typeof conf !== 'undefined' && conf && conf.offsiteBarber) ? conf.offsiteBarber : 200);
+    const offsiteShopFee = parseFloat(localStorage.getItem('offsiteShopFee')) || 
+        ((typeof conf !== 'undefined' && conf && conf.offsiteShop) ? conf.offsiteShop : 100);
+    
+    // ✅ ค่าชดเชยกรณีฟรี
+    const freeBarberComp = parseFloat(localStorage.getItem('freeBarberComp')) || 
+        ((typeof conf !== 'undefined' && conf && conf.freeBarber) ? conf.freeBarber : 100);
+    const freeShopComp = parseFloat(localStorage.getItem('freeShopComp')) || 
+        ((typeof conf !== 'undefined' && conf && conf.freeShop) ? conf.freeShop : 0);
+    
     if (isOffsite && isFree) {
-        // 📌 นอกสถานที่ + สิทธิ์ฟรี
+        // 📌 นอกสถานที่ + ฟรี → ค่าชดเชยตามตั้งค่า
         barberShare = freeBarberComp;
         shopShare = freeShopComp;
     } else if (isOffsite) {
-        // 🚗 นอกสถานที่ปกติ: หักเข้าส่วนร้านก่อนตาม offsiteShopFee (100) ส่วนที่เหลือยกให้ช่าง
-        shopShare = Math.min(price, offsiteShopFee);
-        barberShare = Math.max(0, price - shopShare);
+        // 🚗 นอกสถานที่ปกติ → ตามค่าที่กำหนดแยกกันในหน้าตั้งค่า
+        barberShare = offsiteBarberFee;
+        shopShare = offsiteShopFee;
+        // 💡 ถ้าต้องการให้รวมเท่ากับราคาที่จ่าย เปลี่ยนเป็น:
+        // barberShare = offsiteBarberFee;
+        // shopShare = Math.max(0, price - offsiteBarberFee);
     } else if (isFree) {
-        // 📌 สิทธิ์ฟรีในร้านปกติ
+        // 📌 ฟรีในร้าน → ค่าชดเชย
         barberShare = freeBarberComp;
         shopShare = freeShopComp;
     } else {
-        // 📌 งานในร้านปกติ
-        shopShare = Math.round(price * shopRate);
-        barberShare = price - shopShare;
+        // 📌 ปกติในร้าน → คิดเป็น %
+        const bPart = Math.round(price * (1 - shopRate));
+        barberShare = bPart;
+        shopShare = price - bPart;
     }
-
+    
     // ✅ 5. บันทึกข้อมูล
     db.push({
         id: Date.now(), 
@@ -830,17 +840,17 @@ async function handleSave(event) {
         endTime: tEnd || (typeof addMinutes === 'function' ? addMinutes(tStart, 30) : tStart),
         price: price || 0, 
         tip: tip || 0, 
-        pay: currentPay || curPay || "", 
+        pay: currentPay || "", 
         svcs: svcs || [],
-        payCash: typeof finalCash !== 'undefined' ? finalCash : (fCash || 0), 
-        payTrans: typeof finalTrans !== 'undefined' ? finalTrans : (fTrans || 0),
+        payCash: typeof finalCash !== 'undefined' ? finalCash : 0, 
+        payTrans: typeof finalTrans !== 'undefined' ? finalTrans : 0,
         custType: custTypeVal || 'none',
         barberShare: barberShare, 
         shopShare: shopShare, 
         type: 'SERVICE'
     });
     saveDB();
-
+    
     // ✅ 6. แจ้งผลสำเร็จ
     notify("success", "บันทึกสำเร็จ", "จัดเก็บข้อมูลเรียบร้อยแล้ว");
     const sfx = document.getElementById("successSound");
@@ -848,7 +858,7 @@ async function handleSave(event) {
         sfx.currentTime = 0;
         sfx.play().catch(e => console.log("Audio play failed"));
     }
-
+    
     // ✨ 7. Animation ปุ่มบันทึก
     const btnSave = event?.currentTarget || document.querySelector(".btn-save");
     if (btnSave) {
@@ -861,7 +871,7 @@ async function handleSave(event) {
             btnSave.innerHTML = originalContent;
         }, 1200);
     }
-
+    
     // ✅ 8. รีเซ็ตฟอร์ม
     payMethod = ""; 
     if (typeof setPaymentType === 'function') setPaymentType("");
@@ -899,10 +909,8 @@ function renderDay(selectedDate) {
     let dInp = selectedDate || ($("dateInp") ? $("dateInp").value : new Date().toISOString().split('T')[0]);
     if ($("dateInp")) $("dateInp").value = dInp;
     let allRec = db.filter(r => r.date === dInp);
-
     const days = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
     const dayName = days[new Date(dInp).getDay()];
-
     if (allRec.length === 0 && typeof archives !== 'undefined') {
         const archivedDay = archives.find(a => a.date === dInp);
         if (archivedDay && archivedDay.details) {
@@ -917,11 +925,15 @@ function renderDay(selectedDate) {
     let calcBarberShare = 0;
     let calcShopShare = 0;
 
+    // ✅ ปรับปรุง: ดึงค่าการตั้งค่าให้ครบถ้วน ทั้ง localStorage และ conf
     const shopRate = parseFloat(localStorage.getItem('shopCommissionRate')) || ((typeof conf !== 'undefined' && conf && conf.perc) ? (conf.perc / 100) : 0.50);
-    const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || 200;
-    const offsiteShopFee = parseFloat(localStorage.getItem('offsiteShopFee')) || 100;
-    const freeBarberComp = parseFloat(localStorage.getItem('freeBarberComp')) || 100;
-    const freeShopComp = parseFloat(localStorage.getItem('freeShopComp')) || 0;
+    
+    // 🟢 นอกสถานที่ — ดึงค่าตามลำดับ: localStorage → conf → ค่าเริ่มต้น
+    const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || ((typeof conf !== 'undefined' && conf && conf.offsiteBarber) ? conf.offsiteBarber : 200);
+    const offsiteShopFee = parseFloat(localStorage.getItem('offsiteShopFee')) || ((typeof conf !== 'undefined' && conf && conf.offsiteShop) ? conf.offsiteShop : 100);
+    
+    const freeBarberComp = parseFloat(localStorage.getItem('freeBarberComp')) || ((typeof conf !== 'undefined' && conf && conf.freeBarber) ? conf.freeBarber : 100);
+    const freeShopComp = parseFloat(localStorage.getItem('freeShopComp')) || ((typeof conf !== 'undefined' && conf && conf.freeShop) ? conf.freeShop : 0);
 
     let listHtml = "";
     let realCustomerCount = 0;
@@ -937,11 +949,10 @@ function renderDay(selectedDate) {
         const cType = r.custType || 'none';
         const timeShow = r.endTime ? `${r.time}-${r.endTime}` : r.time;
         const payStr = r.pay ? String(r.pay).trim() : 'เงินสด';
-
         const isFree = payStr.includes('ฟรี') || payStr.toLowerCase().includes('free');
         const isPureFree = isFree && !(payStr.includes('สด') || payStr.toLowerCase().includes('cash') || payStr.includes('โอน') || payStr.toLowerCase().includes('trans'));
-
-        // 1. คำนวณยอดเงินรวม (Total / Cash / Trans / Tip)
+        
+        // 1. คำนวณยอดเงินรวม
         if (payStr.includes('Mix') || payStr.includes('ผสม')) {
             const pCash = parseFloat(r.payCash) || 0;
             const pTrans = parseFloat(r.payTrans) || 0;
@@ -951,23 +962,23 @@ function renderDay(selectedDate) {
         } else if (!isPureFree) {
             tot += p; cash += p;
         }
-
         if (!isPureFree) tips += t;
 
-        // 🟢 2. คำนวณส่วนแบ่ง ช่าง / ร้าน (Barber / Shop Share) - แก้ไขจุดนี้
+        // 2. 🟢 คำนวณส่วนแบ่ง — ปรับปรุงตรงนี้
         if (r.barberShare !== undefined && r.shopShare !== undefined) {
             calcBarberShare += r.barberShare;
             calcShopShare += r.shopShare;
         } else if (cType === 'offsite' && isFree) {
+            // นอกสถานที่ + ฟรี → ใช้ค่าชดเชยตามตั้งค่า
             calcBarberShare += freeBarberComp;
             calcShopShare += freeShopComp;
         } else if (cType === 'offsite') {
-            // 🚗 นอกสถานที่ปกติ: ยึดการหักเข้าส่วนร้านตาม offsiteShopFee (100) ส่วนที่เหลือเป็นของช่าง
-            const sPart = Math.min(p, offsiteShopFee); // ร้านได้ 100
-            const bPart = Math.max(0, p - sPart);      // ช่างได้ส่วนที่เหลือ (เช่น 300 - 100 = 200)
-            
-            calcBarberShare += bPart;
-            calcShopShare += sPart;
+            // ✅ นอกสถานที่ ปกติ → ตามค่าที่กำหนดในหน้าตั้งค่าโดยตรง
+            calcBarberShare += offsiteBarberFee;
+            calcShopShare += offsiteShopFee;
+            // หมายเหตุ: ถ้าต้องการให้ยอดรวมตรงกับราคาที่ระบุ ให้ใช้บรรทัดล่างแทน
+            // calcBarberShare += offsiteBarberFee;
+            // calcShopShare += Math.max(0, p - offsiteBarberFee);
         } else if (isFree) {
             calcBarberShare += freeBarberComp;
             calcShopShare += freeShopComp;
@@ -977,7 +988,7 @@ function renderDay(selectedDate) {
             calcShopShare += (p - bPart);
         }
 
-        // 3. สถิติจำนวนลูกค้าและบริการ
+        // 3. สถิติลูกค้า
         if (!(rType === 'HOLIDAY' || rType === 'GUARANTEE' || (p === 0 && isPureFree))) {
             if (currentSvcs.length > 0 || cType === 'offsite') {
                 realCustomerCount++;
@@ -988,10 +999,9 @@ function renderDay(selectedDate) {
             currentSvcs.forEach(s => { if (s) stats[s] = (stats[s] || 0) + 1; });
         }
 
-        // 4. การแสดงผล UI รายการ
+        // 4. สร้างรายการแสดงผล
         let payIcon = '💵';
         let moneyDetailText = `฿${p}`;
-
         if (isFree) {
             if (payStr.includes('สด') || payStr.toLowerCase().includes('cash')) {
                 payIcon = '🎁 + 💵';
@@ -1009,12 +1019,10 @@ function renderDay(selectedDate) {
         } else if (payStr.includes('Trans') || payStr.includes('โอน') || payStr.includes('📱')) {
             payIcon = '📱';
         }
-
         let custTag = ""; 
         if (cType === 'offsite') custTag = ` <span style="background:#ef4444; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🚗 นอกสถานที่</span>`;
         else if (cType === 'new') custTag = ` <span style="color:#22c55e; font-size:11px; font-weight:bold;">[🌟]</span>`;
         else if (cType === 'regular') custTag = ` <span style="color:#eab308; font-size:11px; font-weight:bold;">[📌]</span>`;
-
         listHtml += `
         <div class="history-row" style="padding:15px; border-bottom:1px solid #f1f5f9; background:#fff;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1041,13 +1049,10 @@ function renderDay(selectedDate) {
         </div>`;
     });
 
-    // 5. สรุปยอดเงินและส่วนแบ่ง
+    // 5. สรุปยอดเงิน
     const guarAmt = (typeof conf !== 'undefined' && conf && conf.guar) ? conf.guar : 0;
     const bEarn = isHoliday ? 0 : Math.max(calcBarberShare, guarAmt) + tips;
-    
-    // ยอดร้าน = ยอดรวมทั้งหมด - ค่าแรงช่าง (ไม่รวมทิป)
     const sEarn = isHoliday ? 0 : (tot - (bEarn - tips)); 
-    
     const settle = isHoliday ? 0 : cash - bEarn;
 
     if ($("dTotal")) $("dTotal").innerText = tot.toLocaleString();
@@ -1086,7 +1091,6 @@ function renderDay(selectedDate) {
     const allStatsKeys = Object.keys(stats);
     const haircutGroup = allStatsKeys.filter(k => !cleanExtras.includes(k.trim().toLowerCase()));
     const extraGroup = allStatsKeys.filter(k => cleanExtras.includes(k.trim().toLowerCase()));
-
     haircutGroup.forEach(k => {
         sH += `<span style="background:#4338ca;color:#fff;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:800;">${k}: ${stats[k]}</span>`;
     });
@@ -1102,7 +1106,7 @@ function renderDay(selectedDate) {
     else if (settle > 0) { txt = `ช่างคืนร้าน ฿${Math.floor(settle).toLocaleString()}`; statusColor = "#b91c1c"; icon = "🥷"; }
     else if (settle < 0) { txt = `ร้านคืนช่าง ฿${Math.floor(Math.abs(settle)).toLocaleString()}`; statusColor = "#4338ca"; icon = "🏠"; }
     else { txt = "ยอดพอดี"; statusColor = "#15803d"; icon = "✅"; }
-
+    
     const actionBox = $("settleBarContainer");
     if (actionBox) {
         actionBox.style.display = "flex";
@@ -1127,15 +1131,14 @@ function renderDay(selectedDate) {
             const yBE = parseInt(dateParts[0]) + 543;
             displayDateBE = `${d}/${m}/${yBE}`;
         }
-
         dList.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 8px 12px; border-radius: 12px; border-bottom: 2px solid #f1f5f9; margin-bottom: 10px;">           
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 8px 12px; border-radius: 12px; border-bottom: 2px solid #f1f5f9; margin-bottom: 10px;">            
                 <div style="display: flex; align-items: center; gap: 10px; margin-right: 15px;">
                     <b style="font-size: 13px; color: #1e293b;">รายงานวันที่</b>            
                     <div style="position: relative; background: #f1f5f9; padding: 5px 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; cursor: pointer; width: 140px; height: 34px;"> 
                         <span style="font-size: 14px; font-weight: 700; color: #6366f1; width: 100%; text-align: center;">
                             ${dayName} ${displayDateBE}
-                        </span>                                     
+                        </span>                            
                         <input type="date" id="reportDateSelector" value="${dInp}" 
                                onchange="renderDay(this.value)" 
                                style="position: absolute; opacity: 0; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer;">
@@ -1155,6 +1158,7 @@ function renderDay(selectedDate) {
             </div>`;
     } 
 }
+
 /* ========= SECTION 13: DELETE RECORD ========= */
 function delRec(id) {
     if (confirm("ลบรายการนี้?")) { db = db.filter(r => r.id !== id); saveDB(); renderDay(); }
