@@ -2621,21 +2621,21 @@ function renderDailyTableReport() {
     const [y, mNum] = mVal.split('-').map(Number);
     const targetPrefix = `${y}-${String(mNum).padStart(2, '0')}`;
     
-    // ✅ 1. ตรวจสอบและดึงค่า Branch ให้ถูกต้อง (ป้องกันสตริง "undefined")
+    // ดึงโหมดการแสดงผล + สาขาปัจจุบัน
     const viewAll = (localStorage.getItem("view_data_scope") || "all") === "all";
-    let activeBranch = localStorage.getItem("active_branch_name");
-    if (!activeBranch || activeBranch === "undefined" || activeBranch === "null") {
-        activeBranch = "";
-    }
+    const activeBranch = (localStorage.getItem("active_branch_name") || "").trim();
     
     // กรองข้อมูลเดือนที่เลือก
     let filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
     
-    // ✅ 2. ปรับปรุงการกรองสาขาอย่างปลอดภัย
-    if (!viewAll && activeBranch !== "") {
+    // ✅ 1. แก้ไขเงื่อนไขการกรองสาขา: ถ้าเลือกดูเฉพาะสาขา ให้ดึงข้อมูลที่ตรงกัน + ข้อมูลเก่าที่ไม่มีสาขามาแสดงด้วย
+    if (!viewAll) {
         filtered = filtered.filter(a => {
-            const hasNoBranch = !a.branch || a.branch === "undefined" || a.branch === "null" || a.branch === "";
-            const matchesBranch = a.branch === activeBranch;
+            const b = String(a.branch || '').trim();
+            const hasNoBranch = !b || b === 'undefined' || b === 'null' || b === 'สาขาไม่ระบุ';
+            const matchesBranch = activeBranch !== '' && b === activeBranch;
+            
+            // แสดงข้อมูลถ้า: ไม่มีสาขา (ข้อมูลสำรองเก่า) OR ชื่อสาขาตรงกับปัจจุบัน
             return hasNoBranch || matchesBranch;
         });
     }
@@ -2647,11 +2647,10 @@ function renderDailyTableReport() {
     const monthThaiName = monthNames[mNum - 1] || '';
     const thaiDayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
     
-    // ✅ 3. ปรับการแสดงผลชื่อสาขาในหัวรายงาน
-    const displayTitleBranch = activeBranch !== "" ? activeBranch : "ทุกสาขา / ไม่ระบุสาขา";
+    const displayTitleBranch = (activeBranch && activeBranch !== "undefined") ? activeBranch : "สาขาไม่ระบุ";
     
     let reportTitle = "";
-    if (viewAll || activeBranch === "") {
+    if (viewAll) {
         reportTitle = `รายงานทุกสาขา · ประจำเดือน: ${monthThaiName} ${y + 543}`;
     } else {
         reportTitle = `รายงาน: ${displayTitleBranch} · ประจำเดือน: ${monthThaiName} ${y + 543}`;
@@ -2661,7 +2660,6 @@ function renderDailyTableReport() {
     let workDays = 0;
     let rowsHTML = '';
     
-    // เรียงวันที่จาก 1 -> 31
     filtered.sort((a, b) => a.date.localeCompare(b.date));
     
     filtered.forEach(day => {
@@ -2669,9 +2667,11 @@ function renderDailyTableReport() {
         let dayCust = 0;
         let shave = 0, wash = 0, dye = 0;
         
-        const branchName = (day.branch && day.branch !== "undefined" && day.branch !== "null" && day.branch !== "")
-                        ? day.branch
-                        : (activeBranch !== "" ? activeBranch : "ทั่วไป");
+        // ✅ 2. แสดงชื่อสาขาจริงของข้อมูลรายการนั้นๆ (ถ้าไม่มีให้ขึ้นว่า "สาขาไม่ระบุ/สำรอง")
+        const rawBranch = String(day.branch || '').trim();
+        const branchName = (rawBranch && rawBranch !== "undefined" && rawBranch !== "null")
+                        ? rawBranch
+                        : "สาขาไม่ระบุ";
         
         if (!isOffDay) {
             workDays++;
@@ -3296,7 +3296,6 @@ function processComparison() {
     document.getElementById('compareTableFoot').innerHTML = footHtml;
 }
 /* ========= SECTION 22: IMPORT / EXPORT / CLEAR ========= */
-/* ========= SECTION 22: IMPORT / EXPORT / CLEAR ========= */
 // 1. ฟังก์ชันส่งออกข้อมูล (Export)
 function exportBackup() {
     try {
@@ -3336,7 +3335,7 @@ function exportBackup() {
     }
 }
 
-// 2. ฟังก์ชันนำเข้าข้อมูล (Import)
+// 2. ฟังก์ชันนำเข้าข้อมูล (Import) - แก้ไขระบบจัดการชื่อสาขาแล้ว
 function importBackup(input) {
     const file = input.files?.[0];
     if (!file) return;
@@ -3349,60 +3348,62 @@ function importBackup(input) {
             }
             
             const processImport = () => {
-                // ✅ กำหนดชื่อสาขาปัจจุบันก่อน — สำคัญมาก
-                const targetBranch = data.activeBranch 
-                    || localStorage.getItem("active_branch_name")
-                    || "สาขาไม่ระบุ";
-                
-                // ✅ เติมชื่อสาขาให้ข้อมูลที่นำเข้าแต่ยังไม่มี
+                // ✅ 1. กำหนดค่า Standard สำหรับข้อมูลที่ไม่มีสาขาให้เป็น "สาขาไม่ระบุ"
+                const defaultBranchLabel = "สาขาไม่ระบุ";
+
+                // ✅ 2. ตรวจสอบข้อมูล archives โดยไม่บังคับเปลี่ยนสาขาเก่าเป็นสาขาใหม่
                 if (data.archives && Array.isArray(data.archives)) {
                     data.archives.forEach(day => {
-                        if (!day.branch || day.branch === "undefined" || day.branch === "") {
-                            day.branch = targetBranch;
+                        if (!day.branch || day.branch === "undefined" || day.branch === "null" || day.branch === "") {
+                            day.branch = defaultBranchLabel;
                         }
                         if (day.details && Array.isArray(day.details)) {
                             day.details.forEach(d => {
-                                if (!d.branch || d.branch === "undefined" || d.branch === "") {
-                                    d.branch = targetBranch;
+                                if (!d.branch || d.branch === "undefined" || d.branch === "null" || d.branch === "") {
+                                    d.branch = defaultBranchLabel;
                                 }
                             });
                         }
                     });
                 }
+
                 if (data.db && Array.isArray(data.db)) {
                     data.db.forEach(item => {
-                        if (!item.branch || item.branch === "undefined" || item.branch === "") {
-                            item.branch = targetBranch;
+                        if (!item.branch || item.branch === "undefined" || item.branch === "null" || item.branch === "") {
+                            item.branch = defaultBranchLabel;
                         }
                     });
                 }
                 
-                // ✅ บันทึกข้อมูล
+                // ✅ 3. บันทึกข้อมูลหลักเข้า LocalStorage
                 if (data.db !== undefined) localStorage.setItem("barber_db", JSON.stringify(data.db));
                 if (data.archives !== undefined) localStorage.setItem("barber_archives", JSON.stringify(data.archives));
                 if (data.account !== undefined) localStorage.setItem("barber_account", JSON.stringify(data.account));
                 if (data.conf !== undefined) localStorage.setItem("barber_conf", JSON.stringify(data.conf));
                 
-                // ✅ คืนค่าชื่อสาขาและโหมด (ถ้ามีในไฟล์)
-                if (data.activeBranch !== null) {
-                    localStorage.setItem("active_branch_name", data.activeBranch);
-                } else {
-                    localStorage.setItem("active_branch_name", targetBranch);
+                // ✅ 4. จัดการชื่อสาขาปัจจุบันอย่างปลอดภัย (คลีนค่า undefined/null ออก)
+                let activeBranchToSet = data.activeBranch;
+                if (!activeBranchToSet || activeBranchToSet === "undefined" || activeBranchToSet === "null") {
+                    activeBranchToSet = localStorage.getItem("active_branch_name") || defaultBranchLabel;
                 }
-                if (data.viewScope !== null) {
+                localStorage.setItem("active_branch_name", activeBranchToSet);
+
+                if (data.viewScope !== null && data.viewScope !== undefined) {
                     localStorage.setItem("view_data_scope", data.viewScope);
+                } else {
+                    localStorage.setItem("view_data_scope", "all"); // ค่าเริ่มต้นให้มองเห็นทุกข้อมูล
                 }
                 
-                // ✅ อัปเดตตัวแปรในหน้า
+                // ✅ 5. อัปเดตตัวแปรในหน่วยความจำ
                 if (typeof db !== 'undefined' && data.db) db = data.db;
                 if (typeof archives !== 'undefined' && data.archives) archives = data.archives;
                 if (typeof account !== 'undefined' && data.account) account = data.account;
                 if (typeof conf !== 'undefined' && data.conf) conf = data.conf;
                 
-                console.log(`✅ นำเข้าสำเร็จ · เติมชื่อสาขา: ${targetBranch}`);
+                console.log(`✅ นำเข้าข้อมูลสำเร็จเรียบร้อย`);
                 
                 if (typeof Swal !== 'undefined') {
-                    Swal.fire({ title: 'สำเร็จ', text: 'กำลังรีโหลดข้อมูล...', icon: 'success', showConfirmButton: false, timer: 1500 });
+                    Swal.fire({ title: 'สำเร็จ', text: 'นำเข้าข้อมูลและรีโหลดเรียบร้อยแล้ว', icon: 'success', showConfirmButton: false, timer: 1500 });
                 }
                 setTimeout(() => location.reload(), 1500);
             };
@@ -3435,6 +3436,7 @@ function importBackup(input) {
     };
     reader.readAsText(file);
 }
+
 // 3. ฟังก์ชันล้างข้อมูล (Clear Data)
 function clearData() {
     const executeClear = () => {
