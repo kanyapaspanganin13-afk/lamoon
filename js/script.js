@@ -2123,225 +2123,230 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 /* ========= FIX: LOAD HIST MONTH ========= */
 function loadHistMonth() {
-    const $ = (id) => document.getElementById(id);
-    const picker = $("monthlyReportPicker") || $("histMonth");
-    let m = picker ? picker.value : '';
+    const $ = (id) => document.getElementById(id);
+    
+    // 🎯 แก้ไขจุดที่ 1: ดึงเฉพาะช่องของหน้าสรุปยอดรวม (histMonth) แยกเด็ดขาด ไม่ไปดึงของ monthlyReportPicker
+    const picker = $("histMonth") || $("monthlyReportPicker");
+    let m = picker ? picker.value : '';
 
-    if (!m) {
-        const now = new Date();
-        const yyyy = now.getFullYear();
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        m = `${yyyy}-${mm}`;
-        if (picker) picker.value = m;
-    }
+    if (!m) {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        m = `${yyyy}-${mm}`;
+        if (picker) picker.value = m;
+    }
 
-    if (typeof archives === 'undefined' || !Array.isArray(archives)) return;
+    if (typeof archives === 'undefined' || !Array.isArray(archives)) return;
 
-    let [y, mNum] = m.split('-').map(Number);
-    const searchYear = y > 2500 ? y - 543 : y;
-    const targetPrefix = `${searchYear}-${String(mNum).padStart(2, '0')}`;
-    
-    const monthNames = [
-        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
-    ];
-    const monthThaiName = monthNames[mNum - 1] || '';
-    const displayYearThai = searchYear + 543;
-    const monthNameFormatted = `${monthThaiName} ${displayYearThai}`;
+    let [y, mNum] = m.split('-').map(Number);
+    const searchYear = y > 2500 ? y - 543 : y;
+    const searchYearBE = searchYear + 543; // รองรับกรณีใน db บันทึกเป็น พ.ศ.
+    
+    const targetPrefixCE = `${searchYear}-${String(mNum).padStart(2, '0')}`;
+    const targetPrefixBE = `${searchYearBE}-${String(mNum).padStart(2, '0')}`;
+    
+    const monthNames = [
+        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    ];
+    const monthThaiName = monthNames[mNum - 1] || '';
+    const monthNameFormatted = `${monthThaiName} ${searchYear + 543}`;
 
-    const filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
+    // 🎯 แก้ไขจุดที่ 2: ดึง Scope สาขาปัจจุบันมาร่วมกรองด้วย
+    const currentBranch = typeof getActiveBranch === 'function' ? getActiveBranch() : localStorage.getItem("active_branch_name");
+    const viewScope = typeof getViewScope === 'function' ? getViewScope() : (localStorage.getItem("view_data_scope") || "all");
 
-    if (!filtered.length) {
-        if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
-        if (typeof notify === 'function') notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthNameFormatted}`);
-        
-        if (typeof generateMonthlyReport === 'function') {
-            generateMonthlyReport(m, 0, 0, 0, 0, 0, 0, 0, {}, {}, {}, 0, 0, 0, 0);
-        }
-        return;
-    }
+    // กรองวันที่ทั้งแบบ ค.ศ. (2026) และ พ.ศ. (2569) + กรองสาขา
+    const filtered = archives.filter(a => {
+        if (!a.date) return false;
+        const matchDate = a.date.startsWith(targetPrefixCE) || a.date.startsWith(targetPrefixBE);
+        const matchBranch = (viewScope === "all") || (a.branch === currentBranch) || (!a.branch && currentBranch === "สาขาหลัก");
+        return matchDate && matchBranch;
+    });
 
-    // 🎯 1. ดึงการตั้งค่าล่าสุด
-    const shopRate = parseFloat(localStorage.getItem('shopCommissionRate')) || ((typeof conf !== 'undefined' && conf && conf.perc) ? (conf.perc / 100) : 0.50);
-    const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || 200;
-    const freeBarberComp = parseFloat(localStorage.getItem('freeBarberComp')) || 100;
-    const guarantee = (typeof conf !== 'undefined' && conf && conf.guar) ? conf.guar : 0;
+    if (!filtered.length) {
+        if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
+        
+        // ส่งค่า 0 เพื่อรีเซ็ตหน้าจออย่างปลอดภัย
+        if (typeof generateMonthlyReport === 'function') {
+            generateMonthlyReport(m, 0, 0, 0, 0, 0, 0, 0, {}, {}, {}, 0, 0, 0, 0);
+        }
+        return;
+    }
 
-    let countNew = 0, countRegular = 0, countOffsite = 0;  
-    let monthTotal = 0, monthBarber = 0, monthShop = 0, monthCount = 0, monthGuarDays = 0; 
-    let hairStats = {}, serviceStats = {};
-    let offDays = 0, workDays = 0;
-    let weeklyData = {};
+    // 🎯 3. ดึงการตั้งค่าล่าสุด
+    const shopRate = parseFloat(localStorage.getItem('shopCommissionRate')) || ((typeof conf !== 'undefined' && conf && conf.perc) ? (conf.perc / 100) : 0.50);
+    const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || 200;
+    const freeBarberComp = parseFloat(localStorage.getItem('freeBarberComp')) || 100;
+    const guarantee = (typeof conf !== 'undefined' && conf && conf.guar) ? conf.guar : 0;
 
-    const haircutList = ["แฟชั่น", "สกินเฟด", "รองทรง", "ตำรวจ/ทหาร", "นักเรียน", "ทรงนักเรียน", "เปิดข้าง", "ซอยผม/เล็มผม", "แก้ผม", "โกนผม", "เด็ก"];
-    const dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+    let countNew = 0, countRegular = 0, countOffsite = 0;  
+    let monthTotal = 0, monthBarber = 0, monthShop = 0, monthCount = 0, monthGuarDays = 0; 
+    let hairStats = {}, serviceStats = {};
+    let offDays = 0, workDays = 0;
+    let weeklyData = {};
 
-    filtered.forEach(day => {
-        const [dYear, dMonth, dDay] = day.date.split('-').map(Number);
-        const dObj = new Date(dYear, dMonth - 1, dDay);
-        
-        // ⚡ ปรับปรุงการคำนวณสัปดาห์ให้เริ่มนับตามวันอาทิตย์จริง
-        const firstDayOfMonth = new Date(dYear, dMonth - 1, 1).getDay();
-        let wIdx = Math.ceil((dDay + firstDayOfMonth) / 7);
-        if (wIdx > 5) wIdx = 5;
-        const wKey = `สัปดาห์ที่ ${wIdx}`;
+    const haircutList = ["แฟชั่น", "สกินเฟด", "รองทรง", "ตำรวจ/ทหาร", "นักเรียน", "ทรงนักเรียน", "เปิดข้าง", "ซอยผม/เล็มผม", "แก้ผม", "โกนผม", "เด็ก"];
+    const dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
 
-        if (!weeklyData[wKey]) {
-            weeklyData[wKey] = { 
-                customers: 0, workDays: 0, offDays: 0, 
-                zeroDays: 0, guarDays: 0, dailyCounts: [],
-                countNew: 0, countRegular: 0, countOffsite: 0,
-                popularHair: {}, 
-                popularService: {}, 
-                income: 0,
-                shopIncome: 0 
-            };
-        }
+    filtered.forEach(day => {
+        let [dYear, dMonth, dDay] = day.date.split('-').map(Number);
+        if (dYear > 2500) dYear -= 543; // แปลง พ.ศ. กลับเป็น ค.ศ. สำหรับสร้าง Date Object
+        
+        const dObj = new Date(dYear, dMonth - 1, dDay);
+        
+        const firstDayOfMonth = new Date(dYear, dMonth - 1, 1).getDay();
+        let wIdx = Math.ceil((dDay + firstDayOfMonth) / 7);
+        if (wIdx > 5) wIdx = 5;
+        const wKey = `สัปดาห์ที่ ${wIdx}`;
 
-        if (day.off === true || day.type === "HOLIDAY") {
-            offDays++;
-            weeklyData[wKey].offDays++;
-            return;
-        }
+        if (!weeklyData[wKey]) {
+            weeklyData[wKey] = { 
+                customers: 0, workDays: 0, offDays: 0, 
+                zeroDays: 0, guarDays: 0, dailyCounts: [],
+                countNew: 0, countRegular: 0, countOffsite: 0,
+                popularHair: {}, 
+                popularService: {}, 
+                income: 0,
+                shopIncome: 0 
+            };
+        }
 
-        workDays++;
-        weeklyData[wKey].workDays++;
+        if (day.off === true || day.type === "HOLIDAY") {
+            offDays++;
+            weeklyData[wKey].offDays++;
+            return;
+        }
 
-        // ⚡ คำนวณยอดเงินรวมรายวัน
-        let dailyIncome = Number(day.cash || 0) + Number(day.trans || 0);
-        if (dailyIncome === 0 || day.total) dailyIncome = Number(day.total || dailyIncome);
+        workDays++;
+        weeklyData[wKey].workDays++;
 
-        let calcBarberShare = 0;
-        let totalTips = 0;
-        let dayCustomerCount = 0; 
+        let dailyIncome = Number(day.cash || 0) + Number(day.trans || 0);
+        if (dailyIncome === 0 || day.total) dailyIncome = Number(day.total || dailyIncome);
 
-        if (day.details && Array.isArray(day.details) && day.details.length > 0) {
-            day.details.forEach(d => {
-                if (d.type === "SERVICE" || !d.type) {
-                    monthCount++;
-                    dayCustomerCount++; 
-                    weeklyData[wKey].customers++; 
-                    
-                    const p = Number(d.price) || 0;
-                    const t = Number(d.tip) || 0;
-                    const cType = String(d.custType || "").toLowerCase().trim();
-                    const payStr = String(d.pay || "").trim();
-                    const isFree = payStr.startsWith("Free") || payStr.includes("ฟรี");
+        let calcBarberShare = 0;
+        let totalTips = 0;
+        let dayCustomerCount = 0; 
 
-                    totalTips += t;
+        if (day.details && Array.isArray(day.details) && day.details.length > 0) {
+            day.details.forEach(d => {
+                if (d.type === "SERVICE" || !d.type) {
+                    monthCount++;
+                    dayCustomerCount++; 
+                    weeklyData[wKey].customers++; 
+                    
+                    const p = Number(d.price) || 0;
+                    const t = Number(d.tip) || 0;
+                    const cType = String(d.custType || "").toLowerCase().trim();
+                    const payStr = String(d.pay || "").trim();
+                    const isFree = payStr.startsWith("Free") || payStr.includes("ฟรี");
 
-                    // คำนวณส่วนแบ่งช่าง
-                    if (d.barberShare !== undefined) {
-                        calcBarberShare += Number(d.barberShare);
-                    } else if (cType === 'offsite' && isFree) {
-                        calcBarberShare += freeBarberComp;
-                    } else if (cType === 'offsite') {
-                        calcBarberShare += offsiteBarberFee;
-                    } else if (isFree) {
-                        calcBarberShare += freeBarberComp;
-                    } else {
-                        calcBarberShare += Math.round(p * (1 - shopRate));
-                    }
+                    totalTips += t;
 
-                    // สรุปประเภทลูกค้า
-                    if (cType === "new") {
-                        countNew++;
-                        weeklyData[wKey].countNew++;
-                    } else if (cType === "regular") {
-                        countRegular++;
-                        weeklyData[wKey].countRegular++;
-                    } else if (cType === "offsite") {
-                        countOffsite++;
-                        weeklyData[wKey].countOffsite++;
-                    }
+                    if (d.barberShare !== undefined) {
+                        calcBarberShare += Number(d.barberShare);
+                    } else if (cType === 'offsite' && isFree) {
+                        calcBarberShare += freeBarberComp;
+                    } else if (cType === 'offsite') {
+                        calcBarberShare += offsiteBarberFee;
+                    } else if (isFree) {
+                        calcBarberShare += freeBarberComp;
+                    } else {
+                        calcBarberShare += Math.round(p * (1 - shopRate));
+                    }
 
-                    // สรุปสถิติทรงผม/บริการ
-                    const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
-                    svcs.forEach(s => {
-                        if (!s) return;
-                        const cleanS = String(s).trim();
-                        if (haircutList.includes(cleanS)) {
-                            hairStats[cleanS] = (hairStats[cleanS] || 0) + 1;
-                            weeklyData[wKey].popularHair[cleanS] = (weeklyData[wKey].popularHair[cleanS] || 0) + 1;
-                        } else {
-                            serviceStats[cleanS] = (serviceStats[cleanS] || 0) + 1;
-                            weeklyData[wKey].popularService[cleanS] = (weeklyData[wKey].popularService[cleanS] || 0) + 1;
-                        }
-                    });
-                }
-            });
-        } else {
-            calcBarberShare = Number(day.barber) || 0;
-            dayCustomerCount = day.count || 0;
-            monthCount += dayCustomerCount;
-            weeklyData[wKey].customers += dayCustomerCount;
-        }
+                    if (cType === "new") {
+                        countNew++;
+                        weeklyData[wKey].countNew++;
+                    } else if (cType === "regular") {
+                        countRegular++;
+                        weeklyData[wKey].countRegular++;
+                    } else if (cType === "offsite") {
+                        countOffsite++;
+                        weeklyData[wKey].countOffsite++;
+                    }
 
-        // ตรวจสอบเงื่อนไขประกันรายได้ช่าง
-        let isGuaranteeDay = false;
-        if (guarantee > 0 && calcBarberShare < guarantee && dayCustomerCount > 0) {
-            isGuaranteeDay = true;
-        } else if (day.isGuarantee || day.guarantee) {
-            isGuaranteeDay = true;
-        }
+                    const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
+                    svcs.forEach(s => {
+                        if (!s) return;
+                        const cleanS = String(s).trim();
+                        if (haircutList.includes(cleanS)) {
+                            hairStats[cleanS] = (hairStats[cleanS] || 0) + 1;
+                            weeklyData[wKey].popularHair[cleanS] = (weeklyData[wKey].popularHair[cleanS] || 0) + 1;
+                        } else {
+                            serviceStats[cleanS] = (serviceStats[cleanS] || 0) + 1;
+                            weeklyData[wKey].popularService[cleanS] = (weeklyData[wKey].popularService[cleanS] || 0) + 1;
+                        }
+                    });
+                }
+            });
+        } else {
+            calcBarberShare = Number(day.barber) || 0;
+            dayCustomerCount = day.count || 0;
+            monthCount += dayCustomerCount;
+            weeklyData[wKey].customers += dayCustomerCount;
+        }
 
-        if (isGuaranteeDay) {
-            monthGuarDays++;
-            weeklyData[wKey].guarDays++;
-        }
+        let isGuaranteeDay = false;
+        if (guarantee > 0 && calcBarberShare < guarantee && dayCustomerCount > 0) {
+            isGuaranteeDay = true;
+        } else if (day.isGuarantee || day.guarantee) {
+            isGuaranteeDay = true;
+        }
 
-        // ส่วนแบ่งช่างสุทธิต่อวัน (รวมทิป)
-        const pureBarberCost = Math.max(calcBarberShare, (dayCustomerCount > 0 ? guarantee : 0));
-        const dailyBarberNet = Math.floor(pureBarberCost + totalTips);
-        
-        // รายได้สุทธิของร้านต่อวัน
-        const dailyShopNet = Math.max(0, dailyIncome - pureBarberCost);
+        if (isGuaranteeDay) {
+            monthGuarDays++;
+            weeklyData[wKey].guarDays++;
+        }
 
-        monthTotal += dailyIncome;
-        monthBarber += dailyBarberNet;
-        monthShop += dailyShopNet;
+        const pureBarberCost = Math.max(calcBarberShare, (dayCustomerCount > 0 ? guarantee : 0));
+        const dailyBarberNet = Math.floor(pureBarberCost + totalTips);
+        const dailyShopNet = Math.max(0, dailyIncome - pureBarberCost);
 
-        weeklyData[wKey].income += dailyIncome;
-        weeklyData[wKey].shopIncome += dailyShopNet;
+        monthTotal += dailyIncome;
+        monthBarber += dailyBarberNet;
+        monthShop += dailyShopNet;
 
-        if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
-        
-        weeklyData[wKey].dailyCounts.push({ 
-            dayName: dayNames[dObj.getDay()], 
-            count: dayCustomerCount, 
-            income: dailyIncome,
-            barberEarn: dailyBarberNet,
-            shopEarn: dailyShopNet
-        });
-    });
+        weeklyData[wKey].income += dailyIncome;
+        weeklyData[wKey].shopIncome += dailyShopNet;
 
-    const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
+        if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
+        
+        weeklyData[wKey].dailyCounts.push({ 
+            dayName: dayNames[dObj.getDay()], 
+            count: dayCustomerCount, 
+            income: dailyIncome,
+            barberEarn: dailyBarberNet,
+            shopEarn: dailyShopNet
+        });
+    });
 
-    // อัปเดต Element บนหน้าเว็บ
-    if ($("shopTotalMonth")) {
-        $("shopTotalMonth").innerText = `฿${Math.floor(monthShop).toLocaleString()}`;
-    }
+    const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
 
-    // ส่งค่าให้ฟังก์ชันสร้างอินเทอร์เฟซรายงาน
-    if (typeof generateMonthlyReport === 'function') {
-        generateMonthlyReport(
-            m, 
-            monthTotal, 
-            monthBarber, 
-            monthShop, 
-            monthCount, 
-            workDays, 
-            offDays, 
-            avgCustomerPerDay, 
-            weeklyData, 
-            hairStats, 
-            serviceStats, 
-            monthGuarDays, 
-            countNew, 
-            countRegular, 
-            countOffsite
-        );
-    }
+    if ($("shopTotalMonth")) {
+        $("shopTotalMonth").innerText = `฿${Math.floor(monthShop).toLocaleString()}`;
+    }
+
+    if (typeof generateMonthlyReport === 'function') {
+        generateMonthlyReport(
+            m, 
+            monthTotal, 
+            monthBarber, 
+            monthShop, 
+            monthCount, 
+            workDays, 
+            offDays, 
+            avgCustomerPerDay, 
+            weeklyData, 
+            hairStats, 
+            serviceStats, 
+            monthGuarDays, 
+            countNew, 
+            countRegular, 
+            countOffsite
+        );
+    }
 }
 function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular, countOffsite) {
     // Helper Selector
