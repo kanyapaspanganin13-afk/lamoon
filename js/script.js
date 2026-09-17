@@ -2411,6 +2411,157 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         `;
     }
 }
+// ================= แท็บที่ 1: รายงานประจำเดือน (ตารางรายวัน) =================
+function renderDailyTableReport() {
+    const picker = document.getElementById('monthlyReportPicker') || document.getElementById('histMonth');
+    const content = document.getElementById('monthlyContent1') || document.getElementById('monthlyIncomeContent');
+    if (!content) return;
+
+    if (typeof archives === 'undefined' || !Array.isArray(archives)) {
+        content.innerHTML = '<div style="text-align:center; padding: 20px; color: #64748b;">ไม่พบฐานข้อมูลหลัก (archives)</div>';
+        return;
+    }
+
+    let mVal = picker ? picker.value : '';
+    if (!mVal) {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        mVal = `${yyyy}-${mm}`;
+        if (picker) picker.value = mVal;
+    }
+
+    const [y, mNum] = mVal.split('-').map(Number);
+    const targetPrefix = `${y}-${String(mNum).padStart(2, '0')}`;
+    
+    // กรองข้อมูลเดือนที่เลือก
+    const filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
+
+    const monthNames = [
+        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    ];
+    const monthThaiName = monthNames[mNum - 1] || '';
+    const thaiDayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+
+    const currentShopName = (typeof conf !== 'undefined' && conf.shop) ? conf.shop : (localStorage.getItem('shopName') || 'Barber Shop');
+
+    let totalCust = 0, totalBarber = 0, totalShave = 0, totalWash = 0, totalDye = 0;
+    let workDays = 0; // ตัวแปรนับจำนวนวันเปิดทำงาน
+    let rowsHTML = '';
+
+    // เรียงวันที่จาก 1 -> 31
+    filtered.sort((a, b) => a.date.localeCompare(b.date));
+
+    filtered.forEach(day => {
+        // ตรวจสอบวันหยุด
+        const isOffDay = day.off === true || day.type === "HOLIDAY";
+
+        let dayCust = 0;
+        let shave = 0, wash = 0, dye = 0;
+
+        if (!isOffDay) {
+            workDays++; // นับเฉพาะวันที่ไม่ใช่วันหยุด
+
+            if (day.details && Array.isArray(day.details)) {
+                day.details.forEach(d => {
+                    if (d.type === "SERVICE" || !d.type) {
+                        dayCust++;
+                        const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
+                        svcs.forEach(s => {
+                            if (!s) return;
+                            const cleanS = String(s).trim();
+                            if (cleanS.includes("โกน")) shave++;
+                            if (cleanS.includes("สระ")) wash++;
+                            if (cleanS.includes("ย้อม") || cleanS.includes("สี")) dye++;
+                        });
+                    }
+                });
+            } else {
+                dayCust = Number(day.count) || 0;
+            }
+        }
+
+        const barber = isOffDay ? 0 : (Number(day.barber) || 0);
+
+        totalCust += dayCust;
+        totalBarber += barber;
+        totalShave += shave;
+        totalWash += wash;
+        totalDye += dye;
+
+        // คำนวณชื่อวัน
+        let displayDayName = day.dayName || '-';
+        if (day.date) {
+            const [dYear, dMonth, dDay] = day.date.split('-').map(Number);
+            const dObj = new Date(dYear, dMonth - 1, dDay);
+            if (!isNaN(dObj.getTime())) {
+                displayDayName = thaiDayNames[dObj.getDay()];
+            }
+        }
+
+        const dayNum = day.date ? day.date.split('-')[2] : '-';
+
+        // ถ้าเป็นวันหยุด ให้แสดงคำว่า "หยุด" ตัวหนังสือสีแดง
+        if (isOffDay) {
+            rowsHTML += `
+                <tr style="background-color: #fef2f2;">
+                    <td>${parseInt(dayNum, 10)}</td>
+                    <td>${displayDayName}</td>
+                    <td colspan="5" style="color: #ef4444; font-weight: 700; text-align: center;">หยุด</td>
+                </tr>
+            `;
+        } else {
+            // 🟢 เปลี่ยนเลข 0 ให้แสดงผลเป็น '-' ทุกคอลัมน์รายการ
+            rowsHTML += `
+                <tr>
+                    <td>${parseInt(dayNum, 10)}</td>
+                    <td>${displayDayName}</td>
+                    <td>${dayCust || '-'}</td>
+                    <td>${barber > 0 ? barber.toLocaleString() : '-'}</td>
+                    <td>${shave || '-'}</td>
+                    <td>${wash || '-'}</td>
+                    <td>${dye || '-'}</td>
+                </tr>
+            `;
+        }
+    });
+
+    content.innerHTML = `
+        <div style="text-align: center; margin-bottom: 10px;">
+            <h3 style="margin: 0; color: var(--primary, #0284c7);">รายงานร้าน: <span class="shop-name-display">${currentShopName}</span></h3>
+            <p style="margin: 4px 0; font-weight: 700; color: var(--text, #334155);">ประจำเดือน: ${monthThaiName} ${y + 543}</p>
+        </div>
+        <table class="summary-table" style="width:100%; border-collapse: collapse; text-align:center;">
+            <thead>
+                <tr style="background-color: var(--bg, #f1f5f9);">
+                    <th>วันที่</th>
+                    <th>วัน</th>
+                    <th>ลูกค้า</th>
+                    <th>ยอดช่าง</th>
+                    <th>โกน</th>
+                    <th>สระ</th>
+                    <th>ย้อม</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rowsHTML || '<tr><td colspan="7" style="text-align:center; padding: 20px; color:#94a3b8;">ไม่มีข้อมูลในเดือนนี้</td></tr>'}
+            </tbody>
+            <tfoot>
+                <tr style="background-color: #ffeb3b; font-weight: bold; color: #000;">
+                    <td>รวมยอด</td>
+                    <td style="color: #0284c7;">เปิด ${workDays} วัน</td>
+                    <td>${totalCust || '-'}</td>
+                    <td>${totalBarber > 0 ? totalBarber.toLocaleString() : '0'}</td>
+                    <td>${totalShave || '-'}</td>
+                    <td>${totalWash || '-'}</td>
+                    <td>${totalDye || '-'}</td>
+                </tr>
+            </tfoot>
+        </table>
+    `;
+}
+
 // ================= แท็บที่ 2: รายได้ย้อนหลัง 12 เดือน =================
 function renderYearlyIncomeSummary() {
     const select = document.getElementById('yearFilterSelect') || document.getElementById('histYear');
