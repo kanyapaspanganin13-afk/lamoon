@@ -2752,7 +2752,6 @@ function processComparison() {
     const d2_start = document.getElementById('startDate2')?.value;
     const d2_end   = document.getElementById('endDate2')?.value;
 
-    // ✅ อ่านหัวข้อเพียงค่าเดียว → ใช้ทั้ง 2 ช่วง
     const topic = document.getElementById('compareTopic')?.value || 'total';
 
     if (!d1_start || !d1_end || !d2_start || !d2_end) {
@@ -2764,14 +2763,12 @@ function processComparison() {
     const range2 = getDatesArray(d2_start, d2_end);
     const maxRows = Math.max(range1.length, range2.length);
 
-    // ✅ แปลงชื่อหัวข้อ — ชื่อเดียวกันทั้ง 2 ช่วง
     const topicLabel = (t) => {
         const map = { cust:'ลูกค้า', barber:'รายได้ช่าง', shop:'รายได้ร้าน', total:'รายได้รวม' };
         return map[t] || 'รายได้';
     };
-    const label = topicLabel(topic); // ✅ ใช้ label เดียวกันทั้ง 2 ฝั่ง
+    const label = topicLabel(topic);
 
-    // ✅ หัวตาราง — คอลัมน์ขวาสุดเปลี่ยนตามหัวข้อที่เลือก
     const headHtml = `
         <tr>
             <th colspan="4" style="background: var(--summary-bg); color: var(--primary); border: 1px solid var(--summary-border);">📅 ช่วงที่ 1 (${formatTHDate(d1_start)} - ${formatTHDate(d1_end)})</th>
@@ -2789,10 +2786,9 @@ function processComparison() {
         </tr>
     `;
 
-    // ✅ ฟังก์ชันดึงค่าตามหัวข้อ
     function getValueByTopic(dayData, t) {
         switch(t) {
-            case 'cust':  return dayData.cust;
+            case 'cust':   return dayData.cust;
             case 'barber': return dayData.barber;
             case 'shop':   return dayData.shop;
             case 'total':  return dayData.total;
@@ -2800,35 +2796,42 @@ function processComparison() {
         }
     }
 
-      // ดึงข้อมูลรายวัน ครบทุกหัวข้อ — คำนวณรายได้ร้านอัตโนมัติ
-      function getDayDataFull(dateStr) {
-          const list = typeof archives !== 'undefined' ? archives : [];
-          if (!list.length) return { cust: 0, barber: 0, shop: 0, total: 0 };
-          const dayRecords = list.filter(a => a.date === dateStr);
-          if (!dayRecords.length) return { cust: 0, barber: 0, shop: 0, total: 0 };
-      
-          let cust = 0, barber = 0, shop = 0, total = 0;
-          dayRecords.forEach(a => {
-              cust  += a.count || (a.details && Array.isArray(a.details) ? a.details.length : 0);
-              barber += Number(a.barber || 0);
-              total  += Number(a.total || 0); // ✅ อ่านค่า total โดยตรงก่อน
-              
-              // ✅ สำคัญ: ถ้ามีฟิลด์ shop → ใช้ค่าจากข้อมูล / ถ้าไม่มี → คำนวณเองจาก total - barber
-              if (typeof a.shop !== 'undefined' && a.shop !== null && a.shop !== '') {
-                  shop += Number(a.shop);
-              } else {
-                  const recTotal = Number(a.total || 0);
-                  const recBarber = Number(a.barber || 0);
-                  shop += Math.max(0, recTotal - recBarber); // ✅ ป้องกันค่าติดลบ
-              }
-          });
-      
-          return { cust, barber, shop, total };
-      }
+    function getDayDataFull(dateStr) {
+        const list = typeof archives !== 'undefined' ? archives : [];
+        if (!list.length) return { cust: 0, barber: 0, shop: 0, total: 0 };
+        const dayRecords = list.filter(a => a.date === dateStr);
+        if (!dayRecords.length) return { cust: 0, barber: 0, shop: 0, total: 0 };
+    
+        let cust = 0, barber = 0, shop = 0, total = 0;
+        dayRecords.forEach(a => {
+            cust   += a.count || (a.details && Array.isArray(a.details) ? a.details.length : 0);
+            barber += Number(a.barber || 0);
+            total  += Number(a.total || 0);
+            
+            // ✅ อนุญาตให้ติดลบได้ตามจริง (ถ้าร้านต้องจ่ายส่วนต่างประกัน)
+            if (typeof a.shop !== 'undefined' && a.shop !== null && a.shop !== '') {
+                shop += Number(a.shop);
+            } else {
+                const recTotal = Number(a.total || 0);
+                const recBarber = Number(a.barber || 0);
+                shop += (recTotal - recBarber); 
+            }
+        });
+    
+        return { cust, barber, shop, total };
+    }
 
     let bodyHtml = '';
     let sum1Cust = 0, sum1Val = 0;
     let sum2Cust = 0, sum2Val = 0;
+
+    // ✅ ตัวแปลงฟอร์แมต รองรับค่าติดลบ และค่า 0
+    const fmtVal = (v, t, hasData) => {
+        if (!hasData) return '-';
+        if (v === 0) return t === 'cust' ? '0' : '฿0';
+        if (t === 'cust') return v.toLocaleString();
+        return v < 0 ? `-฿${Math.abs(v).toLocaleString()}` : `฿${v.toLocaleString()}`;
+    };
 
     for (let i = 0; i < maxRows; i++) {
         const rowBg1 = i % 2 === 0 ? 'var(--summary-bg)' : 'var(--card)';
@@ -2847,41 +2850,43 @@ function processComparison() {
         const val2 = data2 ? getValueByTopic(data2, topic) : 0;
         if (data2) { sum2Cust += data2.cust; sum2Val += val2; }
 
-        const fmtVal = (v, t) => {
-            if (v === null || v === undefined || v === 0) return '-';
-            return t === 'cust' ? v.toLocaleString() : '฿' + v.toLocaleString();
-        };
+        // กำหนดสีของข้อความ (ถ้าติดลบให้แสดงสีแดง)
+        const valColor1 = val1 < 0 ? '#ef4444' : 'var(--success)';
+        const valColor2 = val2 < 0 ? '#ef4444' : 'var(--success)';
 
         bodyHtml += `
             <tr>
                 <td style="background: ${rowBg1}; color: var(--primary); border: ${border}; font-weight:500;">${dayName1}</td>
                 <td style="background: ${rowBg1}; color: var(--text); border: ${border};">${date1 ? formatShortDate(date1) : '-'}</td>
                 <td style="background: ${rowBg1}; color: var(--text); border: ${border}; font-weight:500;">${data1 ? data1.cust.toLocaleString() : '-'}</td>
-                <td style="background: ${rowBg1}; color: var(--success); border: ${border}; font-weight:600;">${fmtVal(val1, topic)}</td>
+                <td style="background: ${rowBg1}; color: ${valColor1}; border: ${border}; font-weight:600;">${fmtVal(val1, topic, !!data1)}</td>
                 <td style="background: ${rowBg2}; color: var(--btn-compare1); border: ${border}; font-weight:500;">${dayName2}</td>
                 <td style="background: ${rowBg2}; color: var(--text); border: ${border};">${date2 ? formatShortDate(date2) : '-'}</td>
                 <td style="background: ${rowBg2}; color: var(--text); border: ${border}; font-weight:500;">${data2 ? data2.cust.toLocaleString() : '-'}</td>
-                <td style="background: ${rowBg2}; color: var(--success); border: ${border}; font-weight:600;">${fmtVal(val2, topic)}</td>
+                <td style="background: ${rowBg2}; color: ${valColor2}; border: ${border}; font-weight:600;">${fmtVal(val2, topic, !!data2)}</td>
             </tr>
         `;
     }
 
-    // ✅ แถวรวม
     const fmtSum = (v, t) => {
         const val = v || 0;
-        return t === 'cust' ? val.toLocaleString() : '฿' + val.toLocaleString();
+        if (t === 'cust') return val.toLocaleString();
+        return val < 0 ? `-฿${Math.abs(val).toLocaleString()}` : `฿${val.toLocaleString()}`;
     };
+
+    const sum1Color = sum1Val < 0 ? '#ef4444' : 'var(--success)';
+    const sum2Color = sum2Val < 0 ? '#ef4444' : 'var(--success)';
 
     const footHtml = `
         <tr style="font-weight: bold;">
             <td style="background: var(--warning); color: #000; border: 2px solid var(--btn-his2);">รวม</td>
             <td style="background: var(--summary-bg); color: var(--warning); border: 2px solid var(--btn-his2);">${range1.length} วัน</td>
             <td style="background: var(--summary-bg); color: var(--text); border: 2px solid var(--btn-his2); font-size: 1.05em;">${(sum1Cust || 0).toLocaleString()}</td>
-            <td style="background: var(--summary-bg); color: var(--success); border: 2px solid var(--btn-his2); font-size: 1.05em;">${fmtSum(sum1Val, topic)}</td>
+            <td style="background: var(--summary-bg); color: ${sum1Color}; border: 2px solid var(--btn-his2); font-size: 1.05em;">${fmtSum(sum1Val, topic)}</td>
             <td style="background: var(--warning); color: #000; border: 2px solid var(--btn-his2);">รวม</td>
             <td style="background: rgba(147, 142, 245, 0.15); color: var(--btn-compare1); border: 2px solid var(--btn-his2);">${range2.length} วัน</td>
             <td style="background: rgba(147, 142, 245, 0.15); color: var(--text); border: 2px solid var(--btn-his2); font-size: 1.05em;">${(sum2Cust || 0).toLocaleString()}</td>
-            <td style="background: rgba(147, 142, 245, 0.15); color: var(--success); border: 2px solid var(--btn-his2); font-size: 1.05em;">${fmtSum(sum2Val, topic)}</td>
+            <td style="background: rgba(147, 142, 245, 0.15); color: ${sum2Color}; border: 2px solid var(--btn-his2); font-size: 1.05em;">${fmtSum(sum2Val, topic)}</td>
         </tr>
     `;
 
@@ -2889,7 +2894,6 @@ function processComparison() {
     document.getElementById('comparisonSingleContent').innerHTML = bodyHtml;
     document.getElementById('compareTableFoot').innerHTML = footHtml;
 }
-
 /* ========= SECTION 22: IMPORT / EXPORT / CLEAR ========= */
 // 1. ฟังก์ชันส่งออกข้อมูล (Export)
 function exportBackup() {
