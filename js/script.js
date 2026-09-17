@@ -2137,7 +2137,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
     let totalOffsite = 0;
     let calculatedMonthBarber = 0;
     let calculatedMonthShop = 0;
-    let calculatedGuarDays = 0;
 
     weekEntries.forEach(([wk, data]) => {
         totalNew += (data.countNew || 0);
@@ -2148,9 +2147,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         if (data.dailyCounts) {
             data.dailyCounts.forEach(d => {
                 wBarberEarn += Number(d.barberEarn || 0);
-                if (d.isGuar || d.useGuar || (d.guarPay && d.guarPay > 0)) {
-                    calculatedGuarDays++;
-                }
                 const dayName = d.dayName ? d.dayName.split(' ')[0] : '';
                 if (dayName && d.count > 0) {
                     if (!dayStats[dayName]) dayStats[dayName] = { total: 0, count: 0 };
@@ -2166,23 +2162,17 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         calculatedMonthShop += wShopEarn;
     });
 
-    // ✅ ใช้ค่าที่ส่งมาหรือคำนวณสำรอง — แสดง 0 เมื่อไม่มีข้อมูล
+    // ✅ คำนวณยอดเงินรายเดือน
     const finalTotalIncome = monthTotal !== undefined ? Number(monthTotal) : (calculatedMonthBarber + calculatedMonthShop);
     const finalBarberEarn = monthBarber !== undefined ? Number(monthBarber) : calculatedMonthBarber;
-    
-    // ✅ สูตรหลักที่ถูกต้อง: ร้าน = รวม − ช่าง
     const finalShopEarn = Math.max(0, finalTotalIncome - finalBarberEarn);
     
-    // ✅ แก้ไข: บังคับตรงกับหน้าแรก + แสดง 0 เมื่อไม่มี/ผิดพลาด
-    let displayGuarDays;
+    // 🟢 [แก้ไขจุดนี้] หากไม่มีการส่ง monthGuarDays เข้ามา หรือค่าไม่ถูกต้อง ให้เป็น 0 เสมอ
+    let displayGuarDays = 0;
     if (monthGuarDays !== undefined && monthGuarDays !== null && monthGuarDays !== "") {
         const parsed = Number(monthGuarDays);
-        displayGuarDays = isNaN(parsed) || parsed < 0 ? 0 : parsed;
-    } else {
-        displayGuarDays = calculatedGuarDays > 0 ? calculatedGuarDays : 0;
+        displayGuarDays = (!isNaN(parsed) && parsed > 0) ? parsed : 0;
     }
-    // ป้องกันค่าว่าง/ผิดพลาด
-    if (!displayGuarDays || displayGuarDays < 0) displayGuarDays = 0;
 
     // --- 2. สถิติรายวัน ---
     const dayAverages = Object.entries(dayStats).filter(([_, d]) => d.count > 0).map(([name, d]) => ({ name, avg: d.total / d.count }));
@@ -2236,7 +2226,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
             : `สัปดาห์ที่มีรายได้สูงสุด: <b>-</b>`
     ];
     if (totalNew || totalRegular || totalOffsite) {
-        const newColor = "#38bdf8", regColor = "#c084fc", offsiteColor = "#f97316";
         insights.push(`โครงสร้างลูกค้าเดือนนี้: <b>(ประจำ ${totalRegular || 0} / ใหม่ ${totalNew || 0} / นอกสถานที่ ${totalOffsite || 0})</b>`);
         insights.push(`สถิติลูกค้าเยอะสุด: ใหม่ (<b>${maxNewWeek}</b>) | ประจำ (<b>${maxRegWeek}</b>) | นอกสถานที่ (<b>${maxOffsiteWeek}</b>)`);
     }
