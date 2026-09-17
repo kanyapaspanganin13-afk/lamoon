@@ -642,28 +642,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* ========== SECTION 10: BUSINESS LOGIC & COMMISSION CALCULATION ========== */
 // 🟢 1. ฟังก์ชันจัดการเมื่อเปลี่ยนประเภทลูกค้า (ปลดล็อก readOnly ให้แก้ไขราคาได้)
+// 1. ฟังก์ชันจัดการเมื่อเปลี่ยนประเภทลูกค้า
 function handleCustTypeChange(value) {
     const priceInp = document.getElementById('priceInp');
     if (!priceInp) return;
 
     if (value === 'offsite') {
-        // ดึงค่าตั้งต้นจากตั้งค่า หรือใช้ 300 หากไม่ได้ตั้งไว้
-        const defaultRate = (typeof conf !== 'undefined' && conf.offsiteRate) 
+        // ดึงค่าตั้งต้นจากการตั้งค่า
+        const offsiteRate = (typeof conf !== 'undefined' && conf.offsiteRate) 
                             ? conf.offsiteRate 
-                            : (parseFloat(localStorage.getItem('offsiteRate')) || 300);
+                            : parseFloat(localStorage.getItem('offsiteRate'));
 
-        priceInp.value = defaultRate;
-        priceInp.readOnly = false; // 🔓 ปลดล็อกให้แก้ไขราคาได้อิสระ
+        // 🔔 ถ้ายังไม่ได้ตั้งค่าส่วนแบ่ง/ราคานอกสถานที่ ให้แสดงแจ้งเตือน
+        if (!offsiteRate || isNaN(offsiteRate)) {
+            if (typeof notify === "function") {
+                notify("warning", "ยังไม่ได้ตั้งค่า", "ยังไม่ได้ตั้งค่าส่วนแบ่งนอกสถานที่ กรุณาตั้งค่าในเมนูการตั้งค่า");
+            } else if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'ยังไม่ได้ตั้งค่าส่วนแบ่ง',
+                    text: 'กรุณาไปตั้งค่าราคาส่วนแบ่งงานนอกสถานที่ในการตั้งค่าระบบก่อน',
+                    icon: 'warning',
+                    confirmButtonText: 'ตกลง'
+                });
+            }
+            priceInp.value = '';
+        } else {
+            priceInp.value = offsiteRate;
+        }
+
+        // 🔓 ปลดล็อกช่องราคา ให้ระบุ/แก้ไขราคาจริงได้อิสระ
+        priceInp.readOnly = false;
         priceInp.style.opacity = '1';
-        priceInp.focus(); // โฟกัสให้ผู้ใช้พิมพ์เปลี่ยนราคาได้เลย
+        priceInp.focus();
         priceInp.select();
     } else {
-        if (priceInp.value == 300 || priceInp.value == 200) priceInp.value = '';
         priceInp.readOnly = false;
         priceInp.style.opacity = '1';
     }
 }
-
 // 🟢 2. ฟังก์ชันคำนวณส่วนแบ่งช่าง/ร้าน (คำนวณตามราคาที่กรอกจริง ไม่ฮาร์ดโค้ด)
 function calcShares(price, custType, isFree = false, shopCommissionRate = 0.50) {
     const numericPrice = parseFloat(price) || 0;
