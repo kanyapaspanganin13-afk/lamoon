@@ -2124,7 +2124,9 @@ document.addEventListener("DOMContentLoaded", () => {
 /* ========= FIX: LOAD HIST MONTH ========= */
 function loadHistMonth() {
     const $ = (id) => document.getElementById(id);
-    const picker = $("monthlyReportPicker") || $("histMonth");
+    
+    // 🎯 แก้ไขจุดที่ 1: ดึงเฉพาะช่องของหน้าสรุปยอดรวม (histMonth) แยกเด็ดขาด ไม่ไปดึงของ monthlyReportPicker
+    const picker = $("histMonth") || $("monthlyReportPicker");
     let m = picker ? picker.value : '';
 
     if (!m) {
@@ -2139,29 +2141,41 @@ function loadHistMonth() {
 
     let [y, mNum] = m.split('-').map(Number);
     const searchYear = y > 2500 ? y - 543 : y;
-    const targetPrefix = `${searchYear}-${String(mNum).padStart(2, '0')}`;
+    const searchYearBE = searchYear + 543; // รองรับกรณีใน db บันทึกเป็น พ.ศ.
+    
+    const targetPrefixCE = `${searchYear}-${String(mNum).padStart(2, '0')}`;
+    const targetPrefixBE = `${searchYearBE}-${String(mNum).padStart(2, '0')}`;
     
     const monthNames = [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
     ];
     const monthThaiName = monthNames[mNum - 1] || '';
-    const displayYearThai = searchYear + 543;
-    const monthNameFormatted = `${monthThaiName} ${displayYearThai}`;
+    const monthNameFormatted = `${monthThaiName} ${searchYear + 543}`;
 
-    const filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
+    // 🎯 แก้ไขจุดที่ 2: ดึง Scope สาขาปัจจุบันมาร่วมกรองด้วย
+    const currentBranch = typeof getActiveBranch === 'function' ? getActiveBranch() : localStorage.getItem("active_branch_name");
+    const viewScope = typeof getViewScope === 'function' ? getViewScope() : (localStorage.getItem("view_data_scope") || "all");
+
+    // กรองวันที่ทั้งแบบ ค.ศ. (2026) และ พ.ศ. (2569) + กรองสาขา
+    const filtered = archives.filter(a => {
+        if (!a.date) return false;
+        const matchDate = a.date.startsWith(targetPrefixCE) || a.date.startsWith(targetPrefixBE);
+        const matchBranch = (viewScope === "all") || (a.branch === currentBranch) || (!a.branch && currentBranch === "สาขาหลัก");
+        return matchDate && matchBranch;
+    });
 
     if (!filtered.length) {
         if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
-        if (typeof notify === 'function') notify("error", "ไม่พบข้อมูล", `ไม่มีข้อมูลของเดือน ${monthNameFormatted}`);
         
+        // ส่งค่า 0 เพื่อรีเซ็ตหน้าจออย่างปลอดภัย
         if (typeof generateMonthlyReport === 'function') {
             generateMonthlyReport(m, 0, 0, 0, 0, 0, 0, 0, {}, {}, {}, 0, 0, 0, 0);
         }
         return;
     }
 
-    // 🎯 1. ดึงการตั้งค่าล่าสุด
+    // 🎯 3. ดึงการตั้งค่าล่าสุด
     const shopRate = parseFloat(localStorage.getItem('shopCommissionRate')) || ((typeof conf !== 'undefined' && conf && conf.perc) ? (conf.perc / 100) : 0.50);
     const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || 200;
     const freeBarberComp = parseFloat(localStorage.getItem('freeBarberComp')) || 100;
@@ -2177,10 +2191,11 @@ function loadHistMonth() {
     const dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
 
     filtered.forEach(day => {
-        const [dYear, dMonth, dDay] = day.date.split('-').map(Number);
+        let [dYear, dMonth, dDay] = day.date.split('-').map(Number);
+        if (dYear > 2500) dYear -= 543; // แปลง พ.ศ. กลับเป็น ค.ศ. สำหรับสร้าง Date Object
+        
         const dObj = new Date(dYear, dMonth - 1, dDay);
         
-        // ⚡ ปรับปรุงการคำนวณสัปดาห์ให้เริ่มนับตามวันอาทิตย์จริง
         const firstDayOfMonth = new Date(dYear, dMonth - 1, 1).getDay();
         let wIdx = Math.ceil((dDay + firstDayOfMonth) / 7);
         if (wIdx > 5) wIdx = 5;
@@ -2207,7 +2222,6 @@ function loadHistMonth() {
         workDays++;
         weeklyData[wKey].workDays++;
 
-        // ⚡ คำนวณยอดเงินรวมรายวัน
         let dailyIncome = Number(day.cash || 0) + Number(day.trans || 0);
         if (dailyIncome === 0 || day.total) dailyIncome = Number(day.total || dailyIncome);
 
@@ -2230,7 +2244,6 @@ function loadHistMonth() {
 
                     totalTips += t;
 
-                    // คำนวณส่วนแบ่งช่าง
                     if (d.barberShare !== undefined) {
                         calcBarberShare += Number(d.barberShare);
                     } else if (cType === 'offsite' && isFree) {
@@ -2243,7 +2256,6 @@ function loadHistMonth() {
                         calcBarberShare += Math.round(p * (1 - shopRate));
                     }
 
-                    // สรุปประเภทลูกค้า
                     if (cType === "new") {
                         countNew++;
                         weeklyData[wKey].countNew++;
@@ -2255,7 +2267,6 @@ function loadHistMonth() {
                         weeklyData[wKey].countOffsite++;
                     }
 
-                    // สรุปสถิติทรงผม/บริการ
                     const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
                     svcs.forEach(s => {
                         if (!s) return;
@@ -2277,7 +2288,6 @@ function loadHistMonth() {
             weeklyData[wKey].customers += dayCustomerCount;
         }
 
-        // ตรวจสอบเงื่อนไขประกันรายได้ช่าง
         let isGuaranteeDay = false;
         if (guarantee > 0 && calcBarberShare < guarantee && dayCustomerCount > 0) {
             isGuaranteeDay = true;
@@ -2290,11 +2300,8 @@ function loadHistMonth() {
             weeklyData[wKey].guarDays++;
         }
 
-        // ส่วนแบ่งช่างสุทธิต่อวัน (รวมทิป)
         const pureBarberCost = Math.max(calcBarberShare, (dayCustomerCount > 0 ? guarantee : 0));
         const dailyBarberNet = Math.floor(pureBarberCost + totalTips);
-        
-        // รายได้สุทธิของร้านต่อวัน
         const dailyShopNet = Math.max(0, dailyIncome - pureBarberCost);
 
         monthTotal += dailyIncome;
@@ -2317,12 +2324,10 @@ function loadHistMonth() {
 
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
 
-    // อัปเดต Element บนหน้าเว็บ
     if ($("shopTotalMonth")) {
         $("shopTotalMonth").innerText = `฿${Math.floor(monthShop).toLocaleString()}`;
     }
 
-    // ส่งค่าให้ฟังก์ชันสร้างอินเทอร์เฟซรายงาน
     if (typeof generateMonthlyReport === 'function') {
         generateMonthlyReport(
             m, 
