@@ -545,55 +545,66 @@ function saveSettings() {
         const confJSON = JSON.stringify(window.conf);
         localStorage.setItem('barber_conf', confJSON);
         localStorage.setItem('barberConf', confJSON);
-        localStorage.setItem('shopName',          settings.shop);
+        localStorage.setItem('shopName',           settings.shop);
         localStorage.setItem('active_branch_name', settings.branch);
-        localStorage.setItem('shopPerc',          settings.perc);
-        localStorage.setItem('shopGuar',          settings.guar);
+        localStorage.setItem('shopPerc',           settings.perc);
+        localStorage.setItem('shopGuar',           settings.guar);
         localStorage.setItem('shopOffsiteRate',   settings.offsiteRate);
-        localStorage.setItem('shopTheme',         settings.theme);
-        localStorage.setItem('shopVoice',         settings.voice);
-        localStorage.setItem('shopSound',         settings.sound);
+        localStorage.setItem('shopTheme',          settings.theme);
+        localStorage.setItem('shopVoice',          settings.voice);
+        localStorage.setItem('shopSound',          settings.sound);
 
-        // ✅ ย้ายข้อมูลเก่าที่ยังไม่มีสาขา ให้เป็นของสาขานี้
-        if (newBranchName !== oldBranchName || oldBranchName === "สาขาไม่ระบุ") {
-            let changed = false;
-            if (Array.isArray(archives)) {
-                archives.forEach(day => {
-                    if (!day.branch || day.branch === "undefined" || day.branch === "") {
-                        day.branch = newBranchName;
-                        changed = true;
-                    }
-                    if (day.details && Array.isArray(day.details)) {
-                        day.details.forEach(d => {
-                            if (!d.branch || d.branch === "undefined" || d.branch === "") {
-                                d.branch = newBranchName;
-                                changed = true;
-                            }
-                        });
-                    }
-                });
-            }
-            if (Array.isArray(db)) {
-                db.forEach(item => {
-                    if (!item.branch || item.branch === "undefined" || item.branch === "") {
-                        item.branch = newBranchName;
-                        changed = true;
-                    }
-                });
-            }
-            if (changed && typeof saveDB === "function") saveDB();
-            console.log(`✅ ย้ายข้อมูลให้สาขา: ${newBranchName}`);
+        // ✅ 4. ย้ายข้อมูลเก่าทั้งหมด (รวมถึงค่าว่าง, undefined, และ "สาขาไม่ระบุ") ให้เป็นชื่อสาขาใหม่
+        let changedArchives = false;
+        if (typeof archives !== "undefined" && Array.isArray(archives)) {
+            archives.forEach(day => {
+                const b = String(day.branch || '').trim();
+                // ครอบคลุมทั้ง null, undefined, ค่าว่าง และ "สาขาไม่ระบุ"
+                if (!b || b === "undefined" || b === "null" || b === "สาขาไม่ระบุ" || newBranchName !== oldBranchName) {
+                    day.branch = newBranchName;
+                    changedArchives = true;
+                }
+                if (day.details && Array.isArray(day.details)) {
+                    day.details.forEach(d => {
+                        const dbName = String(d.branch || '').trim();
+                        if (!dbName || dbName === "undefined" || dbName === "null" || dbName === "สาขาไม่ระบุ" || newBranchName !== oldBranchName) {
+                            d.branch = newBranchName;
+                            changedArchives = true;
+                        }
+                    });
+                }
+            });
         }
 
+        let changedDB = false;
+        if (typeof db !== "undefined" && Array.isArray(db)) {
+            db.forEach(item => {
+                const ib = String(item.branch || '').trim();
+                if (!ib || ib === "undefined" || ib === "null" || ib === "สาขาไม่ระบุ" || newBranchName !== oldBranchName) {
+                    item.branch = newBranchName;
+                    changedDB = true;
+                }
+            });
+        }
+
+        // ✅ 5. บันทึกข้อมูลกลับเข้า LocalStorage อย่างชัวร์ๆ ทั้ง archives และ db
+        if (changedArchives) {
+            localStorage.setItem("barber_archives", JSON.stringify(archives));
+        }
+        if (changedDB) {
+            localStorage.setItem("barber_db", JSON.stringify(db));
+        }
         if (typeof saveDB === "function") saveDB();
 
-        // 4. อัปเดตการแสดงผล
+        console.log(`✅ อัปเดตข้อมูลให้เป็นสาขา: ${newBranchName} เรียบร้อยแล้ว`);
+
+        // 6. อัปเดตการแสดงผลหน้าเว็บ
         const nameDisp = $("shopNameDisp") || $("shopNameDisplay");
         if (nameDisp) {
             nameDisp.innerText = settings.shop.toUpperCase();
         }
 
-        // ✅ รีเฟรชทุกส่วนที่เกี่ยวข้อง
+        // รีเฟรชส่วน UI ที่เกี่ยวข้อง
         if (typeof renderBranchUI === "function") renderBranchUI();
         if (typeof applyTheme === "function") applyTheme(settings.theme);
         if (typeof calculateMoney === "function") calculateMoney();
@@ -603,7 +614,7 @@ function saveSettings() {
 
         if ($("modalSet")) $("modalSet").style.display = 'none';
 
-        // แจ้งผล
+        // แจ้งเตือนผลลัพธ์
         if (typeof notify === "function") {
             notify("success", "บันทึกสำเร็จ", `สาขา: ${settings.branch}`);
         } else if (typeof Swal !== 'undefined') {
