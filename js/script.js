@@ -514,7 +514,6 @@ function saveDB() {
         return false; 
     }
 }
-
 function saveSettings() {
     // Helper Selector กัน Error
     const $ = (id) => document.getElementById(id);
@@ -522,7 +521,7 @@ function saveSettings() {
         // 1. ดึงค่าจากฟอร์ม (ใช้ช่องชื่อร้านเป็นชื่อสาขา)
         const settings = {
             shop:        $("setShop")?.value?.trim() || "สาขาไม่ระบุ",
-            branch:      $("setShop")?.value?.trim() || "สาขาไม่ระบุ", // ✅ ใช้ค่าเดิมร่วมกัน
+            branch:      $("setShop")?.value?.trim() || "สาขาไม่ระบุ",
             perc:        parseFloat($("setPerc")?.value) || 0,
             guar:        parseFloat($("setGuar")?.value) || 0,
             offsiteRate: parseFloat($("setOffsite")?.value) || 0,
@@ -530,6 +529,10 @@ function saveSettings() {
             voice:       $("setVoice")?.value || "default.mp3",
             sound:       $("setSound")?.value || "on"
         };
+
+        // ✅ เก็บชื่อเดิมก่อนเปลี่ยน
+        const oldBranchName = localStorage.getItem("active_branch_name") || "สาขาไม่ระบุ";
+        const newBranchName = settings.branch;
 
         // 2. อัปเดตตัวแปรกลาง
         if (typeof conf !== "undefined") {
@@ -542,16 +545,45 @@ function saveSettings() {
         const confJSON = JSON.stringify(window.conf);
         localStorage.setItem('barber_conf', confJSON);
         localStorage.setItem('barberConf', confJSON);
-
-        // บันทึกแยกคีย์ — ✅ เพิ่มบรรทัด active_branch_name
         localStorage.setItem('shopName',          settings.shop);
-        localStorage.setItem('active_branch_name', settings.branch); // ← ขาดจุดนี้! เพิ่มแล้วทำงานครบ ✅
+        localStorage.setItem('active_branch_name', settings.branch);
         localStorage.setItem('shopPerc',          settings.perc);
         localStorage.setItem('shopGuar',          settings.guar);
         localStorage.setItem('shopOffsiteRate',   settings.offsiteRate);
         localStorage.setItem('shopTheme',         settings.theme);
         localStorage.setItem('shopVoice',         settings.voice);
         localStorage.setItem('shopSound',         settings.sound);
+
+        // ✅ ย้ายข้อมูลเก่าที่ยังไม่มีสาขา ให้เป็นของสาขานี้
+        if (newBranchName !== oldBranchName || oldBranchName === "สาขาไม่ระบุ") {
+            let changed = false;
+            if (Array.isArray(archives)) {
+                archives.forEach(day => {
+                    if (!day.branch || day.branch === "undefined" || day.branch === "") {
+                        day.branch = newBranchName;
+                        changed = true;
+                    }
+                    if (day.details && Array.isArray(day.details)) {
+                        day.details.forEach(d => {
+                            if (!d.branch || d.branch === "undefined" || d.branch === "") {
+                                d.branch = newBranchName;
+                                changed = true;
+                            }
+                        });
+                    }
+                });
+            }
+            if (Array.isArray(db)) {
+                db.forEach(item => {
+                    if (!item.branch || item.branch === "undefined" || item.branch === "") {
+                        item.branch = newBranchName;
+                        changed = true;
+                    }
+                });
+            }
+            if (changed && typeof saveDB === "function") saveDB();
+            console.log(`✅ ย้ายข้อมูลให้สาขา: ${newBranchName}`);
+        }
 
         if (typeof saveDB === "function") saveDB();
 
@@ -561,14 +593,13 @@ function saveSettings() {
             nameDisp.innerText = settings.shop.toUpperCase();
         }
 
-        // ✅ รีเฟรชส่วนที่แสดงชื่อสาขา + รายงาน
+        // ✅ รีเฟรชทุกส่วนที่เกี่ยวข้อง
         if (typeof renderBranchUI === "function") renderBranchUI();
         if (typeof applyTheme === "function") applyTheme(settings.theme);
         if (typeof calculateMoney === "function") calculateMoney();
-
         const currentDate = $("dateInp")?.value || new Date().toISOString().split('T')[0];
         if (typeof renderDay === "function") renderDay(currentDate);
-        if (typeof renderDailyTableReport === "function") renderDailyTableReport(); // รีเฟรชรายงานทันที
+        if (typeof renderDailyTableReport === "function") renderDailyTableReport();
 
         if ($("modalSet")) $("modalSet").style.display = 'none';
 
@@ -588,33 +619,23 @@ function saveSettings() {
     }
 }
 
-/* 🎨 ฟังก์ชันเปลี่ยนธีม (อัปเดตให้รองรับ dataset/attribute เพิ่มเติมเพื่อ CSS) */
+/* 🎨 ฟังก์ชันเปลี่ยนธีม */
 function applyTheme(theme) {
-    // ลบ class เก่าทั้งหมด
     document.body.classList.remove("vintage", "navy", "light");
-    
-    // กำหนดธีมใหม่
     const selectedTheme = theme || "light";
     if (selectedTheme !== "light") {
         document.body.classList.add(selectedTheme);
     }
-    
-    // อัปเดต data-theme ให้ตรงกับ CSS Selector [data-theme="..."]
     document.body.setAttribute("data-theme", selectedTheme);
-
-    // บันทึกค่าลงเครื่อง
     localStorage.setItem("selectedTheme", selectedTheme);
     localStorage.setItem("shopTheme", selectedTheme);
 }
 
 /* 🚀 โหลดธีมทันทีที่เปิดเว็บ */
 document.addEventListener("DOMContentLoaded", function() {
+    const $ = (id) => document.getElementById(id);
     const savedTheme = localStorage.getItem("selectedTheme") || localStorage.getItem("shopTheme") || "light";
-
-    // สั่งเปลี่ยนธีม
     applyTheme(savedTheme);
-
-    // จัดการตัวเลือก Dropdown
     const themeSelector = $("setTheme");
     if (themeSelector) {
         themeSelector.value = savedTheme;
