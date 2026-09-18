@@ -2124,7 +2124,7 @@ document.addEventListener("DOMContentLoaded", () => {
 /* ========= FIX: LOAD HIST MONTH ========= */
 function loadHistMonth() {
     const $ = (id) => document.getElementById(id);
-    const picker = $("histMonth") || $("monthlyReportPicker");
+    const picker = $("histMonth") \vert{}\vert{} $("monthlyReportPicker");
     let m = picker ? picker.value : '';
     if (!m) {
         const now = new Date();
@@ -2149,7 +2149,7 @@ function loadHistMonth() {
         : (localStorage.getItem("view_data_scope") || "all");
 
     const filtered = archives.filter(a => {
-        if (!a.date) return false;
+        if (!a || !a.date) return false;
         const matchDate = a.date.startsWith(targetPrefixCE) || a.date.startsWith(targetPrefixBE);
         const matchBranch = (viewScope === "all")
             || (a.branch === currentBranch)
@@ -2168,7 +2168,10 @@ function loadHistMonth() {
             );
         }
         if (window.calcNetProfit) window.calcNetProfit();
-        return openReportModal("📊 สรุปรายเดือน", `<div style='text-align:center;padding:50px;color:#94a3b8;'>ไม่พบข้อมูลของเดือน ${m}</div>`);
+        if (typeof openReportModal === 'function') {
+            return openReportModal("📊 สรุปรายเดือน", `<div style='text-align:center;padding:50px;color:#94a3b8;'>ไม่พบข้อมูลของเดือน ${m}</div>`);
+        }
+        return;
     }
 
     const shopRate = parseFloat(localStorage.getItem('shopCommissionRate'))
@@ -2187,6 +2190,8 @@ function loadHistMonth() {
     const dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
 
     filtered.forEach(day => {
+        if (!day || !day.date) return;
+
         let [dYear, dMonth, dDay] = day.date.split('-').map(Number);
         if (dYear > 2500) dYear -= 543;
         const dObj = new Date(dYear, dMonth - 1, dDay);
@@ -2206,6 +2211,8 @@ function loadHistMonth() {
                 income: 0, shopIncome: 0
             };
         }
+
+        // 1. วันหยุด
         if (day.off === true || day.type === "HOLIDAY") {
             offDays++;
             weeklyData[wKey].offDays++;
@@ -2215,6 +2222,8 @@ function loadHistMonth() {
             });
             return;
         }
+
+        // 2. เคลมประกันแบบกด Manual
         const hasManualGuar = day.type === "GUARANTEE_CLAIM"
                             || day.isGuar === true
                             || day.isGuarantee
@@ -2229,7 +2238,7 @@ function loadHistMonth() {
             workDays++;
             weeklyData[wKey].workDays++;
 
-            const claimAmount = day.guarAmount || guarantee;
+            const claimAmount = Number(day.guarAmount || day.guaranteeAmount || guarantee);
             monthBarber += claimAmount;
 
             weeklyData[wKey].dailyCounts.push({
@@ -2239,7 +2248,7 @@ function loadHistMonth() {
                 barberEarn: claimAmount,
                 shopEarn: 0
             });
-            return; // 🟢 หยุดทันที ไม่คำนวณซ้ำ
+            return; // หยุดทำงานของวันนั้นทันที
         }
 
         workDays++;
@@ -2306,20 +2315,26 @@ function loadHistMonth() {
             });
         } else {
             calcBarberShare = Number(day.barber) || 0;
-            dayCustomerCount = day.count || 0;
+            dayCustomerCount = Number(day.count) || 0;
             monthCount += dayCustomerCount;
             weeklyData[wKey].customers += dayCustomerCount;
         }
 
         if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
 
-        const isAutoGuarantee = guarantee > 0 && calcBarberShare < guarantee;
+        // 3. ตรวจสอบประกันอัตโนมัติ (ต้องมีลูกค้ารับบริการ หรือ มียอดเงินเกิดขึ้นจริง และ ยอดช่างต้อง "น้อยกว่า" เกณฑ์ประกัน)
+        const dailyGuaranteeThreshold = Number(day.guaranteeAmount || guarantee);
+        const isAutoGuarantee = dailyGuaranteeThreshold > 0 
+            && (dayCustomerCount > 0 || dailyIncome > 0) 
+            && (calcBarberShare < dailyGuaranteeThreshold);
+
         if (isAutoGuarantee) {
             monthGuarDays++;
             weeklyData[wKey].guarDays++;
         }
+
         const pureBarberCost = isAutoGuarantee
-            ? Math.max(calcBarberShare, guarantee)
+            ? Math.max(calcBarberShare, dailyGuaranteeThreshold)
             : calcBarberShare;
 
         const dailyBarberNet = Math.floor(pureBarberCost + totalTips);
@@ -2347,7 +2362,6 @@ function loadHistMonth() {
     }
     if (window.calcNetProfit) window.calcNetProfit();
 
-    // ✅ ส่งพารามิเตอร์ครบตรงตามลำดับเดิม
     if (typeof generateMonthlyReport === 'function') {
         generateMonthlyReport(
             m, monthTotal, monthBarber, monthShop, monthCount,
