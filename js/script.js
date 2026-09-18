@@ -2123,239 +2123,230 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 /* ========= FIX: LOAD HIST MONTH ========= */
 function loadHistMonth() {
-    const $ = (id) => document.getElementById(id);
-    
-    // 🎯 ดึงเฉพาะช่องของหน้าสรุปยอดรวม (histMonth) แยกเด็ดขาด
-    const picker = $("histMonth") \vert{}\vert{} $("monthlyReportPicker");
-    let m = picker ? picker.value : '';
+    const $ = (id) => document.getElementById(id);
+    
+    // 🎯 แก้ไขจุดที่ 1: ดึงเฉพาะช่องของหน้าสรุปยอดรวม (histMonth) แยกเด็ดขาด ไม่ไปดึงของ monthlyReportPicker
+    const picker = $("histMonth") || $("monthlyReportPicker");
+    let m = picker ? picker.value : '';
 
-    if (!m) {
-        const now = new Date();
-        const yyyy = now.getFullYear();
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        m = `${yyyy}-${mm}`;
-        if (picker) picker.value = m;
-    }
+    if (!m) {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        m = `${yyyy}-${mm}`;
+        if (picker) picker.value = m;
+    }
 
-    if (typeof archives === 'undefined' || !Array.isArray(archives)) return;
+    if (typeof archives === 'undefined' || !Array.isArray(archives)) return;
 
-    let [y, mNum] = m.split('-').map(Number);
-    const searchYear = y > 2500 ? y - 543 : y;
-    const searchYearBE = searchYear + 543; // รองรับกรณีใน db บันทึกเป็น พ.ศ.
-    
-    const targetPrefixCE = `${searchYear}-${String(mNum).padStart(2, '0')}`;
-    const targetPrefixBE = `${searchYearBE}-${String(mNum).padStart(2, '0')}`;
-    
-    const monthNames = [
-        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
-    ];
-    const monthThaiName = monthNames[mNum - 1] || '';
-    const monthNameFormatted = `${monthThaiName} ${searchYear + 543}`;
+    let [y, mNum] = m.split('-').map(Number);
+    const searchYear = y > 2500 ? y - 543 : y;
+    const searchYearBE = searchYear + 543; // รองรับกรณีใน db บันทึกเป็น พ.ศ.
+    
+    const targetPrefixCE = `${searchYear}-${String(mNum).padStart(2, '0')}`;
+    const targetPrefixBE = `${searchYearBE}-${String(mNum).padStart(2, '0')}`;
+    
+    const monthNames = [
+        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    ];
+    const monthThaiName = monthNames[mNum - 1] || '';
+    const monthNameFormatted = `${monthThaiName} ${searchYear + 543}`;
 
-    // 🎯 ดึง Scope สาขาปัจจุบันมาร่วมกรองด้วย
-    const currentBranch = typeof getActiveBranch === 'function' ? getActiveBranch() : localStorage.getItem("active_branch_name");
-    const viewScope = typeof getViewScope === 'function' ? getViewScope() : (localStorage.getItem("view_data_scope") || "all");
+    // 🎯 แก้ไขจุดที่ 2: ดึง Scope สาขาปัจจุบันมาร่วมกรองด้วย
+    const currentBranch = typeof getActiveBranch === 'function' ? getActiveBranch() : localStorage.getItem("active_branch_name");
+    const viewScope = typeof getViewScope === 'function' ? getViewScope() : (localStorage.getItem("view_data_scope") || "all");
 
-    // กรองวันที่ทั้งแบบ ค.ศ. (2026) และ พ.ศ. (2569) + กรองสาขา
-    const filtered = archives.filter(a => {
-        if (!a.date) return false;
-        const matchDate = a.date.startsWith(targetPrefixCE) || a.date.startsWith(targetPrefixBE);
-        const matchBranch = (viewScope === "all") || (a.branch === currentBranch) || (!a.branch && currentBranch === "สาขาหลัก");
-        return matchDate && matchBranch;
-    });
+    // กรองวันที่ทั้งแบบ ค.ศ. (2026) และ พ.ศ. (2569) + กรองสาขา
+    const filtered = archives.filter(a => {
+        if (!a.date) return false;
+        const matchDate = a.date.startsWith(targetPrefixCE) || a.date.startsWith(targetPrefixBE);
+        const matchBranch = (viewScope === "all") || (a.branch === currentBranch) || (!a.branch && currentBranch === "สาขาหลัก");
+        return matchDate && matchBranch;
+    });
 
-    if (!filtered.length) {
-        if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
-        
-        // ส่งค่า 0 เพื่อรีเซ็ตหน้าจออย่างปลอดภัย
-        if (typeof generateMonthlyReport === 'function') {
-            generateMonthlyReport(m, 0, 0, 0, 0, 0, 0, 0, {}, {}, {}, 0, 0, 0, 0);
-        }
-        return;
-    }
+    if (!filtered.length) {
+        if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
+        
+        // ส่งค่า 0 เพื่อรีเซ็ตหน้าจออย่างปลอดภัย
+        if (typeof generateMonthlyReport === 'function') {
+            generateMonthlyReport(m, 0, 0, 0, 0, 0, 0, 0, {}, {}, {}, 0, 0, 0, 0);
+        }
+        return;
+    }
 
-    // 🎯 ดึงการตั้งค่าล่าสุด
-    const shopRate = parseFloat(localStorage.getItem('shopCommissionRate')) || ((typeof conf !== 'undefined' && conf && conf.perc) ? (conf.perc / 100) : 0.50);
-    const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || 200;
-    const freeBarberComp = parseFloat(localStorage.getItem('freeBarberComp')) || 100;
-    const guarantee = (typeof conf !== 'undefined' && conf && conf.guar) ? conf.guar : 0;
+    // 🎯 3. ดึงการตั้งค่าล่าสุด
+    const shopRate = parseFloat(localStorage.getItem('shopCommissionRate')) || ((typeof conf !== 'undefined' && conf && conf.perc) ? (conf.perc / 100) : 0.50);
+    const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || 200;
+    const freeBarberComp = parseFloat(localStorage.getItem('freeBarberComp')) || 100;
+    const guarantee = (typeof conf !== 'undefined' && conf && conf.guar) ? conf.guar : 0;
 
-    let countNew = 0, countRegular = 0, countOffsite = 0;  
-    let monthTotal = 0, monthBarber = 0, monthShop = 0, monthCount = 0, monthGuarDays = 0; 
-    let hairStats = {}, serviceStats = {};
-    let offDays = 0, workDays = 0;
-    let weeklyData = {};
+    let countNew = 0, countRegular = 0, countOffsite = 0;  
+    let monthTotal = 0, monthBarber = 0, monthShop = 0, monthCount = 0, monthGuarDays = 0; 
+    let hairStats = {}, serviceStats = {};
+    let offDays = 0, workDays = 0;
+    let weeklyData = {};
 
-    const haircutList = ["แฟชั่น", "สกินเฟด", "รองทรง", "ตำรวจ/ทหาร", "นักเรียน", "ทรงนักเรียน", "เปิดข้าง", "ซอยผม/เล็มผม", "แก้ผม", "โกนผม", "เด็ก"];
-    const dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+    const haircutList = ["แฟชั่น", "สกินเฟด", "รองทรง", "ตำรวจ/ทหาร", "นักเรียน", "ทรงนักเรียน", "เปิดข้าง", "ซอยผม/เล็มผม", "แก้ผม", "โกนผม", "เด็ก"];
+    const dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
 
-    filtered.forEach(day => {
-        let [dYear, dMonth, dDay] = day.date.split('-').map(Number);
-        if (dYear > 2500) dYear -= 543; // แปลง พ.ศ. กลับเป็น ค.ศ. สำหรับสร้าง Date Object
-        
-        const dObj = new Date(dYear, dMonth - 1, dDay);
-        
-        const firstDayOfMonth = new Date(dYear, dMonth - 1, 1).getDay();
-        let wIdx = Math.ceil((dDay + firstDayOfMonth) / 7);
-        if (wIdx > 5) wIdx = 5;
-        const wKey = `สัปดาห์ที่ ${wIdx}`;
+    filtered.forEach(day => {
+        let [dYear, dMonth, dDay] = day.date.split('-').map(Number);
+        if (dYear > 2500) dYear -= 543; // แปลง พ.ศ. กลับเป็น ค.ศ. สำหรับสร้าง Date Object
+        
+        const dObj = new Date(dYear, dMonth - 1, dDay);
+        
+        const firstDayOfMonth = new Date(dYear, dMonth - 1, 1).getDay();
+        let wIdx = Math.ceil((dDay + firstDayOfMonth) / 7);
+        if (wIdx > 5) wIdx = 5;
+        const wKey = `สัปดาห์ที่ ${wIdx}`;
 
-        if (!weeklyData[wKey]) {
-            weeklyData[wKey] = { 
-                customers: 0, workDays: 0, offDays: 0, 
-                zeroDays: 0, guarDays: 0, dailyCounts: [],
-                countNew: 0, countRegular: 0, countOffsite: 0,
-                popularHair: {}, 
-                popularService: {}, 
-                income: 0,
-                shopIncome: 0 
-            };
-        }
+        if (!weeklyData[wKey]) {
+            weeklyData[wKey] = { 
+                customers: 0, workDays: 0, offDays: 0, 
+                zeroDays: 0, guarDays: 0, dailyCounts: [],
+                countNew: 0, countRegular: 0, countOffsite: 0,
+                popularHair: {}, 
+                popularService: {}, 
+                income: 0,
+                shopIncome: 0 
+            };
+        }
 
-        // 🟢 1. ตรวจสอบวันหยุด
-        if (day.off === true || day.type === "HOLIDAY") {
-            offDays++;
-            weeklyData[wKey].offDays++;
-            return;
-        }
+        if (day.off === true || day.type === "HOLIDAY") {
+            offDays++;
+            weeklyData[wKey].offDays++;
+            return;
+        }
 
-        // 🟢 2. ตรวจสอบรายการเปิดประกันรายได้ (GUARANTEE_CLAIM)
-        if (day.type === "GUARANTEE_CLAIM" || day.isGuar === true) {
-            monthGuarDays++;
-            weeklyData[wKey].guarDays++;
-            return;
-        }
+        workDays++;
+        weeklyData[wKey].workDays++;
 
-        workDays++;
-        weeklyData[wKey].workDays++;
+        let dailyIncome = Number(day.cash || 0) + Number(day.trans || 0);
+        if (dailyIncome === 0 || day.total) dailyIncome = Number(day.total || dailyIncome);
 
-        let dailyIncome = Number(day.cash || 0) + Number(day.trans || 0);
-        if (dailyIncome === 0 || day.total) dailyIncome = Number(day.total || dailyIncome);
+        let calcBarberShare = 0;
+        let totalTips = 0;
+        let dayCustomerCount = 0; 
 
-        let calcBarberShare = 0;
-        let totalTips = 0;
-        let dayCustomerCount = 0; 
+        if (day.details && Array.isArray(day.details) && day.details.length > 0) {
+            day.details.forEach(d => {
+                if (d.type === "SERVICE" || !d.type) {
+                    monthCount++;
+                    dayCustomerCount++; 
+                    weeklyData[wKey].customers++; 
+                    
+                    const p = Number(d.price) || 0;
+                    const t = Number(d.tip) || 0;
+                    const cType = String(d.custType || "").toLowerCase().trim();
+                    const payStr = String(d.pay || "").trim();
+                    const isFree = payStr.startsWith("Free") || payStr.includes("ฟรี");
 
-        if (day.details && Array.isArray(day.details) && day.details.length > 0) {
-            day.details.forEach(d => {
-                if (d.type === "SERVICE" || !d.type) {
-                    monthCount++;
-                    dayCustomerCount++; 
-                    weeklyData[wKey].customers++; 
-                    
-                    const p = Number(d.price) || 0;
-                    const t = Number(d.tip) || 0;
-                    const cType = String(d.custType || "").toLowerCase().trim();
-                    const payStr = String(d.pay || "").trim();
-                    const isFree = payStr.startsWith("Free") || payStr.includes("ฟรี");
+                    totalTips += t;
 
-                    totalTips += t;
+                    if (d.barberShare !== undefined) {
+                        calcBarberShare += Number(d.barberShare);
+                    } else if (cType === 'offsite' && isFree) {
+                        calcBarberShare += freeBarberComp;
+                    } else if (cType === 'offsite') {
+                        calcBarberShare += offsiteBarberFee;
+                    } else if (isFree) {
+                        calcBarberShare += freeBarberComp;
+                    } else {
+                        calcBarberShare += Math.round(p * (1 - shopRate));
+                    }
 
-                    if (d.barberShare !== undefined) {
-                        calcBarberShare += Number(d.barberShare);
-                    } else if (cType === 'offsite' && isFree) {
-                        calcBarberShare += freeBarberComp;
-                    } else if (cType === 'offsite') {
-                        calcBarberShare += offsiteBarberFee;
-                    } else if (isFree) {
-                        calcBarberShare += freeBarberComp;
-                    } else {
-                        calcBarberShare += Math.round(p * (1 - shopRate));
-                    }
+                    if (cType === "new") {
+                        countNew++;
+                        weeklyData[wKey].countNew++;
+                    } else if (cType === "regular") {
+                        countRegular++;
+                        weeklyData[wKey].countRegular++;
+                    } else if (cType === "offsite") {
+                        countOffsite++;
+                        weeklyData[wKey].countOffsite++;
+                    }
 
-                    if (cType === "new") {
-                        countNew++;
-                        weeklyData[wKey].countNew++;
-                    } else if (cType === "regular") {
-                        countRegular++;
-                        weeklyData[wKey].countRegular++;
-                    } else if (cType === "offsite") {
-                        countOffsite++;
-                        weeklyData[wKey].countOffsite++;
-                    }
+                    const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
+                    svcs.forEach(s => {
+                        if (!s) return;
+                        const cleanS = String(s).trim();
+                        if (haircutList.includes(cleanS)) {
+                            hairStats[cleanS] = (hairStats[cleanS] || 0) + 1;
+                            weeklyData[wKey].popularHair[cleanS] = (weeklyData[wKey].popularHair[cleanS] || 0) + 1;
+                        } else {
+                            serviceStats[cleanS] = (serviceStats[cleanS] || 0) + 1;
+                            weeklyData[wKey].popularService[cleanS] = (weeklyData[wKey].popularService[cleanS] || 0) + 1;
+                        }
+                    });
+                }
+            });
+        } else {
+            calcBarberShare = Number(day.barber) || 0;
+            dayCustomerCount = day.count || 0;
+            monthCount += dayCustomerCount;
+            weeklyData[wKey].customers += dayCustomerCount;
+        }
 
-                    const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
-                    svcs.forEach(s => {
-                        if (!s) return;
-                        const cleanS = String(s).trim();
-                        if (haircutList.includes(cleanS)) {
-                            hairStats[cleanS] = (hairStats[cleanS] || 0) + 1;
-                            weeklyData[wKey].popularHair[cleanS] = (weeklyData[wKey].popularHair[cleanS] || 0) + 1;
-                        } else {
-                            serviceStats[cleanS] = (serviceStats[cleanS] || 0) + 1;
-                            weeklyData[wKey].popularService[cleanS] = (weeklyData[wKey].popularService[cleanS] || 0) + 1;
-                        }
-                    });
-                }
-            });
-        } else {
-            calcBarberShare = Number(day.barber) || 0;
-            dayCustomerCount = day.count || 0;
-            monthCount += dayCustomerCount;
-            weeklyData[wKey].customers += dayCustomerCount;
-        }
+        let isGuaranteeDay = false;
+        if (guarantee > 0 && calcBarberShare < guarantee && dayCustomerCount > 0) {
+            isGuaranteeDay = true;
+        } else if (day.isGuarantee || day.guarantee) {
+            isGuaranteeDay = true;
+        }
 
-        // 🟢 3. ตรวจสอบการชดเชยประกัน (กรณีรายได้ช่างต่ำกว่ายอดประกันในวันที่มีลูกค้า)
-        let isGuaranteeDay = false;
-        if (day.isGuar || day.isGuarantee || day.guarantee) {
-            isGuaranteeDay = true;
-        } else if (guarantee > 0 && calcBarberShare < guarantee && dayCustomerCount > 0) {
-            isGuaranteeDay = true;
-        }
+        if (isGuaranteeDay) {
+            monthGuarDays++;
+            weeklyData[wKey].guarDays++;
+        }
 
-        if (isGuaranteeDay) {
-            monthGuarDays++;
-            weeklyData[wKey].guarDays++;
-        }
+        const pureBarberCost = Math.max(calcBarberShare, (dayCustomerCount > 0 ? guarantee : 0));
+        const dailyBarberNet = Math.floor(pureBarberCost + totalTips);
+        const dailyShopNet = Math.max(0, dailyIncome - pureBarberCost);
 
-        const pureBarberCost = Math.max(calcBarberShare, (dayCustomerCount > 0 ? guarantee : 0));
-        const dailyBarberNet = Math.floor(pureBarberCost + totalTips);
-        const dailyShopNet = Math.max(0, dailyIncome - pureBarberCost);
+        monthTotal += dailyIncome;
+        monthBarber += dailyBarberNet;
+        monthShop += dailyShopNet;
 
-        monthTotal += dailyIncome;
-        monthBarber += dailyBarberNet;
-        monthShop += dailyShopNet;
+        weeklyData[wKey].income += dailyIncome;
+        weeklyData[wKey].shopIncome += dailyShopNet;
 
-        weeklyData[wKey].income += dailyIncome;
-        weeklyData[wKey].shopIncome += dailyShopNet;
+        if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
+        
+        weeklyData[wKey].dailyCounts.push({ 
+            dayName: dayNames[dObj.getDay()], 
+            count: dayCustomerCount, 
+            income: dailyIncome,
+            barberEarn: dailyBarberNet,
+            shopEarn: dailyShopNet
+        });
+    });
 
-        if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
-        
-        weeklyData[wKey].dailyCounts.push({ 
-            dayName: dayNames[dObj.getDay()], 
-            count: dayCustomerCount, 
-            income: dailyIncome,
-            barberEarn: dailyBarberNet,
-            shopEarn: dailyShopNet
-        });
-    });
+    const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
 
-    const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
+    if ($("shopTotalMonth")) {
+        $("shopTotalMonth").innerText = `฿${Math.floor(monthShop).toLocaleString()}`;
+    }
 
-    if ($("shopTotalMonth")) {
-        $("shopTotalMonth").innerText = `฿${Math.floor(monthShop).toLocaleString()}`;
-    }
-
-    if (typeof generateMonthlyReport === 'function') {
-        generateMonthlyReport(
-            m, 
-            monthTotal, 
-            monthBarber, 
-            monthShop, 
-            monthCount, 
-            workDays, 
-            offDays, 
-            avgCustomerPerDay, 
-            weeklyData, 
-            hairStats, 
-            serviceStats, 
-            monthGuarDays, 
-            countNew, 
-            countRegular, 
-            countOffsite
-        );
-    }
+    if (typeof generateMonthlyReport === 'function') {
+        generateMonthlyReport(
+            m, 
+            monthTotal, 
+            monthBarber, 
+            monthShop, 
+            monthCount, 
+            workDays, 
+            offDays, 
+            avgCustomerPerDay, 
+            weeklyData, 
+            hairStats, 
+            serviceStats, 
+            monthGuarDays, 
+            countNew, 
+            countRegular, 
+            countOffsite
+        );
+    }
 }
 function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular, countOffsite) {
     // Helper Selector
