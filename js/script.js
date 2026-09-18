@@ -2125,8 +2125,8 @@ document.addEventListener("DOMContentLoaded", () => {
 function loadHistMonth() {
     const $ = (id) => document.getElementById(id);
     
-    // 🎯 แก้ไขจุดที่ 1: ดึงเฉพาะช่องของหน้าสรุปยอดรวม (histMonth) แยกเด็ดขาด ไม่ไปดึงของ monthlyReportPicker
-    const picker = $("histMonth") || $("monthlyReportPicker");
+    // 🎯 ดึงเฉพาะช่องของหน้าสรุปยอดรวม (histMonth) แยกเด็ดขาด
+    const picker = $("histMonth") \vert{}\vert{} $("monthlyReportPicker");
     let m = picker ? picker.value : '';
 
     if (!m) {
@@ -2153,7 +2153,7 @@ function loadHistMonth() {
     const monthThaiName = monthNames[mNum - 1] || '';
     const monthNameFormatted = `${monthThaiName} ${searchYear + 543}`;
 
-    // 🎯 แก้ไขจุดที่ 2: ดึง Scope สาขาปัจจุบันมาร่วมกรองด้วย
+    // 🎯 ดึง Scope สาขาปัจจุบันมาร่วมกรองด้วย
     const currentBranch = typeof getActiveBranch === 'function' ? getActiveBranch() : localStorage.getItem("active_branch_name");
     const viewScope = typeof getViewScope === 'function' ? getViewScope() : (localStorage.getItem("view_data_scope") || "all");
 
@@ -2175,7 +2175,7 @@ function loadHistMonth() {
         return;
     }
 
-    // 🎯 3. ดึงการตั้งค่าล่าสุด
+    // 🎯 ดึงการตั้งค่าล่าสุด
     const shopRate = parseFloat(localStorage.getItem('shopCommissionRate')) || ((typeof conf !== 'undefined' && conf && conf.perc) ? (conf.perc / 100) : 0.50);
     const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || 200;
     const freeBarberComp = parseFloat(localStorage.getItem('freeBarberComp')) || 100;
@@ -2213,9 +2213,17 @@ function loadHistMonth() {
             };
         }
 
+        // 🟢 1. ตรวจสอบวันหยุด
         if (day.off === true || day.type === "HOLIDAY") {
             offDays++;
             weeklyData[wKey].offDays++;
+            return;
+        }
+
+        // 🟢 2. ตรวจสอบรายการเปิดประกันรายได้ (GUARANTEE_CLAIM)
+        if (day.type === "GUARANTEE_CLAIM" || day.isGuar === true) {
+            monthGuarDays++;
+            weeklyData[wKey].guarDays++;
             return;
         }
 
@@ -2288,10 +2296,11 @@ function loadHistMonth() {
             weeklyData[wKey].customers += dayCustomerCount;
         }
 
+        // 🟢 3. ตรวจสอบการชดเชยประกัน (กรณีรายได้ช่างต่ำกว่ายอดประกันในวันที่มีลูกค้า)
         let isGuaranteeDay = false;
-        if (guarantee > 0 && calcBarberShare < guarantee && dayCustomerCount > 0) {
+        if (day.isGuar || day.isGuarantee || day.guarantee) {
             isGuaranteeDay = true;
-        } else if (day.isGuarantee || day.guarantee) {
+        } else if (guarantee > 0 && calcBarberShare < guarantee && dayCustomerCount > 0) {
             isGuaranteeDay = true;
         }
 
