@@ -2125,7 +2125,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function loadHistMonth() {
     const $ = (id) => document.getElementById(id);
 
-    const picker = $("histMonth") \vert{}\vert{} $("monthlyReportPicker");
+    const picker = $("histMonth") || $("monthlyReportPicker");
     let m = picker ? picker.value : '';
     if (!m) {
         const now = new Date();
