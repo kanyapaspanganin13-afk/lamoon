@@ -2206,10 +2206,6 @@ function loadHistMonth() {
                 income: 0, shopIncome: 0
             };
         }
-
-        // ==============================================
-        // 1. วันหยุด — จบเลย ไม่นับอะไร
-        // ==============================================
         if (day.off === true || day.type === "HOLIDAY") {
             offDays++;
             weeklyData[wKey].offDays++;
@@ -2219,10 +2215,6 @@ function loadHistMonth() {
             });
             return;
         }
-
-        // ==============================================
-        // 2. ประกันแบบกดเอง (ตรงกับ handleInsurance ทุกเงื่อนไข)
-        // ==============================================
         const hasManualGuar = day.type === "GUARANTEE_CLAIM"
                             || day.isGuar === true
                             || day.isGuarantee
@@ -2250,9 +2242,6 @@ function loadHistMonth() {
             return; // 🟢 หยุดทันที ไม่คำนวณซ้ำ
         }
 
-        // ==============================================
-        // 3. วันปกติ — เริ่มคำนวณ
-        // ==============================================
         workDays++;
         weeklyData[wKey].workDays++;
 
@@ -2324,18 +2313,11 @@ function loadHistMonth() {
 
         if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
 
-        // ==============================================
-        // 4. ประกันอัตโนมัติ — ยอดจ่ายต่ำกว่าเกณฑ์
-        // ==============================================
         const isAutoGuarantee = guarantee > 0 && calcBarberShare < guarantee;
         if (isAutoGuarantee) {
             monthGuarDays++;
             weeklyData[wKey].guarDays++;
         }
-
-        // ==============================================
-        // 5. คำนวณยอดสุดท้าย ปรับตามประกัน
-        // ==============================================
         const pureBarberCost = isAutoGuarantee
             ? Math.max(calcBarberShare, guarantee)
             : calcBarberShare;
@@ -2612,7 +2594,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                 <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:6px;">
                     <div style="background:rgba(255,255,255,0.08); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#f8fafc;">📅 เปิด ${workDays || 0} วัน</div>
                     <div style="background:rgba(244,63,94,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#fb7185;">⛱️ หยุด ${offDays || 0} วัน</div>
-                    <div style="background:rgba(250,204,21,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#facc15;">🛡️ ประกัน ${displayGuarDays} วัน</div>
+                    <div style="background:rgba(250,204,21,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#facc15;">🛡️ ประกัน  ${monthGuarDays || 0} วัน</div>
                     <div style="background:rgba(147,51,234,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#a855f7;">📊 เฉลี่ย ${(avgCustomerPerDay || 0).toFixed(2)} คน/วัน</div>
                 </div>
             </div>
