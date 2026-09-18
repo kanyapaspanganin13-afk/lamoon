@@ -2125,7 +2125,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function loadHistMonth() {
     const $ = (id) => document.getElementById(id);
 
-    const picker = $("histMonth") || $("monthlyReportPicker");
+    const picker = $("histMonth") \vert{}\vert{} $("monthlyReportPicker");
     let m = picker ? picker.value : '';
     if (!m) {
         const now = new Date();
@@ -2142,11 +2142,6 @@ function loadHistMonth() {
 
     const targetPrefixCE = `${searchYear}-${String(mNum).padStart(2, '0')}`;
     const targetPrefixBE = `${searchYearBE}-${String(mNum).padStart(2, '0')}`;
-
-    const monthNames = [
-        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
-    ];
 
     const currentBranch = typeof getActiveBranch === 'function'
         ? getActiveBranch()
@@ -2167,7 +2162,7 @@ function loadHistMonth() {
     if (!filtered.length) {
         if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
         if (typeof generateMonthlyReport === 'function') {
-            generateMonthlyReport(m, 0, 0, 0, 0, 0, 0, 0, {}, {}, {}, 0, 0, 0, 0);
+            generateMonthlyReport(m, 0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0);
         }
         return;
     }
@@ -2210,7 +2205,7 @@ function loadHistMonth() {
         }
 
         // ==============================================
-        // ✅ วันหยุด — ไม่นับวันทำงาน ไม่คำนวณรายได้
+        // 1. วันหยุด
         // ==============================================
         if (day.off === true || day.type === "HOLIDAY") {
             offDays++;
@@ -2222,30 +2217,15 @@ function loadHistMonth() {
             return;
         }
 
-        // ==============================================
-        // ✅ ประกันรายได้ (กดเปิดเอง) — นับ 1 ครั้ง หยุดทันที
-        // ==============================================
-        if (day.type === "GUARANTEE_CLAIM" || day.isGuar === true || day.isGuarantee || day.guarantee) {
-            monthGuarDays++;
-            weeklyData[wKey].guarDays++;
-            workDays++;
-            weeklyData[wKey].workDays++;
-            weeklyData[wKey].dailyCounts.push({
-                dayName: dayNames[dayOfWeek],
-                count: 0,
-                income: 0,
-                barberEarn: guarantee,
-                shopEarn: 0
-            });
-            monthBarber += guarantee;
-            return; // 🟢 หยุด ไม่คำนวณซ้ำ
-        }
-
-        // ==============================================
-        // ปกติ — วันทำงานทั่วไป
-        // ==============================================
         workDays++;
         weeklyData[wKey].workDays++;
+
+        // ==============================================
+        // 2. ตรวจสอบการเปิดใช้งานประกัน (เช็คทั้ง Root และ Details ตามโค้ดเดิม)
+        // ==============================================
+        const hasManualGuar = day.type === "GUARANTEE_CLAIM" || day.isGuar === true || day.isGuarantee || day.guarantee;
+        const hasDetailGuar = day.details && Array.isArray(day.details) && day.details.some(d => d.type === "GUARANTEE_CLAIM");
+        const isManualGuarantee = hasManualGuar || hasDetailGuar;
 
         let dailyIncome = Number(day.cash || 0) + Number(day.trans || 0);
         if (dailyIncome === 0 || day.total) dailyIncome = Number(day.total || dailyIncome);
@@ -2314,18 +2294,17 @@ function loadHistMonth() {
         }
 
         // ==============================================
-        // ✅ ตรวจประกันอัตโนมัติ — เฉพาะวันที่ยังไม่กดเปิด
-        // ครอบคลุม: มีรายได้ต่ำ + ไม่มีลูกค้าเลย
+        // 3. รวมเงื่อนไขประกัน (กดเปิดเอง OR ยอดไม่ถึงเกณฑ์)
         // ==============================================
         let isGuaranteeDay = false;
-        if (guarantee > 0 && calcBarberShare < guarantee) {
+        if (isManualGuarantee || (guarantee > 0 && calcBarberShare < guarantee)) {
             isGuaranteeDay = true;
             monthGuarDays++;
             weeklyData[wKey].guarDays++;
         }
 
         // ==============================================
-        // ✅ คำนวณยอดจ่ายช่าง — ถ้าเข้าเงื่อนไขจ่ายเต็ม
+        // 4. สรุปยอดเงินจ่ายช่างและร้าน
         // ==============================================
         const pureBarberCost = isGuaranteeDay
             ? Math.max(calcBarberShare, guarantee)
@@ -2355,6 +2334,7 @@ function loadHistMonth() {
         $("shopTotalMonth").innerText = `฿${Math.floor(monthShop).toLocaleString()}`;
     }
 
+    // เรียกใช้ฟังก์ชันตาม Parameter ของฟังก์ชันเดิม
     if (typeof generateMonthlyReport === 'function') {
         generateMonthlyReport(
             m, monthTotal, monthBarber, monthShop, monthCount,
