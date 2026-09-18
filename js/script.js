@@ -2125,7 +2125,6 @@ document.addEventListener("DOMContentLoaded", () => {
 function loadHistMonth() {
     const $ = (id) => document.getElementById(id);
 
-    // ✅ แก้ไข: เปลี่ยนจาก || เป็น ?? เพื่อความชัดเจน
     const picker = $("histMonth") || $("monthlyReportPicker");
     let m = picker ? picker.value : '';
     if (!m) {
@@ -2148,7 +2147,6 @@ function loadHistMonth() {
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
     ];
-    const monthThaiName = monthNames[mNum - 1] || '';
 
     const currentBranch = typeof getActiveBranch === 'function'
         ? getActiveBranch()
@@ -2196,7 +2194,6 @@ function loadHistMonth() {
         const dObj = new Date(dYear, dMonth - 1, dDay);
         const dayOfWeek = dObj.getDay();
 
-        // ✅ ปรับปรุง: คำนวณสัปดาห์ให้แม่นยำขึ้น
         const firstDayOfMonth = new Date(dYear, dMonth - 1, 1).getDay();
         const dayNumberInWeek = dDay + firstDayOfMonth - 1;
         let wIdx = Math.floor(dayNumberInWeek / 7) + 1;
@@ -2212,26 +2209,41 @@ function loadHistMonth() {
             };
         }
 
-        // ✅ วันหยุด
+        // ==============================================
+        // ✅ วันหยุด — ไม่นับวันทำงาน ไม่คำนวณรายได้
+        // ==============================================
         if (day.off === true || day.type === "HOLIDAY") {
             offDays++;
             weeklyData[wKey].offDays++;
             weeklyData[wKey].dailyCounts.push({
                 dayName: dayNames[dayOfWeek],
-                count: 0,
-                income: 0,
-                barberEarn: 0,
-                shopEarn: 0
+                count: 0, income: 0, barberEarn: 0, shopEarn: 0
             });
             return;
         }
 
-        // ✅ ประกันรายได้ — นับแค่ 1 ครั้ง
-        let isGuaranteeDay = false;
+        // ==============================================
+        // ✅ ประกันรายได้ (กดเปิดเอง) — นับ 1 ครั้ง หยุดทันที
+        // ==============================================
         if (day.type === "GUARANTEE_CLAIM" || day.isGuar === true || day.isGuarantee || day.guarantee) {
-            isGuaranteeDay = true;
+            monthGuarDays++;
+            weeklyData[wKey].guarDays++;
+            workDays++;
+            weeklyData[wKey].workDays++;
+            weeklyData[wKey].dailyCounts.push({
+                dayName: dayNames[dayOfWeek],
+                count: 0,
+                income: 0,
+                barberEarn: guarantee,
+                shopEarn: 0
+            });
+            monthBarber += guarantee;
+            return; // 🟢 หยุด ไม่คำนวณซ้ำ
         }
 
+        // ==============================================
+        // ปกติ — วันทำงานทั่วไป
+        // ==============================================
         workDays++;
         weeklyData[wKey].workDays++;
 
@@ -2295,34 +2307,30 @@ function loadHistMonth() {
                 }
             });
         } else {
-            // กรณีไม่มี details ใช้ค่าสรุป
             calcBarberShare = Number(day.barber) || 0;
             dayCustomerCount = day.count || 0;
             monthCount += dayCustomerCount;
             weeklyData[wKey].customers += dayCustomerCount;
         }
 
-        // ==================================================
-        // ✅ แก้ไข: ตรวจสอบประกัน — รวมวันที่ไม่มีลูกค้าด้วย
-        // ==================================================
-        if (!isGuaranteeDay && guarantee > 0) {
-            // ครอบคลุมทั้ง:
-            // 1. มีลูกค้าแต่รายได้ช่างต่ำกว่ายอดประกัน
-            // 2. ไม่มีลูกค้าเลย → calcBarberShare = 0 ซึ่งต่ำกว่าประกันแน่นอน
-            if (calcBarberShare < guarantee) {
-                isGuaranteeDay = true;
-            }
-        }
-
-        if (isGuaranteeDay) {
+        // ==============================================
+        // ✅ ตรวจประกันอัตโนมัติ — เฉพาะวันที่ยังไม่กดเปิด
+        // ครอบคลุม: มีรายได้ต่ำ + ไม่มีลูกค้าเลย
+        // ==============================================
+        let isGuaranteeDay = false;
+        if (guarantee > 0 && calcBarberShare < guarantee) {
+            isGuaranteeDay = true;
             monthGuarDays++;
             weeklyData[wKey].guarDays++;
         }
 
-        // ==================================================
-        // ✅ แก้ไข: จ่ายประกันเต็มเมื่อเข้าเงื่อนไข ไม่สนใจจำนวนลูกค้า
-        // ==================================================
-        const pureBarberCost = Math.max(calcBarberShare, (isGuaranteeDay ? guarantee : 0));
+        // ==============================================
+        // ✅ คำนวณยอดจ่ายช่าง — ถ้าเข้าเงื่อนไขจ่ายเต็ม
+        // ==============================================
+        const pureBarberCost = isGuaranteeDay
+            ? Math.max(calcBarberShare, guarantee)
+            : calcBarberShare;
+
         const dailyBarberNet = Math.floor(pureBarberCost + totalTips);
         const dailyShopNet = Math.max(0, dailyIncome - pureBarberCost);
 
@@ -2332,7 +2340,6 @@ function loadHistMonth() {
         weeklyData[wKey].income += dailyIncome;
         weeklyData[wKey].shopIncome += dailyShopNet;
 
-        // ✅ บันทึกลง dailyCounts เสมอ ไม่ขาด
         weeklyData[wKey].dailyCounts.push({
             dayName: dayNames[dayOfWeek],
             count: dayCustomerCount,
@@ -2357,7 +2364,6 @@ function loadHistMonth() {
         );
     }
 }
-
 // --- generateMonthlyReport ยังคงเหมือนเดิม ---
 function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular, countOffsite) {
     const $ = id => document.getElementById(id);
