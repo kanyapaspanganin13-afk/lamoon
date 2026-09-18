@@ -2401,10 +2401,10 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
     const finalBarberEarn = monthBarber !== undefined ? Number(monthBarber) : calculatedMonthBarber;
     const finalShopEarn = Math.max(0, finalTotalIncome - finalBarberEarn);
     
-    // 🟢 [แก้ไขแล้ว] นำค่า monthGuarDays ที่คำนวณได้จริงมาใช้งาน
+    // 🟢 นำค่า monthGuarDays ที่คำนวณได้จริงมาใช้งาน
     const displayGuarDays = Number(monthGuarDays) || 0;
 
-    // 🎯 แสดงผลค่าประกันลง element บน UI (ตรวจสอบ id ให้ตรงกับใน HTML ของคุณ เช่น guarDaysEl หรือประกัน)
+    // 🎯 แสดงผลค่าประกันลง element บน UI (ถ้ามี element แยก)
     if ($("guarDaysBadge")) {
         $("guarDaysBadge").innerText = `🛡️ ประกัน ${displayGuarDays} วัน`;
     }
@@ -2570,7 +2570,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                 <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:6px;">
                     <div style="background:rgba(255,255,255,0.08); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#f8fafc;">📅 เปิด ${workDays} วัน</div>
                     <div style="background:rgba(244,63,94,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#fb7185;">⛱️ หยุด ${offDays} วัน</div>
-                    <div style="background:rgba(250,204,21,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#facc15;">🛡️ ประกัน 0 วัน</div>
+                    <div style="background:rgba(250,204,21,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#facc15;">🛡️ ประกัน ${displayGuarDays} วัน</div>
                     <div style="background:rgba(147,51,234,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#a855f7;">📊 เฉลี่ย ${(avgCustomerPerDay || 0).toFixed(2)} คน/วัน</div>
                 </div>
             </div>
