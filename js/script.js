@@ -820,7 +820,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* ========== SECTION 10: BUSINESS LOGIC & COMMISSION CALCULATION ========== */
 // 🟢 1. ฟังก์ชันจัดการเมื่อเปลี่ยนประเภทลูกค้า (ปลดล็อก readOnly ให้แก้ไขราคาได้)
-// 1. ฟังก์ชันจัดการเมื่อเปลี่ยนประเภทลูกค้า
 function handleCustTypeChange(value) {
     const priceInp = document.getElementById('priceInp');
     if (!priceInp) return;
@@ -838,7 +837,7 @@ function handleCustTypeChange(value) {
             } else if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     title: 'ยังไม่ได้ตั้งค่าส่วนแบ่ง',
-                    text: 'กรุณาไปตั้งค่าราคาส่วนแบ่งงานนอกสถานที่ในการตั้งค่าระบบก่อน',
+                    text: 'กรุณาตั้งค่าราคาส่วนแบ่งงานนอกสถานที่ในการตั้งค่าระบบก่อน',
                     icon: 'warning',
                     confirmButtonText: 'ตกลง'
                 });
@@ -868,9 +867,11 @@ function calcShares(price, custType, isFree = false, shopCommissionRate = 0.50) 
     }
     
     if (custType === 'offsite') {
-        // 🚗 นอกสถานที่: คำนวณจากราคาที่กรอกจริง (ร้านเก็บค่าบริการคงที่ 100 ส่วนที่เหลือเป็นของช่าง)
-        const offsiteShopFee = parseFloat(localStorage.getItem('offsiteShopFee')) || 100;
-        const shop = Math.min(numericPrice, offsiteShopFee); // ร้านได้ตามค่าธรรมเนียม (ไม่เกินราคางาน)
+        // 🚗 นอกสถานที่: คำนวณจากค่าธรรมเนียมที่ตั้งไว้ในระบบ (ยึดตาม localStorage ไม่ Fix ราคา)
+        const offsiteShopFeeSetting = localStorage.getItem('offsiteShopFee');
+        const offsiteShopFee = offsiteShopFeeSetting !== null ? parseFloat(offsiteShopFeeSetting) || 0 : 0;
+
+        const shop = Math.min(numericPrice, offsiteShopFee); // ร้านได้ตามค่าธรรมเนียมที่ตั้งไว้ (ไม่เกินราคางาน)
         const barber = Math.max(0, numericPrice - shop);     // ช่างได้ส่วนที่เหลือทั้งหมด
         
         return { b: barber, s: shop, barberShare: barber, shopShare: shop };
@@ -884,7 +885,6 @@ function calcShares(price, custType, isFree = false, shopCommissionRate = 0.50) 
 
 // สร้าง Alias ไว้รองรับกรณีที่มีฟังก์ชันอื่นเรียกใช้ชื่อเต็ม
 const calculateShares = calcShares;
-
 /* ========= SECTION 11: SAVE RECORD ========= */
 async function handleSave(event) {
     const $ = (id) => document.getElementById(id);
