@@ -2124,7 +2124,6 @@ document.addEventListener("DOMContentLoaded", () => {
 /* ========= FIX: LOAD HIST MONTH ========= */
 function loadHistMonth() {
     const $ = (id) => document.getElementById(id);
-
     const picker = $("histMonth") || $("monthlyReportPicker");
     let m = picker ? picker.value : '';
     if (!m) {
@@ -2139,7 +2138,6 @@ function loadHistMonth() {
     let [y, mNum] = m.split('-').map(Number);
     const searchYear = y > 2500 ? y - 543 : y;
     const searchYearBE = searchYear + 543;
-
     const targetPrefixCE = `${searchYear}-${String(mNum).padStart(2, '0')}`;
     const targetPrefixBE = `${searchYearBE}-${String(mNum).padStart(2, '0')}`;
 
@@ -2162,9 +2160,15 @@ function loadHistMonth() {
     if (!filtered.length) {
         if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
         if (typeof generateMonthlyReport === 'function') {
-            generateMonthlyReport(m, 0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0);
+            generateMonthlyReport(
+                m, 0, 0, 0, 0,
+                0, 0, 0,
+                {}, {}, {},
+                0, 0, 0, 0
+            );
         }
-        return;
+        if (window.calcNetProfit) window.calcNetProfit();
+        return openReportModal("📊 สรุปรายเดือน", `<div style='text-align:center;padding:50px;color:#94a3b8;'>ไม่พบข้อมูลของเดือน ${m}</div>`);
     }
 
     const shopRate = parseFloat(localStorage.getItem('shopCommissionRate'))
@@ -2185,7 +2189,6 @@ function loadHistMonth() {
     filtered.forEach(day => {
         let [dYear, dMonth, dDay] = day.date.split('-').map(Number);
         if (dYear > 2500) dYear -= 543;
-
         const dObj = new Date(dYear, dMonth - 1, dDay);
         const dayOfWeek = dObj.getDay();
 
@@ -2197,7 +2200,7 @@ function loadHistMonth() {
 
         if (!weeklyData[wKey]) {
             weeklyData[wKey] = {
-                customers: 0, workDays: 0, offDays: 0, guarDays: 0, dailyCounts: [],
+                customers: 0, workDays: 0, offDays: 0, zeroDays: 0, guarDays: 0, dailyCounts: [],
                 countNew: 0, countRegular: 0, countOffsite: 0,
                 popularHair: {}, popularService: {},
                 income: 0, shopIncome: 0
@@ -2205,7 +2208,7 @@ function loadHistMonth() {
         }
 
         // ==============================================
-        // 1. วันหยุด
+        // 1. วันหยุด — จบเลย ไม่นับอะไร
         // ==============================================
         if (day.off === true || day.type === "HOLIDAY") {
             offDays++;
@@ -2217,15 +2220,41 @@ function loadHistMonth() {
             return;
         }
 
-        workDays++;
-        weeklyData[wKey].workDays++;
+        // ==============================================
+        // 2. ประกันแบบกดเอง (ตรงกับ handleInsurance ทุกเงื่อนไข)
+        // ==============================================
+        const hasManualGuar = day.type === "GUARANTEE_CLAIM"
+                            || day.isGuar === true
+                            || day.isGuarantee
+                            || day.guarantee;
+        const hasDetailGuar = day.details
+                            && Array.isArray(day.details)
+                            && day.details.some(d => d.type === "GUARANTEE_CLAIM");
+
+        if (hasManualGuar || hasDetailGuar) {
+            monthGuarDays++;
+            weeklyData[wKey].guarDays++;
+            workDays++;
+            weeklyData[wKey].workDays++;
+
+            const claimAmount = day.guarAmount || guarantee;
+            monthBarber += claimAmount;
+
+            weeklyData[wKey].dailyCounts.push({
+                dayName: dayNames[dayOfWeek],
+                count: 0,
+                income: 0,
+                barberEarn: claimAmount,
+                shopEarn: 0
+            });
+            return; // 🟢 หยุดทันที ไม่คำนวณซ้ำ
+        }
 
         // ==============================================
-        // 2. ตรวจสอบการเปิดใช้งานประกัน (เช็คทั้ง Root และ Details ตามโค้ดเดิม)
+        // 3. วันปกติ — เริ่มคำนวณ
         // ==============================================
-        const hasManualGuar = day.type === "GUARANTEE_CLAIM" || day.isGuar === true || day.isGuarantee || day.guarantee;
-        const hasDetailGuar = day.details && Array.isArray(day.details) && day.details.some(d => d.type === "GUARANTEE_CLAIM");
-        const isManualGuarantee = hasManualGuar || hasDetailGuar;
+        workDays++;
+        weeklyData[wKey].workDays++;
 
         let dailyIncome = Number(day.cash || 0) + Number(day.trans || 0);
         if (dailyIncome === 0 || day.total) dailyIncome = Number(day.total || dailyIncome);
@@ -2293,20 +2322,21 @@ function loadHistMonth() {
             weeklyData[wKey].customers += dayCustomerCount;
         }
 
+        if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
+
         // ==============================================
-        // 3. รวมเงื่อนไขประกัน (กดเปิดเอง OR ยอดไม่ถึงเกณฑ์)
+        // 4. ประกันอัตโนมัติ — ยอดจ่ายต่ำกว่าเกณฑ์
         // ==============================================
-        let isGuaranteeDay = false;
-        if (isManualGuarantee || (guarantee > 0 && calcBarberShare < guarantee)) {
-            isGuaranteeDay = true;
+        const isAutoGuarantee = guarantee > 0 && calcBarberShare < guarantee;
+        if (isAutoGuarantee) {
             monthGuarDays++;
             weeklyData[wKey].guarDays++;
         }
 
         // ==============================================
-        // 4. สรุปยอดเงินจ่ายช่างและร้าน
+        // 5. คำนวณยอดสุดท้าย ปรับตามประกัน
         // ==============================================
-        const pureBarberCost = isGuaranteeDay
+        const pureBarberCost = isAutoGuarantee
             ? Math.max(calcBarberShare, guarantee)
             : calcBarberShare;
 
@@ -2333,8 +2363,9 @@ function loadHistMonth() {
     if ($("shopTotalMonth")) {
         $("shopTotalMonth").innerText = `฿${Math.floor(monthShop).toLocaleString()}`;
     }
+    if (window.calcNetProfit) window.calcNetProfit();
 
-    // เรียกใช้ฟังก์ชันตาม Parameter ของฟังก์ชันเดิม
+    // ✅ ส่งพารามิเตอร์ครบตรงตามลำดับเดิม
     if (typeof generateMonthlyReport === 'function') {
         generateMonthlyReport(
             m, monthTotal, monthBarber, monthShop, monthCount,
