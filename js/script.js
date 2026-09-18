@@ -2401,8 +2401,13 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
     const finalBarberEarn = monthBarber !== undefined ? Number(monthBarber) : calculatedMonthBarber;
     const finalShopEarn = Math.max(0, finalTotalIncome - finalBarberEarn);
     
-    // 🟢 [แก้ไขถาวร] บังคับประกันเป็น 0 วันเสมอ
-    const displayGuarDays = 0;
+    // 🟢 [แก้ไขแล้ว] นำค่า monthGuarDays ที่คำนวณได้จริงมาใช้งาน
+    const displayGuarDays = Number(monthGuarDays) || 0;
+
+    // 🎯 แสดงผลค่าประกันลง element บน UI (ตรวจสอบ id ให้ตรงกับใน HTML ของคุณ เช่น guarDaysEl หรือประกัน)
+    if ($("guarDaysBadge")) {
+        $("guarDaysBadge").innerText = `🛡️ ประกัน ${displayGuarDays} วัน`;
+    }
 
     // --- 2. สถิติรายวัน ---
     const dayAverages = Object.entries(dayStats).filter(([_, d]) => d.count > 0).map(([name, d]) => ({ name, avg: d.total / d.count }));
