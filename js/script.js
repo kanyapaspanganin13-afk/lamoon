@@ -2777,14 +2777,19 @@ function renderDailyTableReport() {
         if (picker) picker.value = mVal;
     }
     const [y, mNum] = mVal.split('-').map(Number);
-    const targetPrefix = `${y}-${String(mNum).padStart(2, '0')}`;
     
+    // 🔧 แก้ไขจุดที่ 1: คำนวณรองรับทั้ง ค.ศ. (2026) และ พ.ศ. (2569)
+    const yearCE = y > 2500 ? y - 543 : y;
+    const yearBE = yearCE + 543;
+    const prefixCE = `${yearCE}-${String(mNum).padStart(2, '0')}`;
+    const prefixBE = `${yearBE}-${String(mNum).padStart(2, '0')}`;
+
     // ดึงโหมดการแสดงผล + สาขาปัจจุบัน
     const viewAll = (localStorage.getItem("view_data_scope") || "all") === "all";
     const activeBranch = (localStorage.getItem("active_branch_name") || "").trim();
     
-    // กรองข้อมูลเดือนที่เลือก
-    let filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
+    // 🔧 แก้ไขจุดที่ 2: กรองข้อมูลโดยเช็กทั้ง ค.ศ. และ พ.ศ.
+    let filtered = archives.filter(a => a && a.date && (a.date.startsWith(prefixCE) || a.date.startsWith(prefixBE)));
     
     if (!viewAll) {
         filtered = filtered.filter(a => {
@@ -2806,9 +2811,9 @@ function renderDailyTableReport() {
     
     let reportTitle = "";
     if (viewAll) {
-        reportTitle = `รายงานทุกสาขา · ประจำเดือน: ${monthThaiName} ${y + 543}`;
+        reportTitle = `รายงานทุกสาขา · ประจำเดือน: ${monthThaiName} ${yearBE}`;
     } else {
-        reportTitle = `รายงาน: ${displayTitleBranch} · ประจำเดือน: ${monthThaiName} ${y + 543}`;
+        reportTitle = `รายงาน: ${displayTitleBranch} · ประจำเดือน: ${monthThaiName} ${yearBE}`;
     }
 
     // ดึงเปอร์เซ็นต์และค่าคอมมิชชันตั้งต้นระบบ
@@ -2832,6 +2837,7 @@ function renderDailyTableReport() {
         let dayCust = 0;
         let shave = 0, wash = 0, dye = 0;
         let calcBarberEarn = 0;
+        let dayGuarClaim = 0;
         
         const rawBranch = String(day.branch || '').trim();
         const branchName = (rawBranch && rawBranch !== "undefined" && rawBranch !== "null")
@@ -2842,10 +2848,17 @@ function renderDailyTableReport() {
             workDays++;
 
             const hasManualGuar = day.type === "GUARANTEE_CLAIM" || day.isGuar === true || day.isGuarantee || day.guarantee;
+            if (hasManualGuar) {
+                dayGuarClaim = Number(day.guarAmount || day.guaranteeAmount || guarantee);
+            }
 
             if (day.details && Array.isArray(day.details) && day.details.length > 0) {
                 day.details.forEach(d => {
-                    if (d.type === "SERVICE" || !d.type) {
+                    // 🔧 แก้ไขจุดที่ 3: คำนวณรายได้ช่างรวมถึงรายการประกันใน details
+                    if (d.type === "GUARANTEE_CLAIM") {
+                        const gAmt = Number(d.amount || d.price || guarantee);
+                        if (gAmt > dayGuarClaim) dayGuarClaim = gAmt;
+                    } else if (d.type === "SERVICE" || !d.type) {
                         dayCust++;
                         const p = Number(d.price) || 0;
                         const t = Number(d.tip) || 0;
@@ -2879,11 +2892,10 @@ function renderDailyTableReport() {
                 dayCust = Number(day.count) || 0;
             }
 
-            // 🔧 เช็กค่าประกันรายได้กับการคำนวณสด
-            if (hasManualGuar) {
-                const claimAmount = Number(day.guarAmount || day.guaranteeAmount || guarantee);
-                calcBarberEarn = Math.max(claimAmount, calcBarberEarn);
-            } else if (calcBarberEarn === 0) {
+            // สรุปรายได้ช่างประจำวัน (ยึดค่าสูงสุดระหว่างค่าประกันกับค่าบริการตัดจริง หรือใช้ค่า day.barber สำรอง)
+            if (dayGuarClaim > 0) {
+                calcBarberEarn = Math.max(dayGuarClaim, calcBarberEarn);
+            } else if (calcBarberEarn === 0 && day.barber) {
                 calcBarberEarn = Number(day.barber) || 0;
             }
         }
@@ -2897,7 +2909,8 @@ function renderDailyTableReport() {
         
         let displayDayName = day.dayName || '-';
         if (day.date) {
-            const [dYear, dMonth, dDay] = day.date.split('-').map(Number);
+            let [dYear, dMonth, dDay] = day.date.split('-').map(Number);
+            if (dYear > 2500) dYear -= 543;
             const dObj = new Date(dYear, dMonth - 1, dDay);
             if (!isNaN(dObj.getTime())) {
                 displayDayName = thaiDayNames[dObj.getDay()];
