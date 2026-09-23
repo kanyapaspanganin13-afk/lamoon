@@ -167,6 +167,47 @@ document.addEventListener("DOMContentLoaded", () => {
     
     console.log(`✅ โหลดสมบูรณ์ — เวอร์ชัน: v${window.APP_VERSION}`);
 });
+
+// 4️⃣ ระบบ Auto Update (ปรับไวยากรณ์ให้ถูกต้อง)
+(function autoUpdate() {
+    const BUILD_SIGNATURE = BUILD_MARK;
+    const currentStoredVersion = localStorage.getItem("app_v");
+
+    if (currentStoredVersion !== BUILD_SIGNATURE) {
+        console.log(`[AutoUpdate] พบเวอร์ชันใหม่: ${currentStoredVersion || '---'} → ${BUILD_SIGNATURE}`);
+
+        const finishUpdate = () => {
+            localStorage.setItem("app_v", BUILD_SIGNATURE);
+            if (currentStoredVersion) {
+                if (typeof notify === 'function') {
+                    notify("info", "✨ มีอัปเดตใหม่", "กำลังโหลดเวอร์ชันล่าสุด...");
+                }
+                setTimeout(() => window.location.reload(true), 600);
+            }
+        };
+
+        if ('caches' in window) {
+            caches.keys()
+                .then(names => Promise.all(names.map(name => caches.delete(name))))
+                .then(finishUpdate)
+                .catch(finishUpdate);
+        } else {
+            finishUpdate();
+        }
+    }
+})();
+
+// 5️⃣ ระบบตรวจจับเปิดแอปกลับขึ้นมาข้ามวัน (Resume Support)
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        const freshDate = new Date().toISOString().split('T')[0];
+        if ($("dateInp") && $("dateInp").value !== freshDate) {
+            $("dateInp").value = freshDate;
+            if (typeof renderDay === 'function') renderDay(freshDate);
+            if (typeof loadHistMonth === 'function') loadHistMonth();
+        }
+    }
+});
 /* =========== SECTION 1A: BRANCH SYSTEM =========== */
 const ACTIVE_BRANCH_KEY = "active_branch_name";
 const VIEW_SCOPE_KEY = "view_data_scope";
