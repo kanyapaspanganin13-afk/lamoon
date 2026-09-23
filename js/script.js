@@ -2426,18 +2426,30 @@ function loadHistMonth() {
         });
     });
 
-    // คำนวณรายได้ร้านจากยอดรวมสทธิ์ เพื่อป้องกันปัญหาตัวเลขไม่ตรงกัน[cite: 7]
-    const monthShop = Math.max(0, monthTotal - monthBarber);
-    const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
-
-    // อัปเดต UI หน้าหลักให้ตรงกัน
-    if ($("grandTotalMonth")) $("grandTotalMonth").innerText = `฿${Math.floor(monthTotal).toLocaleString()}`;
-    if ($("barberTotalMonth")) $("barberTotalMonth").innerText = `฿${Math.floor(monthBarber).toLocaleString()}`;
-    if ($("shopTotalMonth")) $("shopTotalMonth").innerText = `฿${Math.floor(monthShop).toLocaleString()}`;
-
-    if (window.calcNetProfit) window.calcNetProfit();
-
-    if (typeof generateMonthlyReport === 'function') {
+      // ✅ แก้ไข: รวมยอด barberEarn และ shopIncome ที่คำนวณสุทธิจาก weeklyData มาใช้แทน
+          let realBarberTotal = 0;
+          let realShopTotal = 0;
+          Object.values(weeklyData).forEach(w => {
+              if (w.dailyCounts && w.dailyCounts.length > 0) {
+                  w.dailyCounts.forEach(d => {
+                      realBarberTotal += Number(d.barberEarn || 0);
+                      realShopTotal += Number(d.shopEarn || 0);
+                  });
+              }
+          });
+      
+          const finalBarber = realBarberTotal > 0 ? realBarberTotal : monthBarber;
+          const finalShop = Math.max(0, monthTotal - finalBarber);
+          const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
+      
+          // อัปเดต UI หน้าหลักด้วยตัวเลขสุทธิที่ถูกต้อง
+          if ($("grandTotalMonth")) $("grandTotalMonth").innerText = `฿${Math.floor(monthTotal).toLocaleString()}`;
+          if ($("barberTotalMonth")) $("barberTotalMonth").innerText = `฿${Math.floor(finalBarber).toLocaleString()}`;
+          if ($("shopTotalMonth")) $("shopTotalMonth").innerText = `฿${Math.floor(finalShop).toLocaleString()}`;
+      
+          if (window.calcNetProfit) window.calcNetProfit();
+      
+          if (typeof generateMonthlyReport === 'function') {
         generateMonthlyReport(
             m, monthTotal, monthBarber, monthShop, monthCount,
             workDays, offDays, avgCustomerPerDay,
