@@ -2472,7 +2472,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
             });
         }
         
-        // [แก้ไขจุดที่ 1] คำนวณรายได้ร้านประจำสัปดาห์ให้เสถียรขึ้น
         const wShopEarn = data.shopIncome !== undefined
             ? Number(data.shopIncome)
             : Math.max(0, Number(data.income || 0) - wBarberEarn);
@@ -2481,10 +2480,14 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         calcMonthShop += wShopEarn;
     });
 
-    // [แก้ไขจุดที่ 2] ใช้ Nullish Coalescing (??) ป้องกันเลข 0 หลุดไปใช้ค่า Default ผิดพลาด
-    const finalTotalIncome = Number(monthTotal ?? (calcMonthBarber + calcMonthShop));
+    // --- [จุดที่แก้หลัก] กำหนดลำดับความสำคัญของรายได้ให้ตรงกันทั้งระบบ ---
     const finalBarberEarn = Number(monthBarber ?? calcMonthBarber);
     const finalShopEarn = Number(monthShop ?? calcMonthShop);
+    
+    // บังคับให้ ยอดรวมประจำเดือน = ยอดช่าง + ยอดร้าน เสมอ ป้องกันการคำนวณขัดแย้งกัน
+    const finalTotalIncome = (monthTotal !== undefined && monthTotal !== null) 
+        ? Number(monthTotal) 
+        : (finalBarberEarn + finalShopEarn);
 
     const finalCountNew = Number(countNew ?? calcTotalNew);
     const finalCountRegular = Number(countRegular ?? calcTotalRegular);
@@ -2552,7 +2555,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
             const sWidth = sVal ? `${(sVal / maxService) * 100}%` : '0%';
             
             html += `<div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;">
-                <!-- ซ้าย: ทรงผม-->
                 <div style="flex:1; display:flex; align-items:center; gap:8px;">
                     <span style="color:#e2e8f0; font-size:14px; white-space:nowrap;">${hName}</span>
                     <div style="flex:1; height:8px; background:#1e293b; border-radius:4px; overflow:hidden;">
@@ -2560,7 +2562,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                     </div>
                     <span style="color:#fff; font-weight:700; font-size:14px; min-width:24px; text-align:right;">${hVal || ''}</span>
                 </div>
-                <!--ขวา: บริการ-->
                 <div style="flex:1; display:flex; align-items:center; gap:8px;">
                     <span style="color:#fff; font-weight:700; font-size:14px; min-width:24px; text-align:left;">${sVal || ''}</span>
                     <div style="flex:1; height:8px; background:#1e293b; border-radius:4px; overflow:hidden;">
@@ -2601,8 +2602,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         let sumBarber = 0;
         if (data.dailyCounts) data.dailyCounts.forEach(d => sumBarber += Number(d.barberEarn || 0));
         const wBarber = Math.floor(sumBarber);
-        
-        // [แก้ไขจุดที่ 3] ใช้ค่า shopIncome จากการคำนวณประจำสัปดาห์ตรงๆ
         const wShop = Math.floor(data.shopIncome !== undefined ? Number(data.shopIncome) : Math.max(0, weeklyTotalIncome - wBarber));
         
         const sortedDays = data.dailyCounts ? [...data.dailyCounts].sort((a, b) => b.count - a.count) : [];
@@ -2703,7 +2702,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                 <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:6px;">
                     <div style="background:rgba(255,255,255,0.08); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#f8fafc;">📅 เปิด ${workDays || 0} วัน</div>
                     <div style="background:rgba(244,63,94,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#fb7185;">⛱️ หยุด ${offDays || 0} วัน</div>
-                    <div style="background:rgba(250,204,21,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#facc15;">🛡️ ประกัน  ${monthGuarDays || 0} วัน</div>
+                    <div style="background:rgba(250,204,21,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#facc15;">🛡️ ประกัน ${displayGuarDays} วัน</div>
                     <div style="background:rgba(147,51,234,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#a855f7;">📊 เฉลี่ย ${(avgCustomerPerDay || 0).toFixed(2)} คน/วัน</div>
                 </div>
             </div>
@@ -2719,7 +2718,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                     ${insights.map(i => `<div style="font-size:12.5px; color:#f8fafc; margin-bottom:6px;">• ${i}</div>`).join("")}
                 </div>
                 <div>
-                    <div style="font-size:14px; font-weight:800; color:#38bdf8; margin-bottom:12px;">🌀 รายละเอียดแยกสัปดาห์</div>
+                    <div style="font-size:14px; font-weight:800; color:#38bdf8; margin-bottom:12px;">🌀 รายรายละเอียดแยกสัปดาห์</div>
                     ${weeklyHtml}
                 </div>
             </div>
@@ -2745,7 +2744,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         `;
     }
 }
-
 // ================= แท็บที่ 1: รายงานประจำเดือน (ตารางรายวัน) =================
 function renderDailyTableReport() {
     const picker = document.getElementById('monthlyReportPicker') || document.getElementById('histMonth');
