@@ -2460,8 +2460,9 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         calcTotalNew += Number(data.countNew || 0);
         calcTotalRegular += Number(data.countRegular || 0);
         calcTotalOffsite += Number(data.countOffsite || 0);
+        
         let wBarberEarn = 0;
-        if (data.dailyCounts) {
+        if (data.dailyCounts && data.dailyCounts.length > 0) {
             data.dailyCounts.forEach(d => {
                 wBarberEarn += Number(d.barberEarn || 0);
                 const dayName = d.dayName ? String(d.dayName).split(' ')[0] : '';
@@ -2471,20 +2472,23 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                     dayStats[dayName].count += 1;
                 }
             });
+        } else {
+            wBarberEarn = Number(data.barberEarn || 0);
         }
+
         const wIncome = Number(data.income || 0);
         const wShopEarn = data.shopIncome !== undefined
             ? Number(data.shopIncome)
             : Math.max(0, wIncome - wBarberEarn);
+
         calcMonthBarber += wBarberEarn;
         calcMonthShop += wShopEarn;
     });
 
-    // ✅ แก้ไขจุดนี้: ใช้ค่าที่คำนวณสดจาก weeklyData (calcMonthBarber/calcMonthShop) เป็นหลัก
-    // เพื่อให้ตัวเลข 8,790 และ 5,620 ถูกต้องตรงกัน 100%
-    const finalBarberEarn = calcMonthBarber > 0 ? calcMonthBarber : Number(monthBarber || 0);
-    const finalShopEarn = calcMonthShop > 0 ? calcMonthShop : Number(monthShop || 0);
-    const finalTotalIncome = Number(monthTotal || (finalBarberEarn + finalShopEarn));
+    // ✅ แก้ไข: ลอจิกเลือกใช้อย่างรัดกุม แม่นยำ 100%
+    const finalBarberEarn = weekEntries.length > 0 ? calcMonthBarber : Number(monthBarber || 0);
+    const finalShopEarn = weekEntries.length > 0 ? calcMonthShop : Number(monthShop || 0);
+    const finalTotalIncome = weekEntries.length > 0 ? (finalBarberEarn + finalShopEarn) : Number(monthTotal || 0);
 
     const finalCountNew = Number(countNew ?? calcTotalNew);
     const finalCountRegular = Number(countRegular ?? calcTotalRegular);
@@ -2544,21 +2548,21 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
             const sWidth = sVal ? `${(sVal / maxService) * 100}%` : '0%';
             
             html += `<div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;">
-                <!-- ซ้าย: ทรงผม-->
+                <!-- ซ้าย: ทรงผม -->
                 <div style="flex:1; display:flex; align-items:center; gap:8px;">
-                    <span style="color:#e2e8f0; font-size:14px; white-space:nowrap;">${hName}</span>
+                    <span style="color:#e2e8f0; font-size:13px; white-space:nowrap;">${hName}</span>
                     <div style="flex:1; height:8px; background:#1e293b; border-radius:4px; overflow:hidden;">
                         <div style="width:${hWidth}; height:100%; background:${hairColor}; border-radius:4px;"></div>
                     </div>
-                    <span style="color:#fff; font-weight:700; font-size:14px; min-width:24px; text-align:right;">${hVal || ''}</span>
+                    <span style="color:#fff; font-weight:700; font-size:13px; min-width:20px; text-align:right;">${hVal || ''}</span>
                 </div>
-                <!--ขวา: บริการ-->
+                <!-- ขวา: บริการ -->
                 <div style="flex:1; display:flex; align-items:center; gap:8px;">
-                    <span style="color:#fff; font-weight:700; font-size:14px; min-width:24px; text-align:left;">${sVal || ''}</span>
+                    <span style="color:#fff; font-weight:700; font-size:13px; min-width:20px; text-align:left;">${sVal || ''}</span>
                     <div style="flex:1; height:8px; background:#1e293b; border-radius:4px; overflow:hidden;">
                         <div style="width:${sWidth}; height:100%; background:${serviceColor}; border-radius:4px;"></div>
                     </div>
-                    <span style="color:#e2e8f0; font-size:14px; white-space:nowrap;">${sName}</span>
+                    <span style="color:#e2e8f0; font-size:13px; white-space:nowrap;">${sName}</span>
                 </div>
             </div>`;
         }
@@ -2588,7 +2592,11 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
     const weeklyHtml = weekEntries.length > 0 ? weekEntries.map(([wk, data]) => {
         const weeklyTotalIncome = Number(data.income || 0);
         let sumBarber = 0;
-        if (data.dailyCounts) data.dailyCounts.forEach(d => sumBarber += Number(d.barberEarn || 0));
+        if (data.dailyCounts && data.dailyCounts.length > 0) {
+            data.dailyCounts.forEach(d => sumBarber += Number(d.barberEarn || 0));
+        } else {
+            sumBarber = Number(data.barberEarn || 0);
+        }
         const wBarber = Math.floor(sumBarber);
         const wShop = Math.floor(data.shopIncome !== undefined ? Number(data.shopIncome) : Math.max(0, weeklyTotalIncome - wBarber));
         const sortedDays = data.dailyCounts ? [...data.dailyCounts].sort((a, b) => b.count - a.count) : [];
@@ -2713,14 +2721,15 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
     if (servicesContent) {
         servicesContent.innerHTML = `
             <div style="background:#0f172a; padding:20px; border-radius:20px; font-family:system-ui,sans-serif;">
-                <div style="display:flex; gap:24px; margin-bottom:16px; border-bottom:1px solid #1e293b; padding-bottom:12px;">
-                    <div style="font-size:15px; font-weight:800; color:#bef264; display:flex; align-items:center; gap:6px;">
+                <!-- ✅ แก้ไข layout หัวข้อให้เป็น Grid 2 ฝั่งตรงตามแท่งกราฟ -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; border-bottom:1px solid #1e293b; padding-bottom:12px;">
+                    <div style="font-size:14px; font-weight:800; color:#bef264; display:flex; align-items:center; gap:6px;">
                         <div style="width:4px; height:16px; background:#bef264; border-radius:2px;"></div>
                         ทรงผมยอดนิยม
                     </div>
-                    <div style="font-size:15px; font-weight:800; color:#38bdf8; display:flex; align-items:center; gap:6px;">
-                        <div style="width:4px; height:16px; background:#38bdf8; border-radius:2px;"></div>
+                    <div style="font-size:14px; font-weight:800; color:#38bdf8; display:flex; align-items:center; gap:6px; justify-content:flex-end;">
                         บริการยอดนิยม
+                        <div style="width:4px; height:16px; background:#38bdf8; border-radius:2px;"></div>
                     </div>
                 </div>
                 ${renderStats(hairStats, serviceStats, "#bef264", "#38bdf8")}
