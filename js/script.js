@@ -2126,7 +2126,7 @@ document.addEventListener("DOMContentLoaded", () => {
 /* ========= FIX: LOAD HIST MONTH ========= */
 function loadHistMonth() {
     const $ = (id) => document.getElementById(id);
-    const picker = $("histMonth") || $("monthlyReportPicker");
+    const picker = $("histMonth") \vert{}\vert{} $("monthlyReportPicker");
     let m = picker ? picker.value : '';
     if (!m) {
         const now = new Date();
@@ -2225,7 +2225,7 @@ function loadHistMonth() {
             return;
         }
 
-        // 2. เคลมประกันแบบกด Manual
+        // 2. เคลมประกันตามที่มีการกดบันทึกไว้จริง
         const hasManualGuar = day.type === "GUARANTEE_CLAIM"
                             || day.isGuar === true
                             || day.isGuarantee
@@ -2324,21 +2324,8 @@ function loadHistMonth() {
 
         if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
 
-        // 3. ตรวจสอบประกันอัตโนมัติ (ต้องมีลูกค้ารับบริการ หรือ มียอดเงินเกิดขึ้นจริง และ ยอดช่างต้อง "น้อยกว่า" เกณฑ์ประกัน)
-        const dailyGuaranteeThreshold = Number(day.guaranteeAmount || guarantee);
-        const isAutoGuarantee = dailyGuaranteeThreshold > 0 
-            && (dayCustomerCount > 0 || dailyIncome > 0) 
-            && (calcBarberShare < dailyGuaranteeThreshold);
-
-        if (isAutoGuarantee) {
-            monthGuarDays++;
-            weeklyData[wKey].guarDays++;
-        }
-
-        const pureBarberCost = isAutoGuarantee
-            ? Math.max(calcBarberShare, dailyGuaranteeThreshold)
-            : calcBarberShare;
-
+        // คำนวณรายได้ตามจริงที่กดบันทึก (ไม่มีการคำนวณเพิ่มวันประกันอัตโนมัติ)
+        const pureBarberCost = calcBarberShare;
         const dailyBarberNet = Math.floor(pureBarberCost + totalTips);
         const dailyShopNet = Math.max(0, dailyIncome - pureBarberCost);
 
