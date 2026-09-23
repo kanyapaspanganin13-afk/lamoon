@@ -2196,7 +2196,7 @@ document.addEventListener("DOMContentLoaded", () => {
 /* ========= FIX: LOAD HIST MONTH ========= */
 function loadHistMonth() {
     // ใช้ $ จากภายนอก ไม่ต้องประกาศใหม่
-    const picker = $("histMonth") || $("monthlyReportPicker");
+     const picker = $("histMonth") || $("monthlyReportPicker");
     let m = picker ? picker.value : '';
 
     if (!m) {
@@ -2246,7 +2246,7 @@ function loadHistMonth() {
                 0, 0, 0, 0
             );
         }
-        // ✅ เคลียร์เนื้อหาส่วนรายได้เมื่อไม่มีข้อมูล
+        // เคลียร์เนื้อหาส่วนรายได้เมื่อไม่มีข้อมูล
         const incomeContent = $("monthlyIncomeContent");
         if (incomeContent) {
             incomeContent.innerHTML = `<div style="text-align:center; padding:40px; color:#94a3b8;">ไม่พบข้อมูลของเดือน ${m}</div>`;
@@ -2428,12 +2428,12 @@ function loadHistMonth() {
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
 
     if ($("shopTotalMonth")) {
-        $("shopTotalMonth").innerText = `฿${Math.floor(monthTotal).toLocaleString()}`;
+        $("shopTotalMonth").innerText = `฿${Math.floor(monthShop).toLocaleString()}`;
     }
 
     if (window.calcNetProfit) window.calcNetProfit();
 
-    // ✅ เรียกสร้างรายงาน
+    // เรียกสร้างรายงาน
     if (typeof generateMonthlyReport === 'function') {
         generateMonthlyReport(
             m, monthTotal, monthBarber, monthShop, monthCount,
@@ -2442,6 +2442,7 @@ function loadHistMonth() {
             monthGuarDays, countNew, countRegular, countOffsite
         );
     }
+}
 // --- generateMonthlyReport ยังคงเหมือนเดิม ---
 function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular, countOffsite) {
     const $ = id => document.getElementById(id);
