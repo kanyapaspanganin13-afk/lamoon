@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         if (changed) {
             safeCall(saveDB);
-            console.log("✅ อัปเดตข้อมูลเก่าเรียบร้อย:", currentBranch);
+            console.log("✅ อัปเดตข้อมูลเก่าเรียบร้อย:", currentBranchด);
         }
     })();
     
@@ -2197,9 +2197,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 /* ========= FIX: LOAD HIST MONTH ========= */
 function loadHistMonth() {
-    const $ = (id) => document.getElementById(id);
-    const picker = $("histMonth") \vert{}\vert{} $("monthlyReportPicker");
+    // ใช้ $ จากภายนอก ไม่ต้องประกาศใหม่
+    const picker = $("histMonth") || $("monthlyReportPicker");
     let m = picker ? picker.value : '';
+    
     if (!m) {
         const now = new Date();
         const yyyy = now.getFullYear();
@@ -2207,7 +2208,12 @@ function loadHistMonth() {
         m = `${yyyy}-${mm}`;
         if (picker) picker.value = m;
     }
-    if (typeof archives === 'undefined' || !Array.isArray(archives)) return;
+
+    // ตรวจสอบข้อมูลก่อนทำงาน
+    if (typeof archives === 'undefined' || !Array.isArray(archives)) {
+        console.warn("loadHistMonth: archives ไม่พร้อมใช้งาน");
+        return;
+    }
 
     let [y, mNum] = m.split('-').map(Number);
     const searchYear = y > 2500 ? y - 543 : y;
@@ -2217,7 +2223,8 @@ function loadHistMonth() {
 
     const currentBranch = typeof getActiveBranch === 'function'
         ? getActiveBranch()
-        : localStorage.getItem("active_branch_name");
+        : localStorage.getItem("active_branch_name") || "สาขาไม่ระบุ";
+
     const viewScope = typeof getViewScope === 'function'
         ? getViewScope()
         : (localStorage.getItem("view_data_scope") || "all");
@@ -2243,11 +2250,13 @@ function loadHistMonth() {
         }
         if (window.calcNetProfit) window.calcNetProfit();
         if (typeof openReportModal === 'function') {
-            return openReportModal("📊 สรุปรายเดือน", `<div style='text-align:center;padding:50px;color:#94a3b8;'>ไม่พบข้อมูลของเดือน ${m}</div>`);
+            return openReportModal("📊 สรุปรายเดือน", 
+                `<div style='text-align:center;padding:50px;color:#94a3b8;'>ไม่พบข้อมูลของเดือน ${m}</div>`);
         }
         return;
     }
 
+    // คำนวณค่าคอมมิชชันอย่างปลอดภัย
     const shopRate = parseFloat(localStorage.getItem('shopCommissionRate'))
         || ((typeof conf !== 'undefined' && conf && conf.perc) ? (conf.perc / 100) : 0.50);
     const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || 200;
@@ -2270,13 +2279,13 @@ function loadHistMonth() {
         if (dYear > 2500) dYear -= 543;
         const dObj = new Date(dYear, dMonth - 1, dDay);
         const dayOfWeek = dObj.getDay();
-
         const firstDayOfMonth = new Date(dYear, dMonth - 1, 1).getDay();
         const dayNumberInWeek = dDay + firstDayOfMonth - 1;
         let wIdx = Math.floor(dayNumberInWeek / 7) + 1;
         if (wIdx > 5) wIdx = 5;
         const wKey = `สัปดาห์ที่ ${wIdx}`;
 
+        // สร้างข้อมูลสัปดาห์ถ้ายังไม่มี
         if (!weeklyData[wKey]) {
             weeklyData[wKey] = {
                 customers: 0, workDays: 0, offDays: 0, zeroDays: 0, guarDays: 0, dailyCounts: [],
@@ -2297,7 +2306,7 @@ function loadHistMonth() {
             return;
         }
 
-        // 2. เคลมประกันตามที่มีการกดบันทึกไว้จริง
+        // 2. วันเคลมประกัน
         const hasManualGuar = day.type === "GUARANTEE_CLAIM"
                             || day.isGuar === true
                             || day.isGuarantee
@@ -2311,10 +2320,8 @@ function loadHistMonth() {
             weeklyData[wKey].guarDays++;
             workDays++;
             weeklyData[wKey].workDays++;
-
             const claimAmount = Number(day.guarAmount || day.guaranteeAmount || guarantee);
             monthBarber += claimAmount;
-
             weeklyData[wKey].dailyCounts.push({
                 dayName: dayNames[dayOfWeek],
                 count: 0,
@@ -2322,7 +2329,7 @@ function loadHistMonth() {
                 barberEarn: claimAmount,
                 shopEarn: 0
             });
-            return; // หยุดทำงานของวันนั้นทันที
+            return;
         }
 
         workDays++;
@@ -2396,7 +2403,6 @@ function loadHistMonth() {
 
         if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
 
-        // คำนวณรายได้ตามจริงที่กดบันทึก (ไม่มีการคำนวณเพิ่มวันประกันอัตโนมัติ)
         const pureBarberCost = calcBarberShare;
         const dailyBarberNet = Math.floor(pureBarberCost + totalTips);
         const dailyShopNet = Math.max(0, dailyIncome - pureBarberCost);
@@ -2419,8 +2425,9 @@ function loadHistMonth() {
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
 
     if ($("shopTotalMonth")) {
-        $("shopTotalMonth").innerText = `฿${Math.floor(monthShop).toLocaleString()}`;
+        $("shopTotalMonth").innerText = `฿${Math.floor(monthTotal).toLocaleString()}`;
     }
+
     if (window.calcNetProfit) window.calcNetProfit();
 
     if (typeof generateMonthlyReport === 'function') {
