@@ -2455,6 +2455,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
     const dayStats = {};
     let calcTotalNew = 0, calcTotalRegular = 0, calcTotalOffsite = 0;
     let calcMonthBarber = 0, calcMonthShop = 0;
+
     weekEntries.forEach(([wk, data]) => {
         calcTotalNew += Number(data.countNew || 0);
         calcTotalRegular += Number(data.countRegular || 0);
@@ -2478,16 +2479,21 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         calcMonthBarber += wBarberEarn;
         calcMonthShop += wShopEarn;
     });
-    // ✅ ใช้ค่าที่ส่งมาจาก loadHistMonth เป็นหลัก
-    const finalTotalIncome = Number(monthTotal || (calcMonthBarber + calcMonthShop));
-    const finalBarberEarn = Number(monthBarber || calcMonthBarber);
-    const finalShopEarn = Number(monthShop || Math.max(0, finalTotalIncome - finalBarberEarn));
+
+    // ✅ แก้ไขจุดนี้: ใช้ค่าที่คำนวณสดจาก weeklyData (calcMonthBarber/calcMonthShop) เป็นหลัก
+    // เพื่อให้ตัวเลข 8,790 และ 5,620 ถูกต้องตรงกัน 100%
+    const finalBarberEarn = calcMonthBarber > 0 ? calcMonthBarber : Number(monthBarber || 0);
+    const finalShopEarn = calcMonthShop > 0 ? calcMonthShop : Number(monthShop || 0);
+    const finalTotalIncome = Number(monthTotal || (finalBarberEarn + finalShopEarn));
+
     const finalCountNew = Number(countNew ?? calcTotalNew);
     const finalCountRegular = Number(countRegular ?? calcTotalRegular);
     const finalCountOffsite = Number(countOffsite ?? calcTotalOffsite);
     const displayGuarDays = Number(monthGuarDays) || 0;
+    
     const guarBadge = $("guarDaysBadge");
     if (guarBadge) guarBadge.innerText = `🛡️ ประกัน ${displayGuarDays} วัน`;
+
     const dayAverages = Object.entries(dayStats)
         .filter(([_, d]) => d.count > 0)
         .map(([name, d]) => ({ name, avg: d.total / d.count }));
@@ -2505,6 +2511,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
     const sortedService = Object.entries(serviceStats).sort((a, b) => b[1] - a[1]);
     const topService = sortedService[0] || null;
     let maxNewWeek = "-", maxRegWeek = "-", maxOffsiteWeek = "-";
+    
     weekEntries.forEach(([wk, curr]) => {
         const n = Number(curr.countNew || 0);
         const r = Number(curr.countRegular || 0);
@@ -2516,7 +2523,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         if (o > 0 && (maxOffsiteWeek === "-" || o > (weeklyData[maxOffsiteWeek]?.countOffsite || 0))) maxOffsiteWeek = wk;
     });
 
-    // ✅ ปรับ renderStats ให้รับข้อมูลคู่กัน เพื่อแสดงซ้าย-ขวาเหมือนรูป
     const renderStats = (hairData, serviceData, hairColor, serviceColor) => {
         const hairList = Object.entries(hairData || {}).sort((a, b) => b[1] - a[1]);
         const serviceList = Object.entries(serviceData || {}).sort((a, b) => b[1] - a[1]);
@@ -2578,6 +2584,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         );
     }
     insights.push(`ทรงผมยอดนิยม: <b>${topHair?.[0] || '-'}</b> | บริการยอดนิยม: <b>${topService?.[0] || '-'}</b>`);
+
     const weeklyHtml = weekEntries.length > 0 ? weekEntries.map(([wk, data]) => {
         const weeklyTotalIncome = Number(data.income || 0);
         let sumBarber = 0;
@@ -2644,12 +2651,14 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
             <div style="display:flex; flex-wrap:wrap; gap:4px;">${popHair}${popService}</div>
         </div>`;
     }).join("") : `<div style="text-align:center; color:#94a3b8; padding:20px;">ยังไม่มีข้อมูลรายสัปดาห์</div>`;
+
     let displayMonthTitle = m;
     try {
         const [y, mn] = String(m).split('-');
         displayMonthTitle = new Date(Number(y), Number(mn) - 1, 1)
             .toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
     } catch { displayMonthTitle = m; }
+
     const incomeContent = $("monthlyIncomeContent");
     if (incomeContent) {
         incomeContent.innerHTML = `
@@ -2677,12 +2686,13 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                 <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:6px;">
                     <div style="background:rgba(255,255,255,0.08); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#f8fafc;">📅 เปิด ${workDays || 0} วัน</div>
                     <div style="background:rgba(244,63,94,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#fb7185;">⛱️ หยุด ${offDays || 0} วัน</div>
-                    <div style="background:rgba(250,204,21,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#facc15;">🛡️ ประกัน  ${monthGuarDays || 0} วัน</div>
+                    <div style="background:rgba(250,204,21,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#facc15;">🛡️ ประกัน ${monthGuarDays || 0} วัน</div>
                     <div style="background:rgba(147,51,234,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#a855f7;">📊 เฉลี่ย ${(avgCustomerPerDay || 0).toFixed(2)} คน/วัน</div>
                 </div>
             </div>
         `;
     }
+
     const analyticsContent = $("incomeAnalyticsContent");
     if (analyticsContent) {
         analyticsContent.innerHTML = `
@@ -2698,11 +2708,11 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
             </div>
         `;
     }
+
     const servicesContent = $("servicesStatsContent");
     if (servicesContent) {
         servicesContent.innerHTML = `
             <div style="background:#0f172a; padding:20px; border-radius:20px; font-family:system-ui,sans-serif;">
-                <!-- หัวข้อเรียงแถวเดียวกัน -->
                 <div style="display:flex; gap:24px; margin-bottom:16px; border-bottom:1px solid #1e293b; padding-bottom:12px;">
                     <div style="font-size:15px; font-weight:800; color:#bef264; display:flex; align-items:center; gap:6px;">
                         <div style="width:4px; height:16px; background:#bef264; border-radius:2px;"></div>
@@ -2713,7 +2723,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                         บริการยอดนิยม
                     </div>
                 </div>
-                <!-- แสดงผลคู่ซ้าย-ขวา -->
                 ${renderStats(hairStats, serviceStats, "#bef264", "#38bdf8")}
             </div>
         `;
