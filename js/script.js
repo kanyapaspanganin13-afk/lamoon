@@ -2195,9 +2195,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function loadHistMonth() {
-   const picker = $("histMonth") || $("monthlyReportPicker");
+    // ใช้ $ จากภายนอก ไม่ต้องประกาศใหม่
+    const picker = $("histMonth") || $("monthlyReportPicker");
     let m = picker ? picker.value : '';
-
+    
     if (!m) {
         const now = new Date();
         const yyyy = now.getFullYear();
@@ -2206,6 +2207,7 @@ function loadHistMonth() {
         if (picker) picker.value = m;
     }
 
+    // ตรวจสอบข้อมูลก่อนทำงาน
     if (typeof archives === 'undefined' || !Array.isArray(archives)) {
         console.warn("loadHistMonth: archives ไม่พร้อมใช้งาน");
         return;
@@ -2246,12 +2248,13 @@ function loadHistMonth() {
         }
         if (window.calcNetProfit) window.calcNetProfit();
         if (typeof openReportModal === 'function') {
-            return openReportModal("📊 สรุปรายเดือน",
+            return openReportModal("📊 สรุปรายเดือน", 
                 `<div style='text-align:center;padding:50px;color:#94a3b8;'>ไม่พบข้อมูลของเดือน ${m}</div>`);
         }
         return;
     }
 
+    // คำนวณค่าคอมมิชชันอย่างปลอดภัย
     const shopRate = parseFloat(localStorage.getItem('shopCommissionRate'))
         || ((typeof conf !== 'undefined' && conf && conf.perc) ? (conf.perc / 100) : 0.50);
     const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || 200;
@@ -2280,6 +2283,7 @@ function loadHistMonth() {
         if (wIdx > 5) wIdx = 5;
         const wKey = `สัปดาห์ที่ ${wIdx}`;
 
+        // สร้างข้อมูลสัปดาห์ถ้ายังไม่มี
         if (!weeklyData[wKey]) {
             weeklyData[wKey] = {
                 customers: 0, workDays: 0, offDays: 0, zeroDays: 0, guarDays: 0, dailyCounts: [],
@@ -2300,7 +2304,7 @@ function loadHistMonth() {
             return;
         }
 
-        // 2. วันเคลมประกันรายได้
+        // 2. วันเคลมประกัน
         const hasManualGuar = day.type === "GUARANTEE_CLAIM"
                             || day.isGuar === true
                             || day.isGuarantee
@@ -2315,8 +2319,6 @@ function loadHistMonth() {
             workDays++;
             weeklyData[wKey].workDays++;
             const claimAmount = Number(day.guarAmount || day.guaranteeAmount || guarantee);
-            
-            // ประกันรายได้เป็นเงินที่ช่างได้รับ (ร้านจ่ายให้ช่าง)
             monthBarber += claimAmount;
             weeklyData[wKey].dailyCounts.push({
                 dayName: dayNames[dayOfWeek],
@@ -2331,11 +2333,8 @@ function loadHistMonth() {
         workDays++;
         weeklyData[wKey].workDays++;
 
-        // คำนวณรายได้รวมประจำวัน (เงินสด + โอน)
         let dailyIncome = Number(day.cash || 0) + Number(day.trans || 0);
-        if (dailyIncome === 0 && day.total) {
-            dailyIncome = Number(day.total);
-        }
+        if (dailyIncome === 0 || day.total) dailyIncome = Number(day.total || dailyIncome);
 
         let calcBarberShare = 0;
         let totalTips = 0;
@@ -2356,7 +2355,6 @@ function loadHistMonth() {
 
                     totalTips += t;
 
-                    // คิดค่าคอมมิชชัน/ส่วนแบ่งช่างตามเงื่อนไข
                     if (d.barberShare !== undefined) {
                         calcBarberShare += Number(d.barberShare);
                     } else if (cType === 'offsite' && isFree) {
@@ -2366,7 +2364,6 @@ function loadHistMonth() {
                     } else if (isFree) {
                         calcBarberShare += freeBarberComp;
                     } else {
-                        // รายได้ช่าง = ราคาค่าบริการ * (1 - อัตราส่วนร้าน)
                         calcBarberShare += Math.round(p * (1 - shopRate));
                     }
 
@@ -2404,16 +2401,13 @@ function loadHistMonth() {
 
         if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
 
-        // สรุปยอดรายวันอย่างถูกต้อง:
-        // 1. รายได้ช่าง = ส่วนแบ่งค่าบริการ + ทิปทั้งหมด
-        const dailyBarberNet = Math.floor(calcBarberShare + totalTips);
-        // 2. รายได้ร้าน = ยอดขายรวมประจำวัน - ส่วนแบ่งค่าบริการของช่าง
-        const dailyShopNet = Math.max(0, dailyIncome - calcBarberShare);
+        const pureBarberCost = calcBarberShare;
+        const dailyBarberNet = Math.floor(pureBarberCost + totalTips);
+        const dailyShopNet = Math.max(0, dailyIncome - pureBarberCost);
 
         monthTotal += dailyIncome;
         monthBarber += dailyBarberNet;
         monthShop += dailyShopNet;
-
         weeklyData[wKey].income += dailyIncome;
         weeklyData[wKey].shopIncome += dailyShopNet;
 
@@ -2428,9 +2422,8 @@ function loadHistMonth() {
 
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
 
-    // แสดงผลยอดรวมรายได้สุทธิของร้านค้า
     if ($("shopTotalMonth")) {
-        $("shopTotalMonth").innerText = `฿${Math.floor(monthShop).toLocaleString()}`;
+        $("shopTotalMonth").innerText = `฿${Math.floor(monthTotal).toLocaleString()}`;
     }
 
     if (window.calcNetProfit) window.calcNetProfit();
@@ -2453,12 +2446,10 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
     const dayStats = {};
     let calcTotalNew = 0, calcTotalRegular = 0, calcTotalOffsite = 0;
     let calcMonthBarber = 0, calcMonthShop = 0;
-
     weekEntries.forEach(([wk, data]) => {
         calcTotalNew += Number(data.countNew || 0);
         calcTotalRegular += Number(data.countRegular || 0);
         calcTotalOffsite += Number(data.countOffsite || 0);
-        
         let wBarberEarn = 0;
         if (data.dailyCounts) {
             data.dailyCounts.forEach(d => {
@@ -2471,69 +2462,52 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                 }
             });
         }
-        
+        const wIncome = Number(data.income || 0);
         const wShopEarn = data.shopIncome !== undefined
             ? Number(data.shopIncome)
-            : Math.max(0, Number(data.income || 0) - wBarberEarn);
-
+            : Math.max(0, wIncome - wBarberEarn);
         calcMonthBarber += wBarberEarn;
         calcMonthShop += wShopEarn;
     });
-
-    // --- [จุดที่แก้หลัก] กำหนดลำดับความสำคัญของรายได้ให้ตรงกันทั้งระบบ ---
-    const finalBarberEarn = Number(monthBarber ?? calcMonthBarber);
-    const finalShopEarn = Number(monthShop ?? calcMonthShop);
-    
-    // บังคับให้ ยอดรวมประจำเดือน = ยอดช่าง + ยอดร้าน เสมอ ป้องกันการคำนวณขัดแย้งกัน
-    const finalTotalIncome = (monthTotal !== undefined && monthTotal !== null) 
-        ? Number(monthTotal) 
-        : (finalBarberEarn + finalShopEarn);
-
+    // ✅ ใช้ค่าที่ส่งมาจาก loadHistMonth เป็นหลัก
+    const finalTotalIncome = Number(monthTotal || (calcMonthBarber + calcMonthShop));
+    const finalBarberEarn = Number(monthBarber || calcMonthBarber);
+    const finalShopEarn = Number(monthShop || Math.max(0, finalTotalIncome - finalBarberEarn));
     const finalCountNew = Number(countNew ?? calcTotalNew);
     const finalCountRegular = Number(countRegular ?? calcTotalRegular);
     const finalCountOffsite = Number(countOffsite ?? calcTotalOffsite);
-    
     const displayGuarDays = Number(monthGuarDays) || 0;
     const guarBadge = $("guarDaysBadge");
     if (guarBadge) guarBadge.innerText = `🛡️ ประกัน ${displayGuarDays} วัน`;
-
     const dayAverages = Object.entries(dayStats)
         .filter(([_, d]) => d.count > 0)
         .map(([name, d]) => ({ name, avg: d.total / d.count }));
-
     const sortedDays = [...dayAverages].sort((a, b) => b.avg - a.avg);
     const busiestDay = sortedDays[0] || null;
     const quietestDay = sortedDays.length > 1 ? sortedDays.at(-1) : null;
-
     const topIncomeWeek = weekEntries.length > 0
         ? weekEntries.reduce((p, c) => ((Number(c[1].income) || 0) > (Number(p[1].income) || 0) ? c : p))
         : null;
-
     const topCountWeek = weekEntries.length > 0
         ? weekEntries.reduce((p, c) => ((Number(c[1].customers) || 0) > (Number(p[1].customers) || 0) ? c : p))
         : null;
-
     const sortedHair = Object.entries(hairStats).sort((a, b) => b[1] - a[1]);
     const topHair = sortedHair[0] || null;
-
     const sortedService = Object.entries(serviceStats).sort((a, b) => b[1] - a[1]);
     const topService = sortedService[0] || null;
-
     let maxNewWeek = "-", maxRegWeek = "-", maxOffsiteWeek = "-";
-
     weekEntries.forEach(([wk, curr]) => {
         const n = Number(curr.countNew || 0);
         const r = Number(curr.countRegular || 0);
         const o = Number(curr.countOffsite || 0);
-
         curr.newAnalysis = n > r ? "กลุ่มหลักอาทิตย์นี้" : n < r ? "น้อยกว่าลูกค้าประจำ" : "เท่ากับลูกค้าประจำ";
         curr.regAnalysis = r > n ? "กลุ่มหลักอาทิตย์นี้" : r < n ? "น้อยกว่าลูกค้าใหม่" : "เท่ากับลูกค้าใหม่";
-
         if (n > 0 && (maxNewWeek === "-" || n > (weeklyData[maxNewWeek]?.countNew || 0))) maxNewWeek = wk;
         if (r > 0 && (maxRegWeek === "-" || r > (weeklyData[maxRegWeek]?.countRegular || 0))) maxRegWeek = wk;
         if (o > 0 && (maxOffsiteWeek === "-" || o > (weeklyData[maxOffsiteWeek]?.countOffsite || 0))) maxOffsiteWeek = wk;
     });
 
+    // ✅ ปรับ renderStats ให้รับข้อมูลคู่กัน เพื่อแสดงซ้าย-ขวาเหมือนรูป
     const renderStats = (hairData, serviceData, hairColor, serviceColor) => {
         const hairList = Object.entries(hairData || {}).sort((a, b) => b[1] - a[1]);
         const serviceList = Object.entries(serviceData || {}).sort((a, b) => b[1] - a[1]);
@@ -2555,6 +2529,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
             const sWidth = sVal ? `${(sVal / maxService) * 100}%` : '0%';
             
             html += `<div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;">
+                <!-- ซ้าย: ทรงผม-->
                 <div style="flex:1; display:flex; align-items:center; gap:8px;">
                     <span style="color:#e2e8f0; font-size:14px; white-space:nowrap;">${hName}</span>
                     <div style="flex:1; height:8px; background:#1e293b; border-radius:4px; overflow:hidden;">
@@ -2562,6 +2537,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                     </div>
                     <span style="color:#fff; font-weight:700; font-size:14px; min-width:24px; text-align:right;">${hVal || ''}</span>
                 </div>
+                <!--ขวา: บริการ-->
                 <div style="flex:1; display:flex; align-items:center; gap:8px;">
                     <span style="color:#fff; font-weight:700; font-size:14px; min-width:24px; text-align:left;">${sVal || ''}</span>
                     <div style="flex:1; height:8px; background:#1e293b; border-radius:4px; overflow:hidden;">
@@ -2581,12 +2557,10 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
             ? `สัปดาห์ที่มีรายได้สูงสุด: <b>${topIncomeWeek[0]}</b> (฿${Math.floor(topIncomeWeek[1].income).toLocaleString()})`
             : `สัปดาห์ที่มีรายได้สูงสุด: <b>-</b>`
     ];
-
     if (finalCountNew || finalCountRegular || finalCountOffsite) {
         insights.push(`โครงสร้างลูกค้า: <b>ประจำ ${finalCountRegular} / ใหม่ ${finalCountNew} / นอก ${finalCountOffsite}</b>`);
         insights.push(`เยอะสุด: ใหม่ (<b>${maxNewWeek}</b>) | ประจำ (<b>${maxRegWeek}</b>) | นอก (<b>${maxOffsiteWeek}</b>)`);
     }
-
     if (busiestDay?.avg > 0) {
         insights.push(
             !quietestDay || busiestDay.avg === quietestDay.avg
@@ -2594,32 +2568,26 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                 : `ลูกค้าเยอะใน <b>วัน${busiestDay.name}</b> และน้อยใน <b>วัน${quietestDay.name}</b>`
         );
     }
-
     insights.push(`ทรงผมยอดนิยม: <b>${topHair?.[0] || '-'}</b> | บริการยอดนิยม: <b>${topService?.[0] || '-'}</b>`);
-
     const weeklyHtml = weekEntries.length > 0 ? weekEntries.map(([wk, data]) => {
         const weeklyTotalIncome = Number(data.income || 0);
         let sumBarber = 0;
         if (data.dailyCounts) data.dailyCounts.forEach(d => sumBarber += Number(d.barberEarn || 0));
         const wBarber = Math.floor(sumBarber);
         const wShop = Math.floor(data.shopIncome !== undefined ? Number(data.shopIncome) : Math.max(0, weeklyTotalIncome - wBarber));
-        
         const sortedDays = data.dailyCounts ? [...data.dailyCounts].sort((a, b) => b.count - a.count) : [];
         const maxCount = sortedDays[0]?.count || 0;
         const minCount = sortedDays.at(-1)?.count || 0;
         const bestDay = maxCount > 0 ? `${sortedDays[0].dayName} (${maxCount})` : "-";
         const worstDay = sortedDays.length > 1 && maxCount !== minCount ? `${sortedDays.at(-1).dayName} (${minCount})` : "-";
-
         const popHair = Object.entries(data.popularHair || {})
             .sort((a, b) => b[1] - a[1]).slice(0, 2)
             .map(([n, c]) => `<span style="background:rgba(190,242,100,0.1); color:#bef264; padding:2px 8px; border-radius:8px; font-size:10px; border:1px solid rgba(190,242,100,0.2); margin-right:4px;">✂️ ${n} ${c}</span>`)
             .join("");
-
         const popService = Object.entries(data.popularService || {})
             .sort((a, b) => b[1] - a[1]).slice(0, 2)
             .map(([n, c]) => `<span style="background:rgba(56,189,248,0.1); color:#38bdf8; padding:2px 8px; border-radius:8px; font-size:10px; border:1px solid rgba(56,189,248,0.2); margin-right:4px;">🧴 ${n} ${c}</span>`)
             .join("");
-
         return `<div style="background:#020617; border:1px solid rgba(255,255,255,0.08); padding:16px; border-radius:22px; margin-bottom:12px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                 <div style="font-size:15px; font-weight:800; color:#f8fafc;">🗓️ ${wk}</div>
@@ -2667,14 +2635,12 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
             <div style="display:flex; flex-wrap:wrap; gap:4px;">${popHair}${popService}</div>
         </div>`;
     }).join("") : `<div style="text-align:center; color:#94a3b8; padding:20px;">ยังไม่มีข้อมูลรายสัปดาห์</div>`;
-
     let displayMonthTitle = m;
     try {
         const [y, mn] = String(m).split('-');
         displayMonthTitle = new Date(Number(y), Number(mn) - 1, 1)
             .toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
     } catch { displayMonthTitle = m; }
-
     const incomeContent = $("monthlyIncomeContent");
     if (incomeContent) {
         incomeContent.innerHTML = `
@@ -2702,13 +2668,12 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                 <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:6px;">
                     <div style="background:rgba(255,255,255,0.08); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#f8fafc;">📅 เปิด ${workDays || 0} วัน</div>
                     <div style="background:rgba(244,63,94,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#fb7185;">⛱️ หยุด ${offDays || 0} วัน</div>
-                    <div style="background:rgba(250,204,21,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#facc15;">🛡️ ประกัน ${displayGuarDays} วัน</div>
+                    <div style="background:rgba(250,204,21,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#facc15;">🛡️ ประกัน  ${monthGuarDays || 0} วัน</div>
                     <div style="background:rgba(147,51,234,0.15); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:600; color:#a855f7;">📊 เฉลี่ย ${(avgCustomerPerDay || 0).toFixed(2)} คน/วัน</div>
                 </div>
             </div>
         `;
     }
-
     const analyticsContent = $("incomeAnalyticsContent");
     if (analyticsContent) {
         analyticsContent.innerHTML = `
@@ -2718,17 +2683,17 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                     ${insights.map(i => `<div style="font-size:12.5px; color:#f8fafc; margin-bottom:6px;">• ${i}</div>`).join("")}
                 </div>
                 <div>
-                    <div style="font-size:14px; font-weight:800; color:#38bdf8; margin-bottom:12px;">🌀 รายรายละเอียดแยกสัปดาห์</div>
+                    <div style="font-size:14px; font-weight:800; color:#38bdf8; margin-bottom:12px;">🌀 รายละเอียดแยกสัปดาห์</div>
                     ${weeklyHtml}
                 </div>
             </div>
         `;
     }
-
     const servicesContent = $("servicesStatsContent");
     if (servicesContent) {
         servicesContent.innerHTML = `
             <div style="background:#0f172a; padding:20px; border-radius:20px; font-family:system-ui,sans-serif;">
+                <!-- หัวข้อเรียงแถวเดียวกัน -->
                 <div style="display:flex; gap:24px; margin-bottom:16px; border-bottom:1px solid #1e293b; padding-bottom:12px;">
                     <div style="font-size:15px; font-weight:800; color:#bef264; display:flex; align-items:center; gap:6px;">
                         <div style="width:4px; height:16px; background:#bef264; border-radius:2px;"></div>
@@ -2739,6 +2704,7 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                         บริการยอดนิยม
                     </div>
                 </div>
+                <!-- แสดงผลคู่ซ้าย-ขวา -->
                 ${renderStats(hairStats, serviceStats, "#bef264", "#38bdf8")}
             </div>
         `;
