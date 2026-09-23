@@ -2195,10 +2195,9 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function loadHistMonth() {
-    // ใช้ $ จากภายนอก ไม่ต้องประกาศใหม่
-    const picker = $("histMonth") || $("monthlyReportPicker");
+   const picker = $("histMonth") || $("monthlyReportPicker");
     let m = picker ? picker.value : '';
-    
+
     if (!m) {
         const now = new Date();
         const yyyy = now.getFullYear();
@@ -2207,7 +2206,6 @@ function loadHistMonth() {
         if (picker) picker.value = m;
     }
 
-    // ตรวจสอบข้อมูลก่อนทำงาน
     if (typeof archives === 'undefined' || !Array.isArray(archives)) {
         console.warn("loadHistMonth: archives ไม่พร้อมใช้งาน");
         return;
@@ -2248,13 +2246,12 @@ function loadHistMonth() {
         }
         if (window.calcNetProfit) window.calcNetProfit();
         if (typeof openReportModal === 'function') {
-            return openReportModal("📊 สรุปรายเดือน", 
+            return openReportModal("📊 สรุปรายเดือน",
                 `<div style='text-align:center;padding:50px;color:#94a3b8;'>ไม่พบข้อมูลของเดือน ${m}</div>`);
         }
         return;
     }
 
-    // คำนวณค่าคอมมิชชันอย่างปลอดภัย
     const shopRate = parseFloat(localStorage.getItem('shopCommissionRate'))
         || ((typeof conf !== 'undefined' && conf && conf.perc) ? (conf.perc / 100) : 0.50);
     const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || 200;
@@ -2283,7 +2280,6 @@ function loadHistMonth() {
         if (wIdx > 5) wIdx = 5;
         const wKey = `สัปดาห์ที่ ${wIdx}`;
 
-        // สร้างข้อมูลสัปดาห์ถ้ายังไม่มี
         if (!weeklyData[wKey]) {
             weeklyData[wKey] = {
                 customers: 0, workDays: 0, offDays: 0, zeroDays: 0, guarDays: 0, dailyCounts: [],
@@ -2304,7 +2300,7 @@ function loadHistMonth() {
             return;
         }
 
-        // 2. วันเคลมประกัน
+        // 2. วันเคลมประกันรายได้
         const hasManualGuar = day.type === "GUARANTEE_CLAIM"
                             || day.isGuar === true
                             || day.isGuarantee
@@ -2319,6 +2315,8 @@ function loadHistMonth() {
             workDays++;
             weeklyData[wKey].workDays++;
             const claimAmount = Number(day.guarAmount || day.guaranteeAmount || guarantee);
+            
+            // ประกันรายได้เป็นเงินที่ช่างได้รับ (ร้านจ่ายให้ช่าง)
             monthBarber += claimAmount;
             weeklyData[wKey].dailyCounts.push({
                 dayName: dayNames[dayOfWeek],
@@ -2333,8 +2331,11 @@ function loadHistMonth() {
         workDays++;
         weeklyData[wKey].workDays++;
 
+        // คำนวณรายได้รวมประจำวัน (เงินสด + โอน)
         let dailyIncome = Number(day.cash || 0) + Number(day.trans || 0);
-        if (dailyIncome === 0 || day.total) dailyIncome = Number(day.total || dailyIncome);
+        if (dailyIncome === 0 && day.total) {
+            dailyIncome = Number(day.total);
+        }
 
         let calcBarberShare = 0;
         let totalTips = 0;
@@ -2355,6 +2356,7 @@ function loadHistMonth() {
 
                     totalTips += t;
 
+                    // คิดค่าคอมมิชชัน/ส่วนแบ่งช่างตามเงื่อนไข
                     if (d.barberShare !== undefined) {
                         calcBarberShare += Number(d.barberShare);
                     } else if (cType === 'offsite' && isFree) {
@@ -2364,6 +2366,7 @@ function loadHistMonth() {
                     } else if (isFree) {
                         calcBarberShare += freeBarberComp;
                     } else {
+                        // รายได้ช่าง = ราคาค่าบริการ * (1 - อัตราส่วนร้าน)
                         calcBarberShare += Math.round(p * (1 - shopRate));
                     }
 
@@ -2401,13 +2404,16 @@ function loadHistMonth() {
 
         if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
 
-        const pureBarberCost = calcBarberShare;
-        const dailyBarberNet = Math.floor(pureBarberCost + totalTips);
-        const dailyShopNet = Math.max(0, dailyIncome - pureBarberCost);
+        // สรุปยอดรายวันอย่างถูกต้อง:
+        // 1. รายได้ช่าง = ส่วนแบ่งค่าบริการ + ทิปทั้งหมด
+        const dailyBarberNet = Math.floor(calcBarberShare + totalTips);
+        // 2. รายได้ร้าน = ยอดขายรวมประจำวัน - ส่วนแบ่งค่าบริการของช่าง
+        const dailyShopNet = Math.max(0, dailyIncome - calcBarberShare);
 
         monthTotal += dailyIncome;
         monthBarber += dailyBarberNet;
         monthShop += dailyShopNet;
+
         weeklyData[wKey].income += dailyIncome;
         weeklyData[wKey].shopIncome += dailyShopNet;
 
@@ -2422,8 +2428,9 @@ function loadHistMonth() {
 
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
 
+    // แสดงผลยอดรวมรายได้สุทธิของร้านค้า
     if ($("shopTotalMonth")) {
-        $("shopTotalMonth").innerText = `฿${Math.floor(monthTotal).toLocaleString()}`;
+        $("shopTotalMonth").innerText = `฿${Math.floor(monthShop).toLocaleString()}`;
     }
 
     if (window.calcNetProfit) window.calcNetProfit();
