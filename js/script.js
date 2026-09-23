@@ -2786,14 +2786,11 @@ function renderDailyTableReport() {
     // กรองข้อมูลเดือนที่เลือก
     let filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
     
-    // ✅ 1. แก้ไขเงื่อนไขการกรองสาขา: ถ้าเลือกดูเฉพาะสาขา ให้ดึงข้อมูลที่ตรงกัน + ข้อมูลเก่าที่ไม่มีสาขามาแสดงด้วย
     if (!viewAll) {
         filtered = filtered.filter(a => {
             const b = String(a.branch || '').trim();
             const hasNoBranch = !b || b === 'undefined' || b === 'null' || b === 'สาขาไม่ระบุ';
             const matchesBranch = activeBranch !== '' && b === activeBranch;
-            
-            // แสดงข้อมูลถ้า: ไม่มีสาขา (ข้อมูลสำรองเก่า) OR ชื่อสาขาตรงกับปัจจุบัน
             return hasNoBranch || matchesBranch;
         });
     }
@@ -2813,6 +2810,16 @@ function renderDailyTableReport() {
     } else {
         reportTitle = `รายงาน: ${displayTitleBranch} · ประจำเดือน: ${monthThaiName} ${y + 543}`;
     }
+
+    // ดึงเปอร์เซ็นต์และค่าคอมมิชชันตั้งต้นระบบ
+    let rawRate = parseFloat(localStorage.getItem('shopCommissionRate'));
+    if (isNaN(rawRate) && typeof conf !== 'undefined' && conf && conf.perc) rawRate = conf.perc;
+    if (isNaN(rawRate)) rawRate = 50;
+    let rateFactor = rawRate > 1 ? rawRate / 100 : rawRate;
+    const barberRate = rateFactor < 0.5 ? (1 - rateFactor) : rateFactor;
+    const guarantee = (typeof conf !== 'undefined' && conf && conf.guar) ? conf.guar : 0;
+    const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || 200;
+    const freeBarberComp = parseFloat(localStorage.getItem('freeBarberComp')) || 100;
     
     let totalCust = 0, totalBarber = 0, totalShave = 0, totalWash = 0, totalDye = 0;
     let workDays = 0;
@@ -2824,8 +2831,8 @@ function renderDailyTableReport() {
         const isOffDay = day.off === true || day.type === "HOLIDAY";
         let dayCust = 0;
         let shave = 0, wash = 0, dye = 0;
+        let calcBarberEarn = 0;
         
-        // ✅ 2. แสดงชื่อสาขาจริงของข้อมูลรายการนั้นๆ (ถ้าไม่มีให้ขึ้นว่า "สาขาไม่ระบุ/สำรอง")
         const rawBranch = String(day.branch || '').trim();
         const branchName = (rawBranch && rawBranch !== "undefined" && rawBranch !== "null")
                         ? rawBranch
@@ -2833,10 +2840,31 @@ function renderDailyTableReport() {
         
         if (!isOffDay) {
             workDays++;
-            if (day.details && Array.isArray(day.details)) {
+
+            const hasManualGuar = day.type === "GUARANTEE_CLAIM" || day.isGuar === true || day.isGuarantee || day.guarantee;
+
+            if (day.details && Array.isArray(day.details) && day.details.length > 0) {
                 day.details.forEach(d => {
                     if (d.type === "SERVICE" || !d.type) {
                         dayCust++;
+                        const p = Number(d.price) || 0;
+                        const t = Number(d.tip) || 0;
+                        const cType = String(d.custType || "").toLowerCase().trim();
+                        const payStr = String(d.pay || "").trim();
+                        const isFree = payStr.startsWith("Free") || payStr.includes("ฟรี");
+
+                        if (d.barberShare !== undefined && d.barberShare !== null) {
+                            calcBarberEarn += Number(d.barberShare) + t;
+                        } else if (cType === 'offsite' && isFree) {
+                            calcBarberEarn += freeBarberComp + t;
+                        } else if (cType === 'offsite') {
+                            calcBarberEarn += offsiteBarberFee + t;
+                        } else if (isFree) {
+                            calcBarberEarn += freeBarberComp + t;
+                        } else {
+                            calcBarberEarn += Math.round(p * barberRate) + t;
+                        }
+
                         const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
                         svcs.forEach(s => {
                             if (!s) return;
@@ -2850,9 +2878,17 @@ function renderDailyTableReport() {
             } else {
                 dayCust = Number(day.count) || 0;
             }
+
+            // 🔧 เช็กค่าประกันรายได้กับการคำนวณสด
+            if (hasManualGuar) {
+                const claimAmount = Number(day.guarAmount || day.guaranteeAmount || guarantee);
+                calcBarberEarn = Math.max(claimAmount, calcBarberEarn);
+            } else if (calcBarberEarn === 0) {
+                calcBarberEarn = Number(day.barber) || 0;
+            }
         }
         
-        const barber = isOffDay ? 0 : (Number(day.barber) || 0);
+        const barber = isOffDay ? 0 : calcBarberEarn;
         totalCust += dayCust;
         totalBarber += barber;
         totalShave += shave;
