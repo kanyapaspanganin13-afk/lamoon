@@ -2485,10 +2485,10 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         calcMonthShop += wShopEarn;
     });
 
-    // ✅ แก้ไข: ลอจิกเลือกใช้อย่างรัดกุม แม่นยำ 100%
-    const finalBarberEarn = weekEntries.length > 0 ? calcMonthBarber : Number(monthBarber || 0);
-    const finalShopEarn = weekEntries.length > 0 ? calcMonthShop : Number(monthShop || 0);
-    const finalTotalIncome = weekEntries.length > 0 ? (finalBarberEarn + finalShopEarn) : Number(monthTotal || 0);
+    // ✅ แก้ไข: ยึดค่า Parameter หลัก (monthTotal, monthBarber, monthShop) เป็นอันดับแรก
+    const finalBarberEarn = (monthBarber !== undefined && monthBarber !== null && monthBarber !== '') ? Number(monthBarber) : calcMonthBarber;
+    const finalShopEarn = (monthShop !== undefined && monthShop !== null && monthShop !== '') ? Number(monthShop) : calcMonthShop;
+    const finalTotalIncome = (monthTotal !== undefined && monthTotal !== null && monthTotal !== '') ? Number(monthTotal) : (finalBarberEarn + finalShopEarn);
 
     const finalCountNew = Number(countNew ?? calcTotalNew);
     const finalCountRegular = Number(countRegular ?? calcTotalRegular);
@@ -2548,7 +2548,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
             const sWidth = sVal ? `${(sVal / maxService) * 100}%` : '0%';
             
             html += `<div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;">
-                <!-- ซ้าย: ทรงผม -->
                 <div style="flex:1; display:flex; align-items:center; gap:8px;">
                     <span style="color:#e2e8f0; font-size:13px; white-space:nowrap;">${hName}</span>
                     <div style="flex:1; height:8px; background:#1e293b; border-radius:4px; overflow:hidden;">
@@ -2556,7 +2555,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                     </div>
                     <span style="color:#fff; font-weight:700; font-size:13px; min-width:20px; text-align:right;">${hVal || ''}</span>
                 </div>
-                <!-- ขวา: บริการ -->
                 <div style="flex:1; display:flex; align-items:center; gap:8px;">
                     <span style="color:#fff; font-weight:700; font-size:13px; min-width:20px; text-align:left;">${sVal || ''}</span>
                     <div style="flex:1; height:8px; background:#1e293b; border-radius:4px; overflow:hidden;">
@@ -2721,7 +2719,6 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
     if (servicesContent) {
         servicesContent.innerHTML = `
             <div style="background:#0f172a; padding:20px; border-radius:20px; font-family:system-ui,sans-serif;">
-                <!-- ✅ แก้ไข layout หัวข้อให้เป็น Grid 2 ฝั่งตรงตามแท่งกราฟ -->
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; border-bottom:1px solid #1e293b; padding-bottom:12px;">
                     <div style="font-size:14px; font-weight:800; color:#bef264; display:flex; align-items:center; gap:6px;">
                         <div style="width:4px; height:16px; background:#bef264; border-radius:2px;"></div>
