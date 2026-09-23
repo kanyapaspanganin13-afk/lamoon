@@ -2477,18 +2477,22 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         }
 
         const wIncome = Number(data.income || 0);
-        const wShopEarn = data.shopIncome !== undefined
-            ? Number(data.shopIncome)
-            : Math.max(0, wIncome - wBarberEarn);
+        
+        // 🔧 จุดแก้ที่ 1: บังคับคิดรายได้ร้านจาก (รายได้รวม - รายได้ช่าง) เสมอ
+        // เพื่อป้องกันไม่ให้ค่า data.shopIncome ที่ติดมาในบางเดือน (เช่น ก.ค.) มาทำให้ยอดเพี้ยน
+        const wShopEarn = Math.max(0, wIncome - wBarberEarn);
 
         calcMonthBarber += wBarberEarn;
         calcMonthShop += wShopEarn;
     });
 
-    // ✅ แก้ไข: ยึดค่า Parameter หลัก (monthTotal, monthBarber, monthShop) เป็นอันดับแรก
-    const finalBarberEarn = (monthBarber !== undefined && monthBarber !== null && monthBarber !== '') ? Number(monthBarber) : calcMonthBarber;
-    const finalShopEarn = (monthShop !== undefined && monthShop !== null && monthShop !== '') ? Number(monthShop) : calcMonthShop;
-    const finalTotalIncome = (monthTotal !== undefined && monthTotal !== null && monthTotal !== '') ? Number(monthTotal) : (finalBarberEarn + finalShopEarn);
+    // 🔧 จุดแก้ที่ 2: บังคับยึดค่าที่คำนวณสดจาก weeklyData เป็นหลักเสมอ
+    // เพื่อป้องกันค่า monthBarber / monthShop ที่เป็นตัวเลขผิดโดนส่งผ่าน Parameter เข้ามาทับ
+    const finalBarberEarn = calcMonthBarber;
+    const finalShopEarn = calcMonthShop;
+    const finalTotalIncome = (monthTotal !== undefined && monthTotal !== null && monthTotal !== '') 
+        ? Number(monthTotal) 
+        : (finalBarberEarn + finalShopEarn);
 
     const finalCountNew = Number(countNew ?? calcTotalNew);
     const finalCountRegular = Number(countRegular ?? calcTotalRegular);
@@ -2596,7 +2600,10 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
             sumBarber = Number(data.barberEarn || 0);
         }
         const wBarber = Math.floor(sumBarber);
-        const wShop = Math.floor(data.shopIncome !== undefined ? Number(data.shopIncome) : Math.max(0, weeklyTotalIncome - wBarber));
+        
+        // 🔧 จุดแก้ที่ 3: ปรับในส่วน HTML รายสัปดาห์ให้คิดจาก (รายได้สัปดาห์ - รายได้ช่าง) เสมอเช่นกัน
+        const wShop = Math.floor(Math.max(0, weeklyTotalIncome - wBarber));
+        
         const sortedDays = data.dailyCounts ? [...data.dailyCounts].sort((a, b) => b.count - a.count) : [];
         const maxCount = sortedDays[0]?.count || 0;
         const minCount = sortedDays.at(-1)?.count || 0;
