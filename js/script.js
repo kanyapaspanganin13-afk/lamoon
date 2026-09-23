@@ -577,17 +577,15 @@ function updateDateDisplay(v) {
     const thaiYearFull = parseInt(y) + 543;
     const thaiYearShort = thaiYearFull.toString().slice(-2);
     const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-    const days = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
     
-    const dayName = days[new Date(v + 'T00:00:00').getDay()].substring(0, 2);
-    const formattedDate = `${parseInt(d)} ${months[parseInt(m) - 1]} ${thaiYearShort} (${dayName})`;
+    // ✅ แสดงเฉพาะ วัน เดือน ปี — ไม่มีชื่อวันต่อท้าย
+    const formattedDate = `${parseInt(d)} ${months[parseInt(m) - 1]} ${thaiYearShort}`;
     
     const el = $("dateDisplay");
     if (el) el.innerText = formattedDate;
-
     const el2 = $("displayDateThai");
     if (el2) el2.innerText = formattedDate;
-
+    
     if (typeof renderDay === "function") renderDay(v);
 }
 /* ========= SECTION 7: SAVE DATA ========= */
