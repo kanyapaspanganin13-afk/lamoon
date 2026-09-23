@@ -2462,9 +2462,15 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
         calcTotalOffsite += Number(data.countOffsite || 0);
         
         let wBarberEarn = 0;
-        if (data.dailyCounts && data.dailyCounts.length > 0) {
-            data.dailyCounts.forEach(d => {
-                wBarberEarn += Number(d.barberEarn || 0);
+        
+        // 🔧 ปรับการสแกนหา array รายวันให้ครอบคลุมทุกคีย์
+        const daysList = data.dailyCounts || data.days || data.dailyData || [];
+
+        if (Array.isArray(daysList) && daysList.length > 0) {
+            daysList.forEach(d => {
+                // ดึงค่ารายได้ช่างรายวัน (ถ้าไม่มี barberEarn ให้ดู barberIncome)
+                wBarberEarn += Number(d.barberEarn ?? d.barberIncome ?? 0);
+                
                 const dayName = d.dayName ? String(d.dayName).split(' ')[0] : '';
                 if (dayName && d.count > 0) {
                     if (!dayStats[dayName]) dayStats[dayName] = { total: 0, count: 0 };
@@ -2473,21 +2479,20 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
                 }
             });
         } else {
+            // กรณีไม่มี array รายวัน ให้ใช้ค่า barberEarn ของสัปดาห์
             wBarberEarn = Number(data.barberEarn || 0);
         }
 
         const wIncome = Number(data.income || 0);
         
-        // 🔧 จุดแก้ที่ 1: บังคับคิดรายได้ร้านจาก (รายได้รวม - รายได้ช่าง) เสมอ
-        // เพื่อป้องกันไม่ให้ค่า data.shopIncome ที่ติดมาในบางเดือน (เช่น ก.ค.) มาทำให้ยอดเพี้ยน
+        // 🔧 คิดรายได้ร้านจาก (รายได้สัปดาห์ - รายได้ช่าง) เสมอ
         const wShopEarn = Math.max(0, wIncome - wBarberEarn);
 
         calcMonthBarber += wBarberEarn;
         calcMonthShop += wShopEarn;
     });
 
-    // 🔧 จุดแก้ที่ 2: บังคับยึดค่าที่คำนวณสดจาก weeklyData เป็นหลักเสมอ
-    // เพื่อป้องกันค่า monthBarber / monthShop ที่เป็นตัวเลขผิดโดนส่งผ่าน Parameter เข้ามาทับ
+    // 🔧 บังคับยึดค่าที่คำนวณสดจากสัปดาห์เสมอ ไม่ให้ Parameter ภายนอกมาทับ
     const finalBarberEarn = calcMonthBarber;
     const finalShopEarn = calcMonthShop;
     const finalTotalIncome = (monthTotal !== undefined && monthTotal !== null && monthTotal !== '') 
@@ -2594,17 +2599,18 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
     const weeklyHtml = weekEntries.length > 0 ? weekEntries.map(([wk, data]) => {
         const weeklyTotalIncome = Number(data.income || 0);
         let sumBarber = 0;
-        if (data.dailyCounts && data.dailyCounts.length > 0) {
-            data.dailyCounts.forEach(d => sumBarber += Number(d.barberEarn || 0));
+        
+        const daysList = data.dailyCounts || data.days || data.dailyData || [];
+        if (Array.isArray(daysList) && daysList.length > 0) {
+            daysList.forEach(d => sumBarber += Number(d.barberEarn ?? d.barberIncome ?? 0));
         } else {
             sumBarber = Number(data.barberEarn || 0);
         }
-        const wBarber = Math.floor(sumBarber);
         
-        // 🔧 จุดแก้ที่ 3: ปรับในส่วน HTML รายสัปดาห์ให้คิดจาก (รายได้สัปดาห์ - รายได้ช่าง) เสมอเช่นกัน
+        const wBarber = Math.floor(sumBarber);
         const wShop = Math.floor(Math.max(0, weeklyTotalIncome - wBarber));
         
-        const sortedDays = data.dailyCounts ? [...data.dailyCounts].sort((a, b) => b.count - a.count) : [];
+        const sortedDays = daysList.length > 0 ? [...daysList].sort((a, b) => b.count - a.count) : [];
         const maxCount = sortedDays[0]?.count || 0;
         const minCount = sortedDays.at(-1)?.count || 0;
         const bestDay = maxCount > 0 ? `${sortedDays[0].dayName} (${maxCount})` : "-";
