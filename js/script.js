@@ -2198,7 +2198,7 @@ function loadHistMonth() {
     const $ = id => document.getElementById(id);
     const picker = $("histMonth") || $("monthlyReportPicker");
     let m = picker ? picker.value : '';
-
+    
     if (!m) {
         const now = new Date();
         const yyyy = now.getFullYear();
@@ -2209,8 +2209,6 @@ function loadHistMonth() {
 
     if (typeof archives === 'undefined' || !Array.isArray(archives)) {
         console.warn("loadHistMonth: archives ไม่พร้อมใช้งาน");
-        if (window.notify) notify("❌ ไม่พบฐานข้อมูลหลัก", "error");
-        else alert("ไม่พบฐานข้อมูลหลัก");
         return;
     }
 
@@ -2223,6 +2221,7 @@ function loadHistMonth() {
     const currentBranch = typeof getActiveBranch === 'function'
         ? getActiveBranch()
         : localStorage.getItem("active_branch_name") || "สาขาไม่ระบุ";
+
     const viewScope = typeof getViewScope === 'function'
         ? getViewScope()
         : (localStorage.getItem("view_data_scope") || "all");
@@ -2238,27 +2237,35 @@ function loadHistMonth() {
 
     if (!filtered.length) {
         if ($("shopTotalMonth")) $("shopTotalMonth").innerText = "฿0";
+        if ($("barberTotalMonth")) $("barberTotalMonth").innerText = "฿0";
+        if ($("grandTotalMonth")) $("grandTotalMonth").innerText = "฿0";
         if (typeof generateMonthlyReport === 'function') {
-            generateMonthlyReport(m, 0, 0, 0, 0, 0, 0, 0, {}, {}, {}, 0, 0, 0, 0);
+            generateMonthlyReport(
+                m, 0, 0, 0, 0,
+                0, 0, 0,
+                {}, {}, {},
+                0, 0, 0, 0
+            );
         }
         if (window.calcNetProfit) window.calcNetProfit();
-        if (window.notify) notify(`📊 ไม่พบข้อมูลของเดือน ${m}`, "info");
-        if (typeof openReportModal === 'function') {
-            openReportModal("📊 สรุปรายเดือน",
-                `<div style='text-align:center;padding:50px;color:#94a3b8;'>ไม่พบข้อมูลของเดือน ${m}</div>`);
-        }
         return;
     }
 
-    // === คำนวณตามตรรกะเดิมที่ถูกต้อง ===
-    const shopRate = parseFloat(localStorage.getItem('shopCommissionRate'))
-        || ((typeof conf !== 'undefined' && conf?.perc) ? (conf.perc / 100) : 0.50);
+    let rawRate = parseFloat(localStorage.getItem('shopCommissionRate'));
+    if (isNaN(rawRate) && typeof conf !== 'undefined' && conf && conf.perc) {
+        rawRate = conf.perc;
+    }
+    if (isNaN(rawRate)) rawRate = 50;
+
+    let rateFactor = rawRate > 1 ? rawRate / 100 : rawRate;
+    const barberRate = rateFactor < 0.5 ? (1 - rateFactor) : rateFactor;
+
     const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || 200;
     const freeBarberComp = parseFloat(localStorage.getItem('freeBarberComp')) || 100;
-    const guarantee = (typeof conf !== 'undefined' && conf?.guar) ? conf.guar : 0;
+    const guarantee = (typeof conf !== 'undefined' && conf && conf.guar) ? conf.guar : 0;
 
     let countNew = 0, countRegular = 0, countOffsite = 0;
-    let monthTotal = 0, monthBarber = 0, monthShop = 0, monthCount = 0, monthGuarDays = 0;
+    let monthTotal = 0, monthBarber = 0, monthCount = 0, monthGuarDays = 0;
     let hairStats = {}, serviceStats = {};
     let offDays = 0, workDays = 0;
     let weeklyData = {};
@@ -2273,7 +2280,6 @@ function loadHistMonth() {
         if (dYear > 2500) dYear -= 543;
         const dObj = new Date(dYear, dMonth - 1, dDay);
         const dayOfWeek = dObj.getDay();
-
         const firstDayOfMonth = new Date(dYear, dMonth - 1, 1).getDay();
         const dayNumberInWeek = dDay + firstDayOfMonth - 1;
         let wIdx = Math.floor(dayNumberInWeek / 7) + 1;
@@ -2294,12 +2300,13 @@ function loadHistMonth() {
             offDays++;
             weeklyData[wKey].offDays++;
             weeklyData[wKey].dailyCounts.push({
-                dayName: dayNames[dayOfWeek], count: 0, income: 0, barberEarn: 0, shopEarn: 0
+                dayName: dayNames[dayOfWeek],
+                count: 0, income: 0, barberEarn: 0, shopEarn: 0
             });
             return;
         }
 
-        // วันเคลมประกัน
+        // วันประกันรายได้
         const hasManualGuar = day.type === "GUARANTEE_CLAIM"
                             || day.isGuar === true
                             || day.isGuarantee
@@ -2307,16 +2314,21 @@ function loadHistMonth() {
         const hasDetailGuar = day.details
                             && Array.isArray(day.details)
                             && day.details.some(d => d.type === "GUARANTEE_CLAIM");
+
         if (hasManualGuar || hasDetailGuar) {
             monthGuarDays++;
             weeklyData[wKey].guarDays++;
             workDays++;
             weeklyData[wKey].workDays++;
             const claimAmount = Number(day.guarAmount || day.guaranteeAmount || guarantee);
+            
             monthBarber += claimAmount;
             weeklyData[wKey].dailyCounts.push({
-                dayName: dayNames[dayOfWeek], count: 0, income: 0,
-                barberEarn: claimAmount, shopEarn: 0
+                dayName: dayNames[dayOfWeek],
+                count: 0,
+                income: 0,
+                barberEarn: claimAmount,
+                shopEarn: 0
             });
             return;
         }
@@ -2324,13 +2336,14 @@ function loadHistMonth() {
         workDays++;
         weeklyData[wKey].workDays++;
 
-        // คำนวณรายได้
         let dailyIncome = Number(day.cash || 0) + Number(day.trans || 0);
         if (dailyIncome === 0 || day.total) dailyIncome = Number(day.total || dailyIncome);
 
         let calcBarberShare = 0;
         let totalTips = 0;
         let dayCustomerCount = 0;
+
+        const savedBarberEarn = Number(day.barber);
 
         if (day.details && Array.isArray(day.details) && day.details.length > 0) {
             day.details.forEach(d => {
@@ -2347,8 +2360,7 @@ function loadHistMonth() {
 
                     totalTips += t;
 
-                    // === คำนวณส่วนแบ่งช่างตามตรรกะเดิม ===
-                    if (d.barberShare !== undefined) {
+                    if (d.barberShare !== undefined && d.barberShare !== null) {
                         calcBarberShare += Number(d.barberShare);
                     } else if (cType === 'offsite' && isFree) {
                         calcBarberShare += freeBarberComp;
@@ -2357,7 +2369,7 @@ function loadHistMonth() {
                     } else if (isFree) {
                         calcBarberShare += freeBarberComp;
                     } else {
-                        calcBarberShare += Math.round(p * (1 - shopRate));
+                        calcBarberShare += Math.round(p * barberRate);
                     }
 
                     if (cType === "new") {
@@ -2386,8 +2398,6 @@ function loadHistMonth() {
                 }
             });
         } else {
-            // === กรณีไม่มี details → ใช้ค่าที่บันทึกไว้เลย (ตามเวอร์ชันใหม่) ===
-            calcBarberShare = Number(day.barber) || 0;
             dayCustomerCount = Number(day.count) || 0;
             monthCount += dayCustomerCount;
             weeklyData[wKey].customers += dayCustomerCount;
@@ -2395,13 +2405,14 @@ function loadHistMonth() {
 
         if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
 
-        // === คำนวณสุทธิถูกต้อง ===
-        const dailyBarberNet = Math.floor(calcBarberShare + totalTips);
+        const dailyBarberNet = (!isNaN(savedBarberEarn) && savedBarberEarn > 0)
+            ? savedBarberEarn
+            : Math.floor(calcBarberShare + totalTips);
+
         const dailyShopNet = Math.max(0, dailyIncome - dailyBarberNet);
 
         monthTotal += dailyIncome;
         monthBarber += dailyBarberNet;
-        monthShop += dailyShopNet;
 
         weeklyData[wKey].income += dailyIncome;
         weeklyData[wKey].shopIncome += dailyShopNet;
@@ -2415,12 +2426,15 @@ function loadHistMonth() {
         });
     });
 
+    // คำนวณรายได้ร้านจากยอดรวมสทธิ์ เพื่อป้องกันปัญหาตัวเลขไม่ตรงกัน[cite: 7]
+    const monthShop = Math.max(0, monthTotal - monthBarber);
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
 
-    // แสดงยอดรวมร้าน — แก้ให้ตรงกับ monthShop
-    if ($("shopTotalMonth")) {
-        $("shopTotalMonth").innerText = `฿${Math.floor(monthShop).toLocaleString()}`;
-    }
+    // อัปเดต UI หน้าหลักให้ตรงกัน
+    if ($("grandTotalMonth")) $("grandTotalMonth").innerText = `฿${Math.floor(monthTotal).toLocaleString()}`;
+    if ($("barberTotalMonth")) $("barberTotalMonth").innerText = `฿${Math.floor(monthBarber).toLocaleString()}`;
+    if ($("shopTotalMonth")) $("shopTotalMonth").innerText = `฿${Math.floor(monthShop).toLocaleString()}`;
+
     if (window.calcNetProfit) window.calcNetProfit();
 
     if (typeof generateMonthlyReport === 'function') {
