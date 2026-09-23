@@ -2196,7 +2196,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function loadHistMonth() {
     // ใช้ $ จากภายนอก ไม่ต้องประกาศใหม่
-    const picker = $("histMonth") || $("monthlyReportPicker");
+   const picker = $("histMonth") || $("monthlyReportPicker");
     let m = picker ? picker.value : '';
     
     if (!m) {
@@ -2254,9 +2254,18 @@ function loadHistMonth() {
         return;
     }
 
-    // คำนวณค่าคอมมิชชันอย่างปลอดภัย
-    const shopRate = parseFloat(localStorage.getItem('shopCommissionRate'))
-        || ((typeof conf !== 'undefined' && conf && conf.perc) ? (conf.perc / 100) : 0.50);
+    // --- จัดการอัตราส่วนแบ่งช่าง (กรณีต้องคำนวณ dynamic) ---
+    let rawRate = parseFloat(localStorage.getItem('shopCommissionRate'));
+    if (isNaN(rawRate) && typeof conf !== 'undefined' && conf && conf.perc) {
+        rawRate = conf.perc;
+    }
+    if (isNaN(rawRate)) rawRate = 50;
+
+    // แปลง rate ให้อยู่ในรูป decimal (0.0 - 1.0)
+    let rateFactor = rawRate > 1 ? rawRate / 100 : rawRate;
+    // หาก rateFactor < 0.5 แสดงว่าเป็นเปอร์เซ็นต์ร้าน ให้สลับเป็นส่วนของช่าง
+    const barberRate = rateFactor < 0.5 ? (1 - rateFactor) : rateFactor;
+
     const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || 200;
     const freeBarberComp = parseFloat(localStorage.getItem('freeBarberComp')) || 100;
     const guarantee = (typeof conf !== 'undefined' && conf && conf.guar) ? conf.guar : 0;
@@ -2283,7 +2292,6 @@ function loadHistMonth() {
         if (wIdx > 5) wIdx = 5;
         const wKey = `สัปดาห์ที่ ${wIdx}`;
 
-        // สร้างข้อมูลสัปดาห์ถ้ายังไม่มี
         if (!weeklyData[wKey]) {
             weeklyData[wKey] = {
                 customers: 0, workDays: 0, offDays: 0, zeroDays: 0, guarDays: 0, dailyCounts: [],
@@ -2304,7 +2312,7 @@ function loadHistMonth() {
             return;
         }
 
-        // 2. วันเคลมประกัน
+        // 2. วันประกันรายได้
         const hasManualGuar = day.type === "GUARANTEE_CLAIM"
                             || day.isGuar === true
                             || day.isGuarantee
@@ -2319,6 +2327,7 @@ function loadHistMonth() {
             workDays++;
             weeklyData[wKey].workDays++;
             const claimAmount = Number(day.guarAmount || day.guaranteeAmount || guarantee);
+            
             monthBarber += claimAmount;
             weeklyData[wKey].dailyCounts.push({
                 dayName: dayNames[dayOfWeek],
@@ -2340,6 +2349,9 @@ function loadHistMonth() {
         let totalTips = 0;
         let dayCustomerCount = 0;
 
+        // 🟢 ลำดับความสำคัญที่ 1: ยึดค่า day.barber ที่ถูก Save ล็อคไว้แล้วเหมือนโค้ดเดิม
+        const savedBarberEarn = Number(day.barber);
+
         if (day.details && Array.isArray(day.details) && day.details.length > 0) {
             day.details.forEach(d => {
                 if (d.type === "SERVICE" || !d.type) {
@@ -2355,7 +2367,7 @@ function loadHistMonth() {
 
                     totalTips += t;
 
-                    if (d.barberShare !== undefined) {
+                    if (d.barberShare !== undefined && d.barberShare !== null) {
                         calcBarberShare += Number(d.barberShare);
                     } else if (cType === 'offsite' && isFree) {
                         calcBarberShare += freeBarberComp;
@@ -2364,7 +2376,8 @@ function loadHistMonth() {
                     } else if (isFree) {
                         calcBarberShare += freeBarberComp;
                     } else {
-                        calcBarberShare += Math.round(p * (1 - shopRate));
+                        // คำนวณจากเปอร์เซ็นต์ช่างแบบแน่นอน
+                        calcBarberShare += Math.round(p * barberRate);
                     }
 
                     if (cType === "new") {
@@ -2393,7 +2406,6 @@ function loadHistMonth() {
                 }
             });
         } else {
-            calcBarberShare = Number(day.barber) || 0;
             dayCustomerCount = Number(day.count) || 0;
             monthCount += dayCustomerCount;
             weeklyData[wKey].customers += dayCustomerCount;
@@ -2401,13 +2413,17 @@ function loadHistMonth() {
 
         if (dayCustomerCount === 0) weeklyData[wKey].zeroDays++;
 
-        const pureBarberCost = calcBarberShare;
-        const dailyBarberNet = Math.floor(pureBarberCost + totalTips);
-        const dailyShopNet = Math.max(0, dailyIncome - pureBarberCost);
+        // 🟢 ถ้ามีค่า day.barber ที่ล็อคไว้แล้วให้ใช้ค่านั้นเป็นหลัก หากไม่มีค่อยใช้ค่าที่คำนวณใหม่
+        const dailyBarberNet = (!isNaN(savedBarberEarn) && savedBarberEarn > 0)
+            ? savedBarberEarn
+            : Math.floor(calcBarberShare + totalTips);
+
+        const dailyShopNet = Math.max(0, dailyIncome - dailyBarberNet);
 
         monthTotal += dailyIncome;
         monthBarber += dailyBarberNet;
         monthShop += dailyShopNet;
+
         weeklyData[wKey].income += dailyIncome;
         weeklyData[wKey].shopIncome += dailyShopNet;
 
@@ -2423,7 +2439,7 @@ function loadHistMonth() {
     const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
 
     if ($("shopTotalMonth")) {
-        $("shopTotalMonth").innerText = `฿${Math.floor(monthTotal).toLocaleString()}`;
+        $("shopTotalMonth").innerText = `฿${Math.floor(monthShop).toLocaleString()}`;
     }
 
     if (window.calcNetProfit) window.calcNetProfit();
