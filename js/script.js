@@ -2761,222 +2761,173 @@ function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount
 }
 // ================= แท็บที่ 1: รายงานประจำเดือน (ตารางรายวัน) =================
 function renderDailyTableReport() {
-    const picker = document.getElementById('monthlyReportPicker') || document.getElementById('histMonth');
-    const content = document.getElementById('monthlyContent1') || document.getElementById('monthlyIncomeContent');
-    if (!content) return;
-    if (typeof archives === 'undefined' || !Array.isArray(archives)) {
-        content.innerHTML = '<div style="text-align:center; padding: 20px; color: #64748b;">ไม่พบฐานข้อมูลหลัก (archives)</div>';
-        return;
-    }
-    let mVal = picker ? picker.value : '';
-    if (!mVal) {
-        const now = new Date();
-        const yyyy = now.getFullYear();
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        mVal = `${yyyy}-${mm}`;
-        if (picker) picker.value = mVal;
-    }
-    const [y, mNum] = mVal.split('-').map(Number);
-    
-    // 🔧 แก้ไขจุดที่ 1: คำนวณรองรับทั้ง ค.ศ. (2026) และ พ.ศ. (2569)
-    const yearCE = y > 2500 ? y - 543 : y;
-    const yearBE = yearCE + 543;
-    const prefixCE = `${yearCE}-${String(mNum).padStart(2, '0')}`;
-    const prefixBE = `${yearBE}-${String(mNum).padStart(2, '0')}`;
-
-    // ดึงโหมดการแสดงผล + สาขาปัจจุบัน
-    const viewAll = (localStorage.getItem("view_data_scope") || "all") === "all";
-    const activeBranch = (localStorage.getItem("active_branch_name") || "").trim();
-    
-    // 🔧 แก้ไขจุดที่ 2: กรองข้อมูลโดยเช็กทั้ง ค.ศ. และ พ.ศ.
-    let filtered = archives.filter(a => a && a.date && (a.date.startsWith(prefixCE) || a.date.startsWith(prefixBE)));
-    
-    if (!viewAll) {
-        filtered = filtered.filter(a => {
-            const b = String(a.branch || '').trim();
-            const hasNoBranch = !b || b === 'undefined' || b === 'null' || b === 'สาขาไม่ระบุ';
-            const matchesBranch = activeBranch !== '' && b === activeBranch;
-            return hasNoBranch || matchesBranch;
-        });
-    }
-    
-    const monthNames = [
-        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
-    ];
-    const monthThaiName = monthNames[mNum - 1] || '';
-    const thaiDayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
-    
-    const displayTitleBranch = (activeBranch && activeBranch !== "undefined") ? activeBranch : "สาขาไม่ระบุ";
-    
-    let reportTitle = "";
-    if (viewAll) {
-        reportTitle = `รายงานทุกสาขา · ประจำเดือน: ${monthThaiName} ${yearBE}`;
-    } else {
-        reportTitle = `รายงาน: ${displayTitleBranch} · ประจำเดือน: ${monthThaiName} ${yearBE}`;
-    }
-
-    // ดึงเปอร์เซ็นต์และค่าคอมมิชชันตั้งต้นระบบ
-    let rawRate = parseFloat(localStorage.getItem('shopCommissionRate'));
-    if (isNaN(rawRate) && typeof conf !== 'undefined' && conf && conf.perc) rawRate = conf.perc;
-    if (isNaN(rawRate)) rawRate = 50;
-    let rateFactor = rawRate > 1 ? rawRate / 100 : rawRate;
-    const barberRate = rateFactor < 0.5 ? (1 - rateFactor) : rateFactor;
-    const guarantee = (typeof conf !== 'undefined' && conf && conf.guar) ? conf.guar : 0;
-    const offsiteBarberFee = parseFloat(localStorage.getItem('offsiteBarberFee')) || 200;
-    const freeBarberComp = parseFloat(localStorage.getItem('freeBarberComp')) || 100;
-    
-    let totalCust = 0, totalBarber = 0, totalShave = 0, totalWash = 0, totalDye = 0;
-    let workDays = 0;
-    let rowsHTML = '';
-    
-    filtered.sort((a, b) => a.date.localeCompare(b.date));
-    
-    filtered.forEach(day => {
-        const isOffDay = day.off === true || day.type === "HOLIDAY";
-        let dayCust = 0;
-        let shave = 0, wash = 0, dye = 0;
-        let calcBarberEarn = 0;
-        let dayGuarClaim = 0;
-        
-        const rawBranch = String(day.branch || '').trim();
-        const branchName = (rawBranch && rawBranch !== "undefined" && rawBranch !== "null")
-                        ? rawBranch
-                        : "สาขาไม่ระบุ";
-        
-        if (!isOffDay) {
-            workDays++;
-
-            const hasManualGuar = day.type === "GUARANTEE_CLAIM" || day.isGuar === true || day.isGuarantee || day.guarantee;
-            if (hasManualGuar) {
-                dayGuarClaim = Number(day.guarAmount || day.guaranteeAmount || guarantee);
-            }
-
-            if (day.details && Array.isArray(day.details) && day.details.length > 0) {
-                day.details.forEach(d => {
-                    // 🔧 แก้ไขจุดที่ 3: คำนวณรายได้ช่างรวมถึงรายการประกันใน details
-                    if (d.type === "GUARANTEE_CLAIM") {
-                        const gAmt = Number(d.amount || d.price || guarantee);
-                        if (gAmt > dayGuarClaim) dayGuarClaim = gAmt;
-                    } else if (d.type === "SERVICE" || !d.type) {
-                        dayCust++;
-                        const p = Number(d.price) || 0;
-                        const t = Number(d.tip) || 0;
-                        const cType = String(d.custType || "").toLowerCase().trim();
-                        const payStr = String(d.pay || "").trim();
-                        const isFree = payStr.startsWith("Free") || payStr.includes("ฟรี");
-
-                        if (d.barberShare !== undefined && d.barberShare !== null) {
-                            calcBarberEarn += Number(d.barberShare) + t;
-                        } else if (cType === 'offsite' && isFree) {
-                            calcBarberEarn += freeBarberComp + t;
-                        } else if (cType === 'offsite') {
-                            calcBarberEarn += offsiteBarberFee + t;
-                        } else if (isFree) {
-                            calcBarberEarn += freeBarberComp + t;
-                        } else {
-                            calcBarberEarn += Math.round(p * barberRate) + t;
-                        }
-
-                        const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
-                        svcs.forEach(s => {
-                            if (!s) return;
-                            const cleanS = String(s).trim();
-                            if (cleanS.includes("โกน")) shave++;
-                            if (cleanS.includes("สระ")) wash++;
-                            if (cleanS.includes("ย้อม") || cleanS.includes("สี")) dye++;
-                        });
-                    }
-                });
-            } else {
-                dayCust = Number(day.count) || 0;
-            }
-
-            // สรุปรายได้ช่างประจำวัน (ยึดค่าสูงสุดระหว่างค่าประกันกับค่าบริการตัดจริง หรือใช้ค่า day.barber สำรอง)
-            if (dayGuarClaim > 0) {
-                calcBarberEarn = Math.max(dayGuarClaim, calcBarberEarn);
-            } else if (calcBarberEarn === 0 && day.barber) {
-                calcBarberEarn = Number(day.barber) || 0;
-            }
-        }
-        
-        const barber = isOffDay ? 0 : calcBarberEarn;
-        totalCust += dayCust;
-        totalBarber += barber;
-        totalShave += shave;
-        totalWash += wash;
-        totalDye += dye;
-        
-        let displayDayName = day.dayName || '-';
-        if (day.date) {
-            let [dYear, dMonth, dDay] = day.date.split('-').map(Number);
-            if (dYear > 2500) dYear -= 543;
-            const dObj = new Date(dYear, dMonth - 1, dDay);
-            if (!isNaN(dObj.getTime())) {
-                displayDayName = thaiDayNames[dObj.getDay()];
-            }
-        }
-        const dayNum = day.date ? day.date.split('-')[2] : '-';
-        
-        if (isOffDay) {
-            rowsHTML += `
-                <tr style="background-color: #fef2f2;">
-                    <td>${parseInt(dayNum, 10)}</td>
-                    <td>${displayDayName}</td>
-                    <td>${branchName}</td>
-                    <td colspan="5" style="color: #ef4444; font-weight: 700; text-align: center;">หยุด</td>
-                </tr>
-            `;
-        } else {
-            rowsHTML += `
-                <tr>
-                    <td>${parseInt(dayNum, 10)}</td>
-                    <td>${displayDayName}</td>
-                    <td>${branchName}</td>
-                    <td>${dayCust || '-'}</td>
-                    <td>${barber > 0 ? barber.toLocaleString() : '-'}</td>
-                    <td>${shave || '-'}</td>
-                    <td>${wash || '-'}</td>
-                    <td>${dye || '-'}</td>
-                </tr>
-            `;
-        }
-    });
-    
-    content.innerHTML = `
-        <div style="text-align: center; margin-bottom: 10px;">
-            <h3 style="margin: 0; color: var(--primary, #0284c7);">${reportTitle}</h3>
-        </div>
-        <table class="summary-table" style="width:100%; border-collapse: collapse; text-align:center;">
-            <thead>
-                <tr style="background-color: var(--bg, #f1f5f9);">
-                    <th>วันที่</th>
-                    <th>วัน</th>
-                    <th>สาขา</th>
-                    <th>ลูกค้า</th>
-                    <th>ยอดช่าง</th>
-                    <th>โกน</th>
-                    <th>สระ</th>
-                    <th>ย้อม</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${rowsHTML || '<tr><td colspan="8" style="text-align:center; padding: 20px; color:#94a3b8;">ไม่มีข้อมูลในเดือนนี้</td></tr>'}
-            </tbody>
-            <tfoot>
-                <tr style="background-color: #ffeb3b; font-weight: bold; color: #000;">
-                    <td>รวมยอด</td>
-                    <td style="color: #0284c7;">เปิด ${workDays} วัน</td>
-                    <td>-</td>
-                    <td>${totalCust || '-'}</td>
-                    <td>${totalBarber > 0 ? totalBarber.toLocaleString() : '0'}</td>
-                    <td>${totalShave || '-'}</td>
-                    <td>${totalWash || '-'}</td>
-                    <td>${totalDye || '-'}</td>
-                </tr>
-            </tfoot>
-        </table>
-    `;
+    const picker = document.getElementById('monthlyReportPicker') || document.getElementById('histMonth');
+    const content = document.getElementById('monthlyContent1') || document.getElementById('monthlyIncomeContent');
+    if (!content) return;
+    if (typeof archives === 'undefined' || !Array.isArray(archives)) {
+        content.innerHTML = '<div style="text-align:center; padding: 20px; color: #64748b;">ไม่พบฐานข้อมูลหลัก (archives)</div>';
+        return;
+    }
+    let mVal = picker ? picker.value : '';
+    if (!mVal) {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        mVal = `${yyyy}-${mm}`;
+        if (picker) picker.value = mVal;
+    }
+    const [y, mNum] = mVal.split('-').map(Number);
+    const targetPrefix = `${y}-${String(mNum).padStart(2, '0')}`;
+    
+    // ดึงโหมดการแสดงผล + สาขาปัจจุบัน
+    const viewAll = (localStorage.getItem("view_data_scope") || "all") === "all";
+    const activeBranch = (localStorage.getItem("active_branch_name") || "").trim();
+    
+    // กรองข้อมูลเดือนที่เลือก
+    let filtered = archives.filter(a => a.date && a.date.startsWith(targetPrefix));
+    
+    // ✅ 1. แก้ไขเงื่อนไขการกรองสาขา: ถ้าเลือกดูเฉพาะสาขา ให้ดึงข้อมูลที่ตรงกัน + ข้อมูลเก่าที่ไม่มีสาขามาแสดงด้วย
+    if (!viewAll) {
+        filtered = filtered.filter(a => {
+            const b = String(a.branch || '').trim();
+            const hasNoBranch = !b || b === 'undefined' || b === 'null' || b === 'สาขาไม่ระบุ';
+            const matchesBranch = activeBranch !== '' && b === activeBranch;
+            
+            // แสดงข้อมูลถ้า: ไม่มีสาขา (ข้อมูลสำรองเก่า) OR ชื่อสาขาตรงกับปัจจุบัน
+            return hasNoBranch || matchesBranch;
+        });
+    }
+    
+    const monthNames = [
+        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    ];
+    const monthThaiName = monthNames[mNum - 1] || '';
+    const thaiDayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+    
+    const displayTitleBranch = (activeBranch && activeBranch !== "undefined") ? activeBranch : "สาขาไม่ระบุ";
+    
+    let reportTitle = "";
+    if (viewAll) {
+        reportTitle = `รายงานทุกสาขา · ประจำเดือน: ${monthThaiName} ${y + 543}`;
+    } else {
+        reportTitle = `รายงาน: ${displayTitleBranch} · ประจำเดือน: ${monthThaiName} ${y + 543}`;
+    }
+    
+    let totalCust = 0, totalBarber = 0, totalShave = 0, totalWash = 0, totalDye = 0;
+    let workDays = 0;
+    let rowsHTML = '';
+    
+    filtered.sort((a, b) => a.date.localeCompare(b.date));
+    
+    filtered.forEach(day => {
+        const isOffDay = day.off === true || day.type === "HOLIDAY";
+        let dayCust = 0;
+        let shave = 0, wash = 0, dye = 0;
+        
+        // ✅ 2. แสดงชื่อสาขาจริงของข้อมูลรายการนั้นๆ (ถ้าไม่มีให้ขึ้นว่า "สาขาไม่ระบุ/สำรอง")
+        const rawBranch = String(day.branch || '').trim();
+        const branchName = (rawBranch && rawBranch !== "undefined" && rawBranch !== "null")
+                        ? rawBranch
+                        : "สาขาไม่ระบุ";
+        
+        if (!isOffDay) {
+            workDays++;
+            if (day.details && Array.isArray(day.details)) {
+                day.details.forEach(d => {
+                    if (d.type === "SERVICE" || !d.type) {
+                        dayCust++;
+                        const svcs = Array.isArray(d.svcs) ? d.svcs : [d.svcs];
+                        svcs.forEach(s => {
+                            if (!s) return;
+                            const cleanS = String(s).trim();
+                            if (cleanS.includes("โกน")) shave++;
+                            if (cleanS.includes("สระ")) wash++;
+                            if (cleanS.includes("ย้อม") || cleanS.includes("สี")) dye++;
+                        });
+                    }
+                });
+            } else {
+                dayCust = Number(day.count) || 0;
+            }
+        }
+        
+        const barber = isOffDay ? 0 : (Number(day.barber) || 0);
+        totalCust += dayCust;
+        totalBarber += barber;
+        totalShave += shave;
+        totalWash += wash;
+        totalDye += dye;
+        
+        let displayDayName = day.dayName || '-';
+        if (day.date) {
+            const [dYear, dMonth, dDay] = day.date.split('-').map(Number);
+            const dObj = new Date(dYear, dMonth - 1, dDay);
+            if (!isNaN(dObj.getTime())) {
+                displayDayName = thaiDayNames[dObj.getDay()];
+            }
+        }
+        const dayNum = day.date ? day.date.split('-')[2] : '-';
+        
+        if (isOffDay) {
+            rowsHTML += `
+                <tr style="background-color: #fef2f2;">
+                    <td>${parseInt(dayNum, 10)}</td>
+                    <td>${displayDayName}</td>
+                    <td>${branchName}</td>
+                    <td colspan="5" style="color: #ef4444; font-weight: 700; text-align: center;">หยุด</td>
+                </tr>
+            `;
+        } else {
+            rowsHTML += `
+                <tr>
+                    <td>${parseInt(dayNum, 10)}</td>
+                    <td>${displayDayName}</td>
+                    <td>${branchName}</td>
+                    <td>${dayCust || '-'}</td>
+                    <td>${barber > 0 ? barber.toLocaleString() : '-'}</td>
+                    <td>${shave || '-'}</td>
+                    <td>${wash || '-'}</td>
+                    <td>${dye || '-'}</td>
+                </tr>
+            `;
+        }
+    });
+    
+    content.innerHTML = `
+        <div style="text-align: center; margin-bottom: 10px;">
+            <h3 style="margin: 0; color: var(--primary, #0284c7);">${reportTitle}</h3>
+        </div>
+        <table class="summary-table" style="width:100%; border-collapse: collapse; text-align:center;">
+            <thead>
+                <tr style="background-color: var(--bg, #f1f5f9);">
+                    <th>วันที่</th>
+                    <th>วัน</th>
+                    <th>สาขา</th>
+                    <th>ลูกค้า</th>
+                    <th>ยอดช่าง</th>
+                    <th>โกน</th>
+                    <th>สระ</th>
+                    <th>ย้อม</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rowsHTML || '<tr><td colspan="8" style="text-align:center; padding: 20px; color:#94a3b8;">ไม่มีข้อมูลในเดือนนี้</td></tr>'}
+            </tbody>
+            <tfoot>
+                <tr style="background-color: #ffeb3b; font-weight: bold; color: #000;">
+                    <td>รวมยอด</td>
+                    <td style="color: #0284c7;">เปิด ${workDays} วัน</td>
+                    <td>-</td>
+                    <td>${totalCust || '-'}</td>
+                    <td>${totalBarber > 0 ? totalBarber.toLocaleString() : '0'}</td>
+                    <td>${totalShave || '-'}</td>
+                    <td>${totalWash || '-'}</td>
+                    <td>${totalDye || '-'}</td>
+                </tr>
+            </tfoot>
+        </table>
+    `;
 }
 // ================= แท็บที่ 2: รายได้ย้อนหลัง 12 เดือน =================
 function renderYearlyIncomeSummary() {
