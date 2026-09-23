@@ -54,7 +54,9 @@ let payMethod = "";
 
 // 3️⃣ เริ่มทำงานหลัก — DOMContentLoaded ชุดเดียว
 document.addEventListener("DOMContentLoaded", () => {
-    const today = new Date().toISOString().split('T')[0];
+    // คำนวณวันที่ปัจจุบันสดใหม่เสมอ
+    const getFreshDate = () => new Date().toISOString().split('T')[0];
+    const today = getFreshDate();
     
     // --- ตั้งค่าวันที่ ---
     if ($("dateInp")) { 
@@ -82,13 +84,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if ($("tEnd")) $("tEnd").value = curTime;
     
     // --- เริ่มระบบสาขา ---
-    initBranchSystem();
+    if (typeof initBranchSystem === 'function') initBranchSystem();
     
     // --- อัปเดตข้อมูลเก่าให้มีชื่อสาขา ---
     (function migrateOldData() {
         const currentBranch = localStorage.getItem("active_branch_name")
-                           || localStorage.getItem("shopName")
-                           || "สาขาไม่ระบุ";
+                            || localStorage.getItem("shopName")
+                            || "สาขาไม่ระบุ";
         let changed = false;
         if (Array.isArray(db)) {
             db.forEach(item => {
