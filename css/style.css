@@ -54,7 +54,7 @@ h2,.top-bar,.top-title{text-align:center;color:var(--text);font-weight:900;margi
 .top-bar{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;position:relative;}
 .top-bar .btn-back{display:none !important;}
 .top-title{font-size:20px !important;font-weight:800 !important;letter-spacing:.3px;color:var(--text);}
-.top-title-wrap{text-align:center;padding:4px 0 8px;background:transparent !important;border:none !important;box-shadow:none !important;margin:0 0 16px !important;}
+.top-title-wrap{text-align:center;padding:4px 0 0px;background:transparent !important;border:none !important;box-shadow:none !important;margin:0 0 4px !important;}
 .top-title-wrap .top-title{font-size:18px;font-weight:700;margin:0;}
 .home-btn-wrapper,.btn-back-small{display:none !important;}
 
