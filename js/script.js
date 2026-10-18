@@ -2894,40 +2894,37 @@ function renderDailyTableReport() {
         }
     });
     
-    content.innerHTML = `
-        <div style="text-align: center; margin-bottom: 10px;">
-            <h3 style="margin: 0; color: var(--primary, #0284c7);">${reportTitle}</h3>
-        </div>
-        <table class="summary-table" style="width:100%; border-collapse: collapse; text-align:center;">
-            <thead>
-                <tr style="background-color: var(--bg, #f1f5f9);">
-                    <th>วันที่</th>
-                    <th>วัน</th>
-                    <th>สาขา</th>
-                    <th>ลูกค้า</th>
-                    <th>ยอดช่าง</th>
-                    <th>โกน</th>
-                    <th>สระ</th>
-                    <th>ย้อม</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${rowsHTML || '<tr><td colspan="8" style="text-align:center; padding: 20px; color:#94a3b8;">ไม่มีข้อมูลในเดือนนี้</td></tr>'}
-            </tbody>
-            <tfoot>
-                <tr style="background-color: #ffeb3b; font-weight: bold; color: #000;">
-                    <td>รวมยอด</td>
-                    <td style="color: #0284c7;">เปิด ${workDays} วัน</td>
-                    <td>-</td>
-                    <td>${totalCust || '-'}</td>
-                    <td>${totalBarber > 0 ? totalBarber.toLocaleString() : '0'}</td>
-                    <td>${totalShave || '-'}</td>
-                    <td>${totalWash || '-'}</td>
-                    <td>${totalDye || '-'}</td>
-                </tr>
-            </tfoot>
-        </table>
-    `;
+content.innerHTML = `
+        <table class="summary-table" style="width:100%; border-collapse: collapse; text-align:center; margin-top: 0px !important;">
+            <thead>
+                <tr style="background-color: var(--bg, #f1f5f9);">
+                    <th>วันที่</th>
+                    <th>วัน</th>
+                    <th>สาขา</th>
+                    <th>ลูกค้า</th>
+                    <th>ยอดช่าง</th>
+                    <th>โกน</th>
+                    <th>สระ</th>
+                    <th>ย้อม</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rowsHTML || '<tr><td colspan="8" style="text-align:center; padding: 20px; color:#94a3b8;">ไม่มีข้อมูลในเดือนนี้</td></tr>'}
+            </tbody>
+            <tfoot>
+                <tr style="background-color: #ffeb3b; font-weight: bold; color: #000;">
+                    <td>รวมยอด</td>
+                    <td style="color: #0284c7;">เปิด ${workDays} วัน</td>
+                    <td>-</td>
+                    <td>${totalCust || '-'}</td>
+                    <td>${totalBarber > 0 ? totalBarber.toLocaleString() : '0'}</td>
+                    <td>${totalShave || '-'}</td>
+                    <td>${totalWash || '-'}</td>
+                    <td>${totalDye || '-'}</td>
+                </tr>
+            </tfoot>
+        </table>
+    `;
 }
 // ================= แท็บที่ 2: รายได้ย้อนหลัง 12 เดือน =================
 function renderYearlyIncomeSummary() {
