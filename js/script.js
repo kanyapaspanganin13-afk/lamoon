@@ -295,69 +295,67 @@ function initBranchSystem() {
   renderBranchUI();
 }
 /* =========== SECTION 2: MAIN NAVIGATION =========== */
-function switchMainView(viewName, subNum = null) {
-    // ซ่อนทุกหน้าก่อน
-    document.querySelectorAll('.app-page').forEach(page => {
-        page.classList.remove('active');
-        page.style.display = 'none';
-    });
-
-    // 1. หน้าแรก (เช็คเผื่อทั้ง 'home' และ 'pageHome')
-    if (viewName === 'home' || viewName === 'pageHome') {
-        const homePage = document.getElementById('pageHome');
-        if (homePage) {
-            homePage.classList.add('active');
-            homePage.style.display = 'block';
-        }
-        if (typeof updateNavDisplay === 'function') updateNavDisplay('home');
-        return;
+function switchMainTab(pageId, tabId, event) {
+    if (event && event.preventDefault) event.preventDefault();
+    // 1. จัดการสลับ "หน้าหลัก" (Main Pages/Sections)
+    const allPages = document.querySelectorAll('.page-content, section[id^="page-"], .main-page, .app-page');
+    if (allPages.length > 0) {
+        allPages.forEach(p => {
+            p.style.display = 'none';
+            p.classList.remove('active');
+        });
     }
-
-    // 2. กลุ่มหน้าทำงาน/รายงาน/บัญชี (เช็คเผื่อทั้ง 'workGroup' และ 'pageWorkGroup')
-    if (viewName === 'workGroup' || viewName === 'pageWorkGroup') {
-        const workPage = document.getElementById('pageWorkGroup');
-        if (!workPage) return;
-        workPage.classList.add('active');
-        workPage.style.display = 'block';
+    const currentPage = document.getElementById(pageId);
+    if (currentPage) {
+        currentPage.style.display = 'block';
+        currentPage.classList.add('active');
+    }
+    // 2. จัดการสลับ "แท็บย่อย" ภายในหน้านั้น (ถ้ามี tabId)
+    if (tabId && currentPage) {
+        currentPage.querySelectorAll('.tab-panel').forEach(panel => {
+            panel.classList.remove('active');
+            panel.style.display = 'none';
+        });
+        const targetPanel = document.getElementById(tabId);
+        if (targetPanel) {
+            targetPanel.classList.add('active');
+            targetPanel.style.display = 'block';
+        }
+        currentPage.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         
-        // เรียก goSub เปลี่ยนแท็บย่อยตาม subNum ที่ส่งมา (ถ้าไม่ส่งมาให้เปิดแท็บ 1)
-        if (typeof goSub === 'function') {
-            goSub(subNum || 1);
+        // Active ปุ่มแท็บที่ถูกกด
+        if (event && event.currentTarget) {
+            event.currentTarget.classList.add('active');
         }
-        if (typeof updateNavDisplay === 'function') updateNavDisplay('workGroup', subNum);
-        return;
     }
-
-    // 3. รายงานสรุป
-    if (viewName === 'summaryPage' || viewName === 'pageSummary') {
-        const summaryPage = document.getElementById('pageSummary');
-        if (!summaryPage) return;
-        summaryPage.classList.add('active');
-        summaryPage.style.display = 'block';
-        if (typeof switchMainTab === 'function') switchMainTab('pageSummary', 'summaryTab1');
-        if (typeof updateNavDisplay === 'function') updateNavDisplay('summaryPage');
-        return;
+    // 3. สั่งอัปเดต Bottom Nav
+    if (typeof updateNavDisplay === 'function') {
+        updateNavDisplay(pageId);
     }
-
-    // 4. สรุปรายเดือน
-    if (viewName === 'monthlySummary' || viewName === 'pageMonthlyReport') {
-        const monthlyPage = document.getElementById('pageMonthlyReport');
-        if (!monthlyPage) return;
-        monthlyPage.classList.add('active');
-        monthlyPage.style.display = 'block';
-        if (typeof switchMainTab === 'function') switchMainTab('pageMonthlyReport', 'monthlyTab1');
-        if (typeof updateNavDisplay === 'function') updateNavDisplay('monthlySummary');
-        return;
-    }
-
-    // 5. หน้าเปรียบเทียบ
-    if (viewName === 'comparePage' || viewName === 'pageComparison') {
-        const comparisonPage = document.getElementById('pageComparison');
-        if (!comparisonPage) return;
-        comparisonPage.classList.add('active');
-        comparisonPage.style.display = 'block';
-        if (typeof updateNavDisplay === 'function') updateNavDisplay('comparePage');
-        return;
+    // 🟢 4. โหลดข้อมูลแยกตามหน้าและแท็บแบบเด็ดขาด (แก้ไขปัญหายอดเป็น 0 และเดือนตีกัน)
+    const todayYm = new Date().toISOString().slice(0, 7); // เดือนปัจจุบัน YYYY-MM
+    // CASE A: หน้า "สรุปรายเดือน" (ตารางประจำเดือน / รายได้ย้อนหลัง)
+    if (pageId === 'pageMonthlyReport' || pageId === 'monthlyReport') {
+        if (tabId === 'monthlyTab2') {
+            // แท็บรายได้ย้อนหลัง/รายปี
+            if (typeof initYearOptions === 'function') initYearOptions();
+            if (typeof renderYearlyIncomeSummary === 'function') renderYearlyIncomeSummary();
+        } else {
+            // แท็บรายงานประจำเดือน (ตารางรายวัน) -> ใช้ monthlyReportPicker
+            if ($\(("monthlyReportPicker") && !\)$("monthlyReportPicker").value) {
+                $("monthlyReportPicker").value = todayYm;
+            }
+            if (typeof renderDailyTableReport === 'function') renderDailyTableReport();
+        }
+    } 
+    
+    // CASE B: หน้า "สรุปยอดรวม / วิเคราะห์รายได้" (หน้า Report หลัก)
+    else if (pageId === 'report' || pageId === 'pageReport' || pageId === 'pageSummary') {
+        // ใช้ histMonth
+        if ($\(("histMonth") && !\)$("histMonth").value) {
+            $("histMonth").value = todayYm;
+        }
+        if (typeof loadHistMonth === 'function') loadHistMonth();
     }
 }
 function go(p) {
