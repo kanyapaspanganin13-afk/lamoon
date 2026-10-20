@@ -2427,31 +2427,44 @@ function loadHistMonth() {
     });
 
       // ✅ แก้ไข: รวมยอด barberEarn และ shopIncome ที่คำนวณสุทธิจาก weeklyData มาใช้แทน
-          let realBarberTotal = 0;
-          let realShopTotal = 0;
-          Object.values(weeklyData).forEach(w => {
-              if (w.dailyCounts && w.dailyCounts.length > 0) {
-                  w.dailyCounts.forEach(d => {
-                      realBarberTotal += Number(d.barberEarn || 0);
-                      realShopTotal += Number(d.shopEarn || 0);
-                  });
-              }
-          });
-      
-          const finalBarber = realBarberTotal > 0 ? realBarberTotal : monthBarber;
-          const finalShop = Math.max(0, monthTotal - finalBarber);
-          const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
-      
-          // อัปเดต UI หน้าหลักด้วยตัวเลขสุทธิที่ถูกต้อง
-          if ($("grandTotalMonth")) $("grandTotalMonth").innerText = `฿${Math.floor(monthTotal).toLocaleString()}`;
-          if ($("barberTotalMonth")) $("barberTotalMonth").innerText = `฿${Math.floor(finalBarber).toLocaleString()}`;
-          if ($("shopTotalMonth")) $("shopTotalMonth").innerText = `฿${Math.floor(finalShop).toLocaleString()}`;
-      
-          if (window.calcNetProfit) window.calcNetProfit();
-      
-          if (typeof generateMonthlyReport === 'function') {
+   let realBarberTotal = 0;
+    let realShopTotal = 0;
+    Object.values(weeklyData).forEach(w => {
+        if (w.dailyCounts && w.dailyCounts.length > 0) {
+            w.dailyCounts.forEach(d => {
+                realBarberTotal += Number(d.barberEarn || 0);
+                realShopTotal += Number(d.shopEarn || 0);
+            });
+        }
+    });
+
+    const finalBarber = realBarberTotal > 0 ? realBarberTotal : monthBarber;
+    const finalShop = Math.max(0, monthTotal - finalBarber);
+    const monthShop = finalShop; // ✅ ประกาศตัวแปร monthShop ป้องกัน Error
+    const avgCustomerPerDay = workDays > 0 ? (monthCount / workDays) : 0;
+
+    // ✅ เพิ่มส่วนแปลงชื่อเดือนและปี พ.ศ. เพื่ออัปเดตหัวข้อการ์ดสรุปผลอัตโนมัติ
+    const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+    const thaiMonthName = thaiMonths[mNum - 1] || "";
+    const thaiYear = searchYear + 543;
+
+    // ค้นหาและอัปเดตข้อความหัวข้อการ์ดสรุปรายได้ประจำเดือน
+    document.querySelectorAll('.summary-title, h3, h4, div').forEach(el => {
+        if (el.innerText && el.innerText.includes("รายได้รวมประจำเดือน")) {
+            el.innerText = `✂️ รายได้รวมประจำเดือน (${thaiMonthName} ${thaiYear})`;
+        }
+    });
+
+    // อัปเดต UI หน้าหลักด้วยตัวเลขสุทธิที่ถูกต้อง
+    if ($("grandTotalMonth")) $("grandTotalMonth").innerText = `฿${Math.floor(monthTotal).toLocaleString()}`;
+    if ($("barberTotalMonth")) $("barberTotalMonth").innerText = `฿${Math.floor(finalBarber).toLocaleString()}`;
+    if ($("shopTotalMonth")) $("shopTotalMonth").innerText = `฿${Math.floor(finalShop).toLocaleString()}`;
+
+    if (window.calcNetProfit) window.calcNetProfit();
+
+    if (typeof generateMonthlyReport === 'function') {
         generateMonthlyReport(
-            m, monthTotal, monthBarber, monthShop, monthCount,
+            m, monthTotal, finalBarber, monthShop, monthCount,
             workDays, offDays, avgCustomerPerDay,
             weeklyData, hairStats, serviceStats,
             monthGuarDays, countNew, countRegular, countOffsite
