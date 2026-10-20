@@ -461,7 +461,6 @@ function goSub(num) {
 /* =========== SECTION 4: MAIN TABS =========== */   
 function switchMainTab(pageId, tabId, event) {
     if (event && event.preventDefault) event.preventDefault();
-
     // 1. จัดการสลับ "หน้าหลัก" (Main Pages/Sections)
     const allPages = document.querySelectorAll('.page-content, section[id^="page-"], .main-page, .app-page');
     if (allPages.length > 0) {
@@ -470,26 +469,22 @@ function switchMainTab(pageId, tabId, event) {
             p.classList.remove('active');
         });
     }
-
     const currentPage = document.getElementById(pageId);
     if (currentPage) {
         currentPage.style.display = 'block';
         currentPage.classList.add('active');
     }
-
     // 2. จัดการสลับ "แท็บย่อย" ภายในหน้านั้น (ถ้ามี tabId)
     if (tabId && currentPage) {
         currentPage.querySelectorAll('.tab-panel').forEach(panel => {
             panel.classList.remove('active');
             panel.style.display = 'none';
         });
-
         const targetPanel = document.getElementById(tabId);
         if (targetPanel) {
             targetPanel.classList.add('active');
             targetPanel.style.display = 'block';
         }
-
         currentPage.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         
         // Active ปุ่มแท็บที่ถูกกด
@@ -497,15 +492,13 @@ function switchMainTab(pageId, tabId, event) {
             event.currentTarget.classList.add('active');
         }
     }
-
     // 3. สั่งอัปเดต Bottom Nav
     if (typeof updateNavDisplay === 'function') {
         updateNavDisplay(pageId);
     }
-
-    // 🟢 4. โหลดข้อมูลแยกตามหน้าและแท็บแบบเด็ดขาด (แก้ไขปัญหายอดเป็น 0 และเดือนตีกัน)
+    // 🟢 4. โหลดข้อมูลแยกตามหน้าและแท็บ — แก้ไขให้แยกค่าเดือนอย่างสมบูรณ์
     const todayYm = new Date().toISOString().slice(0, 7); // เดือนปัจจุบัน YYYY-MM
-
+    
     // CASE A: หน้า "สรุปรายเดือน" (ตารางประจำเดือน / รายได้ย้อนหลัง)
     if (pageId === 'pageMonthlyReport' || pageId === 'monthlyReport') {
         if (tabId === 'monthlyTab2') {
@@ -513,19 +506,31 @@ function switchMainTab(pageId, tabId, event) {
             if (typeof initYearOptions === 'function') initYearOptions();
             if (typeof renderYearlyIncomeSummary === 'function') renderYearlyIncomeSummary();
         } else {
-            // แท็บรายงานประจำเดือน (ตารางรายวัน) -> ใช้ monthlyReportPicker
-            if ($("monthlyReportPicker") && !$("monthlyReportPicker").value) {
-                $("monthlyReportPicker").value = todayYm;
+            // แท็บรายงานประจำเดือน -> ใช้ monthlyReportPicker
+            const pickerReport = $("monthlyReportPicker");
+            const savedReportMonth = localStorage.getItem("reportViewMonth");
+            if (pickerReport) {
+                if (savedReportMonth) {
+                    pickerReport.value = savedReportMonth;
+                } else if (!pickerReport.value) {
+                    pickerReport.value = todayYm;
+                }
             }
             if (typeof renderDailyTableReport === 'function') renderDailyTableReport();
         }
     } 
     
-    // CASE B: หน้า "สรุปยอดรวม / วิเคราะห์รายได้" (หน้า Report หลัก)
+    // CASE B: หน้า "สรุปยอดรวม / วิเคราะห์รายได้"
     else if (pageId === 'report' || pageId === 'pageReport' || pageId === 'pageSummary') {
-        // ใช้ histMonth
-        if ($("histMonth") && !$("histMonth").value) {
-            $("histMonth").value = todayYm;
+        // ใช้ histMonth — โหลดค่าที่บันทึกไว้ก่อนหน้า ไม่เขียนทับถ้ามีอยู่แล้ว
+        const pickerSummary = $("histMonth");
+        const savedSummaryMonth = localStorage.getItem("summaryViewMonth");
+        if (pickerSummary) {
+            if (savedSummaryMonth) {
+                pickerSummary.value = savedSummaryMonth;
+            } else if (!pickerSummary.value) {
+                pickerSummary.value = todayYm;
+            }
         }
         if (typeof loadHistMonth === 'function') loadHistMonth();
     }
