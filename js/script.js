@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         if (changed) {
             safeCall(saveDB);
-            console.log("✅ อัปเดตข้อมูลเก่าเรียบร้อย:", currentBranchด);
+            console.log("✅ อัปเดตข้อมูลเก่าเรียบร้อย:", currentBranch);
         }
     })();
     
