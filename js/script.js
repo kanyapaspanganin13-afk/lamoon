@@ -461,6 +461,9 @@ function goSub(num) {
 /* =========== SECTION 4: MAIN TABS =========== */   
 function switchMainTab(pageId, tabId, event) {
     if (event && event.preventDefault) event.preventDefault();
+    // เพิ่ม: ประกาศ $ ให้ใช้งานได้ในฟังก์ชันนี้
+    const $ = id => document.getElementById(id);
+    
     // 1. จัดการสลับ "หน้าหลัก" (Main Pages/Sections)
     const allPages = document.querySelectorAll('.page-content, section[id^="page-"], .main-page, .app-page');
     if (allPages.length > 0) {
@@ -496,43 +499,34 @@ function switchMainTab(pageId, tabId, event) {
     if (typeof updateNavDisplay === 'function') {
         updateNavDisplay(pageId);
     }
-    // 🟢 4. โหลดข้อมูลแยกตามหน้าและแท็บ — แก้ไขให้แยกค่าเดือนอย่างสมบูรณ์
+    // 🟢 4. โหลดข้อมูลแยกตามหน้าและแท็บ
     const todayYm = new Date().toISOString().slice(0, 7); // เดือนปัจจุบัน YYYY-MM
     
-    // CASE A: หน้า "สรุปรายเดือน" (ตารางประจำเดือน / รายได้ย้อนหลัง)
+    // CASE A: หน้า "สรุปรายเดือน"
     if (pageId === 'pageMonthlyReport' || pageId === 'monthlyReport') {
         if (tabId === 'monthlyTab2') {
-            // แท็บรายได้ย้อนหลัง/รายปี
             if (typeof initYearOptions === 'function') initYearOptions();
             if (typeof renderYearlyIncomeSummary === 'function') renderYearlyIncomeSummary();
         } else {
-            // แท็บรายงานประจำเดือน -> ใช้ monthlyReportPicker
             const pickerReport = $("monthlyReportPicker");
             const savedReportMonth = localStorage.getItem("reportViewMonth");
             if (pickerReport) {
-                if (savedReportMonth) {
-                    pickerReport.value = savedReportMonth;
-                } else if (!pickerReport.value) {
-                    pickerReport.value = todayYm;
-                }
+                pickerReport.value = savedReportMonth || pickerReport.value || todayYm;
             }
             if (typeof renderDailyTableReport === 'function') renderDailyTableReport();
         }
     } 
-    
     // CASE B: หน้า "สรุปยอดรวม / วิเคราะห์รายได้"
     else if (pageId === 'report' || pageId === 'pageReport' || pageId === 'pageSummary') {
-        // ใช้ histMonth — โหลดค่าที่บันทึกไว้ก่อนหน้า ไม่เขียนทับถ้ามีอยู่แล้ว
         const pickerSummary = $("histMonth");
         const savedSummaryMonth = localStorage.getItem("summaryViewMonth");
         if (pickerSummary) {
-            if (savedSummaryMonth) {
-                pickerSummary.value = savedSummaryMonth;
-            } else if (!pickerSummary.value) {
-                pickerSummary.value = todayYm;
-            }
+            pickerSummary.value = savedSummaryMonth || pickerSummary.value || todayYm;
         }
-        if (typeof loadHistMonth === 'function') loadHistMonth();
+        // ✅ เรียกโหลดข้อมูลทันที
+        if (typeof loadHistMonth === 'function') {
+            loadHistMonth();
+        }
     }
 }
 /* =========== SECTION 5: AUTO-UPDATE SYSTEM =========== */
