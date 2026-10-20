@@ -1,11 +1,14 @@
 /* ==========================================================
    Barber-Note v1.1.0 — FULL VERSION + NEW NAVIGATION
+   อัปเดต: 20/10/2026 | ปรับปรุงความเสถียร + ป้องกัน undefined
    ========================================================== */
+
 /* =========== SECTION 1: INITIALIZATION & GLOBAL VARIABLES =========== */
 // 1️⃣ กำหนดตัวแปร GLOBAL ก่อนเสมอ
 const $ = id => document.getElementById(id);
 const BUILD_MARK = "1.0.0-20260917-1715";
 const LAST_UPDATED = "17/09/2026";
+
 window.APP_VERSION = "";
 window.BUILD_NUMBER = "";
 
@@ -13,15 +16,34 @@ window.BUILD_NUMBER = "";
 let db = JSON.parse(localStorage.getItem("barber_db")) || [];
 let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
 let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
+
 let conf = JSON.parse(localStorage.getItem("barber_conf")) || { 
     shop: localStorage.getItem("shopName") || "Barber Shop", 
-    perc: parseFloat(localStorage.getItem("shopPerc")) || 50, 
-    guar: parseFloat(localStorage.getItem("shopGuar")) || 0,
-    theme: localStorage.getItem("shopTheme") || "light",
-    voice: localStorage.getItem("shopVoice") || "female",
-    sound: localStorage.getItem("shopSound") || "on"
+    perc: 50, 
+    guar: 0,
+    theme: "light",
+    voice: "female",
+    sound: "on"
 };
+// ตรวจสอบ/เติมค่าที่ขาดหาย ป้องกันค่าเสีย
+conf = {
+    shop: conf.shop || "Barber Shop",
+    perc: typeof conf.perc === "number" ? conf.perc : 50,
+    guar: typeof conf.guar === "number" ? conf.guar : 0,
+    theme: conf.theme || "light",
+    voice: conf.voice || "female",
+    sound: conf.sound || "on"
+};
+
 let payMethod = "";
+
+// ตรวจสอบฟังก์ชันก่อนเรียกใช้ ป้องกัน ReferenceError
+const safeCall = (fn, ...args) => {
+    if (typeof fn === 'function') {
+        try { fn(...args); }
+        catch (e) { console.error(`❌ ข้อผิดพลาดในฟังก์ชัน:`, e); }
+    }
+};
 
 // 2️⃣ ระบบเวอร์ชัน — รันทันที
 (function initVersion() {
@@ -40,10 +62,15 @@ let payMethod = "";
     
     const renderVersion = () => {
         const verEl = document.getElementById("appVersionDisplay");
-        if (verEl) {
-            const [d, m, y] = LAST_UPDATED.split('/');
+        if (!verEl) return;
+
+        const parts = LAST_UPDATED.split('/');
+        if (parts.length >= 3) {
+            const [d, m, y] = parts;
             const yrBE = (parseInt(y) + 543).toString().slice(-2);
             verEl.innerHTML = `v${window.APP_VERSION} | Update ${d}/${m}/${yrBE}`;
+        } else {
+            verEl.textContent = `v${window.APP_VERSION}`;
         }
     };
     
@@ -55,16 +82,9 @@ let payMethod = "";
     
     console.log(`✅ เวอร์ชันปัจจุบัน: v${window.APP_VERSION} (บิลด์ #${storedBuild})`);
 })();
+
 // 3️⃣ เริ่มทำงานหลัก — DOMContentLoaded ชุดเดียว
 document.addEventListener("DOMContentLoaded", () => {
-    // ตรวจสอบฟังก์ชันก่อนเรียกใช้ ป้องกัน ReferenceError
-    const safeCall = (fn, ...args) => {
-        if (typeof fn === 'function') {
-            try { fn(...args); }
-            catch (e) { console.error(`❌ ข้อผิดพลาดในฟังก์ชัน:`, e); }
-        }
-    };
-
     // คำนวณวันที่ปัจจุบันสดใหม่เสมอ
     const getFreshDate = () => new Date().toISOString().split('T')[0];
     const today = getFreshDate();
@@ -196,11 +216,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const finishUpdate = () => {
             localStorage.setItem("app_v", BUILD_SIGNATURE);
             if (currentStoredVersion) {
-                // แจ้งเตือนเฉพาะเมื่อมีเวอร์ชันเก่าอยู่แล้ว
                 if (typeof notify === 'function') {
                     notify("info", "✨ มีอัปเดตใหม่", "กำลังโหลดเวอร์ชันล่าสุด...");
                 }
-                // หน่วงเวลาและตรวจสอบอีกครั้งก่อนรีเฟรช ป้องกันลูป
                 setTimeout(() => {
                     if (localStorage.getItem("app_v") !== BUILD_SIGNATURE) {
                         window.location.reload(true);
@@ -226,8 +244,8 @@ document.addEventListener("visibilitychange", () => {
         const freshDate = new Date().toISOString().split('T')[0];
         if ($("dateInp") && $("dateInp").value !== freshDate) {
             $("dateInp").value = freshDate;
-            if (typeof renderDay === 'function') renderDay(freshDate);
-            if (typeof loadHistMonth === 'function') loadHistMonth();
+            safeCall(renderDay, freshDate);
+            safeCall(loadHistMonth);
         }
     }
 });
