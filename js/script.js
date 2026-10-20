@@ -2196,16 +2196,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function loadHistMonth() {
     const $ = id => document.getElementById(id);
-    const picker = $("histMonth") || $("monthlyReportPicker");
-    let m = picker ? picker.value : '';
+    // แยกตัวเลือกเดือนสำหรับแต่ละหน้า
+    const pickerSummary = $("histMonth");
+    const pickerReport = $("monthlyReportPicker");
+    
+    // ตรวจสอบว่ากำลังทำงานกับหน้าไหน แล้วดึงค่าเดือนของหน้านั้น
+    let activePicker;
+    if (pickerSummary && pickerSummary.offsetParent !== null) {
+        activePicker = pickerSummary;
+    } else if (pickerReport && pickerReport.offsetParent !== null) {
+        activePicker = pickerReport;
+    } else {
+        activePicker = pickerSummary || pickerReport;
+    }
+    
+    let m = activePicker ? activePicker.value : '';
     
     if (!m) {
         const now = new Date();
         const yyyy = now.getFullYear();
         const mm = String(now.getMonth() + 1).padStart(2, '0');
         m = `${yyyy}-${mm}`;
-        if (picker) picker.value = m;
+        if (pickerSummary) pickerSummary.value = m;
+        if (pickerReport) pickerReport.value = m;
     }
+    
+    // บันทึกค่าแยกตามหน้า
+    if (activePicker === pickerSummary) {
+        localStorage.setItem("summaryViewMonth", m);
+    } else if (activePicker === pickerReport) {
+        localStorage.setItem("reportViewMonth", m);
+    }
+    
     if (typeof archives === 'undefined' || !Array.isArray(archives)) {
         console.warn("loadHistMonth: archives ไม่พร้อมใช้งาน");
         return;
@@ -2425,11 +2447,37 @@ function loadHistMonth() {
     }
 }
 
-// ✅ เพิ่ม: ตรวจจับการเปลี่ยนเดือนและโหลดข้อมูลใหม่
-const monthPicker = document.getElementById("histMonth") || document.getElementById("monthlyReportPicker");
-if (monthPicker) {
-    monthPicker.addEventListener("change", loadHistMonth);
+// ✅ แยกการฟังเหตุการณ์เปลี่ยนเดือน ให้แต่ละหน้าทำงานอิสระกัน
+const pickerSummary = document.getElementById("histMonth");
+const pickerReport = document.getElementById("monthlyReportPicker");
+
+// โหลดค่าที่บันทึกไว้ล่าสุดเมื่อเปิดหน้า
+if (pickerSummary) {
+    const savedSummaryMonth = localStorage.getItem("summaryViewMonth");
+    if (savedSummaryMonth) pickerSummary.value = savedSummaryMonth;
+    pickerSummary.addEventListener("change", loadHistMonth);
 }
+if (pickerReport) {
+    const savedReportMonth = localStorage.getItem("reportViewMonth");
+    if (savedReportMonth) pickerReport.value = savedReportMonth;
+    pickerReport.addEventListener("change", loadHistMonth);
+}
+
+// โหลดข้อมูลเมื่อสลับกลับมาหน้าเดิม
+window.loadSummaryMonth = function() {
+    if (pickerSummary) {
+        const saved = localStorage.getItem("summaryViewMonth");
+        if (saved) pickerSummary.value = saved;
+        loadHistMonth();
+    }
+};
+window.loadReportMonth = function() {
+    if (pickerReport) {
+        const saved = localStorage.getItem("reportViewMonth");
+        if (saved) pickerReport.value = saved;
+        loadHistMonth();
+    }
+};
 function generateMonthlyReport(m, monthTotal, monthBarber, monthShop, monthCount, workDays, offDays, avgCustomerPerDay, weeklyData, hairStats, serviceStats, monthGuarDays, countNew, countRegular, countOffsite) {
     const $ = id => document.getElementById(id);
     weeklyData = weeklyData || {};
