@@ -55,7 +55,6 @@ let payMethod = "";
     
     console.log(`✅ เวอร์ชันปัจจุบัน: v${window.APP_VERSION} (บิลด์ #${storedBuild})`);
 })();
-
 // 3️⃣ เริ่มทำงานหลัก — DOMContentLoaded ชุดเดียว
 document.addEventListener("DOMContentLoaded", () => {
     // ตรวจสอบฟังก์ชันก่อนเรียกใช้ ป้องกัน ReferenceError
