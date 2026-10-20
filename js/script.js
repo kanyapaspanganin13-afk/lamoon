@@ -457,73 +457,38 @@ function goSub(num) {
 }
 
 /* =========== SECTION 4: MAIN TABS =========== */   
-function switchMainTab(pageId, tabId, event) {
-    if (event && event.preventDefault) event.preventDefault();
-    // เพิ่ม: ประกาศ $ ให้ใช้งานได้ในฟังก์ชันนี้
+function switchMainView(viewId, subTab) {
     const $ = id => document.getElementById(id);
     
-    // 1. จัดการสลับ "หน้าหลัก" (Main Pages/Sections)
-    const allPages = document.querySelectorAll('.page-content, section[id^="page-"], .main-page, .app-page');
-    if (allPages.length > 0) {
-        allPages.forEach(p => {
-            p.style.display = 'none';
-            p.classList.remove('active');
-        });
-    }
-    const currentPage = document.getElementById(pageId);
-    if (currentPage) {
-        currentPage.style.display = 'block';
-        currentPage.classList.add('active');
-    }
-    // 2. จัดการสลับ "แท็บย่อย" ภายในหน้านั้น (ถ้ามี tabId)
-    if (tabId && currentPage) {
-        currentPage.querySelectorAll('.tab-panel').forEach(panel => {
-            panel.classList.remove('active');
-            panel.style.display = 'none';
-        });
-        const targetPanel = document.getElementById(tabId);
-        if (targetPanel) {
-            targetPanel.classList.add('active');
-            targetPanel.style.display = 'block';
-        }
-        currentPage.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        
-        // Active ปุ่มแท็บที่ถูกกด
-        if (event && event.currentTarget) {
-            event.currentTarget.classList.add('active');
-        }
-    }
-    // 3. สั่งอัปเดต Bottom Nav
-    if (typeof updateNavDisplay === 'function') {
-        updateNavDisplay(pageId);
-    }
-    // 🟢 4. โหลดข้อมูลแยกตามหน้าและแท็บ
-    const todayYm = new Date().toISOString().slice(0, 7); // เดือนปัจจุบัน YYYY-MM
+    // 1. จัดการซ่อน/แสดงหน้าหลักตาม viewId (เช่น home, workGroup)
+    // ปรับเปลี่ยนตามโครงสร้างฟังก์ชันเดิมที่มีอยู่แล้วในระบบของคุณ
     
-    // CASE A: หน้า "สรุปรายเดือน"
-    if (pageId === 'pageMonthlyReport' || pageId === 'monthlyReport') {
-        if (tabId === 'monthlyTab2') {
-            if (typeof initYearOptions === 'function') initYearOptions();
-            if (typeof renderYearlyIncomeSummary === 'function') renderYearlyIncomeSummary();
-        } else {
-            const pickerReport = $("monthlyReportPicker");
-            const savedReportMonth = localStorage.getItem("reportViewMonth");
-            if (pickerReport) {
-                pickerReport.value = savedReportMonth || pickerReport.value || todayYm;
+    // สมมติว่าหากเลือกกลุ่มงานรายงาน (เช่น viewId === 'workGroup' และ subTab === 2)
+    if (viewId === 'workGroup') {
+        if (subTab === 2) {
+            // หน้าสรุปยอดรวม / รายงาน
+            const pickerSummary = $("histMonth");
+            const todayYm = new Date().toISOString().slice(0, 7);
+            
+            if (pickerSummary) {
+                const savedSummaryMonth = localStorage.getItem("summaryViewMonth");
+                if (savedSummaryMonth && !pickerSummary.value) {
+                    pickerSummary.value = savedSummaryMonth;
+                } else if (!pickerSummary.value) {
+                    pickerSummary.value = todayYm;
+                }
+                localStorage.setItem("summaryViewMonth", pickerSummary.value);
             }
-            if (typeof renderDailyTableReport === 'function') renderDailyTableReport();
-        }
-    } 
-    // CASE B: หน้า "สรุปยอดรวม / วิเคราะห์รายได้"
-    else if (pageId === 'report' || pageId === 'pageReport' || pageId === 'pageSummary') {
-        const pickerSummary = $("histMonth");
-        const savedSummaryMonth = localStorage.getItem("summaryViewMonth");
-        if (pickerSummary) {
-            pickerSummary.value = savedSummaryMonth || pickerSummary.value || todayYm;
-        }
-        // ✅ เรียกโหลดข้อมูลทันที
-        if (typeof loadHistMonth === 'function') {
-            loadHistMonth();
+            
+            // ✅ สั่งโหลดข้อมูลสรุปยอดรวมทันทีที่กดเมนูด้านล่าง
+            if (typeof loadHistMonth === 'function') {
+                loadHistMonth();
+            }
+        } else if (subTab === 1) {
+            // หน้าบันทึก
+            if (typeof renderDailyTableReport === 'function') {
+                renderDailyTableReport();
+            }
         }
     }
 }
