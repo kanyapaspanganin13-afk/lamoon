@@ -210,152 +210,138 @@ document.addEventListener("visibilitychange", () => {
         }
     }
 });
-/* =========== SECTION 1A: BRANCH SYSTEM =========== */
+/* ==========================================================
+   Barber-Note v1.1.0 — NAVIGATION & BRANCH SYSTEM (Optimized)
+   ========================================================== */
+
+// 1️⃣ ระบบสาขา (Branch System)
 const ACTIVE_BRANCH_KEY = "active_branch_name";
 const VIEW_SCOPE_KEY = "view_data_scope";
 
 function getActiveBranch() {
-  return localStorage.getItem(ACTIVE_BRANCH_KEY) 
-      || localStorage.getItem("shopName")  // ✅ สำรองค่าจากชื่อร้านเดิม
-      || "สาขาไม่ระบุ";
+    return localStorage.getItem(ACTIVE_BRANCH_KEY) 
+        || localStorage.getItem("shopName") 
+        || "สาขาไม่ระบุ";
 }
 
 function setActiveBranch(name) {
-  name = (name || "").trim();
-  if (!name) return;
-  
-  localStorage.setItem(ACTIVE_BRANCH_KEY, name);
-  
-  // ✅ อัปเดตทุกส่วนที่เกี่ยวข้อง
-  renderBranchUI();
-  if (typeof renderDay === "function") renderDay();
-  if (typeof renderDailyTableReport === "function") renderDailyTableReport();
-  if (typeof renderMonthReport === "function") renderMonthReport();
-  
-  console.log(`✅ เปลี่ยนสาขา → ${name}`);
+    name = (name || "").trim();
+    if (!name) return;
+    
+    localStorage.setItem(ACTIVE_BRANCH_KEY, name);
+    
+    renderBranchUI();
+    safeCall("renderDay");
+    safeCall("renderDailyTableReport");
+    safeCall("renderMonthReport");
+    
+    console.log(`✅ เปลี่ยนสาขา → ${name}`);
 }
 
 function promptSetupBranch() {
-  const current = getActiveBranch();
-  const newName = prompt("ตั้งชื่อสาขาที่ท่านกำลังทำงาน", current);
-  if (newName && newName.trim()) {
-    setActiveBranch(newName.trim());
-    if (typeof notify === "function") {
-      notify("success", "สำเร็จ", `ทำงานที่: ${newName}`);
+    const current = getActiveBranch();
+    const newName = prompt("ตั้งชื่อสาขาที่ท่านกำลังทำงาน", current);
+    if (newName && newName.trim()) {
+        setActiveBranch(newName.trim());
+        if (typeof notify === "function") {
+            notify("success", "สำเร็จ", `ทำงานที่: ${newName}`);
+        }
     }
-  }
 }
 
 function getViewScope() {
-  return localStorage.getItem(VIEW_SCOPE_KEY) || "all";
+    return localStorage.getItem(VIEW_SCOPE_KEY) || "all";
 }
 
 function setViewScope(mode) {
-  localStorage.setItem(VIEW_SCOPE_KEY, mode);
-  
-  // ✅ รีเฟรชทุกส่วนที่แสดงผล
-  if (typeof renderDay === "function") renderDay();
-  if (typeof renderDailyTableReport === "function") renderDailyTableReport();
-  if (typeof renderMonthReport === "function") renderMonthReport();
+    localStorage.setItem(VIEW_SCOPE_KEY, mode);
+    
+    safeCall("renderDay");
+    safeCall("renderDailyTableReport");
+    safeCall("renderMonthReport");
 }
 
 function renderBranchUI() {
-  const el = document.getElementById("currentBranchDisplay");
-  if (el) el.textContent = getActiveBranch();
-  
-  // ✅ อัปเดตจุดแสดงชื่อสาขาอื่นด้วย
-  document.querySelectorAll('.branch-name-display').forEach(span => {
-    span.textContent = getActiveBranch();
-  });
+    const currentBranch = getActiveBranch();
+    const el = document.getElementById("currentBranchDisplay");
+    if (el) el.textContent = currentBranch;
+    
+    document.querySelectorAll('.branch-name-display').forEach(span => {
+        span.textContent = currentBranch;
+    });
 }
 
 function initBranchSystem() {
-  renderBranchUI();
+    renderBranchUI();
 }
-/* =========== SECTION 2: MAIN NAVIGATION =========== */
+
+
+// 2️⃣ ระบบนำทางหลัก (Main Navigation & Tabs)
 function switchMainTab(pageId, tabId, event) {
     if (event && event.preventDefault) event.preventDefault();
-    // เพิ่ม: ประกาศ $ ให้ใช้งานได้ในฟังก์ชันนี้
-    const $ = id => document.getElementById(id);
     
-    // 1. จัดการสลับ "หน้าหลัก" (Main Pages/Sections)
-    const allPages = document.querySelectorAll('.page-content, section[id^="page-"], .main-page, .app-page');
-    if (allPages.length > 0) {
-        allPages.forEach(p => {
-            p.style.display = 'none';
-            p.classList.remove('active');
-        });
-    }
+    // 1. สลับหน้าหลัก (Main Pages)
+    document.querySelectorAll('.page-content, section[id^="page-"], .main-page, .app-page').forEach(p => {
+        p.style.display = 'none';
+        p.classList.remove('active');
+    });
+    
     const currentPage = document.getElementById(pageId);
     if (currentPage) {
         currentPage.style.display = 'block';
         currentPage.classList.add('active');
     }
-    // 2. จัดการสลับ "แท็บย่อย" ภายในหน้านั้น (ถ้ามี tabId)
+    
+    // 2. สลับแท็บย่อยภายในหน้า (ถ้ามี tabId)
     if (tabId && currentPage) {
         currentPage.querySelectorAll('.tab-panel').forEach(panel => {
             panel.classList.remove('active');
             panel.style.display = 'none';
         });
+        
         const targetPanel = document.getElementById(tabId);
         if (targetPanel) {
             targetPanel.classList.add('active');
             targetPanel.style.display = 'block';
         }
-        currentPage.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         
-        // Active ปุ่มแท็บที่ถูกกด
+        currentPage.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         if (event && event.currentTarget) {
             event.currentTarget.classList.add('active');
         }
     }
-    // 3. สั่งอัปเดต Bottom Nav
+    
+    // 3. อัปเดต Bottom Nav
     if (typeof updateNavDisplay === 'function') {
         updateNavDisplay(pageId);
     }
-    // 🟢 4. โหลดข้อมูลแยกตามหน้าและแท็บ
-    const todayYm = new Date().toISOString().slice(0, 7); // เดือนปัจจุบัน YYYY-MM
     
-    // CASE A: หน้า "สรุปรายเดือน"
+    // 4. โหลดข้อมูลตามหน้าและแท็บที่เลือก
+    const todayYm = new Date().toISOString().slice(0, 7);
+    
     if (pageId === 'pageMonthlyReport' || pageId === 'monthlyReport') {
         if (tabId === 'monthlyTab2') {
-            // แท็บรายได้ย้อนหลัง/รายปี
-            if (typeof initYearOptions === 'function') initYearOptions();
-            if (typeof renderYearlyIncomeSummary === 'function') renderYearlyIncomeSummary();
+            safeCall("initYearOptions");
+            safeCall("renderYearlyIncomeSummary");
         } else {
-            // แท็บรายงานประจำเดือน -> ใช้ monthlyReportPicker
             const pickerReport = $("monthlyReportPicker");
             const savedReportMonth = localStorage.getItem("reportViewMonth");
             if (pickerReport) {
-                if (savedReportMonth) {
-                    pickerReport.value = savedReportMonth;
-                } else if (!pickerReport.value) {
-                    pickerReport.value = todayYm;
-                }
+                pickerReport.value = savedReportMonth || pickerReport.value || todayYm;
             }
-            if (typeof renderDailyTableReport === 'function') renderDailyTableReport();
+            safeCall("renderDailyTableReport");
         }
-    } 
-    // CASE B: หน้า "สรุปยอดรวม / วิเคราะห์รายได้"
-    else if (pageId === 'report' || pageId === 'pageReport' || pageId === 'pageSummary') {
+    } else if (pageId === 'report' || pageId === 'pageReport' || pageId === 'pageSummary') {
         const pickerSummary = $("histMonth");
         const savedSummaryMonth = localStorage.getItem("summaryViewMonth");
         if (pickerSummary) {
-            if (savedSummaryMonth) {
-                pickerSummary.value = savedSummaryMonth;
-            } else if (!pickerSummary.value) {
-                pickerSummary.value = todayYm;
-            }
+            pickerSummary.value = savedSummaryMonth || pickerSummary.value || todayYm;
         }
-        // สั่งโหลดข้อมูลทันที
-        if (typeof loadHistMonth === 'function') {
-            loadHistMonth();
-        }
+        safeCall("loadHistMonth");
     }
 }
 
 function go(p) {
-    const $ = id => document.getElementById(id);
     document.querySelectorAll('.page, .app-page').forEach(pg => {
         pg.classList.remove('active');
         pg.style.display = 'none'; 
@@ -376,130 +362,108 @@ function go(p) {
     
     const dateInpValue = $("dateInp")?.value || new Date().toISOString().split('T')[0];
     if (p === 2) {
-        if (typeof renderDay === 'function') renderDay(dateInpValue);
-        updateDateDisplay(dateInpValue);
-    }
-    if (p === 3) { 
+        safeCall("renderDay", dateInpValue);
+        safeCall("updateDateDisplay", dateInpValue);
+    } else if (p === 3) {
         if ($("accDate") && $("dateInp")) {
             $("accDate").value = $("dateInp").value;
         }
-        if (typeof loadAccountStatus === 'function') {
-            loadAccountStatus(); 
-        }
+        safeCall("loadAccountStatus");
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* ========= SECTION 2.1: BOTTOM NAVIGATION ========= */
+
+// 2.1 Bottom Navigation Display
 function updateNavDisplay(viewName, subNum) {
     const nav = document.querySelector('.bottom-nav');
     if (!nav) return;
-    nav.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-    });
+    
+    nav.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    
     if (viewName === 'home' || viewName === 'pageHome') {
         nav.querySelector('#navHome')?.classList.add('active');
-    }
-    else if (viewName === 'workGroup' || viewName.startsWith('sub')) {
-        let num = subNum;
-        if (!num && typeof viewName === 'string' && viewName.startsWith('sub')) {
-            num = parseInt(viewName.replace('sub', ''), 10);
-        }
-        if (num === 1) nav.querySelector('#nav1')?.classList.add('active');
-        if (num === 2) nav.querySelector('#nav2')?.classList.add('active');
-        if (num === 3) nav.querySelector('#nav3')?.classList.add('active');
-    }
-    else if (viewName === 'settings') {
+    } else if (viewName === 'workGroup' || viewName.startsWith('sub')) {
+        let num = subNum || (typeof viewName === 'string' && viewName.startsWith('sub') ? parseInt(viewName.replace('sub', ''), 10) : null);
+        if (num) nav.querySelector(`#nav${num}`)?.classList.add('active');
+    } else if (viewName === 'settings') {
         nav.querySelector('#navSettings')?.classList.add('active');
     }
 }
 
-/* =========== SECTION 3: SUB-PAGE NAVIGATION =========== */
+
+// 3️⃣ ระบบ Sub-Page Navigation
 function goSub(num) {
-    const $ = id => document.getElementById(id);
     const workPage = document.getElementById('pageWorkGroup');
     if (!workPage) return;
+    
     workPage.querySelectorAll('.sub-page').forEach(page => {
         page.classList.remove('active');
         page.style.display = 'none';
     });
+    
     const target = document.getElementById('p' + num);
     if (!target) return;
+    
     target.classList.add('active');
     target.style.display = 'block';
     updateNavDisplay('sub' + num);
+    
     const dateInput = document.getElementById('dateInp');
     const dInp = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
+    
     if (num === 2) {
-        if (typeof renderDay === 'function') renderDay(dInp);
-        if (typeof updateDateDisplay === 'function') updateDateDisplay(dInp);
-    }
-    if (num === 3) {
+        safeCall("renderDay", dInp);
+        safeCall("updateDateDisplay", dInp);
+    } else if (num === 3) {
         const accDate = document.getElementById('accDate');
         if (accDate && dateInput) accDate.value = dateInput.value;
-        if (typeof loadAccountStatus === 'function') loadAccountStatus();
+        safeCall("loadAccountStatus");
     }
 }
 
-/* =========== SECTION 4: MAIN TABS =========== */    
+
+// 4️⃣ ระบบ Main Tabs (ย่อย)
 function switchMainView(viewId, subTab) {
-    const $ = id => document.getElementById(id);
-    
     if (viewId === 'workGroup') {
+        const todayYm = new Date().toISOString().slice(0, 7);
         if (subTab === 2) {
             const pickerSummary = $("histMonth");
-            const todayYm = new Date().toISOString().slice(0, 7);
-            
             if (pickerSummary) {
                 const savedSummaryMonth = localStorage.getItem("summaryViewMonth");
-                if (savedSummaryMonth && !pickerSummary.value) {
-                    pickerSummary.value = savedSummaryMonth;
-                } else if (!pickerSummary.value) {
-                    pickerSummary.value = todayYm;
-                }
+                pickerSummary.value = savedSummaryMonth || pickerSummary.value || todayYm;
                 localStorage.setItem("summaryViewMonth", pickerSummary.value);
             }
-            
-            if (typeof loadHistMonth === 'function') {
-                loadHistMonth();
-            }
+            safeCall("loadHistMonth");
         } else if (subTab === 1) {
-            if (typeof renderDailyTableReport === 'function') {
-                renderDailyTableReport();
-            }
+            safeCall("renderDailyTableReport");
         }
     }
 }
-/* =========== SECTION 5: AUTO-UPDATE SYSTEM =========== */
+
+
+// 5️⃣ ระบบ Auto-Update System
 (function initAutoUpdateSystem() {
-    // สร้างลายเซ็นจาก BUILD_MARK โดยตรง — แม่นยำที่สุด
-    const BUILD_SIGNATURE = BUILD_MARK;
+    const BUILD_SIGNATURE = typeof BUILD_MARK !== 'undefined' ? BUILD_MARK : "1.0.0";
     const currentStoredVersion = localStorage.getItem("app_v");
     
-    // ตรวจพบเวอร์ชันใหม่
     if (currentStoredVersion !== BUILD_SIGNATURE) {
         console.log(`[AutoUpdate] พบเวอร์ชันใหม่: ${currentStoredVersion || '---'} → ${BUILD_SIGNATURE}`);
         
-        // ล้างแคช + บันทึก + รีโหลด
         const finishUpdateProcess = () => {
             localStorage.setItem("app_v", BUILD_SIGNATURE);
-            
-            // แจ้งเตือน + รีโหลด เฉพาะเมื่อมีเวอร์ชันเก่าอยู่แล้ว
             if (currentStoredVersion) {
                 if (typeof notify === 'function') {
                     notify("info", "✨ มีอัปเดตใหม่", "กำลังโหลดเวอร์ชันล่าสุด...");
                 }
-                // บังคับรีโหลดข้ามแคช เพิ่มการป้องกันลูป
                 setTimeout(() => {
-                    // ตรวจสอบอีกครั้งก่อนรีเฟรช
                     if (localStorage.getItem("app_v") !== BUILD_SIGNATURE) {
-                        window.location.reload(true);
+                        window.location.reload();
                     }
                 }, 600);
             }
         };
         
-        // ล้าง Cache API ถ้ามี
         if ('caches' in window) {
             caches.keys()
                 .then(cacheNames => Promise.all(cacheNames.map(name => caches.delete(name))))
