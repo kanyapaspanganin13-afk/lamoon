@@ -1,14 +1,26 @@
 /* ==========================================================
-   Barber-Note v1.1.0 — FULL VERSION + NEW NAVIGATION (Fixed)
+   Barber-Note v1.1.0 — FULL VERSION (Cleaned & Optimized)
    ========================================================== */
-/* =========== SECTION 1: INITIALIZATION & GLOBAL VARIABLES =========== */
+
+// 0️⃣ แก้ไขปัญหา Trusted Types ในระดับเบราว์เซอร์ตั้งแต่เริ่มต้น
+if (window.trustedTypes && window.trustedTypes.createPolicy) {
+    if (!window.trustedTypes.defaultPolicy) {
+        window.trustedTypes.createPolicy('default', {
+            createHTML: (string) => string,
+            createScript: (string) => string,
+            createScriptURL: (string) => string,
+        });
+    }
+}
+
+// 1️⃣ ตัวแปร Global และฟังก์ชันช่วยเหลือพื้นฐาน
 const $ = id => document.getElementById(id);
 const BUILD_MARK = "1.0.0-20260917-1715";
 const LAST_UPDATED = "17/09/2026";
 window.APP_VERSION = "";
 window.BUILD_NUMBER = "";
 
-// โหลดข้อมูลพร้อมค่าตั้งต้นที่ปลอดภัย
+// โหลดข้อมูลพร้อมค่าตั้งต้นที่ปลอดภัยจาก localStorage
 let db = JSON.parse(localStorage.getItem("barber_db")) || [];
 let archives = JSON.parse(localStorage.getItem("barber_archives")) || [];
 let account = JSON.parse(localStorage.getItem("barber_account")) || { balance: 0, logs: [] };
@@ -22,7 +34,21 @@ let conf = JSON.parse(localStorage.getItem("barber_conf")) || {
 };
 let payMethod = "";
 
-// 2️⃣ ระบบเวอร์ชัน — รันทันที
+// ฟังก์ชันเรียกใช้อย่างปลอดภัย ป้องกันแอปพังหากยังไม่ประกาศฟังก์ชัน
+const safeCall = (fnName, ...args) => {
+    const fn = window[fnName] || (typeof window[fnName] !== 'undefined' ? window[fnName] : null);
+    if (typeof fn === 'function') {
+        try { return fn(...args); } 
+        catch (e) { console.error(`❌ ข้อผิดพลาดในฟังก์ชัน ${fnName}:`, e); }
+    } else {
+        console.warn(`⚠️ ไม่พบฟังก์ชัน: ${fnName}`);
+    }
+};
+
+const getFreshDate = () => new Date().toISOString().split('T')[0];
+
+
+// 2️⃣ ระบบเวอร์ชัน (รันทันที)
 (function initVersion() {
     const storedMark = localStorage.getItem("build_mark") || "";
     let storedBuild = parseInt(localStorage.getItem("build_num") || "0");
@@ -31,14 +57,14 @@ let payMethod = "";
         storedBuild = storedBuild <= 0 ? 1 : storedBuild + 1;
         localStorage.setItem("build_mark", BUILD_MARK);
         localStorage.setItem("build_num", String(storedBuild));
-        console.log(`🔄 พบการเปลี่ยนแปลงโค้ด — อัปเดตบิลด์ #${storedBuild}`);
+        console.log(`🔄 อัปเดตบิลด์ใหม่ #${storedBuild}`);
     }
     
     window.BUILD_NUMBER = storedBuild;
     window.APP_VERSION = BUILD_MARK.split('-')[0] + `.${storedBuild}`;
     
     const renderVersion = () => {
-        const verEl = document.getElementById("appVersionDisplay");
+        const verEl = $("appVersionDisplay");
         if (verEl) {
             const [d, m, y] = LAST_UPDATED.split('/');
             const yrBE = (parseInt(y) + 543).toString().slice(-2);
@@ -51,186 +77,136 @@ let payMethod = "";
     } else {
         renderVersion();
     }
-    
-    console.log(`✅ เวอร์ชันปัจจุบัน: v${window.APP_VERSION} (บิลด์ #${storedBuild})`);
 })();
 
-// 3️⃣ เริ่มทำงานหลัก — DOMContentLoaded ชุดเดียว
-document.addEventListener("DOMContentLoaded", () => {
-    // ปรับปรุง safeCall ให้แจ้งเตือนชัดเจนขึ้นหากหาฟังก์ชันไม่พบ
-    const safeCall = (fnName, ...args) => {
-        const fn = window[fnName] || eval(`typeof ${fnName} !== 'undefined' ? ${fnName} : null`);
-        if (typeof fn === 'function') {
-            try { 
-                return fn(...args); 
-            } catch (e) { 
-                console.error(`❌ ข้อผิดพลาดในฟังก์ชัน ${fnName}:`, e); 
-            }
-        } else {
-            console.warn(`⚠️ ไม่พบฟังก์ชัน: ${fnName} (โปรดตรวจสอบว่าได้ประกาศไว้หรือยัง)`);
-        }
-    };
 
-    const getFreshDate = () => new Date().toISOString().split('T')[0];
+// 3️⃣ ระบบทำงานหลักครั้งเดียวเมื่อ DOM พร้อมใช้งาน
+document.addEventListener("DOMContentLoaded", () => {
     const today = getFreshDate();
     
-    // --- ตั้งค่าวันที่ ---
+    // --- ตั้งค่าวันที่และเวลาเริ่มต้น ---
     if ($("dateInp")) { 
         $("dateInp").value = today; 
         safeCall("updateDateDisplay", today);
     }
     if ($("accDate")) $("accDate").value = today;
     
-    // --- ตั้งค่าธีม ---
+    const now = new Date();
+    const curTime = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+    if ($("tStart")) $("tStart").value = curTime;
+    if ($("tEnd")) $("tEnd").value = curTime;
+
+    // --- ตั้งค่าธีมและชื่อร้าน ---
     if (conf.theme) safeCall("applyTheme", conf.theme);
     
-    // --- แสดงชื่อร้าน ---
     const savedShopName = localStorage.getItem("shopName") || conf.shop || "BARBER SHOP";
     if ($("shopTitleDisplay")) $("shopTitleDisplay").innerText = savedShopName;
     document.querySelectorAll('.shop-title-text, .shop-name-display').forEach(el => {
         el.innerText = savedShopName;
     });
-    
-    // --- ตั้งค่าเวลา ---
-    const now = new Date();
-    const curTime = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
-    if ($("tStart")) $("tStart").value = curTime;
-    if ($("tEnd")) $("tEnd").value = curTime;
-    
-    // --- เริ่มระบบสาขา ---
-    safeCall("initBranchSystem");
-    
-    // --- อัปเดตข้อมูลเก่าให้มีชื่อสาขา ---
-    (function migrateOldData() {
-        const currentBranch = localStorage.getItem("active_branch_name")
-                            || localStorage.getItem("shopName")
-                            || "สาขาไม่ระบุ";
-        let changed = false;
-        
-        if (Array.isArray(db)) {
-            db.forEach(item => {
-                if (!item.branch || item.branch === "undefined") {
-                    item.branch = currentBranch;
-                    changed = true;
-                }
-            });
-        }
-        
-        if (Array.isArray(archives)) {
-            archives.forEach(day => {
-                if (!day.branch || day.branch === "undefined") {
-                    day.branch = currentBranch;
-                    changed = true;
-                }
-                if (day.details && Array.isArray(day.details)) {
-                    day.details.forEach(d => {
-                        if (!d.branch || d.branch === "undefined") d.branch = currentBranch;
-                    });
-                }
-            });
-        }
-        
-        if (changed) {
-            safeCall("saveDB");
-            console.log("✅ อัปเดตข้อมูลเก่าเรียบร้อย:", currentBranch);
-        }
-    })();
-    
-    // --- โหลดข้อมูลหน้าแรก ---
-    safeCall("renderDay", today);
-    safeCall("loadAccountStatus");
-    safeCall("goSub", 1);
-    
-    // --- ตั้งค่าเดือนเริ่มต้น ---
-    const nowDate = new Date();
-    const currentMonth = `${nowDate.getFullYear()}-${String(nowDate.getMonth() + 1).padStart(2,'0')}`;
+
+    // --- ตั้งค่าเดือนเริ่มต้นสำหรับตัวเลือกรายงาน ---
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,'0')}`;
     if ($("histMonth")) $("histMonth").value = currentMonth;
     if ($("monthlyReportPicker")) $("monthlyReportPicker").value = currentMonth;
     
     if ($("compMonth1")) {
-        const prevMonthDate = new Date(nowDate.getFullYear(), nowDate.getMonth() - 1, 1);
-        const prevMonth = `${prevMonthDate.getFullYear()}-${String(prevMonthDate.getMonth() + 1).padStart(2,'0')}`;
-        $("compMonth1").value = prevMonth;
+        const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        $("compMonth1").value = `${prevMonthDate.getFullYear()}-${String(prevMonthDate.getMonth() + 1).padStart(2,'0')}`;
     }
     if ($("compMonth2")) $("compMonth2").value = currentMonth;
-    
-    // --- ตั้งค่าเสียง ---
+
+    // --- ตั้งค่าเสียงและการแสดงผลบนมือถือ ---
     if (conf.sound === "off") {
         document.body.classList.add("muted");
     } else {
         document.body.classList.remove("muted");
     }
     
-    // --- มือถือ ---
     const viewport = document.querySelector('meta[name="viewport"]');
     if (viewport) {
         viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
     }
-    
-    // --- ผูกเหตุการณ์เปลี่ยนเดือน ---
+
+    // --- ระบบอัปเดตข้อมูลเก่าให้มีชื่อสาขา (Migration) ---
+    (function migrateOldData() {
+        const currentBranch = localStorage.getItem("active_branch_name") || savedShopName;
+        let changed = false;
+        
+        db.forEach(item => {
+            if (!item.branch || item.branch === "undefined") { item.branch = currentBranch; changed = true; }
+        });
+        
+        archives.forEach(day => {
+            if (!day.branch || day.branch === "undefined") { day.branch = currentBranch; changed = true; }
+            if (Array.isArray(day.details)) {
+                day.details.forEach(d => {
+                    if (!d.branch || d.branch === "undefined") { d.branch = currentBranch; changed = true; }
+                });
+            }
+        });
+        
+        if (changed) {
+            safeCall("saveDB");
+            console.log("✅ อัปเดตข้อมูลสาขาเรียบร้อย");
+        }
+    })();
+
+    // --- เริ่มต้นระบบสาขาและโหลดข้อมูลหน้าแรก ---
+    safeCall("initBranchSystem");
+    safeCall("renderDay", today);
+    safeCall("loadAccountStatus");
+    safeCall("goSub", 1);
+
+    // --- ผูกเหตุการณ์เปลี่ยนเดือน (รวมไว้ที่เดียว) ---
     const handleMonthChange = (e) => {
-        const selectedMonth = e.target.value;
-        if ($("histMonth")) $("histMonth").value = selectedMonth;
-        if ($("monthlyReportPicker")) $("monthlyReportPicker").value = selectedMonth;
+        const val = e.target.value;
+        if ($("histMonth")) $("histMonth").value = val;
+        if ($("monthlyReportPicker")) $("monthlyReportPicker").value = val;
         safeCall("loadHistMonth");
         safeCall("renderDailyTableReport");
     };
-    
-    if ($("monthlyReportPicker")) {
-        $("monthlyReportPicker").addEventListener('change', handleMonthChange);
-    }
-    if ($("histMonth")) {
-        $("histMonth").addEventListener('change', handleMonthChange);
-    }
-    
-    // --- ซ่อนหน้าโหลด ---
+
+    if ($("monthlyReportPicker")) $("monthlyReportPicker").addEventListener('change', handleMonthChange);
+    if ($("histMonth")) $("histMonth").addEventListener('change', handleMonthChange);
+
+    // --- ซ่อนหน้าจอโหลด ---
     const loadingScreen = $("loadingScreen");
     if (loadingScreen) loadingScreen.style.display = "none";
     
-    console.log(`✅ โหลดสมบูรณ์ — เวอร์ชัน: v${window.APP_VERSION}`);
+    console.log(`✅ โหลดสมบูรณ์ — v${window.APP_VERSION}`);
 });
 
-// 4️⃣ ระบบ Auto Update (ปรับปรุงความเสถียร)
+
+// 4️⃣ ระบบ Auto Update
 (function autoUpdate() {
-    const BUILD_SIGNATURE = BUILD_MARK;
     const currentStoredVersion = localStorage.getItem("app_v");
-    
-    if (currentStoredVersion !== BUILD_SIGNATURE) {
-        console.log(`[AutoUpdate] พบเวอร์ชันใหม่: ${currentStoredVersion || '---'} → ${BUILD_SIGNATURE}`);
-        
+    if (currentStoredVersion !== BUILD_MARK) {
         const finishUpdate = () => {
-            localStorage.setItem("app_v", BUILD_SIGNATURE);
+            localStorage.setItem("app_v", BUILD_MARK);
             if (currentStoredVersion) {
-                if (typeof notify === 'function') {
-                    notify("info", "✨ มีอัปเดตใหม่", "กำลังโหลดเวอร์ชันล่าสุด...");
-                }
-                setTimeout(() => {
-                    if (localStorage.getItem("app_v") !== BUILD_SIGNATURE) {
-                        window.location.reload(); // ตัด true ออกเพื่อความเข้ากันได้กับเบราว์เซอร์ยุคใหม่
-                    }
-                }, 800);
+                if (typeof notify === 'function') notify("info", "✨ มีอัปเดตใหม่", "กำลังโหลดเวอร์ชันล่าสุด...");
+                setTimeout(() => window.location.reload(), 800);
             }
         };
         
         if ('caches' in window) {
-            caches.keys()
-                .then(names => Promise.all(names.map(name => caches.delete(name))))
-                .then(finishUpdate)
-                .catch(finishUpdate);
+            caches.keys().then(names => Promise.all(names.map(name => caches.delete(name)))).then(finishUpdate).catch(finishUpdate);
         } else {
             finishUpdate();
         }
     }
 })();
 
-// 5️⃣ ระบบตรวจจับเปิดแอปกลับขึ้นมาข้ามวัน (Resume Support)
+
+// 5️⃣ ระบบตรวจจับเปิดแอปกลับขึ้นมาข้ามวัน
 document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
-        const freshDate = new Date().toISOString().split('T')[0];
+        const freshDate = getFreshDate();
         if ($("dateInp") && $("dateInp").value !== freshDate) {
             $("dateInp").value = freshDate;
-            if (typeof renderDay === 'function') renderDay(freshDate);
-            if (typeof loadHistMonth === 'function') loadHistMonth();
+            safeCall("renderDay", freshDate);
+            safeCall("loadHistMonth");
         }
     }
 });
