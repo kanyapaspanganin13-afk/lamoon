@@ -211,520 +211,624 @@ document.addEventListener("visibilitychange", () => {
     }
 });
 
-/* =========== SECTION 1: BRANCH SYSTEM =========== */
+/* =========== SECTION 1A: BRANCH SYSTEM =========== */
 const ACTIVE_BRANCH_KEY = "active_branch_name";
 const VIEW_SCOPE_KEY = "view_data_scope";
 
 function getActiveBranch() {
-    return localStorage.getItem(ACTIVE_BRANCH_KEY) 
-        || localStorage.getItem("shopName") 
-        || "สาขาไม่ระบุ";
+  return localStorage.getItem(ACTIVE_BRANCH_KEY) 
+      || localStorage.getItem("shopName")  // ✅ สำรองค่าจากชื่อร้านเดิม
+      || "สาขาไม่ระบุ";
 }
 
 function setActiveBranch(name) {
-    name = (name || "").trim();
-    if (!name) return;
-    
-    localStorage.setItem(ACTIVE_BRANCH_KEY, name);
-    
-    renderBranchUI();
-    if (typeof renderDay === "function") renderDay();
-    if (typeof renderDailyTableReport === "function") renderDailyTableReport();
-    if (typeof renderMonthReport === "function") renderMonthReport();
-    
-    console.log(`✅ เปลี่ยนสาขา → ${name}`);
+  name = (name || "").trim();
+  if (!name) return;
+  
+  localStorage.setItem(ACTIVE_BRANCH_KEY, name);
+  
+  // ✅ อัปเดตทุกส่วนที่เกี่ยวข้อง
+  renderBranchUI();
+  if (typeof renderDay === "function") renderDay();
+  if (typeof renderDailyTableReport === "function") renderDailyTableReport();
+  if (typeof renderMonthReport === "function") renderMonthReport();
+  
+  console.log(`✅ เปลี่ยนสาขา → ${name}`);
 }
 
 function promptSetupBranch() {
-    const current = getActiveBranch();
-    const newName = prompt("ตั้งชื่อสาขาที่ท่านกำลังทำงาน", current);
-    if (newName && newName.trim()) {
-        setActiveBranch(newName.trim());
-        if (typeof notify === "function") {
-            notify("success", "สำเร็จ", `ทำงานที่: ${newName}`);
-        }
-    }
+  const current = getActiveBranch();
+  const newName = prompt("ตั้งชื่อสาขาที่ท่านกำลังทำงาน", current);
+  if (newName && newName.trim()) {
+    setActiveBranch(newName.trim());
+    if (typeof notify === "function") {
+      notify("success", "สำเร็จ", `ทำงานที่: ${newName}`);
+    }
+  }
 }
 
 function getViewScope() {
-    return localStorage.getItem(VIEW_SCOPE_KEY) || "all";
+  return localStorage.getItem(VIEW_SCOPE_KEY) || "all";
 }
 
 function setViewScope(mode) {
-    localStorage.setItem(VIEW_SCOPE_KEY, mode);
-    
-    if (typeof renderDay === "function") renderDay();
-    if (typeof renderDailyTableReport === "function") renderDailyTableReport();
-    if (typeof renderMonthReport === "function") renderMonthReport();
+  localStorage.setItem(VIEW_SCOPE_KEY, mode);
+  
+  // ✅ รีเฟรชทุกส่วนที่แสดงผล
+  if (typeof renderDay === "function") renderDay();
+  if (typeof renderDailyTableReport === "function") renderDailyTableReport();
+  if (typeof renderMonthReport === "function") renderMonthReport();
 }
 
 function renderBranchUI() {
-    const currentBranch = getActiveBranch();
-    const el = document.getElementById("currentBranchDisplay");
-    if (el) el.textContent = currentBranch;
-    
-    document.querySelectorAll('.branch-name-display').forEach(span => {
-        span.textContent = currentBranch;
-    });
+  const el = document.getElementById("currentBranchDisplay");
+  if (el) el.textContent = getActiveBranch();
+  
+  // ✅ อัปเดตจุดแสดงชื่อสาขาอื่นด้วย
+  document.querySelectorAll('.branch-name-display').forEach(span => {
+    span.textContent = getActiveBranch();
+  });
 }
 
 function initBranchSystem() {
-    renderBranchUI();
+  renderBranchUI();
 }
-
-
-/* =========== SECTION 2: MAIN NAVIGATION & TABS =========== */
+/* =========== SECTION 2: MAIN NAVIGATION =========== */
 function switchMainTab(pageId, tabId, event) {
-    if (event && event.preventDefault) event.preventDefault();
-    const $ = id => document.getElementById(id);
-    
-    // 1. จัดการสลับหน้าหลัก (Main Pages/Sections)
-    document.querySelectorAll('.page-content, section[id^="page-"], .main-page, .app-page').forEach(p => {
-        p.style.display = 'none';
-        p.classList.remove('active');
-    });
-    
-    const currentPage = $(pageId);
-    if (currentPage) {
-        currentPage.style.display = 'block';
-        currentPage.classList.add('active');
-    }
-    
-    // 2. จัดการสลับแท็บย่อยภายในหน้า (ถ้ามี tabId)
-    if (tabId && currentPage) {
-        currentPage.querySelectorAll('.tab-panel').forEach(panel => {
-            panel.classList.remove('active');
-            panel.style.display = 'none';
-        });
-        
-        const targetPanel = $(tabId);
-        if (targetPanel) {
-            targetPanel.classList.add('active');
-            targetPanel.style.display = 'block';
-        }
-        
-        currentPage.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        if (event && event.currentTarget) {
-            event.currentTarget.classList.add('active');
-        }
-    }
-    
-    // 3. อัปเดตแถบนำทางด้านล่าง (Bottom Nav)
-    if (typeof updateNavDisplay === 'function') {
-        updateNavDisplay(pageId);
-    }
-    
-    // 4. โหลดข้อมูลอัตโนมัติตามหน้าและแท็บที่เลือก
-    const todayYm = new Date().toISOString().slice(0, 7);
-    
-    if (pageId === 'pageMonthlyReport' || pageId === 'monthlyReport') {
-        if (tabId === 'monthlyTab2') {
-            if (typeof initYearOptions === 'function') initYearOptions();
-            if (typeof renderYearlyIncomeSummary === 'function') renderYearlyIncomeSummary();
-        } else {
-            const pickerReport = $("monthlyReportPicker");
-            const savedReportMonth = localStorage.getItem("reportViewMonth");
-            if (pickerReport) {
-                pickerReport.value = savedReportMonth || pickerReport.value || todayYm;
-            }
-            if (typeof renderDailyTableReport === 'function') renderDailyTableReport();
-        }
-    } else if (pageId === 'report' || pageId === 'pageReport' || pageId === 'pageSummary') {
-        const pickerSummary = $("histMonth");
-        const savedSummaryMonth = localStorage.getItem("summaryViewMonth");
-        if (pickerSummary) {
-            pickerSummary.value = savedSummaryMonth || pickerSummary.value || todayYm;
-        }
-        if (typeof loadHistMonth === 'function') loadHistMonth();
-    }
+    if (event && event.preventDefault) event.preventDefault();
+    // เพิ่ม: ประกาศ $ ให้ใช้งานได้ในฟังก์ชันนี้
+    const $ = id => document.getElementById(id);
+    
+    // 1. จัดการสลับ "หน้าหลัก" (Main Pages/Sections)
+    const allPages = document.querySelectorAll('.page-content, section[id^="page-"], .main-page, .app-page');
+    if (allPages.length > 0) {
+        allPages.forEach(p => {
+            p.style.display = 'none';
+            p.classList.remove('active');
+        });
+    }
+    const currentPage = document.getElementById(pageId);
+    if (currentPage) {
+        currentPage.style.display = 'block';
+        currentPage.classList.add('active');
+    }
+    // 2. จัดการสลับ "แท็บย่อย" ภายในหน้านั้น (ถ้ามี tabId)
+    if (tabId && currentPage) {
+        currentPage.querySelectorAll('.tab-panel').forEach(panel => {
+            panel.classList.remove('active');
+            panel.style.display = 'none';
+        });
+        const targetPanel = document.getElementById(tabId);
+        if (targetPanel) {
+            targetPanel.classList.add('active');
+            targetPanel.style.display = 'block';
+        }
+        currentPage.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        
+        // Active ปุ่มแท็บที่ถูกกด
+        if (event && event.currentTarget) {
+            event.currentTarget.classList.add('active');
+        }
+    }
+    // 3. สั่งอัปเดต Bottom Nav
+    if (typeof updateNavDisplay === 'function') {
+        updateNavDisplay(pageId);
+    }
+    // 🟢 4. โหลดข้อมูลแยกตามหน้าและแท็บ
+    const todayYm = new Date().toISOString().slice(0, 7); // เดือนปัจจุบัน YYYY-MM
+    
+    // CASE A: หน้า "สรุปรายเดือน"
+    if (pageId === 'pageMonthlyReport' || pageId === 'monthlyReport') {
+        if (tabId === 'monthlyTab2') {
+            // แท็บรายได้ย้อนหลัง/รายปี
+            if (typeof initYearOptions === 'function') initYearOptions();
+            if (typeof renderYearlyIncomeSummary === 'function') renderYearlyIncomeSummary();
+        } else {
+            // แท็บรายงานประจำเดือน -> ใช้ monthlyReportPicker
+            const pickerReport = $("monthlyReportPicker");
+            const savedReportMonth = localStorage.getItem("reportViewMonth");
+            if (pickerReport) {
+                if (savedReportMonth) {
+                    pickerReport.value = savedReportMonth;
+                } else if (!pickerReport.value) {
+                    pickerReport.value = todayYm;
+                }
+            }
+            if (typeof renderDailyTableReport === 'function') renderDailyTableReport();
+        }
+    } 
+    // CASE B: หน้า "สรุปยอดรวม / วิเคราะห์รายได้"
+    else if (pageId === 'report' || pageId === 'pageReport' || pageId === 'pageSummary') {
+        const pickerSummary = $("histMonth");
+        const savedSummaryMonth = localStorage.getItem("summaryViewMonth");
+        if (pickerSummary) {
+            if (savedSummaryMonth) {
+                pickerSummary.value = savedSummaryMonth;
+            } else if (!pickerSummary.value) {
+                pickerSummary.value = todayYm;
+            }
+        }
+        // สั่งโหลดข้อมูลทันที
+        if (typeof loadHistMonth === 'function') {
+            loadHistMonth();
+        }
+    }
 }
 
+function go(p) {
+    const $ = id => document.getElementById(id);
+    document.querySelectorAll('.page, .app-page').forEach(pg => {
+        pg.classList.remove('active');
+        pg.style.display = 'none'; 
+    });
+    
+    const targetPage = document.getElementById('p' + p) || document.getElementById('page' + p);
+    if (targetPage) {
+        targetPage.classList.add('active');
+        targetPage.style.display = 'block';
+    }
+    
+    document.querySelectorAll('.nav-item').forEach((btn, i) => {
+        const isSelected = (i + 1) === p;
+        btn.classList.toggle('active', isSelected);
+        btn.style.color = isSelected ? 'var(--accent)' : 'var(--text)';
+        btn.style.opacity = isSelected ? '1' : '0.5';
+    });
+    
+    const dateInpValue = $("dateInp")?.value || new Date().toISOString().split('T')[0];
+    if (p === 2) {
+        if (typeof renderDay === 'function') renderDay(dateInpValue);
+        updateDateDisplay(dateInpValue);
+    }
+    if (p === 3) { 
+        if ($("accDate") && $("dateInp")) {
+            $("accDate").value = $("dateInp").value;
+        }
+        if (typeof loadAccountStatus === 'function') {
+            loadAccountStatus(); 
+        }
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-/* =========== SECTION 3: SUB-PAGE & BOTTOM NAVIGATION =========== */
+/* ========= SECTION 2.1: BOTTOM NAVIGATION ========= */
 function updateNavDisplay(viewName, subNum) {
-    const nav = document.querySelector('.bottom-nav');
-    if (!nav) return;
-    
-    nav.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    
-    if (viewName === 'home' || viewName === 'pageHome') {
-        nav.querySelector('#navHome')?.classList.add('active');
-    } else if (viewName === 'workGroup' || viewName.startsWith('sub')) {
-        let num = subNum;
-        if (!num && typeof viewName === 'string' && viewName.startsWith('sub')) {
-            num = parseInt(viewName.replace('sub', ''), 10);
-        }
-        if (num) nav.querySelector(`#nav${num}`)?.classList.add('active');
-    } else if (viewName === 'settings') {
-        nav.querySelector('#navSettings')?.classList.add('active');
-    }
+    const nav = document.querySelector('.bottom-nav');
+    if (!nav) return;
+    nav.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    if (viewName === 'home' || viewName === 'pageHome') {
+        nav.querySelector('#navHome')?.classList.add('active');
+    }
+    else if (viewName === 'workGroup' || viewName.startsWith('sub')) {
+        let num = subNum;
+        if (!num && typeof viewName === 'string' && viewName.startsWith('sub')) {
+            num = parseInt(viewName.replace('sub', ''), 10);
+        }
+        if (num === 1) nav.querySelector('#nav1')?.classList.add('active');
+        if (num === 2) nav.querySelector('#nav2')?.classList.add('active');
+        if (num === 3) nav.querySelector('#nav3')?.classList.add('active');
+    }
+    else if (viewName === 'settings') {
+        nav.querySelector('#navSettings')?.classList.add('active');
+    }
 }
 
+/* =========== SECTION 3: SUB-PAGE NAVIGATION =========== */
 function goSub(num) {
-    const workPage = document.getElementById('pageWorkGroup');
-    if (!workPage) return;
-    
-    workPage.querySelectorAll('.sub-page').forEach(page => {
-        page.classList.remove('active');
-        page.style.display = 'none';
-    });
-    
-    const target = document.getElementById('p' + num);
-    if (!target) return;
-    
-    target.classList.add('active');
-    target.style.display = 'block';
-    updateNavDisplay('sub' + num);
-    
-    const dateInput = document.getElementById('dateInp');
-    const dInp = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
-    
-    if (num === 2) {
-        if (typeof renderDay === 'function') renderDay(dInp);
-        if (typeof updateDateDisplay === 'function') updateDateDisplay(dInp);
-    } else if (num === 3) {
-        const accDate = document.getElementById('accDate');
-        if (accDate && dateInput) accDate.value = dateInput.value;
-        if (typeof loadAccountStatus === 'function') loadAccountStatus();
-    }
+    const $ = id => document.getElementById(id);
+    const workPage = document.getElementById('pageWorkGroup');
+    if (!workPage) return;
+    workPage.querySelectorAll('.sub-page').forEach(page => {
+        page.classList.remove('active');
+        page.style.display = 'none';
+    });
+    const target = document.getElementById('p' + num);
+    if (!target) return;
+    target.classList.add('active');
+    target.style.display = 'block';
+    updateNavDisplay('sub' + num);
+    const dateInput = document.getElementById('dateInp');
+    const dInp = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
+    if (num === 2) {
+        if (typeof renderDay === 'function') renderDay(dInp);
+        if (typeof updateDateDisplay === 'function') updateDateDisplay(dInp);
+    }
+    if (num === 3) {
+        const accDate = document.getElementById('accDate');
+        if (accDate && dateInput) accDate.value = dateInput.value;
+        if (typeof loadAccountStatus === 'function') loadAccountStatus();
+    }
 }
 
-
-/* =========== SECTION 4: AUTO-UPDATE SYSTEM =========== */
+/* =========== SECTION 4: MAIN TABS =========== */    
+function switchMainView(viewId, subTab) {
+    const $ = id => document.getElementById(id);
+    
+    if (viewId === 'workGroup') {
+        if (subTab === 2) {
+            const pickerSummary = $("histMonth");
+            const todayYm = new Date().toISOString().slice(0, 7);
+            
+            if (pickerSummary) {
+                const savedSummaryMonth = localStorage.getItem("summaryViewMonth");
+                if (savedSummaryMonth && !pickerSummary.value) {
+                    pickerSummary.value = savedSummaryMonth;
+                } else if (!pickerSummary.value) {
+                    pickerSummary.value = todayYm;
+                }
+                localStorage.setItem("summaryViewMonth", pickerSummary.value);
+            }
+            
+            if (typeof loadHistMonth === 'function') {
+                loadHistMonth();
+            }
+        } else if (subTab === 1) {
+            if (typeof renderDailyTableReport === 'function') {
+                renderDailyTableReport();
+            }
+        }
+    }
+}
+/* =========== SECTION 5: AUTO-UPDATE SYSTEM =========== */
 (function initAutoUpdateSystem() {
-    const BUILD_SIGNATURE = typeof BUILD_MARK !== 'undefined' ? BUILD_MARK : "1.0.0";
-    const currentStoredVersion = localStorage.getItem("app_v");
-    
-    if (currentStoredVersion !== BUILD_SIGNATURE) {
-        console.log(`[AutoUpdate] พบเวอร์ชันใหม่: ${currentStoredVersion || '---'} → ${BUILD_SIGNATURE}`);
-        
-        const finishUpdateProcess = () => {
-            localStorage.setItem("app_v", BUILD_SIGNATURE);
-            if (currentStoredVersion) {
-                if (typeof notify === 'function') {
-                    notify("info", "✨ มีอัปเดตใหม่", "กำลังโหลดเวอร์ชันล่าสุด...");
-                }
-                setTimeout(() => {
-                    if (localStorage.getItem("app_v") !== BUILD_SIGNATURE) {
-                        window.location.reload();
-                    }
-                }, 600);
-            }
-        };
-        
-        if ('caches' in window) {
-            caches.keys()
-                .then(cacheNames => Promise.all(cacheNames.map(name => caches.delete(name))))
-                .then(finishUpdateProcess)
-                .catch(finishUpdateProcess);
-        } else {
-            finishUpdateProcess();
-        }
-    }
+    // สร้างลายเซ็นจาก BUILD_MARK โดยตรง — แม่นยำที่สุด
+    const BUILD_SIGNATURE = BUILD_MARK;
+    const currentStoredVersion = localStorage.getItem("app_v");
+    
+    // ตรวจพบเวอร์ชันใหม่
+    if (currentStoredVersion !== BUILD_SIGNATURE) {
+        console.log(`[AutoUpdate] พบเวอร์ชันใหม่: ${currentStoredVersion || '---'} → ${BUILD_SIGNATURE}`);
+        
+        // ล้างแคช + บันทึก + รีโหลด
+        const finishUpdateProcess = () => {
+            localStorage.setItem("app_v", BUILD_SIGNATURE);
+            
+            // แจ้งเตือน + รีโหลด เฉพาะเมื่อมีเวอร์ชันเก่าอยู่แล้ว
+            if (currentStoredVersion) {
+                if (typeof notify === 'function') {
+                    notify("info", "✨ มีอัปเดตใหม่", "กำลังโหลดเวอร์ชันล่าสุด...");
+                }
+                // บังคับรีโหลดข้ามแคช เพิ่มการป้องกันลูป
+                setTimeout(() => {
+                    // ตรวจสอบอีกครั้งก่อนรีเฟรช
+                    if (localStorage.getItem("app_v") !== BUILD_SIGNATURE) {
+                        window.location.reload(true);
+                    }
+                }, 600);
+            }
+        };
+        
+        // ล้าง Cache API ถ้ามี
+        if ('caches' in window) {
+            caches.keys()
+                .then(cacheNames => Promise.all(cacheNames.map(name => caches.delete(name))))
+                .then(finishUpdateProcess)
+                .catch(finishUpdateProcess);
+        } else {
+            finishUpdateProcess();
+        }
+    }
 })();
-
-/* =========== SECTION 5: DATE DISPLAY =========== */  
+/* ===========  SECTION 6: DATE DISPLAY =========== */  
 function updateDateDisplay(v) {
-    if (!v) return;
-    const [y, m, d] = v.split('-');
-    const thaiYearFull = parseInt(y) + 543;
-    const thaiYearShort = thaiYearFull.toString().slice(-2);
-    const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-    
-    const formattedDate = `${parseInt(d)} ${months[parseInt(m) - 1]} ${thaiYearShort}`;
-    
-    const el = $("dateDisplay");
-    if (el) el.innerText = formattedDate;
-    const el2 = $("displayDateThai");
-    if (el2) el2.innerText = formattedDate;
-    
-    if (typeof renderDay === "function") renderDay(v);
+    if (!v) return;
+    const [y, m, d] = v.split('-');
+    const thaiYearFull = parseInt(y) + 543;
+    const thaiYearShort = thaiYearFull.toString().slice(-2);
+    const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    
+    // ✅ แสดงเฉพาะ วัน เดือน ปี — ไม่มีชื่อวันต่อท้าย
+    const formattedDate = `${parseInt(d)} ${months[parseInt(m) - 1]} ${thaiYearShort}`;
+    
+    const el = $("dateDisplay");
+    if (el) el.innerText = formattedDate;
+    const el2 = $("displayDateThai");
+    if (el2) el2.innerText = formattedDate;
+    
+    if (typeof renderDay === "function") renderDay(v);
 }
-
-
-/* =========== SECTION 6: SAVE DATA & SETTINGS =========== */
+/* ========= SECTION 7: SAVE DATA ========= */
 function saveDB() {
-    try {
-        localStorage.setItem("barber_db", JSON.stringify(typeof db !== "undefined" ? db : []));
-        localStorage.setItem("barber_archives", JSON.stringify(typeof archives !== "undefined" ? archives : []));
-        localStorage.setItem("barber_account", JSON.stringify(typeof account !== "undefined" ? account : {}));
-        localStorage.setItem("barber_conf", JSON.stringify(typeof conf !== "undefined" ? conf : {}));
-        return true;
-    } catch (e) { 
-        console.error("❌ บันทึกไม่ได้:", e); 
-        return false; 
-    }
+    try {
+        localStorage.setItem("barber_db", JSON.stringify(typeof db !== "undefined" ? db : []));
+        localStorage.setItem("barber_archives", JSON.stringify(typeof archives !== "undefined" ? archives : []));
+        localStorage.setItem("barber_account", JSON.stringify(typeof account !== "undefined" ? account : {}));
+        localStorage.setItem("barber_conf", JSON.stringify(typeof conf !== "undefined" ? conf : {}));
+        return true;
+    } catch (e) { 
+        console.error("❌ บันทึกไม่ได้:", e); 
+        return false; 
+    }
 }
-
 function saveSettings() {
-    try {
-        const settings = {
-            shop: $("setShop")?.value?.trim() || "สาขาไม่ระบุ",
-            branch: $("setShop")?.value?.trim() || "สาขาไม่ระบุ",
-            perc: parseFloat($("setPerc")?.value) || 0,
-            guar: parseFloat($("setGuar")?.value) || 0,
-            offsiteRate: parseFloat($("setOffsite")?.value) || 0,
-            theme: $("setTheme")?.value || "light",
-            voice: $("setVoice")?.value || "default.mp3",
-            sound: $("setSound")?.value || "on"
-        };
+    const $ = (id) => document.getElementById(id);
+    try {
+        const settings = {
+            shop:        $("setShop")?.value?.trim() || "สาขาไม่ระบุ",
+            branch:      $("setShop")?.value?.trim() || "สาขาไม่ระบุ",
+            perc:        parseFloat($("setPerc")?.value) || 0,
+            guar:        parseFloat($("setGuar")?.value) || 0,
+            offsiteRate: parseFloat($("setOffsite")?.value) || 0,
+            theme:       $("setTheme")?.value || "light",
+            voice:       $("setVoice")?.value || "default.mp3",
+            sound:       $("setSound")?.value || "on"
+        };
 
-        const newBranchName = settings.branch;
+        const newBranchName = settings.branch;
 
-        if (typeof conf !== "undefined") {
-            Object.assign(conf, settings);
-        } else {
-            window.conf = { ...settings };
-        }
+        // 1. อัปเดตตัวแปรกลาง conf
+        if (typeof conf !== "undefined") {
+            Object.assign(conf, settings);
+        } else {
+            window.conf = { ...settings };
+        }
 
-        const confJSON = JSON.stringify(window.conf);
-        localStorage.setItem('barber_conf', confJSON);
-        localStorage.setItem('barberConf', confJSON);
-        localStorage.setItem('shopName', settings.shop);
-        localStorage.setItem('active_branch_name', newBranchName);
-        localStorage.setItem('shopPerc', settings.perc);
-        localStorage.setItem('shopGuar', settings.guar);
-        localStorage.setItem('shopOffsiteRate', settings.offsiteRate);
-        localStorage.setItem('shopTheme', settings.theme);
-        localStorage.setItem('shopVoice', settings.voice);
-        localStorage.setItem('shopSound', settings.sound);
+        // 2. บันทึกลง LocalStorage (เฉพาะการตั้งค่า ไม่แตะประวัติ archives/db เก่า)
+        const confJSON = JSON.stringify(window.conf);
+        localStorage.setItem('barber_conf', confJSON);
+        localStorage.setItem('barberConf', confJSON);
+        localStorage.setItem('shopName',           settings.shop);
+        localStorage.setItem('active_branch_name', newBranchName);
+        localStorage.setItem('shopPerc',           settings.perc);
+        localStorage.setItem('shopGuar',           settings.guar);
+        localStorage.setItem('shopOffsiteRate',   settings.offsiteRate);
+        localStorage.setItem('shopTheme',          settings.theme);
+        localStorage.setItem('shopVoice',          settings.voice);
+        localStorage.setItem('shopSound',          settings.sound);
 
-        let changed = false;
-        if (typeof archives !== "undefined" && Array.isArray(archives)) {
-            archives.forEach(day => {
-                if (!day.branch || day.branch === "undefined" || day.branch === "null" || day.branch === "สาขาไม่ระบุ" || day.branch.trim() === "") {
-                    day.branch = newBranchName;
-                    changed = true;
-                }
-            });
-        }
-        if (changed) {
-            localStorage.setItem("barber_archives", JSON.stringify(archives));
-        }
+        // 3. ซ่อมแซมเฉพาะรายการในอดีตที่เป็นค่าว่างเปล่า/สาขาไม่ระบุ (ไม่เปลี่ยนรายการที่มีชื่อสาขาเดิมอยู่แล้ว)
+        let changed = false;
+        if (typeof archives !== "undefined" && Array.isArray(archives)) {
+            archives.forEach(day => {
+                if (!day.branch || day.branch === "undefined" || day.branch === "null" || day.branch === "สาขาไม่ระบุ" || day.branch.trim() === "") {
+                    day.branch = newBranchName;
+                    changed = true;
+                }
+            });
+        }
+        if (changed) {
+            localStorage.setItem("barber_archives", JSON.stringify(archives));
+        }
 
-         const nameDisp = $("shopNameDisp") || $("shopNameDisplay");
-        if (nameDisp) nameDisp.innerText = settings.shop.toUpperCase();
+        // 4. อัปเดต UI
+        const nameDisp = $("shopNameDisp") || $("shopNameDisplay");
+        if (nameDisp) nameDisp.innerText = settings.shop.toUpperCase();
 
-        if (typeof renderBranchUI === "function") renderBranchUI();
-        if (typeof applyTheme === "function") applyTheme(settings.theme);
-        if (typeof calculateMoney === "function") calculateMoney();
-        if (typeof renderDailyTableReport === "function") renderDailyTableReport();
+        if (typeof renderBranchUI === "function") renderBranchUI();
+        if (typeof applyTheme === "function") applyTheme(settings.theme);
+        if (typeof calculateMoney === "function") calculateMoney();
+        if (typeof renderDailyTableReport === "function") renderDailyTableReport();
 
-        if ($("modalSet")) $("modalSet").style.display = 'none';
+        if ($("modalSet")) $("modalSet").style.display = 'none';
 
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({ title: 'บันทึกสำเร็จ', text: `ตั้งค่าสาขาปัจจุบันเป็น: ${newBranchName}`, icon: 'success', timer: 1500, showConfirmButton: false });
-        }
-    } catch (e) {
-        console.error("saveSettings error:", e);
-    }
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ title: 'บันทึกสำเร็จ', text: `ตั้งค่าสาขาปัจจุบันเป็น: ${newBranchName}`, icon: 'success', timer: 1500, showConfirmButton: false });
+        }
+    } catch (e) {
+        console.error("saveSettings error:", e);
+    }
 }
-
-
-/* =========== SECTION 7: THEME MANAGEMENT =========== */
+/* 🎨 ฟังก์ชันเปลี่ยนธีม */
 function applyTheme(theme) {
-    document.body.classList.remove("vintage", "navy", "light");
-    const selectedTheme = theme || "light";
-    if (selectedTheme !== "light") {
-        document.body.classList.add(selectedTheme);
-    }
-    document.body.setAttribute("data-theme", selectedTheme);
-    localStorage.setItem("selectedTheme", selectedTheme);
-    localStorage.setItem("shopTheme", selectedTheme);
+    document.body.classList.remove("vintage", "navy", "light");
+    const selectedTheme = theme || "light";
+    if (selectedTheme !== "light") {
+        document.body.classList.add(selectedTheme);
+    }
+    document.body.setAttribute("data-theme", selectedTheme);
+    localStorage.setItem("selectedTheme", selectedTheme);
+    localStorage.setItem("shopTheme", selectedTheme);
 }
 
-
-/* =========== SECTION 8: NOTIFY & SOUND SYSTEM =========== */
+/* 🚀 โหลดธีมทันทีที่เปิดเว็บ */
+document.addEventListener("DOMContentLoaded", function() {
+    const $ = (id) => document.getElementById(id);
+    const savedTheme = localStorage.getItem("selectedTheme") || localStorage.getItem("shopTheme") || "light";
+    applyTheme(savedTheme);
+    const themeSelector = $("setTheme");
+    if (themeSelector) {
+        themeSelector.value = savedTheme;
+        themeSelector.addEventListener("change", function() {
+            applyTheme(this.value);
+            if (navigator.vibrate) navigator.vibrate(10); 
+        });
+    }
+});
+/* ========= SECTION 8: NOTIFY & SOUND ========= */
 function speak(type, message = "") {
-    const currentConf = (typeof conf !== 'undefined' && conf) ? conf : JSON.parse(localStorage.getItem('barber_conf') || '{}');
-    
-    const soundSetting = currentConf.sound || localStorage.getItem('shopSound') || "on";
-    if (soundSetting === "off") return;
+    // 🎯 ดึงค่าจากการตั้งค่าพร้อม Fallback กัน undefined
+    const currentConf = (typeof conf !== 'undefined' && conf) ? conf : JSON.parse(localStorage.getItem('barber_conf') || '{}');
+    
+    // 1. ตรวจสอบสถานะการเปิด/ปิดเสียง
+    const soundSetting = currentConf.sound || localStorage.getItem('shopSound') || "on";
+    if (soundSetting === "off") return;
 
-    const voiceSetting = String(currentConf.voice || localStorage.getItem('shopVoice') || "").toLowerCase();
-    const isMan = voiceSetting === "male" || voiceSetting.includes("man") || voiceSetting.includes("male");
+    // 2. ตรวจสอบประเภทเสียง (รองรับทั้งการตั้งค่าเพศ male/female หรือชื่อไฟล์)
+    const voiceSetting = String(currentConf.voice || localStorage.getItem('shopVoice') || "").toLowerCase();
+    const isMan = voiceSetting === "male" || voiceSetting.includes("man") || voiceSetting.includes("male");
 
-    const audioId = (type === "success") 
-        ? (isMan ? "successSoundMan" : "successSoundWoman")
-        : (isMan ? "errorSoundMan" : "errorSoundWoman");
-    
-    const audio = $(audioId) || $(type === "success" ? "successSound" : "errorSound");
-    
-    if (audio) { 
-        audio.pause(); 
-        audio.currentTime = 0; 
-        audio.play().catch(e => console.warn("Audio autoplay prevented:", e)); 
-    }
+    // 3. เลือกระบุ Element เสียงตามการตั้งค่า
+    const audioId = (type === "success") 
+        ? (isMan ? "successSoundMan" : "successSoundWoman")
+        : (isMan ? "errorSoundMan" : "errorSoundWoman");
+    
+    const $ = (id) => document.getElementById(id);
+    const audio = $(audioId) || $(type === "success" ? "successSound" : "errorSound"); // ถอยไปใช้ ID หลักหากไม่แยกชาย/หญิง
+    
+    if (audio) { 
+        audio.pause(); 
+        audio.currentTime = 0; 
+        audio.play().catch(e => console.warn("Audio autoplay prevented:", e)); 
+    }
 
-    if (message && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(message);
-        utterance.lang = 'th-TH';
-        utterance.rate = 1.0;
-        window.speechSynthesis.speak(utterance);
-    }
+    // 4. อ่านข้อความเสียง (Text-to-Speech)
+    if (message && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.lang = 'th-TH';
+        utterance.rate = 1.0; // ความเร็วปกติ
+        window.speechSynthesis.speak(utterance);
+    }
 }
+
+// 🔓 ปลดล็อกการเล่นเสียง Autoplay บนเบราว์เซอร์
+document.addEventListener('click', function unlockAudio() {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
+    }
+    document.removeEventListener('click', unlockAudio);
+}, { once: true });
 
 function notify(type, title, text = "") {
-    const speechMsg = text || title;
-    speak(type, speechMsg);
+    // 📢 ส่งข้อความ title/text ให้อ่านเสียง TTS ตามการตั้งค่า
+    const speechMsg = text || title;
+    speak(type, speechMsg);
 
-    if (typeof Swal === 'undefined') { 
-        alert(`${title}\n${text}`); 
-        return; 
-    }
+    // แสดงแจ้งเตือน SweetAlert2 หรือ alert ปกติ
+    if (typeof Swal === 'undefined') { 
+        alert(`${title}\n${text}`); 
+        return; 
+    }
 
-    Swal.fire({ 
-        icon: type, 
-        title: title, 
-        text: text, 
-        timer: 2200, 
-        showConfirmButton: false,
-        timerProgressBar: true, 
-        background: 'var(--card, #1e293b)', 
-        color: 'var(--text, #ffffff)',
-        iconColor: type === 'success' ? 'var(--success, #10b981)' : 'var(--danger, #ef4444)'
-    });
+    Swal.fire({ 
+        icon: type, 
+        title: title, 
+        text: text, 
+        timer: 2200, 
+        showConfirmButton: false,
+        timerProgressBar: true, 
+        background: 'var(--card, #1e293b)', 
+        color: 'var(--text, #ffffff)',
+        iconColor: type === 'success' ? 'var(--success, #10b981)' : 'var(--danger, #ef4444)'
+    });
 }
-
-
-/* =========== SECTION 9: PAYMENT TYPE & TIME MANAGEMENT =========== */
+/* ========= SECTION 9: PAYMENT TYPE ========= */
 function editTime(id) {
-    const rec = db.find(r => r.id === id);
-    if (!rec) return;
-    
-    const newStart = prompt("⏱️ แก้เวลาเริ่ม (HH:MM)", rec.time);
-    if (!newStart) return;
-    
-    const newEnd = prompt("⏱️ แก้เวลาเสร็จ (HH:MM)", rec.endTime || "");
-    
-    rec.time = newStart;
-    rec.endTime = newEnd || (typeof addMinutes === 'function' ? addMinutes(newStart, 30) : "");
-    
-    saveDB();
-    if (typeof renderDay === "function") renderDay();
+    const rec = db.find(r => r.id === id);
+    if (!rec) return;
+    
+    const newStart = prompt("⏱️ แก้เวลาเริ่ม (HH:MM)", rec.time);
+    if (!newStart) return;
+    
+    const newEnd = prompt("⏱️ แก้เวลาเสร็จ (HH:MM)", rec.endTime || "");
+    
+    rec.time = newStart;
+    // ถ้าไม่มีเวลาเสร็จ ให้บวกไป 30 นาทีอัตโนมัติ (ถ้ามีฟังก์ชัน addMinutes)
+    rec.endTime = newEnd || (typeof addMinutes === 'function' ? addMinutes(newStart, 30) : "");
+    
+    saveDB();
+    renderDay();
 }
 
 function setPaymentType(m) {
-    payMethod = m;
+    payMethod = m;
 
-    const priceInp = $("priceInp");
-    const mixPanel = $("mixPanel");
-    const payTypeSelect = $("payTypeSelect");
+    const priceInp = $("priceInp");
+    const mixPanel = $("mixPanel");
+    const payTypeSelect = $("payTypeSelect");
 
-    if (payTypeSelect) {
-        if (m === "") {
-            payTypeSelect.value = "";
-            payTypeSelect.selectedIndex = 0;
-            
-            const originalDisplay = payTypeSelect.style.display;
-            payTypeSelect.style.display = 'none';
-            payTypeSelect.offsetHeight; 
-            payTypeSelect.style.display = originalDisplay;
-        } else {
-            payTypeSelect.value = m;
-        }
-    }
+    // 🎯 จัดการ Dropdown เลือกประเภทจ่ายเงิน
+    if (payTypeSelect) {
+        if (m === "") {
+            payTypeSelect.value = "";
+            payTypeSelect.selectedIndex = 0;
+            
+            // 🔥 รีเฟรช Element แก้ปัญหา UI ไอคอนทับข้อความ
+            const originalDisplay = payTypeSelect.style.display;
+            payTypeSelect.style.display = 'none';
+            payTypeSelect.offsetHeight; // Trigger reflow
+            payTypeSelect.style.display = originalDisplay;
+        } else {
+            payTypeSelect.value = m;
+        }
+    }
 
-    const isFreeType = m === 'Free' || m === 'FreeCash' || m === 'FreeTrans';
+    // 🧹 เคลียร์ค่าเมื่อรีเซ็ต หรือเมื่อเลือกสิทธิ์ฟรีทุกรูปแบบ (Free / Free+Cash / Free+Trans)
+    const isFreeType = m === 'Free' || m === 'FreeCash' || m === 'FreeTrans';
 
-    if (m === "" || isFreeType) {
-        if ($("mixCash")) $("mixCash").value = "";
-        if ($("mixTrans")) $("mixTrans").value = "";
-        if (mixPanel) mixPanel.style.display = 'none';
+    if (m === "" || isFreeType) {
+        if ($("mixCash")) $("mixCash").value = "";
+        if ($("mixTrans")) $("mixTrans").value = "";
+        if (mixPanel) mixPanel.style.display = 'none';
 
-        if (isFreeType && priceInp) {
-            priceInp.readOnly = false;
-            priceInp.style.opacity = '1';
-        }
+        if (isFreeType && priceInp) {
+            // 🎯 ให้ยึดค่าจากตั้งค่า: ปลดล็อก/ล็อก ช่องราคาตามการใช้งานปกติ ไม่ไปเขียนทับค่า 300 หรือ 0 ที่ตั้งไว้
+            priceInp.readOnly = false;
+            priceInp.style.opacity = '1';
+        }
 
-        if (m === "") return;
-    } else {
-        if (priceInp) {
-            priceInp.readOnly = false;
-            priceInp.style.opacity = '1';
-        }
-    }
+        if (m === "") return;
+    } else {
+        // 🔓 ปลดล็อกช่องราคาสำหรับวิธีชำระปกติ
+        if (priceInp) {
+            priceInp.readOnly = false;
+            priceInp.style.opacity = '1';
+        }
+    }
 
-    if (mixPanel) {
-        if (m === 'Mix') {
-            mixPanel.style.display = 'block';
-            if ($("mixCash")) $("mixCash").value = ""; 
-            updateMixValues(); 
-            mixPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        } else {
-            mixPanel.style.display = 'none';
-        }
-    }
+    // 🧮 จัดการแผงการชำระแบบผสม (Mix Panel)
+    if (mixPanel) {
+        if (m === 'Mix') {
+            mixPanel.style.display = 'block';
+            if ($("mixCash")) $("mixCash").value = ""; 
+            updateMixValues(); // คำนวณยอดโอนเริ่มต้นให้อัตโนมัติ
+            mixPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+            mixPanel.style.display = 'none';
+        }
+    }
 }
 
+// 🔄 คำนวณยอดเงินสด/เงินโอนอัตโนมัติ
 function updateMixValues(fromField = 'cash') {
-    const price = parseFloat($("priceInp")?.value) || 0;
-    const tip = parseFloat($("tipInp")?.value) || 0;
-    const total = price + tip;
+    const price = parseFloat($("priceInp")?.value) || 0;
+    const tip = parseFloat($("tipInp")?.value) || 0;
+    const total = price + tip;
 
-    if (fromField === 'cash') {
-        const cash = parseFloat($("mixCash")?.value) || 0;
-        const remain = total - cash;
-        if ($("mixTrans")) {
-            $("mixTrans").value = remain >= 0 ? remain : 0;
-        }
-    } else if (fromField === 'trans') {
-        const trans = parseFloat($("mixTrans")?.value) || 0;
-        const remain = total - trans;
-        if ($("mixCash")) {
-            $("mixCash").value = remain >= 0 ? remain : 0;
-        }
-    }
+    if (fromField === 'cash') {
+        const cash = parseFloat($("mixCash")?.value) || 0;
+        const remain = total - cash;
+        if ($("mixTrans")) {
+            $("mixTrans").value = remain >= 0 ? remain : 0;
+        }
+    } else if (fromField === 'trans') {
+        const trans = parseFloat($("mixTrans")?.value) || 0;
+        const remain = total - trans;
+        if ($("mixCash")) {
+            $("mixCash").value = remain >= 0 ? remain : 0;
+        }
+    }
 }
 
-
-/* =========== SECTION 10: INITIALIZATION & EVENT LISTENERS =========== */
+// 📌 ผูก Event Listeners ปลอดภัยเมื่อ DOM โหลดเรียบร้อย
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. โหลดและตั้งค่าธีมเริ่มต้น
-    const savedTheme = localStorage.getItem("selectedTheme") || localStorage.getItem("shopTheme") || "light";
-    applyTheme(savedTheme);
-    const themeSelector = $("setTheme");
-    if (themeSelector) {
-        themeSelector.value = savedTheme;
-        themeSelector.addEventListener("change", function() {
-            applyTheme(this.value);
-            if (navigator.vibrate) navigator.vibrate(10); 
-        });
-    }
+    if ($("mixCash")) {
+        $("mixCash").addEventListener("input", function() {
+            if (payMethod === 'Free' || payMethod === '') {
+                this.value = "";
+                if ($("mixTrans")) $("mixTrans").value = "";
+                return;
+            }
+            updateMixValues('cash');
+        });
+    }
 
-    // 2. ปลดล็อกเสียง Autoplay
-    document.addEventListener('click', function unlockAudio() {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
-        }
-    }, { once: true });
+    if ($("mixTrans")) {
+        $("mixTrans").addEventListener("input", function() {
+            if (payMethod === 'Free' || payMethod === '') {
+                this.value = "";
+                if ($("mixCash")) $("mixCash").value = "";
+                return;
+            }
+            updateMixValues('trans');
+        });
+    }
 
-    // 3. ผูก Event Listeners สำหรับระบบชำระเงินแบบ Mix
-    if ($("mixCash")) {
-        $("mixCash").addEventListener("input", function() {
-            if (payMethod === 'Free' || payMethod === '') {
-                this.value = "";
-                if ($("mixTrans")) $("mixTrans").value = "";
-                return;
-            }
-            updateMixValues('cash');
-        });
-    }
-
-    if ($("mixTrans")) {
-        $("mixTrans").addEventListener("input", function() {
-            if (payMethod === 'Free' || payMethod === '') {
-                this.value = "";
-                if ($("mixCash")) $("mixCash").value = "";
-                return;
-            }
-            updateMixValues('trans');
-        });
-    }
-
-    $("priceInp")?.addEventListener("input", () => { if (payMethod === 'Mix') updateMixValues('cash'); });
-    $("tipInp")?.addEventListener("input", () => { if (payMethod === 'Mix') updateMixValues('cash'); });
+    // อัปเดตยอด Mix ทันทีเมื่อมีการเปลี่ยนราคาหรือทิป
+    $("priceInp")?.addEventListener("input", () => { if (payMethod === 'Mix') updateMixValues('cash'); });
+    $("tipInp")?.addEventListener("input", () => { if (payMethod === 'Mix') updateMixValues('cash'); });
 });
 /* ========== SECTION 10: BUSINESS LOGIC & COMMISSION CALCULATION ========== */
 // 🟢 1. ฟังก์ชันจัดการเมื่อเปลี่ยนประเภทลูกค้า (ปลดล็อก readOnly ให้แก้ไขราคาได้)
