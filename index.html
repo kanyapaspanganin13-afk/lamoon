@@ -27,7 +27,7 @@
 <body>
 <div class="container main-wrap">
 
-    <!-- ================= SECTION 1: หน้าแรก ================= -->
+<!-- ================= SECTION 1: หน้าแรก ================= -->
     <section id="pageHome" class="app-page active">
         <div class="home-header">
             <h2 style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
@@ -36,33 +36,32 @@
             </h2>
         </div>
         <div class="menu-grid">
-            <button class="menu-card" onclick="handleInsurance()">
+            <button class="menu-card" onclick="safeCall('handleInsurance')">
                 <div class="menu-icon grad-yellow"><i class="fas fa-shield-alt"></i></div>
                 <span>ประกันรายได้</span>
             </button>
-            <button class="menu-card" onclick="handleHoliday()">
+            <button class="menu-card" onclick="safeCall('handleHoliday')">
                 <div class="menu-icon grad-red"><i class="fas fa-umbrella-beach"></i></div>
                 <span>วันหยุด</span>
             </button>
-            <button class="menu-card" onclick="switchMainView('pageSummary')">
+            <button class="menu-card" onclick="switchMainTab('pageSummary')">
                 <div class="menu-icon grad-blue"><i class="fas fa-chart-line"></i></div>          
                 <span>สรุปยอดรวม</span>
             </button>
-            <button class="menu-card" onclick="switchMainView('pageMonthlyReport')">
+            <button class="menu-card" onclick="switchMainTab('pageMonthlyReport', 'monthlyTab1')">
                 <div class="menu-icon grad-green"><i class="fas fa-calendar-alt"></i></div>     
                 <span>สรุปรายเดือน</span>
             </button>
-            <button class="menu-card" onclick="handleGoogleSheet()">
+            <button class="menu-card" onclick="safeCall('handleGoogleSheet')">
                 <div class="menu-icon grad-emerald"><i class="fas fa-table"></i></div>               
                 <span>เปิด Sheet</span>
             </button>
-            <button class="menu-card" onclick="switchMainView('pageComparison')">
+            <button class="menu-card" onclick="switchMainTab('pageComparison')">
                 <div class="menu-icon grad-cyan"><i class="fas fa-code-compare"></i></div>      
                 <span>เปรียบเทียบยอด</span>
             </button>
         </div>
     </section>
-
     <!-- ================= SECTION 2: กลุ่มบันทึกงาน ================= -->
     <section id="pageWorkGroup" class="app-page" style="display: none;">
         <div class="top-bar">
@@ -381,21 +380,21 @@
         <div id="fullReportContent" class="full-report-modal-content"></div>
     </div>
 
-    <!-- แถบนำทางล่างสุด -->
+<!-- แถบนำทางล่างสุด -->
     <nav class="bottom-nav">
-        <div onclick="switchMainView('home')" id="navHome" class="nav-item">
+        <div onclick="switchMainTab('pageHome')" id="navHome" class="nav-item">
             <i class="fas fa-home"></i><span>หน้าแรก</span>
         </div>
-        <div onclick="switchMainView('workGroup', 1)" id="nav1" class="nav-item">
+        <div onclick="switchMainTab('pageWorkGroup'); goSub(1);" id="nav1" class="nav-item">
             <i class="fas fa-edit"></i><span>บันทึก</span>
         </div>
-        <div onclick="switchMainView('workGroup', 2)" id="nav2" class="nav-item">
+        <div onclick="switchMainTab('pageWorkGroup'); goSub(2);" id="nav2" class="nav-item">
             <i class="fas fa-chart-bar"></i><span>รายงาน</span>
         </div>
-        <div onclick="switchMainView('workGroup', 3)" id="nav3" class="nav-item">
+        <div onclick="switchMainTab('pageWorkGroup'); goSub(3);" id="nav3" class="nav-item">
             <i class="fas fa-wallet"></i><span>บัญชี</span>
         </div>
-        <div onclick="openSettings()" id="navSettings" class="nav-item">
+        <div onclick="safeCall('openSettings')" id="navSettings" class="nav-item">
             <i class="fas fa-cog"></i><span>ตั้งค่า</span>
         </div>
     </nav>
