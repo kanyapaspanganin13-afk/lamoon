@@ -210,11 +210,8 @@ document.addEventListener("visibilitychange", () => {
         }
     }
 });
-/* ==========================================================
-   Barber-Note v1.1.0 — NAVIGATION & BRANCH SYSTEM (Optimized)
-   ========================================================== */
 
-// 1️⃣ ระบบสาขา (Branch System)
+/* =========== SECTION 1: BRANCH SYSTEM =========== */
 const ACTIVE_BRANCH_KEY = "active_branch_name";
 const VIEW_SCOPE_KEY = "view_data_scope";
 
@@ -231,9 +228,9 @@ function setActiveBranch(name) {
     localStorage.setItem(ACTIVE_BRANCH_KEY, name);
     
     renderBranchUI();
-    safeCall("renderDay");
-    safeCall("renderDailyTableReport");
-    safeCall("renderMonthReport");
+    if (typeof renderDay === "function") renderDay();
+    if (typeof renderDailyTableReport === "function") renderDailyTableReport();
+    if (typeof renderMonthReport === "function") renderMonthReport();
     
     console.log(`✅ เปลี่ยนสาขา → ${name}`);
 }
@@ -256,9 +253,9 @@ function getViewScope() {
 function setViewScope(mode) {
     localStorage.setItem(VIEW_SCOPE_KEY, mode);
     
-    safeCall("renderDay");
-    safeCall("renderDailyTableReport");
-    safeCall("renderMonthReport");
+    if (typeof renderDay === "function") renderDay();
+    if (typeof renderDailyTableReport === "function") renderDailyTableReport();
+    if (typeof renderMonthReport === "function") renderMonthReport();
 }
 
 function renderBranchUI() {
@@ -276,30 +273,31 @@ function initBranchSystem() {
 }
 
 
-// 2️⃣ ระบบนำทางหลัก (Main Navigation & Tabs)
+/* =========== SECTION 2: MAIN NAVIGATION & TABS =========== */
 function switchMainTab(pageId, tabId, event) {
     if (event && event.preventDefault) event.preventDefault();
+    const $ = id => document.getElementById(id);
     
-    // 1. สลับหน้าหลัก (Main Pages)
+    // 1. จัดการสลับหน้าหลัก (Main Pages/Sections)
     document.querySelectorAll('.page-content, section[id^="page-"], .main-page, .app-page').forEach(p => {
         p.style.display = 'none';
         p.classList.remove('active');
     });
     
-    const currentPage = document.getElementById(pageId);
+    const currentPage = $(pageId);
     if (currentPage) {
         currentPage.style.display = 'block';
         currentPage.classList.add('active');
     }
     
-    // 2. สลับแท็บย่อยภายในหน้า (ถ้ามี tabId)
+    // 2. จัดการสลับแท็บย่อยภายในหน้า (ถ้ามี tabId)
     if (tabId && currentPage) {
         currentPage.querySelectorAll('.tab-panel').forEach(panel => {
             panel.classList.remove('active');
             panel.style.display = 'none';
         });
         
-        const targetPanel = document.getElementById(tabId);
+        const targetPanel = $(tabId);
         if (targetPanel) {
             targetPanel.classList.add('active');
             targetPanel.style.display = 'block';
@@ -311,25 +309,25 @@ function switchMainTab(pageId, tabId, event) {
         }
     }
     
-    // 3. อัปเดต Bottom Nav
+    // 3. อัปเดตแถบนำทางด้านล่าง (Bottom Nav)
     if (typeof updateNavDisplay === 'function') {
         updateNavDisplay(pageId);
     }
     
-    // 4. โหลดข้อมูลตามหน้าและแท็บที่เลือก
+    // 4. โหลดข้อมูลอัตโนมัติตามหน้าและแท็บที่เลือก
     const todayYm = new Date().toISOString().slice(0, 7);
     
     if (pageId === 'pageMonthlyReport' || pageId === 'monthlyReport') {
         if (tabId === 'monthlyTab2') {
-            safeCall("initYearOptions");
-            safeCall("renderYearlyIncomeSummary");
+            if (typeof initYearOptions === 'function') initYearOptions();
+            if (typeof renderYearlyIncomeSummary === 'function') renderYearlyIncomeSummary();
         } else {
             const pickerReport = $("monthlyReportPicker");
             const savedReportMonth = localStorage.getItem("reportViewMonth");
             if (pickerReport) {
                 pickerReport.value = savedReportMonth || pickerReport.value || todayYm;
             }
-            safeCall("renderDailyTableReport");
+            if (typeof renderDailyTableReport === 'function') renderDailyTableReport();
         }
     } else if (pageId === 'report' || pageId === 'pageReport' || pageId === 'pageSummary') {
         const pickerSummary = $("histMonth");
@@ -337,44 +335,12 @@ function switchMainTab(pageId, tabId, event) {
         if (pickerSummary) {
             pickerSummary.value = savedSummaryMonth || pickerSummary.value || todayYm;
         }
-        safeCall("loadHistMonth");
+        if (typeof loadHistMonth === 'function') loadHistMonth();
     }
 }
 
-function go(p) {
-    document.querySelectorAll('.page, .app-page').forEach(pg => {
-        pg.classList.remove('active');
-        pg.style.display = 'none'; 
-    });
-    
-    const targetPage = document.getElementById('p' + p) || document.getElementById('page' + p);
-    if (targetPage) {
-        targetPage.classList.add('active');
-        targetPage.style.display = 'block';
-    }
-    
-    document.querySelectorAll('.nav-item').forEach((btn, i) => {
-        const isSelected = (i + 1) === p;
-        btn.classList.toggle('active', isSelected);
-        btn.style.color = isSelected ? 'var(--accent)' : 'var(--text)';
-        btn.style.opacity = isSelected ? '1' : '0.5';
-    });
-    
-    const dateInpValue = $("dateInp")?.value || new Date().toISOString().split('T')[0];
-    if (p === 2) {
-        safeCall("renderDay", dateInpValue);
-        safeCall("updateDateDisplay", dateInpValue);
-    } else if (p === 3) {
-        if ($("accDate") && $("dateInp")) {
-            $("accDate").value = $("dateInp").value;
-        }
-        safeCall("loadAccountStatus");
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
 
-
-// 2.1 Bottom Navigation Display
+/* =========== SECTION 3: SUB-PAGE & BOTTOM NAVIGATION =========== */
 function updateNavDisplay(viewName, subNum) {
     const nav = document.querySelector('.bottom-nav');
     if (!nav) return;
@@ -384,15 +350,16 @@ function updateNavDisplay(viewName, subNum) {
     if (viewName === 'home' || viewName === 'pageHome') {
         nav.querySelector('#navHome')?.classList.add('active');
     } else if (viewName === 'workGroup' || viewName.startsWith('sub')) {
-        let num = subNum || (typeof viewName === 'string' && viewName.startsWith('sub') ? parseInt(viewName.replace('sub', ''), 10) : null);
+        let num = subNum;
+        if (!num && typeof viewName === 'string' && viewName.startsWith('sub')) {
+            num = parseInt(viewName.replace('sub', ''), 10);
+        }
         if (num) nav.querySelector(`#nav${num}`)?.classList.add('active');
     } else if (viewName === 'settings') {
         nav.querySelector('#navSettings')?.classList.add('active');
     }
 }
 
-
-// 3️⃣ ระบบ Sub-Page Navigation
 function goSub(num) {
     const workPage = document.getElementById('pageWorkGroup');
     if (!workPage) return;
@@ -413,36 +380,17 @@ function goSub(num) {
     const dInp = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
     
     if (num === 2) {
-        safeCall("renderDay", dInp);
-        safeCall("updateDateDisplay", dInp);
+        if (typeof renderDay === 'function') renderDay(dInp);
+        if (typeof updateDateDisplay === 'function') updateDateDisplay(dInp);
     } else if (num === 3) {
         const accDate = document.getElementById('accDate');
         if (accDate && dateInput) accDate.value = dateInput.value;
-        safeCall("loadAccountStatus");
+        if (typeof loadAccountStatus === 'function') loadAccountStatus();
     }
 }
 
 
-// 4️⃣ ระบบ Main Tabs (ย่อย)
-function switchMainView(viewId, subTab) {
-    if (viewId === 'workGroup') {
-        const todayYm = new Date().toISOString().slice(0, 7);
-        if (subTab === 2) {
-            const pickerSummary = $("histMonth");
-            if (pickerSummary) {
-                const savedSummaryMonth = localStorage.getItem("summaryViewMonth");
-                pickerSummary.value = savedSummaryMonth || pickerSummary.value || todayYm;
-                localStorage.setItem("summaryViewMonth", pickerSummary.value);
-            }
-            safeCall("loadHistMonth");
-        } else if (subTab === 1) {
-            safeCall("renderDailyTableReport");
-        }
-    }
-}
-
-
-// 5️⃣ ระบบ Auto-Update System
+/* =========== SECTION 4: AUTO-UPDATE SYSTEM =========== */
 (function initAutoUpdateSystem() {
     const BUILD_SIGNATURE = typeof BUILD_MARK !== 'undefined' ? BUILD_MARK : "1.0.0";
     const currentStoredVersion = localStorage.getItem("app_v");
@@ -474,7 +422,8 @@ function switchMainView(viewId, subTab) {
         }
     }
 })();
-/* ===========  SECTION 6: DATE DISPLAY =========== */  
+
+/* =========== SECTION 5: DATE DISPLAY =========== */  
 function updateDateDisplay(v) {
     if (!v) return;
     const [y, m, d] = v.split('-');
@@ -482,7 +431,6 @@ function updateDateDisplay(v) {
     const thaiYearShort = thaiYearFull.toString().slice(-2);
     const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
     
-    // ✅ แสดงเฉพาะ วัน เดือน ปี — ไม่มีชื่อวันต่อท้าย
     const formattedDate = `${parseInt(d)} ${months[parseInt(m) - 1]} ${thaiYearShort}`;
     
     const el = $("dateDisplay");
@@ -492,7 +440,9 @@ function updateDateDisplay(v) {
     
     if (typeof renderDay === "function") renderDay(v);
 }
-/* ========= SECTION 7: SAVE DATA ========= */
+
+
+/* =========== SECTION 6: SAVE DATA & SETTINGS =========== */
 function saveDB() {
     try {
         localStorage.setItem("barber_db", JSON.stringify(typeof db !== "undefined" ? db : []));
@@ -505,43 +455,40 @@ function saveDB() {
         return false; 
     }
 }
+
 function saveSettings() {
-    const $ = (id) => document.getElementById(id);
     try {
         const settings = {
-            shop:        $("setShop")?.value?.trim() || "สาขาไม่ระบุ",
-            branch:      $("setShop")?.value?.trim() || "สาขาไม่ระบุ",
-            perc:        parseFloat($("setPerc")?.value) || 0,
-            guar:        parseFloat($("setGuar")?.value) || 0,
+            shop: $("setShop")?.value?.trim() || "สาขาไม่ระบุ",
+            branch: $("setShop")?.value?.trim() || "สาขาไม่ระบุ",
+            perc: parseFloat($("setPerc")?.value) || 0,
+            guar: parseFloat($("setGuar")?.value) || 0,
             offsiteRate: parseFloat($("setOffsite")?.value) || 0,
-            theme:       $("setTheme")?.value || "light",
-            voice:       $("setVoice")?.value || "default.mp3",
-            sound:       $("setSound")?.value || "on"
+            theme: $("setTheme")?.value || "light",
+            voice: $("setVoice")?.value || "default.mp3",
+            sound: $("setSound")?.value || "on"
         };
 
         const newBranchName = settings.branch;
 
-        // 1. อัปเดตตัวแปรกลาง conf
         if (typeof conf !== "undefined") {
             Object.assign(conf, settings);
         } else {
             window.conf = { ...settings };
         }
 
-        // 2. บันทึกลง LocalStorage (เฉพาะการตั้งค่า ไม่แตะประวัติ archives/db เก่า)
         const confJSON = JSON.stringify(window.conf);
         localStorage.setItem('barber_conf', confJSON);
         localStorage.setItem('barberConf', confJSON);
-        localStorage.setItem('shopName',           settings.shop);
+        localStorage.setItem('shopName', settings.shop);
         localStorage.setItem('active_branch_name', newBranchName);
-        localStorage.setItem('shopPerc',           settings.perc);
-        localStorage.setItem('shopGuar',           settings.guar);
-        localStorage.setItem('shopOffsiteRate',   settings.offsiteRate);
-        localStorage.setItem('shopTheme',          settings.theme);
-        localStorage.setItem('shopVoice',          settings.voice);
-        localStorage.setItem('shopSound',          settings.sound);
+        localStorage.setItem('shopPerc', settings.perc);
+        localStorage.setItem('shopGuar', settings.guar);
+        localStorage.setItem('shopOffsiteRate', settings.offsiteRate);
+        localStorage.setItem('shopTheme', settings.theme);
+        localStorage.setItem('shopVoice', settings.voice);
+        localStorage.setItem('shopSound', settings.sound);
 
-        // 3. ซ่อมแซมเฉพาะรายการในอดีตที่เป็นค่าว่างเปล่า/สาขาไม่ระบุ (ไม่เปลี่ยนรายการที่มีชื่อสาขาเดิมอยู่แล้ว)
         let changed = false;
         if (typeof archives !== "undefined" && Array.isArray(archives)) {
             archives.forEach(day => {
@@ -555,8 +502,7 @@ function saveSettings() {
             localStorage.setItem("barber_archives", JSON.stringify(archives));
         }
 
-        // 4. อัปเดต UI
-        const nameDisp = $("shopNameDisp") || $("shopNameDisplay");
+        const nameDisp = $("shopNameDisp") \vert{}\vert{} $("shopNameDisplay");
         if (nameDisp) nameDisp.innerText = settings.shop.toUpperCase();
 
         if (typeof renderBranchUI === "function") renderBranchUI();
@@ -573,7 +519,9 @@ function saveSettings() {
         console.error("saveSettings error:", e);
     }
 }
-/* 🎨 ฟังก์ชันเปลี่ยนธีม */
+
+
+/* =========== SECTION 7: THEME MANAGEMENT =========== */
 function applyTheme(theme) {
     document.body.classList.remove("vintage", "navy", "light");
     const selectedTheme = theme || "light";
@@ -585,40 +533,22 @@ function applyTheme(theme) {
     localStorage.setItem("shopTheme", selectedTheme);
 }
 
-/* 🚀 โหลดธีมทันทีที่เปิดเว็บ */
-document.addEventListener("DOMContentLoaded", function() {
-    const $ = (id) => document.getElementById(id);
-    const savedTheme = localStorage.getItem("selectedTheme") || localStorage.getItem("shopTheme") || "light";
-    applyTheme(savedTheme);
-    const themeSelector = $("setTheme");
-    if (themeSelector) {
-        themeSelector.value = savedTheme;
-        themeSelector.addEventListener("change", function() {
-            applyTheme(this.value);
-            if (navigator.vibrate) navigator.vibrate(10); 
-        });
-    }
-});
-/* ========= SECTION 8: NOTIFY & SOUND ========= */
+
+/* =========== SECTION 8: NOTIFY & SOUND SYSTEM =========== */
 function speak(type, message = "") {
-    // 🎯 ดึงค่าจากการตั้งค่าพร้อม Fallback กัน undefined
     const currentConf = (typeof conf !== 'undefined' && conf) ? conf : JSON.parse(localStorage.getItem('barber_conf') || '{}');
     
-    // 1. ตรวจสอบสถานะการเปิด/ปิดเสียง
     const soundSetting = currentConf.sound || localStorage.getItem('shopSound') || "on";
     if (soundSetting === "off") return;
 
-    // 2. ตรวจสอบประเภทเสียง (รองรับทั้งการตั้งค่าเพศ male/female หรือชื่อไฟล์)
     const voiceSetting = String(currentConf.voice || localStorage.getItem('shopVoice') || "").toLowerCase();
     const isMan = voiceSetting === "male" || voiceSetting.includes("man") || voiceSetting.includes("male");
 
-    // 3. เลือกระบุ Element เสียงตามการตั้งค่า
     const audioId = (type === "success") 
         ? (isMan ? "successSoundMan" : "successSoundWoman")
         : (isMan ? "errorSoundMan" : "errorSoundWoman");
     
-    const $ = (id) => document.getElementById(id);
-    const audio = $(audioId) || $(type === "success" ? "successSound" : "errorSound"); // ถอยไปใช้ ID หลักหากไม่แยกชาย/หญิง
+    const audio = $(audioId) \vert{}\vert{}$(type === "success" ? "successSound" : "errorSound");
     
     if (audio) { 
         audio.pause(); 
@@ -626,30 +556,19 @@ function speak(type, message = "") {
         audio.play().catch(e => console.warn("Audio autoplay prevented:", e)); 
     }
 
-    // 4. อ่านข้อความเสียง (Text-to-Speech)
     if (message && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(message);
         utterance.lang = 'th-TH';
-        utterance.rate = 1.0; // ความเร็วปกติ
+        utterance.rate = 1.0;
         window.speechSynthesis.speak(utterance);
     }
 }
 
-// 🔓 ปลดล็อกการเล่นเสียง Autoplay บนเบราว์เซอร์
-document.addEventListener('click', function unlockAudio() {
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
-    }
-    document.removeEventListener('click', unlockAudio);
-}, { once: true });
-
 function notify(type, title, text = "") {
-    // 📢 ส่งข้อความ title/text ให้อ่านเสียง TTS ตามการตั้งค่า
     const speechMsg = text || title;
     speak(type, speechMsg);
 
-    // แสดงแจ้งเตือน SweetAlert2 หรือ alert ปกติ
     if (typeof Swal === 'undefined') { 
         alert(`${title}\n${text}`); 
         return; 
@@ -667,7 +586,9 @@ function notify(type, title, text = "") {
         iconColor: type === 'success' ? 'var(--success, #10b981)' : 'var(--danger, #ef4444)'
     });
 }
-/* ========= SECTION 9: PAYMENT TYPE ========= */
+
+
+/* =========== SECTION 9: PAYMENT TYPE & TIME MANAGEMENT =========== */
 function editTime(id) {
     const rec = db.find(r => r.id === id);
     if (!rec) return;
@@ -678,11 +599,10 @@ function editTime(id) {
     const newEnd = prompt("⏱️ แก้เวลาเสร็จ (HH:MM)", rec.endTime || "");
     
     rec.time = newStart;
-    // ถ้าไม่มีเวลาเสร็จ ให้บวกไป 30 นาทีอัตโนมัติ (ถ้ามีฟังก์ชัน addMinutes)
     rec.endTime = newEnd || (typeof addMinutes === 'function' ? addMinutes(newStart, 30) : "");
     
     saveDB();
-    renderDay();
+    if (typeof renderDay === "function") renderDay();
 }
 
 function setPaymentType(m) {
@@ -692,23 +612,20 @@ function setPaymentType(m) {
     const mixPanel = $("mixPanel");
     const payTypeSelect = $("payTypeSelect");
 
-    // 🎯 จัดการ Dropdown เลือกประเภทจ่ายเงิน
     if (payTypeSelect) {
         if (m === "") {
             payTypeSelect.value = "";
             payTypeSelect.selectedIndex = 0;
             
-            // 🔥 รีเฟรช Element แก้ปัญหา UI ไอคอนทับข้อความ
             const originalDisplay = payTypeSelect.style.display;
             payTypeSelect.style.display = 'none';
-            payTypeSelect.offsetHeight; // Trigger reflow
+            payTypeSelect.offsetHeight; 
             payTypeSelect.style.display = originalDisplay;
         } else {
             payTypeSelect.value = m;
         }
     }
 
-    // 🧹 เคลียร์ค่าเมื่อรีเซ็ต หรือเมื่อเลือกสิทธิ์ฟรีทุกรูปแบบ (Free / Free+Cash / Free+Trans)
     const isFreeType = m === 'Free' || m === 'FreeCash' || m === 'FreeTrans';
 
     if (m === "" || isFreeType) {
@@ -717,26 +634,23 @@ function setPaymentType(m) {
         if (mixPanel) mixPanel.style.display = 'none';
 
         if (isFreeType && priceInp) {
-            // 🎯 ให้ยึดค่าจากตั้งค่า: ปลดล็อก/ล็อก ช่องราคาตามการใช้งานปกติ ไม่ไปเขียนทับค่า 300 หรือ 0 ที่ตั้งไว้
             priceInp.readOnly = false;
             priceInp.style.opacity = '1';
         }
 
         if (m === "") return;
     } else {
-        // 🔓 ปลดล็อกช่องราคาสำหรับวิธีชำระปกติ
         if (priceInp) {
             priceInp.readOnly = false;
             priceInp.style.opacity = '1';
         }
     }
 
-    // 🧮 จัดการแผงการชำระแบบผสม (Mix Panel)
     if (mixPanel) {
         if (m === 'Mix') {
             mixPanel.style.display = 'block';
             if ($("mixCash")) $("mixCash").value = ""; 
-            updateMixValues(); // คำนวณยอดโอนเริ่มต้นให้อัตโนมัติ
+            updateMixValues(); 
             mixPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } else {
             mixPanel.style.display = 'none';
@@ -744,7 +658,6 @@ function setPaymentType(m) {
     }
 }
 
-// 🔄 คำนวณยอดเงินสด/เงินโอนอัตโนมัติ
 function updateMixValues(fromField = 'cash') {
     const price = parseFloat($("priceInp")?.value) || 0;
     const tip = parseFloat($("tipInp")?.value) || 0;
@@ -765,8 +678,29 @@ function updateMixValues(fromField = 'cash') {
     }
 }
 
-// 📌 ผูก Event Listeners ปลอดภัยเมื่อ DOM โหลดเรียบร้อย
+
+/* =========== SECTION 10: INITIALIZATION & EVENT LISTENERS =========== */
 document.addEventListener("DOMContentLoaded", () => {
+    // 1. โหลดและตั้งค่าธีมเริ่มต้น
+    const savedTheme = localStorage.getItem("selectedTheme") || localStorage.getItem("shopTheme") || "light";
+    applyTheme(savedTheme);
+    const themeSelector = $("setTheme");
+    if (themeSelector) {
+        themeSelector.value = savedTheme;
+        themeSelector.addEventListener("change", function() {
+            applyTheme(this.value);
+            if (navigator.vibrate) navigator.vibrate(10); 
+        });
+    }
+
+    // 2. ปลดล็อกเสียง Autoplay
+    document.addEventListener('click', function unlockAudio() {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
+        }
+    }, { once: true });
+
+    // 3. ผูก Event Listeners สำหรับระบบชำระเงินแบบ Mix
     if ($("mixCash")) {
         $("mixCash").addEventListener("input", function() {
             if (payMethod === 'Free' || payMethod === '') {
@@ -789,11 +723,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // อัปเดตยอด Mix ทันทีเมื่อมีการเปลี่ยนราคาหรือทิป
     $("priceInp")?.addEventListener("input", () => { if (payMethod === 'Mix') updateMixValues('cash'); });
     $("tipInp")?.addEventListener("input", () => { if (payMethod === 'Mix') updateMixValues('cash'); });
 });
-
 /* ========== SECTION 10: BUSINESS LOGIC & COMMISSION CALCULATION ========== */
 // 🟢 1. ฟังก์ชันจัดการเมื่อเปลี่ยนประเภทลูกค้า (ปลดล็อก readOnly ให้แก้ไขราคาได้)
 function handleCustTypeChange(value) {
