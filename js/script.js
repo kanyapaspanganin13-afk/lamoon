@@ -502,7 +502,7 @@ function saveSettings() {
             localStorage.setItem("barber_archives", JSON.stringify(archives));
         }
 
-        const nameDisp = $("shopNameDisp") \vert{}\vert{} $("shopNameDisplay");
+         const nameDisp = $("shopNameDisp") || $("shopNameDisplay");
         if (nameDisp) nameDisp.innerText = settings.shop.toUpperCase();
 
         if (typeof renderBranchUI === "function") renderBranchUI();
@@ -548,7 +548,7 @@ function speak(type, message = "") {
         ? (isMan ? "successSoundMan" : "successSoundWoman")
         : (isMan ? "errorSoundMan" : "errorSoundWoman");
     
-    const audio = $(audioId) \vert{}\vert{}$(type === "success" ? "successSound" : "errorSound");
+    const audio = $(audioId) || $(type === "success" ? "successSound" : "errorSound");
     
     if (audio) { 
         audio.pause(); 
